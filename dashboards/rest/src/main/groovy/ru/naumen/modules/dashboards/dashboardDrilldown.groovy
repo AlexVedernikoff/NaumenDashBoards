@@ -93,6 +93,11 @@ class DashboardDrilldownService
             requestContent.descriptor = baseDescriptor
         }
 
+        if(requestContent.filters)
+        {
+            requestContent.filters = updateRequestFiltersWithNA(requestContent.filters)
+        }
+
         def attrCases = requestContent?.filters?.attribute?.findResults { attr ->
             if(!attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
             {
@@ -123,6 +128,39 @@ class DashboardDrilldownService
         }
         def linkBuilder = link.getBuilder(offsetMinutes)
         return api.web.list(linkBuilder)
+    }
+
+    /**
+     * Метод преобразования данных по агрегациям NA к атрибутам с системными группировками
+     * @param filters - список текущих фильтров
+     * @return список, где изменены фильтры с агрегацией NA в атрибуты с системными группировками
+     */
+    private List updateRequestFiltersWithNA(List filters)
+    {
+        def naFilters = filters.findAll {it?.aggregation == 'NOT_APPLICABLE'}
+        filters -= naFilters
+
+        naFilters.each { filter ->
+            if (filter)
+            {
+                def attribute = filter.attribute
+                filter.group = new SystemGroupInfo(way: Way.SYSTEM, data: GroupType.OVERLAP)
+                if(attribute.type == AttributeType.CATALOG_ITEM_TYPE)
+                {
+                    def tempValue = filter.value
+                    def (value, uuid) = LinksAttributeMarshaller.unmarshal(tempValue)
+                    tempValue = utils.get(uuid).get(attribute.code)
+                    filter.value = ObjectMarshaller.marshal(tempValue.title, tempValue.UUID)
+                }
+                if(attribute.type in AttributeType.DATE_TYPES)
+                {
+                    filter.group = new SystemGroupInfo(way: Way.SYSTEM, data: GroupType.DAY, format: 'dd.mm.YY hh:ii')
+                }
+                filter.remove('aggregation')
+            }
+        }
+
+        return filters + naFilters
     }
 
     /**

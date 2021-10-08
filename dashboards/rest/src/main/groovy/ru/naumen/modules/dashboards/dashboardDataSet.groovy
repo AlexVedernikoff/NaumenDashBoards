@@ -3146,6 +3146,10 @@ class DashboardDataSetService
                         }
                         if(fromNA)
                         {
+                            if(value && uuid)
+                            {
+                                return ObjectMarshaller.marshal(value, uuid)
+                            }
                             return value
                         }
                         else
