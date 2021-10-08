@@ -1,11 +1,8 @@
 // @flow
 import type {
 	AddWidget,
-	AnyWidget,
 	AxisData,
-	AxisWidget,
 	CircleData,
-	CircleWidget,
 	ClearMessageWarning,
 	DeleteWidget,
 	Group,
@@ -20,12 +17,10 @@ import type {
 	WidgetType,
 	WidgetsDataState
 } from './types';
-import type {AppState} from 'store/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
-import {AXIS_FORMAT_TYPE, CHART_COLORS_SETTINGS_TYPES, DEFAULT_AXIS_FORMAT} from 'store/widgets/data/constants';
+import {AXIS_FORMAT_TYPE, DEFAULT_AXIS_FORMAT} from 'store/widgets/data/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
-import {getWidgetGlobalChartColorsSettings} from 'store/dashboard/customChartColorsSettings/selectors';
 import {GROUP_WAYS} from 'src/store/widgets/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {WIDGET_SETS, WIDGET_TYPES} from './constants';
@@ -181,9 +176,9 @@ const getComboYAxisName = (source: Source | null, indicators: Array<Indicator>, 
  * @param {Array<T>} data - массив набора данных виджета для построения
  * @returns {T}
  */
-const getMainDataSet = <T: Object>(data: $ReadOnlyArray<T>): T => {
+function getMainDataSet<T: Object> (data: $ReadOnlyArray<T>): T {
 	return data.find(dataSet => !dataSet.sourceForCompute) || data[0];
-};
+}
 
 /**
  * Возвращает индекс набора данных главного источника
@@ -191,9 +186,9 @@ const getMainDataSet = <T: Object>(data: $ReadOnlyArray<T>): T => {
  * @param {Array<T>} data - массив набора данных виджета для построения
  * @returns {number}
  */
-const getMainDataSetIndex = <T: Object>(data: $ReadOnlyArray<T>): number => {
+function getMainDataSetIndex <T: Object> (data: $ReadOnlyArray<T>): number {
 	return data.findIndex(dataSet => !dataSet.sourceForCompute) || 0;
-};
+}
 
 /**
  * Создает ключ ключ пользовательских настроек цветов основанный на переданных значениях
@@ -270,18 +265,16 @@ const getCustomColorsSettingsKeyByData = (data: Array<AxisData | CircleData>, ty
  * @param {SetMessageWarning} payload - данные об ошибке
  * @returns {WidgetsDataState}
  */
-const setWidgetWarning = (state: WidgetsDataState, {payload}: SetMessageWarning): WidgetsDataState => {
-	return {
-		...state,
-		map: {
-			...state.map,
-			[payload.id]: {
-				...state.map[payload.id],
-				warningMessage: payload.message
-			}
+const setWidgetWarning = (state: WidgetsDataState, {payload}: SetMessageWarning): WidgetsDataState => ({
+	...state,
+	map: {
+		...state.map,
+		[payload.id]: {
+			...state.map[payload.id],
+			warningMessage: payload.message
 		}
-	};
-};
+	}
+});
 
 /**
  * Устанавливаем ошибку на виджет
@@ -299,36 +292,6 @@ const clearWidgetWarning = (state: WidgetsDataState, {payload}: ClearMessageWarn
 			[payload]: newPayload
 		}
 	};
-};
-
-const updateNewWidgetCustomColorsSettings = (awidget: AnyWidget, state: AppState) => {
-	let isChanged = false;
-
-	if (awidget.type !== WIDGET_TYPES.TEXT) {
-		// $FlowFixMe: это не WIDGET_TYPES.TEXT => Widget
-		const widget = (awidget: Widget);
-		const settings = getWidgetGlobalChartColorsSettings(widget)(state);
-
-		if (settings) {
-			// $FlowFixMe: getWidgetGlobalChartColorsSettings проверяет на то что это AxisWidget или CircleWidget
-			const colorWidget = (widget: AxisWidget | CircleWidget);
-			const colorsSettings = colorWidget.colorsSettings;
-
-			if (colorsSettings && !colorsSettings.custom.useGlobal) {
-				colorWidget.colorsSettings = {
-					...colorsSettings,
-					custom: {
-						data: {...settings},
-						useGlobal: true
-					},
-					type: CHART_COLORS_SETTINGS_TYPES.CUSTOM
-				};
-				isChanged = true;
-			}
-		}
-	}
-
-	return isChanged;
 };
 
 const getDefaultFormatForAttribute = (attribute: Attribute | null, group: Group | null) => {
@@ -379,6 +342,5 @@ export {
 	setSelectedWidget,
 	setWidgets,
 	setWidgetWarning,
-	updateNewWidgetCustomColorsSettings,
 	updateWidget
 };

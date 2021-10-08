@@ -1,5 +1,5 @@
 // @flow
-import type {AttributeColumn, BuildDataState, DataSetDescriptorRelation, DiagramBuildData, WidgetDataError} from './types';
+import type {AttributeColumn, BuildDataState, Column, DataSetDescriptorRelation, DiagramBuildData, WidgetDataError} from './types';
 import {COLUMN_TYPES, SEPARATOR, TITLE_SEPARATOR} from './constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import type {SourceData, Widget} from 'store/widgets/data/types';
@@ -128,6 +128,18 @@ const isCardObjectColumn = (column: AttributeColumn): boolean => {
 };
 
 /**
+ * Проверяет, есть ли в таблице индикаторы с агрегацией
+ * @param {Array<Column>} columns - столбцы таблицы
+ * @returns  {boolean}
+ */
+const hasIndicatorsWithAggregation = (columns: Array<Column>): boolean =>
+	columns.some(column =>
+		column.type === COLUMN_TYPES.INDICATOR
+		&& column.aggregation
+		&& column.aggregation !== DEFAULT_AGGREGATION.NOT_APPLICABLE
+	);
+
+/**
  * Очищает коды из меток данных. Платформа для не сгруппированных значений возвращает:
  * <значение индикатора>#<код для построения карточки объекта>.
  * Для показа надо оставить только <значение индикатора>
@@ -165,6 +177,7 @@ const removeCodesFromTableData = (tableData: DiagramBuildData): DiagramBuildData
 export {
 	getSeparatedLabel,
 	getWidgetFilterOptionsDescriptors,
+	hasIndicatorsWithAggregation,
 	isCardObjectColumn,
 	isIndicatorColumn,
 	removeCodesFromTableData,

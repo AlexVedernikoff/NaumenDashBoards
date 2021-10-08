@@ -4,7 +4,7 @@ import type {AnyWidget, Chart, SetWidgetWarning, ValidateWidgetToCopyResult, Wid
 import api from 'api';
 import {ApiError} from 'api/errors';
 import {batch} from 'react-redux';
-import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGETS_EVENTS} from './constants';
+import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGET_TYPES, WIDGETS_EVENTS} from './constants';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from 'store/dashboard/settings/constants';
 import {deepClone} from 'helpers';
@@ -13,8 +13,9 @@ import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchCustomGroups} from 'store/customGroups/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
-import {getCustomColorsSettingsKey, updateNewWidgetCustomColorsSettings} from './helpers';
+import {getCustomColorsSettingsKey} from './helpers';
 import {getParams} from 'store/helpers';
+import {getWidgetGlobalChartColorsSettings} from 'store/dashboard/customChartColorsSettings/selectors';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
 import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -183,18 +184,54 @@ const saveWidgetWithNewFilters = (widget: Widget): ThunkAction =>
 	};
 
 /**
+ * Обновляет настройки цветов из глобальных источников
+ * @param {AnyWidget} awidget - виджет
+ * @returns {ThunkAction}
+ */
+const updateWidgetCustomColorsSettings = (awidget: AnyWidget) => async (dispatch: Dispatch, getState: GetState): Promise<boolean> => {
+	let isChanged = false;
+	const state = getState();
+
+	if (awidget.type !== WIDGET_TYPES.TEXT) {
+		// $FlowFixMe: это не WIDGET_TYPES.TEXT => Widget
+		const widget = (awidget: Widget);
+		const settings = getWidgetGlobalChartColorsSettings(widget)(state);
+
+		if (settings) {
+			// $FlowFixMe: getWidgetGlobalChartColorsSettings проверяет на то что это AxisWidget или CircleWidget
+			const colorWidget = (widget: AxisWidget | CircleWidget);
+			const {colorsSettings: oldColorsSettings} = colorWidget;
+
+			if (oldColorsSettings && !oldColorsSettings.custom.useGlobal) {
+				colorWidget.colorsSettings = {
+					...oldColorsSettings,
+					custom: {
+						data: {...settings},
+						useGlobal: true
+					},
+					type: CHART_COLORS_SETTINGS_TYPES.CUSTOM
+				};
+
+				isChanged = true;
+			}
+		}
+	}
+
+	return isChanged;
+};
+
+/**
  * Создает новый виджет
  * @param {AnyWidget} settings - данные формы создания виджета
  * @returns {ThunkAction}
  */
 const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<string | void> => {
-	const state = getState();
 	let validationErrors;
 
 	dispatch(requestWidgetSave());
 
 	try {
-		updateNewWidgetCustomColorsSettings(settings, state);
+		await dispatch(updateWidgetCustomColorsSettings(settings));
 
 		const widget = await api.instance.dashboardSettings.widget.create(getParams(), settings);
 
@@ -230,9 +267,9 @@ const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => asy
 		dispatch(checkWidgetsCount());
 
 		const widget = await api.instance.dashboardSettings.widget.copyWidget(getParams(), dashboardKey, widgetKey);
-		const state = getState();
+		const widgetCustomColorsSettingsUpdated = await dispatch(updateWidgetCustomColorsSettings(widget));
 
-		if (updateNewWidgetCustomColorsSettings(widget, state)) {
+		if (widgetCustomColorsSettingsUpdated) {
 			const {colorsSettings} = widget;
 
 			await dispatch(editWidgetChunkData(widget, {colorsSettings}, false));
