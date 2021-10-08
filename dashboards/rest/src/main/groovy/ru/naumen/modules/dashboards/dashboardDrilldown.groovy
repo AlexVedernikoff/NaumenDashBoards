@@ -137,30 +137,35 @@ class DashboardDrilldownService
      */
     private List updateRequestFiltersWithNA(List filters)
     {
-        def naFilters = filters.findAll {it?.aggregation == 'NOT_APPLICABLE'}
-        filters -= naFilters
+        def naFilters = filters?.findAll {it?.aggregation == 'NOT_APPLICABLE'}
+        if(naFilters)
+        {
+            filters -= naFilters
 
-        naFilters.each { filter ->
-            if (filter)
-            {
-                def attribute = filter.attribute
-                filter.group = new SystemGroupInfo(way: Way.SYSTEM, data: GroupType.OVERLAP)
-                if(attribute.type == AttributeType.CATALOG_ITEM_TYPE)
+            naFilters.each { filter ->
+                if (filter)
                 {
-                    def tempValue = filter.value
-                    def (value, uuid) = LinksAttributeMarshaller.unmarshal(tempValue)
-                    tempValue = utils.get(uuid).get(attribute.code)
-                    filter.value = ObjectMarshaller.marshal(tempValue.title, tempValue.UUID)
+                    def attribute = filter.attribute
+                    filter.group = new SystemGroupInfo(way: Way.SYSTEM, data: GroupType.OVERLAP)
+                    if(attribute.type == AttributeType.CATALOG_ITEM_TYPE)
+                    {
+                        def tempValue = filter.value
+                        def (value, uuid) = LinksAttributeMarshaller.unmarshal(tempValue)
+                        tempValue = utils.get(uuid).get(attribute.code)
+                        filter.value = ObjectMarshaller.marshal(tempValue.title, tempValue.UUID)
+                    }
+                    if(attribute.type in AttributeType.DATE_TYPES)
+                    {
+                        filter.group = new SystemGroupInfo(way: Way.SYSTEM, data: GroupType.DAY, format: 'dd.mm.YY hh:ii')
+                    }
+                    filter.remove('aggregation')
                 }
-                if(attribute.type in AttributeType.DATE_TYPES)
-                {
-                    filter.group = new SystemGroupInfo(way: Way.SYSTEM, data: GroupType.DAY, format: 'dd.mm.YY hh:ii')
-                }
-                filter.remove('aggregation')
             }
-        }
 
-        return filters + naFilters
+            return filters + naFilters
+        }
+        return filters
+
     }
 
     /**
