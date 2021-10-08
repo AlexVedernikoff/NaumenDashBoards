@@ -11,9 +11,7 @@
 
 package ru.naumen.modules.dashboards
 
-import groovy.transform.Field
 import ru.naumen.core.server.script.api.criteria.*
-import java.sql.Timestamp
 import ru.naumen.core.server.script.api.injection.InjectApi
 import static MessageProvider.*
 
@@ -1163,7 +1161,7 @@ class DashboardQueryWrapperUtils
                                                                  it.code.contains(AttributeType.VALUE_TYPE)) }?.sourceCode?.unique())
 
         clonedAggregations.each {
-            prepareAttribute(it.attribute as Attribute, true)
+            prepareAttribute(it.attribute as Attribute, it.type != Aggregation.NOT_APPLICABLE)
             if(templateUUID && (it.type == Aggregation.PERCENT || it.attribute.code.contains(AttributeType.VALUE_TYPE)))
             {
                 criteria = wrapper.totalValueCriteria
@@ -1227,13 +1225,16 @@ class DashboardQueryWrapperUtils
         {
             attributeSet = clonedAggregations.findAll { it?.type == Aggregation.NOT_APPLICABLE }.attribute + clonedGroups*.attribute
         }
-        attributeSet?.unique { it?.code }?.findResults { it }?.collect { attr ->
-            new FilterParameter(
-                title: 'не пусто',
-                type: Comparison.NOT_NULL,
-                attribute: attr,
-                value: null
-            )
+        attributeSet?.unique { it?.code }?.findResults { attr ->
+            if(attr)
+            {
+                return new FilterParameter(
+                    title: 'не пусто',
+                    type: Comparison.NOT_NULL,
+                    attribute: attr,
+                    value: null
+                )
+            }
         }?.each {
             if(templateUUID && it.attribute.code.contains(AttributeType.VALUE_TYPE))
             {
@@ -1409,6 +1410,9 @@ class DashboardQueryWrapperUtils
         Boolean attributeIsDynamic = attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
         attribute = updateRefAttributeCode(attribute)
 
+        Boolean localizationIsOn = getBeanFactory().getBean('localizationSettingsService').localizationSettings.localizationEnabled
+        Boolean ableToUseBaseOrTitle = checkIfAbleToUseBaseOrTitle(localizationIsOn)
+
         switch (attributeType)
         {
             case AttributeType.DT_INTERVAL_TYPE:
@@ -1428,11 +1432,20 @@ class DashboardQueryWrapperUtils
                     {
                         attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
                         Boolean attrFromEmployee = checkIfAttrFromEmployeeClass(attribute)
-                        if(!attrFromEmployee)
+                        if(ableToUseBaseOrTitle)
                         {
-                            attribute.attrChains().last().ref = new Attribute(code: 'base', type: 'string')
+                            //если есть доработка, и атрибут не из класса Employee,
+                            // а также сама локализация на стенде включена, то можно добавить поле base
+                            if(!attrFromEmployee && localizationIsOn)
+                            {
+                                attribute.attrChains().last().ref = new Attribute(code: 'base', type: 'string')
+                            }
                         }
-
+                        else
+                        {
+                            //иначе используется костыль для подсчета, если здесь оставить title, будет ошибка
+                            attribute.attrChains().last().ref = new Attribute(code: 'id', type: 'string')
+                        }
                     }
                     else
                     {
@@ -1457,9 +1470,24 @@ class DashboardQueryWrapperUtils
                     else
                     {
                         Boolean attrFromEmployee = checkIfAttrFromEmployeeClass(attribute)
-                        if(!attrFromEmployee)
+                        if(ableToUseBaseOrTitle)
                         {
-                            attribute.attrChains().last().ref = new Attribute(code: 'base', title: 'Базовая локаль', type: 'string')
+                            if(!attrFromEmployee && localizationIsOn)
+                            {
+                                attribute.attrChains().last().ref = new Attribute(code: 'base', title: 'Базовая локаль', type: 'string')
+                            }
+                        }
+                        else
+                        {
+                            if(attribute?.attrChains()?.size() == 1)
+                            {
+                                attribute?.code = 'id'
+                            }
+                            else
+                            {
+                                //сюда придёт код, если выбран атрибут и в нём его атрибут с кодом title, т.е. всего 2 уровня
+                                attribute?.ref?.code = 'id'
+                            }
                         }
                     }
                 }
@@ -1495,6 +1523,25 @@ class DashboardQueryWrapperUtils
                 valueToCheck = 'metaClassFqn'
             }
             return attrChains[attrIndex][valueToCheck]?.contains('employee')
+        }
+    }
+
+    /**
+     * Метод с микрозапросом для проверки возможности использования поля base - проверка наличия доработки на стенде
+     * @return флаг на наличие доработки - возможность использования
+     */
+    private static boolean checkIfAbleToUseBaseOrTitle(Boolean localizationIsOn)
+    {
+        try
+        {
+            def criteria = api.db.createCriteria().addSource('ou')
+                              .addColumn(api.selectClause.count(api.selectClause.property(localizationIsOn ? 'title.base' : 'title')))
+            def res = api.db.query(criteria).list()
+            return true
+        }
+        catch (Exception ex)
+        {
+            return false
         }
     }
 
