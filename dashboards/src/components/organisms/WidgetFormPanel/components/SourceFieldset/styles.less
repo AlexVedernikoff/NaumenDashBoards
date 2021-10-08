@@ -2,9 +2,14 @@
 
 :local {
 	@height: 28px;
+	@filterButtonWidth: 24px;
 
 	.container {
 		position: relative;
+	}
+
+	.sourceTreeSelect {
+		width: calc(100% - @filterButtonWidth);
 	}
 
 	.combinedContainer {
@@ -13,13 +18,14 @@
 
 		.filterButton {
 			cursor: pointer;
-			flex: 0 1 24px;
+			flex: 0 1 @filterButtonWidth;
 			margin-right: 7px;
 			text-align: center;
 		}
 
 		.sourceSelectLabelEdit,
 		.sourceTreeSelect{
+			display: flex;
 			flex: 1 1 auto;
 		}
 	}
@@ -35,6 +41,9 @@
 
 	.sourceSelectLabel {
 		display: flex;
+		flex: 1 1 auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
 
 		.unsaveMarker {
 			color: @error;
@@ -45,6 +54,10 @@
 	.sourceSelectLabelEdit {
 		height: 28px;
 		padding: 5px 0;
+
+		div {
+			width: 100%;
+		}
 	}
 
 	.savedFiltersButton {
