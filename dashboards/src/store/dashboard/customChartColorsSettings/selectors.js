@@ -20,7 +20,7 @@ const getGlobalChartColorsSettings = (state: AppState): State => state.dashboard
  */
 const getWidgetGlobalChartColorsSettings = (widget: Widget) => createSelector(
 	getGlobalChartColorsSettings,
-	settingsMap => {
+	(settingsMap): string | null => {
 		let settings = null;
 
 		if (hasChartColorsSettings(widget.type)) {

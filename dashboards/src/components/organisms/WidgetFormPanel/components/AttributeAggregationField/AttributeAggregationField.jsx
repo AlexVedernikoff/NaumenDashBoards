@@ -22,6 +22,13 @@ export class AttributeAggregationField extends PureComponent<Props, State> {
 		}
 	};
 
+	componentDidMount () {
+		const {attribute, usesNotApplicableAggregation} = this.props;
+		const options = getAggregationOptions(attribute, usesNotApplicableAggregation);
+
+		this.setState({options});
+	}
+
 	componentDidUpdate (prevProps: Props) {
 		const {attribute, usesNotApplicableAggregation, value} = this.props;
 
