@@ -1534,9 +1534,9 @@ class DashboardQueryWrapperUtils
     {
         try
         {
-            def criteria = api.db.createCriteria().addSource('ou')
-                              .addColumn(api.selectClause.count(api.selectClause.property(localizationIsOn ? 'title.base' : 'title')))
-            def res = api.db.query(criteria).list()
+            def criteria = getApi().db.createCriteria().addSource('ou')
+                              .addColumn(getApi().selectClause.count(getApi().selectClause.property(localizationIsOn ? 'title.base' : 'title')))
+            def res = getApi().db.query(criteria).list()
             return true
         }
         catch (Exception ex)
