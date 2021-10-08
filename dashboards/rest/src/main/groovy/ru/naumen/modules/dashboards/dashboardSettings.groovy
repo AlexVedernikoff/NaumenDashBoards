@@ -413,7 +413,7 @@ class DashboardSettingsService
             def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
             return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
-        Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode)
+        Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode, true)
 
         def defaultDashboard = getSettingByLogin(null, isForUser ? subjectUUID : null) ?: new DashboardSettingsClass()
         def personalDashboard = getSettingByLogin(user?.login as String, isForUser ? subjectUUID : null)
@@ -942,7 +942,7 @@ class DashboardSettingsService
         return prepareWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
             dashboardSettings.widgets += totalWidget
             saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
-            return totalWidget
+            return updateDescriptorWithCodeAndUuid(totalWidget)
         }
     }
 
@@ -988,7 +988,7 @@ class DashboardSettingsService
                 {
                     return throwWidgetNotSavedException(currentUserLocale, key, personalDashboardKey)
                 }
-                return widgetWithCorrectName
+                return updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
             }
             else
             {
@@ -1008,7 +1008,7 @@ class DashboardSettingsService
                     {
                         return throwWidgetNotSavedException(currentUserLocale, key, personalDashboardKey)
                     }
-                    return totalWidget
+                    return updateDescriptorWithCodeAndUuid(totalWidget)
                 }
             }
         }
@@ -1033,12 +1033,13 @@ class DashboardSettingsService
                 closureReplaceWidgetKey(null)
             }
             def widgetDb = setUuidInSettings(widgetWithCorrectName, widgetKey)
+            widgetDb = updateDescriptorWithCodeAndUuid(widgetDb)
             String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
             DashboardSettingsClass dashboardSettings = getDashboardSetting(defaultDashboardKey)
             dashboardSettings.widgets.removeIf { it?.id == widgetKey }
             dashboardSettings.widgets += widgetDb
             saveJsonSettings(defaultDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
-            return widgetWithCorrectName
+            return updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
         }
     }
 
@@ -1223,7 +1224,7 @@ class DashboardSettingsService
             List<String> customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
             Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it.id in customGroupsIds }
             Collection<CustomGroup> destinationCustomGroups = dashboardSettings?.customGroups?.findAll { group ->
-                customGroupsIds.any { group.id.contains(it) }
+                customGroupsIds?.any { group?.id?.contains(it) }
             }
             //кастомные группировки на Дб для копирования могут уже существовать, возможно, потребуется сохранить группировку по-новому
             correctCustomGroups = editCustomGroupsToCorrectFormat(currentCustomGroups, destinationCustomGroups, destinationDashboardKey)
@@ -1894,7 +1895,8 @@ class DashboardSettingsService
     private Widget prepareWidgetSettings(Widget widgetSettings, Closure<String> generateCode, String userLogin = '')
     {
         String key = generateCode()
-        return setUuidInSettings(widgetSettings, key)
+        Widget widget = setUuidInSettings(widgetSettings, key)
+        return updateDescriptorWithCodeAndUuid(widget)
     }
 
     /**
@@ -2022,13 +2024,14 @@ class DashboardSettingsService
      * Получение настроек дашборда
      * @param classFqn    - код типа куда выведено встроенное приложение
      * @param contentCode - код контента встроенного приложения
+     * @param changeDescriptor - флаг на изменение дескриптора у виджетов
      * @param dashboardUUID - уникальный идентификатор экземпляра дашборда
      * @param login       - логин текущего пользователя
      * @return настройки дашборда
      */
-    private DashboardSettingsClass getDashboardSetting(String classFqn, String contentCode, String login = null, String dashboardUUID = '')
+    private DashboardSettingsClass getDashboardSetting(String classFqn, String contentCode, Boolean changeDescriptor = false,  String login = null, String dashboardUUID = '')
     {
-        return getDashboardSetting(generateDashboardKey(classFqn, contentCode, login, dashboardUUID))
+        return getDashboardSetting(generateDashboardKey(classFqn, contentCode, login, dashboardUUID), changeDescriptor)
     }
 
     /**
@@ -2049,9 +2052,10 @@ class DashboardSettingsService
     /**
      * Получение настроек дашборда
      * @param dashboardKey - уникальный идентификатор дашборда
+     * @param changeDescriptor - флаг на изменение дескриптора у виджетов
      * @return настройки дашборда
      */
-    private DashboardSettingsClass getDashboardSetting(String dashboardKey)
+    private DashboardSettingsClass getDashboardSetting(String dashboardKey, Boolean changeDescriptor = false)
     {
         def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
 
@@ -2068,6 +2072,11 @@ class DashboardSettingsService
                 {
                     widget = updateWidgetCustomGroup(widget, dashboard)
                     widget = updateWidgetIndicators(widget)
+                    if(changeDescriptor)
+                    {
+                        widget = updateDescriptorWithCodeAndUuid(widget)
+                    }
+                    return widget
                 }
             }
             if(dashboard.dashboardUUID)
@@ -2623,6 +2632,76 @@ class DashboardSettingsService
     {
         def attributeType = api.metainfo.getMetaClass(classFqn)?.getAttribute(code)?.getType()
         return attributeType?.toString()?.contains('caseList')
+    }
+
+    /**
+     * Метод изменения полей в дескрипторе
+     * @param widget - настройки виджета
+     * @return измененные настройки виджета
+     */
+    private Widget updateDescriptorWithCodeAndUuid(Widget widget)
+    {
+        def slurper = new groovy.json.JsonSlurper()
+        widget?.data?.each { data ->
+            def descriptor = data?.source?.descriptor
+            if(descriptor)
+            {
+                def tempDescriptor = slurper.parseText(descriptor)
+
+                tempDescriptor?.filters?.each { filterValue ->
+                    filterValue?.each { filter ->
+                        def properties = filter.properties
+                        def attrType = properties.attrTypeCode
+                        if(filter.dtObjectWrapper)
+                        {
+                            def obj = filter.dtObjectWrapper
+                            Map fieldsToRemoveAdd = getFieldToRemoveAndFieldToAdd(obj.keySet().toList(), attrType)
+                            if(obj[fieldsToRemoveAdd.fieldToRemove])
+                            {
+                                String fieldToRemove = fieldsToRemoveAdd.fieldToRemove
+                                String fieldToAdd = fieldsToRemoveAdd.fieldToAdd
+
+                                def fqn = obj.fqn
+                                Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: api.metainfo.checkAttributeExisting(fqn, fieldToAdd).isEmpty()
+
+                                if(attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
+                                {
+                                    def value = fieldToRemove == 'uuid'
+                                        ? api.utils.get(obj.uuid)[fieldToAdd]
+                                        : api.utils.findFirst(fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase(): fieldToAdd]
+
+                                    if(value)
+                                    {
+                                        filter.dtObjectWrapper.remove(fieldToRemove)
+                                        filter.dtObjectWrapper << [(fieldToAdd): value]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                data?.source?.descriptor = toJson(tempDescriptor)
+            }
+        }
+        return widget
+    }
+
+    /**
+     * Метод получения полей для изменения дескриптора
+     * @param dtObjectWrapperKeySet - список ключей в dtObjectWrapper
+     * @param attrType - тип атрибута в дескрипторе
+     * @return словарь из полей для удаления/добавления
+     */
+    private Map<String, String> getFieldToRemoveAndFieldToAdd(List dtObjectWrapperKeySet, String attrType)
+    {
+        if(attrType == AttributeType.CATALOG_ITEM_TYPE)
+        {
+            return dtObjectWrapperKeySet.any { it == 'uuid' } ? [fieldToRemove: 'uuid', fieldToAdd: 'code'] : [fieldToRemove: 'code', fieldToAdd: 'uuid']
+        }
+        else
+        {
+            return dtObjectWrapperKeySet.any { it == 'uuid' } ? [fieldToRemove: 'uuid', fieldToAdd: 'idHolder'] : [fieldToRemove: 'idHolder', fieldToAdd: 'uuid']
+        }
     }
 }
 
