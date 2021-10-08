@@ -529,7 +529,7 @@ class DashboardsService
             return meta ? meta.attributes.findResults {
                 if(!it.computable && it.type.code in types)
                 {
-                    Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(metaInfo.code, it.code, it.type.code)
+                    Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(meta.code, it.code, it.type.code)
                     return buildAttribute(it, metaInfo.title, metaInfo.code, ableForAvg)
                 }
             } : []
