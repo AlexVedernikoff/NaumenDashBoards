@@ -1384,7 +1384,7 @@ class DashboardsService
         return attributes.findResults {
             if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
             {
-                Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(sourceCode, it.code, it.type.code)
+                Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(it.metaClass.code, it.code, it.type.code)
                 buildAttribute(it, sourceName?.replace('Event for ', ''), sourceCode, ableForAvg)
             }
         }.sort { it.title }
