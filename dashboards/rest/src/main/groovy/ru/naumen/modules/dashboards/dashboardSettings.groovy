@@ -1148,7 +1148,7 @@ class DashboardSettingsService
         String classFqn = requestContent.classFqn
         String contentCode = requestContent.contentCode
         String groupUser = getUserGroup(user)
-        Boolean hasPersonalDashboard = user?.login && getDashboardSetting(classFqn, contentCode, user.login as String)
+        Boolean hasPersonalDashboard = user?.login && getDashboardSetting(classFqn, contentCode, false, user.login as String)
         return [groupUser : groupUser,
                 hasPersonalDashboard: hasPersonalDashboard,
                 name: user?.title,
