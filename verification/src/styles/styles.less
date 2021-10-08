@@ -1,0 +1,54 @@
+body {
+	background-color: @blue;
+	font-family: Roboto;
+	font-size: 14px;
+	margin: 0;
+}
+
+html, body, #root{
+	height: 100%;
+	overflow: hidden;
+}
+
+button {
+	background-color: transparent;
+	border: none;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+
+	&:focus{
+		outline:0;
+	}
+}
+
+.ReactTable .pagination-bottom .-pagination {
+	align-items: flex-end !important;
+}
+
+.tooltip-container {
+	color: @info;
+}
+
+input {
+	background: transparent;
+	border: none;
+	outline: none;
+}
+
+::-webkit-scrollbar {
+	width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 4px;
+	background-color: @grey;
+
+	&:hover, &:active {
+		background-color: #6E6E6E;
+	}
+}
+
+input::-ms-clear {
+	display: none;
+}
