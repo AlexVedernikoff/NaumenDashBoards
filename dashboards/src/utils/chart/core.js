@@ -78,8 +78,11 @@ const getAnnotationsOptions = (data: DiagramBuildData): Options => {
 		let value = 0;
 
 		series.forEach(({data = []}) => { value += parseFloat(data[labelIndex] ?? 0); });
+		const digets = Number.isInteger(value) ? 0 : 2;
+		const text = value.toFixed(digets);
+
 		return extend(ANNOTATION_POINT, {
-			label: {text: value},
+			label: {text},
 			x: label,
 			y: value
 		});
