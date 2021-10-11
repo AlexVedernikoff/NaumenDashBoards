@@ -5,15 +5,22 @@ import {DEFAULT_COMPONENTS, EXPORT_LIST} from './constants';
 import memoize from 'memoize-one';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'components/types';
 import styles from './styles.less';
 import Widget from 'containers/Widget';
 
 export class DiagramWidget extends PureComponent<Props, State> {
 	static defaultProps = {
 		...Widget.defaultProps,
-		components: DEFAULT_COMPONENTS,
-		forwardedRef: createRef()
+		components: DEFAULT_COMPONENTS
 	};
+
+	widgetRef: Ref<'div'>;
+
+	// eslint-disable-next-line react/no-deprecated
+	componentWillMount () {
+		this.widgetRef = this.props.forwardedRef ?? createRef();
+	}
 
 	getComponents = memoize(() => ({
 		ControlPanel: this.renderControlPanel
@@ -21,19 +28,22 @@ export class DiagramWidget extends PureComponent<Props, State> {
 
 	handleExport = async (type: string) => {
 		const {widget} = this.props;
-		const current = this.props.forwardedRef?.current;
 
-		if (current) {
-			const name = getSnapshotName(widget.name);
+		if (this.widgetRef) {
+			const {current} = this.widgetRef;
 
 			if (current) {
-				createSnapshot({
-					container: current,
-					fragment: true,
-					name,
-					toDownload: true,
-					type
-				});
+				const name = await getSnapshotName(widget.name);
+
+				if (current) {
+					createSnapshot({
+						container: current,
+						fragment: true,
+						name,
+						toDownload: true,
+						type
+					});
+				}
 			}
 		}
 	};
@@ -52,7 +62,7 @@ export class DiagramWidget extends PureComponent<Props, State> {
 			<Widget
 				className={widgetCN}
 				components={this.getComponents()}
-				forwardedRef={this.props.forwardedRef}
+				forwardedRef={this.widgetRef}
 				widget={widget}
 			>
 				<components.Content widget={widget}>{children}</components.Content>

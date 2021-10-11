@@ -3,24 +3,31 @@ import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'components/types';
 import styles from './styles.less';
 
 export class SearchInput extends PureComponent<Props, State> {
 	static defaultProps = {
 		className: '',
 		focusOnMount: false,
-		forwardedRef: createRef(),
 		value: ''
 	};
+
+	inputRef: Ref<'input'>;
 
 	state = {
 		value: ''
 	};
 
+	// eslint-disable-next-line react/no-deprecated
+	componentWillMount () {
+		this.inputRef = this.props.forwardedRef ?? createRef();
+	}
+
 	componentDidMount () {
-		const {focusOnMount, forwardedRef, value} = this.props;
+		const {focusOnMount, value} = this.props;
 		const {value: stateValue} = this.state;
-		const input = forwardedRef?.current;
+		const input = this.inputRef?.current;
 
 		if (value !== stateValue) {
 			this.setState({value});
@@ -40,15 +47,13 @@ export class SearchInput extends PureComponent<Props, State> {
 	handleClick = (e: SyntheticInputEvent<HTMLInputElement>) => e.stopPropagation();
 
 	handleClickRemoveIcon = () => {
-		const {forwardedRef} = this.props;
-
 		this.setState({value: ''});
 		this.props.onChange('');
-		forwardedRef?.current && forwardedRef.current.focus();
+		this.inputRef?.current && this.inputRef.current.focus();
 	};
 
 	renderInput = () => {
-		const {forwardedRef, onFocus} = this.props;
+		const {onFocus} = this.props;
 		const {value} = this.state;
 
 		return (
@@ -58,7 +63,7 @@ export class SearchInput extends PureComponent<Props, State> {
 				onClick={this.handleClick}
 				onFocus={onFocus}
 				placeholder="Поиск"
-				ref={forwardedRef}
+				ref={this.inputRef}
 				value={value}
 			/>
 		);
