@@ -3,9 +3,10 @@ import type {AppState} from 'store/types';
 import type {ConnectedProps} from './types';
 
 export const props = (state: AppState): ConnectedProps => {
-	const {editMode} = state.dashboard.settings;
+	const {editMode, isMobileDevice} = state.dashboard.settings;
 
 	return {
-		editMode
+		editMode,
+		isMobileDevice
 	};
 };

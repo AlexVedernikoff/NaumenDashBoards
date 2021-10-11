@@ -1,6 +1,7 @@
 // @flow
 export type ConnectedProps = {
-	editMode: boolean
+	editMode: boolean,
+	isMobileDevice: boolean
 };
 
 export type Props = ConnectedProps;

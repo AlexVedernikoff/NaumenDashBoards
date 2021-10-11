@@ -1,15 +1,18 @@
 // @flow
 import {DASHBOARD_HEADER_HEIGHT} from 'components/organisms/DashboardHeader/constants';
 import {gridRef} from 'components/organisms/WidgetsGrid/constants';
+import isMobile from 'ismobilejs';
 import type {Store} from 'store/types';
 
 export class DashboardResizer {
 	initHeight: number = window.innerHeight;
 	sizeWillBeChanged = false;
 	store = null;
+	isMobile = false;
 
 	constructor (store: Store) {
 		this.store = store;
+		this.isMobile = isMobile().any;
 	}
 
 	getContentHeight (): number | null {
@@ -74,6 +77,10 @@ export class DashboardResizer {
 		if (document.body && document.body.style.height !== height) {
 			document.body.style.height = height;
 			document.body.style.minHeight = minHeight;
+
+			if (this.isMobile) {
+				document.body.style.overflow = 'auto';
+			}
 
 			this.sizeWillBeChanged = true;
 		}

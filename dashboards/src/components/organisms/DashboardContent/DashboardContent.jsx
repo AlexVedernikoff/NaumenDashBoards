@@ -1,4 +1,5 @@
 // @flow
+import cn from 'classnames';
 import DashboardPanel from 'containers/DashboardPanel';
 import type {Props} from 'containers/DashboardContent/types';
 import React, {PureComponent} from 'react';
@@ -13,8 +14,13 @@ export class DashboardContent extends PureComponent<Props> {
 	};
 
 	render () {
+		const {isMobileDevice} = this.props;
+		const className = cn(styles.content, {
+			[styles.contentMobile]: isMobileDevice
+		});
+
 		return (
-			<div className={styles.content}>
+			<div className={className}>
 				<WidgetsGrid />
 				{this.renderPanel()}
 			</div>
