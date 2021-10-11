@@ -7,8 +7,8 @@ import settingsStyles from 'styles/settings.less';
 
 export class Text extends PureComponent<Props> {
 	static defaultProps: DefaultProps = {
-		alignmentBaseline: 'middle',
 		className: '',
+		dominantBaseline: 'middle',
 		fill: null,
 		fontSizeScale: 1,
 		textAnchor: 'middle'

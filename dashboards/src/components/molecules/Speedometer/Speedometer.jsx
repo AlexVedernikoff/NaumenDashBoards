@@ -112,12 +112,12 @@ export class Speedometer extends PureComponent<Props, State> {
 
 		return (
 			<Text
-				alignmentBaseline="text-before-edge"
+				dominantBaseline="text-before-edge"
 				fontSizeScale={fontSizeScale}
 				style={style}
 				textAnchor="middle"
 				x={x}
-				y={arcY}
+				y={arcY + 5}
 			>
 				{text}
 			</Text>
@@ -238,7 +238,7 @@ export class Speedometer extends PureComponent<Props, State> {
 
 		if (style.show) {
 			const {Text} = this.getComponents();
-			return <Text {...props} alignmentBaseline="text-bottom" fontSizeScale={fontSizeScale} style={style} />;
+			return <Text {...props} dominantBaseline="text-bottom" fontSizeScale={fontSizeScale} style={style} />;
 		}
 
 		return null;
@@ -263,11 +263,11 @@ export class Speedometer extends PureComponent<Props, State> {
 		return (
 			<svg className="speedometer" height={height} width={width} xmlns="http://www.w3.org/2000/svg">
 				{this.renderRanges()}
+				{this.renderNeedle()}
 				{this.renderLegend()}
 				{this.renderBorders()}
 				{this.renderTitle()}
 				{this.renderValue()}
-				{this.renderNeedle()}
 			</svg>
 		);
 	};
@@ -292,7 +292,7 @@ export class Speedometer extends PureComponent<Props, State> {
 
 		return (
 			<Text
-				alignmentBaseline="middle"
+				dominantBaseline="middle"
 				fontSizeScale={fontSizeScale}
 				style={TITLE_STYLE}
 				textAnchor="middle"
@@ -317,7 +317,7 @@ export class Speedometer extends PureComponent<Props, State> {
 
 		return (
 			<Text
-				alignmentBaseline="text-before-edge"
+				dominantBaseline="text-before-edge"
 				fontSizeScale={fontSizeScale}
 				style={style}
 				textAnchor="middle"

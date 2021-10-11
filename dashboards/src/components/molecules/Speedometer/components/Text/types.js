@@ -3,8 +3,8 @@
 import type {FontStyle} from 'store/widgets/data/types';
 
 export type DefaultProps = {
-	alignmentBaseline: string,
 	className: string,
+	dominantBaseline: string,
 	fill: ?string,
 	fontSizeScale: number,
 	textAnchor: string
