@@ -1101,7 +1101,7 @@ class DashboardDataSetService
 
             def mayBeBreakdown = data.breakdown
             def breakdownMap = [:]
-            breakdownMap = isDiagramTypeTable && !hasTableNotOnlyBaseSources && !mayBeBreakdown && commonBreakdown
+            breakdownMap = isDiagramTypeTable && !hasTableNotOnlyBaseSources && !mayBeBreakdown && computationInTableRequest && commonBreakdown
                 ? [(data.dataKey): commonBreakdown.values().find()]
                 : breakdownMap
             boolean dynamicInBreakdown = false
