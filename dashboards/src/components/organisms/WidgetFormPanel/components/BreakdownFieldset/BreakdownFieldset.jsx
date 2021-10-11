@@ -96,16 +96,17 @@ export class BreakdownFieldset extends Component<Props> {
 	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, index: number = 0): Array<Attribute> => {
 		const {helpers, index: dataSetIndex, value} = this.props;
 		let filteredOptions = options;
+		const {attribute} = value[index] ?? {};
 
 		if (index > this.mainIndex) {
-			const mainParameter = value[this.mainIndex].attribute;
+			const {attribute: mainParameter} = value[this.mainIndex];
 
 			if (mainParameter) {
 				filteredOptions = filterByAttribute(options, mainParameter, filterByRef);
 			}
 		}
 
-		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex);
+		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, attribute);
 	};
 
 	handleChangeGroup = (breakdownIndex: number) => (group: Group, attribute: Attribute) => {
@@ -223,7 +224,7 @@ export class BreakdownFieldset extends Component<Props> {
 
 	renderGroupWithContext = () => (
 		<Context.Consumer>
-			{(context) => this.renderGroup(context)}
+			{context => this.renderGroup(context)}
 		</Context.Consumer>
 	);
 

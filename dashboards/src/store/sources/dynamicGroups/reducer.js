@@ -13,26 +13,28 @@ const setDynamicGroups = (
 	payload: ReceiveDynamicAttributeGroupsPayload
 ): DynamicGroupsState => {
 	const {dataKey, groups} = payload;
-	const result = {...state};
+	const data = {};
 
 	groups.forEach(group => {
-		result[dataKey] = {
-			...result[dataKey],
-			data: {
-				...result[dataKey].data,
-				[group.code]: {
-					children: [],
-					error: false,
-					id: group.code,
-					loading: false,
-					parent: null,
-					uploaded: false,
-					value: group
-				}
-			},
-			loading: false
+		data[group.code] = {
+			children: [],
+			error: false,
+			id: group.code,
+			loading: false,
+			parent: null,
+			uploaded: false,
+			value: group
 		};
 	});
+
+	const result = {
+		...state,
+		[dataKey]: {
+			...state[dataKey],
+			data: {...state[dataKey].data, ...data},
+			loading: false
+		}
+	};
 
 	return result;
 };

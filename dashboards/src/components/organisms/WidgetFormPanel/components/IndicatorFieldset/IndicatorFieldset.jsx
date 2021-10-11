@@ -51,9 +51,15 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	}));
 
 	getMainOptions = (options: Array<Attribute>): Array<mixed> => {
-		const {dataSetIndex, helpers, values} = this.props;
+		const {dataSetIndex, helpers, value, values} = this.props;
+		const {attribute} = value;
+		let filterAttribute: ?Attribute = null;
 
-		return [...values.computedAttrs, ...helpers.filterAttributesByUsed(options, dataSetIndex)];
+		if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+			filterAttribute = (attribute: Attribute);
+		}
+
+		return [...values.computedAttrs, ...helpers.filterAttributesByUsed(options, dataSetIndex, filterAttribute)];
 	};
 
 	handleChangeLabel = ({value: attribute}: OnSelectEvent) => this.change({
@@ -197,7 +203,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	renderFieldWithContext = () => (
 		<Context.Consumer>
-			{(indicator) => this.renderField(indicator)}
+			{indicator => this.renderField(indicator)}
 		</Context.Consumer>
 	);
 

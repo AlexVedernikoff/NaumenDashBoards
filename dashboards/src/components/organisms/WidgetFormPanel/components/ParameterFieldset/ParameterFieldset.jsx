@@ -37,10 +37,11 @@ export class ParameterFieldset extends PureComponent<Props> {
 	};
 
 	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, dataSetIndex: number): Array<Attribute> => {
-		const {filterOptions, helpers} = this.props;
+		const {filterOptions, helpers, value} = this.props;
+		const {attribute} = value;
 		const filteredOptions = filterOptions ? filterOptions(options, dataSetIndex, filterByRef) : options;
 
-		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex);
+		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, attribute);
 	};
 
 	getComponents = memoize(() => ({
@@ -94,7 +95,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 
 	renderGroupWithContext = () => (
 		<Context.Consumer>
-			{(parameter) => this.renderGroup(parameter)}
+			{parameter => this.renderGroup(parameter)}
 		</Context.Consumer>
 	);
 
