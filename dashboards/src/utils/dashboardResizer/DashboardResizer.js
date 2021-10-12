@@ -74,15 +74,15 @@ export class DashboardResizer {
 	setFullHeight = () => this.setHeight('100%', `${this.initHeight}px`);
 
 	setHeight = (height: string, minHeight: string) => {
-		if (document.body && document.body.style.height !== height) {
-			document.body.style.height = height;
-			document.body.style.minHeight = minHeight;
-
+		if (document.body) {
 			if (this.isMobile) {
 				document.body.style.overflow = 'auto';
-			}
+			} else if (document.body.style.height !== height) {
+				document.body.style.height = height;
+				document.body.style.minHeight = minHeight;
 
-			this.sizeWillBeChanged = true;
+				this.sizeWillBeChanged = true;
+			}
 		}
 	};
 }
