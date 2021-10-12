@@ -82,7 +82,7 @@ class MessageProvider
     String getMessage(Map bindings = [:], String messageCode, String locale)
     {
         def message = MESSAGES[messageCode][locale]
-        return message ? utils.processTemplate(message, bindings) : null
+        return message ? api.utils.processTemplate(message, bindings) : null
     }
 
     /**
