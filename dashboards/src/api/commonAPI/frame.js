@@ -20,7 +20,8 @@ export default class Frame implements FrameAPI {
 	}
 
 	getCurrentLocale () {
-		return window.jsApi.getCurrentLocale();
+		const {getCurrentLocale} = window.jsApi;
+		return getCurrentLocale ? getCurrentLocale() : 'ru';
 	}
 
 	getCurrentUser () {
