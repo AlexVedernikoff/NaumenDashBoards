@@ -19,8 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
 import ru.naumen.core.shared.IUUIDIdentifiable
 import static MessageProvider.*
-import static CurrentUserHolder.*
-
 import static groovy.json.JsonOutput.toJson
 
 @Field @Lazy @Delegate DashboardSettings dashboardSettings = new DashboardSettingsImpl(binding)
@@ -413,6 +411,9 @@ class DashboardSettingsService
             def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
             return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
+
+        checkAndUpdateSettings(subjectUUID, contentCode, isPersonal ? user?.login as String :  null, isForUser ? subjectUUID : null)
+
         Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode, true)
 
         def defaultDashboard = getSettingByLogin(null, isForUser ? subjectUUID : null) ?: new DashboardSettingsClass()
@@ -461,6 +462,85 @@ class DashboardSettingsService
             defaultDashboard.dashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
             return defaultDashboard
         }
+    }
+
+    /**
+     * Метод преобразования настроек виджетов дашборда, в которых используется uuid за значением, привязанном к стенду
+     * @param subjectUUID - код карточки объекта, на которой расположен дашборд
+     * @param contentCode - код контента, на котором расположен дашборд
+     * @param login - логин пользователя (нужен для личного дашборда)
+     * @param dashboardUUID - уникальный идентификатор экземпляра дашборда
+     */
+    private void checkAndUpdateSettings(String subjectUUID, String contentCode, String login, String dashboardUUID)
+    {
+        String dashboardKey = generateDashboardKey(subjectUUID, contentCode, login, dashboardUUID)
+        def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
+        DashboardSettingsClass dashboard = Jackson.fromJsonString(dashboardSettings, DashboardSettingsClass)
+        if(dashboard)
+        {
+            Boolean widgetsDescriptorHasBadFields = false
+            dashboard.widgets.each { widget ->
+                DashboardUtils.convertWidgetToNewFormat(widget)
+                widgetsDescriptorHasBadFields = widgetsDescriptorHasBadFields || checkIfWidgetDescriptorHasBadFields(widget)
+            }
+
+            if(widgetsDescriptorHasBadFields)
+            {
+                dashboard.widgets = dashboard.widgets.findResults { widget ->
+                    if (widget?.type == DiagramType.TEXT)
+                    {
+                        return widget
+                    }
+                    else
+                    {
+                        return DashboardUtils.updateDescriptorWithCodeAndUuid(widget, false)
+                    }
+                }
+                saveJsonSettings(dashboardKey, Jackson.toJsonString(dashboard), DASHBOARD_NAMESPACE)
+            }
+        }
+    }
+
+    /**
+     * Метод проверки дескриптора на наличие "плохих" полей
+     * @param widget - настройки виджета
+     * @return флаг на наличие "плохих" полей
+     */
+    private Boolean checkIfWidgetDescriptorHasBadFields(Widget widget)
+    {
+        Boolean hasBadFields = false
+        if (widget?.type != DiagramType.TEXT)
+        {
+            def slurper = new groovy.json.JsonSlurper()
+            widget?.data?.each { data ->
+                def descriptor = data?.source?.descriptor
+                if(descriptor)
+                {
+                    def tempDescriptor = slurper.parseText(descriptor)
+
+                    tempDescriptor?.filters?.each { filterValue ->
+                        filterValue?.each { filter ->
+                            def attrType = filter.properties.attrTypeCode
+                            if(filter.dtObjectWrapper)
+                            {
+                                def obj = filter.dtObjectWrapper
+                                Map fieldsToRemoveAdd = DashboardUtils.getFieldToRemoveAndFieldToAdd(obj.keySet().toList(), attrType, false)
+
+                                if(fieldsToRemoveAdd)
+                                {
+                                    String fieldToRemove = fieldsToRemoveAdd.fieldToRemove
+                                    String fieldToAdd = fieldsToRemoveAdd.fieldToAdd
+
+                                    Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: api.metainfo.checkAttributeExisting(obj.fqn, fieldToAdd).isEmpty()
+                                    hasBadFields = hasBadFields || (obj[fieldToRemove] && attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return hasBadFields
     }
 
     /**
@@ -942,7 +1022,7 @@ class DashboardSettingsService
         return prepareWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
             dashboardSettings.widgets += totalWidget
             saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
-            return updateDescriptorWithCodeAndUuid(totalWidget)
+            return DashboardUtils.updateDescriptorWithCodeAndUuid(totalWidget)
         }
     }
 
@@ -988,7 +1068,7 @@ class DashboardSettingsService
                 {
                     return throwWidgetNotSavedException(currentUserLocale, key, personalDashboardKey)
                 }
-                return updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
+                return DashboardUtils.updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
             }
             else
             {
@@ -1008,7 +1088,7 @@ class DashboardSettingsService
                     {
                         return throwWidgetNotSavedException(currentUserLocale, key, personalDashboardKey)
                     }
-                    return updateDescriptorWithCodeAndUuid(totalWidget)
+                    return DashboardUtils.updateDescriptorWithCodeAndUuid(totalWidget)
                 }
             }
         }
@@ -1033,13 +1113,13 @@ class DashboardSettingsService
                 closureReplaceWidgetKey(null)
             }
             def widgetDb = setUuidInSettings(widgetWithCorrectName, widgetKey)
-            widgetDb = updateDescriptorWithCodeAndUuid(widgetDb)
+            widgetDb = DashboardUtils.updateDescriptorWithCodeAndUuid(widgetDb)
             String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
             DashboardSettingsClass dashboardSettings = getDashboardSetting(defaultDashboardKey)
             dashboardSettings.widgets.removeIf { it?.id == widgetKey }
             dashboardSettings.widgets += widgetDb
             saveJsonSettings(defaultDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
-            return updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
+            return DashboardUtils.updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
         }
     }
 
@@ -1896,7 +1976,7 @@ class DashboardSettingsService
     {
         String key = generateCode()
         Widget widget = setUuidInSettings(widgetSettings, key)
-        return updateDescriptorWithCodeAndUuid(widget)
+        return DashboardUtils.updateDescriptorWithCodeAndUuid(widget)
     }
 
     /**
@@ -2074,7 +2154,7 @@ class DashboardSettingsService
                     widget = updateWidgetIndicators(widget)
                     if(changeDescriptor)
                     {
-                        widget = updateDescriptorWithCodeAndUuid(widget)
+                        widget = DashboardUtils.updateDescriptorWithCodeAndUuid(widget)
                     }
                     return widget
                 }
@@ -2632,76 +2712,6 @@ class DashboardSettingsService
     {
         def attributeType = api.metainfo.getMetaClass(classFqn)?.getAttribute(code)?.getType()
         return attributeType?.toString()?.contains('caseList')
-    }
-
-    /**
-     * Метод изменения полей в дескрипторе
-     * @param widget - настройки виджета
-     * @return измененные настройки виджета
-     */
-    private Widget updateDescriptorWithCodeAndUuid(Widget widget)
-    {
-        def slurper = new groovy.json.JsonSlurper()
-        widget?.data?.each { data ->
-            def descriptor = data?.source?.descriptor
-            if(descriptor)
-            {
-                def tempDescriptor = slurper.parseText(descriptor)
-
-                tempDescriptor?.filters?.each { filterValue ->
-                    filterValue?.each { filter ->
-                        def properties = filter.properties
-                        def attrType = properties.attrTypeCode
-                        if(filter.dtObjectWrapper)
-                        {
-                            def obj = filter.dtObjectWrapper
-                            Map fieldsToRemoveAdd = getFieldToRemoveAndFieldToAdd(obj.keySet().toList(), attrType)
-                            if(obj[fieldsToRemoveAdd.fieldToRemove])
-                            {
-                                String fieldToRemove = fieldsToRemoveAdd.fieldToRemove
-                                String fieldToAdd = fieldsToRemoveAdd.fieldToAdd
-
-                                def fqn = obj.fqn
-                                Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: api.metainfo.checkAttributeExisting(fqn, fieldToAdd).isEmpty()
-
-                                if(attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
-                                {
-                                    def value = fieldToRemove == 'uuid'
-                                        ? api.utils.get(obj.uuid)[fieldToAdd]
-                                        : api.utils.findFirst(fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase(): fieldToAdd]
-
-                                    if(value)
-                                    {
-                                        filter.dtObjectWrapper.remove(fieldToRemove)
-                                        filter.dtObjectWrapper << [(fieldToAdd): value]
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                data?.source?.descriptor = toJson(tempDescriptor)
-            }
-        }
-        return widget
-    }
-
-    /**
-     * Метод получения полей для изменения дескриптора
-     * @param dtObjectWrapperKeySet - список ключей в dtObjectWrapper
-     * @param attrType - тип атрибута в дескрипторе
-     * @return словарь из полей для удаления/добавления
-     */
-    private Map<String, String> getFieldToRemoveAndFieldToAdd(List dtObjectWrapperKeySet, String attrType)
-    {
-        if(attrType == AttributeType.CATALOG_ITEM_TYPE)
-        {
-            return dtObjectWrapperKeySet.any { it == 'uuid' } ? [fieldToRemove: 'uuid', fieldToAdd: 'code'] : [fieldToRemove: 'code', fieldToAdd: 'uuid']
-        }
-        else
-        {
-            return dtObjectWrapperKeySet.any { it == 'uuid' } ? [fieldToRemove: 'uuid', fieldToAdd: 'idHolder'] : [fieldToRemove: 'idHolder', fieldToAdd: 'uuid']
-        }
     }
 }
 

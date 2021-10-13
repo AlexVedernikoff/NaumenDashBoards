@@ -931,6 +931,87 @@ class DashboardUtils
             default: return false
         }
     }
+
+    /**
+     * Метод получения полей для изменения дескриптора
+     * @param dtObjectWrapperKeySet - список ключей в dtObjectWrapper
+     * @param attrType - тип атрибута в дескрипторе
+     * @param needToReverse - флаг на необходимость возврата данных для обратного превращения
+     * @return словарь из полей для удаления/добавления
+     */
+    static Map<String, String> getFieldToRemoveAndFieldToAdd(List dtObjectWrapperKeySet, String attrType, Boolean needToReverse = true)
+    {
+        if(attrType == AttributeType.CATALOG_ITEM_TYPE)
+        {
+            return dtObjectWrapperKeySet.any { it == 'uuid' }
+                ? [fieldToRemove: 'uuid', fieldToAdd: 'code']
+                : needToReverse ? [fieldToRemove: 'code', fieldToAdd: 'uuid'] : [:]
+        }
+        else
+        {
+            return dtObjectWrapperKeySet.any { it == 'uuid' }
+                ? [fieldToRemove: 'uuid', fieldToAdd: 'idHolder']
+                : needToReverse ? [fieldToRemove: 'idHolder', fieldToAdd: 'uuid'] : [:]
+        }
+    }
+
+    /**
+     * Метод изменения полей в дескрипторе
+     * @param widget - настройки виджета
+     * @param needToReverse - флаг на необходимость возврата данных для обратного превращения
+     * @return измененные настройки виджета
+     */
+    static Widget updateDescriptorWithCodeAndUuid(Widget widget, Boolean needToReverse = true)
+    {
+        if(widget)
+        {
+            def slurper = new groovy.json.JsonSlurper()
+            widget?.data?.each { data ->
+                def descriptor = data?.source?.descriptor
+                if(descriptor)
+                {
+                    def tempDescriptor = slurper.parseText(descriptor)
+
+                    tempDescriptor?.filters?.each { filterValue ->
+                        filterValue?.each { filter ->
+                            def attrType = filter.properties.attrTypeCode
+                            if(filter.dtObjectWrapper)
+                            {
+                                def obj = filter.dtObjectWrapper
+                                Map fieldsToRemoveAdd = getFieldToRemoveAndFieldToAdd(obj.keySet().toList(), attrType, needToReverse)
+                                if(fieldsToRemoveAdd)
+                                {
+                                    if(obj[fieldsToRemoveAdd.fieldToRemove])
+                                    {
+                                        String fieldToRemove = fieldsToRemoveAdd.fieldToRemove
+                                        String fieldToAdd = fieldsToRemoveAdd.fieldToAdd
+
+                                        def fqn = obj.fqn
+                                        Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: api.metainfo.checkAttributeExisting(fqn, fieldToAdd).isEmpty()
+
+                                        if(attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
+                                        {
+                                            def value = fieldToRemove == 'uuid'
+                                                ? api.utils.get(obj.uuid)[fieldToAdd]
+                                                : api.utils.findFirst(fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase(): fieldToAdd]
+
+                                            if(value)
+                                            {
+                                                filter.dtObjectWrapper.remove(fieldToRemove)
+                                                filter.dtObjectWrapper << [(fieldToAdd): value]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    data?.source?.descriptor = toJson(tempDescriptor)
+                }
+            }
+        }
+        return widget
+    }
 }
 
 //region КЛАССЫ

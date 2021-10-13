@@ -12,6 +12,7 @@
 
 package ru.naumen.modules.dashboards
 
+import com.amazonaws.util.json.Jackson
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.spi.ScriptServiceImpl
 import ru.naumen.core.server.script.api.injection.InjectApi
@@ -78,6 +79,11 @@ interface DashboardConfig
      * @param file - файл в формате json. Например: [namespace : [key : value]]
      */
     void updateDataInKeyValueStorageFromFile(def file)
+
+    /**
+     * Обновляет дескрипторы виджетов у дашбордов в хранилище с применения uuid на применение code
+     */
+    void setCodeInsteadOfUuidInDashboardsSettings()
 }
 
 @InheritConstructors
@@ -142,6 +148,12 @@ class DashboardConfigImpl extends BaseController implements DashboardConfig
     void updateDataInKeyValueStorageFromFile(def file)
     {
         service.updateDataInKeyValueStorageFromFile(file)
+    }
+
+    @Override
+    void setCodeInsteadOfUuidInDashboardsSettings()
+    {
+        service.setCodeInsteadOfUuidInDashboardsSettings()
     }
 }
 
@@ -677,6 +689,34 @@ class DashboardConfigService
                     logger.info("workerKeyValueStorage >>> In namespace = ${namespaceForUpdate} " +
                                 "by key = ${keyForUpdate} new value = ${newValue}")
                 }
+            }
+        }
+    }
+
+    /**
+     * Обновляет дескрипторы виджетов у дашбордов в хранилище с применения uuid на применение code
+     */
+    void setCodeInsteadOfUuidInDashboardsSettings()
+    {
+        List dashboardKeys = getDashboardKeys('widgets', DASHBOARD_NAMESPACE)
+
+        dashboardKeys.each { dashboardKey ->
+            def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
+            DashboardSettingsClass dashboard = Jackson.fromJsonString(dashboardSettings, DashboardSettingsClass)
+            if(dashboard)
+            {
+                dashboard.widgets = dashboard.widgets.findResults { w ->
+                    def widget = DashboardUtils.convertWidgetToNewFormat(w)
+                    if(widget?.type == DiagramType.TEXT)
+                    {
+                        return widget
+                    }
+                    else
+                    {
+                        return DashboardUtils.updateDescriptorWithCodeAndUuid(widget, false)
+                    }
+                }
+                api.keyValue.put(DASHBOARD_NAMESPACE, dashboardKey, Jackson.toJsonString(dashboard))
             }
         }
     }
