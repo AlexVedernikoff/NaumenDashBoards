@@ -73,7 +73,7 @@ const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
 		fontFamily: FONT_FAMILIES[0],
 		fontSize: 14,
 		position: LEGEND_POSITIONS.right,
-		show: true,
+		show: false,
 		textHandler: TEXT_HANDLERS.CROP
 	}
 };

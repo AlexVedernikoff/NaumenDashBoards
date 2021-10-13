@@ -53,8 +53,8 @@ export class WidgetFormPanel extends PureComponent<Props, State> {
 		value
 	}));
 
-	handleChangeType = (type: WidgetType) => {
-		this.setState({type});
+	handleChangeType = (type: WidgetType, callback?: () => mixed) => {
+		this.setState({type}, callback);
 	};
 
 	renderForm = () => {
