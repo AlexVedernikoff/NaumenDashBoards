@@ -976,7 +976,7 @@ class DashboardSettingsService
         if (isPersonal)
         {
             checkRightsOnEditDashboard(requestContent.editable, currentUserLocale)
-            Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode)
+            Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode, false)
             if (user && isPersonalWidget(widgetKey, user))
             {
                 widgetWithCorrectName = prepareWidgetSettings(widgetWithCorrectName) { widgetKey }
