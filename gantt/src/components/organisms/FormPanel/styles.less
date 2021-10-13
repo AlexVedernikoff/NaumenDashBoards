@@ -3,16 +3,39 @@
 :local {
 	.contentTitle {
 		font-size: 13px;
-	}
-
-	.border {
-		border-bottom: 1px solid #EBEBEB;
-		position: relative;
+		margin-bottom: 8px;
+		margin-top: 8px;
 	}
 
 	.button {
-		padding-left: 2px;
-		padding-right: 2px;
+		border-radius: 0;
+		font-weight: normal;
+		justify-content: start;
+		padding: 12.5px 0;
+		position: relative;
+		width: 100%;
+
+		&:hover,
+		&:focus {
+			background-color: #F2F2F2;
+			border-radius: 0;
+
+			&:before {
+				background-color: #F2F2F2;
+				content: "";
+				height: 100%;
+				position: absolute;
+				right: -50px;
+				top: 0;
+				width: 1000%;
+				z-index: -1;
+			}
+		}
+
+		&[disabled] {
+			color: lightgrey;
+			cursor: not-allowed;
+		}
 	}
 
 	.list {
@@ -28,9 +51,43 @@
 		min-width: 90%;
 		justify-content: space-between;
 
-		&.react-draggable-dragging, .resizing  {
-			z-index: 50;
+		&:hover {
+			&:before {
+				background-color: #F2F2F2;
+				content: "";
+				height: calc(100% + 10px);
+				position: absolute;
+				right: -50px;
+				top: -5px;
+				width: 1000%;
+				z-index: -1;
+			}
 		}
+
+		&:active:not(:first-child) {
+			&:before {
+				background-color: #DDF0EB;
+				content: "";
+				height: calc(100% + 10px);
+				position: absolute;
+				right: -50px;
+				top: -5px;
+				width: 1000%;
+				z-index: -1;
+			}
+
+			z-index: 20;
+		}
+	}
+
+	.basket,
+	.kebab {
+		visibility: hidden;
+	}
+
+	.item:hover .basket ,
+	.item:hover:not(:first-child) .kebab {
+		visibility: visible;
 	}
 
 	.disabled button,
@@ -39,16 +96,14 @@
 		opacity: .5;
 	}
 
-	.header {
-		align-items: center;
-		display: flex;
-		padding: 8px;
-		flex-direction: row;
-		justify-content: space-between;
-	}
-
 	.top {
 		margin-top: 5px;
+	}
+
+	.select {
+		padding-bottom: 12px;
+		padding-top: 4px;
+		width: 100%;
 	}
 
 	.bottom {
@@ -74,8 +129,21 @@
 		margin: 10px 0;
 	}
 
+	.checkbox {
+		padding-bottom: 8px;
+		padding-top: 8px;
+		width: 100%;
+	}
+
+	.checkbox > div {
+		justify-content: start;
+		padding-left: 2px;
+		padding-right: 2px;
+		width: 100%;
+	}
+
 	.label {
-		color: @grey;
+		color: #323232;
 		font-size: 13px;
 	}
 
@@ -87,7 +155,7 @@
 	}
 
 	.field {
-		padding: 8px 24px;
+		padding: 9px 14px 8px 20px;
 	}
 
 	.content {
@@ -99,9 +167,8 @@
 	}
 
 	.input {
+		max-width: 80%;
 		overflow: hidden;
-		max-width: 50%;
-		width: 50%;
 	}
 
 	.title > :not(:first-child) {
@@ -112,10 +179,5 @@
 		align-items: center;
 		display: flex;
 		justify-content: space-between;
-	}
-
-	.errorField {
-		color: red;
-		padding: 0 24px;
 	}
 }

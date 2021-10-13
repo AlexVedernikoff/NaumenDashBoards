@@ -1,7 +1,7 @@
 // @flow
 import 'rc-menu/assets/index.css';
 import type {Attribute} from 'store/attributes/types';
-import {Button, Checkbox, ConfirmModal, Container, FormControl, Icon, Select, TreeSelect} from 'naumen-common-components';
+import {Button, Checkbox, Container, FormControl, Icon, Select, TreeSelect} from 'naumen-common-components';
 import cn from 'classnames';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import {Column, SourceItem} from 'src/store/App/types';
@@ -11,10 +11,12 @@ import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import {deepClone} from 'helpers';
 import {defaultAttributeSetting, ITEM_TYPES_FOR_WORK} from 'src/store/App/constants';
 import DropdownMenu from 'components/atoms/DropdownMenu';
+import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
+import Modal from 'src/components/atoms/Modal';
 import {openFilterForm} from 'utils/api/context';
 import type {Props} from './types';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from './styles.less';
 import WorkIcon from 'icons/WorkIcon';
 
@@ -26,7 +28,12 @@ const Work = (props: Props) => {
 	const [showModal, setShowModal] = useState(false);
 	const [showModalRemoving, setShowModalRemoving] = useState(false);
 	const [showMenu, setShowMenu] = useState(false);
+	const [top, setTop] = useState(null);
 	const mayBeNested = getPrevItem(index)?.type === 'WORK';
+
+	useEffect(() => {
+		setTop(document.getElementById('workSettingsButton' + index)?.getBoundingClientRect().top);
+	}, [showModal]);
 
 	const changeSource = (source: SourceItem) => {
 		setValueAttributes({});
@@ -120,7 +127,7 @@ const Work = (props: Props) => {
 
 		return (
 			<button className={styles.filterButton} disabled={!work?.source?.value} onClick={handleOpenFilterForm}>
-				<Icon name={iconName} />
+				<Icon height={14} name={iconName} />
 				<span className={styles.desc}>Фильтрация</span>
 			</button>
 		);
@@ -130,7 +137,7 @@ const Work = (props: Props) => {
 		const {options} = props;
 
 		return (
-			<>
+			<div className={styles.select}>
 				<span className={styles.label}>Работа</span>
 				<TreeSelect
 					className={styles.sourceTreeSelect}
@@ -140,7 +147,7 @@ const Work = (props: Props) => {
 					removable={true}
 					value={work.source.value}
 				/>
-			</>
+			</div>
 		);
 	};
 
@@ -162,20 +169,22 @@ const Work = (props: Props) => {
 
 	const renderAttributesButton = () => {
 		return (
-			<Button
-				className={styles.button}
-				disabled={!work.source.value?.value}
-				onClick={handleAttributesButton}
-				variant='ADDITIONAL'
-			>
-				Атрибуты для таблицы
-			</Button>
+			<div className={styles.width} id={`workSettingsButton${index}`}>
+				<Button
+					className={styles.button}
+					disabled={!work.source.value?.value}
+					onClick={handleAttributesButton}
+					variant='ADDITIONAL'
+				>
+					Атрибуты для таблицы
+				</Button>
+			</div>
 		);
 	};
 
 	const renderNestedCheckbox = () => {
 		return (
-			<FormControl className={styles.margin} label='Вложенная работа'>
+			<FormControl className={cn(styles.checkbox)} label='Вложенная работа'>
 				<Checkbox checked={work.nested} name='Checkbox' onChange={handleCheckboxChange} value={work.nested} />
 			</FormControl>
 		);
@@ -199,7 +208,7 @@ const Work = (props: Props) => {
 		const currentValue: Attribute = workAttribute ? getAdditionalFields(workAttribute, workAttribute.title, workAttribute.code) : null;
 
 		return (
-			<>
+			<div className={styles.select}>
 				<span className={styles.label}>Атрибут связи с ресурсом</span>
 				<Select className={cn(styles.margin, styles.width)}
 					fetchOptions={getOptionsForBondWithResource}
@@ -210,7 +219,7 @@ const Work = (props: Props) => {
 					placeholder='Атрибут связи с ресурсом'
 					value={currentValue}
 				/>
-			</>
+			</div>
 		);
 	};
 
@@ -232,7 +241,7 @@ const Work = (props: Props) => {
 		const currentValue: Attribute = workAttribute ? getAdditionalFields(workAttribute, workAttribute.title, workAttribute.code) : null;
 
 		return (
-			<>
+			<div className={styles.select}>
 				<span className={styles.label}>Связь с вышестоящей работой</span>
 				<Select className={cn(styles.margin, styles.width)}
 					fetchOptions={getOptionsForBondWithWork}
@@ -243,7 +252,7 @@ const Work = (props: Props) => {
 					placeholder='Связь с вышестоящей работой'
 					value={currentValue}
 				/>
-			</>
+			</div>
 		);
 	};
 
@@ -289,7 +298,7 @@ const Work = (props: Props) => {
 		const currentValue: Attribute = attribute ? getAdditionalFields(attribute, attribute.title, attribute.code) : null;
 
 		return (
-			<>
+			<div className={styles.select}>
 				<span className={styles.label}>{label}</span>
 				<Select className={cn(styles.margin, styles.width)}
 					fetchOptions={getOptionsForDate}
@@ -300,7 +309,7 @@ const Work = (props: Props) => {
 					placeholder={label}
 					value={currentValue}
 				/>
-			</>
+			</div>
 		);
 	};
 
@@ -356,16 +365,17 @@ const Work = (props: Props) => {
 		return null;
 	};
 
-	const renderConfirmModal = () => {
+	const renderFrom = () => {
 		if (showModal) {
 			return (
-				<ConfirmModal
+				<Form
 					className={styles.height}
-					header='Атрибуты для таблицы'
-					notice={false}
 					onClose={handleCancelModal}
 					onSubmit={handleSaveModal}
-					text={getContentModal()} />
+					top={top}
+				>
+					{columns && getContentModal()}
+				</Form>
 			);
 		}
 
@@ -375,14 +385,14 @@ const Work = (props: Props) => {
 	const renderRemovingModal = () => {
 		if (showModalRemoving) {
 			return (
-				<ConfirmModal
-					header='Вы желаете удалить работу?'
+				<Modal
 					notice={true}
 					onClose={() => setShowModalRemoving(false)}
 					onSubmit={handleDeleteBlock}
 					submitText="Удалить"
-					text="При удалении работы также удалятся и все вложенные в нее работы"
-				/>
+				>
+					При удалении работы также удалятся и все вложенные в нее работы
+				</Modal>
 			);
 		}
 
@@ -408,7 +418,7 @@ const Work = (props: Props) => {
 		<div className={styles.border} style={getPaddingLeftForChildren(level)}>
 			{renderDropdownMenu()}
 			{renderCollapsableFormBox()}
-			{renderConfirmModal()}
+			{renderFrom()}
 			{renderRemovingModal()}
 		</div>
 	);

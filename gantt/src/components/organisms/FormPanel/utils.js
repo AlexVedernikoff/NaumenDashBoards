@@ -145,4 +145,10 @@ export const getUpdatedLevel = (oldLevel: number, isNested: boolean): number => 
  * @param level - уровень вложенности (глубины)
  * @returns {Object}
  */
-export const getPaddingLeftForChildren = (level: number): Object => ({'paddingLeft': `${level * 36}px`});
+export const getPaddingLeftForChildren = (level: number): Object => {
+	if (!level) {
+		return ({'paddingLeft': '20px'});
+	}
+
+	return ({'marginLeft': `${level * 36 + 20}px`});
+};

@@ -2,8 +2,8 @@
 import {
 	Button,
 	Checkbox,
-	ConfirmModal,
 	FormControl,
+	Icon,
 	IconButton,
 	Loader,
 	Select,
@@ -16,9 +16,11 @@ import {connect} from 'react-redux';
 import {deepClone} from 'src/helpers';
 import {defaultColumn} from 'src/store/App/constants';
 import {defaultResourceSetting} from 'store/App/constants';
+import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
 import {getChild, getNeighbor, getParent, getUpdatedLevel} from './utils';
 import GridLayout from 'react-grid-layout';
+import Modal from 'src/components/atoms/Modal';
 import type {Props} from './types';
 import React, {useState} from 'react';
 import Resource from './components/Resource';
@@ -188,17 +190,17 @@ const FormPanel = (props: Props) => {
 	);
 
 	const renderSelectCommonBlock = () => (
-		<>
+		<div className={styles.select}>
 			<span className={styles.label}>Масштаб по умолчанию</span>
 			<Select className={styles.top} onSelect={handleScaleChange} options={ScaleNames} placeholder='Масштаб по умолчанию' value={ScaleNames.find(item => item.value === settings.scale)} />
-		</>
+		</div>
 	);
 
 	const renderCheckboxCommonBlock = () => {
 		const {settings} = props;
 
 		return (
-			<FormControl className={styles.margin} label='Свернуть работы по умолчанию'>
+			<FormControl className={cn(styles.checkbox)} label='Свернуть работы по умолчанию'>
 				<Checkbox checked={settings.rollUp} name='Checkbox' onChange={handleCheckboxChange} value={settings.rollUp} />
 			</FormControl>
 		);
@@ -210,9 +212,10 @@ const FormPanel = (props: Props) => {
 		</Button>
 	);
 
-	const renderConfirmModal = () => {
+	const renderFrom = () => {
 		if (showModal) {
-			return <ConfirmModal className={styles.height} header={getHeaderModal()} notice={false} onClose={handleCancelColumnSettings} onSubmit={handleSaveColumnSettings} text={getContentModal()} />;
+			const top = document.getElementById('panelSettingsButton')?.getBoundingClientRect().top;
+			return <Form header={getHeaderModal()} onClose={handleCancelColumnSettings} onSubmit={handleSaveColumnSettings} top={top}>{getContentModal()}</Form>;
 		}
 
 		return null;
@@ -220,12 +223,14 @@ const FormPanel = (props: Props) => {
 
 	const renderCommonBlock = () => {
 		return (
-			<div className={cn(styles.border, styles.field)}>
+			<div className={styles.field}>
 				{renderHeaderCommonBlock()}
 				{renderSelectCommonBlock()}
 				{renderCheckboxCommonBlock()}
-				{renderButtonCommonBlock()}
-				{renderConfirmModal()}
+				<div className={styles.form} id='panelSettingsButton'>
+					{renderButtonCommonBlock()}
+					{renderFrom()}
+				</div>
 			</div>
 		);
 	};
@@ -243,7 +248,23 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
-	const renderError = () => error && <p className={styles.errorField}>{error}</p>;
+	const renderError = () => {
+		if (error) {
+			return (
+				<Modal
+					notice={false}
+					onClose={() => setError('')}
+					onSubmit={() => setError('')}
+					submitText='Ок'
+					text={''}
+				>
+					{error}
+				</Modal>
+			);
+		}
+
+		return null;
+	};
 
 	const checkingSettings = () => {
 		for (let i = 0; i < resources.length; i++) {
@@ -277,10 +298,9 @@ const FormPanel = (props: Props) => {
 
 	const getHeaderModal = () => {
 		return (
-			<div className={styles.header}>
-				<span>Настройки столбцов таблицы</span>
-				<IconButton active={true} icon='PLUS' onClick={handleAddNewColumn} variant='GRAY' />
-			</div>
+			<Button onClick={handleAddNewColumn} outline={true} variant='INFO'>
+				Добавить столбец
+			</Button>
 		);
 	};
 
@@ -289,9 +309,10 @@ const FormPanel = (props: Props) => {
 			<GridLayout className="layout" cols={1} layouts={layout} onLayoutChange={layout => setLayout(layout)} rowHeight={35} width={300}>
 				{columnSettingsModal.map((item, index) => (
 					<div className={styles.item} data-grid={{h: 1, static: !index, w: 1, x: 0, y: index}} key={item.code}>
+						<Icon className={styles.kebab} name='KEBAB' />
 						<ShowBox checked={item.show} className={!index && styles.disabled} name={item.code} onChange={() => index && handleColumnShowChange(index)} value={item.show} />
 						<TextInput className={styles.input} maxLength={30} name={item.code} onChange={target => handleColumnNameChange(target, index)} onlyNumber={false} placeholder='Введите название столбца' value={item.title} />
-						<IconButton className={!index && styles.disabled} icon='BASKET' onClick={() => index && handleDeleteColumn(index)} />
+						<IconButton className={!index ? styles.disabled : styles.basket} icon='BASKET' onClick={() => index && handleDeleteColumn(index)} />
 					</div>
 				))}
 			</GridLayout>

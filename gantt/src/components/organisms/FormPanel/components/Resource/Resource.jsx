@@ -1,7 +1,7 @@
 // @flow
 import 'rc-menu/assets/index.css';
 import type {Attribute} from 'store/attributes/types';
-import {Button, Checkbox, ConfirmModal, Container, FormControl, Icon, Select, TreeSelect} from 'naumen-common-components';
+import {Button, Checkbox, Container, FormControl, Icon, Select, TreeSelect} from 'naumen-common-components';
 import cn from 'classnames';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import {Column, SourceItem} from 'src/store/App/types';
@@ -11,10 +11,12 @@ import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import {deepClone} from 'helpers';
 import {defaultAttributeSetting, ITEM_TYPES_FOR_ALL} from 'src/store/App/constants';
 import DropdownMenu from 'components/atoms/DropdownMenu';
+import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
+import Modal from 'src/components/atoms/Modal';
 import {openFilterForm} from 'utils/api/context';
 import type {Props} from './types';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import ResourceIcon from 'icons/ResourceIcon';
 import styles from './styles.less';
 
@@ -26,6 +28,11 @@ const Resource = (props: Props) => {
 	const [showModal, setShowModal] = useState(false);
 	const [showModalRemoving, setShowModalRemoving] = useState(false);
 	const [showMenu, setShowMenu] = useState(false);
+	const [top, setTop] = useState(null);
+
+	useEffect(() => {
+		setTop(document.getElementById('resourcesSettingsButton' + index)?.getBoundingClientRect().top);
+	}, [showModal]);
 
 	const changeSource = (source: SourceItem) => {
 		const value = {
@@ -115,7 +122,7 @@ const Resource = (props: Props) => {
 
 		return (
 			<button className={styles.filterButton} disabled={!resource?.source?.value} onClick={handleOpenFilterForm}>
-				<Icon name={iconName} />
+				<Icon height={14} name={iconName} />
 				<span className={styles.desc}>Фильтрация</span>
 			</button>
 		);
@@ -125,7 +132,7 @@ const Resource = (props: Props) => {
 		const {options} = props;
 
 		return (
-			<>
+			<div className={styles.select}>
 				<span className={styles.label}>Ресурс</span>
 				<TreeSelect
 					className={styles.sourceTreeSelect}
@@ -135,7 +142,7 @@ const Resource = (props: Props) => {
 					removable={true}
 					value={resource.source.value}
 				/>
-			</>
+			</div>
 		);
 	};
 
@@ -157,20 +164,22 @@ const Resource = (props: Props) => {
 
 	const renderAttributesButton = () => {
 		return (
-			<Button
-				className={styles.button}
-				disabled={!resource.source.value?.value}
-				onClick={handleAttributesButton}
-				variant='ADDITIONAL'
-			>
-				Атрибуты для таблицы
-			</Button>
+			<div className={styles.width} id={`resourcesSettingsButton${index}`}>
+				<Button
+					className={styles.button}
+					disabled={!resource.source.value?.value}
+					onClick={handleAttributesButton}
+					variant='ADDITIONAL'
+				>
+					Атрибуты для таблицы
+				</Button>
+			</div>
 		);
 	};
 
 	const renderNestedCheckbox = () => {
 		return (
-			<FormControl className={styles.margin} label='Вложенный ресурс'>
+			<FormControl className={cn(styles.checkbox)} label='Вложенный ресурс'>
 				<Checkbox checked={resource.nested} name='Checkbox' onChange={handleCheckboxChange} value={resource.nested} />
 			</FormControl>
 		);
@@ -194,7 +203,7 @@ const Resource = (props: Props) => {
 		const currentValue: null | Attribute = resourceAttribute ? getAdditionalFields(resourceAttribute, resourceAttribute.title, resourceAttribute.code) : null;
 
 		return (
-			<>
+			<div className={styles.select}>
 				<span className={styles.label}>Связь с вышестоящим ресурсом</span>
 				<Select className={cn(styles.margin, styles.width)}
 					fetchOptions={getOptionsForBondWithResource}
@@ -205,7 +214,7 @@ const Resource = (props: Props) => {
 					placeholder='Связь с вышестоящим ресурсом'
 					value={currentValue}
 				/>
-			</>
+			</div>
 		);
 	};
 
@@ -272,17 +281,17 @@ const Resource = (props: Props) => {
 		return null;
 	};
 
-	const renderConfirmModal = () => {
+	const renderFrom = () => {
 		if (showModal) {
 			return (
-				<ConfirmModal
+				<Form
 					className={styles.height}
-					header='Атрибуты для таблицы'
-					notice={false}
 					onClose={handleCancelModal}
 					onSubmit={handleSaveModal}
-					text={columns && getContentModal()}
-				/>
+					top={top}
+				>
+					{columns && getContentModal()}
+				</Form>
 			);
 		}
 
@@ -292,14 +301,14 @@ const Resource = (props: Props) => {
 	const renderRemovingModal = () => {
 		if (showModalRemoving) {
 			return (
-				<ConfirmModal
-					header='Вы желаете удалить ресурс?'
+				<Modal
 					notice={true}
 					onClose={() => setShowModalRemoving(false)}
 					onSubmit={handleDeleteBlock}
 					submitText="Удалить"
-					text="При удалении ресурса также удалятся и все вложенные в него ресурсы и работы"
-				/>
+				>
+					При удалении ресурса также удалятся и все вложенные в него ресурсы и работы
+				</Modal>
 			);
 		}
 
@@ -322,7 +331,7 @@ const Resource = (props: Props) => {
 		<div className={styles.border} style={getPaddingLeftForChildren(level)}>
 			{renderDropdownMenu()}
 			{renderCollapsableFormBox()}
-			{renderConfirmModal()}
+			{renderFrom()}
 			{renderRemovingModal()}
 		</div>
 	);
