@@ -3639,7 +3639,7 @@ class DashboardDataSetService
     private void checkAggregationAndBreakdownListSize(Set groupResult, Set breakdownResult, Integer dataSetNum = 1)
     {
         def maxSize = maxDiagramDataSize * dataSetNum
-        if ((groupResult.size() * breakdownResult.size()) > maxSize)
+        if ((groupResult.size() * breakdownResult.size()) >= maxSize)
         {
             String message = messageProvider.getConstant(OVERFLOW_DATA_ERROR, currentUserLocale)
             api.utils.throwReadableException("$message#${ OVERFLOW_DATA_ERROR }")
