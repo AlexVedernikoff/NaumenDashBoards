@@ -3687,6 +3687,7 @@ class DashboardDataSetService
                 return new RoundDiagram()
             case 2:
                 def (aggregationResult, groupResult) = transposeDataSet
+                checkAggregationAndBreakdownListSize(aggregationResult as Set, groupResult as Set)
                 return new RoundDiagram(series: (aggregationResult as List).collect {
                     it as Double
                 }, labels: groupResult, countTotals: countTotals)
