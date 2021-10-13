@@ -11,7 +11,6 @@ import type {Props, State, Values} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import TimerButton from 'components/atoms/TimerButton';
-import {USER_ROLES} from 'store/context/constants';
 
 export class AutoUpdateButton extends PureComponent<Props, State> {
 	state = {
@@ -119,16 +118,15 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	};
 
 	renderForm = () => {
-		const {className, personalDashboard, role} = this.props;
+		const {className} = this.props;
+		const formClassName = cn([styles.form, className]);
 
-		if (personalDashboard || role !== USER_ROLES.REGULAR) {
-			return (
-				<form className={cn([styles.form, className])} onSubmit={this.handleSubmit}>
-					{this.renderTitle()}
-					{this.renderSettings()}
-				</form>
-			);
-		}
+		return (
+			<form className={formClassName} onSubmit={this.handleSubmit}>
+				{this.renderTitle()}
+				{this.renderSettings()}
+			</form>
+		);
 	};
 
 	renderInput = () => {
@@ -177,7 +175,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	renderText = () => <span className={styles.text}> минут</span>;
 
 	renderTimerButton = () => {
-		const {onChangeRemainder, personalDashboard, role, settings} = this.props;
+		const {onChangeRemainder, settings} = this.props;
 		const {enabled, remainder} = settings;
 		const buttonCN = enabled ? styles.enabledAutoUpdateButton : '';
 
@@ -187,18 +185,14 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 			);
 		}
 
-		if (personalDashboard || role !== USER_ROLES.REGULAR) {
-			return (
-				<IconButton
-					className={buttonCN}
-					name={ICON_NAMES.TIMER_OFF}
-					outline
-					tip="Автообновление выключено"
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<IconButton
+				className={buttonCN}
+				name={ICON_NAMES.TIMER_OFF}
+				outline
+				tip="Автообновление выключено"
+			/>
+		);
 	};
 
 	renderTitle = () => {

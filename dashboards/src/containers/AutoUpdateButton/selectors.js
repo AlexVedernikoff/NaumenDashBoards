@@ -4,8 +4,6 @@ import {changeIntervalRemainder, saveAutoUpdateSettings} from 'store/dashboard/s
 import type {ConnectedFunctions, ConnectedProps} from './types';
 
 export const props = (state: AppState): ConnectedProps => ({
-	personalDashboard: state.dashboard.settings.personal,
-	role: state.context.user.role,
 	settings: state.dashboard.settings.autoUpdate
 });
 
