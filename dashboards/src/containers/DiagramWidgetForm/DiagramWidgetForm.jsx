@@ -4,10 +4,10 @@ import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {Breakdown, Indicator, Parameter} from 'store/widgetForms/types';
 import {connect} from 'react-redux';
 import FiltersOnWidget from 'containers/FiltersOnWidget';
+import type {FiltersOnWidgetErrors, Props, State} from './types';
 import {functions, props} from './selectors';
 import {HELPERS_CONTEXT} from 'containers/DiagramWidgetForm/HOCs/withHelpers/constants';
 import memoize from 'memoize-one';
-import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {RenderProps} from 'components/organisms/WidgetForm/types';
 import {TAB_TYPES} from 'src/containers/DiagramWidgetForm/constants';
@@ -35,9 +35,10 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 	 * Отфильтровывает атрибуты в зависимости от уже использованных
 	 * @param {Array<Attribute>} options - список атрибутов
 	 * @param {number} dataSetIndex - индекс набора данных
-	 * @returns  {Array<Attribute>} - список отфильтрованных атрибутов
+	 * @param {Attribute} includeAttribute - атрибут который не надо отфильтровывать
+	 * @returns {Array<Attribute>} - список отфильтрованных атрибутов
 	 */
-	filterAttributesByUsed = (options: Array<Attribute>, dataSetIndex: number): Array<Attribute> => {
+	filterAttributesByUsed = (options: Array<Attribute>, dataSetIndex: number, includeAttribute: Attribute): Array<Attribute> => {
 		const {breakdown, indicators, parameters} = this.props.values.data[dataSetIndex];
 		const usedAttributes = [
 			...this.getUsedAttributes(parameters),
@@ -49,8 +50,9 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 		if (usedAttributes.length > 0) {
 			filteredOptions = options.filter(attribute => {
 				const {code, sourceCode = null} = attribute;
+				const isInclude = includeAttribute && (includeAttribute.code === code && includeAttribute.sourceCode === sourceCode);
 
-				return usedAttributes.findIndex(
+				return isInclude || usedAttributes.findIndex(
 					usedAttribute => usedAttribute.code === code && usedAttribute.sourceCode === sourceCode
 				) === -1;
 			});
@@ -65,12 +67,20 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 	 * @returns {Array<Attribute>} - использованные атрибуты
 	 */
 	getUsedAttributes = (items: Array<Indicator> | ?(Array<Parameter> | Breakdown)): Array<Attribute> => {
-		return items?.reduce((used, {attribute}) => {
-			return attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR ? [...used, attribute] : used;
-		}, []) ?? [];
+		const result = [];
+
+		if (items) {
+			items.forEach(({attribute}) => {
+				if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+					result.push(attribute);
+				}
+			});
+		}
+
+		return result;
 	};
 
-	handleFiltersOnWidgetErrors = (filtersOnWidgetErrors) => this.setState({filtersOnWidgetErrors});
+	handleFiltersOnWidgetErrors = (filtersOnWidgetErrors: FiltersOnWidgetErrors) => this.setState({filtersOnWidgetErrors});
 
 	validate = async (values: Values) => {
 		const environment = process.env.NODE_ENV;

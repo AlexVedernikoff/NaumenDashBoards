@@ -4,6 +4,8 @@ import type {Schema} from 'components/types';
 import type {SetFieldValue, Values} from 'components/organisms/WidgetForm/types';
 import type {Widget} from 'store/widgets/data/types';
 
+export type FiltersOnWidgetErrors = {[key: string]: string};
+
 export type ConnectedProps = {
 	saving: boolean,
 	tabs: typeof REGULAR_TABS | typeof TABS,
@@ -33,5 +35,5 @@ export type Props = {
 } & ConnectedProps & ConnectedFunctions;
 
 export type State = {
-	filtersOnWidgetErrors: {[key: string]: string}
+	filtersOnWidgetErrors: FiltersOnWidgetErrors
 };
