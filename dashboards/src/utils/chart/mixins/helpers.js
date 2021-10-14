@@ -79,9 +79,8 @@ const formatLabels = (widget: AxisWidget | ComboWidget, labels: Array<string>): 
 	return formattedLabels;
 };
 
-const getXAxisLabels = (labels: Array<string>, wrap: boolean): ApexLabels => {
-	return wrap ? labels.map(label => label.split(' ')) : labels;
-};
+const getXAxisLabels = (labels: Array<string>, wrap: boolean): ApexLabels =>
+	wrap ? labels.map(label => label.split(' ')) : labels;
 
 const getXAxisOptions = (props: AxisProps, rotate: boolean, horizontal: boolean = false) => {
 	const {name, show, showName} = props;
@@ -91,6 +90,7 @@ const getXAxisOptions = (props: AxisProps, rotate: boolean, horizontal: boolean 
 			hideOverlappingLabels: false,
 			maxHeight: 100,
 			minHeight: 50,
+			offsetY: rotate ? 0 : -3,
 			rotate: rotate ? -60 : 0,
 			show,
 			trim: !horizontal && rotate
