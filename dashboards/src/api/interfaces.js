@@ -26,6 +26,7 @@ export interface FrameAPI {
 	getCurrentLocale (): string;
 	getCurrentUser (): UserDTO;
 	getSubjectUuid (): string;
+	getViewMode(): string;
 	openFilterForm (descriptor: FilterFormDescriptorDTO, useAttrFilter?: boolean): Promise<DTOValue>;
 	restCallAsJson(url: string, options: DTOValue): Promise<DTOValue>;
 	restCallModule(module: string, method: string, ...params: Array<DTOValue>): Promise<DTOValue>;

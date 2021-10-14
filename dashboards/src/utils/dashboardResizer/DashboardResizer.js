@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {DASHBOARD_HEADER_HEIGHT} from 'components/organisms/DashboardHeader/constants';
 import {gridRef} from 'components/organisms/WidgetsGrid/constants';
 import isMobile from 'ismobilejs';
@@ -33,18 +34,7 @@ export class DashboardResizer {
 		return editable;
 	};
 
-	isFullSize = () => {
-		let isFullSize = true;
-
-		if (window.frameElement) {
-			const {innerHeight: parentHeight} = window.parent;
-			const {innerHeight} = window;
-
-			isFullSize = parentHeight >= innerHeight && innerHeight !== this.initHeight;
-		}
-
-		return isFullSize;
-	};
+	isFullSize = () => window.frameElement ? api.instance.frame.getViewMode() === 'fullScreen' : true;
 
 	listenerCallback = (callback: Function) => window.addEventListener('resize', () => {
 		callback();
@@ -71,7 +61,21 @@ export class DashboardResizer {
 
 	setCustomHeight = (height: number) => this.setHeight(`${height}px`, '');
 
-	setFullHeight = () => this.setHeight('100%', `${this.initHeight}px`);
+	setFullHeight = () => {
+		const {frameElement} = window;
+
+		if (frameElement) {
+			const clientHeight = frameElement.ownerDocument.documentElement.clientHeight;
+			const {left, top} = frameElement.getBoundingClientRect();
+			// left - padding топового блока
+			// 8px - margin-top растяние элемента оболочки iframe
+			const height = clientHeight - top - left - 8;
+
+			this.setHeight(`${height}px`, `${this.initHeight}px`);
+		} else {
+			this.setHeight(`100%`, `${this.initHeight}px`);
+		}
+	};
 
 	setHeight = (height: string, minHeight: string) => {
 		if (document.body) {
