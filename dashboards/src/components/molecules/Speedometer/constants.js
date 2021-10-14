@@ -1,5 +1,5 @@
 // @flow
-import {FONT_FAMILIES, FONT_STYLES} from 'store/widgets/data/constants';
+import {FONT_STYLES} from 'store/widgets/data/constants';
 
 const START_DEGREE = -90;
 const END_DEGREE = 90;
@@ -12,7 +12,7 @@ const BASE_VALUE_FONT_SIZE = 24;
 
 const TITLE_STYLE = {
 	fontColor: '#323232',
-	fontFamily: FONT_FAMILIES[0],
+	fontFamily: 'Roboto',
 	fontSize: 18,
 	fontStyle: FONT_STYLES.BOLD,
 	show: true

@@ -8,7 +8,11 @@ export type Context = {
 	value: WidgetType
 };
 
-export type Props = {
+export type InjectedProps = {
+	type: Context
+};
+
+export type Props = InjectedProps & {
 	setFieldValue: SetFieldValue,
 	type: Context,
 	values: Values,
