@@ -212,7 +212,7 @@ const FormPanel = (props: Props) => {
 		</Button>
 	);
 
-	const renderFrom = () => {
+	const renderForm = () => {
 		if (showModal) {
 			const top = document.getElementById('panelSettingsButton')?.getBoundingClientRect().top;
 			return <Form header={getHeaderModal()} onClose={handleCancelColumnSettings} onSubmit={handleSaveColumnSettings} top={top}>{getContentModal()}</Form>;
@@ -229,7 +229,7 @@ const FormPanel = (props: Props) => {
 				{renderCheckboxCommonBlock()}
 				<div className={styles.form} id='panelSettingsButton'>
 					{renderButtonCommonBlock()}
-					{renderFrom()}
+					{renderForm()}
 				</div>
 			</div>
 		);

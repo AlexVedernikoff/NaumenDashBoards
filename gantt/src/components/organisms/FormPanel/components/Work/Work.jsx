@@ -327,7 +327,7 @@ const Work = (props: Props) => {
 		</li>
 	);
 
-	const getContentModal = () => {
+	const getContentForm = () => {
 		const newValueAttributes: Array<Attribute> = valueAttributes?.attributes && valueAttributes.attributes.map(item => item && getAdditionalFields(item, item.title, item.code));
 
 		return (
@@ -365,7 +365,7 @@ const Work = (props: Props) => {
 		return null;
 	};
 
-	const renderFrom = () => {
+	const renderForm = () => {
 		if (showModal) {
 			return (
 				<Form
@@ -374,7 +374,7 @@ const Work = (props: Props) => {
 					onSubmit={handleSaveModal}
 					top={top}
 				>
-					{columns && getContentModal()}
+					{columns && getContentForm()}
 				</Form>
 			);
 		}
@@ -418,7 +418,7 @@ const Work = (props: Props) => {
 		<div className={styles.border} style={getPaddingLeftForChildren(level)}>
 			{renderDropdownMenu()}
 			{renderCollapsableFormBox()}
-			{renderFrom()}
+			{renderForm()}
 			{renderRemovingModal()}
 		</div>
 	);

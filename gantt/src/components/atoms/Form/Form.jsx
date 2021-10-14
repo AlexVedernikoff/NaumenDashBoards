@@ -45,7 +45,7 @@ export class Form extends Component<Props> {
 
 		if (showCancelButton) {
 			return (
-				<Button className={styles.cancelButton} onClick={onClose} outline={true} variant='INFO'>
+				<Button onClick={onClose} outline={true} variant='INFO'>
 					{cancelText}
 				</Button>
 			);
@@ -73,8 +73,8 @@ export class Form extends Component<Props> {
 			<div className={styles.header}>
 				{header}
 				<div className={styles.buttonGroup}>
-					{this.renderSubmitButton()}
 					{this.renderCancelButton()}
+					{this.renderSubmitButton()}
 				</div>
 			</div>
 		);
@@ -84,7 +84,7 @@ export class Form extends Component<Props> {
 		const {onSubmit, submitText, submitting} = this.props;
 
 		return (
-			<Button disabled={submitting} onClick={onSubmit} outline={true} variant='INFO'>
+			<Button className={styles.submitButton} disabled={submitting} onClick={onSubmit} variant='INFO'>
 				{submitText}
 			</Button>
 		);
