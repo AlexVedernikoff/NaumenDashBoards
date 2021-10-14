@@ -107,6 +107,10 @@ export default class Frame implements FrameAPI {
 		return awaitResult;
 	}
 
+	getViewMode () {
+		return 'fullScreen';
+	}
+
 	restCallAsJson (url: string, options: DTOValue): Promise<DTOValue> {
 		throw new Error('Fake api cannot use restCallModule');
 	}

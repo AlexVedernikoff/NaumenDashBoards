@@ -32,6 +32,10 @@ export default class Frame implements FrameAPI {
 		return window.jsApi.extractSubjectUuid();
 	}
 
+	getViewMode () {
+		return window.jsApi.getViewMode();
+	}
+
 	restCallAsJson (url: string, options: DTOValue) {
 		return window.jsApi.restCallAsJson(url, options);
 	}
