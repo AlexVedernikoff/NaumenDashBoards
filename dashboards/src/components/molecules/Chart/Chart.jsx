@@ -2,7 +2,7 @@
 import ApexCharts from 'apexcharts';
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
-import {getOptions} from 'utils/chart';
+import {getOptions, LEGEND_POSITIONS} from 'utils/chart';
 import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
@@ -85,9 +85,10 @@ export class Chart extends PureComponent<Props> {
 
 	render () {
 		const {widget} = this.props;
+		const {right, top} = LEGEND_POSITIONS;
 		const className = cn({
 			[styles.chart]: true,
-			[styles.circleChart]: widget.type in WIDGET_SETS.CIRCLE
+			[styles.circleChart]: widget.type in WIDGET_SETS.CIRCLE && (!widget.legend.show || (widget.legend.position in {right, top}))
 		});
 		return (
 			<ResizeDetector onResize={this.handleResize} skipOnMount={true}>
