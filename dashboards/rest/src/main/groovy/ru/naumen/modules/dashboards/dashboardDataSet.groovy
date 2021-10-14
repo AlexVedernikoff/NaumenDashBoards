@@ -299,18 +299,21 @@ class DashboardDataSetService
                 }
                 List aggregations = getSpecificAggregationsList(widgetSettings)
                 def aggregationsSize = aggregations.size()
-                def transposeRes = fullRes?.find()?.transpose()[0..aggregationsSize - 1]
+                if(fullRes?.find())
+                {
+                    def transposeRes = fullRes?.find()?.transpose()[0..aggregationsSize - 1]
 
-                tableTotals = transposeRes?.withIndex()?.collect { val, i ->
-                    if (i in listIdsOfNormalAggregations)
-                    {
-                        return val.sum {
-                            it as Double
+                    tableTotals = transposeRes?.withIndex()?.collect { val, i ->
+                        if (i in listIdsOfNormalAggregations)
+                        {
+                            return val.sum {
+                                it as Double
+                            }
                         }
-                    }
-                    else
-                    {
-                        return val.size()
+                        else
+                        {
+                            return val.size()
+                        }
                     }
                 }
             }
