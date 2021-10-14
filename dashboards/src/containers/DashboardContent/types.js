@@ -5,3 +5,7 @@ export type ConnectedProps = {
 };
 
 export type Props = ConnectedProps;
+
+export type State = {
+	intersecting: boolean
+};
