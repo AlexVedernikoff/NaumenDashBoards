@@ -3,6 +3,7 @@ import BaseSortingBox from 'WidgetFormPanel/components/SortingBox';
 import Container from 'components/atoms/Container';
 import type {ContainerProps} from 'WidgetFormPanel/components/SortingBox/types';
 import type {DataSet} from 'store/widgetForms/comboChartForm/types';
+import FormField from 'components/molecules/FormField';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import memoize from 'memoize-one';
 import type {OnSelectEvent} from 'components/types';
@@ -65,13 +66,15 @@ export class SortingBox extends PureComponent<Props> {
 			const options = data.filter(({sourceForCompute}) => !sourceForCompute);
 
 			return (
-				<Select
-					getOptionLabel={this.getIndicatorLabel(sortingValue)}
-					getOptionValue={this.getIndicatorValue}
-					onSelect={this.handleSelectIndicator}
-					options={options}
-					value={dataSet}
-				/>
+				<FormField small={true}>
+					<Select
+						getOptionLabel={this.getIndicatorLabel(sortingValue)}
+						getOptionValue={this.getIndicatorValue}
+						onSelect={this.handleSelectIndicator}
+						options={options}
+						value={dataSet}
+					/>
+				</FormField>
 			);
 		}
 	};
