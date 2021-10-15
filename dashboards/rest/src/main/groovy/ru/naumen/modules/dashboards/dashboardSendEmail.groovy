@@ -11,13 +11,16 @@
 
 package ru.naumen.modules.dashboards
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import groovy.transform.InheritConstructors
+
 import javax.mail.util.ByteArrayDataSource
 import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.Field
 import static MessageProvider.*
 import static CurrentUserHolder.*
 
-@Field @Lazy @Delegate DashboardSendEmail dashboardSendEmail = new DashboardSendEmailImpl()
+@Field @Lazy @Delegate DashboardSendEmail dashboardSendEmail = new DashboardSendEmailImpl(binding)
 
 /**
  * Интерфейс главного контроллера
@@ -26,22 +29,26 @@ interface DashboardSendEmail
 {
     /**
      * Метод отправки сообщений на почту
-     * @param tokenKey - ключ на файл в хранилище
-     * @param format - формат файла
-     * @param fileName - название файла
-     * @param users - список пользователей
+     * @param requestContent - тело запроса
      */
-    void sendFileToMail(String tokenKey, String format, String fileName, List users)
+    void sendFileToMail(Map<String, Object> requestContent)
 }
 
+@InheritConstructors
 class DashboardSendEmailImpl extends BaseController implements DashboardSendEmail
 {
     DashboardSendEmailService service = DashboardSendEmailService.instance
 
-    @Override
-    void sendFileToMail(String tokenKey, String format, String fileName, List users)
+    Object run()
     {
-        service.sendFileToMail(tokenKey, format, fileName, users)
+        return null
+    }
+
+    @Override
+    void sendFileToMail(Map<String, Object> requestContent)
+    {
+        SendFileToEmailRequest request = new ObjectMapper().convertValue(requestContent, SendFileToEmailRequest)
+        service.sendFileToMail(request)
     }
 }
 
@@ -52,13 +59,14 @@ class DashboardSendEmailService
     MessageProvider messageProvider = MessageProvider.instance
     /**
      * Метод отправки сообщений на почту
-     * @param tokenKey - ключ на файл в хранилище
-     * @param format - формат файла
-     * @param fileName - название файла
-     * @param users - список пользователей
+     * @param request - запрос на отправку скрина с дашбордом по почте
      */
-    void sendFileToMail(String tokenKey, String format, String fileName, List users)
+    void sendFileToMail(SendFileToEmailRequest request)
     {
+        String tokenKey = request.tokenKey
+        String format = request.format
+        String fileName = request.fileName
+        List users = request.users
         users.each {user ->
             if (!user?.email)
             {
@@ -77,4 +85,27 @@ class DashboardSendEmailService
             api.mail.sender.sendMail(message)
         }
     }
+}
+
+/**
+ * Запрос на отправку скрина с дашбордом по почте
+ */
+class SendFileToEmailRequest
+{
+    /**
+     *  Ключ на файл в хранилище
+     */
+    String tokenKey
+    /**
+     * Формат файла
+     */
+    String format
+    /**
+     * Название файла
+     */
+    String fileName
+    /**
+     * Список пользователей
+     */
+    List users
 }
