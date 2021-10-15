@@ -31,7 +31,7 @@ interface DashboardSendEmail
      * Метод отправки сообщений на почту
      * @param requestContent - тело запроса
      */
-    void sendFileToMail(Map<String, Object> requestContent)
+    Boolean sendFileToMail(Map<String, Object> requestContent)
 }
 
 @InheritConstructors
@@ -45,10 +45,10 @@ class DashboardSendEmailImpl extends BaseController implements DashboardSendEmai
     }
 
     @Override
-    void sendFileToMail(Map<String, Object> requestContent)
+    Boolean sendFileToMail(Map<String, Object> requestContent)
     {
         SendFileToEmailRequest request = new ObjectMapper().convertValue(requestContent, SendFileToEmailRequest)
-        service.sendFileToMail(request)
+        return service.sendFileToMail(request)
     }
 }
 
@@ -61,7 +61,7 @@ class DashboardSendEmailService
      * Метод отправки сообщений на почту
      * @param request - запрос на отправку скрина с дашбордом по почте
      */
-    void sendFileToMail(SendFileToEmailRequest request)
+    Boolean sendFileToMail(SendFileToEmailRequest request)
     {
         String tokenKey = request.tokenKey
         String format = request.format
@@ -84,6 +84,7 @@ class DashboardSendEmailService
             message.attachFile(ds, "${fileName}.${format}")
             api.mail.sender.sendMail(message)
         }
+        return true
     }
 }
 
