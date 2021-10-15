@@ -963,7 +963,7 @@ class DashboardUtils
      */
     static Widget updateDescriptorWithCodeAndUuid(Widget widget, Boolean needToReverse = true)
     {
-        if(widget)
+        if(widget && widget.type != DiagramType.TEXT)
         {
             def slurper = new groovy.json.JsonSlurper()
             widget?.data?.each { data ->
