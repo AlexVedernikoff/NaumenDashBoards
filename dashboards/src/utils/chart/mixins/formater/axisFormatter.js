@@ -34,7 +34,7 @@ const getLegendFormatter = (widget: AxisWidget, container: HTMLDivElement): Numb
 	const format = Array.isArray(breakdown)
 		? widget.breakdownFormat ?? getDefaultFormatForAttribute(breakdown[0].attribute, breakdown[0].group)
 		: widget.parameter?.format ?? getDefaultFormatForAttribute(parameters[0].attribute, parameters[0].group);
-	let formatter = makeFormatterByFormat(format);
+	let formatter = makeFormatterByFormat(format, false);
 
 	if (textHandler === TEXT_HANDLERS.CROP) {
 		formatter = (compose(cropFormatter(length), formatter): ValueFormatter);
@@ -91,7 +91,7 @@ const getCategoryFormatter = (widget: AxisWidget): NumberFormatter | ValueFormat
 		return sevenDaysFormatter;
 	}
 
-	return makeFormatterByFormat(parameter.format ?? getDefaultFormatForAttribute(attribute, group));
+	return makeFormatterByFormat(parameter.format ?? getDefaultFormatForAttribute(attribute, group), false);
 };
 
 /**

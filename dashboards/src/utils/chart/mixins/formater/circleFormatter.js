@@ -57,7 +57,7 @@ const getCategoryFormatter = (widget: CircleWidget): NumberFormatter | ValueForm
 		return sevenDaysFormatter;
 	}
 
-	return makeFormatterByFormat(breakdownFormat ?? getDefaultFormatForAttribute(attribute, group));
+	return makeFormatterByFormat(breakdownFormat ?? getDefaultFormatForAttribute(attribute, group), false);
 };
 
 const getLegendFormatter = (widget: CircleWidget, container: HTMLDivElement): NumberFormatter | ValueFormatter => {

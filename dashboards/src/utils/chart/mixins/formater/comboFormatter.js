@@ -92,7 +92,7 @@ const getCategoryFormatter = (widget: ComboWidget): NumberFormatter | ValueForma
 		return sevenDaysFormatter;
 	}
 
-	return makeFormatterByFormat(parameter.format ?? getDefaultFormatForAttribute(attribute, group));
+	return makeFormatterByFormat(parameter.format ?? getDefaultFormatForAttribute(attribute, group), false);
 };
 
 const getLegendFormatter = (widget: ComboWidget, container: HTMLDivElement, crop: boolean): ComboNumberFormatter | ComboValueFormatter => {

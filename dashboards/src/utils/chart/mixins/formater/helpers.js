@@ -244,9 +244,10 @@ export const makeFormatterByNumberFormat = (format: NumberAxisFormat, hideZero: 
 /**
  * Преобразует AxisFormat в форматер
  * @param {AxisFormat} format - требуемый формат
+ * @param {boolean} hideZero - сообщает нужно ли убирать нулевые (пустые) значения
  * @returns {NumberFormatter | ValueFormatter} - функция форматер
  */
-export const makeFormatterByFormat = (format: AxisFormat): (NumberFormatter | ValueFormatter) => {
+export const makeFormatterByFormat = (format: AxisFormat, hideZero: boolean = true): (NumberFormatter | ValueFormatter) => {
 	let result = checkString(getLabelFormatter());
 
 	if (format !== null) {
@@ -255,7 +256,7 @@ export const makeFormatterByFormat = (format: AxisFormat): (NumberFormatter | Va
 		}
 
 		if (format.type === AXIS_FORMAT_TYPE.INTEGER_FORMAT || format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT) {
-			result = checkNumber(makeFormatterByNumberFormat(format));
+			result = checkNumber(makeFormatterByNumberFormat(format, hideZero));
 		}
 	}
 
