@@ -1054,7 +1054,7 @@ class DashboardsService
      * @param groupCode - код группы
      * @return атрибуты по коду группы
      */
-    private getSystemAttributesByGroupCode(def metainfo, String groupCode)
+    private def getSystemAttributesByGroupCode(def metainfo, String groupCode)
     {
         try
         {
