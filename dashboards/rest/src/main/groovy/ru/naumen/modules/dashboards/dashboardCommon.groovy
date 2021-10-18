@@ -927,7 +927,7 @@ class DashboardUtils
             case AttributeType.DT_INTERVAL_TYPE:
                 return true
             case AttributeType.CATALOG_ITEM_TYPE:
-                return api.utils.findFirst(sourceCode, [(attributeCode): op.isNotNull()])?.get(attributeCode)?.code?.isNumber()
+                return getApi().utils.findFirst(sourceCode, [(attributeCode): op.isNotNull()])?.get(attributeCode)?.code?.isNumber()
             default: return false
         }
     }
@@ -956,6 +956,42 @@ class DashboardUtils
     }
 
     /**
+     * Метод формирования нового значения в рамках фильтра
+     * @param obj - объект в условии
+     * @param attrType - тип атрибута
+     * @param needToReverse - флаг на необходимость возврата данных для обратного превращения
+     */
+    private static def getFilterForObjectWrapper(def obj, def attrType, boolean needToReverse)
+    {
+        Map fieldsToRemoveAdd = getFieldToRemoveAndFieldToAdd(obj.keySet().toList(), attrType, needToReverse)
+        if (fieldsToRemoveAdd)
+        {
+            if (obj[fieldsToRemoveAdd.fieldToRemove])
+            {
+                String fieldToRemove = fieldsToRemoveAdd.fieldToRemove
+                String fieldToAdd = fieldsToRemoveAdd.fieldToAdd
+
+                def fqn = obj.fqn
+                Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: getApi().metainfo.checkAttributeExisting(fqn, fieldToAdd).isEmpty()
+
+                if (attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
+                {
+                    def value = fieldToRemove == 'uuid'
+                        ? getApi().utils.get(obj.uuid)[fieldToAdd]
+                        : getApi().utils.findFirst(fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase() : fieldToAdd]
+
+                    if (value)
+                    {
+                        obj.remove(fieldToRemove)
+                        obj << [(fieldToAdd): value]
+                    }
+                }
+            }
+        }
+        return obj
+    }
+
+    /**
      * Метод изменения полей в дескрипторе
      * @param widget - настройки виджета
      * @param needToReverse - флаг на необходимость возврата данных для обратного превращения
@@ -977,31 +1013,12 @@ class DashboardUtils
                             def attrType = filter.properties.attrTypeCode
                             if(filter.dtObjectWrapper)
                             {
-                                def obj = filter.dtObjectWrapper
-                                Map fieldsToRemoveAdd = getFieldToRemoveAndFieldToAdd(obj.keySet().toList(), attrType, needToReverse)
-                                if(fieldsToRemoveAdd)
-                                {
-                                    if(obj[fieldsToRemoveAdd.fieldToRemove])
-                                    {
-                                        String fieldToRemove = fieldsToRemoveAdd.fieldToRemove
-                                        String fieldToAdd = fieldsToRemoveAdd.fieldToAdd
-
-                                        def fqn = obj.fqn
-                                        Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: api.metainfo.checkAttributeExisting(fqn, fieldToAdd).isEmpty()
-
-                                        if(attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
-                                        {
-                                            def value = fieldToRemove == 'uuid'
-                                                ? api.utils.get(obj.uuid)[fieldToAdd]
-                                                : api.utils.findFirst(fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase(): fieldToAdd]
-
-                                            if(value)
-                                            {
-                                                filter.dtObjectWrapper.remove(fieldToRemove)
-                                                filter.dtObjectWrapper << [(fieldToAdd): value]
-                                            }
-                                        }
-                                    }
+                                filter.dtObjectWrapper = getFilterForObjectWrapper(filter.dtObjectWrapper, attrType, needToReverse)
+                            }
+                            if(filter.dtObjectWrapperList)
+                            {
+                                filter.dtObjectWrapperList = filter.dtObjectWrapperList.collect { dtObjectWrapper ->
+                                    return getFilterForObjectWrapper(dtObjectWrapper, attrType, needToReverse)
                                 }
                             }
                         }
@@ -1012,6 +1029,7 @@ class DashboardUtils
         }
         return widget
     }
+
 }
 
 //region КЛАССЫ
@@ -1987,6 +2005,7 @@ class DashboardSettingsClass
 /**
  * Класс, описывающий внутренности таблицы для фронта
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 class TableObject
 {
     /**
@@ -2825,6 +2844,7 @@ class NumberFormat extends Format
 /**
  * Класс, описывающий сортировку
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 class Sorting
 {
     /**
@@ -3223,6 +3243,7 @@ abstract class Widget
  * Класс, описывающий общие настройки для новых виджетов
  */
 @Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
 class NewDiagrams extends Widget
 {
     /**

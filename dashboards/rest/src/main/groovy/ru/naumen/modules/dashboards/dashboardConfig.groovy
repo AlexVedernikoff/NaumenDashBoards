@@ -702,7 +702,15 @@ class DashboardConfigService
 
         dashboardKeys.each { dashboardKey ->
             def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
-            DashboardSettingsClass dashboard = Jackson.fromJsonString(dashboardSettings, DashboardSettingsClass)
+            DashboardSettingsClass dashboardtry
+            {
+                dashboard = Jackson.fromJsonString(dashboardSettings, DashboardSettingsClass)
+            }
+            catch (Exception ex)
+            {
+                dashboard = null
+                logger.error('Дашборд не был обновлен: ' + dashboardKey)
+            }
             if(dashboard)
             {
                 dashboard.widgets = dashboard.widgets.findResults { w ->
