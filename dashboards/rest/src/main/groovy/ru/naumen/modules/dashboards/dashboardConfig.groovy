@@ -714,15 +714,26 @@ class DashboardConfigService
             }
             if(dashboard)
             {
-                dashboard.widgets = dashboard.widgets.findResults { w ->
+                dashboard.widgets = dashboard.widgets?.findResults { w ->
                     def widget = DashboardUtils.convertWidgetToNewFormat(w)
-                    if(widget?.type == DiagramType.TEXT)
+                    if(widget)
                     {
-                        return widget
-                    }
-                    else
-                    {
-                        return DashboardUtils.updateDescriptorWithCodeAndUuid(widget, false)
+                        if(widget.type == DiagramType.TEXT)
+                        {
+                            return widget
+                        }
+                        else
+                        {
+                            try
+                            {
+                                return DashboardUtils.updateDescriptorWithCodeAndUuid(widget, false)
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.error('Виджет не был обновлен: ' + dashboardKey + ' ключ виджета: ' + widget?.id)
+                                return widget
+                            }
+                        }
                     }
                 }
                 api.keyValue.put(DASHBOARD_NAMESPACE, dashboardKey, Jackson.toJsonString(dashboard))
