@@ -5,15 +5,30 @@ import styles from './styles.less';
 
 export class Startup extends Component<Props> {
 	componentDidMount () {
-		const {getAttributeData} = this.props;
-		getAttributeData();
+		const {getAttributes, getSetting} = this.props;
+
+		getSetting();
+		getAttributes();
 	}
 
 	render () {
-		const {children, error} = this.props;
+		const {
+			children,
+			errorAttributes,
+			errorSetting,
+			loadingAttributes,
+			loadingSetting} = this.props;
 
-		if (error) {
-			return <p>Ошибка загрузки</p>;
+		if (loadingAttributes || loadingSetting) {
+			return <p>Загрузка данных</p>;
+		}
+
+		if (errorSetting) {
+			return <p>Ошибка загрузки стартовых настроек</p>;
+		}
+
+		if (errorAttributes) {
+			return <p>Ошибка загрузки атрибутов проверок</p>;
 		}
 
 		return (
