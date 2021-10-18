@@ -972,20 +972,24 @@ class DashboardUtils
                 String fieldToAdd = fieldsToRemoveAdd.fieldToAdd
 
                 def fqn = obj.fqn
-                Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: getApi().metainfo.checkAttributeExisting(fqn, fieldToAdd).isEmpty()
-
-                if (attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
+                if(fqn && fqn != "null")
                 {
-                    def value = fieldToRemove == 'uuid'
-                        ? getApi().utils.get(obj.uuid)[fieldToAdd]
-                        : getApi().utils.findFirst(fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase() : fieldToAdd]
+                    Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: getApi().metainfo.checkAttributeExisting(fqn, fieldToAdd).isEmpty()
 
-                    if (value)
+                    if (attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
                     {
-                        obj.remove(fieldToRemove)
-                        obj << [(fieldToAdd): value]
+                        def value = fieldToRemove == 'uuid'
+                            ? getApi().utils.get(obj.uuid)[fieldToAdd]
+                            : getApi().utils.findFirst(fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase() : fieldToAdd]
+
+                        if (value)
+                        {
+                            obj.remove(fieldToRemove)
+                            obj << [(fieldToAdd): value]
+                        }
                     }
                 }
+
             }
         }
         return obj
