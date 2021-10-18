@@ -160,7 +160,7 @@
 			<title lang="client">select</title>
 			<mimeType>application/x-groovy</mimeType>
 			<scriptBody>
-				<![CDATA[ return [edit: 'Редактируемый', user: 'Пользовательский', userSource: 'Пользовательский ограниченный', viewOnly: 'Для просмотра'] ]]>
+				<![CDATA[ return [edit: 'Редактируемый', viewOnly: 'Для просмотра'] ]]>
 			</scriptBody>
 			<defaultCategories/>
 			<subjectDependencies/>
