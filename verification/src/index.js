@@ -6,7 +6,7 @@ import App from 'components/App';
 import {Provider} from 'react-redux';
 import React from 'react';
 import {render} from 'react-dom';
-import {root, store} from './app.constants';
+import {root, store} from './constants';
 
 if (root) {
 	const renderApp = () => (

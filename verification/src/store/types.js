@@ -1,5 +1,7 @@
 // @flow
-import type {AttributeState} from './attribute/types';
+import type {AttributesState} from './attributes/types';
+import type {SettingState} from './setting/types';
+import type {UserState} from './user/types';
 
 type Action = {
 	data?: any,
@@ -7,7 +9,9 @@ type Action = {
 };
 
 export type State = {
-	attribute: AttributeState
+	attributes: AttributesState,
+	setting: SettingState,
+	user: UserState
 };
 
 /* eslint-disable no-use-before-define */

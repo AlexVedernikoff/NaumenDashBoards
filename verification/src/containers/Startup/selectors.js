@@ -1,20 +1,26 @@
 // @flow
-import type {AttributeState} from 'store/attribute/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {getAttributeData} from 'store/attribute/actions';
+import {getAttributes} from 'store/attributes/actions';
+import {getSetting} from 'store/setting/actions';
+import type {State} from 'store/types';
 
 /**
- * @param {AttributeState} state - глобальное хранилище состояния
+ * @param {State} state - глобальное хранилище состояния
  * @returns {ConnectedProps}
  */
-export const props = (state: AttributeState): ConnectedProps => {
-	const {errorCommon} = state.attribute;
+export const props = (state: State): ConnectedProps => {
+	const {error: errorSetting, loading: loadingSetting} = state.setting;
+	const {error: errorAttributes, loading: loadingAttributes} = state.attributes;
 
 	return {
-		error: errorCommon
+		errorAttributes,
+		errorSetting,
+		loadingAttributes,
+		loadingSetting
 	};
 };
 
 export const functions: ConnectedFunctions = {
-	getAttributeData,
+	getAttributes,
+	getSetting
 };

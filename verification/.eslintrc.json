@@ -58,7 +58,8 @@
 		"sort-vars": [2, {"ignoreCase": false}],
 		"local-rules/sort-class-methods": "error",
 		"local-rules/sort-imports": "error",
-		"arrow-parens": ["warn", "as-needed", {"requireForBlockBody": true}]
+		"arrow-parens": ["warn", "as-needed"],
+		"no-return-await": "warn"
 	},
 	"settings": {
 		"react": {
