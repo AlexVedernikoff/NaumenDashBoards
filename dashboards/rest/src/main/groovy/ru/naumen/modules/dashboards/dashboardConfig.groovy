@@ -702,7 +702,8 @@ class DashboardConfigService
 
         dashboardKeys.each { dashboardKey ->
             def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
-            DashboardSettingsClass dashboardtry
+            DashboardSettingsClass dashboard
+            try
             {
                 dashboard = Jackson.fromJsonString(dashboardSettings, DashboardSettingsClass)
             }
