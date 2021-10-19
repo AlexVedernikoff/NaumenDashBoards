@@ -938,14 +938,16 @@ class DashboardsService
     {
         List<String> templateUUIDS = getUUIDSForTemplates(groupUUID)
         return templateUUIDS?.collect { templateUUID ->
-            return getDynamicAttributeType(templateUUID) ? new Attribute(
+            def type = getDynamicAttributeType(templateUUID)
+            return type ? new Attribute(
                 code: "${AttributeType.TOTAL_VALUE_TYPE}_${templateUUID}",
                 title: api.utils.get(templateUUID).title,
-                type: getDynamicAttributeType(templateUUID),
+                type: type,
                 property: AttributeType.TOTAL_VALUE_TYPE,
                 metaClassFqn: AttributeType.TOTAL_VALUE_TYPE,
                 sourceName: api.utils.get(groupUUID).title,
-                sourceCode: groupUUID
+                sourceCode: groupUUID,
+                ableForAvg: type in [*AttributeType.NUMBER_TYPES, AttributeType.DT_INTERVAL_TYPE]
             ) : null
         }?.grep().toList()
     }
