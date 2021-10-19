@@ -68,7 +68,7 @@ class GanttDataSetService
         def data = new GanttDiagramData()
         data.commonSettings = settings.commonSettings
         data.diagramKey = settings.diagramKey
-        if (settings.resourceAndWorkSettings.size() == 0)
+        if (!(settings?.resourceAndWorkSettings))
         {
             data.tasks = []
         }
@@ -183,7 +183,14 @@ class GanttDataSetService
                 // Преобразование в список из словарей (добавление к значениям, полученным из БД, ключей).
                 List<Map<String, String>> resMap = []
                 res.each { item ->
-                    Map<String, String> itemMap = mapAttributesIndexes.collectEntries { key, value -> [(key) : item[value]]}
+                    Map<String, String> itemMap = mapAttributesIndexes.collectEntries { key, value -> [(key) : item[value]] }
+                    itemMap.id += "_${settings.id}" //добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
+
+                    if(itemMap.parent)
+                    {
+                        itemMap.parent += "_${settings.parent}" //добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
+                    }
+
                     resMap.add(itemMap)
                 }
 
