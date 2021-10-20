@@ -99,7 +99,7 @@ class DashboardDrilldownService
         }
 
         def attrCases = requestContent?.filters?.attribute?.findResults { attr ->
-            if(!attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE))
+            if(!attr?.code?.contains(AttributeType.TOTAL_VALUE_TYPE) && attr?.type != 'COMPUTED_ATTR')
             {
                 //если атрибут из типа использован на первом уровне, то нужно привести работу,
                 //аналогично работе при построении диаграмм - подготовить список типов,
