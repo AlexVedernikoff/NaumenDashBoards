@@ -1,7 +1,10 @@
 // @flow
+import type {UserData} from 'store/context/types';
 export type ConnectedProps = {
+	editableDashboard: boolean,
 	editMode: boolean,
-	isMobileDevice: boolean
+	isMobileDevice: boolean,
+	user: UserData
 };
 
 export type Props = ConnectedProps;

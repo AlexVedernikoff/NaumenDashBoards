@@ -59,10 +59,20 @@ export class WidgetsGrid extends Component<Props, State> {
 		const {editableDashboard, isUserMode, layoutMode, layouts, user} = this.props;
 
 		if (editableDashboard && !isUserMode && user.role === USER_ROLES.REGULAR) {
-			window.addEventListener('beforeunload', (event) => {
+			const beforeUnloadEvent = () => event => {
 				event.preventDefault();
 				event.returnValue = '';
-			});
+			};
+
+			window.addEventListener('beforeunload', beforeUnloadEvent);
+
+			window.parent.addEventListener('popstate', event => {
+				if (!confirm('В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?')) {
+					window.parent.history.back();
+				} else {
+					window.removeEventListener('beforeunload', beforeUnloadEvent);
+				}
+			}, {once: true});
 		}
 
 		if (layoutMode === LAYOUT_MODE.WEB) {
@@ -101,7 +111,7 @@ export class WidgetsGrid extends Component<Props, State> {
 		resetFocusedWidget();
 	};
 
-	handleItemClick = (e) => e.stopPropagation();
+	handleItemClick = e => e.stopPropagation();
 
 	handleLayoutChange = debounce((layout: Layout, layouts: Layouts) => {
 		const {changeLayouts, layoutMode} = this.props;
