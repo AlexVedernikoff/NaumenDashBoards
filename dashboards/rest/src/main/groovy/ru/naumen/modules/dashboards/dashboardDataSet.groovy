@@ -82,7 +82,9 @@ class DashboardDataSetImpl extends BaseController implements DashboardDataSet
             widgetFilters = []
         }
         Integer frontOffsetMinutes = otherSettings.offsetUTCMinutes
-        return service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user).with(JsonOutput.&toJson)
+        return user
+            ? api.auth.callAs(user){ service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user).with(JsonOutput.&toJson) }
+            : service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user).with(JsonOutput.&toJson)
     }
 
     @Override
@@ -99,7 +101,9 @@ class DashboardDataSetImpl extends BaseController implements DashboardDataSet
             widgetFilters = []
         }
         Integer frontOffsetMinutes = otherSettings.offsetUTCMinutes
-        return service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user, tableRequestSettings).with(JsonOutput.&toJson)
+        return user
+            ? api.auth.callAs(user){ service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user, tableRequestSettings).with(JsonOutput.&toJson) }
+            : service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user, tableRequestSettings).with(JsonOutput.&toJson)
     }
 }
 
