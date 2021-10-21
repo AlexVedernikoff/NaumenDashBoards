@@ -321,7 +321,7 @@ class GanttSettingsService
     private Attribute buildAttribute(def value, String sourceName, String sourceCode)
     {
         return new Attribute(
-            code: value.code,
+            code: getAttributeCode(value),
             title: value.title,
             type: value.type.code as String,
             property: value.type.relatedMetaClass as String,
@@ -330,6 +330,21 @@ class GanttSettingsService
             sourceName: sourceName,
             sourceCode: sourceCode
         )
+    }
+
+    /**
+     * Метод получения правильного кода атрибута для запроса в БД
+     * @param systemAttribute - атрибут в системе
+     * @return правильный  атрибута для запроса в БД
+     */
+    private String getAttributeCode(def systemAttribute)
+    {
+        Boolean attrSignedInClass = systemAttribute.declaredMetaClass.fqn.isClass()
+        if(!attrSignedInClass)
+        {
+           return systemAttribute.attributeFqn.toString()
+        }
+        return systemAttribute.code
     }
 
     /**
