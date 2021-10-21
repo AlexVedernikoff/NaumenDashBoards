@@ -1580,6 +1580,7 @@ class ExceptionMessageMarshaller
         if(message?.contains('У Вас нет прав'))
         {
             message = 'При построении виджета произошла ошибка. Для решения проблемы необходимо обратиться к администратору системы. Подробная информация содержится в логах приложения.'
+            type = 'noRights'
         }
         return [message, type]
     }
