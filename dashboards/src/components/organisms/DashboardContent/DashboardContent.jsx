@@ -5,11 +5,12 @@ import type {Props, State} from 'containers/DashboardContent/types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
+import {USER_ROLES} from 'store/context/constants';
 import WidgetsGrid from 'containers/WidgetsGrid/WidgetsGrid';
 
 export class DashboardContent extends PureComponent<Props, State> {
 	state = {
-		intersecting: false
+		intersecting: true
 	};
 
 	contentRef: Ref<'div'> = createRef();
@@ -17,10 +18,13 @@ export class DashboardContent extends PureComponent<Props, State> {
 
 	componentDidMount () {
 		const {current} = this.contentRef;
+		const {editableDashboard, user} = this.props;
 
-		if (current) {
-			this.observer = new IntersectionObserver(this.handleIntersectionObserver);
-			this.observer.observe(current);
+		if (!editableDashboard || user.role !== USER_ROLES.REGULAR) {
+			if (current) {
+				this.observer = new IntersectionObserver(this.handleIntersectionObserver);
+				this.observer.observe(current);
+			}
 		}
 	}
 
