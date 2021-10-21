@@ -22,7 +22,6 @@ export type DispatchConnectedFunctions = {
 };
 
 export type ConnectedProps = {
-	editableDashboard: boolean,
 	editMode: boolean,
 	focusedWidget: string,
 	hasCreateNewWidget: boolean,
