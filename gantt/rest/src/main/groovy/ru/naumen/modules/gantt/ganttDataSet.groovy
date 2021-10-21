@@ -223,7 +223,7 @@ class GanttDataSetService
                         // Добавление элемента в результирующий список.
                         result.add(it)
                         // Рекурсивный вызов для "потомков". Список с настройками передается со второго элемента.
-                        result.addAll(buildDataListFromSettings(settingsList[(i + 1)..-1], it['id']))
+                        result.addAll(buildDataListFromSettings(settingsList[(i + 1)..-1], it['id']?.takeWhile {it != '_'}))
                         return
                     }
                 }

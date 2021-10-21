@@ -395,11 +395,14 @@ class GanttSettingsService
      */
     private Collection<GanttDataSource> mappingDataSource(def fqns)
     {
+        Closure classValidator = { clazz ->
+            !clazz.@metaClass.isHidden() && clazz.@metaClass.status.name() != 'REMOVED'
+        }
         return fqns.collect {
             new GanttDataSource(
                 it.code,
                 it.title,
-                mappingDataSource(it.children)
+                mappingDataSource(it.children.findAll { classValidator.call(it) })
             )
         }.sort { it.title }
     }
