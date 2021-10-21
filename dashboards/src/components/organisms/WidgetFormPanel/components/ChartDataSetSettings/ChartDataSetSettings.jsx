@@ -65,7 +65,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 	renderBreakdownFieldSet = () => {
 		const {components, index, requiredBreakdown, value} = this.props;
 		const {breakdown, dataKey, indicators} = value;
-		const {attribute} = indicators[0];
+		const {attribute} = indicators?.[0] ?? {};
 
 		return (
 			<components.BreakdownFieldset
@@ -86,7 +86,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		const {index, value} = this.props;
 		const {indicators, top} = value;
 
-		const disabled = !isAllowedTopAggregation(indicators[0].aggregation);
+		const disabled = !isAllowedTopAggregation(indicators?.[0]?.aggregation);
 
 		return (
 			<FormField path={getErrorPath(DIAGRAM_FIELDS.data, index, DIAGRAM_FIELDS.top, DIAGRAM_FIELDS.count)}>

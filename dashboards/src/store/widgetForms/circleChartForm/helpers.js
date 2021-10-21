@@ -56,7 +56,7 @@ const changeValuesByAxisOrComboChart = (state: State, values: AxisValues | Combo
 			const {breakdown, dataKey, indicators, showBlankData, showEmptyData, source, sourceForCompute, top} = dataSet;
 
 			return {
-				breakdown: breakdown ?? getDefaultBreakdown(dataKey),
+				breakdown: sourceForCompute ? [] : (breakdown ?? getDefaultBreakdown(dataKey)),
 				dataKey,
 				indicators,
 				showBlankData,

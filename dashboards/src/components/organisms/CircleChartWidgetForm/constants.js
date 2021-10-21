@@ -4,7 +4,7 @@ import {array, baseSchema, mixed, object} from 'src/containers/DiagramWidgetForm
 const schema = object({
 	...baseSchema,
 	data: array().of(object({
-		breakdown: array().breakdown(),
+		breakdown: mixed().requiredByCompute(array().breakdown()),
 		indicators: mixed().requiredByCompute(array().indicators()),
 		source: object().source(),
 		top: object().topSettings()
