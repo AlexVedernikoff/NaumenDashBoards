@@ -1577,10 +1577,11 @@ class ExceptionMessageMarshaller
     static List<String> unmarshal(String value)
     {
         def(message, type) = value ? value.tokenize(delimiter) : []
-        if(message?.contains('У Вас нет прав'))
+        if(message?.contains('У Вас нет прав') || message?.contains('You don\'t have permissions') || message?.contains('Sie haben keine Berechtigung'))
         {
-            message = 'При построении виджета произошла ошибка. Для решения проблемы необходимо обратиться к администратору системы. Подробная информация содержится в логах приложения.'
-            type = 'noRights'
+            String locale = DashboardUtils.getUserLocale(CurrentUserHolder.currentUser.get()?.UUID)
+            message = MessageProvider.instance.getConstant(MessageProvider.NO_RIGHTS_ERROR, locale)
+            type = MessageProvider.NO_RIGHTS_ERROR
         }
         return [message, type]
     }

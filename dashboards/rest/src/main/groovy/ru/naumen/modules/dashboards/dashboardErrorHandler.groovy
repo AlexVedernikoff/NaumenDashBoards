@@ -69,6 +69,7 @@ class MessageProvider
     public static final String SOURCE_NOT_FOUND_ERROR = 'sourceNotFound'
     public static final String OVERFLOW_DATA_ERROR = 'overflowData'
     public static final String NO_DETAIL_DATA_ERROR = 'noDetailData'
+    public static final String NO_RIGHTS_ERROR = 'noRights'
 
     /**
      * Получение локализованного сообщения
@@ -404,7 +405,15 @@ class MessageProvider
             en: 'No data detail is provided for this widget',
             de: 'Für dieses Widget werden keine Datendetails bereitgestellt',
             pl: 'Brak szczegółów danych dla tego widżetu'
+        ],
+        (NO_RIGHTS_ERROR): [
+            ru: 'При построении виджета произошла ошибка. Для решения проблемы необходимо обратиться к администратору системы. Подробная информация содержится в логах приложения.',
+            en: 'An error occurred while creating the widget. To fix the problem you need to contact the system administrator. Detailed information can be found in the application logs.',
+            de: 'Beim Erstellen des Widgets ist ein Fehler aufgetreten. Um das Problem zu beheben, müssen Sie sich an den Systemadministrator wenden. Detaillierte Informationen sind in den Anwendungsprotokollen enthalten.',
+            pl: 'Wystąpił błąd podczas budowania widżetu. Aby rozwiązać problem, musisz skontaktować się z administratorem systemu. Szczegółowe informacje zawarte są w logach aplikacji.'
         ]
+
+
 
     ]
 }
