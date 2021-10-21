@@ -187,5 +187,5 @@
     "build-storybook": "build-storybook",
     "generate-localalize": "node ./utils/generate-localization.js"
   },
-  "version": "2.3.0"
+  "version": "2.3.0-0"
 }
