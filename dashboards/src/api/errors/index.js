@@ -52,6 +52,8 @@ export class NoDataForCondition extends ApiError {}
 
 export class NoDetailData extends ApiError {}
 
+export class NoRights extends ApiError {}
+
 export class NoRightsToRemoveWidget extends ApiError {}
 
 export class NotSuitableAggregationAndAttributeType extends ApiError {}
