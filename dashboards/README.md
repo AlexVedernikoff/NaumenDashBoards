@@ -194,6 +194,22 @@ $ npm i
 
 ### Сборка для разработки
 
+1. Измените файл .env.develop в соответсвии с настройками:
+
+* API_DRIVER=exec-dev - параметр драйвера для работы с REST API
+* EDITABLE_MODE=edit:Редактируемый - режим запуска ВП
+* USER_LANG=ru - язык пользователя
+* API_URL - URL портала для ВП
+* ACCESS_KEY - API ключ для ВП
+* CONTENT_CODE - код виджета - jsApi.findContentCode()
+* CONTEXT_OBJECT_META_CLASS - код класса на котором размещен виджет - (await jsApi.commands.getCurrentContextObject()).metaClass
+* SUBJECT_UUID - ключ класса на котором размещен виджет - jsApi.extractSubjectUuid()
+* USER_LOGIN - логин пользователя - jsApi.getCurrentUser().login
+* USER_UUID - UUID пользователя - jsApi.getCurrentUser().uuid
+
+
+2. Выполните
+
 ```bash
 $ npm run dev
 ```
@@ -201,6 +217,9 @@ $ npm run dev
 Сценарий `dev` собирает модули в итоговую сборку и держит ее в памяти. Результат можно увидеть в браузере по адресу `http://ваш-ip-адрес:8080`. При изменении каких либо исходных файлов (кроме конфигурационных), запустится процесс пересборки и после его окончания страница в браузере обновится.
 
 ### Сборка для эксплуатации
+
+1. Измените файл .env.build в соответсвии с настройками:
+* API_DRIVER=exec - параметр драйвера для работы через exec/exec-post
 
 ```bash
 $ npm run build
