@@ -65,14 +65,6 @@ export class WidgetsGrid extends Component<Props, State> {
 			};
 
 			window.addEventListener('beforeunload', beforeUnloadEvent);
-
-			window.parent.addEventListener('popstate', event => {
-				if (!confirm('В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?')) {
-					window.parent.history.back();
-				} else {
-					window.removeEventListener('beforeunload', beforeUnloadEvent);
-				}
-			}, {once: true});
 		}
 
 		if (layoutMode === LAYOUT_MODE.WEB) {
