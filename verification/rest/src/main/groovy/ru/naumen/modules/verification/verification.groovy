@@ -183,10 +183,12 @@ class VerificationService
     {
         if (verificationState == VerificationState.VERIFICATION_FINISHED)
         {
+            def metainfo = metainfo.getMetaClass(MetaClasses.CLAIM_METACLASS)
             return AttributeCode.VERIFICATION_ATTRIBUTE_CODES.findResults {
                 if (claim.get(it))
                 {
-                    return new VerificationValue(title: it, values: claim.get(it)*.title)
+                    def systemAttribute = metainfo.getAttribute(it)
+                    return new VerificationValue(title: systemAttribute.title, values: claim.get(it)*.title)
                 }
             }
         }
