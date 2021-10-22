@@ -33,6 +33,7 @@ export type DefaultProps = {|
 	getOptionLabel: (option: Option) => string,
 	getOptions: (options: Array<Option>) => Array<Option>,
 	getOptionValue: (option: Option) => any,
+	icon?: string,
 	isSearching: boolean,
 	loading: boolean,
 	loadingMessage: string,

@@ -98,11 +98,12 @@ export class Select extends Component<Props, State> {
 
 	renderIndicators = () => {
 		const {Caret, IndicatorsContainer} = this.components;
+		const {icon} = this.props;
 
 		return (
 			<IndicatorsContainer className={styles.indicatorsContainer}>
 				{this.renderLoader()}
-				<Caret className={styles.caret} icon={ICON_NAMES.CARET} onClick={this.handleClick} round={true} />
+				<Caret className={styles.caret} icon={icon || ICON_NAMES.CARET} onClick={this.handleClick} round={true} />
 			</IndicatorsContainer>
 		);
 	};
