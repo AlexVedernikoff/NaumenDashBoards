@@ -724,7 +724,7 @@ class DashboardSettingsService
             ? getDashboardSetting(personalDashboardKey)
             : getDashboardSetting(defaultDashboardKey)
 
-        if (groupKey in dashboard.customGroups.id)
+        if (groupKey in dashboard.customGroups?.id)
         {
             dashboard.customGroups.removeIf { it?.id == groupKey }
             if (saveJsonSettings(personalDashboardKey, toJson(dashboard), DASHBOARD_NAMESPACE))
@@ -1018,7 +1018,7 @@ class DashboardSettingsService
             dashboardSettings = getDashboardSetting(dashboardKey) ?: new DashboardSettingsClass()
         }
 
-        def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgets*.id, subjectUUID,
+        def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgets.id, subjectUUID,
                                                         contentCode, isPersonal ? user?.login as String : null, isForUser ? subjectUUID : null)
 
         return prepareWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
@@ -1075,7 +1075,7 @@ class DashboardSettingsService
             else
             {
                 DashboardSettingsClass dashboardSettings = getSettingByLogin(user?.login as String, isForUser ? subjectUUID : null) ?: getSettingByLogin(null, isForUser ? subjectUUID : null)
-                def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgets*.id,
+                def generateKey = this.&generateWidgetKey.curry(dashboardSettings.widgets.id,
                                                                 subjectUUID,
                                                                 contentCode,
                                                                 user?.login as String,
@@ -1293,18 +1293,18 @@ class DashboardSettingsService
         String sourceDashboardKey = requestContent.dashboardKey
 
         DashboardSettingsClass sourceDashboardSettings = getDashboardSetting(sourceDashboardKey)
-        Widget widgetSettings = getWidgetSettings(sourceDashboardSettings.widgets.find { it.id == widgetKey})
+        Widget widgetSettings = getWidgetSettings(sourceDashboardSettings.widgets.find { it?.id == widgetKey})
         String destinationDashboardKey = generateDashboardKey(classFqn, contentCode)
         DashboardSettingsClass dashboardSettings = getDashboardSetting(destinationDashboardKey) ?: new DashboardSettingsClass()
         List currentWidgets = dashboardSettings.widgets
 
-        Closure<String> generateKey = this.&generateWidgetKey.curry(currentWidgets*.id, classFqn, contentCode)
+        Closure<String> generateKey = this.&generateWidgetKey.curry(currentWidgets.id, classFqn, contentCode)
         Widget newWidgetSettings = editWidgetDescriptor(widgetSettings, destinationDashboardKey)
         Collection<CustomGroup> correctCustomGroups = []
         if(destinationDashboardKey != sourceDashboardKey)
         {
             List<String> customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
-            Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it.id in customGroupsIds }
+            Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it?.id in customGroupsIds }
             Collection<CustomGroup> destinationCustomGroups = dashboardSettings?.customGroups?.findAll { group ->
                 customGroupsIds?.any { group?.id?.contains(it) }
             }
@@ -1339,7 +1339,7 @@ class DashboardSettingsService
         String destinationDashboardKey = generateDashboardKey(subjectUUID, contentCode)
         List reasons = []
         DashboardSettingsClass sourceDashboardSettings = getDashboardSetting(sourceDashboardKey)
-        Widget widgetSettings = getWidgetSettings(sourceDashboardSettings.widgets.find { it.id == widgetKey })
+        Widget widgetSettings = getWidgetSettings(sourceDashboardSettings.widgets.find { it?.id == widgetKey })
 
         String dashboardKey = generateDashboardKey(subjectUUID, contentCode)
 
@@ -1383,7 +1383,7 @@ class DashboardSettingsService
             if(destinationDashboardKey != sourceDashboardKey)
             {
                 List customGroupsIds = getCustomGroupsIdsFromWidget(widgetSettings)
-                Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it.id in customGroupsIds }
+                Collection<CustomGroup> currentCustomGroups = sourceDashboardSettings.customGroups.findAll { it?.id in customGroupsIds }
                 widgetSettings.data.each { dataValue ->
                     widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.parameters, currentCustomGroups, 'any', currentUserLocale)
                     widgetContainsRelativeCriteriaCustomGroups = widgetContainsRelativeCriteriaCustomGroups || returnParametersOrBreakdownAnswer(dataValue.breakdown, currentCustomGroups, 'any', currentUserLocale)
@@ -1471,12 +1471,12 @@ class DashboardSettingsService
 
         String widgetKey = requestContent.id
         List widgets = dashboardSettings.widgets
-        if(widgetKey in widgets*.id)
+        if(widgetKey in widgets.id)
         {
             def chunkData = requestContent.chunkData as Map<String, Object>
             def fieldsToChange = chunkData.keySet()
 
-            def widgetSettings = widgets.find { it.id == widgetKey }
+            def widgetSettings = widgets.find { it?.id == widgetKey }
 
             fieldsToChange.each { field -> widgetSettings[field] = chunkData[field] }
             dashboardSettings.widgets.removeIf { it?.id == widgetKey }
@@ -1827,7 +1827,7 @@ class DashboardSettingsService
         return valuesWithGroup.collect {
             def groupKey = it?.group?.data
             if(it?.group?.way == Way.CUSTOM &&
-               currentCustomGroups.find{ it.id == groupKey }*.subGroups
+               currentCustomGroups.find{ it?.id == groupKey }*.subGroups
                                   ?.data
                                   ?.type?.flatten()*.toLowerCase()
                                   ?.every { it.contains('subject') || it.contains('object') })
@@ -1886,9 +1886,9 @@ class DashboardSettingsService
     private CustomGroup addUUIDSToSubGroupsIfNotAdded(CustomGroup group)
     {
         group?.subGroups.each {
-            if(!it.id)
+            if(!it?.id)
             {
-                it.id = UUID.randomUUID()
+                it?.id = UUID.randomUUID()
             }
         }
         return group
