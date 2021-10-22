@@ -24,7 +24,7 @@ const Template = args => {
 
 	return (
 		<div style={{width: 300}}>
-			<Select {...args} editable={true} icon={'ARROW_BOTTOM'} onChangeLabel={onSelect} onSelect={onSelect} value={value} />
+			<Select {...args} editable={true} icon={'MINUS'} onChangeLabel={onSelect} onSelect={onSelect} value={value} />
 		</div>
 	);
 };
