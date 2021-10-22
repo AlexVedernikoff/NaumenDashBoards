@@ -85,7 +85,6 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 	renderDataTopField = () => {
 		const {index, value} = this.props;
 		const {indicators, top} = value;
-
 		const disabled = !isAllowedTopAggregation(indicators?.[0]?.aggregation);
 
 		return (
