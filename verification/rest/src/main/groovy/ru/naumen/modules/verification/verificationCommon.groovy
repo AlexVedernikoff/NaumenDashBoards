@@ -194,10 +194,15 @@ class Attribute implements IHasTitle
 class Value implements IHasTitle
 {
     /**
-     * Код атрибута
+     * Уникальный идентификатор значения
      */
     @JsonProperty("UUID")
     String UUID
+
+    /**
+     * Код значения
+     */
+    String code
 }
 
 /**

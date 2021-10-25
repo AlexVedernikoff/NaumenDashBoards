@@ -13,7 +13,6 @@ package ru.naumen.modules.verification
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
-import groovy.transform.Canonical
 import groovy.transform.Field
 
 import static groovy.json.JsonOutput.toJson
@@ -129,7 +128,7 @@ class VerificationService
         return AttributeCode.VERIFICATION_ATTRIBUTE_CODES.findResults { code ->
             def systemAttribute = metainfo.getAttribute(code)
             def clazz = systemAttribute.type.attributeType.permittedTypes.find()
-            List<Value> values =  utils.find(clazz, [:]).findResults { return new Value(title: it.title, UUID: it.UUID) }
+            List<Value> values =  utils.find(clazz, [:]).findResults { return new Value(title: it.title, UUID: it.UUID, code: it.code) }
             return new Attribute(title: systemAttribute.title,
                                  code: code,
                                  values: values,
