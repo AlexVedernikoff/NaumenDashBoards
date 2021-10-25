@@ -166,7 +166,7 @@ class GanttDataSetService
             Source source = settings.source
             // Так как из БД нельзя получить повторяющиеся колонки, то имена атрибутов делаем уникальными.
             List<String> listAttributes = mapAttributes.values().toList().unique()
-            List<List<String>> res = getListResultsForParent(source, mapAttributes['parent'], parentUUID, listAttributes)
+            List<List<String>> res = getListResultsForParent(source, mapAttributes['parent'], parentUUID?.takeWhile {it != '_'}, listAttributes)
             if (res)
             {
                 /* Из БД пришел набор данных. Необходимо задать правильное соответствие между названием
@@ -184,11 +184,11 @@ class GanttDataSetService
                 List<Map<String, String>> resMap = []
                 res.each { item ->
                     Map<String, String> itemMap = mapAttributesIndexes.collectEntries { key, value -> [(key) : item[value]] }
-                    itemMap.id += "_${settings.id}" //добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
+                    itemMap.id += "_${UUID.randomUUID()}" //добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
 
                     if(itemMap.parent)
                     {
-                        itemMap.parent += "_${settings.parent}" //добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
+                        itemMap.parent = parentUUID//добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
                     }
 
                     resMap.add(itemMap)
@@ -223,7 +223,7 @@ class GanttDataSetService
                         // Добавление элемента в результирующий список.
                         result.add(it)
                         // Рекурсивный вызов для "потомков". Список с настройками передается со второго элемента.
-                        result.addAll(buildDataListFromSettings(settingsList[(i + 1)..-1], it['id']?.takeWhile {it != '_'}))
+                        result.addAll(buildDataListFromSettings(settingsList[(i + 1)..-1], it['id']))
                         return
                     }
                 }
