@@ -1,22 +1,27 @@
 // @flow
+import FinishedVerificationContent from './FinishedVerificationContent';
+import InVerificationContent from './InVerificationContent';
+import NoVerificationContent from './NoVerificationContent';
 import type {Props} from 'containers/VerificationContent/types';
 import React, {PureComponent} from 'react';
-import styles from './styles.less';
+import {SettingVerificationState} from 'store/setting/types';
 
 export class VerificationContent extends PureComponent<Props> {
 	render () {
-		const {attributes, setting} = this.props;
+		const {setting} = this.props;
 
-		const renderPreformattedObject = obj => {
-			return <pre>{JSON.stringify(obj, null, 2)}</pre>;
-		};
+		if (setting.userIsAbleToVerify) {
+			switch (setting.verificationState) {
+				case SettingVerificationState.IN_VERIFICATION:
+					return <InVerificationContent {...this.props} />;
+				case SettingVerificationState.NO_VERIFICATION:
+					return <NoVerificationContent {...this.props} />;
+				case SettingVerificationState.VERIFICATION_FINISHED:
+					return <FinishedVerificationContent {...this.props} />;
+			}
+		}
 
-		return (
-			<div className={styles.content}>
-				{renderPreformattedObject(setting)}
-				{renderPreformattedObject(attributes)}
-			</div>
-		);
+		return null;
 	}
 }
 

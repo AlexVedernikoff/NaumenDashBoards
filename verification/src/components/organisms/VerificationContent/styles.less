@@ -6,4 +6,21 @@
 		height: calc(100% - @top-bar-height);
 		position: relative;
 	}
+
+	.table {
+		box-sizing: border-box;
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		overflow: hidden;
+		position: relative;
+
+		tr td {
+				padding: 5px 20px;
+
+				&:last-child {
+					font-weight: bold;
+				}
+		}
+	}
 }

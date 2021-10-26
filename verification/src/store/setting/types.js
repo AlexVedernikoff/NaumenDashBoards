@@ -3,20 +3,22 @@ import {SETTING_EVENTS} from './constants';
 
 export type SettingVerification = {
 	title: string,
-	value: string
+	values: string[]
 };
 
-export type SettingVerificationState = {
+export const SettingVerificationState = {
 	IN_VERIFICATION: 'IN_VERIFICATION',
 	NO_VERIFICATION: 'NO_VERIFICATION',
-	VERIFICATION_FINISHED: 'VERIFICATION_FINISHED',
+	VERIFICATION_FINISHED: 'VERIFICATION_FINISHED'
 };
+
+export type SettingVerificationStateKeys = $Keys<SettingVerificationState>;
 
 export type SettingData = {
 	message: string,
 	userIsAbleToVerify: boolean,
 	verification: SettingVerification[],
-	verificationState: $Keys<SettingVerificationState>,
+	verificationState: SettingVerificationStateKeys,
 };
 
 export type SettingAction = {

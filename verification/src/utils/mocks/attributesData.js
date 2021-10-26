@@ -2,6 +2,7 @@ export default [
 	{
 		'code': 'checkStatus',
 		'title': 'Проверка статуса потребителя',
+		'typeList': 'checkbox',
 		'values': [
 			{
 				'UUID': 'catalogs$301837713',
@@ -60,6 +61,7 @@ export default [
 	{
 		'code': 'checkA19',
 		'title': 'Проверка по ст. 19 (новый)',
+		'typeList': 'checkbox',
 		'values': [
 			{
 				'UUID': 'catalogs$301804900',
@@ -118,6 +120,7 @@ export default [
 	{
 		'code': 'checkA15',
 		'title': 'Проверка по ст. 15',
+		'typeList': 'radio',
 		'values': [
 			{
 				'UUID': 'catalogs$301804807',
@@ -132,6 +135,7 @@ export default [
 	{
 		'code': 'checkProperty',
 		'title': 'Проверка требований имущественного характера',
+		'typeList': 'radio',
 		'values': [
 			{
 				'UUID': 'catalogs$301804862',
@@ -154,6 +158,7 @@ export default [
 	{
 		'code': 'checkA16',
 		'title': 'Проверка по ст. 16',
+		'typeList': 'radio',
 		'values': [
 			{
 				'UUID': 'catalogs$301804871',
@@ -212,6 +217,7 @@ export default [
 	{
 		'code': 'checkThirdA16',
 		'title': 'Проверка по ст. 16 (3 лица)',
+		'typeList': 'radio',
 		'values': [
 			{
 				'UUID': 'catalogs$301804867',
@@ -234,6 +240,7 @@ export default [
 	{
 		'code': 'checkOthers',
 		'title': 'Проверка по иным вопросам',
+		'typeList': 'checkbox',
 		'values': [
 			{
 				'UUID': 'catalogs$301804804',
@@ -252,6 +259,7 @@ export default [
 	{
 		'code': 'checkA17',
 		'title': 'Проверка по ст. 17 (новый)',
+		'typeList': 'checkbox',
 		'values': [
 			{
 				'UUID': 'catalogs$301804884',
@@ -270,17 +278,18 @@ export default [
 	{
 		'code': 'checkFinServ',
 		'title': 'Проверка значения финансовой услуги',
+		'typeList': 'radio',
 		'values': [
 			{
-				'UUID': 'catalogs$301510301',
+				'UUID': 'valueCorrect',
 				'title': 'значение финансовой услуги корректно'
 			},
 			{
-				'UUID': 'catalogs$301510302',
+				'UUID': 'valueError',
 				'title': 'ошибка в значении финансовой услуги'
 			},
 			{
-				'UUID': 'catalogs$301510303',
+				'UUID': 'notEnoughData',
 				'title': 'недостаточно данных для идентификации'
 			}
 		]
