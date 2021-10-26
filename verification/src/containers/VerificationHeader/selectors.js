@@ -7,8 +7,14 @@ import type {State} from 'store/types';
  * @returns {ConnectedProps}
  */
 export const props = (state: State): ConnectedProps => {
-	return {
+	const {setting} = state.setting;
+	const {attributes} = state.attributes;
+	const verification = state.verification;
 
+	return {
+		attributes,
+		setting,
+		verification
 	};
 };
 

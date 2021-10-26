@@ -1,4 +1,5 @@
 // @flow
+import {AttributesData} from 'store/attributes/types';
 import {UserData} from 'store/user/types';
 
 export default class Api {
@@ -27,6 +28,17 @@ export default class Api {
 	async getStartSettings (claimUUID: string, user: UserData) {
 		const url = `exec-post?func=modules.verification.getStartSettings&params=requestContent`;
 		const body = {claimUUID, user};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		return this.jsApi.restCallAsJson(url, options);
+	}
+
+	async setValueAndTaskState (claimUUID: string, code: string, values: AttributesData) {
+		const url = `exec-post?func=modules.verification.setValueAndTaskState&params=requestContent`;
+		const body = {claimUUID, code, values};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'

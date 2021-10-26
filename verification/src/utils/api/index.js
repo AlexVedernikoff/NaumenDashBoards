@@ -17,7 +17,6 @@ export const getAttributesData = async (): Promise<AttributesData> => {
 
 /**
  * Возвращает текущего пользователя
- *
  * @returns {Promise<UserData>} - пользователь
  */
 export const getCurrentUser = async (): Promise<UserData> => {
@@ -26,10 +25,9 @@ export const getCurrentUser = async (): Promise<UserData> => {
 
 /**
  * Возвращает стартовые настройки
- *
  * @returns {Promise<SettingData>} - настройки
- * @param claimUUID
- * @param user
+ * @param claimUUID - Uuid
+ * @param user - Пользователь
  */
 export const getStartSettings = async (claimUUID: string, user: UserData): Promise<SettingData> => {
 	return await api.getStartSettings(claimUUID, user);
@@ -37,9 +35,19 @@ export const getStartSettings = async (claimUUID: string, user: UserData): Promi
 
 /**
  * Возвращает текущее Uuid обращения
- *
- * @returns {Promise<UserData>} - Uuid
+ * @returns {Promise<string>} - Uuid
  */
 export const getSubjectUuid = async (): Promise<string> => {
 	return await api.getSubjectUuid();
+};
+
+/**
+ * Отправляет на проверку и возвращает статус
+ * @returns {Promise<{isFullChecked, message}>} - Сообщение и статус дальнейшей проверки
+ * @param claimUUID - Uuid
+ * @param code - Код атрибута
+ * @param values Значения атрибута
+ */
+export const setValueAndTaskState = async (claimUUID: string, code: string, values: AttributesData): Promise<string> => {
+	return await api.setValueAndTaskState(claimUUID, code, values);
 };
