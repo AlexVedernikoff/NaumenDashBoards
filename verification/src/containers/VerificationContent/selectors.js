@@ -1,7 +1,7 @@
 // @flow
 
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {sendVerificationValue, setIndexVerification, setVerificationAttribute} from 'store/verification/actions';
+import {sendVerificationValue, setIndexVerification, setVerificationCode, setVerificationValue} from 'store/verification/actions';
 import type {State} from 'store/types';
 
 /**
@@ -23,5 +23,6 @@ export const props = (state: State): ConnectedProps => {
 export const functions: ConnectedFunctions = {
 	sendVerificationValue,
 	setIndexVerification,
-	setVerificationAttribute
+	setVerificationCode,
+	setVerificationValue
 };

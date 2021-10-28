@@ -11,10 +11,15 @@ const reducer = (state: VerificationState = initialVerificationState, action: Ve
 				...state,
 				index: action.payload
 			};
-		case VERIFICATION_EVENTS.SET_VERIFICATION_ATTRIBUTE:
+		case VERIFICATION_EVENTS.SET_VERIFICATION_CODE:
 			return {
 				...state,
-				attribute: action.payload
+				code: action.payload
+			};
+		case VERIFICATION_EVENTS.SET_VERIFICATION_VALUE:
+			return {
+				...state,
+				values: action.payload
 			};
 		case VERIFICATION_EVENTS.SET_VERIFICATION_RESULT:
 			return {
