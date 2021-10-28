@@ -156,8 +156,8 @@ class VerificationService
             message = VerificationMessages.IF_TASK_STATE_FULL_CHECK
             Boolean ableToSetValue = false
             AttributeCode.VERIFICATION_ATTRIBUTE_CODES.each {
-                ableToSetValue = ableToCheck || it == attributeCode
-                if(ableToSetValue)
+                ableToSetValue = ableToSetValue || it == attributeCode
+                if(ableToSetValue && it != attributeCode)
                 {
                     setAttributeValues(claim, it, [])
                 }
