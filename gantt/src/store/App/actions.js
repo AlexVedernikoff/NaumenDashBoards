@@ -3,6 +3,7 @@ import {APP_EVENTS, defaultCommonSettings, defaultResourceSettings} from './cons
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {getContext, getDataSources, getDiagramData, getInitialSettings, getUserData, saveData} from 'utils/api';
+import {v4 as uuidv4} from 'uuid';
 
 /**
  * Получает данные, необходимые для работы ВП
@@ -22,7 +23,7 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(setSubjectUuid(subjectUuid));
 		dispatch(setUserData({email, name, role}));
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
-		dispatch(setResourceSettings(resourceAndWorkSettings && Object.keys(resourceAndWorkSettings).length ? resourceAndWorkSettings : defaultResourceSettings));
+		dispatch(setResourceSettings(resourceAndWorkSettings && Object.keys(resourceAndWorkSettings).length ? resourceAndWorkSettings : { ...defaultResourceSettings, id: uuidv4() }));
 		dispatch(setSources(sources));
 		dispatch(saveMasterSettings());
 	} catch (error) {

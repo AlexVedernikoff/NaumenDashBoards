@@ -1,10 +1,22 @@
 @import '/styles/variables';
 
 :local {
+	.wrapper {
+		background-color: rgba(0, 0, 0, 0.1);
+		bottom: 0;
+		left: 0;
+		overflow-y: scroll;
+		position: fixed;
+		right: 0;
+		top: 0;
+		// затемненная подложка должна оставаться под основным контентом формы
+		z-index: 29;
+	}
+
 	.form {
-		box-shadow: 0 2px 8px rgba(129, 146, 161, 0.37);
 		color: #323232;
-		overflow: hidden;
+		max-height: 300px;
+		overflow-y: scroll;
 		position: absolute;
 		right: calc(100% + 20px);
 		width: 600px;
@@ -34,6 +46,11 @@
 		border-radius: 0 0 @border-radius @border-radius;
 		padding: 4px 0 6px 0;
 		position: relative;
+		font-size: 13px;
+
+		& input {
+			font-size: 13px;
+		}
 	}
 
 	.noticeContent {

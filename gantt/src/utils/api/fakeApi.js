@@ -46,11 +46,13 @@ export default class FakeApi {
 			},
 			{
 				'code': '234',
-				'title': 'Исполнитель'
+				'title': 'Исполнитель',
+				'type': 'object'
 			},
 			{
 				'code': 'd951f9',
-				'title': 'Дата'
+				'title': 'Дата',
+				'type': 'bool'
 			}
 		];
 	}

@@ -57,12 +57,18 @@ export class Form extends Component<Props> {
 	renderForm = () => {
 		const {size, top} = this.props;
 		const width = Number.isInteger(size) && size;
+		// вычисляет расположение формы
+		const newTop = top > window.innerHeight - 248 ? 'auto' : (top - 52);
+		const newBottom = newTop === 'auto' ? 0 : 'auto';
 
 		return (
-			<div className={this.getContainerCN()} onClick={this.prevent} style={{top: top - 52, width}}>
-				{this.renderHeader()}
-				{this.renderBody()}
-			</div>
+			<>
+				<div className={styles.wrapper} />
+				<div className={this.getContainerCN()} onClick={this.prevent} style={{bottom: newBottom, top: newTop, width}}>
+					{this.renderHeader()}
+					{this.renderBody()}
+				</div>
+			</>
 		);
 	};
 

@@ -4,12 +4,16 @@ export const ScaleNames = [
 		value: 'DAY'
 	},
 	{
+		label: 'Неделя',
+		value: 'WEEK'
+	},
+	{
 		label: 'Месяц',
 		value: 'MONTH'
 	},
 	{
-		label: 'Неделя',
-		value: 'WEEK'
+		label: 'Квартал',
+		value: 'QUARTER'
 	},
 	{
 		label: 'Год',

@@ -2,13 +2,21 @@
 
 :local {
 	.contentTitle {
+		color: #323232;
 		font-size: 13px;
 		margin-bottom: 8px;
 		margin-top: 8px;
 	}
 
+	.hidden {
+		overflow-X: hidden;
+		max-height: 300px;
+		overflow-Y: scroll;
+	}
+
 	.button {
 		border-radius: 0;
+		font-size: 13px;
 		font-weight: normal;
 		justify-content: start;
 		padding: 12.5px 0;
@@ -130,6 +138,7 @@
 	}
 
 	.checkbox {
+		font-size: 13px;
 		padding-bottom: 8px;
 		padding-top: 8px;
 		width: 100%;
@@ -143,7 +152,7 @@
 	}
 
 	.label {
-		color: #323232;
+		color: #737373;
 		font-size: 13px;
 	}
 
@@ -159,11 +168,16 @@
 	}
 
 	.content {
-		padding: 12px 0;
+		padding-right: 8px;
+		direction: ltr;
 	}
 
 	.react-resizable-handle {
 		max-width: 1px;
+	}
+
+	.selectIcon svg {
+		fill: #999999;
 	}
 
 	.input {

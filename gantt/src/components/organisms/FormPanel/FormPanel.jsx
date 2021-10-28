@@ -192,7 +192,7 @@ const FormPanel = (props: Props) => {
 	const renderSelectCommonBlock = () => (
 		<div className={styles.select}>
 			<span className={styles.label}>Масштаб по умолчанию</span>
-			<Select className={styles.top} onSelect={handleScaleChange} options={ScaleNames} placeholder='Масштаб по умолчанию' value={ScaleNames.find(item => item.value === settings.scale)} />
+			<Select className={cn(styles.selectIcon, styles.top)} icon={'CHEVRON'} onSelect={handleScaleChange} options={ScaleNames} placeholder='Масштаб по умолчанию' value={ScaleNames.find(item => item.value === settings.scale)} />
 		</div>
 	);
 
@@ -200,7 +200,7 @@ const FormPanel = (props: Props) => {
 		const {settings} = props;
 
 		return (
-			<FormControl className={cn(styles.checkbox)} label='Свернуть работы по умолчанию'>
+			<FormControl className={cn(styles.checkbox)} label='Свернуть работы по умолчанию' small={true}>
 				<Checkbox checked={settings.rollUp} name='Checkbox' onChange={handleCheckboxChange} value={settings.rollUp} />
 			</FormControl>
 		);
@@ -215,7 +215,7 @@ const FormPanel = (props: Props) => {
 	const renderForm = () => {
 		if (showModal) {
 			const top = document.getElementById('panelSettingsButton')?.getBoundingClientRect().top;
-			return <Form header={getHeaderModal()} onClose={handleCancelColumnSettings} onSubmit={handleSaveColumnSettings} top={top}>{getContentModal()}</Form>;
+			return <Form className={styles.hidden} header={getHeaderModal()} onClose={handleCancelColumnSettings} onSubmit={handleSaveColumnSettings} top={top}>{getContentModal()}</Form>;
 		}
 
 		return null;
@@ -349,12 +349,12 @@ const FormPanel = (props: Props) => {
 	}
 
 	return (
-		<>
+		<div className={styles.content}>
 			{renderCommonBlock()}
 			{resources.map((item, index) => getFormByType(item, index))}
 			{renderError()}
 			{renderBottom()}
-		</>
+		</div>
 	);
 };
 

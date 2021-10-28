@@ -122,11 +122,11 @@ const Work = (props: Props) => {
 	};
 
 	const renderFilter = () => {
-		const active = work?.source?.descriptor;
+		const active = JSON.parse(work?.source?.descriptor || '{}').filters?.length > 0;
 		const iconName = active ? 'FILLED_FILTER' : 'FILTER';
 
 		return (
-			<button className={styles.filterButton} disabled={!work?.source?.value} onClick={handleOpenFilterForm}>
+			<button className={styles.filter} disabled={!work?.source?.value} onClick={handleOpenFilterForm}>
 				<Icon height={14} name={iconName} />
 				<span className={styles.desc}>Фильтрация</span>
 			</button>
@@ -184,7 +184,7 @@ const Work = (props: Props) => {
 
 	const renderNestedCheckbox = () => {
 		return (
-			<FormControl className={cn(styles.checkbox)} label='Вложенная работа'>
+			<FormControl className={cn(styles.checkbox)} label='Вложенная работа' small={true}>
 				<Checkbox checked={work.nested} name='Checkbox' onChange={handleCheckboxChange} value={work.nested} />
 			</FormControl>
 		);
@@ -210,8 +210,9 @@ const Work = (props: Props) => {
 		return (
 			<div className={styles.select}>
 				<span className={styles.label}>Атрибут связи с ресурсом</span>
-				<Select className={cn(styles.margin, styles.width)}
+				<Select className={cn(styles.margin, styles.selectIcon, styles.width)}
 					fetchOptions={getOptionsForBondWithResource}
+					icon={'CHEVRON'}
 					isSearching={true}
 					loading={loading?.bondWithResource}
 					onSelect={handleAttributeBondWithResource}
@@ -243,8 +244,9 @@ const Work = (props: Props) => {
 		return (
 			<div className={styles.select}>
 				<span className={styles.label}>Связь с вышестоящей работой</span>
-				<Select className={cn(styles.margin, styles.width)}
+				<Select className={cn(styles.margin, styles.selectIcon, styles.width)}
 					fetchOptions={getOptionsForBondWithWork}
+					icon={'CHEVRON'}
 					isSearching={true}
 					loading={loading?.bondWithWork}
 					onSelect={handleAttributeBondWithWork}
@@ -300,8 +302,9 @@ const Work = (props: Props) => {
 		return (
 			<div className={styles.select}>
 				<span className={styles.label}>{label}</span>
-				<Select className={cn(styles.margin, styles.width)}
+				<Select className={cn(styles.margin, styles.selectIcon, styles.width)}
 					fetchOptions={getOptionsForDate}
+					icon={'CHEVRON'}
 					isSearching={true}
 					loading={loading?.date}
 					onSelect={value => handleChangeDate(value, target)}
@@ -313,19 +316,26 @@ const Work = (props: Props) => {
 		);
 	};
 
-	const renderColumn = (column: Column, options: Array<Attribute>) => (
-		<li className={styles.item} key={column.code}>
-			<span className={styles.title}>{column.title}</span>
-			<Select className={styles.width}
-				isSearching={true}
-				loading={loading?.attributes}
-				onSelect={value => handleAttributeSelect(value, column.code)}
-				options={options}
-				placeholder='Выберите элемент'
-				value={getAttribute(column.code)}
-			/>
-		</li>
-	);
+	const renderColumn = (column: Column, options: Array<Attribute>) => {
+		const opts = index === 0 && options && options.filter(option => option.type === 'string');
+
+		return (
+			<li className={styles.item} key={column.code}>
+				<span className={styles.title}>{column.title}</span>
+				<Select className={cn(styles.selectIcon, styles.width)}
+					editable={Boolean(index)}
+					icon={'CHEVRON'}
+					isSearching={true}
+					loading={loading?.attributes}
+					onChangeLabel={(value) => handleAttributeSelect(value, column.code)}
+					onSelect={value => handleAttributeSelect(value, column.code)}
+					options={opts || options}
+					placeholder='Выберите элемент'
+					value={getAttribute(column.code)}
+				/>
+			</li>
+		);
+	};
 
 	const getContentForm = () => {
 		const newValueAttributes: Array<Attribute> = valueAttributes?.attributes && valueAttributes.attributes.map(item => item && getAdditionalFields(item, item.title, item.code));

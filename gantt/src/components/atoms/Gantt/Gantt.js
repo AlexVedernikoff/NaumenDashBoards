@@ -2,6 +2,7 @@
 import './styles.less';
 import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
 import CheckedMenu from 'components/atoms/CheckedMenu';
+import {codeMainColumn} from 'src/store/App/constants';
 import {gantt} from 'dhtmlx-gantt';
 import React, {useEffect, useRef, useState} from 'react';
 
@@ -55,6 +56,33 @@ const Gantt = (props: Props) => {
 					{format: '%F', unit: 'month'},
 					{format: '%Y', unit: 'year'}
 				]
+			},
+			{
+				min_column_width: 90,
+				name: 'quarter',
+				scale_height: HEIGHT_HEADER,
+				scales: [
+					{format: '%M', unit: 'month'},
+					{format: function (date) {
+						const month = date.getMonth();
+						const year = date.getFullYear();
+						let qNum;
+
+						if (month >= 9) {
+							qNum = 4;
+						} else if (month >= 6) {
+							qNum = 3;
+						} else if (month >= 3) {
+							qNum = 2;
+						} else {
+							qNum = 1;
+						}
+
+						return qNum + ' квартал' + ' | ' + year;
+					},
+					unit: 'quarter'
+					}
+				]
 			}
 		]
 	};
@@ -67,7 +95,12 @@ const Gantt = (props: Props) => {
 		gantt.config.grid_resize = true;
 		gantt.config.keep_grid_width = true;
 		gantt.config.columns = configureAdaptedColumns();
-
+		gantt.plugins({
+			tooltip: true
+		});
+		gantt.templates.tooltip_text = function (start, end, task) {
+			return task[codeMainColumn];
+		};
 		gantt.templates.parse_date = (dateStr) => gantt.date.convert_to_utc(new Date(dateStr));
 		gantt.ext.zoom.init(zoomConfig);
 		gantt.showLightbox = function (id) {};
@@ -123,6 +156,7 @@ const Gantt = (props: Props) => {
 				...item,
 				hide: !item.show,
 				label: item.title,
+				minWidth: 100,
 				name: item.code,
 				resize: true,
 				width: 180

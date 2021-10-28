@@ -62,7 +62,7 @@ export const ITEM_TYPES_FOR_ALL = [
 
 export const ITEM_TYPES_FOR_WORK = [ITEM_TYPES_FOR_ALL[1]];
 
-const codeMainColumn = 'd951f959-640b-4b47-b7ed-2f0daf7867';
+export const codeMainColumn = 'd951f959-640b-4b47-b7ed-2f0daf7867';
 
 const defaultCommonSettings = {
 	'columnSettings': [
@@ -98,7 +98,7 @@ const defaultResourceSetting = {
 		'descriptor': '',
 		'value': null
 	},
-	'type': ITEM_TYPES_FOR_ALL[0]
+	'type': ITEM_TYPES_FOR_ALL[0].code
 };
 
 const defaultColumn = {

@@ -16,16 +16,19 @@
 	}
 
 	.label {
-		color: #323232;
+		color: #737373;
 		font-size: 13px;
 	}
 
 	.button {
 		border-radius: 0;
+		display: flex;
+		font-size: 13px;
 		font-weight: normal;
 		justify-content: start;
 		padding: 12.5px 0;
 		position: relative;
+		text-align: start;
 		width: 100%;
 
 		&:hover,
@@ -120,42 +123,18 @@
 	}
 
 	.desc {
-		margin-left: 7px;
+		font-size: 13px;
+		margin-left: 16px;
 	}
 
 	.header {
 		align-items: center;
 		display: flex;
 		flex-direction: row;
-	}
+		font-size: 13px;
 
-	.filterButton {
-		align-items: center;
-		border: none;
-		color: #323232;
-		cursor: pointer;
-		display: flex;
-		font-weight: normal;
-		justify-content: start;
-		letter-spacing: .1px;
-		margin-right: auto;
-		overflow-x: hidden;
-		padding: 14px 0;
-		text-align: center;
-		width: 100%;
-
-		&:hover,
-		&:focus {
-			background-color: transparent;
-			font-weight: bold;
-			letter-spacing: 0;
-		}
-
-		&[disabled] {
-			color: lightgrey;
-			cursor: not-allowed;
-			font-weight: normal;
-			letter-spacing: .1px;
+		& span {
+			margin-left: 13px;
 		}
 	}
 
@@ -186,6 +165,10 @@
 		& > div {
 			border-bottom: none;
 		}
+	}
+
+	.selectIcon svg {
+		fill: #999999;
 	}
 
 	.width {
