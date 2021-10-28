@@ -1,5 +1,5 @@
 // @flow
-import {AttributesData} from 'store/attributes/types';
+import {AttributesValue} from 'store/attributes/types';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getSubjectUuid, setValueAndTaskState} from 'utils/api';
 import {VERIFICATION_EVENTS} from './constants';
@@ -17,14 +17,26 @@ const setIndexVerification = (index: number): ThunkAction => async (dispatch: Di
 };
 
 /**
- * Установка текущего выбранного атрибута для последующей проверки
+ * Сохранение текущего кода атрибута для последующей проверки
  * @returns {ThunkAction}
- * @param {AttributesData} attribute - атрибут
+ * @param {AttributesData} code - код
  */
-const setVerificationAttribute = (attribute: AttributesData): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const setVerificationCode = (code: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch({
-		payload: attribute,
-		type: VERIFICATION_EVENTS.SET_VERIFICATION_ATTRIBUTE
+		payload: code,
+		type: VERIFICATION_EVENTS.SET_VERIFICATION_CODE
+	});
+};
+
+/**
+ * Сохранение значений для последующей проверки
+ * @returns {ThunkAction}
+ * @param {AttributesData} values - атрибут
+ */
+const setVerificationValue = (values: AttributesValue): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	dispatch({
+		payload: values,
+		type: VERIFICATION_EVENTS.SET_VERIFICATION_VALUE
 	});
 };
 
@@ -33,7 +45,7 @@ const setVerificationAttribute = (attribute: AttributesData): ThunkAction => asy
  * @returns {ThunkAction}
  */
 const sendVerificationValue = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {verification: {attribute: {code, values}}} = getState();
+	const {verification: {code, values}} = getState();
 	const claimUUID = await getSubjectUuid();
 
 	try {
@@ -77,6 +89,7 @@ const setErrorVerification = (payload: string) => ({
 
 export {
 	setIndexVerification,
-	setVerificationAttribute,
+	setVerificationCode,
+	setVerificationValue,
 	sendVerificationValue
 };

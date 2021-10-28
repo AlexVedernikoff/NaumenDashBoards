@@ -2,8 +2,9 @@
 import {ATTRIBUTE_EVENTS} from './constants';
 
 export type AttributesValue = {
+	code: string,
 	title: string,
-	UUID: string,
+	UUID: string
 };
 
 export const AttributesTypeList = {
@@ -24,12 +25,15 @@ export const AttributesCodeList = {
 	fullCheck: 'fullCheck'
 };
 
+export const AttributeValuesMultiSelectCodeList = ['byPostWithoutSign', 'decisionFUAboutSame', 'manyAppalicantsOneFO'];
+
 export type AttributesTypeListKeys = $Keys<AttributesTypeList>;
 
 export type AttributesCodeListKeys = $Keys<AttributesCodeList>;
 
 export type AttributesData = {
 	code: AttributesCodeListKeys,
+	listType: AttributesTypeListKeys,
 	title: boolean,
 	typeList: AttributesTypeListKeys,
 	values: AttributesValue[],

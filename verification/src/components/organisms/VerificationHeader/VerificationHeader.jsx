@@ -6,11 +6,12 @@ import styles from './styles.less';
 export class VerificationHeader extends PureComponent<Props> {
 	render () {
 		const {attributes, setting, verification} = this.props;
+		const attribute = attributes[verification.index];
 
 		const renderTitleVerification = (obj: SettingVerificationStateKeys) => {
 			switch (obj) {
 				case SettingVerificationState.IN_VERIFICATION:
-					return attributes[verification.index].title;
+					return attribute?.title;
 				case SettingVerificationState.NO_VERIFICATION:
 					return 'Проведение проверок обращения';
 				case SettingVerificationState.VERIFICATION_FINISHED:

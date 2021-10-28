@@ -1,5 +1,5 @@
 // @flow
-import {AttributesData, AttributesTypeList, AttributesValue} from 'store/attributes/types';
+import {AttributeValuesMultiSelectCodeList, AttributesData, AttributesTypeList, AttributesValue} from 'store/attributes/types';
 import Button from 'components/atoms/Button';
 import Checkbox from 'components/atoms/Checkbox';
 import FormControl from 'components/molecules/FormControl';
@@ -10,17 +10,9 @@ import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class VerificationContent extends PureComponent<Props> {
-	componentDidMount () {
-		const {attributes, setVerificationAttribute, verification} = this.props;
-
-		const attribute = attributes[verification.index];
-
-		setVerificationAttribute({...attribute, values: []});
-	}
-
-	checkRenderTypeField = ({code, typeList, values}: AttributesData) => {
+	checkRenderTypeField = ({code, listType, values}: AttributesData) => {
 		return values.map((value: AttributesValue) => {
-			switch (typeList) {
+			switch (listType) {
 				case AttributesTypeList.RADIO:
 					return this.renderRadioField(value, code);
 				case AttributesTypeList.CHECK:
@@ -32,70 +24,79 @@ export class VerificationContent extends PureComponent<Props> {
 	};
 
 	handleCheckboxValue = (value: AttributesValue) => {
-		const {setVerificationAttribute, verification} = this.props;
-		const values = verification?.attribute?.values || [];
-		const isSome = values.some(v => v.UUID === value.UUID);
+		const {setVerificationValue, verification} = this.props;
+		const isSave = verification.values.some(v => v.UUID === value.UUID);
+		const isMultiSelect = AttributeValuesMultiSelectCodeList.some(code => code === value.code);
+		const valuesDefault = verification.values.filter(filterItem => !AttributeValuesMultiSelectCodeList.some(code => code === filterItem.code));
 
-		setVerificationAttribute({...verification.attribute, values: isSome ? values.filter(v => v.UUID !== value.UUID) : [...values, value]});
+		if (valuesDefault.length < 1 || isMultiSelect || isSave) {
+			setVerificationValue(isSave ? verification.values.filter(v => v.UUID !== value.UUID) : [...verification.values, value]);
+		}
 	};
 
 	handleNextVerification = async () => {
-		const {attributes, sendVerificationValue, setIndexVerification, setVerificationAttribute, verification} = this.props;
+		const {sendVerificationValue, setIndexVerification, setVerificationValue, verification} = this.props;
 
 		await sendVerificationValue();
 
 		if (!verification.isFullChecked) {
 			const index = verification.index + 1;
-			const attribute = attributes[index];
 
 			setIndexVerification(index);
-			setVerificationAttribute({...attribute, values: []});
+			setVerificationValue([]);
 		}
 	};
 
 	handleRadioValue = (value: AttributesValue) => {
-		const {setVerificationAttribute, verification} = this.props;
-		const values = verification?.attribute?.values || [];
-		const isSome = values.some(v => v.UUID === value.UUID);
+		const {setVerificationValue, verification} = this.props;
+		const isSome = verification.values.some(v => v.UUID === value.UUID);
 
-		setVerificationAttribute({...verification.attribute, values: isSome ? [] : [value]});
+		setVerificationValue(isSome ? [] : [value]);
 	};
 
-	renderCheckboxField = ({UUID, title}: AttributesValue, code: string) => {
+	renderCheckboxField = (field: AttributesValue, code: string) => {
 		const {verification} = this.props;
-		const checked = verification.attribute?.values.some(value => { return value.UUID === UUID; });
+		const checked = verification.values.some(value => value.UUID === field.UUID);
+		const isMultiSelect = AttributeValuesMultiSelectCodeList.some(code => code === field.code);
+		const valuesDefault = verification.values.filter(filterItem => !AttributeValuesMultiSelectCodeList.some(code => code === filterItem.code));
+
+		const onClick = () => {
+			this.handleCheckboxValue(field);
+		};
 
 		return (
-			<FormField key={UUID} small>
-				<FormControl label={title} onClickLabel={e => {
-					this.handleCheckboxValue({UUID, title});
-				}}>
-					<Checkbox checked={checked} name={code} value={UUID} />
+			<FormField key={field.UUID} small>
+				<FormControl className={valuesDefault.length > 0 && !isMultiSelect && styles.disabled} label={field.title} onClickLabel={onClick}>
+					<Checkbox checked={checked} name={code} onChange={onClick} value={field.UUID} />
 				</FormControl>
 			</FormField>
 		);
 	};
 
-	renderRadioField = ({UUID, title}: AttributesValue, code: string) => {
+	renderRadioField = (field: AttributesValue, code: string) => {
 		const {verification} = this.props;
-		const checked = verification.attribute?.values.some(value => { return value.UUID === UUID; });
+		const checked = verification.values.some(value => { return value.UUID === field.UUID; });
+
+		const onClick = () => {
+			this.handleRadioValue(field);
+		};
 
 		return (
-			<FormField key={UUID} small>
-				<FormControl label={title} onClickLabel={e => {
-					this.handleRadioValue({UUID, title});
-				}}>
-					<RadioButton checked={checked} name={code} value={UUID} />
+			<FormField key={field.UUID} small>
+				<FormControl label={field.title} onClickLabel={onClick}>
+					<RadioButton checked={checked} name={code} onChange={onClick} value={field.UUID} />
 				</FormControl>
 			</FormField>
 		);
 	};
 
 	render () {
-		const {attributes, verification} = this.props;
+		const {attributes, setVerificationCode, verification} = this.props;
 		const attribute = attributes[verification.index];
 
 		if (attribute) {
+			setVerificationCode(attribute.code);
+
 			if (verification.isFullChecked) {
 				return (
 					<div className={styles.content}>

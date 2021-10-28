@@ -3,12 +3,13 @@ import type {VerificationAction, VerificationState} from './types';
 import {VERIFICATION_EVENTS} from './constants';
 
 export const initialVerificationState: VerificationState = {
-	attribute: null,
+	code: '',
 	error: false,
 	index: 0,
 	isFullChecked: false,
 	loading: false,
-	message: ''
+	message: '',
+	values: []
 };
 
 export const defaultVerificationAction: VerificationAction = {

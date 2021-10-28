@@ -1,4 +1,5 @@
 export default {
+	'message': 'Недоступно',
 	'userIsAbleToVerify': true,
 	'verification': [
 		{
@@ -17,5 +18,5 @@ export default {
 			]
 		}
 	],
-	'verificationState': 'VERIFICATION_FINISHED' // NO_VERIFICATION | IN_VERIFICATION | VERIFICATION_FINISHED
+	'verificationState': 'IN_VERIFICATION' // NO_VERIFICATION | IN_VERIFICATION | VERIFICATION_FINISHED
 };

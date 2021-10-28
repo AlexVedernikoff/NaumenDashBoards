@@ -30,7 +30,7 @@ export default class FakeApi {
 	async setValueAndTaskState (code, claimUUID, values) {
 		await new Promise(resolve => setTimeout(() => resolve(), 500));
 
-		return {isFullChecked: true, message: 'Проводится проверка обращения'};
+		return {isFullChecked: false, message: 'Проводится проверка обращения'};
 	}
 
 	getSubjectUuid () {

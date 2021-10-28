@@ -38,6 +38,7 @@ export default class Api {
 
 	async setValueAndTaskState (claimUUID: string, code: string, values: AttributesData) {
 		const url = `exec-post?func=modules.verification.setValueAndTaskState&params=requestContent`;
+
 		const body = {claimUUID, code, values};
 		const options = {
 			body: JSON.stringify(body),
