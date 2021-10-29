@@ -95,7 +95,7 @@ const Gantt = (props: Props) => {
 		gantt.config.grid_resize = true;
 		gantt.config.keep_grid_width = true;
 		gantt.config.columns = configureAdaptedColumns();
-		gantt.config.scroll_size = 17;
+		gantt.config.scroll_size = 18;
 		gantt.plugins({
 			tooltip: true
 		});
