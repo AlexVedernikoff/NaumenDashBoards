@@ -126,7 +126,7 @@ const Work = (props: Props) => {
 		const iconName = active ? 'FILLED_FILTER' : 'FILTER';
 
 		return (
-			<button className={styles.filter} disabled={!work?.source?.value} onClick={handleOpenFilterForm}>
+			<button className={styles.button} disabled={!work?.source?.value} onClick={handleOpenFilterForm}>
 				<Icon height={14} name={iconName} />
 				<span className={styles.desc}>Фильтрация</span>
 			</button>
