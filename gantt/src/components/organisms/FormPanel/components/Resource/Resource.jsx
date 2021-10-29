@@ -55,6 +55,10 @@ const Resource = (props: Props) => {
 	const handleAttributeSelect = (target: Attribute, code: string) => {
 		const indexSelectedAttr = attributeSettingsModal.findIndex(attr => attr.code === code);
 
+		if (!target) {
+			return setAttributeSettingsModal([...attributeSettingsModal.slice(0, indexSelectedAttr), ...attributeSettingsModal.slice(indexSelectedAttr + 1)]);
+		}
+
 		if (indexSelectedAttr === -1) {
 			const newAttribute = {
 				...defaultAttributeSetting,
@@ -242,7 +246,7 @@ const Resource = (props: Props) => {
 					icon={'CHEVRON'}
 					isSearching={true}
 					loading={loading?.attributes}
-					onChangeLabel={(value) => handleAttributeSelect(value, column.code)}
+					onChangeLabel={() => handleAttributeSelect(null, column.code)}
 					onSelect={(value) => handleAttributeSelect(value, column.code)}
 					options={opts || options}
 					placeholder='Выберите элемент'
