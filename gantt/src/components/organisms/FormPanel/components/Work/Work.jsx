@@ -316,7 +316,7 @@ const Work = (props: Props) => {
 		);
 	};
 
-	const renderColumn = (column: Column, options: Array<Attribute>) => {
+	const renderColumn = (column: Column, index, options: Array<Attribute>) => {
 		const opts = index === 0 && options && options.filter(option => option.type === 'string');
 
 		return (
@@ -342,7 +342,7 @@ const Work = (props: Props) => {
 
 		return (
 			<ul className={styles.list}>
-				{columns.map(column => renderColumn(column, newValueAttributes))}
+				{columns.map((column, index) => renderColumn(column, index, newValueAttributes))}
 			</ul>
 		);
 	};
