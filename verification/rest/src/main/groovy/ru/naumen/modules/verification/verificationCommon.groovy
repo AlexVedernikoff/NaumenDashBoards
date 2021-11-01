@@ -72,10 +72,11 @@ class VerificationMessages
  */
 class TaskState
 {
-    static final Collection<String> IN_VERIFICATION_STATES = [PROV_ST19, CHECK_A15, CHECK_PROPERTY,
+    static final Collection<String> IN_VERIFICATION_STATES = [CHECK_STATUS, PROV_ST19, CHECK_A15, CHECK_PROPERTY,
                                                               CHECK_A16, CHECK_THIRD_A16, CHECK_OTHERS,
                                                               PR_ST17, CHECK_FIN_SERV].asImmutable()
 
+    static final String CHECK_STATUS = 'checkStatus'
     static final String PROV_ST19 = 'provSt19'
     static final String CHECK_A15 = 'checkA15'
     static final String CHECK_PROPERTY = 'checkProperty'
