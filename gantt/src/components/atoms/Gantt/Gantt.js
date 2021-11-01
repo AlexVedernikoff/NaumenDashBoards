@@ -1,9 +1,9 @@
 // @flow
 import './styles.less';
-import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
+import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
-import {gantt} from 'dhtmlx-gantt';
+import {gantt} from 'naumen-gantt';
 import React, {useEffect, useRef, useState} from 'react';
 
 const HEIGHT_HEADER = 70;
