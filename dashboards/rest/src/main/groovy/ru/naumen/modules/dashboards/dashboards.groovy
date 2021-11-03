@@ -402,7 +402,7 @@ class DashboardsService
             attributeTitle = attribute?.title
         }
 
-        return ([metaInfo] + metaClassTypes).collectMany { mc ->
+        def attributes = ([metaInfo] + metaClassTypes).collectMany { mc ->
             def attributes = types
                 ? mc?.attributes?.findAll { it.type.code in types ? it : null }
                 : mc?.attributes?.toList()
@@ -410,7 +410,29 @@ class DashboardsService
             return attributes
                 ? mappingAttribute(attributes, attributeTitle ?: mc.title, parentClassFqn ? classFqn : mc.code)
                 : []
-        }.unique { it.code }.sort { it.title }
+        }.unique { it.code }
+
+        return getTimerAttributesWithValue(attributes)
+    }
+
+    /**
+     * Метод получения списка атрибутов с добавленными атрибутами типа счетчик с пометкой на получение значений по атрибуту
+     * @param attributes - текущий список атрибутов
+     * @return список атрибутов с добавленными атрибутами типа счетчик с пометкой на получение значений по атрибуту
+     */
+    private Collection<Attribute> getTimerAttributesWithValue(Collection<Attribute> attributes)
+    {
+        Collection<Attribute> timerAttributesWithValue = []
+        attributes.each {
+            if (it.type == AttributeType.TIMER_TYPE)
+            {
+                it.timerValue = TimerValue.STATUS
+                def timerAttributeWithValue = it.deepClone()
+                timerAttributeWithValue.timerValue = TimerValue.VALUE
+                timerAttributesWithValue << timerAttributeWithValue
+            }
+        }
+        return (attributes + timerAttributesWithValue).sort { it.title }
     }
 
     /**
@@ -490,7 +512,7 @@ class DashboardsService
             UUIDAttr = buildAttribute(UUIDAttr, mainMetaClass.title, classFqn, ableForAvg)
             attrs += UUIDAttr
         }
-        return attrs
+        return getTimerAttributesWithValue(attrs)
     }
 
     /**
@@ -560,7 +582,7 @@ class DashboardsService
                 it.title
             }
         }
-        return result
+        return getTimerAttributesWithValue(attributes)
     }
 
     /**
@@ -937,7 +959,7 @@ class DashboardsService
     List<Attribute> getDynamicAttributes(String groupUUID)
     {
         List<String> templateUUIDS = getUUIDSForTemplates(groupUUID)
-        return templateUUIDS?.collect { templateUUID ->
+        Collection<Attribute> attributes = templateUUIDS?.collect { templateUUID ->
             def type = getDynamicAttributeType(templateUUID)
             return type ? new Attribute(
                 code: "${AttributeType.TOTAL_VALUE_TYPE}_${templateUUID}",
@@ -950,6 +972,8 @@ class DashboardsService
                 ableForAvg: type in [*AttributeType.NUMBER_TYPES, AttributeType.DT_INTERVAL_TYPE]
             ) : null
         }?.grep().toList()
+
+        return getTimerAttributesWithValue(attributes)
     }
 
     /**
@@ -1392,7 +1416,7 @@ class DashboardsService
         }.sort { it.title }
     }
 
-    private Attribute buildAttribute(def value, String sourceName, String sourceCode, Boolean ableForAvg)
+    private Attribute buildAttribute(def value, String sourceName, String sourceCode, Boolean ableForAvg, TimerValue timerValue = null)
     {
         return new Attribute(
             code: value.code,
@@ -1403,7 +1427,8 @@ class DashboardsService
             declaredMetaClass: value.declaredMetaClass,
             sourceName: sourceName,
             sourceCode: sourceCode,
-            ableForAvg: ableForAvg
+            ableForAvg: ableForAvg,
+            timerValue: timerValue
         )
     }
 

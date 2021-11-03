@@ -497,12 +497,23 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 else
                 {
-                    criteria.addGroupColumn(column)
-                    criteria.addColumn(column)
+                    if(attributeChains?.find {it?.type == AttributeType.TIMER_TYPE}?.timerValue == TimerValue.VALUE )
+                    {
+                        def timerColumn = sc.columnDivide(sc.property(attributeCodes), sc.constant(1000))
+                        criteria.addGroupColumn(timerColumn)
+                        criteria.addColumn(timerColumn)
+                    }
+                    else
+                    {
+                        criteria.addGroupColumn(column)
+                        criteria.addColumn(column)
+                    }
+
                 }
                 String sortingType = parameter.sortingType
                 if (sortingType)
                 {
+                    logger.error('sortingType group ' + sortingType)
                     Closure sorting = getSorting(sortingType)
                     column.with(sorting).with(criteria.&addOrder)
                 }
@@ -906,6 +917,9 @@ class QueryWrapper implements CriteriaWrapper
                 case Comparison.BETWEEN:
                     def (first, second) = parameter.value
                     return api.filters.between(columnCode, first, second)
+                case Comparison.NOT_BETWEEN:
+                    def (first, second) = parameter.value
+                    return api.filters.not(api.filters.between(columnCode, first, second))
                 case Comparison.IN:
                     return api.filters.attrValueEq(code, parameter.value)
                 case Comparison.CONTAINS:
@@ -1419,7 +1433,8 @@ class DashboardQueryWrapperUtils
                 attribute.attrChains().last().ref = new Attribute(code: 'ms', type: 'long')
                 break
             case AttributeType.TIMER_TYPES:
-                attribute.attrChains().last().ref = new Attribute(code: 'statusCode', type: 'string')
+                String attrCode = attribute.attrChains().last().timerValue == TimerValue.VALUE ? 'elapsed' : 'statusCode'
+                attribute.attrChains().last().ref =  new Attribute(code: attrCode, type: 'string')
                 break
             case AttributeType.LINK_TYPES:
                 if(forAggregation && attributeType in [AttributeType.CATALOG_ITEM_TYPE, AttributeType.CATALOG_ITEM_SET_TYPE])

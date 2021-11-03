@@ -600,7 +600,7 @@ class Link
                             def wrapper = MainDateFilterProvider.getWrapperForDynamicAttr(attr, classFqn, descriptor)
                             wrapper.totalValueCriteria.add(api.filters.attrValueEq('value',
                                     api.utils.get(LinksAttributeMarshaller.unmarshal(value).last())))
-                            objects = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                            objects = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
                         }
                         else
                         {
@@ -712,7 +712,7 @@ class Link
                                .addColumn(api.selectClause.property('UUID'))
                         wrapper.filtering(wrapper.totalValueCriteria, true, filterParam)
 
-                        def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+                        def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
                         checkValuesSize(uuids)
                         filterBuilder.AND(
                             filterBuilder.OR('totalValue', 'containsInSet', uuids)
@@ -775,26 +775,26 @@ class Link
                                         def uuids = getValuesForRefAttrInCustomGroup(attr, it.data, customSubGroupCondition)
                                         return filterBuilder.OR(attr.code, 'containsInSet', uuids)
                                     }
-                                    switch (it.type.toLowerCase())
+                                    switch (Condition.getByTitle(it.type.toLowerCase()))
                                     {
-                                        case 'empty':
+                                        case Condition.EMPTY:
                                             return filterBuilder.OR(attr.code, 'null', null)
-                                        case 'not_empty':
+                                        case Condition.NOT_EMPTY:
                                             return filterBuilder.OR(attr.code, 'notNull', null)
-                                        case 'today':
+                                        case Condition.TODAY:
                                             return filterBuilder.OR(attr.code, 'today', null)
-                                        case 'last':
+                                        case Condition.LAST:
                                             return filterBuilder.OR(attr.code, 'lastN', it.data as int)
-                                        case 'last_hours':
+                                        case Condition.LAST_HOURS:
                                             Date date = DateUtils.addMinutes(it.data, offsetMinutes)
                                             return filterBuilder.OR(attr.code, 'lastNHours', date as Double)
-                                        case 'near':
+                                        case Condition.NEAR:
                                             Date date = DateUtils.addMinutes(it.data, offsetMinutes)
                                             return filterBuilder.OR(attr.code, 'nextN', date as int)
-                                        case 'near_hours':
+                                        case Condition.NEAR_HOURS:
                                             Date date = DateUtils.addMinutes(it.data, offsetMinutes)
-                                            return filterBuilder.OR(attr.code, 'nextNHours', date as Double)
-                                        case 'between':
+                                            return filterBuilder.OR(attr.code, 'nextNHours', date as Double) 
+                                        case Condition.BETWEEN:
                                             String dateFormat
                                             def dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
                                             def start
@@ -875,13 +875,13 @@ class Link
                                             return filterBuilder
                                         }
                                     }
-                                    switch (it.type.toLowerCase())
+                                    switch (Condition.getByTitle(it.type.toLowerCase()))
                                     {
-                                        case 'contains':
+                                        case Condition.CONTAINS:
                                             return buildStateFilter(attr.code, 'contains', it.data.uuid)
-                                        case 'not_contains':
+                                        case Condition.NOT_CONTAINS:
                                             return buildStateFilter(attr.code, 'notContains', it.data.uuid)
-                                        case 'contains_any':
+                                        case Condition.CONTAINS_ANY:
                                             List objectsToFilter = it.data*.uuid.collectMany { stateCode ->
                                                 if (sourceCode.contains('$'))
                                                 {
@@ -896,11 +896,11 @@ class Link
                                                 }
                                             }
                                             return filterBuilder.AND(filterBuilder.OR(attr.code, 'containsInSet', objectsToFilter))
-                                        case 'title_contains':
+                                        case Condition.TITLE_CONTAINS:
                                             return filterBuilder.AND(filterBuilder.OR(attr.code, 'titleContains', it.data))
-                                        case 'title_not_contains':
+                                        case Condition.TITLE_NOT_CONTAINS:
                                             return filterBuilder.AND(filterBuilder.OR(attr.code, 'titleNotContains', it.data))
-                                        case ['equal_subject_attribute', 'equal_attr_current_object']:
+                                        case [Condition.EQUAL_SUBJECT_ATTRIBUTE, Condition.EQUAL_ATTR_CURRENT_OBJECT]:
                                             return filterBuilder.AND(filterBuilder.OR(attr.code, 'contains', it.data.uuid))
                                         default:
                                             String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
@@ -915,9 +915,9 @@ class Link
                                     Boolean attributeTypeIsSet = attributeType in AttributeType.LINK_SET_TYPES
                                     Boolean twoLinkAttrs = attr.attrChains().count { it.type in AttributeType.LINK_TYPES } == 2
                                     def lastAttr = attr.attrChains().last()
-                                    switch (it.type.toLowerCase())
+                                    switch (Condition.getByTitle(it.type.toLowerCase()))
                                     {
-                                        case 'empty':
+                                        case Condition.EMPTY:
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): null])
@@ -929,7 +929,7 @@ class Link
                                                 )
                                             }
                                             return filterBuilder.OR(attr.code, 'null', null)
-                                        case 'not_empty':
+                                        case Condition.NOT_EMPTY:
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = api.utils.find(attr.property, [(lastAttr.code): op.not(null)])
@@ -941,7 +941,7 @@ class Link
                                                 )
                                             }
                                             return filterBuilder.OR(attr.code, 'notNull', null)
-                                        case 'contains':
+                                        case Condition.CONTAINS:
                                             def value = api.utils.get(it.data.uuid)
                                             if(twoLinkAttrs)
                                             {
@@ -959,7 +959,7 @@ class Link
                                             }
 
                                             return filterBuilder.OR(attr.code, 'contains', value)
-                                        case 'not_contains':
+                                        case Condition.NOT_CONTAINS:
                                             def value = api.utils.get(it.data.uuid)
                                             if(twoLinkAttrs)
                                             {
@@ -977,7 +977,7 @@ class Link
                                             }
                                             filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', value))
                                             return filterBuilder.OR(attr.code, 'notContains', value)
-                                        case 'title_contains':
+                                        case Condition.TITLE_CONTAINS:
                                             def value = it.data
                                             if(twoLinkAttrs)
                                             {
@@ -995,7 +995,7 @@ class Link
                                                 'titleContains',
                                                 value
                                             )
-                                        case 'title_not_contains':
+                                        case Condition.TITLE_NOT_CONTAINS:
                                             def value = it.data
                                             if(twoLinkAttrs)
                                             {
@@ -1013,7 +1013,7 @@ class Link
                                                 'titleNotContains',
                                                 value
                                             )
-                                        case 'contains_including_archival':
+                                        case Condition.CONTAINS_INCLUDING_ARCHIVAL:
                                             def value = api.utils.get(it.data.uuid)
                                             if(twoLinkAttrs)
                                             {
@@ -1034,7 +1034,7 @@ class Link
                                                 'containsWithRemoved',
                                                 value
                                             )
-                                        case 'not_contains_including_archival':
+                                        case Condition.NOT_CONTAINS_INCLUDING_ARCHIVAL:
                                             def value = api.utils.get(it.data.uuid)
                                             if(twoLinkAttrs)
                                             {
@@ -1055,7 +1055,7 @@ class Link
                                                 'notContainsWithRemoved',
                                                 value
                                             )
-                                        case 'contains_including_nested':
+                                        case Condition.CONTAINS_INCLUDING_NESTED:
                                             def value = api.utils.get(it.data.uuid)
                                             if(twoLinkAttrs)
                                             {
@@ -1076,7 +1076,7 @@ class Link
                                                 'containsWithNested',
                                                 value
                                             )
-                                        case 'contains_any':
+                                        case Condition.CONTAINS_ANY:
                                             def uuids = it.data*.uuid
                                             def values = uuids.collect { uuid ->
                                                 api.utils.get(uuid)
@@ -1091,7 +1091,7 @@ class Link
                                                 'containsInSet',
                                                 values
                                             )
-                                        case ['contains_current_object', 'equal_current_object']:
+                                        case [Condition.CONTAINS_CURRENT_OBJECT, Condition.EQUAL_CURRENT_OBJECT]:
                                             if(twoLinkAttrs)
                                             {
                                                 def objects = findObjects(attr.ref, attr.property, subjectUUID)
@@ -1107,8 +1107,8 @@ class Link
                                                 'contains',
                                                 subjectUUID
                                             )
-                                        case ['contains_attr_current_object',
-                                              'equal_attr_current_object']:
+                                        case [Condition.CONTAINS_ATTR_CURRENT_OBJECT,
+                                              Condition.EQUAL_ATTR_CURRENT_OBJECT]:
                                             def subjectAttribute = it.data
                                             def code = subjectAttribute.code
                                             def subjectType = subjectAttribute.type
@@ -1144,17 +1144,17 @@ class Link
                                         def uuids = getValuesForRefAttrInCustomGroup(attr, it.data, customSubGroupCondition)
                                         return filterBuilder.OR(attr.code, 'containsInSet', uuids)
                                     }
-                                    switch (it.type.toLowerCase())
+                                    switch (Condition.getByTitle(it.type.toLowerCase()))
                                     {
-                                        case 'status_contains':
+                                        case Condition.STATUS_CONTAINS:
                                             String code = it.data.value?.toLowerCase()?.take(1)
                                             return filterBuilder.
                                                 OR(attr.code, 'timerStatusContains', [code])
-                                        case 'status_not_contains':
+                                        case Condition.STATUS_NOT_CONTAINS:
                                             String code = it.data.value?.toLowerCase()?.take(1)
                                             return filterBuilder.
                                                 OR(attr.code, 'timerStatusNotContains', [code])
-                                        case 'expires_between':
+                                        case Condition.EXPIRES_BETWEEN:
                                             String dateFormat
                                             def dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
                                             def start
@@ -1188,11 +1188,19 @@ class Link
                                                 'backTimerDeadLineFromTo',
                                                 [start, end]
                                             )
-                                        case 'expiration_contains':
+                                        case Condition.EXPIRATION_CONTAINS:
                                             String conditionType = it.data.value == 'EXCEED'
                                                 ? 'timerStatusContains'
                                                 : 'timerStatusNotContains'
                                             return filterBuilder.OR(attr.code, conditionType, ['e'])
+                                        case Condition.EQUAL:
+                                        case Condition.NOT_EQUAL:
+                                        case Condition.GREATER:
+                                        case Condition.LESS:
+                                        case Condition.EMPTY:
+                                        case Condition.NOT_EMPTY:
+                                            String message = messageProvider.getConstant(NO_DETAIL_DATA_ERROR, currentUserLocale)
+                                            api.utils.throwReadableException("${message}#${NO_DETAIL_DATA_ERROR}")
                                         default:
                                             String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
                                             api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
@@ -1209,19 +1217,19 @@ class Link
                                         def uuids = getValuesForRefAttrInCustomGroup(attr, it.data, customSubGroupCondition)
                                         return filterBuilder.OR(attr.code, 'containsInSet', uuids)
                                     }
-                                    switch (it.type.toLowerCase())
+                                    switch (Condition.getByTitle(it.type.toLowerCase()))
                                     {
-                                        case 'contains':
+                                        case Condition.CONTAINS:
                                             return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
-                                        case 'not_contains':
+                                        case Condition.NOT_CONTAINS:
                                             return filterBuilder.OR(attr.code, 'notContains', it.data.uuid)
-                                        case 'contains_any':
+                                        case Condition.CONTAINS_ANY:
                                             return filterBuilder.OR(attr.code, 'containsInSet', it.data*.uuid)
-                                        case 'title_contains':
+                                        case Condition.TITLE_CONTAINS:
                                             return filterBuilder.OR(attr.code, 'titleContains', it.data)
-                                        case 'title_not_contains':
+                                        case Condition.TITLE_NOT_CONTAINS:
                                             return filterBuilder.OR(attr.code, 'titleNotContains', it.data)
-                                        case ['equal_subject_attribute', 'equal_attr_current_object']:
+                                        case [Condition.EQUAL_SUBJECT_ATTRIBUTE, Condition.EQUAL_ATTR_CURRENT_OBJECT]:
                                             return filterBuilder.OR(attr.code, 'contains', it.data.uuid)
                                         default:
                                             String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
@@ -1245,21 +1253,21 @@ class Link
 
     private String getFilterCondition(String condition)
     {
-        switch (condition.toLowerCase())
+        switch (Condition.getByTitle(condition.toLowerCase()))
         {
-            case 'empty':
+            case Condition.EMPTY:
                 return 'null'
-            case 'not_empty':
+            case Condition.NOT_EMPTY:
                 return 'notNull'
-            case ['equal', 'contains']:
+            case [Condition.EQUAL, Condition.CONTAINS]:
                 return 'contains'
-            case ['not_contains', 'not_equal', 'not_contains_not_empty']:
+            case [Condition.NOT_CONTAINS, Condition.NOT_EQUAL, Condition.NOT_CONTAINS_NOT_EMPTY]:
                 return 'notContains'
-            case ['not_contains_including_empty', 'not_equal_not_empty']:
+            case [Condition.NOT_CONTAINS_INCLUDING_EMPTY, Condition.NOT_EQUAL_NOT_EMPTY]:
                 return 'notContainsIncludeEmpty'
-            case 'greater':
+            case Condition.GREATER:
                 return 'greater'
-            case 'less':
+            case Condition.LESS:
                 return 'less'
             default:
                 String message = messageProvider.getMessage(NOT_SUPPORTED_FILTER_CONDITION_ERROR, currentUserLocale, condition: condition)
@@ -1313,9 +1321,23 @@ class Link
             : api.db.createCriteria().addSource(classFqn)
         criteria.addColumn(sc.property("${attr.code}.UUID"))
                 .add(api.filters.attrValueEq((Attribute.getAttributeType(attr) in AttributeType.TIMER_TYPES)
-                                                 ?  attr.attrChains().code.join('.') + '.statusCode'
+                                                 ?  attr.attrChains().code.join('.') + getTimerAttrCode(attr)
                                                  : attr.attrChains().code.join('.'), DBvalue))
         return api.db.query(criteria).list()
+    }
+
+    /**
+     * Метод получения кода для второго атрибута в запросе по счетчикам
+     * @param attr - атрибут типа счетчик
+     * @return код для второго атрибута в запросе по счетчикам
+     */
+    String getTimerAttrCode(Attribute attr)
+    {
+        if(attr.timerValue == TimerValue.VALUE)
+        {
+            return '.elapsed'
+        }
+        return '.statusCode'
     }
 
     /**
@@ -1329,7 +1351,7 @@ class Link
     {
         Source source = new Source(classFqn: classFqn, descriptor: descriptor)
         def attributeType = Attribute.getAttributeType(attr)
-        Closure<Collection<Collection<FilterParameter>>> mappingFilters = DashboardDataSetService.instance.getMappingFilterMethodByType(attributeType, subjectUUID, source)
+        Closure<Collection<Collection<FilterParameter>>> mappingFilters = DashboardDataSetService.instance.getMappingFilterMethodByType(attributeType, subjectUUID, source, 240, true)
         def filters = mappingFilters(
             customSubGroupCondition,
             attr,
@@ -1342,7 +1364,7 @@ class Link
         wrapper.criteria.addColumn(api.selectClause.property("${attr.code}.UUID"))
         wrapper.filtering(wrapper.criteria, false, filterParam)
 
-        def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+        def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
         checkValuesSize(uuids)
         return uuids
     }
@@ -1387,8 +1409,34 @@ class Link
                     values = getValuesForRefAttr(attr, interval)
                     break
                 case AttributeType.TIMER_TYPES:
-                    String statusCode = TimerStatus.getByName(value)
-                    values = getValuesForRefAttr(attr, statusCode)
+                    if (attr?.attrChains()?.last()?.timerValue == TimerValue.VALUE)
+                    {
+                        value = value?.split(':')
+                        if (value)
+                        {
+                            //формируем условие как для кастомной группировки
+                            def customSubGroupCondition = [[[
+                                                                'type': 'equal',
+                                                                'data': [
+                                                                    'label': '',
+                                                                    'value': [
+                                                                        ['type': 'HOUR', 'value': value[0]],
+                                                                        ['type': 'MINUTE', 'value': value[1]],
+                                                                        ['type': 'SECOND', 'value': value[2]]
+                                                                    ]
+                                                                ]
+                                                            ]]]
+
+                            logger.error('getValuesForRefAttrInCustomGroup ' + toJson(customSubGroupCondition))
+
+                            values = getValuesForRefAttrInCustomGroup(attr, null, customSubGroupCondition)
+                        }
+                    }
+                    else
+                    {
+                        String statusCode = TimerStatus.getByName(value)
+                        values = getValuesForRefAttr(attr, statusCode)
+                    }
                     break
                 case AttributeType.BOOL_TYPE:
                     if (!value.isInteger()) {
@@ -1430,8 +1478,16 @@ class Link
                 def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
                 return filterBuilder.OR(code, 'contains', interval)
             case AttributeType.TIMER_TYPES:
-                String statusCode = TimerStatus.getByName(value)
-                return filterBuilder.OR(code, 'timerStatusContains', [statusCode])
+                if (attr.timerValue == TimerValue.VALUE)
+                {
+                    String message = messageProvider.getMessage(NO_DETAIL_DATA_ERROR, currentUserLocale)
+                    api.utils.throwReadableException("$message#${NO_DETAIL_DATA_ERROR}")
+                }
+                else
+                {
+                    String statusCode = TimerStatus.getByName(value)
+                    return filterBuilder.OR(code, 'timerStatusContains', [statusCode])
+                }
             case AttributeType.BOOL_TYPE:
                 if (!value.isInteger()) {
                     value = value.toLowerCase() == 'да' ? '1' : '0'
@@ -1589,7 +1645,7 @@ class Link
 
             int intValue = value.replace('-й', '') as int
             wrapper.totalValueCriteria.add(w.eq(s.day(s.property('value')), intValue))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1623,7 +1679,7 @@ class Link
 
             int intValue = MainDateFilterProvider.russianWeekDay.get(value)
             wrapper.totalValueCriteria.add(w.eq(s.dayOfWeek(s.property('value')), intValue))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1664,7 +1720,7 @@ class Link
                 Date endDate = new Date(date.getTime() + dateScope)
                 wrapper.totalValueCriteria.add(w.between(s.property('value'), date, endDate))
             }
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1712,7 +1768,7 @@ class Link
             Date anotherDate = new Date(dateToFind.getTime() + hourScope)
 
             wrapper.totalValueCriteria.add(w.between(s.property('value'), dateToFind, anotherDate))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1757,7 +1813,7 @@ class Link
 
             Date date = new SimpleDateFormat('dd.MM.yyyy HH:mm').parse(value)
             wrapper.totalValueCriteria.add(w.eq(s.property('value'), date))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1805,7 +1861,7 @@ class Link
 
             wrapper.totalValueCriteria.add(w.eq(s.day(s.property('value')), day as int))
                    .add(w.eq(s.month(s.property('value')), month as int))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1842,7 +1898,7 @@ class Link
             def w = api.whereClause
             def s = api.selectClause
             wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), value as int))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1873,7 +1929,7 @@ class Link
             def hoursANDmins = value.tokenize(':/')
             wrapper.totalValueCriteria.add(w.eq(s.extract(s.property('value'), 'HOUR'), hoursANDmins[0] as int))
                    .add(w.eq(s.extract(s.property('value'), 'MINUTE'), hoursANDmins[1] as int))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1906,7 +1962,7 @@ class Link
             def s = api.selectClause
 
             wrapper.totalValueCriteria.add(w.eq(s.extract(s.property('value'), 'HOUR'), value as int))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1937,7 +1993,7 @@ class Link
 
             value = value.replace(' мин', '')
             wrapper.totalValueCriteria.add(w.eq(s.extract(s.property('value'), 'MINUTE'), value as int))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -1974,7 +2030,7 @@ class Link
                 return parser.parse(dayAndMonth)
             }
             wrapper.totalValueCriteria.add(w.between(s.property('value'), startDate, endDate))
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -2190,7 +2246,7 @@ class Link
             {
                 wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), valueMap.year))
             }
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -2258,7 +2314,7 @@ class Link
             {
                 wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), valueMap.year as int))
             }
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }
@@ -2325,7 +2381,7 @@ class Link
             {
                 wrapper.totalValueCriteria.add(w.eq(s.year(s.property('value')), valueMap.year))
             }
-            def uuids = wrapper.getResult(true, DiagramType.TABLE, true).flatten()
+            def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
             return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
         }

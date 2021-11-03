@@ -1624,9 +1624,10 @@ class DashboardDataSetService
      * @param subjectUUID - идентификатор "текущего объекта"
      * @param source - источник запроса
      * @param offsetUTCMinutes - смещение часового пояса пользователя относительно серверного времени
+     * @param fromDD - флаг на вызов метода из модуля Дриллдаун
      * @return функция преобразования настроек пользовательской группировки
      */
-    private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type, String subjectUUID, Source source, Integer offsetUTCMinutes)
+    private Closure<Collection<Collection<FilterParameter>>> getMappingFilterMethodByType(String type, String subjectUUID, Source source, Integer offsetUTCMinutes, Boolean fromDD = false)
     {
         switch (type)
         {
@@ -1649,7 +1650,7 @@ class DashboardDataSetService
             case AttributeType.META_CLASS_TYPE:
                 return this.&mappingMetaClassTypeFilters.curry(subjectUUID)
             case AttributeType.TIMER_TYPES:
-                return this.&mappingTimerTypeFilters.curry(source)
+                return this.&mappingTimerTypeFilters.curry(source, fromDD)
             default:
                 String message = messageProvider.getMessage(NOT_SUPPORTED_ATTRIBUTE_TYPE_FOR_CUSTOM_GROUP_ERROR, currentUserLocale, type: type)
                 api.utils.throwReadableException("$message#${NOT_SUPPORTED_ATTRIBUTE_TYPE_FOR_CUSTOM_GROUP_ERROR}")
@@ -1700,9 +1701,9 @@ class DashboardDataSetService
         String message = messageProvider.getConstant(NO_DATA_FOR_CONDITION_ERROR, currentUserLocale)
         def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
-            switch (conditionType.toLowerCase())
+            switch (Condition.getByTitle(conditionType.toLowerCase()))
             {
-                case 'empty':
+                case Condition.EMPTY:
                     return new FilterParameter(
                         value: null,
                         title: title,
@@ -1710,7 +1711,7 @@ class DashboardDataSetService
                         type: Comparison.IS_NULL,
                         attribute: attribute
                     )
-                case 'not_empty':
+                case Condition.NOT_EMPTY:
                     return new FilterParameter(
                         value: null,
                         title: title,
@@ -1718,7 +1719,7 @@ class DashboardDataSetService
                         type: Comparison.NOT_NULL,
                         attribute: attribute
                     )
-                case 'contains':
+                case Condition.CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1732,7 +1733,7 @@ class DashboardDataSetService
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
-                case 'not_contains':
+                case Condition.NOT_CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1746,7 +1747,7 @@ class DashboardDataSetService
                         type: Comparison.NOT_EQUAL,
                         attribute: attribute
                     )
-                case 'contains_any':
+                case Condition.CONTAINS_ANY:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1761,7 +1762,7 @@ class DashboardDataSetService
                         type: Comparison.IN,
                         attribute: attribute
                     )
-                case 'title_contains':
+                case Condition.TITLE_CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1773,7 +1774,7 @@ class DashboardDataSetService
                         type: Comparison.CONTAINS,
                         attribute: attribute
                     )
-                case 'title_not_contains':
+                case Condition.TITLE_NOT_CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1785,7 +1786,7 @@ class DashboardDataSetService
                         type: Comparison.NOT_CONTAINS,
                         attribute: attribute
                     )
-                case 'contains_current_object':
+                case Condition.CONTAINS_CURRENT_OBJECT:
                     def value = api.utils.get(subjectUUID)
                     return new FilterParameter(
                         value: value,
@@ -1794,7 +1795,7 @@ class DashboardDataSetService
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
-                case ['contains_attr_current_object', 'equal_attr_current_object']:
+                case [Condition.CONTAINS_ATTR_CURRENT_OBJECT, Condition.EQUAL_ATTR_CURRENT_OBJECT]:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1837,9 +1838,9 @@ class DashboardDataSetService
         String message = messageProvider.getConstant(NO_DATA_FOR_CONDITION_ERROR, currentUserLocale)
         def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
-            switch (conditionType.toLowerCase())
+            switch (Condition.getByTitle(conditionType.toLowerCase()))
             {
-                case 'empty':
+                case Condition.EMPTY:
                     return new FilterParameter(
                         value: null,
                         title: title,
@@ -1847,7 +1848,7 @@ class DashboardDataSetService
                         type: Comparison.IS_NULL,
                         attribute: attribute
                     )
-                case 'not_empty':
+                case Condition.NOT_EMPTY:
                     return new FilterParameter(
                         value: null,
                         title: title,
@@ -1855,7 +1856,7 @@ class DashboardDataSetService
                         type: Comparison.NOT_NULL,
                         attribute: attribute
                     )
-                case 'contains':
+                case Condition.CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1869,7 +1870,7 @@ class DashboardDataSetService
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
-                case 'not_contains':
+                case Condition.NOT_CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1883,7 +1884,7 @@ class DashboardDataSetService
                         type: Comparison.NOT_EQUAL,
                         attribute: attribute
                     )
-                case 'in':
+                case Condition.IN:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1898,7 +1899,7 @@ class DashboardDataSetService
                         type: Comparison.IN,
                         attribute: attribute
                     )
-                case 'title_contains':
+                case Condition.TITLE_CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1910,7 +1911,7 @@ class DashboardDataSetService
                         type: Comparison.CONTAINS,
                         attribute: attribute
                     )
-                case 'title_not_contains':
+                case Condition.TITLE_NOT_CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1922,7 +1923,7 @@ class DashboardDataSetService
                         type: Comparison.NOT_CONTAINS,
                         attribute: attribute
                     )
-                case 'contains_including_archival':
+                case Condition.CONTAINS_INCLUDING_ARCHIVAL:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1935,7 +1936,7 @@ class DashboardDataSetService
                         type: Comparison.EQUAL_REMOVED,
                         attribute: attribute
                     )
-                case 'not_contains_including_archival':
+                case Condition.NOT_CONTAINS_INCLUDING_ARCHIVAL:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1948,7 +1949,7 @@ class DashboardDataSetService
                         type: Comparison.NOT_EQUAL_REMOVED,
                         attribute: attribute
                     )
-                case 'contains_including_nested':
+                case Condition.CONTAINS_INCLUDING_NESTED:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1963,7 +1964,7 @@ class DashboardDataSetService
                         type: Comparison.IN,
                         attribute: attribute
                     )
-                case 'contains_any':
+                case Condition.CONTAINS_ANY:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -1978,7 +1979,7 @@ class DashboardDataSetService
                         type: Comparison.IN,
                         attribute: attribute
                     )
-                case ['contains_current_object', 'equal_current_object']:
+                case [Condition.CONTAINS_CURRENT_OBJECT, Condition.EQUAL_CURRENT_OBJECT]:
                     def value = api.utils.get(subjectUUID)
                     return new FilterParameter(
                         value: value,
@@ -1987,7 +1988,7 @@ class DashboardDataSetService
                         type: Comparison.EQUAL,
                         attribute: attribute
                     )
-                case ['equal_attr_current_object', 'contains_attr_current_object']:
+                case [Condition.EQUAL_ATTR_CURRENT_OBJECT, Condition.CONTAINS_ATTR_CURRENT_OBJECT]:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -2038,19 +2039,19 @@ class DashboardDataSetService
                 new FilterParameter(value: value, title: title,
                                     id: id, type: type, attribute: attribute)
             }
-            switch (conditionType.toLowerCase())
+            switch (Condition.getByTitle(conditionType.toLowerCase()))
             {
-                case 'empty':
+                case Condition.EMPTY:
                     return buildFilterParameterFromCondition(Comparison.IS_NULL)
-                case 'not_empty':
+                case Condition.NOT_EMPTY:
                     return buildFilterParameterFromCondition(Comparison.NOT_NULL)
-                case 'equal':
+                case Condition.EQUAL:
                     return buildFilterParameterFromCondition(Comparison.EQUAL)
-                case 'not_equal':
+                case Condition.NOT_EQUAL:
                     return buildFilterParameterFromCondition(Comparison.NOT_EQUAL)
-                case 'greater':
+                case Condition.GREATER:
                     return buildFilterParameterFromCondition(Comparison.GREATER)
-                case 'less':
+                case Condition.LESS:
                     return buildFilterParameterFromCondition(Comparison.LESS)
                 default:
                     message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
@@ -2088,17 +2089,17 @@ class DashboardDataSetService
                     attribute: attribute
                 )
             }
-            switch (conditionType.toLowerCase())
+            switch (Condition.getByTitle(conditionType.toLowerCase()))
             {
-                case 'contains':
+                case Condition.CONTAINS:
                     return buildFilterParameterFromCondition(Comparison.CONTAINS)
-                case 'not_contains_including_empty':
+                case Condition.NOT_CONTAINS_INCLUDING_EMPTY:
                     return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS_INCLUDING_EMPTY)
-                case 'not_contains':
+                case Condition.NOT_CONTAINS:
                     return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS)
-                case 'empty':
+                case Condition.EMPTY:
                     return buildFilterParameterFromCondition(Comparison.IS_NULL)
-                case 'not_empty':
+                case Condition.NOT_EMPTY:
                     return buildFilterParameterFromCondition(Comparison.NOT_NULL)
                 default:
                     message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
@@ -2137,21 +2138,21 @@ class DashboardDataSetService
                 )
             }
             String conditionType = condition.type
-            switch (conditionType.toLowerCase())
+            switch (Condition.getByTitle(conditionType.toLowerCase()))
             {
-                case 'equal':
+                case Condition.EQUAL:
                     return buildFilterParameterFromCondition(Comparison.EQUAL) as FilterParameter
-                case 'not_equal_not_empty':
+                case Condition.NOT_EQUAL_NOT_EMPTY:
                     return buildFilterParameterFromCondition(Comparison.NOT_EQUAL_AND_NOT_NULL) as FilterParameter
-                case 'not_equal':
+                case Condition.NOT_EQUAL:
                     return buildFilterParameterFromCondition(Comparison.NOT_EQUAL) as FilterParameter
-                case 'greater':
+                case Condition.GREATER:
                     return buildFilterParameterFromCondition(Comparison.GREATER) as FilterParameter
-                case 'less':
+                case Condition.LESS:
                     return buildFilterParameterFromCondition(Comparison.LESS) as FilterParameter
-                case 'empty':
+                case Condition.EMPTY:
                     return buildFilterParameterFromCondition(Comparison.IS_NULL) as FilterParameter
-                case 'not_empty':
+                case Condition.NOT_EMPTY:
                     return buildFilterParameterFromCondition(Comparison.NOT_NULL) as FilterParameter
                 default:
                     message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
@@ -2193,18 +2194,18 @@ class DashboardDataSetService
                     value: value
                 )
             }
-            switch (conditionType.toLowerCase())
+            switch (Condition.getByTitle(conditionType.toLowerCase()))
             {
-                case 'empty':
+                case Condition.EMPTY:
                     return buildFilterParameterFromCondition(null, Comparison.IS_NULL)
-                case 'not_empty':
+                case Condition.NOT_EMPTY:
                     return buildFilterParameterFromCondition(null, Comparison.NOT_NULL)
-                case 'today':
+                case Condition.TODAY:
                     return buildFilterParameterFromCondition(null, Comparison.TODAY)
-                case 'last':
+                case Condition.LAST:
                     def count = condition.data as int
                     return buildFilterParameterFromCondition(count, Comparison.LAST_N_DAYS)
-                case 'last_hours':
+                case Condition.LAST_HOURS:
                     def count  = condition.data as int
                     def start = Calendar.instance.with {
                         add(DAY_OF_MONTH, 0)
@@ -2225,7 +2226,7 @@ class DashboardDataSetService
                     start = DateUtils.addMinutes(start, offsetMinutes)
                     end = DateUtils.addMinutes(end, offsetMinutes)
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
-                case 'near':
+                case Condition.NEAR:
                     def count = condition.data as int
                     def start = new Date()
                     //86400000 - 24*60*60*1000 (день в мс)
@@ -2233,7 +2234,7 @@ class DashboardDataSetService
                     start = DateUtils.addMinutes(start, offsetMinutes)
                     end = DateUtils.addMinutes(end, offsetMinutes)
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
-                case 'near_hours':
+                case Condition.NEAR_HOURS:
                     def count = condition.data as int
                     def start = new Date()
                     //3600000 - 60*60*1000 (час в мс)
@@ -2241,7 +2242,7 @@ class DashboardDataSetService
                     start = DateUtils.addMinutes(start, offsetMinutes)
                     end = DateUtils.addMinutes(end, offsetMinutes)
                     return buildFilterParameterFromCondition([start, end], Comparison.BETWEEN)
-                case 'between':
+                case Condition.BETWEEN:
                     def dateSet = condition.data as Map<String, Object> // тут будет массив дат или одна из них
                     def start
                     if(dateSet.startDate)
@@ -2314,18 +2315,19 @@ class DashboardDataSetService
             Closure buildFilterParameterFromCondition = { Comparison comparison, Attribute attr, value ->
                 return new FilterParameter(title: title, id: id, type: comparison, attribute: attr, value: value)
             }
-            switch (conditionType.toLowerCase()) {
-                case 'contains':
+            switch (Condition.getByTitle(conditionType.toLowerCase()))
+            {
+                case Condition.CONTAINS:
                     return buildFilterParameterFromCondition(Comparison.EQUAL, attribute, condition.data.uuid)
-                case 'not_contains':
+                case Condition.NOT_CONTAINS:
                     return buildFilterParameterFromCondition(Comparison.NOT_EQUAL, attribute, condition.data.uuid)
-                case 'contains_any':
+                case Condition.CONTAINS_ANY:
                     return buildFilterParameterFromCondition(Comparison.IN, attribute, condition.data.uuid)
-                case 'title_contains':
+                case Condition.TITLE_CONTAINS:
                     return buildFilterParameterFromCondition(Comparison.STATE_TITLE_CONTAINS, attribute, condition.data)
-                case 'title_not_contains':
+                case Condition.TITLE_NOT_CONTAINS:
                     return buildFilterParameterFromCondition(Comparison.STATE_TITLE_NOT_CONTAINS, attribute, condition.data)
-                case ['equal_subject_attribute', 'equal_attr_current_object']:
+                case [Condition.EQUAL_SUBJECT_ATTRIBUTE, Condition.EQUAL_ATTR_CURRENT_OBJECT]:
                     if (!condition.data)
                     {
                         String message = messageProvider.getConstant(NO_DATA_FOR_CONDITION_ERROR, currentUserLocale)
@@ -2352,13 +2354,14 @@ class DashboardDataSetService
 
     /**
      * Метод преодбразований настроек группировки для таймеров
-     * @para, source - источник запроса
+     * @param source - источник запроса
+     * @param fromDD - флаг, указывающий на то, что метод вызыван из модуля Дриллдаун
      * @param data - настройки группировки
      * @param attribute - атрибут к которому привязана группировки
      * @param title - название группировки
      * @return настройки группировки в удобном формате
      */
-    private List<List<FilterParameter>> mappingTimerTypeFilters(Source source, List<List> data, Attribute attribute, String title, String id)
+    private List<List<FilterParameter>> mappingTimerTypeFilters(Source source, Boolean fromDD, List<List> data, Attribute attribute, String title, String id)
     {
         Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
         def dynamicFilter
@@ -2376,28 +2379,28 @@ class DashboardDataSetService
                 return new FilterParameter(title: title,
                                            id: id, type: comparison, attribute: attr, value: value)
             }
-            switch (conditionType.toLowerCase())
+            switch (Condition.getByTitle(conditionType.toLowerCase()))
             {
-                case 'status_contains':
+                case Condition.STATUS_CONTAINS:
                     def status = condition.data.value.toString()
                     String value = status.toLowerCase().charAt(0)
                     def temAttribute = attribute.deepClone()
                     temAttribute.addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
                     return buildFilterParameterFromCondition(Comparison.CONTAINS, temAttribute, value)
-                case 'status_not_contains':
+                case Condition.STATUS_NOT_CONTAINS:
                     def status = condition.data.value.toString()
                     String value = status.toLowerCase().charAt(0)
                     def temAttribute = attribute.deepClone()
                     temAttribute.addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
                     return buildFilterParameterFromCondition(Comparison.NOT_CONTAINS, temAttribute, value)
-                case 'expiration_contains':
+                case Condition.EXPIRATION_CONTAINS:
                     def comparison = condition.data.value == 'EXCEED'
                         ? Comparison.CONTAINS
                         : Comparison.NOT_CONTAINS
                     def temAttribute = attribute.deepClone()
                     temAttribute.addLast(new Attribute(title: 'статус', code: 'statusCode', type: 'string'))
                     return buildFilterParameterFromCondition(comparison, temAttribute, 'e')
-                case 'expires_between': // Время окончания в диапазоне
+                case Condition.EXPIRES_BETWEEN: // Время окончания в диапазоне
                     def temAttribute = attribute.deepClone()
                     temAttribute.addLast(new Attribute(title: 'время окончания', code: 'deadLineTime', type: 'integer'))
                     def dateSet = condition.data as Map<String, Object> // тут будет массив дат или одна из них
@@ -2436,12 +2439,96 @@ class DashboardDataSetService
                         end = new Date().clearTime()
                     }
                     return buildFilterParameterFromCondition(Comparison.BETWEEN,temAttribute, [start.getTime(), end.getTime()])
+                case Condition.GREATER:
+                    def temAttribute = attribute.deepClone()
+                    temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
+                    def durationInMs = getTimerDurationInMsByConditionValue(condition.data.value, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                    return buildFilterParameterFromCondition(Comparison.GREATER, temAttribute, durationInMs)
+                case Condition.LESS:
+                    def temAttribute = attribute.deepClone()
+                    temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
+                    def durationInMs = getTimerDurationInMsByConditionValue(condition.data.value, TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES)
+                    return buildFilterParameterFromCondition(Comparison.LESS, temAttribute, durationInMs)
+                case Condition.EQUAL:
+                    def temAttribute = attribute.deepClone()
+                    temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
+                    def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(condition.data.value)
+                    def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(condition.data.value,fromDD ? TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS : TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                    return buildFilterParameterFromCondition(Comparison.BETWEEN, temAttribute, [durationInMsMinuteStart, durationInMsMinuteEnd])
+                case Condition.NOT_EQUAL:
+                    def temAttribute = attribute.deepClone()
+                    temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
+                    def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(condition.data.value)
+                    def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(condition.data.value, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                    return buildFilterParameterFromCondition(Comparison.NOT_BETWEEN, temAttribute, [durationInMsMinuteStart, durationInMsMinuteEnd])
+                case Condition.EMPTY:
+                    def temAttribute = attribute.deepClone()
+                    return buildFilterParameterFromCondition(Comparison.IS_NULL, temAttribute, null)
+                case Condition.NOT_EMPTY:
+                    def temAttribute = attribute.deepClone()
+                    return buildFilterParameterFromCondition(Comparison.NOT_NULL, temAttribute, null)
                 default:
-                    message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
+                    String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: conditionType)
                     api.utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
             }
         }
         return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
+    }
+
+
+    /**
+     * Метод полученеия количества округленных миллисекунд из условия
+     * @param conditionValue - условие, содержащее количество часов, минут, возможно секунд
+     * @param roundType - тип округления
+     * @return - количество миллисекунд
+     */
+    Long getTimerDurationInMsByConditionValue(ArrayList conditionValue, TIMER_ROUND_TYPE roundType = TIMER_ROUND_TYPE.NO_ROUND)
+    {
+        def msInSecond = 1000
+        def msInMinute = 60 * msInSecond
+        def minutesInHour = 60
+
+        Long durationInMs = conditionValue.collect {
+            switch (it.type)
+            {
+                case 'HOUR':
+                    return msInMinute * minutesInHour * (it.value as Integer)
+                case 'MINUTE':
+                    def minutes = it.value as Integer
+
+                    if (roundType == TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES) {
+                        minutes++
+                    }
+                    if (roundType == TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES) {
+                        minutes--
+                    }
+                    return msInMinute * minutes
+                case 'SECOND':
+                    def seconds = it.value as Integer
+
+                    if (roundType == TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS)
+                    {
+                        seconds++
+                    }
+                    if (roundType == TIMER_ROUND_TYPE.ROUND_FLOOR_BY_SECONDS)
+                    {
+                        seconds--
+                    }
+                    return msInSecond * seconds
+                default: return 0
+            }
+        }.sum()
+
+        if (roundType in [TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES])
+        {
+            durationInMs--
+        }
+        if (roundType in [TIMER_ROUND_TYPE.ROUND_FLOOR_BY_SECONDS, TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES])
+        {
+            durationInMs++
+        }
+
+        return durationInMs
     }
 
     private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
@@ -2457,9 +2544,9 @@ class DashboardDataSetService
         String message = messageProvider.getConstant(NO_DATA_FOR_CONDITION_ERROR, currentUserLocale)
         def possibleFilter = mappingFilter(data) { condition ->
             String conditionType = condition.type
-            switch (conditionType.toLowerCase())
+            switch (Condition.getByTitle(conditionType.toLowerCase()))
             {
-                case 'contains':
+                case Condition.CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -2469,7 +2556,7 @@ class DashboardDataSetService
                         value: uuid, title: title,
                         id: id, type: Comparison.CONTAINS, attribute: attribute
                     )
-                case 'not_contains':
+                case Condition.NOT_CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -2479,7 +2566,7 @@ class DashboardDataSetService
                         value: uuid, title: title,
                         id: id, type: Comparison.NOT_CONTAINS, attribute: attribute
                     )
-                case 'contains_any':
+                case Condition.CONTAINS_ANY:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -2489,7 +2576,7 @@ class DashboardDataSetService
                         value: uuids, title: title,
                         id: id, type: Comparison.CONTAINS, attribute: attribute
                     )
-                case 'title_contains':
+                case Condition.TITLE_CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -2498,7 +2585,7 @@ class DashboardDataSetService
                         value: condition.data, title: title,
                         id: id, type: Comparison.METACLASS_TITLE_CONTAINS, attribute: attribute
                     )
-                case 'title_not_contains':
+                case Condition.TITLE_NOT_CONTAINS:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -2510,7 +2597,7 @@ class DashboardDataSetService
                         type: Comparison.METACLASS_TITLE_NOT_CONTAINS,
                         attribute: attribute
                     )
-                case 'equal_attr_current_object':
+                case Condition.EQUAL_ATTR_CURRENT_OBJECT:
                     if (!condition.data)
                     {
                         return api.utils.throwReadableException("$message#${NO_DATA_FOR_CONDITION_ERROR}")
@@ -2629,9 +2716,9 @@ class DashboardDataSetService
                             def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filtersTitle): res]
 
                             partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
-                            Boolean hasState = newRequestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) == AttributeType.STATE_TYPE } ||
-                                               newRequestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) == AttributeType.STATE_TYPE  }
-                            if (hasState)
+                            Boolean hasStateOrTimer = newRequestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] } ||
+                                               newRequestData?.aggregations?.any { it?.type in Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE]  }
+                            if (hasStateOrTimer)
                             {
                                 partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations)
                             }
@@ -2709,13 +2796,13 @@ class DashboardDataSetService
                         def groups = dataSet.values().head().groups
                         def aggregations = dataSet.values().head().aggregations
                         String aggregationSortingType = aggregations.find()?.sortingType
-                        Boolean hasState = groups?.any { value -> Attribute.getAttributeType(value?.attribute) == AttributeType.STATE_TYPE } ||
-                                           aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) == AttributeType.STATE_TYPE }
+                        Boolean hasStateOrTimer = groups?.any { value -> Attribute.getAttributeType(value?.attribute) in [AttributeType.STATE_TYPE,  AttributeType.TIMER_TYPE]} ||
+                                           aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE,  AttributeType.TIMER_TYPE] }
                         def res = variables.withIndex().collectMany { totalVar, j ->
                             def res = groups?.size() || notAggregatedAttributes.size() ?
                                 findUniqueGroups([0], totalVar).collect { group ->
                                     def resultCalculation = calculator.execute { variable ->
-                                        hasState
+                                        hasStateOrTimer
                                             ? (totalVar[variable as String].sum {
                                             def value = it[1..-1]
                                             group == value ? it[0] as Double : 0
@@ -3119,9 +3206,14 @@ class DashboardDataSetService
                             return api.utils.formatters.oneZeroFormatter(value.toBoolean())
                         }
                     case AttributeType.TIMER_TYPES:
-                        if(!value)
+                        if(value == null)
                         {
                             return getNullValue(diagramType, fromBreakdown)
+                        }
+                        if(parameter.attribute.attrChains()?.last()?.timerValue == TimerValue.VALUE)
+                        {
+                            value = new Long(value) * 1000
+                            return getTimerValue(value)
                         }
                         return (value as TimerStatus).getRussianName()
                     case AttributeType.DATE_TYPES:
@@ -3319,6 +3411,19 @@ class DashboardDataSetService
     }
 
     /**
+     * Метод получения значения счетчика для пользователя в формате чч:мм
+     * @param value - значение в миллисекундах из БД
+     * @return
+     */
+    private String getTimerValue(Long value)
+    {
+        def hours = TimeUnit.MILLISECONDS.toHours(value)
+        def minutes = TimeUnit.MILLISECONDS.toMinutes(value) - TimeUnit.MINUTES.toMinutes(TimeUnit.MILLISECONDS.toHours(value))
+        def seconds = TimeUnit.MILLISECONDS.toSeconds(value) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(value))
+        def temp = "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}"
+    }
+
+    /**
      * Метод по получению корректного значения временного интервала для предложенного типа
      * @param millis - значение из БД в миллисекундах
      * @param type - тип, в который нужно привести
@@ -3431,8 +3536,6 @@ class DashboardDataSetService
                 it?.attribute?.property == AttributeType.TOTAL_VALUE_TYPE
             }
 
-            //TODO: может понадобиться
-            // Integer groupsCount = requestData?.groups?.size()
             Integer aggregationsCount = requestData?.aggregations?.size()
 
             if(dynInGroups)
@@ -3532,27 +3635,29 @@ class DashboardDataSetService
     private List prepareRequestWithStates(List res, List listIdsOfNormalAggregations)
     {
         def list = res
-        Set stateValues = list.findResults { el ->
+        Set stateValues = []
+        list.each { el ->
             def elAggregations = el[listIdsOfNormalAggregations]
-            return el.minus(elAggregations)
+            stateValues << el.minus(elAggregations)
         }
         Integer aggregationCnt = listIdsOfNormalAggregations.size()
         if (aggregationCnt > 0)
         {
             return stateValues.collect { value ->
                 def aggergationSet = []
-                def resValue = res.findResults { resValue ->
-                    def tempResValue = resValue
+                def resValue = []
+                res.each {
+                    def tempResValue = it
                     def elAggregations = tempResValue[listIdsOfNormalAggregations]
                     tempResValue = tempResValue.minus(elAggregations)
                     //сравниваем значение с тем, что есть в текущей паре "название статуса (код)"
                     if (tempResValue == value)
                     {
                         //если оно совпадает берём у всего значения агрегацию
-                        aggergationSet << [resValue[listIdsOfNormalAggregations]]
-                        return [aggergationSet.collectMany{ it }, *tempResValue]
+                        aggergationSet << [it[listIdsOfNormalAggregations]]
+                        resValue = [aggergationSet.collectMany{ it }, *tempResValue]
                     }
-                }.last()
+                }
                 List totalAggregation = aggregationCnt > 1
                     ? getTotalAggregation(resValue, aggregationCnt)
                     : [DECIMAL_FORMAT.format(resValue[0].sum { it[0] as Double })]
@@ -5256,9 +5361,9 @@ class DashboardDataSetService
                                                     .with(formatAggregation)
                 def total = res ? [(requisiteNode.title): res] : [:]
                 total = formatResult(total, aggregationCnt)
-                Boolean hasState = requestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) == AttributeType.STATE_TYPE } ||
-                                   requestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) == AttributeType.STATE_TYPE }
-                if (hasState)
+                Boolean hasStateOrTimer = requestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] } ||
+                                   requestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] }
+                if (hasStateOrTimer)
                 {
                     total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
                 }
