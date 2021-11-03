@@ -513,7 +513,6 @@ class QueryWrapper implements CriteriaWrapper
                 String sortingType = parameter.sortingType
                 if (sortingType)
                 {
-                    logger.error('sortingType group ' + sortingType)
                     Closure sorting = getSorting(sortingType)
                     column.with(sorting).with(criteria.&addOrder)
                 }
