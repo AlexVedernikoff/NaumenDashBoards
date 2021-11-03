@@ -178,6 +178,7 @@ enum Comparison
     GREATER_OR_EQUAL,
     LESS_OR_EQUAL,
     BETWEEN,
+    NOT_BETWEEN,
     IN,
     CONTAINS,
     TODAY,
@@ -416,6 +417,77 @@ enum DashboardType
     BASE,
     USER,
     VIEW
+}
+
+/**
+ * Тип значения у атрибута типа "счетчик"
+ */
+enum TimerValue
+{
+    STATUS,
+    VALUE
+}
+
+/**
+ * Типы округлений для счетчиков
+ */
+enum TIMER_ROUND_TYPE
+{
+    NO_ROUND,
+    ROUND_CEIL_BY_SECONDS,
+    ROUND_FLOOR_BY_SECONDS,
+    ROUND_CEIL_BY_MINUTES,
+    ROUND_FLOOR_BY_MINUTES
+}
+
+/**
+ * Типы условий пользовательских группировок
+ */
+enum Condition
+{
+    STATUS_CONTAINS('status_contains'),
+    STATUS_NOT_CONTAINS('status_not_contains'),
+    EXPIRATION_CONTAINS('expiration_contains'),
+    EXPIRES_BETWEEN('expires_between'),
+    LESS('less'),
+    GREATER('greater'),
+    EQUAL('equal'),
+    NOT_EQUAL('not_equal'),
+    EMPTY('empty'),
+    NOT_EMPTY('not_empty'),
+    CONTAINS('contains'),
+    NOT_CONTAINS('not_contains'),
+    CONTAINS_ANY('contains_any'),
+    TITLE_CONTAINS('title_contains'),
+    TITLE_NOT_CONTAINS('title_not_contains'),
+    EQUAL_ATTR_CURRENT_OBJECT('equal_attr_current_object'),
+    EQUAL_SUBJECT_ATTRIBUTE('equal_subject_attribute'),
+    BETWEEN('between'),
+    NEAR_HOURS('near_hours'),
+    NEAR('near'),
+    LAST_HOURS('last_hours'),
+    LAST('last'),
+    TODAY('today'),
+    NOT_EQUAL_NOT_EMPTY('not_equal_not_empty'),
+    NOT_CONTAINS_INCLUDING_EMPTY('not_contains_including_empty'),
+    CONTAINS_ATTR_CURRENT_OBJECT('contains_attr_current_object'),
+    CONTAINS_CURRENT_OBJECT('contains_current_object'),
+    EQUAL_CURRENT_OBJECT('equal_current_object'),
+    CONTAINS_INCLUDING_NESTED('contains_including_nested'),
+    NOT_CONTAINS_INCLUDING_ARCHIVAL('not_contains_including_archival'),
+    CONTAINS_INCLUDING_ARCHIVAL('contains_including_archival'),
+    IN('in'),
+    NOT_CONTAINS_NOT_EMPTY('not_contains_not_empty')
+
+    String frontTitle
+
+    Condition(String frontTitle) {
+        this.frontTitle = frontTitle
+    }
+
+    static Condition getByTitle(String frontTitle) {
+        return values().find { it.frontTitle == frontTitle }
+    }
 }
 //endregion
 
@@ -1166,6 +1238,11 @@ class Attribute extends BaseAttribute
      */
     Boolean ableForAvg = false
 
+    /**
+     * Тип выводимого значения для атрибута типа счетчик
+     */
+    TimerValue timerValue
+
     static Attribute fromMap(Map<String, Object> data)
     {
         return data ? new Attribute(
@@ -1178,6 +1255,7 @@ class Attribute extends BaseAttribute
             sourceName: data.sourceName as String,
             sourceCode: data.sourceCode as String,
             ableForAvg: data.ableForAvg as Boolean,
+            timerValue: data.timerValue as TimerValue,
             ref: fromMap(data.ref as Map<String, Object>)
         ) : null
     }
@@ -1207,6 +1285,7 @@ class Attribute extends BaseAttribute
             sourceName: this.sourceName,
             sourceCode: this.sourceCode,
             ableForAvg: this.ableForAvg,
+            timerValue: this.timerValue,
             ref: this.ref?.deepClone()
         )
     }
