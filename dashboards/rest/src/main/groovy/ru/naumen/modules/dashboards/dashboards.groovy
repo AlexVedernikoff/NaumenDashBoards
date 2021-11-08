@@ -404,7 +404,7 @@ class DashboardsService
 
         def attributes = ([metaInfo] + metaClassTypes).collectMany { mc ->
             def attributes = types
-                ? mc?.attributes?.findAll { it.type.code in types ? it : null }
+                ? mc?.attributes?.findAll { it.type.code in types && !isHiddenAttribute(it) ? it : null }
                 : mc?.attributes?.toList()
 
             return attributes
@@ -499,7 +499,7 @@ class DashboardsService
 
         def attrs = listOfSystemAttribute?.unique { it?.code }?.findResults {
             Boolean attrInMainClass = classFqn ? api.metainfo.checkAttributeExisting(classFqn, it.code).isEmpty() : false
-            if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
+            if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES && !isHiddenAttribute(it))
             {
                 Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(attrInMainClass ? classFqn : it.metaClass.code, it.code, it.type.code)
                 return buildAttribute(it, attrInMainClass ? mainMetaClass.title : it.metaClass.title, attrInMainClass ? classFqn : it.metaClass.code, ableForAvg)
@@ -549,7 +549,7 @@ class DashboardsService
 
         Collection<Attribute> result = [metaInfo, *metaInfos].collectMany { meta ->
             return meta ? meta.attributes.findResults {
-                if(!it.computable && it.type.code in types)
+                if(!it.computable && it.type.code in types && !isHiddenAttribute(it))
                 {
                     Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(meta.code, it.code, it.type.code)
                     return buildAttribute(it, metaInfo.title, metaInfo.code, ableForAvg)
@@ -569,7 +569,8 @@ class DashboardsService
                     ? attributes.findResults {
                         if (!(it.code in result*.code) &&
                             !(it.code in attributeList*.code) &&
-                            !it.computable && it.type.code in types)
+                            !it.computable && it.type.code in types &&
+                            !isHiddenAttribute(it))
                         {
                             Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(metaInfo.code, it.code, it.type.code)
                             return buildAttribute(it, metaInfo.title, metaInfo.code, ableForAvg)
@@ -1072,6 +1073,16 @@ class DashboardsService
         def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
         String message = messageProvider.getConstant(EMPTY_DASHBOARD_CODE_ERROR, currentUserLocale)
         api.utils.throwReadableException("$message#${EMPTY_DASHBOARD_CODE_ERROR}")
+    }
+
+    /**
+     * Метод для определения скрытого атрибута
+     * @param attribute
+     * @return скрывать атрибут или нет
+     */
+    private Boolean isHiddenAttribute(def attribute)
+    {
+        return attribute.tags?.any { attribute.code == 'Metadata' }
     }
 
     /**
