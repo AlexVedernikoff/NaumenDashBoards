@@ -4225,6 +4225,111 @@ class WidgetFilterResponse
 }
 
 /**
+ * Класс, описывающий запрос для получения данных по диаграмме
+ */
+@Canonical
+class GetGataForCompositeDiagramRequest
+{
+    /**
+     * Ключ дашборда
+     */
+    String dashboardKey
+    /**
+     * Ключ виджета
+     */
+    String widgetKey
+    /**
+     * Ключ объекта, на карточке которого расположен дашборд
+     */
+    String cardObjectUuid
+    /**
+     * Фильтры на виджете
+     */
+    def widgetFilters
+    /**
+     * Смещение ЧП
+     */
+    Integer offsetUTCMinutes
+}
+
+/**
+ * Класс, описывающий запрос для получения данных по таблице
+ */
+@Canonical
+class GetDataForTableDiagramRequest extends GetGataForCompositeDiagramRequest
+{
+    /**
+     * Настройки для таблицы
+     */
+    TableRequestSettings tableRequestSettings
+}
+
+/**
+ * Класс, описывающий запрос по получению ссылки(дриллдаун)
+ */
+@Canonical
+class GetLinkRequest
+{
+    /**
+     * Ключ объекта, на карточке которого расположен дашборд
+     */
+    String cardObjectUuid
+    /**
+     * Ключ дескриптора из хранилища
+     */
+    String filterId
+    /**
+     * Дескриптор в запросе
+     */
+    String descriptor
+    /**
+     * Дескриптор на виджете (пользовательская фильтрация)
+     */
+    String widgetDescriptor
+    /**
+     * Список фильтров на виджете
+     */
+    List widgetFilters
+    /**
+     * Список фильтров по атрибутам
+     */
+    List filters
+    /**
+     * Список типов для метакласа
+     */
+    List cases
+    /**
+     * Ключ дашборда
+     */
+    String dashboardKey
+    /**
+     * Код группы (для пользовательского дашбординга)
+     */
+    String groupCode
+    /**
+     * Код метакласса для запроса
+     */
+    String classFqn
+    /**
+     * Название ссылки
+     */
+    String title
+    /**
+     * Список кодов атрибутов для получаемой ссылки
+     */
+    List attrCodes
+
+    /**
+     * Смещение ЧП
+     */
+    Integer offsetUTCMinutes
+    /**
+     * Тип диаграммы
+     */
+    DiagramType diagramTypeFromRequest
+}
+
+/**
  * Настройки для пагинации
  */
 class PaginationSettings

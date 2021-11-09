@@ -10,6 +10,7 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules.dashboards
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Field
 import com.fasterxml.jackson.core.type.TypeReference
 import ru.naumen.metainfo.shared.IAttrReference
@@ -31,13 +32,9 @@ interface DashboardDrilldown
     /**
      * Метод пролучения ссылки на страницу со списком объектов сформированным из параметров запроса.
      * @param requestContent - параметры запроса
-     * @param cardObjectUuid - Uuid карточки текущего объекта
-     * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
-     * @param dashboardKey - ключ дашборда
-     * @param groupCode - код группы
      * @return ссылка на на страницу с произвольным списком объектов в json-формате.
      */
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey, String groupCode, IUUIDIdentifiable user)
+    String getLink(Map<String, Object> requestContent, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
@@ -46,9 +43,9 @@ class DashboardDrilldownImpl extends BaseController implements DashboardDrilldow
     DashboardDrilldownService service = DashboardDrilldownService.instance
 
     @Override
-    String getLink(Map<String, Object> requestContent, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey, String groupCode, IUUIDIdentifiable user)
+    String getLink(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        return toJson([link: service.getLink(requestContent, cardObjectUuid, diagramTypeFromRequest, dashboardKey, groupCode, user)])
+        return toJson([link: service.getLink(requestContent, user)])
     }
 }
 
@@ -59,22 +56,16 @@ class DashboardDrilldownService
     /**
      * Метод пролучения ссылки на страницу со списком объектов сформированным из параметров запроса.
      * @param request - параметры запроса
-     * @param cardObjectUuid - Uuid карточки текущего объекта
-     * @param diagramTypeFromRequest - тип диаграммы из запроса (в виде строки)
-     * @param dashboardKey - ключ дашборда
-     * @param groupCode - код группы
      * @return ссылка на на страницу с произвольным списком объектов в json-формате.
      */
-    String getLink(Map<String, Object> request, String cardObjectUuid, String diagramTypeFromRequest, String dashboardKey,  String groupCode, IUUIDIdentifiable user)
+    String getLink(Map<String, Object> request, IUUIDIdentifiable user)
     {
         // Вычисляем смещение часового пояса по настройкам пользователя системы и настройкам клиента у фронта.
-        Integer frontOffsetMinutes = request.offsetUTCMinutes
+        GetLinkRequest requestContent = new ObjectMapper().convertValue(request, GetLinkRequest)
         String userUUID = user?.UUID
-        def offsetMinutes = DashboardUtils.getOffsetUTCMinutes(userUUID, frontOffsetMinutes)
+        def offsetMinutes = DashboardUtils.getOffsetUTCMinutes(userUUID, requestContent.offsetUTCMinutes)
+        String cardObjectUuid = requestContent.cardObjectUuid
 
-        def requestContent = [:]
-        requestContent.putAll(request)
-        DiagramType diagramType = diagramTypeFromRequest as DiagramType
         if(requestContent.filterId)
         {
             requestContent.descriptor = DashboardUtils.getSourceFiltersFromStorage([[key:'id', value: source.filterId]]).find()
@@ -111,9 +102,9 @@ class DashboardDrilldownService
         requestContent.cases += attrCases
 
         DashboardSettingsService dashboardSettingsService = DashboardSettingsService.instance
-        DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey)
+        DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(requestContent.dashboardKey)
         cardObjectUuid = DashboardDataSetService.instance.getCardObjectUUID(dbSettings, user) ?: cardObjectUuid
-        Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, diagramType, groupCode)
+        Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid)
         Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
 
         if(anyFiltersWithCustomGroupKey)
@@ -174,11 +165,10 @@ class DashboardDrilldownService
      * @param cardObjectUuid - запрос на построение диаграммы
      * @return Изменённый запрос
      */
-    private Map<String, Object> transformRequest(Map<String, Object> requestContent,
+    private GetLinkRequest transformRequest(GetLinkRequest requestContent,
                                                  String cardObjectUuid)
     {
-        Closure<Map<String, Object>> transform = { Map<String, Object> request ->
-            Map<String, Object> res = [:] << request
+        Closure<GetLinkRequest> transform = { GetLinkRequest request ->
             res.descriptor = DashboardMarshaller.substitutionCardObject(
                 request.descriptor as String,
                 cardObjectUuid
@@ -255,13 +245,13 @@ class Link
      */
     private String currentUserLocale
 
-    Link(Map<String, Object> map, String cardObjectUuid, DiagramType diagramType, String groupCode)
+    Link(GetLinkRequest map, String cardObjectUuid)
     {
         this.subjectUUID = cardObjectUuid
         this.classFqn = map.classFqn
         def metaInfo = api.metainfo.getMetaClass(this.classFqn)
         this.title = map.title ?: "Список элементов '${ this.classFqn }'"
-        if(groupCode)
+        if(map.groupCode)
         {
             this.attrGroup = groupCode
         }
@@ -275,7 +265,7 @@ class Link
         this.cases = map.cases as Collection
         this.attrCodes = map.attrCodes as Collection
         this.filters = mapper.convertValue(map.filters, new TypeReference<Collection<DrilldownFilter>>() {})
-        this.diagramType = diagramType
+        this.diagramType = map.diagramTypeFromRequest
         this.template = metaInfo.attributes.find {
             it.code == 'dashboardTemp'
         }?.with {

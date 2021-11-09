@@ -163,11 +163,11 @@ interface Dashboards
 
     /**
      * Метод формирования ссылки для перехода на дашборд
-     * @param dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
+     * @param requestContent - тело запроса с полем dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
      * @param user - текущий пользователь
      * @return ссылка на на страницу с дошбордом в json-формате.
      */
-    String getDashboardLink(String dashboardCode, IUUIDIdentifiable user)
+    String getDashboardLink(Map<String, Object> requestContent, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
@@ -297,8 +297,9 @@ class DashboardsImpl extends BaseController implements Dashboards
     }
 
     @Override
-    String getDashboardLink(String dashboardCode, IUUIDIdentifiable user)
+    String getDashboardLink(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
+        String dashboardCode = requestContent.dashboardCode
         return toJson(service.getDashboardLink(dashboardCode, user))
     }
 }

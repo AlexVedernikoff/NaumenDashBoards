@@ -41,7 +41,7 @@ interface DashboardSettings
      * @param dashboardKey - ключ дашборда
      * @return список кастомных группировок в json-формате
      */
-    String getCustomGroups(String dashboardKey)
+    String getCustomGroups(Map<String, Object> requestContent)
 
     /**
      * Получение кастомной группировки для дашборда по ключу дашборда и группировки
@@ -49,7 +49,7 @@ interface DashboardSettings
      * @param customGroupKey - ключ группировки на дб
      * @return кастомная группировка в json-формате
      */
-    String getCustomGroup(String dashboardKey, String customGroupKey)
+    String getCustomGroup(Map<String, Object> requestContent)
 
     /**
      * Метод обновления состояния автообновления
@@ -243,14 +243,17 @@ class DashboardSettingsImpl extends BaseController implements DashboardSettings
     }
 
     @Override
-    String getCustomGroups(String dashboardKey)
+    String getCustomGroups(Map<String, Object> requestContent)
     {
+        String dashboardKey = requestContent.dashboardKey
         return Jackson.toJsonString(service.getCustomGroups(dashboardKey))
     }
 
     @Override
-    String getCustomGroup(String dashboardKey, String customGroupKey)
+    String getCustomGroup(Map<String, Object> requestContent)
     {
+        String dashboardKey = requestContent.dashboardKey
+        String customGroupKey = requestContent.customGroupKey
         return Jackson.toJsonString(service.getCustomGroup(dashboardKey, customGroupKey))
     }
 

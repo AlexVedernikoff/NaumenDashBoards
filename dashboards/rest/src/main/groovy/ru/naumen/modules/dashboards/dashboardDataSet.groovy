@@ -12,6 +12,7 @@
 package ru.naumen.modules.dashboards
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.transform.Field
 import groovy.transform.TupleConstructor
@@ -38,24 +39,18 @@ interface DashboardDataSet
     /**
      * Получение данных для диаграмм. Нужен для обратной совместимости.
      * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
-     * @param cardObjectUuid - идентификатор "текущего объекта"
-     * @param otherSettings - дополнительные настройки со списком пользовательских фильтров для виджетов по ключу widgetFilters
      * @param user - текущий пользователь системы
      * @return данные для построения диаграммы
      */
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, Map<String, Object> otherSettings, IUUIDIdentifiable user)
+    String getDataForCompositeDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Получение данных для таблиц. Нужен для обратной совместимости.
-     * @param dashboardKey - ключ дашборда для построения виджета
-     * @param widgetKey - ключ виджета
-     * @param cardObjectUuid - уникальный идентификатор текущего объекта
-     * @param otherSettings - дополнительные настройки со списком пользовательских фильтров для виджетов по ключу widgetFilters,
-     * а также настройками для запроса по таблице по ключу tableRequestSettings
+     * @param requestContent - ключ дашборда для построения виджета
      * @param user - текущий пользователь системы
      * @return данные для построения таблицы
      */
-    String getDataForTableDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, Map<String, Object> otherSettings, IUUIDIdentifiable user)
+    String getDataForTableDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
 }
 
 @InjectApi
@@ -70,40 +65,39 @@ class DashboardDataSetImpl extends BaseController implements DashboardDataSet
     }
 
     @Override
-    String getDataForCompositeDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, Map<String, Object> otherSettings, IUUIDIdentifiable user)
+    String getDataForCompositeDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
+        GetGataForCompositeDiagramRequest request = new ObjectMapper().convertValue(requestContent, GetGataForCompositeDiagramRequest)
         Collection<WidgetFilterResponse> widgetFilters
-        if(otherSettings.widgetFilters)
+        if(request.widgetFilters)
         {
-            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(otherSettings.widgetFilters)
+            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(request.widgetFilters)
         }
         else
         {
             widgetFilters = []
         }
-        Integer frontOffsetMinutes = otherSettings.offsetUTCMinutes
         return user
-            ? api.auth.callAs(user){ service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user).with(JsonOutput.&toJson) }
-            : service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user).with(JsonOutput.&toJson)
+            ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user).with(JsonOutput.&toJson) }
+            : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user).with(JsonOutput.&toJson)
     }
 
     @Override
-    String getDataForTableDiagram(String dashboardKey, String widgetKey, String cardObjectUuid, Map<String, Object> otherSettings, IUUIDIdentifiable user)
+    String getDataForTableDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        TableRequestSettings tableRequestSettings = new TableRequestSettings(otherSettings.tableRequestSettings)
+        GetDataForTableDiagramRequest request = new ObjectMapper().convertValue(requestContent, GetDataForTableDiagramRequest)
         Collection<WidgetFilterResponse> widgetFilters
-        if(otherSettings.widgetFilters)
+        if(request.widgetFilters)
         {
-            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(otherSettings.widgetFilters)
+            widgetFilters = WidgetFilterResponse.getWidgetFiltersCollection(request.widgetFilters)
         }
         else
         {
             widgetFilters = []
         }
-        Integer frontOffsetMinutes = otherSettings.offsetUTCMinutes
         return user
-            ? api.auth.callAs(user){ service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user, tableRequestSettings).with(JsonOutput.&toJson) }
-            : service.buildDiagram(dashboardKey, widgetKey, cardObjectUuid, widgetFilters, frontOffsetMinutes, user, tableRequestSettings).with(JsonOutput.&toJson)
+            ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.tableRequestSettings).with(JsonOutput.&toJson) }
+            : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.tableRequestSettings).with(JsonOutput.&toJson)
     }
 }
 
