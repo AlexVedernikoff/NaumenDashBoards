@@ -141,7 +141,7 @@ export class Speedometer extends PureComponent<Props, State> {
 		const {color, options: {borders, ranges}} = this.props;
 		const {data, formatter, style, type, use} = ranges;
 		const {max, min} = borders;
-		const {displayType, position, show, textHandler} = style;
+		const {displayType, fontFamily, fontSize, position, show, textHandler} = style;
 
 		if (use && show && position === RANGES_POSITION.LEGEND) {
 			const {height, legendHeight, legendPosition, legendWidth, width} = this.state;
@@ -156,6 +156,8 @@ export class Speedometer extends PureComponent<Props, State> {
 				[styles.text_handler_wrap]: textHandler === TEXT_HANDLERS.WRAP
 			});
 			const style = {
+				fontFamily,
+				fontSize,
 				height: `${legendHeight}px`,
 				width: `${legendWidth}px`
 			};
