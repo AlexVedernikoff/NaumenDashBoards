@@ -169,11 +169,11 @@ class DashboardDrilldownService
                                                  String cardObjectUuid)
     {
         Closure<GetLinkRequest> transform = { GetLinkRequest request ->
-            res.descriptor = DashboardMarshaller.substitutionCardObject(
+            request.descriptor = DashboardMarshaller.substitutionCardObject(
                 request.descriptor as String,
                 cardObjectUuid
             )
-            return res
+            return request
         }
         return cardObjectUuid ? transform(requestContent) : requestContent
     }
@@ -253,7 +253,7 @@ class Link
         this.title = map.title ?: "Список элементов '${ this.classFqn }'"
         if(map.groupCode)
         {
-            this.attrGroup = groupCode
+            this.attrGroup = map.groupCode
         }
         else
         {
@@ -1416,8 +1416,6 @@ class Link
                                                                     ]
                                                                 ]
                                                             ]]]
-
-                            logger.error('getValuesForRefAttrInCustomGroup ' + toJson(customSubGroupCondition))
 
                             values = getValuesForRefAttrInCustomGroup(attr, null, customSubGroupCondition)
                         }
