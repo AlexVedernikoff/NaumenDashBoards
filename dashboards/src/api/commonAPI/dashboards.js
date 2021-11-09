@@ -37,8 +37,8 @@ export default class Dashboards implements DashboardsAPI {
 		return this.transport('dashboards', 'getCatalogObject', ['requestContent'], {property});
 	}
 
-	getDashboardLink (dashboardId: string) {
-		return this.transport('dashboards', 'getDashboardLink', ['dashboardCode'], dashboardId);
+	getDashboardLink (dashboardCode: string) {
+		return this.transport('dashboards', 'getDashboardLink', ['requestContent'], {dashboardCode});
 	}
 
 	getDataSourceAttributes (params: DTOValue) {

@@ -9,16 +9,19 @@ export default class DrillDown implements DrillDownAPI {
 		this.transport = transport;
 	}
 
-	getLink (payload: DTOValue, subjectUUID: string, type: string, dashboardCode: string, groupCode: string = '') {
+	getLink (payload: DTOValue, cardObjectUuid: string, diagramTypeFromRequest: string, dashboardKey: string, groupCode: string = '') {
 		return this.transport(
 			'dashboardDrilldown',
 			'getLink',
-			['requestContent', 'cardObjectUuid', 'diagramTypeFromRequest', 'dashboardKey', 'groupCode'],
-			{...payload, offsetUTCMinutes: -(new Date()).getTimezoneOffset()},
-			subjectUUID,
-			type,
-			dashboardCode,
-			groupCode
+			['requestContent'],
+			{
+				...payload,
+				cardObjectUuid,
+				dashboardKey,
+				diagramTypeFromRequest,
+				groupCode,
+				offsetUTCMinutes: -(new Date()).getTimezoneOffset()
+			}
 		);
 	}
 }

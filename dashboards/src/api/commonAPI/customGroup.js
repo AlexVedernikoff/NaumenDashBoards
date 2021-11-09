@@ -13,12 +13,12 @@ export default class CustomGroup implements CustomGroupAPI {
 		return this.transport('dashboardSettings', 'deleteCustomGroup', ['requestContent'], {...dashboard, groupKey});
 	}
 
-	getAll (dashboardId: string) {
-		return this.transport('dashboardSettings', 'getCustomGroups', ['dashboardKey'], dashboardId);
+	getAll (dashboardKey: string) {
+		return this.transport('dashboardSettings', 'getCustomGroups', ['requestContent'], {dashboardKey});
 	}
 
-	getItem (dashboardId: string, groupKey: string) {
-		return this.transport('dashboardSettings', 'getCustomGroup', ['dashboardKey', 'customGroupKey'], dashboardId, groupKey);
+	getItem (dashboardKey: string, customGroupKey: string) {
+		return this.transport('dashboardSettings', 'getCustomGroup', ['requestContent'], {customGroupKey, dashboardKey});
 	}
 
 	save (dashboard: DashbordParams, data: CustomGroupData) {

@@ -18,13 +18,13 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 		return this.transport(
 			'dashboardDataSet',
 			'getDataForCompositeDiagram',
-			['dashboardKey', 'widgetKey', 'cardObjectUuid', 'requestContent'],
-			dashboardKey,
-			widgetKey,
-			cardObjectUuid,
+			['requestContent'],
 			{
+				cardObjectUuid,
+				dashboardKey,
 				offsetUTCMinutes: -(new Date()).getTimezoneOffset(),
-				widgetFilters
+				widgetFilters,
+				widgetKey
 			}
 		);
 	}
@@ -39,14 +39,14 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 		return this.transport(
 			'dashboardDataSet',
 			'getDataForTableDiagram',
-			['dashboardKey', 'widgetKey', 'cardObjectUuid', 'requestContent'],
-			dashboardKey,
-			widgetKey,
-			cardObjectUuid,
+			['requestContent'],
 			{
+				cardObjectUuid,
+				dashboardKey,
 				offsetUTCMinutes: -(new Date()).getTimezoneOffset(),
 				tableRequestSettings,
-				widgetFilters
+				widgetFilters,
+				widgetKey
 			}
 		);
 	}
