@@ -21,13 +21,21 @@
 	font-family: Roboto;
 }
 
+.gantt_hor_scroll {
+	// скролл должен быть над панелью
+	z-index: 100;
+}
+
 .gantt-error {
 	display: none;
 }
 
-.gantt_tree_content {
+.gantt_tree_content,
+.gantt_grid_head_cell {
 	overflow:hidden;
 	text-overflow: ellipsis;
+	text-align: center;
+	padding: 2px;
 }
 
 .gantt_task_progress_drag,
@@ -62,10 +70,15 @@
 	transform: translateY(-50%);
 }
 
+// кнопка-плюсик для добавления скрытого столбца
 .gantt_grid_head_button::after {
 	color: #4D92C8;
 	content: "\2795";
 	cursor: pointer;
 	display: block;
 	font-size: 20px;
+}
+
+.gantt_grid_head_button::before {
+	content: "";
 }

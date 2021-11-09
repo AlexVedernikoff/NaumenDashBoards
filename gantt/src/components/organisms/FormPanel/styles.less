@@ -14,6 +14,14 @@
 		overflow-Y: scroll;
 	}
 
+	.bigButton {
+		position: absolute;
+		bottom: 0;
+		right: -50px;
+		top: 0;
+		width: 1000%;
+	}
+
 	.button {
 		border-radius: 0;
 		font-size: 13px;
@@ -43,6 +51,15 @@
 		&[disabled] {
 			color: lightgrey;
 			cursor: not-allowed;
+		}
+
+		&[disabled] svg {
+			color: lightgrey;
+			cursor: not-allowed;
+		}
+
+		&[disabled] .bigButton {
+			display: none;
 		}
 	}
 

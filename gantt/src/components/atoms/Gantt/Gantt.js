@@ -116,13 +116,6 @@ const Gantt = (props: Props) => {
 	}, [scale]);
 
 	useEffect(() => {
-		tasks
-			.filter(task => !task.parent)
-			.map(task => task.id)
-			.forEach(taskId => rollUp ? gantt.close(taskId) : gantt.open(taskId));
-	}, [rollUp]);
-
-	useEffect(() => {
 		gantt.config.columns = configureAdaptedColumns();
 		gantt.render();
 	}, [columns]);
@@ -132,6 +125,13 @@ const Gantt = (props: Props) => {
 		gantt.parse(JSON.stringify({data: tasks}));
 		gantt.render();
 	}, [tasks]);
+
+	useEffect(() => {
+		tasks
+			.filter(task => !task.parent)
+			.map(task => task.id)
+			.forEach(taskId => rollUp ? gantt.close(taskId) : gantt.open(taskId));
+	}, [rollUp, tasks]);
 
 	const handleHeaderClick = () => {
 		gantt.attachEvent('onGridHeaderClick', function (name, e) {

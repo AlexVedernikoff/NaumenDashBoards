@@ -1,5 +1,5 @@
 // @flow
-import {APP_EVENTS, defaultCommonSettings, defaultResourceSettings} from './constants';
+import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {getContext, getDataSources, getDiagramData, getInitialSettings, getUserData, saveData} from 'utils/api';
@@ -23,7 +23,7 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(setSubjectUuid(subjectUuid));
 		dispatch(setUserData({email, name, role}));
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
-		dispatch(setResourceSettings(resourceAndWorkSettings && Object.keys(resourceAndWorkSettings).length ? resourceAndWorkSettings : { ...defaultResourceSettings, id: uuidv4() }));
+		dispatch(setResourceSettings(resourceAndWorkSettings && Object.keys(resourceAndWorkSettings).length ? resourceAndWorkSettings : [{ ...defaultResourceSetting, id: uuidv4() }]));
 		dispatch(setSources(sources));
 		dispatch(saveMasterSettings());
 	} catch (error) {

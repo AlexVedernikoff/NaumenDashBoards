@@ -1,5 +1,5 @@
 // @flow
-import {FormBox, Icon, IconButton} from 'naumen-common-components';
+import {FormBox, IconButton} from 'naumen-common-components';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -41,7 +41,7 @@ export class CollapsableFormBox extends PureComponent<Props, State> {
 		const {showContent} = this.state;
 		const iconName = showContent ? 'ARROW_TOP' : 'ARROW_BOTTOM';
 
-		return <Icon className={styles.icon} name={iconName} onClick={this.handleClick} />;
+		return <IconButton className={styles.icon} icon={iconName} onClick={this.handleClick} />;
 	};
 
 	render () {

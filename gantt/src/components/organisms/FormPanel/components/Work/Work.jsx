@@ -130,7 +130,8 @@ const Work = (props: Props) => {
 		const iconName = active ? 'FILLED_FILTER' : 'FILTER';
 
 		return (
-			<button className={styles.button} disabled={!work?.source?.value} onClick={handleOpenFilterForm}>
+			<button className={cn(styles.button, styles.width)} disabled={!work?.source?.value}>
+				<div className={styles.bigButton} onClick={handleOpenFilterForm}> </div>
 				<Icon height={14} name={iconName} />
 				<span className={styles.desc}>Фильтрация</span>
 			</button>
@@ -177,9 +178,9 @@ const Work = (props: Props) => {
 				<Button
 					className={styles.button}
 					disabled={!work.source.value?.value}
-					onClick={handleAttributesButton}
 					variant='ADDITIONAL'
 				>
+					<div className={styles.bigButton} onClick={handleAttributesButton}> </div>
 					Атрибуты для таблицы
 				</Button>
 			</div>
@@ -188,9 +189,11 @@ const Work = (props: Props) => {
 
 	const renderNestedCheckbox = () => {
 		return (
-			<FormControl className={cn(styles.checkbox)} label='Вложенная работа' small={true}>
-				<Checkbox checked={work.nested} name='Checkbox' onChange={handleCheckboxChange} value={work.nested} />
-			</FormControl>
+			<div onClick={handleCheckboxChange}>
+				<FormControl className={cn(styles.checkbox)} label='Вложенная работа' small={true}>
+					<Checkbox checked={work.nested} name='Checkbox' onChange={handleCheckboxChange} value={work.nested} />
+				</FormControl>
+			</div>
 		);
 	};
 
@@ -326,7 +329,7 @@ const Work = (props: Props) => {
 		return (
 			<li className={styles.item} key={column.code}>
 				<span className={styles.title}>{column.title}</span>
-				<Select className={cn(styles.selectIcon, styles.width)}
+				<Select className={cn(styles.selectIcon, styles.selectWidth, styles.width)}
 					editable={Boolean(index)}
 					icon={'CHEVRON'}
 					isSearching={true}

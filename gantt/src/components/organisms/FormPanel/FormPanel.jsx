@@ -67,11 +67,18 @@ const FormPanel = (props: Props) => {
 		setResourceSettings([...resources.slice(0, index), ...resources.slice(indexLastChild + 1)]);
 	};
 
-	const handleUpdateResourceSettings = (value: ResourceSetting, index: number) => {
+	const handleUpdateResourceSettings = (value: ResourceSetting, index: number, updateChildren: false) => {
 		const {setResourceSettings} = props;
 		const newSettings = deepClone(resources);
 
 		newSettings[index] = value;
+
+		if (updateChildren) {
+			for (let i = index + 1; i < resources.length && resources[i].level > resources[index].level; i++) {
+				newSettings[i] = {...newSettings[i], communicationResourceAttribute: null, communicationWorkAttribute: null};
+			}
+		}
+
 		setResourceSettings(newSettings);
 	};
 
@@ -200,14 +207,17 @@ const FormPanel = (props: Props) => {
 		const {settings} = props;
 
 		return (
-			<FormControl className={cn(styles.checkbox)} label='Свернуть работы по умолчанию' small={true}>
-				<Checkbox checked={settings.rollUp} name='Checkbox' onChange={handleCheckboxChange} value={settings.rollUp} />
-			</FormControl>
+			<div onClick={handleCheckboxChange}>
+				<FormControl className={cn(styles.checkbox)} label='Свернуть работы по умолчанию' small={true}>
+					<Checkbox checked={settings.rollUp} name='Checkbox' onChange={handleCheckboxChange} value={settings.rollUp} />
+				</FormControl>
+			</div>
 		);
 	};
 
 	const renderButtonCommonBlock = () => (
-		<Button className={styles.button} onClick={handleOpenColumnSettingsModal} variant='ADDITIONAL'>
+		<Button className={styles.button} variant='ADDITIONAL'>
+			<div className={styles.bigButton} onClick={handleOpenColumnSettingsModal}> </div>
 			Настройки столбцов таблицы
 		</Button>
 	);
@@ -333,7 +343,7 @@ const FormPanel = (props: Props) => {
 				index={index}
 				key={item.source.value ? item.source.value.value + index : index}
 				level={item.level}
-				onChange={value => handleUpdateResourceSettings(value, index)}
+				onChange={(value, updateChildren) => handleUpdateResourceSettings(value, index, updateChildren)}
 				options={sources}
 				value={item}
 			/>
