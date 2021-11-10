@@ -2436,24 +2436,24 @@ class DashboardDataSetService
                 case Condition.GREATER:
                     def temAttribute = attribute.deepClone()
                     temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
-                    def durationInMs = getTimerDurationInMsByConditionValue(condition.data.value, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                    def durationInMs = getTimerDurationInMsByConditionValue(condition.data, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
                     return buildFilterParameterFromCondition(Comparison.GREATER, temAttribute, durationInMs)
                 case Condition.LESS:
                     def temAttribute = attribute.deepClone()
                     temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
-                    def durationInMs = getTimerDurationInMsByConditionValue(condition.data.value, TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES)
+                    def durationInMs = getTimerDurationInMsByConditionValue(condition.data, TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES)
                     return buildFilterParameterFromCondition(Comparison.LESS, temAttribute, durationInMs)
                 case Condition.EQUAL:
                     def temAttribute = attribute.deepClone()
                     temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
-                    def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(condition.data.value)
-                    def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(condition.data.value,fromDD ? TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS : TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                    def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(condition.data)
+                    def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(condition.data,fromDD ? TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS : TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
                     return buildFilterParameterFromCondition(Comparison.BETWEEN, temAttribute, [durationInMsMinuteStart, durationInMsMinuteEnd])
                 case Condition.NOT_EQUAL:
                     def temAttribute = attribute.deepClone()
                     temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
-                    def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(condition.data.value)
-                    def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(condition.data.value, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                    def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(condition.data)
+                    def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(condition.data, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
                     return buildFilterParameterFromCondition(Comparison.NOT_BETWEEN, temAttribute, [durationInMsMinuteStart, durationInMsMinuteEnd])
                 case Condition.EMPTY:
                     def temAttribute = attribute.deepClone()
