@@ -109,7 +109,7 @@ export class VerificationContent extends PureComponent<Props> {
 				<div className={styles.content}>
 					{this.checkRenderTypeField(attribute)}
 					<FormField small>
-						<Button onClick={this.handleNextVerification}>Проверка проведенна</Button>
+						<Button onClick={this.handleNextVerification}>Проверка проведена</Button>
 					</FormField>
 				</div>
 			);

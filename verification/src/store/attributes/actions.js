@@ -1,7 +1,7 @@
 // @flow
 import {ATTRIBUTE_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getAttributesData} from 'utils/api';
+import {getAttributesData, getSubjectUuid} from 'utils/api';
 
 /**
  * Получение и сохранение атрибутов
@@ -11,7 +11,8 @@ const getAttributes = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
 	try {
 		dispatch(showLoaderAttributes());
 
-		const attributes = await getAttributesData();
+		const claimUUID = await getSubjectUuid();
+		const attributes = await getAttributesData(claimUUID);
 
 		dispatch(setAttributes(attributes));
 	} catch (error) {

@@ -16,10 +16,12 @@ export default class Api {
 		return this.jsApi.extractSubjectUuid();
 	}
 
-	async getAttributesData () {
-		const url = 'exec?func=modules.verification.getVerificationList&params=';
+	async getAttributesData (claimUUID: string) {
+		const url = 'exec-post?func=modules.verification.getVerificationList&params=requestContent';
+		const body = {claimUUID};
 		const options = {
-			method: 'GET'
+			body: JSON.stringify(body),
+			method: 'POST'
 		};
 
 		return this.jsApi.restCallAsJson(url, options);
