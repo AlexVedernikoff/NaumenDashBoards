@@ -2974,6 +2974,10 @@ class CustomGroup
      * Тип кастомной группировки
      */
     String type
+    /**
+     * Тип формата атрибута (для атрибутов типа счетчик)
+     */
+    TimerValue timerValue
 
     @JsonCreator
     static CustomGroup create(String json) {
