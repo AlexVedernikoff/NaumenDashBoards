@@ -9,6 +9,7 @@ const dist = resolve(__dirname, '../dist');
 const license = process.env.LICENSE;
 const production = environment === 'production';
 const src = resolve(__dirname, '../src');
+const storybook = !!process.env.STORYBOOK;
 
 module.exports = {
 	development,
@@ -16,5 +17,6 @@ module.exports = {
 	license,
 	mode: environment,
 	production,
-	src
+	src,
+	storybook
 };

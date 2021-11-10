@@ -14,7 +14,6 @@
 
 	.widget {
 		height: 100%;
-		overflow: hidden;
 
 		&:hover {
 			z-index: 1;
@@ -27,6 +26,7 @@
 
 	.controlPanel {
 		visibility: hidden;
+		z-index: 2;
 	}
 
 	.widgetWarning {
@@ -44,8 +44,8 @@
 
 	.widgetWaringContent {
 		background-color: @white;
-		border-radius: 5px;
 		border: 1px solid #e3e3e3;
+		border-radius: 5px;
 		box-shadow: 2px 2px 6px -4px #999;
 		font-size: 14px;
 		padding: 16px;

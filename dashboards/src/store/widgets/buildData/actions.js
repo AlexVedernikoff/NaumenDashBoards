@@ -83,15 +83,18 @@ const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update
 /**
  * Экспортируем таблицу в XLSX
  * @param {TableWidget} widget - данные виджета
- * @param {number} rowCount - количество записей для экспорта
  * @returns {ThunkAction}
  */
-const exportTableToXLSX = (widget: TableWidget, rowCount: number = 1e4): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const exportTableToXLSX = (widget: TableWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	const state = getState();
-	const data = await getDataForTableDiagram(state, widget, 1, rowCount);
-	const name = await getSnapshotName(widget.name);
+	const {total} = state.widgets.buildData[widget.id]?.data ?? {};
 
-	return exportSheet(name, removeCodesFromTableData(data));
+	if (total) {
+		const data = await getDataForTableDiagram(state, widget, 1, total);
+		const name = await getSnapshotName(widget.name);
+
+		return exportSheet(name, removeCodesFromTableData(data));
+	}
 };
 
 /**

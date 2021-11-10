@@ -1,7 +1,7 @@
 'use strict';
 const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
-const {development, license} = require('./define');
+const {development, license, storybook} = require('./define');
 const Dotenv = require('dotenv-webpack');
 const GroovyWebpackPlugin = require('groovy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -11,13 +11,17 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const packagejson = require('../package.json');
 const ParametersXMLWebpackPlugin = require('parameters-xml-webpack-plugin');
 
-const devPlugins = [
+const devPluginsProject = [
 	new BundleStatsWebpackPlugin({
 		outDir: '..',
 		silent: true
 	}),
 	new CircularDependencyPlugin()
 ];
+
+const devPluginsStorybook = [];
+
+const devPlugins = storybook ? devPluginsStorybook : devPluginsProject;
 
 const prodPlugins = [
 	new ParametersXMLWebpackPlugin({

@@ -1,6 +1,5 @@
 // @flow
 import {connect} from 'react-redux';
-import ControlPanel from 'containers/TableWidgetControlPanel';
 import {DEFAULT_COMPONENTS} from 'components/organisms/DiagramWidget/constants';
 import {functions, props} from './selectors';
 import {LoadingDiagramWidget} from 'components/organisms/DiagramWidget';
@@ -15,8 +14,7 @@ UPDATING_CONTEXT.displayName = 'UPDATING_CONTEXT';
 
 export class TableWidgetContainer extends PureComponent<Props> {
 	components = {
-		...DEFAULT_COMPONENTS,
-		ControlPanel
+		...DEFAULT_COMPONENTS
 	};
 
 	renderTable = (data: TableBuildData) => {

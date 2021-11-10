@@ -113,9 +113,7 @@ export class DashboardPanel extends PureComponent<Props, State> {
 		);
 	};
 
-	renderFallback = () => {
-		return <div className={styles.fallback}>Загрузка...</div>;
-	};
+	renderFallback = () => <div className={styles.fallback}>Загрузка...</div>;
 
 	renderHeader = () => {
 		const {position, title} = this.props;

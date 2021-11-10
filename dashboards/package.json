@@ -60,6 +60,7 @@
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.12.13",
     "@storybook/addon-actions": "^6.1.17",
+    "@storybook/addon-controls": "^6.1.21",
     "@storybook/addon-essentials": "^6.1.17",
     "@storybook/addon-links": "^6.1.17",
     "@storybook/client-api": "^6.1.17",
@@ -183,8 +184,8 @@
     "test:update": "cross-env API_DRIVER=exec-dev jest --updateSnapshot",
     "test:watch": "cross-env API_DRIVER=exec-dev npm run test -- --watch",
     "zip": "zip -r -j \"$npm_package_name-v$npm_package_version.zip\" ./dist/*",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook",
+    "storybook": "cross-env STORYBOOK=true start-storybook -p 6006",
+    "build-storybook": "cross-env STORYBOOK=true NODE_ENV=production build-storybook",
     "generate-localalize": "node ./utils/generate-localization.js"
   },
   "version": "2.3.0-0"

@@ -20,7 +20,7 @@ const createContextName = async () => {
 	return `${name} (${moment().format('DD-MM-YYYY')})`;
 };
 
-const getSnapshotName = async (widgetName) => {
+const getSnapshotName = async widgetName => {
 	const contextName = await createContextName();
 	return `${widgetName}_${contextName}`;
 };
@@ -54,9 +54,8 @@ const save = (blob: Blob, fileName: string, extension: string) => {
  * @param {boolean} includeEdge - включить в проверку `Edge`.
  * @returns {boolean} - возвращает `true`, если используется браузер `IE` или `Edge`.
  */
-const isLegacyBrowser = (includeEdge: boolean = true) => {
-	return typeof document.documentMode === 'number' || (includeEdge && /Edge/.test(navigator.userAgent));
-};
+const isLegacyBrowser = (includeEdge: boolean = true) =>
+	typeof document.documentMode === 'number' || (includeEdge && /Edge/.test(navigator.userAgent));
 
 const minimize = (string: string): string => string.replace(/\t|\r|\n|\v|\f/g, '');
 

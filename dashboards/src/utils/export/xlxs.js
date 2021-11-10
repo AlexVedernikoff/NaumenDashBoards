@@ -45,9 +45,7 @@ class Table {
 
 	createRows = () => this.data.map(this.createRow).join('');
 
-	createSubHead = () => {
-		return this.usesSubColumns ? `<tr>${this.getSubColumns().map(this.createSubheadColumn).join('')}</tr>` : '';
-	};
+	createSubHead = () => this.usesSubColumns ? `<tr>${this.getSubColumns().map(this.createSubheadColumn).join('')}</tr>` : '';
 
 	createSubheadColumn = ({header}: BaseColumn) => `<th>${header}</th>`;
 
@@ -59,15 +57,11 @@ class Table {
 		</table>
 	`);
 
-	getDataColumns = () => this.columns.reduce((columns, column) => {
-		return Array.isArray(column.columns) ? [...columns, ...column.columns] : [...columns, column];
-	}, []);
+	getDataColumns = () =>
+		this.columns.reduce((columns, column) => Array.isArray(column.columns) ? [...columns, ...column.columns] : [...columns, column], []);
 
-	getSubColumns = () => {
-		return this.columns.reduce((columns, column) => {
-			return Array.isArray(column.columns) ? [...columns, ...column.columns] : columns;
-		}, []);
-	};
+	getSubColumns = () =>
+		this.columns.reduce((columns, column) => Array.isArray(column.columns) ? [...columns, ...column.columns] : columns, []);
 }
 
 const stringToArrayBuffer = (s: string) => {
@@ -84,7 +78,7 @@ const stringToArrayBuffer = (s: string) => {
 const exportSheet = async (name: string, data: TableBuildData) => {
 	const columnsArray: Array<BaseColumn> = [];
 
-	data.columns.forEach((column) => {
+	data.columns.forEach(column => {
 		const {accessor, columns, footer = '', header = ''} = column;
 
 		columnsArray.push({accessor, columns, footer, header});

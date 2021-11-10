@@ -1,15 +1,15 @@
 // @flow
 import cn from 'classnames';
-import ControlPanel from 'containers/WidgetControlPanel';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import WidgetKebab from 'containers/WidgetKebab';
 
 export class Widget extends PureComponent<Props, State> {
 	static defaultProps = {
 		className: '',
 		components: {
-			ControlPanel
+			WidgetKebab
 		}
 	};
 
@@ -54,18 +54,18 @@ export class Widget extends PureComponent<Props, State> {
 		return !hasError && children;
 	};
 
-	renderControlPanel = () => {
-		const {components, isMobileDevice, widget} = this.props;
-		const {ControlPanel} = components;
-
-		return isMobileDevice ? null : <ControlPanel className={styles.controlPanel} widget={widget} />;
-	};
-
 	renderError = () => {
 		const {hasError} = this.state;
 		const message = 'Ошибка построения.';
 
 		return hasError && <div className={styles.error} title={message}>{message}</div>;
+	};
+
+	renderWidgetKebab = () => {
+		const {components, forwardedRef, isMobileDevice, widget} = this.props;
+		const {WidgetKebab} = components;
+
+		return isMobileDevice ? null : <WidgetKebab className={styles.controlPanel} widget={widget} widgetRef={forwardedRef} />;
 	};
 
 	renderWidgetWarning = () => {
@@ -86,7 +86,7 @@ export class Widget extends PureComponent<Props, State> {
 		return (
 			<div className={cn(styles.widget, className)} onClick={this.handleClick} ref={forwardedRef}>
 				{this.renderWidgetWarning()}
-				{this.renderControlPanel()}
+				{this.renderWidgetKebab()}
 				{this.renderError()}
 				{this.renderChildren()}
 			</div>

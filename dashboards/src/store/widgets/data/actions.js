@@ -1,13 +1,16 @@
 // @flow
+
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
 import type {AnyWidget, Chart, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
 import api from 'api';
 import {ApiError} from 'api/errors';
 import {batch} from 'react-redux';
 import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGET_TYPES, WIDGETS_EVENTS} from './constants';
+import {confirmDialog} from 'store/commonDialogs/actions';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EVENTS} from 'store/dashboard/settings/constants';
 import {deepClone} from 'helpers';
+import {DEFAULT_BUTTONS, FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {fetchCustomGroups} from 'store/customGroups/actions';
@@ -294,6 +297,25 @@ const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => asy
 };
 
 /**
+ * Удаляет виджет c запросом разрешения у пользователя
+ * @param {string} widgetId - идентификатор виджета;
+ * @returns {ThunkAction}
+ */
+const removeWidgetWithConfirm = (widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	const confirmOptions = {
+		cancelText: 'Нет',
+		defaultButton: DEFAULT_BUTTONS.CANCEL_BUTTON,
+		footerPosition: FOOTER_POSITIONS.RIGHT,
+		size: SIZES.SMALL,
+		submitText: 'Да'
+	};
+
+	if (await dispatch(confirmDialog('Подтверждение удаления', 'Вы действительно хотите удалить виджет?', confirmOptions))) {
+		dispatch(removeWidget(widgetId));
+	}
+};
+
+/**
  * Удаляет виджет
  * @param {string} widgetId - идентификатор виджета;
  * @returns {ThunkAction}
@@ -335,7 +357,7 @@ const selectWidget = (widgetId: string): ThunkAction => (dispatch: Dispatch, get
 					.filter(e => !!e)
 			);
 
-			sourcesSet.forEach((item) => {
+			sourcesSet.forEach(item => {
 				dispatch(fetchSourcesFilters(item));
 			});
 		}
@@ -518,5 +540,6 @@ export {
 	setWidgets,
 	updateWidget,
 	validateWidgetToCopy,
+	removeWidgetWithConfirm,
 	saveChartWidget
 };

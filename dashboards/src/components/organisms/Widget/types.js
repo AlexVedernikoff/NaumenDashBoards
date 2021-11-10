@@ -3,13 +3,13 @@ import type {AnyWidget} from 'store/widgets/data/types';
 import type {ConnectedFunctions, ConnectedProps} from 'containers/Widget/types';
 import type {Ref} from 'components/types';
 
-export type ControlPanelProps = {
+export type WidgetKebabProps = {
 	className: string,
 	widget: AnyWidget
 };
 
 type Components = {
-	ControlPanel: React$ComponentType<ControlPanelProps>
+	WidgetKebab: React$ComponentType<WidgetKebabProps>
 };
 
 export type Props = ConnectedFunctions & ConnectedProps & {
