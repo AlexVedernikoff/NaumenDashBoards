@@ -40,7 +40,7 @@ interface VerificationController
      * Метод получения списка атрибутов и их значений для вывода на карточках проверки
      * @return список атрибутов для вывода на карточках проверки
      */
-    String getVerificationList()
+    String getVerificationList(Map<String, Object> requestContent)
 
     /**
      * Метод по установке значений в атрибут обращения, а также статуса в задаче на проверку по 123-ФЗ
@@ -68,9 +68,10 @@ class VerificationImpl implements VerificationController
     }
 
     @Override
-    String getVerificationList()
+    String getVerificationList(Map<String, Object> requestContent)
     {
-        return Jackson.toJsonString(service.getVerificationList())
+        BaseRequest request = mapper.convertValue(requestContent, BaseRequest)
+        return Jackson.toJsonString(service.getVerificationList(request))
     }
 
     @Override
@@ -98,6 +99,17 @@ class VerificationService
 
     private static final String TEAM_TITLE_TO_FIND = 'Управление данными'
 
+    private static final Map<String, String> taskStateVSAttributeCode = [
+        (TaskState.CHECK_STATUS): AttributeCode.CHECK_STATUS,
+        (TaskState.PROV_ST19): AttributeCode.CHECK_A19,
+        (TaskState.CHECK_A15): AttributeCode.CHECK_A15,
+        (TaskState.CHECK_PROPERTY): AttributeCode.CHECK_PROPERTY,
+        (TaskState.CHECK_A16): AttributeCode.CHECK_A16,
+        (TaskState.CHECK_THIRD_A16): AttributeCode.CHECK_THIRD_A16,
+        (TaskState.PR_ST17): AttributeCode.CHECK_A17,
+        (TaskState.CHECK_FIN_SERV): AttributeCode.CHECK_FIN_SERV
+    ]
+
     /**
      * Метод получения стартовых настроек для отображения проверок
      * @param claimUUID - уникальный идентификатор обращения
@@ -122,17 +134,29 @@ class VerificationService
      * Метод получения списка атрибутов и их значений для вывода на карточках проверки
      * @return список атрибутов для вывода на карточках проверки
      */
-    Collection<Attribute> getVerificationList()
+    Collection<Attribute> getVerificationList(BaseRequest request)
     {
-        def metainfo = metainfo.getMetaClass(MetaClasses.CLAIM_METACLASS)
-        return AttributeCode.VERIFICATION_ATTRIBUTE_CODES.findResults { code ->
-            def systemAttribute = metainfo.getAttribute(code)
-            def clazz = systemAttribute.type.attributeType.permittedTypes.find()
-            List<Value> values =  utils.find(clazz, [:]).findResults { return new Value(title: it.title, UUID: it.UUID, code: it.code) }
-            return new Attribute(title: systemAttribute.title,
-                                 code: code,
-                                 values: values,
-                                 listType: code in AttributeCode.CHECKBOX_ATTRIBUTE_CODES ? ListType.CHECK : ListType.RADIO)
+        IUUIDIdentifiable claim = utils.get(request.claimUUID)
+        IUUIDIdentifiable task = claim.tasks.find { it.metaClass.toString() == MetaClasses.TASK_METACLASS }
+        String state = task.state
+        String currentAttributeCode = taskStateVSAttributeCode.get(state)
+        if(currentAttributeCode)
+        {
+            def metainfo = metainfo.getMetaClass(MetaClasses.CLAIM_METACLASS)
+            Boolean returnAttribute = false
+            return AttributeCode.VERIFICATION_ATTRIBUTE_CODES.findResults { code ->
+                returnAttribute = returnAttribute || code == currentAttributeCode
+                if(returnAttribute)
+                {
+                    def systemAttribute = metainfo.getAttribute(code)
+                    def clazz = systemAttribute.type.attributeType.permittedTypes.find()
+                    List<Value> values =  utils.find(clazz, [:]).findResults { return new Value(title: it.title, UUID: it.UUID, code: it.code) }
+                    return new Attribute(title: systemAttribute.title,
+                                         code: code,
+                                         values: values,
+                                         listType: code in AttributeCode.CHECKBOX_ATTRIBUTE_CODES ? ListType.CHECK : ListType.RADIO)
+                }
+            }
         }
     }
 

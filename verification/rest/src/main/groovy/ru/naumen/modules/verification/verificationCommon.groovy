@@ -248,10 +248,22 @@ class SetValueAndTaskStateRequest
 }
 
 /**
+ * Базовый запрос на получение данных по настройкам/проверкам
+ */
+@Canonical
+class BaseRequest
+{
+    /**
+     * Уникальный идентификатор обращения
+     */
+    String claimUUID
+}
+
+/**
  * Запрос на получение стартовых настроек
  */
 @Canonical
-class GetStartSettingsRequest
+class GetStartSettingsRequest extends BaseRequest
 {
     /**
      * Уникальный идентификатор обращения
