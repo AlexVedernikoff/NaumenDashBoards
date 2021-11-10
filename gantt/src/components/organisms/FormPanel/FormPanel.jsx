@@ -18,7 +18,7 @@ import {defaultColumn} from 'src/store/App/constants';
 import {defaultResourceSetting} from 'store/App/constants';
 import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
-import {getChild, getNeighbor, getParent, getUpdatedLevel} from './utils';
+import {getChild, getIndexBottomNeighbor, getNeighbor, getUpdatedLevel, skipChildren} from './utils';
 import GridLayout from 'react-grid-layout';
 import Modal from 'src/components/atoms/Modal';
 import type {Props} from './types';
@@ -43,8 +43,17 @@ const FormPanel = (props: Props) => {
 		const newLevel = (value === 'WORK' && resources[index].type !== 'WORK') ? resources[index].level + 1 : resources[index].level;
 		const newParent = (value === 'WORK' && resources[index].type !== 'WORK') ? resources[index].id : resources[index].parent;
 
+		let indexForNewBlock = index;
+
+		// новая работа [от ресурса] встает сразу под ресурсом
+		// новая работа [от работыА] встает сразу после детей-работ работыА
+		// новый ресурс встает сразу после всех детей
+		if ((value === 'WORK' && resources[index].type === 'WORK') || (value === 'RESOURCE')) {
+			indexForNewBlock = skipChildren(index) - 1;
+		}
+
 		setResourceSettings([
-			...resources.slice(0, index + 1),
+			...resources.slice(0, indexForNewBlock + 1),
 			{
 				...defaultResourceSetting,
 				id: uuidv4(),
@@ -52,7 +61,7 @@ const FormPanel = (props: Props) => {
 				parent: newParent,
 				type: value
 			},
-			...resources.slice(index + 1)
+			...resources.slice(indexForNewBlock + 1)
 		]);
 	};
 
@@ -82,33 +91,46 @@ const FormPanel = (props: Props) => {
 		setResourceSettings(newSettings);
 	};
 
-	const handleUpdateChildrenLevel = (indexParent: number, isNested: boolean) => {
+	const handleUpdateChildrenLevel = (index: number, isNested: boolean) => {
 		const {setResourceSettings} = props;
 		const newSettings = deepClone(resources);
 
-		const parent = isNested
-			? getNeighbor(indexParent, newSettings[indexParent].level)
-			: getParent(indexParent, newSettings[indexParent].level);
-
-		if ((isNested && !parent) || (!isNested && !parent)) {
-			throw new Error();
-		}
-
 		if (isNested) {
-			newSettings[indexParent].nested = true;
-			newSettings[indexParent].parent = parent.id;
-			newSettings[indexParent].level = parent.level + 1;
+			const newParent = getNeighbor(index, newSettings[index].level);
+
+			newSettings[index].nested = true;
+			newSettings[index].parent = newParent.id;
+			newSettings[index].level = newParent.level + 1;
+
+			for (let i = index + 1; i < resources.length && resources[i].level > resources[index].level; i++) {
+				newSettings[i].level = getUpdatedLevel(newSettings[i].level, isNested);
+			}
+
+			setResourceSettings(newSettings);
 		} else {
-			newSettings[indexParent].nested = false;
-			newSettings[indexParent].level = parent.level;
-			newSettings[indexParent].parent = !parent.level ? '' : newSettings.filter(el => el.id === parent.parent)[0]?.id;
-		}
+			// при снятии галочки - ресурс/работа переезжает со своими детьми на место после бывших соседей, то есть перед новым соседом
+			const newIndex = getIndexBottomNeighbor(index, newSettings[index].level - 1);
+			const children = [];
 
-		for (let i = indexParent + 1; i < resources.length && resources[i].level > resources[indexParent].level; i++) {
-			newSettings[i].level = getUpdatedLevel(newSettings[i].level, isNested);
-		}
+			newSettings[index].nested = false;
+			newSettings[index].level = newSettings[index].level > 0 ? newSettings[index].level - 1 : 0;
+			newSettings[index].parent = newSettings.filter(el => el.id === newSettings[index].parent)[0]?.parent;
+			newSettings[index].communicationResourceAttribute = null;
+			newSettings[index].communicationWorkAttribute = null;
 
-		setResourceSettings(newSettings);
+			for (let i = index + 1; i < resources.length && resources[i].level > resources[index].level; i++) {
+				newSettings[i].level = getUpdatedLevel(newSettings[i].level, isNested);
+				children.push(newSettings[i]);
+			}
+
+			setResourceSettings([
+				...resources.slice(0, index),
+				...resources.slice(index + children.length + 1, newIndex),
+				newSettings[index],
+				...children,
+				...resources.slice(newIndex)
+			]);
+		}
 	};
 
 	const handleUpdateCommonSettings = (target: string, value: CommonSettings) => {

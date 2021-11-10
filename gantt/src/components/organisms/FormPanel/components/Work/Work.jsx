@@ -191,7 +191,7 @@ const Work = (props: Props) => {
 		return (
 			<div onClick={handleCheckboxChange}>
 				<FormControl className={cn(styles.checkbox)} label='Вложенная работа' small={true}>
-					<Checkbox checked={work.nested} name='Checkbox' onChange={handleCheckboxChange} value={work.nested} />
+					<Checkbox checked={work.nested} name='Checkbox' value={work.nested} />
 				</FormControl>
 			</div>
 		);

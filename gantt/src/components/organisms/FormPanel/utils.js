@@ -24,7 +24,7 @@ export const getParent = (indexChild: number, levelChild: number): ResourceSetti
 };
 
 /**
- * Получаем ближайшего соседа с такой же глубиной (уровнем)
+ * Получаем ближайшего соседа сверху с такой же глубиной (уровнем)
  * @param index - индекс
  * @param level - уровень (глубина)
  * @returns {ResourceSetting}
@@ -39,6 +39,41 @@ export const getNeighbor = (index: number, level: number): ResourceSetting => {
 	}
 
 	return null;
+};
+
+/**
+ * Получаем индекс ближайшего соседа снизу с такой же глубиной (уровнем)
+ * @param index - индекс
+ * @param level - уровень (глубина)
+ * @returns {number}
+ */
+export const getIndexBottomNeighbor = (index: number, level: number): number => {
+	const {resources} = store.getState().APP;
+
+	for (let i = index + 1; i < resources.length; i++) {
+		if (resources[i].level === level) {
+			return i;
+		}
+	}
+
+	return resources.length;
+};
+
+/**
+ * Пропускаем всех детей
+ * @param index - индекс
+ * @returns {number}
+ */
+export const skipChildren = (index: number): number => {
+	const {resources} = store.getState().APP;
+
+	for (let i = index + 1; i < resources.length; i++) {
+		if (resources[i].level <= resources[index].level) {
+			return i;
+		}
+	}
+
+	return resources.length;
 };
 
 /**
