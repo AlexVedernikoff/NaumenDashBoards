@@ -6,6 +6,7 @@ import {DEFAULT_PROPS} from './constants';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import List from './components/List';
+import ListOptionDefault from 'components/molecules/Select/components/ListOption';
 import Loader from 'components/atoms/Loader';
 import type {OnChangeEvent, Ref} from 'components/types';
 import type {Option, Props, State} from './types';
@@ -71,6 +72,13 @@ export class Select extends Component<Props, State> {
 		}
 
 		return foundOptions;
+	};
+
+	getListComponents = () => {
+		const {ListOption} = this.components;
+		return {
+			ListOption: ListOption ?? ListOptionDefault
+		};
 	};
 
 	handleChangeLabel = ({value}: OnChangeEvent<string>) => {
@@ -156,6 +164,7 @@ export class Select extends Component<Props, State> {
 		if (!loading) {
 			return (
 				<List
+					components={this.getListComponents()}
 					getOptionLabel={getOptionLabel}
 					getOptionValue={getOptionValue}
 					multiple={multiple}
