@@ -9,10 +9,11 @@ const api = process.env.NODE_ENV === 'development' ? new FakeApi() : new Api();
 
 /**
  * Возвращает атрибуты проверок
+ * @param claimUUID - Uuid
  * @returns {Promise<AttributesData>} - атрибуты
  */
-export const getAttributesData = async (): Promise<AttributesData> => {
-	return await api.getAttributesData();
+export const getAttributesData = async (claimUUID: string): Promise<AttributesData> => {
+	return await api.getAttributesData(claimUUID);
 };
 
 /**

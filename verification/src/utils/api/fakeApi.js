@@ -15,7 +15,7 @@ export default class FakeApi {
 		};
 	}
 
-	async getAttributesData () {
+	async getAttributesData (claimUUID) {
 		await new Promise(resolve => setTimeout(() => resolve(), 500));
 
 		return attributesData;
