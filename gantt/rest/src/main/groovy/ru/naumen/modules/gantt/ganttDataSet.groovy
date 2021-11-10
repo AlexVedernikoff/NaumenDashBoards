@@ -80,6 +80,27 @@ class GanttDataSetService
     }
 
     /**
+     * Метод подготовки атрибута для запроса
+     * @param attribute - значение атрибута
+     * @return объединенная строчка через точку из кодов атрибута
+     */
+    private String prepare(Attribute attribute)
+    {
+        String attributeType = Attribute.getAttributeType(attribute)
+
+        switch (attributeType)
+        {
+            case AttributeType.LINK_TYPES:
+                attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
+                break
+            case AttributeType.META_CLASS_TYPE:
+                attribute.code = 'metaClassFqn'
+                break
+        }
+        return attribute.attrChains().code.join('.')
+    }
+
+    /**
      * Метод получения данных для построения диаграммы Ганта, вызывается рекурсивно
      * @param settings - иерархический список настроек
      * @param parentUUID - уникальный идентификатор записи в БД о родителе
@@ -106,8 +127,12 @@ class GanttDataSetService
             'type' : RESOURSE/WORK
            ] */
 
-        // Closure для подготовки кодов аттрибутов для запроса в БД.
-        Closure prepare = { (it?.type in AttributeType.LINK_TYPES) ? ("${it.code}.title") : it.code }
+        // Closure для подготовки значения аттрибута типа метакласс после запроса в БД.
+        Closure updateIfMetaClass = { item, attr ->
+            attr == 'metaClassFqn'
+                ? api.metainfo.getMetaClass(item)?.title
+                : item
+        }
 
         def result = []
 
@@ -177,13 +202,15 @@ class GanttDataSetService
                 Map<String, Integer> mapAttributesIndexes = [:]
                 mapAttributes.each {key, value ->
                     Integer ind = listAttributes.indexOf(value)
-                    mapAttributesIndexes.put(key, ind)
+                    mapAttributesIndexes.put(key, [ind: ind, attr: value])
                 }
 
                 // Преобразование в список из словарей (добавление к значениям, полученным из БД, ключей).
                 List<Map<String, String>> resMap = []
                 res.each { item ->
-                    Map<String, String> itemMap = mapAttributesIndexes.collectEntries { key, value -> [(key) : item[value]] }
+                    Map<String, String> itemMap = mapAttributesIndexes.collectEntries { key, valueMap ->
+                        return [(key) : updateIfMetaClass(item[valueMap.ind], valueMap.attr)]
+                    }
                     itemMap.id += "_${UUID.randomUUID()}" //добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
 
                     if(itemMap.parent)
