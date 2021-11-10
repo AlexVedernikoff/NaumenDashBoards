@@ -16,7 +16,7 @@ export class MainSelect extends Component<Props> {
 
 		return {
 			Field: this.renderField,
-			List,
+			List: this.renderList,
 			Value: this.renderValue,
 			...rest
 		};
@@ -51,6 +51,8 @@ export class MainSelect extends Component<Props> {
 
 		return !value?.ref ? <components.Field /> : null;
 	};
+
+	renderList = props => <List {...props} />;
 
 	renderValue = (props: ValueProps) => {
 		const {className, label, onClick} = props;

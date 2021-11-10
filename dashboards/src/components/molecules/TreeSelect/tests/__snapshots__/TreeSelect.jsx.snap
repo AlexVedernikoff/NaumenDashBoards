@@ -52,11 +52,6 @@ exports[`TreeSelect renders menu when "showMenu" property is changing 2`] = `
       <SearchInput
         className=""
         focusOnMount={true}
-        forwardedRef={
-          Object {
-            "current": null,
-          }
-        }
         onChange={[Function]}
         value=""
       />

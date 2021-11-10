@@ -57,7 +57,15 @@ addMethod(object, 'interval', function () {
 	return this.test(
 		'check-interval',
 		'Поле должно содержать целое число',
-		data => number().integer().isValidSync(data.value)
+		data => number().integer().isValidSync(data?.value)
+	);
+});
+
+addMethod(array, 'intervalArray', function () {
+	return this.test(
+		'check-interval',
+		'Поле должно содержать вещественное число',
+		data => array().required().of(object({value: number().required()})).isValidSync(data)
 	);
 });
 
@@ -78,6 +86,7 @@ const createSchema = (getOrConditionRule: (condition: OrCondition) => ?Schema) =
 });
 
 export {
+	array,
 	createSchema,
 	number,
 	object,

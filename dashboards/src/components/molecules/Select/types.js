@@ -1,6 +1,7 @@
 // @flow
 import type {ComponentProps as IconButtonProps} from 'components/atoms/IconButton/types';
 import type {ComponentProps as ListProps} from './components/List/types';
+import type {ComponentProps as ListOptionProps} from './components/ListOption/types';
 import type {InputRef, OnChangeEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props as SearchInputProps} from 'components/atoms/SearchInput/types';
@@ -19,6 +20,7 @@ export type Components = {
 	Caret: React$ComponentType<IconButtonProps>,
 	IndicatorsContainer: React$ComponentType<ContainerProps>,
 	List: React$ComponentType<ListProps>,
+	ListOption: React$ComponentType<ListOptionProps>,
 	MenuContainer: React$ComponentType<ContainerProps>,
 	MenuHeader: React$ComponentType<ContainerProps>,
 	Message: React$ComponentType<ContainerProps>,

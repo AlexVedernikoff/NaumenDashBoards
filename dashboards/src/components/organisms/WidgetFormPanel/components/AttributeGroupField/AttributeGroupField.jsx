@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES, TIMER_VALUE} from 'store/sources/attributes/constants';
 import CatalogItemGroupModal from 'containers/CatalogItemGroupModal';
 import CatalogItemSetGroupModal from 'containers/CatalogItemSetGroupModal';
 import {createDefaultGroup} from 'store/widgets/helpers';
@@ -19,6 +19,7 @@ import React, {Fragment, PureComponent} from 'react';
 import StateGroupModal from 'containers/StateGroupModal';
 import StringGroupModal from 'containers/StringGroupModal';
 import TimerGroupModal from 'containers/TimerGroupModal';
+import TimerValueGroupModal from 'containers/TimerValueGroupModal';
 
 export class AttributeGroupField extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -145,7 +146,9 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 				return source && <ObjectGroupModal {...props} source={source} />;
 			case backTimer:
 			case timer:
-				return <TimerGroupModal {...props} />;
+				return attribute.timerValue === TIMER_VALUE.STATUS
+					? <TimerGroupModal {...props} />
+					: <TimerValueGroupModal {...props} />;
 			case catalogItem:
 				return <CatalogItemGroupModal {...props} />;
 			case catalogItemSet:

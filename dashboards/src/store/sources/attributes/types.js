@@ -1,6 +1,6 @@
 // @flow
 import type {AttrSetConditions} from 'store/widgetForms/types';
-import {ATTRIBUTES_EVENTS, SOURCE_ATTRIBUTE_TYPES} from './constants';
+import {ATTRIBUTES_EVENTS, SOURCE_ATTRIBUTE_TYPES, TIMER_VALUE} from './constants';
 import type {OnLoadCallback} from 'store/sources/types';
 import type {ThunkAction} from 'store/types';
 
@@ -13,6 +13,7 @@ export type Attribute = {
 	ref: Attribute | null,
 	sourceCode: string,
 	sourceName: string,
+	timerValue: ?$Keys<typeof TIMER_VALUE>,
 	title: string,
 	type: $Keys<typeof SOURCE_ATTRIBUTE_TYPES>,
 };

@@ -7,11 +7,13 @@ import {DEFAULT_PROPS as SELECT_DEFAULT_PROPS} from 'components/molecules/Select
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import LabelEditingForm from 'components/molecules/InputForm';
+import ListOption from 'components/molecules/Select/components/ListOption';
 import Loader from 'components/atoms/Loader';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {Component} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import TimerValueListOptionValue from 'components/organisms/WidgetFormPanel/components/AttributeFieldset/components/TimerValueListOptionValue';
 
 export class AttributeSelect extends Component<Props, State> {
 	static defaultProps = {
@@ -30,6 +32,7 @@ export class AttributeSelect extends Component<Props, State> {
 		if (!this.components) {
 			this.components = {
 				IndicatorsContainer: this.renderIndicators,
+				ListOption: this.renderListOption,
 				ValueContainer: this.renderValueContainer,
 				...components
 			};
@@ -38,9 +41,25 @@ export class AttributeSelect extends Component<Props, State> {
 		return this.components;
 	};
 
+	getListOptionComponents = option => ({
+		Value: this.renderListOptionValue(option)
+	});
+
 	getOptionLabel = (attribute: Attribute | null) => attribute?.title ?? '';
 
-	getOptionValue = (attribute: Attribute | null) => attribute?.code ?? '';
+	getOptionValue = (attribute: Attribute | null) => {
+		let code = '';
+
+		if (attribute) {
+			code = attribute.code;
+
+			if (attribute.timerValue) {
+				code += '$TV:' + attribute.timerValue;
+			}
+		}
+
+		return code;
+	};
 
 	handleClickDropIcon = () => {
 		const {name, onDrop} = this.props;
@@ -107,6 +126,26 @@ export class AttributeSelect extends Component<Props, State> {
 			{this.renderRemoveIcon()}
 		</div>
 	);
+
+	renderListOption = props => {
+		const {option} = props;
+		return (
+			<ListOption
+				components={this.getListOptionComponents(option)}
+				{...props}
+			/>
+		);
+	};
+
+	renderListOptionValue = attribute => props => {
+		const {children, className} = props;
+
+		if (attribute.timerValue !== null) {
+			return <TimerValueListOptionValue attribute={attribute} className={className} />;
+		}
+
+		return <Container className={className}>{children}</Container>;
+	};
 
 	renderLoader = () => this.props.loading ? <Loader className={styles.loader} /> : null;
 

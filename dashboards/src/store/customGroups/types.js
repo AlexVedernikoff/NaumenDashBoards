@@ -1,5 +1,5 @@
 // @flow
-import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES, TIMER_VALUE} from 'store/sources/attributes/constants';
 import {CUSTOM_GROUPS_EVENTS, OR_CONDITION_SETS, OR_CONDITION_TYPES} from './constants';
 import {INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
 
@@ -162,7 +162,8 @@ export type TimerCustomGroup = {|
 	id: string,
 	name: string,
 	subGroups: Array<TimerSubGroup>,
-	type: typeof ATTRIBUTE_TYPES.backTimer | typeof ATTRIBUTE_TYPES.timer
+	timerValue: $Keys<typeof TIMER_VALUE>,
+	type: typeof ATTRIBUTE_TYPES.backTimer | typeof ATTRIBUTE_TYPES.timer,
 |};
 
 export type CustomGroup =

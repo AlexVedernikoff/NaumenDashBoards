@@ -211,8 +211,9 @@ const hasAttributeDrillDown = (attribute: MixedAttribute | null) => {
 	if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
 		const isDateType = getAttributeValue(attribute, 'type') === ATTRIBUTE_TYPES.dtInterval;
 		const isServiceCallEvt = attribute.metaClassFqn === 'serviceCall__Evt';
+		const isTimerValue = attribute.timerValue !== null;
 
-		return !isDateType && !isServiceCallEvt;
+		return !isDateType && !isServiceCallEvt && !isTimerValue;
 	}
 
 	return true;
