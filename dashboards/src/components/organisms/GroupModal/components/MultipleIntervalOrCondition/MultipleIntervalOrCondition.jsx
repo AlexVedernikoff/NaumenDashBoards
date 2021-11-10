@@ -43,7 +43,7 @@ export class MultipleIntervalOrCondition extends PureComponent<Props> {
 		}
 	}
 
-	handleChange = (idx: number) => (e: SyntheticInputEvent<HTMLInputElement>) => {
+	getHandleChange = (idx: number) => (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {data, onChange, type} = this.props;
 		let {value} = e.currentTarget;
 
@@ -67,7 +67,7 @@ export class MultipleIntervalOrCondition extends PureComponent<Props> {
 		});
 	};
 
-	handleSelect = (idx: number) => ({value}: OnSelectEvent) => {
+	getHandleSelect = (idx: number) => ({value}: OnSelectEvent) => {
 		const {data, onChange, type} = this.props;
 		const newType = value.value;
 		const newData = [];
@@ -94,7 +94,7 @@ export class MultipleIntervalOrCondition extends PureComponent<Props> {
 
 		return (
 			<div className={styles.field}>
-				<MaterialTextInput onChange={this.handleChange(idx)} value={value} />
+				<MaterialTextInput onChange={this.getHandleChange(idx)} value={value} />
 			</div>
 		);
 	};
@@ -116,7 +116,7 @@ export class MultipleIntervalOrCondition extends PureComponent<Props> {
 		return (
 			<div className={styles.field}>
 				<MaterialSelect
-					onSelect={this.handleSelect(idx)}
+					onSelect={this.getHandleSelect(idx)}
 					options={options}
 					placeholder=""
 					value={value}
