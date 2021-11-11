@@ -10,6 +10,7 @@ import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import type {DropDownParams, FiltersOnWidget, NavigationData, NavigationProps, Option} from './types';
 import {getPartsClassFqn} from 'store/widgets/links/helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
+import memoize from 'memoize-one';
 
 /**
  * Преобразует AnyWidget в Widget
@@ -31,7 +32,7 @@ const parseDiagramWidget = (awidget: AnyWidget): ?Widget => {
  * @param {AnyWidget} awidget - виджет
  * @returns  {NavigationProps}
  */
-const navigationSelector = (awidget: AnyWidget): NavigationProps | null => {
+const navigationSelector = memoize((awidget: AnyWidget): NavigationProps | null => {
 	const widget = parseDiagramWidget(awidget);
 
 	if (widget) {
@@ -45,14 +46,14 @@ const navigationSelector = (awidget: AnyWidget): NavigationProps | null => {
 	}
 
 	return null;
-};
+});
 
 /**
  * Формирует данные для перехода по кнопке навигации
  * @param   {AnyWidget}  awidget  [awidget description]
  * @returns {NavigationData}
  */
-const getDataForNavigation = (awidget: AnyWidget): ?NavigationData => {
+const getDataForNavigation = memoize((awidget: AnyWidget): ?NavigationData => {
 	const widget = parseDiagramWidget(awidget);
 
 	if (widget) {
@@ -67,7 +68,7 @@ const getDataForNavigation = (awidget: AnyWidget): ?NavigationData => {
 	}
 
 	return null;
-};
+});
 
 /**
  * Преобразует значение DISPLAY_MODE в код иконок
@@ -90,7 +91,7 @@ const getDisplayModeIcon = (displayMode: DisplayMode) => {
  * @param {AnyWidget} awidget - виджет
  * @returns {DropDownParams} - спецификация отображения выпадающего списка
  */
-const modeSelector = (awidget: AnyWidget): ?DropDownParams => {
+const modeSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 	const {displayMode} = awidget;
 	const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
 	const text = `Отображается ${value.label}`;
@@ -100,14 +101,14 @@ const modeSelector = (awidget: AnyWidget): ?DropDownParams => {
 		text,
 		value: displayMode
 	};
-};
+});
 
 /**
  * Формирует спецификацию отображения выпадающего списка экспорта виджета
  * @param {AnyWidget} awidget - виджет
  * @returns {DropDownParams} - спецификация отображения выпадающего списка
  */
-const exportParamsSelector = (awidget: AnyWidget): ?DropDownParams => {
+const exportParamsSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 	const widget = parseDiagramWidget(awidget);
 
 	if (widget) {
@@ -127,14 +128,14 @@ const exportParamsSelector = (awidget: AnyWidget): ?DropDownParams => {
 	}
 
 	return null;
-};
+});
 
 /**
  * Формирует спецификацию отображения выпадающего списка перехода на страницу источника
  * @param {AnyWidget} awidget - виджет
  * @returns {DropDownParams} - спецификация отображения выпадающего списка
  */
-const dataSelector = (awidget: AnyWidget): ?DropDownParams => {
+const dataSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 	const widget = parseDiagramWidget(awidget);
 
 	if (widget) {
@@ -158,7 +159,7 @@ const dataSelector = (awidget: AnyWidget): ?DropDownParams => {
 	}
 
 	return null;
-};
+});
 
 /**
  * Проверка того, что на виджете установленна пользовательская фильтрация
@@ -232,7 +233,7 @@ const getFiltersOnWidget = (widget: Widget): FiltersOnWidget => {
  * @param {AnyWidget} awidget - виджет
  * @returns {DropDownParams} - спецификация отображения выпадающего списка
  */
-const filtersOnWidgetSelector = (awidget: AnyWidget): ?DropDownParams => {
+const filtersOnWidgetSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 	const widget = parseDiagramWidget(awidget);
 
 	if (widget) {
@@ -253,7 +254,7 @@ const filtersOnWidgetSelector = (awidget: AnyWidget): ?DropDownParams => {
 	}
 
 	return null;
-};
+});
 
 /**
  * Асинхронное открытие окна платформы для установки фильтрации на виджете
