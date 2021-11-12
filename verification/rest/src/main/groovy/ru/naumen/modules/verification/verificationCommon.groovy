@@ -40,7 +40,7 @@ enum ListType
 class MetaClasses
 {
     static final String TASK_METACLASS = 'task$checkTask'
-    static final String TASK_EDITFU_METACLASS = 'Проводится проверка оплаты 3 лиц'
+    static final String TASK_EDITFU_METACLASS = 'task$editFUtask'
     static final String TASK_CHECK_CHANGES_METACLASS = 'task$checkChanges'
     static final String CLAIM_METACLASS = 'serviceCall$Claim'
     static final String TEAM_METACLASS = 'team'
