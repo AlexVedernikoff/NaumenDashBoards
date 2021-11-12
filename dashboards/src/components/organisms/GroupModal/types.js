@@ -25,6 +25,7 @@ export type CustomGroup = {|
 	id: string,
 	name: string,
 	subGroups: Array<SubGroup>,
+	timerValue: ?string,
 	type: any
 |};
 
@@ -64,6 +65,7 @@ export type Props = {
 	attribute: Attribute,
 	components: Components,
 	customGroups: Array<CustomGroup>,
+	customTimerValue?: string,
 	customType: string,
 	onClose: () => void,
 	onSubmit: (value: Group, attribute: Attribute) => void,

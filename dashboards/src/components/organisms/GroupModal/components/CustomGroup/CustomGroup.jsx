@@ -62,7 +62,7 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	handleClickCreate = () => {
-		const {onClearUnnamed, onSelect, onUpdate, options, type} = this.props;
+		const {onClearUnnamed, onSelect, onUpdate, options, timerValue, type} = this.props;
 		const id = `${LOCAL_PREFIX_ID}${uuid()}`;
 
 		if (options.length < 30) {
@@ -70,6 +70,7 @@ export class CustomGroup extends Component<Props, State> {
 				id,
 				name: '',
 				subGroups: [createNewSubGroup()],
+				timerValue,
 				type
 			};
 
@@ -125,9 +126,9 @@ export class CustomGroup extends Component<Props, State> {
 	};
 
 	// $FlowFixMe[prop-missing]
-	isUsingCurrentGroup = (widget: Widget) => !!widget.data.find(({breakdown, parameters}) => {
-		return this.testFieldAtUsingGroup(breakdown) || this.testFieldAtUsingGroup(parameters);
-	});
+	isUsingCurrentGroup = (widget: Widget) => !!widget.data.find(({breakdown, parameters}) =>
+		this.testFieldAtUsingGroup(breakdown) || this.testFieldAtUsingGroup(parameters)
+	);
 
 	save = async (force: boolean): Promise<string | null> => {
 		const {onCreate, onSelect, onUpdate, value} = this.props;
@@ -161,7 +162,7 @@ export class CustomGroup extends Component<Props, State> {
 
 	validate = async () => {
 		const {schema, value} = this.props;
-		let errors = {};
+		const errors = {};
 
 		if (value) {
 			try {

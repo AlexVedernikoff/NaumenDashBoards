@@ -13,6 +13,7 @@ import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {Component} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import {TIMER_VALUE} from 'store/sources/attributes/constants';
 import TimerValueListOptionValue from 'components/organisms/WidgetFormPanel/components/AttributeFieldset/components/TimerValueListOptionValue';
 
 export class AttributeSelect extends Component<Props, State> {
@@ -53,8 +54,8 @@ export class AttributeSelect extends Component<Props, State> {
 		if (attribute) {
 			code = attribute.code;
 
-			if (attribute.timerValue) {
-				code += '$TV:' + attribute.timerValue;
+			if (attribute.timerValue === TIMER_VALUE.VALUE) {
+				code += '$TV:' + TIMER_VALUE.VALUE;
 			}
 		}
 

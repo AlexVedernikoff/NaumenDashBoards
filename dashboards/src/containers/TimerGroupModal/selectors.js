@@ -6,7 +6,7 @@ import {TIMER_VALUE} from 'store/sources/attributes/constants';
 
 export const props = (state: AppState, props: Props): ConnectedProps => {
 	const customGroups = getCustomGroupsValues(state).filter(
-		({timerValue, type}) => (type === props.attribute.type && timerValue === TIMER_VALUE.STATUS)
+		({timerValue, type}) => (type === props.attribute.type && (timerValue === TIMER_VALUE.STATUS || !timerValue))
 	);
 
 	return {
