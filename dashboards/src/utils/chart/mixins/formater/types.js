@@ -25,6 +25,7 @@ export type AxisFormatter = {
 		default: NumberFormatter | ValueFormatter,
 		overlapped: NumberFormatter | ValueFormatter
 	},
+	tooltip: NumberFormatter,
 };
 
 export type CircleFormatter = {

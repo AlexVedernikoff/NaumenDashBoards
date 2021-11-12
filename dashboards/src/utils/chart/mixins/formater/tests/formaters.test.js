@@ -222,5 +222,17 @@ describe('Formatters test', () => {
 		expect(defaultFormatter('test#code')).toBe('test');
 	});
 
+	it('makeFormatterByNumberFormatNullSymbolCount', () => {
+		const formatter = makeFormatterByNumberFormat({...numberFormat, symbolCount: null, additional: null});
+
+		expect(formatter(0)).toBe('');
+		expect(formatter(1)).toBe('0тыс.');
+		expect(formatter(9)).toBe('0тыс.');
+		expect(formatter(10)).toBe('0.01тыс.');
+		expect(formatter(1009)).toBe('1тыс.');
+		expect(formatter(1019)).toBe('1.02тыс.');
+	});
+
+
 
 });

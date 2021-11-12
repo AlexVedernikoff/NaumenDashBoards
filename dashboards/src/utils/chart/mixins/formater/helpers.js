@@ -13,7 +13,7 @@ import {SEPARATOR, TITLE_SEPARATOR} from 'store/widgets/buildData/constants';
  */
 export function loggerFormatter<U, T> (func: (value: U) => T): (value: U) => T {
 	if (process.env.NODE_ENV === 'development') {
-		return (value) => {
+		return value => {
 			const result = func(value);
 
 			console.log('LOG: ', value, '->', result);
@@ -29,9 +29,7 @@ export function loggerFormatter<U, T> (func: (value: U) => T): (value: U) => T {
  * @param {number} symbolCount - количество знаков после запятой, по умолчанию - 0
  * @returns {NumberFormatter} - функция-форматер
  */
-export const defaultNumberFormatter = (symbolCount: number = 0): NumberFormatter => (value: number): string => {
-	return value.toFixed(symbolCount);
-};
+export const defaultNumberFormatter = (symbolCount: number = 0): NumberFormatter => (value: number): string => value.toFixed(symbolCount);
 
 /**
  * Служебный, не изменяющий форматер.
@@ -84,9 +82,7 @@ export const getLabelFormatter = (format: LabelFormat = LABEL_FORMATS.TITLE): Va
  * @returns {NumberFormatter} - функция-форматер, возвращаюшая пустую строку, если значение равно Infinity, или результат вызова successFormatter
  * в другом случае
  */
-export const checkInfinity = (successFormatter: NumberFormatter): NumberFormatter => (value: number | typeof Infinity) => {
-	return value === Infinity ? '' : successFormatter(value);
-};
+export const checkInfinity = (successFormatter: NumberFormatter): NumberFormatter => (value: number | typeof Infinity) => value === Infinity ? '' : successFormatter(value);
 
 /**
  * Форматтер-оболочка для проверки на 0
@@ -94,9 +90,7 @@ export const checkInfinity = (successFormatter: NumberFormatter): NumberFormatte
  * @returns {NumberFormatter} - функция-форматер, возвращаюшая пустую строку, если значение равно 0, или результат вызова successFormatter
  * в другом случае
  */
-export const checkZero = (successFormatter: NumberFormatter): NumberFormatter => (value: number) => {
-	return value === 0 ? '' : successFormatter(value);
-};
+export const checkZero = (successFormatter: NumberFormatter): NumberFormatter => (value: number) => value === 0 ? '' : successFormatter(value);
 
 /**
  * Форматтер-оболочка для проверки на cтроку
@@ -126,9 +120,7 @@ export const checkNumber = (successFormatter: NumberFormatter) => (value: string
  * @param {string} additional - строка добавления
  * @returns {ValueFormatter} - функция-форматер
  */
-export const additionalFormat = (additional: string): ValueFormatter => (value) => {
-	return value ? `${value}${additional}` : value;
-};
+export const additionalFormat = (additional: string): ValueFormatter => value => value ? `${value}${additional}` : value;
 
 /**
  * Форматтер для добавления процента в конец значения
@@ -206,7 +198,7 @@ export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, ad
 			break;
 	}
 
-	return compose(additionalFormat(additional), addConverter, (value) => value / divider);
+	return compose(additionalFormat(additional), addConverter, value => value / divider);
 };
 
 /**
@@ -217,15 +209,22 @@ export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, ad
  */
 export const makeFormatterByNumberFormat = (format: NumberAxisFormat, hideZero: boolean = true): NumberFormatter => {
 	let formatter = (value: number): string => {
+		let result = '';
+		let {splitDigits, symbolCount} = format;
+
 		if (value || (!hideZero && value === 0)) {
-			return value.toLocaleString(undefined, {
-				maximumFractionDigits: format.symbolCount ?? 0,
-				minimumFractionDigits: format.symbolCount ?? 0,
-				useGrouping: format.splitDigits ?? false
+			if (symbolCount === null) {
+				symbolCount = Number.isInteger(value) || Math.abs(value - Math.trunc(value)) < 0.01 ? 0 : 2;
+			}
+
+			result = value.toLocaleString(undefined, {
+				maximumFractionDigits: symbolCount ?? 0,
+				minimumFractionDigits: symbolCount ?? 0,
+				useGrouping: splitDigits ?? false
 			});
 		}
 
-		return '';
+		return result;
 	};
 
 	if (format.notation) {
