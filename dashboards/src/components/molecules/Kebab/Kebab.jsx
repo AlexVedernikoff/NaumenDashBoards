@@ -54,7 +54,7 @@ export class Kebab extends PureComponent<Props, State> {
 	handleResize = (placeWidth, height) => {
 		const children = this.getChildren(this.props.children);
 		const buttonPlaceWidth = placeWidth - 8;
-		const availibleButtonsCount = Math.floor(buttonPlaceWidth / 28);
+		const availibleButtonsCount = Math.max(Math.floor(buttonPlaceWidth / 28), 1);
 		const kebabElementsCount = children.length;
 		const showKebab = kebabElementsCount > availibleButtonsCount;
 		const elements = showKebab ? availibleButtonsCount - 1 : kebabElementsCount;

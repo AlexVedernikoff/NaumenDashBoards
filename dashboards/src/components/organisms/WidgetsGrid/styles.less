@@ -1,4 +1,4 @@
-@import "/styles/variables.less";
+@import '/styles/variables.less';
 
 :local {
 	.createButtonPlace {
@@ -38,9 +38,11 @@
 	}
 
 	.MKGridContainer {
-		margin: 0 auto;
-		padding: 0;
-		width: 320px;
+		@containerWidth: 320px;
+		@halfContainerWidth: @containerWidth / 2;
+
+		padding: 0 calc(50% - @halfContainerWidth); // margin: 0 auto не подходит потому как overflow-y: auto; затирает overflow-x: visible, обрезая оверлеи
+		width: @containerWidth;
 	}
 
 	.grid {
@@ -88,7 +90,7 @@
 
 	&.react-grid-placeholder {
 		background: @grey;
-		opacity: 0.8;
+		opacity: .8;
 		transition-duration: 300ms;
 		user-select: none;
 	}

@@ -1,4 +1,5 @@
 // @flow
+import cn from 'classnames';
 import IconButton from 'components/atoms/IconButton';
 import type {Props} from './types';
 import React, { PureComponent} from 'react';
@@ -13,7 +14,10 @@ class KebabIconButton extends PureComponent<Props> {
 
 	render () {
 		const {active, icon, onClick, text} = this.props;
-		const className = active ? styles.activeKebabItem : null;
+		const className = cn(styles.kebabIconButton, {
+			[styles.activeKebabItem]: active
+		});
+
 		return (
 			<IconButton className={className} icon={icon} onClick={onClick} round={false} tip={text} />
 		);
