@@ -143,7 +143,7 @@
       "^src(.*)$": "<rootDir>/src$1"
     },
     "setupFiles": [
-      "<rootDir>/test/setup.js"
+      "<rootDir>/tests/setup.js"
     ],
     "snapshotSerializers": [
       "enzyme-to-json/serializer"
@@ -154,7 +154,8 @@
     "testEnvironment": "enzyme",
     "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.jsx?$",
     "testPathIgnorePatterns": [
-      "/tests/helpers.*\\.jsx?$"
+      "/tests/helpers.*\\.jsx?$",
+      "/tests/setup.js"
     ]
   },
   "keywords": [

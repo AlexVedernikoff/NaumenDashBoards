@@ -80,7 +80,7 @@ const axisMixin = (widget: AxisWidget, data: DiagramBuildData, container: HTMLDi
 				intersect: true,
 				shared: false,
 				y: {
-					formatter: formatter.indicator,
+					formatter: formatter.tooltip,
 					title: {
 						formatter: formatter.legend
 					}
