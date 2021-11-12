@@ -106,6 +106,7 @@ class VerificationService
         (TaskState.CHECK_PROPERTY): AttributeCode.CHECK_PROPERTY,
         (TaskState.CHECK_A16): AttributeCode.CHECK_A16,
         (TaskState.CHECK_THIRD_A16): AttributeCode.CHECK_THIRD_A16,
+        (TaskState.CHECK_OTHERS) : AttributeCode.CHECK_OTHERS,
         (TaskState.PR_ST17): AttributeCode.CHECK_A17,
         (TaskState.CHECK_FIN_SERV): AttributeCode.CHECK_FIN_SERV
     ]
@@ -150,7 +151,7 @@ class VerificationService
                 {
                     def systemAttribute = metainfo.getAttribute(code)
                     def clazz = systemAttribute.type.attributeType.permittedTypes.find()
-                    List<Value> values =  utils.find(clazz, [:]).findResults { return new Value(title: it.title, UUID: it.UUID, code: it.code) }
+                    List<Value> values =  utils.find(clazz, [removed: false]).findResults { return new Value(title: it.title, UUID: it.UUID, code: it.code) }
                     return new Attribute(title: systemAttribute.title,
                                          code: code,
                                          values: values,
@@ -158,6 +159,7 @@ class VerificationService
                 }
             }
         }
+        return []
     }
 
     /**
@@ -174,6 +176,7 @@ class VerificationService
         String state = getState(attributeCode, values, claim.get(AttributeCode.RIGHTC_CONCEDE))
         setAttributeValues(claim, attributeCode, values)
         Boolean fullChecked = state == TaskState.FULL_CHECK
+        Boolean inprogress = state == TaskState.INPROGRESS
         String message
         if(fullChecked)
         {
@@ -187,11 +190,15 @@ class VerificationService
                 }
             }
         }
+        if(inprogress)
+        {
+            message = VerificationMessages.IF_TASK_STATE_INPROGRESS
+        }
         setTaskState(task, attributeCode, state)
 
         if(attributeCode == AttributeCode.CHECK_FIN_SERV)
         {
-            createClaimTask(task, claim, values.find())
+            createClaimTask(claim, task, values.find().code)
         }
         return new SetValueAndTaskStateResponse(fullChecked, message)
     }
@@ -298,7 +305,7 @@ class VerificationService
             case AttributeCode.CHECK_A19: return TaskState.CHECK_A15
             case AttributeCode.CHECK_A15: return TaskState.CHECK_PROPERTY
             case AttributeCode.CHECK_PROPERTY: return TaskState.CHECK_A16
-            case AttributeCode.CHECK_A16: return rightcConcede ? TaskState.INPROGRESS : TaskState.CHECK_OTHERS
+            case AttributeCode.CHECK_A16: return rightcConcede ? TaskState.CHECK_THIRD_A16 : TaskState.CHECK_OTHERS
             case AttributeCode.CHECK_THIRD_A16: return TaskState.CHECK_OTHERS
             case AttributeCode.CHECK_OTHERS: return TaskState.PR_ST17
             case AttributeCode.CHECK_A17: return  rightcConcede ? TaskState.INPROGRESS : TaskState.CHECK_FIN_SERV
