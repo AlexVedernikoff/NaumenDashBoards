@@ -89,14 +89,19 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	handleSelectIndicator = ({value: attribute}: OnSelectEvent) => {
 		const {value} = this.props;
 		let newIndicator = value;
-
 		const {attribute: currentAttribute} = value;
 
-		if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && (!currentAttribute || currentAttribute.type !== attribute.type)) {
-			newIndicator = {
-				...newIndicator,
-				aggregation: getDefaultAggregation(attribute)
-			};
+		if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+			const mustClearAggregation = !currentAttribute
+			|| currentAttribute.type !== attribute.type
+			|| (currentAttribute.timerValue && attribute.timerValue && currentAttribute.timerValue !== attribute.timerValue);
+
+			if (mustClearAggregation) {
+				newIndicator = {
+					...newIndicator,
+					aggregation: getDefaultAggregation(attribute)
+				};
+			}
 		}
 
 		this.change({

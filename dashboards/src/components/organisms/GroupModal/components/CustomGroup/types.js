@@ -16,6 +16,7 @@ export type Props = {
 	options: Array<CustomGroup>,
 	schema: Schema | null,
 	submitted: boolean,
+	timerValue?: string,
 	type: string,
 	value: CustomGroup,
 	widgets: Array<Widget>

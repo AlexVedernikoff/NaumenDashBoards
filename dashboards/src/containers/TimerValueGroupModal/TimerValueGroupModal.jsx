@@ -41,6 +41,7 @@ export class TimerValueGroupModal extends Component<Props> {
 				attribute={attribute}
 				components={this.getComponents()}
 				customGroups={customGroups}
+				customTimerValue={attribute.timerValue}
 				customType={attribute.type}
 				onClose={onClose}
 				onSubmit={onSubmit}

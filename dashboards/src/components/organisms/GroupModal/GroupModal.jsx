@@ -99,7 +99,7 @@ export class GroupModal extends Component<Props, State> {
 	};
 
 	renderCustomGroup = () => {
-		const {components, customGroups, customType, orConditionOptions, schema} = this.props;
+		const {components, customGroups, customTimerValue, customType, orConditionOptions, schema} = this.props;
 		const {customData, submitted, way} = this.state;
 
 		if (way === GROUP_WAYS.CUSTOM) {
@@ -114,6 +114,7 @@ export class GroupModal extends Component<Props, State> {
 							options={customGroups}
 							schema={schema}
 							submitted={submitted}
+							timerValue={customTimerValue}
 							type={customType}
 							value={customData}
 						/>

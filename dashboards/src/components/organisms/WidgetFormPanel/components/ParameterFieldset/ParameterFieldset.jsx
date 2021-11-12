@@ -63,8 +63,12 @@ export class ParameterFieldset extends PureComponent<Props> {
 		const {dataSetIndex, value} = this.props;
 		const {attribute} = value;
 		let newValue = value;
+		const mustClearGroup = newAttribute.type in ATTRIBUTE_SETS.REFERENCE
+			|| !attribute
+			|| attribute.type !== newAttribute.type
+			|| attribute.timerValue !== newAttribute.timerValue;
 
-		if (dataSetIndex === 0 && (newAttribute.type in ATTRIBUTE_SETS.REFERENCE || !attribute || attribute.type !== newAttribute.type)) {
+		if (dataSetIndex === 0 && mustClearGroup) {
 			newValue = {
 				...newValue,
 				group: getDefaultSystemGroup(newAttribute)

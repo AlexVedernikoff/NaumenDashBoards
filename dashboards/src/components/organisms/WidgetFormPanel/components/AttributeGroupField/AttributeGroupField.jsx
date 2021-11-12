@@ -146,7 +146,7 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 				return source && <ObjectGroupModal {...props} source={source} />;
 			case backTimer:
 			case timer:
-				return attribute.timerValue === TIMER_VALUE.STATUS
+				return attribute.timerValue === TIMER_VALUE.STATUS || !attribute.timerValue
 					? <TimerGroupModal {...props} />
 					: <TimerValueGroupModal {...props} />;
 			case catalogItem:

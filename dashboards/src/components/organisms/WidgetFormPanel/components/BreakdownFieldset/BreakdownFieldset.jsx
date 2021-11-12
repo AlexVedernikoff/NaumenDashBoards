@@ -134,7 +134,7 @@ export class BreakdownFieldset extends Component<Props> {
 		const {attribute: prevAttribute} = breakdown[breakdownIndex];
 		const {value: attribute} = event;
 		const isMain = breakdownIndex === this.mainIndex;
-		const typeIsChanged = !prevAttribute || prevAttribute.type !== attribute.type;
+		const typeIsChanged = !prevAttribute || prevAttribute.type !== attribute.type || prevAttribute.timerValue !== attribute.timerValue;
 		let newBreakdown = breakdown.map((item, i) => i === breakdownIndex ? {...item, attribute} : item);
 
 		if (isMain && typeIsChanged) {
