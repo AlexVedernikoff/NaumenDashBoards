@@ -5213,12 +5213,11 @@ class DashboardDataSetService
      * @param parameterWithDate - параметр, если в списке параметров есть атрибут даты
      * @param parameterOrderWithDates - порядок для параметра, содержащего дату
      * @param aggregationOrderWithDates - порядок для показателя в запросе, где в параметре дата
-     * @param aggregationNA - флаг на наличие агрегации N/A
      * @return TOP Х данных
      */
     List getTop(List currentRes, Integer top, List parameterFilters = [], List breakdownFilters = [],
                 Boolean fromNoOrTwoFiltersList = false, def parameterWithDate = null,
-                String parameterOrderWithDates = '', String aggregationOrderWithDates = '', Boolean aggregationNA = false)
+                String parameterOrderWithDates = '', String aggregationOrderWithDates = '')
     {
         Integer paramIndex = 1 //индекс, на котором расположены значения параметра (первого параметра для таблицы)
         Integer aggregationIndex = 0 //индекс, на котором расположены значения показателя (первого показателя для таблицы)
@@ -5227,13 +5226,7 @@ class DashboardDataSetService
             paramIndex = parameterFilters ? 1 : 2
         }
         //суммируем данные по группам - подсчитываем значения первого показателя и выставляем в порядке по убыванию
-        def tempResult = aggregationNA
-            ? currentRes.groupBy { it[paramIndex] }.collect{ k, v -> [k, v]}
-            : currentRes.groupBy { it[paramIndex] }.collect{ k, v ->
-            [k, v.sum{ it[aggregationIndex] as Double } ]
-        }.sort {
-            -it[1] as Double
-        }
+        def tempResult = currentRes.groupBy { it[paramIndex] }.collect{ k, v -> [k, v]}
         //берём из этих групп первые по top или все группы, если данных меньше
         if(tempResult.size() > top && fromNoOrTwoFiltersList)
         {
@@ -5361,7 +5354,7 @@ class DashboardDataSetService
                 {
                     total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
                 }
-                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, notAggregatedAttributes, total, parameter,
+                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
                                                       parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
             case 'computation':
                 def requisiteNode = node as ComputationRequisiteNode
@@ -5423,7 +5416,7 @@ class DashboardDataSetService
                 }]]
                 def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, diagramType in DiagramType.CountTypes ? false : onlyFilled)]
                 total = formatResult(total, aggregationCnt)
-                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, notAggregatedAttributes, total, parameter,
+                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
                                                       parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
             default:
                 String message = messageProvider.getMessage(REQUISITE_IS_NOT_SUPPORTED_ERROR, currentUserLocale, nodeType: nodeType)
@@ -5436,7 +5429,6 @@ class DashboardDataSetService
      * @param top - настройки по ТОПу
      * @param isDiagramTypeTable - флаг на то, что диаграмма - таблица
      * @param tableHasBreakdown - наличие разбивки в таблице
-     * @param notAggregatedAttributes - список названий агрегации N/A
      * @param total - итоговый датасет
      * @param parameter - значение параметра
      * @param parameterWithDate - флаг на наличие параметра с датой
@@ -5448,7 +5440,6 @@ class DashboardDataSetService
      */
     private List totalPrepareForNoFiltersResult(Integer top, Boolean isDiagramTypeTable,
                                                 Boolean tableHasBreakdown,
-                                                List<String> notAggregatedAttributes,
                                                 List total,
                                                 def parameter,
                                                 Boolean parameterWithDate,
@@ -5459,7 +5450,7 @@ class DashboardDataSetService
     {
         if (top)
         {
-            if (isDiagramTypeTable && !tableHasBreakdown && notAggregatedAttributes)
+            if (isDiagramTypeTable && !tableHasBreakdown)
             {
                 def tempPaginationSettings = new PaginationSettings(pageSize: top,firstElementIndex: 0)
                 total = getDataSetWithPagination(total, tempPaginationSettings)
@@ -5468,7 +5459,7 @@ class DashboardDataSetService
             {
                 total = getTop(total, top, [], [], true,
                                parameterWithDate ? parameter : null,
-                               parameterSortingType, aggregationSortingType, notAggregatedAttributes.any())
+                               parameterSortingType, aggregationSortingType)
             }
         }
 
