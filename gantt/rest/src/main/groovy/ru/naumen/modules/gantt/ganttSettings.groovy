@@ -99,11 +99,6 @@ class GanttSettingsImpl implements GanttSettingsController
     String getGanttSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         GetGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, GetGanttSettingsRequest)
-        // Для обычного пользователя шлем пустую строку.
-        if (service.getUserGroup(user) == 'REGULAR')
-        {
-            return ''
-        }
         return Jackson.toJsonString(service.getGanttSettings(request))
     }
 
@@ -127,6 +122,8 @@ class GanttSettingsService
 {
     private static final String GANTT_NAMESPACE = 'gantts'
     private static final String MAIN_FQN = 'abstractBO'
+    private static final String OLD_GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
+    private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
 
     /**
      * Отдает список источников данных с детьми
@@ -268,6 +265,19 @@ class GanttSettingsService
         {
             return "REGULAR"
         }
+    }
+
+    /**
+     * Метод проверки пользователя на мастера дашборда
+     * @param user
+     * @return
+     */
+    private boolean checkUserOnMasterDashboard(IUUIDIdentifiable user)
+    {
+        return user?.UUID
+            ? ((OLD_GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code) ||
+               (GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code))
+            : true
     }
 
     /**
@@ -490,7 +500,13 @@ class BaseGanttSettingsRequest
 /**
  * Тело запроса на получение настроек диаграммы Ганта
  */
-class GetGanttSettingsRequest extends BaseGanttSettingsRequest {}
+class GetGanttSettingsRequest extends BaseGanttSettingsRequest
+{
+    /**
+     * Таймзона устройства пользователя
+     */
+    String timezone
+}
 
 /**
  * Тело запроса на сохранение настроек диаграммы Ганта

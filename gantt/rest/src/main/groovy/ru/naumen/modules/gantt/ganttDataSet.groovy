@@ -15,16 +15,18 @@ import groovy.transform.Field
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
 import static groovy.json.JsonOutput.toJson
+import ru.naumen.core.shared.IUUIDIdentifiable
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 interface GanttDataSetController
 {
     /**
      * Метод получения данных для построения диаграммы Ганта.
-     * @param request - тело запроса [subjectUUID:..., contentCode: ...]
+     * @param requestData - тело запроса [subjectUUID:..., contentCode: ...]
+     * @param user - пользователь
      * @return данные для построения диаграммы Ганта.
      */
-    String getGanttDiagramData(Map<String, String> requestData)
+    String getGanttDiagramData(Map<String, String> requestData, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
@@ -33,10 +35,10 @@ class GanttDataSetImpl implements GanttDataSetController
     GanttDataSetService service = GanttDataSetService.instance
 
     @Override
-    String getGanttDiagramData(Map<String, String> requestContent)
+    String getGanttDiagramData(Map<String, String> requestContent, IUUIDIdentifiable user)
     {
         GetGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, GetGanttSettingsRequest)
-        return toJson(service.getGanttDiagramData(request))
+        return toJson(service.getGanttDiagramData(request, user))
     }
 }
 
@@ -57,9 +59,10 @@ class GanttDataSetService
     /**
      * Метод получения данных для построения диаграммы Ганта
      * @param request - тело запроса [subjectUUID:..., contentCode: ...]
+     * @param user - пользователь
      * @return данные для построения диаграммы Ганта
      */
-    GanttDiagramData getGanttDiagramData(GetGanttSettingsRequest request)
+    GanttDiagramData getGanttDiagramData(GetGanttSettingsRequest request, IUUIDIdentifiable user)
     {
         // Получение настроек диаграммы из хранилища.
         GanttSettingsService service = GanttSettingsService.instance
@@ -75,6 +78,39 @@ class GanttDataSetService
         else
         {
             data.tasks = buildDataListFromSettings(settings.resourceAndWorkSettings, null)
+            def timezone = TimeZone.getTimeZone(api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone)
+            def workAttributeSettings = settings.resourceAndWorkSettings.find { it.startWorkAttribute && it.endWorkAttribute }
+            data.tasks.each {
+                if (it['start_date'])
+                {
+                    if (workAttributeSettings?.startWorkAttribute?.type == 'date')
+                    {
+                        it['start_date'] = it['start_date'].format("yyyy-MM-dd'T'HH:mm:ss")
+                    }
+                    else
+                    {
+                        it['start_date'] = it['start_date'].format("yyyy-MM-dd'T'HH:mm:ss", timezone)
+                    }
+                }
+                if (it['end_date'])
+                {
+                    if (workAttributeSettings?.endWorkAttribute?.type == 'date')
+                    {
+                        it['end_date'] = it['end_date'].format("yyyy-MM-dd'T'HH:mm:ss")
+                    }
+                    else
+                    {
+                        it['end_date'] = it['end_date'].format("yyyy-MM-dd'T'HH:mm:ss", timezone)
+                    }
+                }
+
+                def task = it
+                data.tasks.each {
+                    if (it.parent == task.id) {
+                        task['type'] = 'project'
+                    }
+                }
+            }
         }
         return data
     }
