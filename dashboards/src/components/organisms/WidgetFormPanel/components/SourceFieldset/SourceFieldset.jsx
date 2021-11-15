@@ -375,7 +375,7 @@ export class SourceFieldset extends Component<Props, State> {
 
 		if (!isPersonal && showSavedFilters && usesFilter && filterList && filterList.length > 0) {
 			return (
-				<FormField className={styles.savedFiltersButton}>
+				<FormField className={styles.savedFiltersButton} small>
 					<SavedFilters
 						filters={filterList}
 						isPersonal={false}

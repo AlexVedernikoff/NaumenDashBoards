@@ -32,7 +32,7 @@ export const props = (state: AppState, props: ComponentProps): ConnectedProps =>
 		filtersListLoading,
 		isPersonal,
 		isUserMode,
-		showSavedFilters: isUserMode,
+		showSavedFilters: !isUserMode,
 		sources: sources ?? state.sources.data.map
 	};
 };
