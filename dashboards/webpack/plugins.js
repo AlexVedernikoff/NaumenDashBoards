@@ -5,6 +5,7 @@ const {development, license, storybook} = require('./define');
 const Dotenv = require('dotenv-webpack');
 const GroovyWebpackPlugin = require('groovy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const {IgnorePlugin} = require('webpack');
 // MiniCssExtractPlugin заменяет ExtractTextWebpackPlugin и выполняет ту же задачу (сборку css в один файл)
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -42,6 +43,9 @@ const plugins = [
 		template: './src/index.html',
 		title: 'SMP Embedded Application'
 	}),
+	new CopyPlugin([
+		{from: './public', to: './public'}
+	]),
 	new Dotenv()
 ];
 
