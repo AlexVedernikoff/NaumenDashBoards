@@ -35,16 +35,9 @@ export class VerificationContent extends PureComponent<Props> {
 	};
 
 	handleNextVerification = async () => {
-		const {sendVerificationValue, setIndexVerification, setVerificationValue, verification} = this.props;
+		const {sendVerificationValue} = this.props;
 
 		await sendVerificationValue();
-
-		if (!verification.isFullChecked) {
-			const index = verification.index + 1;
-
-			setIndexVerification(index);
-			setVerificationValue([]);
-		}
 	};
 
 	handleRadioValue = (value: AttributesValue) => {
@@ -91,20 +84,18 @@ export class VerificationContent extends PureComponent<Props> {
 	};
 
 	render () {
-		const {attributes, setVerificationCode, verification} = this.props;
+		const {attributes, verification} = this.props;
 		const attribute = attributes[verification.index];
 
+		if (verification?.isFullChecked) {
+			return (
+				<div className={styles.content}>
+					{verification.message}
+				</div>
+			);
+		}
+
 		if (attribute) {
-			setVerificationCode(attribute.code);
-
-			if (verification.isFullChecked) {
-				return (
-					<div className={styles.content}>
-						{verification.message}
-					</div>
-				);
-			}
-
 			return (
 				<div className={styles.content}>
 					{this.checkRenderTypeField(attribute)}

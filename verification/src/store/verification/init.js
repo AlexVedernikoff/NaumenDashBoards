@@ -3,6 +3,7 @@ import type {VerificationAction, VerificationState} from './types';
 import {VERIFICATION_EVENTS} from './constants';
 
 export const initialVerificationState: VerificationState = {
+	attrCode: false,
 	code: '',
 	error: false,
 	index: 0,

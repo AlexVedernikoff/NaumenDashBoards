@@ -2,6 +2,7 @@
 import {ATTRIBUTE_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {getAttributesData, getSubjectUuid} from 'utils/api';
+import {setVerificationCode} from 'store/verification/actions';
 
 /**
  * Получение и сохранение атрибутов
@@ -13,7 +14,9 @@ const getAttributes = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
 
 		const claimUUID = await getSubjectUuid();
 		const attributes = await getAttributesData(claimUUID);
+		const [attribute] = attributes;
 
+		dispatch(setVerificationCode(attribute.code));
 		dispatch(setAttributes(attributes));
 	} catch (error) {
 		dispatch(setErrorAttributes(error));

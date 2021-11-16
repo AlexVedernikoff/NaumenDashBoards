@@ -1,30 +1,27 @@
 // @flow
-import React, {PureComponent} from 'react';
-import {SettingVerificationState, SettingVerificationStateKeys} from 'store/setting/types';
+import React from 'react';
+import {SettingVerificationState} from 'store/setting/types';
 import styles from './styles.less';
 
-export class VerificationHeader extends PureComponent<Props> {
-	render () {
-		const {attributes, setting, verification} = this.props;
-		const attribute = attributes[verification.index];
+const VerificationHeader = ({attributes, setting, verification}: Props) => {
+	const attribute = attributes[verification.index];
+	const obj = verification?.isFullChecked ? SettingVerificationState.NO_VERIFICATION : setting.verificationState;
 
-		const renderTitleVerification = (obj: SettingVerificationStateKeys) => {
-			switch (obj) {
-				case SettingVerificationState.IN_VERIFICATION:
-					return attribute?.title;
-				case SettingVerificationState.NO_VERIFICATION:
-					return 'Проведение проверок обращения';
-				case SettingVerificationState.VERIFICATION_FINISHED:
-					return 'Проверки обращения проведены';
-			}
-		};
+	let content = '';
 
-		return (
-			<p className={styles.header}>
-				{renderTitleVerification(setting.verificationState)}
-			</p>
-		);
+	switch (obj) {
+		case SettingVerificationState.IN_VERIFICATION:
+			content = attribute?.title;
+			break;
+		case SettingVerificationState.NO_VERIFICATION:
+			content = 'Проведение проверок обращения';
+			break;
+		case SettingVerificationState.VERIFICATION_FINISHED:
+			content = 'Проверки обращения проведены';
+			break;
 	}
-}
+
+	return content ? <p className={styles.header}>{content}</p> : null;
+};
 
 export default VerificationHeader;
