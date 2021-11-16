@@ -45,18 +45,33 @@ const setVerificationValue = (values: AttributesValue): ThunkAction => async (di
  * @returns {ThunkAction}
  */
 const sendVerificationValue = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {verification: {code, values}} = getState();
+	const {attributes: {attributes}, verification: {code, index, values}} = getState();
 	const claimUUID = await getSubjectUuid();
 
 	try {
 		dispatch(showLoaderVerification());
 
-		const {isFullChecked, message} = await setValueAndTaskState(claimUUID, code, values);
+		const {attrCode, isFullChecked, message} = await setValueAndTaskState(claimUUID, code, values);
 
 		dispatch({
-			payload: {isFullChecked, message},
+			payload: {attrCode, isFullChecked, message},
 			type: VERIFICATION_EVENTS.SET_VERIFICATION_RESULT
 		});
+
+		const indexStep = attributes.findIndex(({code}) => attrCode === code);
+
+		if (attrCode && indexStep !== -1) {
+			dispatch(setVerificationValue([]));
+			dispatch(setIndexVerification(indexStep));
+			dispatch(setVerificationCode(attrCode));
+		} else if (!isFullChecked) {
+			const newIndex = index + 1;
+			const attribute = attributes[newIndex];
+
+			dispatch(setVerificationValue([]));
+			dispatch(setIndexVerification(newIndex));
+			dispatch(setVerificationCode(attribute.code));
+		}
 	} catch (error) {
 		dispatch(setErrorVerification(error));
 	} finally {
