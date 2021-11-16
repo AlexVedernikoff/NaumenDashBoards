@@ -114,14 +114,15 @@ const openCardObject = (value: string): ThunkAction => async (dispatch: Dispatch
  * @param {string} widgetId - уникальный идентификатор виджета
  * @returns {ThunkAction}
  */
-const openNavigationLink = (dashboardId: string, widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const openNavigationLink = (dashboardId: string, widgetId: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {context: {subjectUuid}} = getState();
 	const storageSettings = new StorageSettings(dashboardId);
 
 	widgetId ? storageSettings.setTargetWidget(widgetId) : storageSettings.setFocus(true);
 	dispatch(requestLink(dashboardId));
 
 	try {
-		const {link} = await api.instance.dashboards.getDashboardLink(dashboardId);
+		const {link} = await api.instance.dashboards.getDashboardLink(dashboardId, subjectUuid);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(dashboardId));

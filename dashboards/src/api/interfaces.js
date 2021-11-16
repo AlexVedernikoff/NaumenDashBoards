@@ -91,7 +91,7 @@ export interface DashboardsAPI {
 	getCardObject(value: DTOValue): Promise<DTOValue>;
 	getCatalogItemObject(property: DTOValue): Promise<DTOValue>;
 	getCatalogObject(property: DTOValue): Promise<DTOValue>;
-	getDashboardLink(dashboardId: string): Promise<DTOValue>;
+	getDashboardLink(dashboardId: string, subjectUUID: string): Promise<DTOValue>;
 	getDataSourceAttributes(params: DTOValue): Promise<DTOValue>;
 	getDataSources(dashboardUUID: string): Promise<DTOValue>;
 	getDynamicAttributeGroups(actualDescriptor: DTOValue): Promise<DTOValue>;
