@@ -98,7 +98,7 @@ const defaultResourceSetting = {
 		'descriptor': '',
 		'value': null
 	},
-	'type': ITEM_TYPES_FOR_ALL[0].code
+	'type': 'RESOURCE'
 };
 
 const defaultColumn = {

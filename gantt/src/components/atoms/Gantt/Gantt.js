@@ -90,25 +90,36 @@ const Gantt = (props: Props) => {
 	useEffect(() => {
 		handleHeaderClick();
 
+		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
+
 		gantt.config.open_tree_initially = true;
-		gantt.config.resize_rows = true;
-		gantt.config.grid_resize = true;
-		gantt.config.keep_grid_width = true;
 		gantt.config.columns = configureAdaptedColumns();
-		gantt.config.scroll_size = 18;
+		gantt.config.resize_rows = true;
+		gantt.config.duration_unit = 'minute';
+		gantt.config.duration_step = 1;
+		gantt.config.scroll_size = 6;
+		gantt.templates.parse_date = (dateStr) => gantt.date.convert_to_utc(new Date(dateStr));
+		gantt.ext.zoom.init(zoomConfig);
+		gantt.showLightbox = function (id) {};
+		gantt.i18n.setLocale('ru');
+		gantt.plugins({marker: true});
 		gantt.plugins({
 			tooltip: true
 		});
 		gantt.templates.tooltip_text = function (start, end, task) {
 			return task[codeMainColumn];
 		};
-		gantt.templates.parse_date = (dateStr) => gantt.date.convert_to_utc(new Date(dateStr));
-		gantt.ext.zoom.init(zoomConfig);
-		gantt.showLightbox = function (id) {};
+
+		gantt.addMarker({
+			css: 'today',
+			start_date: new Date(),
+			text: dateToStr(new Date()),
+			title: dateToStr(new Date())
+		});
+
+		generateGridWidth();
+
 		gantt.init(ganttContainer.current);
-		gantt.i18n.setLocale('ru');
-		gantt.config.duration_unit = 'minute';
-		gantt.config.duration_step = 1;
 	}, []);
 
 	useEffect(() => {
@@ -116,22 +127,21 @@ const Gantt = (props: Props) => {
 	}, [scale]);
 
 	useEffect(() => {
-		gantt.config.columns = configureAdaptedColumns();
-		gantt.render();
-	}, [columns]);
-
-	useEffect(() => {
-		gantt.clearAll();
-		gantt.parse(JSON.stringify({data: tasks}));
-		gantt.render();
-	}, [tasks]);
-
-	useEffect(() => {
 		tasks
 			.filter(task => !task.parent)
 			.map(task => task.id)
 			.forEach(taskId => rollUp ? gantt.close(taskId) : gantt.open(taskId));
-	}, [rollUp, tasks]);
+	}, [rollUp]);
+
+	useEffect(() => {
+		gantt.parse(JSON.stringify({data: tasks}));
+		gantt.render();
+
+		const dateX = gantt.posFromDate(new Date());
+		const scrollTo = Math.max(dateX - gantt.config.task_scroll_offset, 0);
+
+		gantt.scrollTo(scrollTo);
+	}, [tasks]);
 
 	const handleHeaderClick = () => {
 		gantt.attachEvent('onGridHeaderClick', function (name, e) {
@@ -141,6 +151,7 @@ const Gantt = (props: Props) => {
 				gantt.getGridColumn('button').hide = false;
 				column.hide = true;
 				column.show = false;
+				generateGridWidth();
 				gantt.render();
 			} else if (column.name === 'button') {
 				setPosition({left: e.x, top: e.y - 52});
@@ -160,10 +171,11 @@ const Gantt = (props: Props) => {
 				minWidth: 100,
 				name: item.code,
 				resize: true,
-				width: 180
+				width: '*'
 			}));
+
 			adaptedColumns[0].tree = true;
-			adaptedColumns.push({hide: !columns.find(item => !item.show), name: 'button', resize: true, width: 44});
+			adaptedColumns.push({hide: !columns.find(item => !item.show), name: 'button', width: 50});
 			adaptedColumns[0].template = task => {
 				if (!task.parent || task.type === 'RESOURCE') {
 					return '<b>' + task[adaptedColumns[0].name] + '</b>';
@@ -171,6 +183,7 @@ const Gantt = (props: Props) => {
 
 				return task[adaptedColumns[0].name];
 			};
+
 			return adaptedColumns;
 		}
 	};
@@ -179,7 +192,16 @@ const Gantt = (props: Props) => {
 		gantt.getGridColumn(column.name).hide = !value;
 		gantt.getGridColumn(column.name).show = value;
 		gantt.getGridColumn('button').hide = value && !gantt.config.columns.find(item => item.hide);
+
+		generateGridWidth();
 		gantt.render();
+	};
+
+	const generateGridWidth = () => {
+		const countColumns = gantt.config.columns.filter((col) => col.show).length;
+		const isShowButton = gantt.config.columns.some((col) => !col.hide && col.name === 'button');
+
+		gantt.config.grid_width = countColumns * 200 + (isShowButton ? 50 : 0);
 	};
 
 	const renderCheckedMenu = () => {

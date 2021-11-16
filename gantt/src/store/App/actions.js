@@ -2,7 +2,7 @@
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getContext, getDataSources, getDiagramData, getInitialSettings, getUserData, saveData} from 'utils/api';
+import {getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, saveData} from 'utils/api';
 import {v4 as uuidv4} from 'uuid';
 
 /**
@@ -42,7 +42,9 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(showLoaderData());
 
 		const {contentCode, subjectUuid} = getContext();
-		const {commonSettings, diagramKey, tasks} = await getDiagramData(contentCode, subjectUuid);
+		const user = await getCurrentUser();
+		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+		const {commonSettings, diagramKey, tasks} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
 
 		dispatch(setContentCode(contentCode));
 		dispatch(setDiagramKey(diagramKey));

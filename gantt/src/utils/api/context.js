@@ -2,13 +2,21 @@
 import {api} from './';
 import {arrayToTree} from 'utils/arrayToTree';
 import {FilterFormDescriptorDTO} from './types';
-import type {Params, Settings, Source} from 'store/app/types';
+import type {Params, Settings, Source, UserData} from 'store/app/types';
 
 const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
 	hasDynamic,
 	label,
 	value
 });
+
+/**
+ * Возвращает текущего пользователя
+ * @returns {Promise<UserData>} - пользователь
+ */
+const getCurrentUser = async (): Promise<UserData> => {
+	return api.getCurrentUser();
+};
 
 /**
  * Вычисляет uuid объекта, на карточке которого выведено ВП.
@@ -41,6 +49,8 @@ const getInitialParams = async (): Promise<Params> => {
 
 /**
  * Возвращает сохраненные настройки
+ * @param contentCode - code объекта
+ * @param subjectUuid - Uuid объекта
  * @returns {Promise<Params>} - настройки
  */
 const getInitialSettings = async (contentCode: string, subjectUuid: string): Promise<Params> => {
@@ -52,13 +62,15 @@ const getInitialSettings = async (contentCode: string, subjectUuid: string): Pro
  * Возвращает данные с учетом настроек
  * @returns {Promise<Params>} - данные
  */
-const getDiagramData = async (contentCode: string, subjectUuid: string): Promise<Params> => {
-	const data = await api.getDiagramData(contentCode, subjectUuid);
+const getDiagramData = async (contentCode: string, subjectUuid: string, user: UserData, timezone: string): Promise<Params> => {
+	const data = await api.getDiagramData(contentCode, subjectUuid, user, timezone);
 	return data;
 };
 
 /**
  * Возвращает список атрибутов для источника данных
+ * @param classFqn - код класса
+ * @param parentClassFqn - код класса родителя
  * @returns {Promise<Source>} - атрибуты
  */
 const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string = null): Promise<Source> => {
@@ -69,6 +81,8 @@ const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string 
 /**
  * Возвращает список атрибутов для источника данных по типам
  * @returns {Promise<Source>} - атрибуты
+ * @param classFqn - код класса
+ * @param types - типы
  */
 const getDataSourceAttributesByTypes = async (classFqn: string, types: string = null): Promise<Source> => {
 	const attributes = await api.getDataSourceAttributesByTypes(classFqn, types);
@@ -77,6 +91,9 @@ const getDataSourceAttributesByTypes = async (classFqn: string, types: string = 
 
 /**
  * Отправляет сохраненные настройки
+ * @param contentCode - code объекта
+ * @param subjectUuid - Uuid объекта
+ * @param data - сохраняемые пользователем настройки
  * @returns {Promise<Params>} - новые настройки
  */
 const saveData = async (subjectUuid: string, contentCode: string, data: Settings): Promise<Params> => {
@@ -86,7 +103,9 @@ const saveData = async (subjectUuid: string, contentCode: string, data: Settings
 
 /**
  * Открывает окно фильтрации
+ *
  * @returns {string} - JSON объект с настройкой фильтрации
+ * @param context
  */
 const openFilterForm = (context: FilterFormDescriptorDTO): string => {
 	return api.openFilterForm(context);
@@ -111,6 +130,7 @@ const getDataSources = async (): Promise<Params> => {
 
 export {
 	getContext,
+	getCurrentUser,
 	getDataSourceAttributes,
 	getDataSourceAttributesByTypes,
 	getDataSources,

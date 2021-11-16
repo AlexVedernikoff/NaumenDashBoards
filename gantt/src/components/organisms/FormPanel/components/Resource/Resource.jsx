@@ -104,6 +104,7 @@ const Resource = (props: Props) => {
 
 	const handleCheckboxChange = () => {
 		const {handleUpdateChildrenLevel} = props;
+
 		handleUpdateChildrenLevel(!resource.nested);
 	};
 

@@ -109,6 +109,7 @@ const Work = (props: Props) => {
 
 	const handleCheckboxChange = () => {
 		const {handleUpdateChildrenLevel} = props;
+
 		handleUpdateChildrenLevel(!work.nested);
 	};
 

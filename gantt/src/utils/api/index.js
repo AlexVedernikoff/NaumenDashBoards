@@ -3,6 +3,7 @@ import Api from './api';
 import FakeApi from './fakeApi';
 import {
 	getContext,
+	getCurrentUser,
 	getDataSourceAttributes,
 	getDataSourceAttributesByTypes,
 	getDataSources,
@@ -16,6 +17,7 @@ import {
 
 export {
 	getContext,
+	getCurrentUser,
 	getDataSourceAttributes,
 	getDataSourceAttributesByTypes,
 	getDataSources,
