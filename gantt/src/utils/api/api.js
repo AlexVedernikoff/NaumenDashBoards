@@ -1,5 +1,5 @@
 // @flow
-import {Settings} from 'src/store/App/types';
+import {Settings, UserData} from 'src/store/App/types';
 
 export default class Api {
 	constructor () {
@@ -9,6 +9,10 @@ export default class Api {
 
 	async getParams () {
 		return this.jsApi.contents.getParameters();
+	}
+
+	async getCurrentUser () {
+		return window.jsApi.getCurrentUser();
 	}
 
 	async getInitialSettings (contentCode: string, subjectUuid: string) {
@@ -39,11 +43,12 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
-	async getDiagramData (contentCode: string, subjectUuid: string) {
-		const url = `exec-post?func=modules.ganttDataSet.getGanttDiagramData&params=requestContent`;
+	async getDiagramData (contentCode: string, subjectUUID: string, user: UserData, timezone: string) {
+		const url = `exec-post?func=modules.ganttDataSet.getGanttDiagramData&params=requestContent,user`;
 		const body = {
-			contentCode: contentCode,
-			subjectUUID: subjectUuid
+			contentCode,
+			subjectUUID,
+			timezone
 		};
 		const options = {
 			body: JSON.stringify(body),

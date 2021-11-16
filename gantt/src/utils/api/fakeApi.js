@@ -10,6 +10,19 @@ export default class FakeApi {
 		};
 	}
 
+	async getCurrentUser () {
+		await new Promise(resolve => setTimeout(() => resolve(), 500));
+
+		return {
+			admin: true,
+			licensed: true,
+			login: 'UserLogin',
+			roles: ['ROLE_SUPERUSER', 'ROLE_ADMIN', 'ROLE_OPERATOR'],
+			title: 'UserTitle',
+			uuid: 'uuidUser'
+		};
+	}
+
 	async getInitialSettings (contentCode, subjectUuid) {
 		await new Promise(resolve => setTimeout(() => resolve(), 1200));
 		return getSettings;
@@ -25,7 +38,8 @@ export default class FakeApi {
 		return {email: 'test@d.ru', groupUser: USER_ROLES.MASTER, name: 'test'};
 	}
 
-	async getDiagramData (contentCode, subjectUuid) {
+
+	async getDiagramData (contentCode, subjectUuid, user, timezone) {
 		await new Promise(resolve => setTimeout(() => resolve(), 300));
 		return getDiagramData();
 	}
