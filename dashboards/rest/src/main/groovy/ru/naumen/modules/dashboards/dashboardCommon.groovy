@@ -1050,9 +1050,19 @@ class DashboardUtils
 
                     if (attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
                     {
-                        def value = fieldToRemove == 'uuid'
-                            ? getApi().utils.get(obj.uuid)[fieldToAdd]
-                            : getApi().utils.findFirst(fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase() : fieldToAdd]
+                        def value
+
+                        try
+                        {
+                            value = fieldToRemove == 'uuid'
+                                ? getApi().utils.get(obj.uuid)[fieldToAdd]
+                                : getApi().utils.findFirst( fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase() : fieldToAdd]
+                        }
+                        catch (Exception ex)
+                        {
+                            getLogger().error("no object with field ${fieldToRemove} value ${obj[fieldToRemove]}")
+                            value = null
+                        }
 
                         if (value)
                         {
