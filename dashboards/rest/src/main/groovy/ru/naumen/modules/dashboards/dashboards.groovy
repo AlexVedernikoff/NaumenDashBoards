@@ -584,7 +584,7 @@ class DashboardsService
                 it.title
             }
         }
-        return getTimerAttributesWithValue(attributes)
+        return getTimerAttributesWithValue(result)
     }
 
     /**

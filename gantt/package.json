@@ -172,7 +172,7 @@
     "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"
   },
   "scripts": {
-    "build": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
+    "build": "cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
     "build-dev": "npm run clear && cross-env NODE_ENV=development webpack --config ./webpack/config.js && npm run zip",
     "build-license": "npm run clear && cross-env NODE_ENV=production LICENSE=use webpack --config ./webpack/config.js && npm run zip",
     "clear": "rm -rf ./dist/*",

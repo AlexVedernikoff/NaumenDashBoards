@@ -1046,7 +1046,16 @@ class DashboardUtils
                 def fqn = obj.fqn
                 if(fqn && fqn != "null")
                 {
-                    Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: getApi().metainfo.checkAttributeExisting(fqn, fieldToAdd).isEmpty()
+                    Boolean attrClassHasAttrToAdd = false
+                    Boolean fqnIsNotActual = !(getApi().metainfo.getMetaClass(fqn))
+                    if(fqnIsNotActual)
+                    {
+                        return null
+                    }
+                    else
+                    {
+                        attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: getApi().metainfo.checkAttributeExisting(fqn, fieldToAdd).isEmpty()
+                    }
 
                     if (attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
                     {
@@ -1094,12 +1103,21 @@ class DashboardUtils
                 {
                     def tempDescriptor = slurper.parseText(descriptor)
 
+                    List filtersToRemove = []
                     tempDescriptor?.filters?.each { filterValue ->
                         filterValue?.each { filter ->
                             def attrType = filter.properties.attrTypeCode
                             if(filter.dtObjectWrapper)
                             {
-                                filter.dtObjectWrapper = getFilterForObjectWrapper(filter.dtObjectWrapper, attrType, needToReverse)
+                                def newDtObjectWrapper = getFilterForObjectWrapper(filter.dtObjectWrapper, attrType, needToReverse)
+                                if(newDtObjectWrapper)
+                                {
+                                    filter.dtObjectWrapper = newDtObjectWrapper
+                                }
+                                else
+                                {
+                                    filtersToRemove << filter
+                                }
                             }
                             if(filter.dtObjectWrapperList)
                             {
@@ -1108,6 +1126,13 @@ class DashboardUtils
                                 }
                             }
                         }
+                    }
+
+                    tempDescriptor?.filters = tempDescriptor?.filters.findResults { filter ->
+                        filtersToRemove.each {
+                            filter -= it
+                        }
+                        return filter ?: null
                     }
                     data?.source?.descriptor = toJson(tempDescriptor)
                 }

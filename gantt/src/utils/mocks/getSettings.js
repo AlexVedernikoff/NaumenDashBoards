@@ -4,20 +4,35 @@ export default {
 	'commonSettings': {
 		'columnSettings': [
 			{
-				'code': 'd951f959-640b-4b47-b7ed-2f0daf7867',
-				'show': true,
-				'title': 'Название'
+				"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
+				"code":"d951f959-640b-4b47-b7ed-2f0daf7867",
+				"show":true
 			},
 			{
-				'code': 'd951f7',
-				'show': true,
-				'title': 'Другое?'
+				"title":"\u0422\u0438\u043f",
+				"code":"5af9985a-79b4-42b9-9d0f-635f6d80561e",
+				"show":true
 			},
 			{
-				'code': 'd951f9',
-				'show': false,
-				'title': 'Дата'
-			}
+				"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f",
+				"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb",
+				"show":false
+			},
+			{
+				"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435\u0435",
+				"code":"d951f959-640b-4b47-b7ed-2f0daf78671",
+				"show":true
+			},
+			{
+				"title":"\u0422\u0438\u043f\u043f",
+				"code":"5af9985a-79b4-42b9-9d0f-635f6d80561e2",
+				"show":true
+			},
+			{
+				"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f\u044f",
+				"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb3",
+				"show":false
+			},
 		],
 		'rollUp': false,
 		'scale': 'DAY'
@@ -53,10 +68,6 @@ export default {
 						},
 						"code": "d951f7"
 					},
-					{
-						"attribute": null,
-						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
-					}
 				],
 				"communicationResourceAttribute": null,
 				"nested": false,
@@ -99,250 +110,5 @@ export default {
 				"level": 1,
 				"type": "RESOURCE"
 			},
-			{
-				"attributeSettings": [
-					{
-						"attribute": {
-							"code": "title",
-							"property": null,
-							"title": "test",
-							"declaredMetaClass": null,
-							"type": null,
-							"metaClassFqn": "service",
-							"sourceCode": null,
-							"ref": null,
-							"sourceName": null
-						},
-						"code": "d951f7"
-					}
-				],
-				"communicationResourceAttribute": {
-					"code": "template",
-					"declaredMetaClass": null,
-					"property": "serviceCall",
-					"metaClassFqn": "service",
-					"title": "Шаблон",
-					"ref": null,
-					"type": null,
-					"sourceCode": null,
-					"sourceName": null
-				},
-				"endWorkAttribute": null,
-				"nested": false,
-				"source": {
-					"descriptor": "",
-					"value": {
-						"label": "Шаблон задач",
-						"value": "template$templateTask"
-					}
-				},
-				"startWorkAttribute": {
-					"code": "Атрибут",
-					"declaredMetaClass": null,
-					"metaClassFqn": "service",
-					"property": "serviceCall",
-					"ref": null,
-					"sourceCode": null,
-					"title": "test date",
-					"sourceName": null,
-					"type": "date"
-				},
-				"communicationWorkAttribute": null,
-				"id": "a099865",
-				"parent": "567876543456",
-				"level": 2,
-				"type": "WORK"
-			},
-			{
-				"attributeSettings": [
-					{
-						"attribute": {
-							"code": "title",
-							"title": ""
-						},
-						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
-					}
-				],
-				"communicationResourceAttribute": null,
-				"communicationWorkAttribute": null,
-				"id": "f48bb0c2-e51f-4a03-9647-c927ad07c47d",
-				"level": 1,
-				"nested": true,
-				"parent": "123456789",
-				"source": {
-					"descriptor": "",
-					"value": {
-						"label": "1Настраиваемый лог",
-						"value": "log"
-					}
-				},
-				"type": "RESOURCE"
-			},
-			{
-				"attributeSettings": [
-					{
-						"attribute": {
-							"code": "title",
-							"title": ""
-						},
-						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
-					}
-				],
-				"communicationResourceAttribute": null,
-				"communicationWorkAttribute": null,
-				"id": "690d5937-9491-4062-b751-7c40a6df1c44",
-				"level": 2,
-				"nested": true,
-				"parent": "f48bb0c2-e51f-4a03-9647-c927ad07c47d",
-				"source": {
-					"descriptor": "",
-					"value": {
-						"label": "2Настраиваемый лог",
-						"value": "log"
-					}
-				},
-				"type": "RESOURCE"
-			},
-			{
-				"attributeSettings": [
-					{
-						"attribute": {
-							"code": "title",
-							"title": ""
-						},
-						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
-					}
-				],
-				"communicationResourceAttribute": null,
-				"communicationWorkAttribute": null,
-				"id": "3f646ff7-6180-49be-8b96-2e282e76116d",
-				"level": 2,
-				"nested": true,
-				"parent": "f48bb0c2-e51f-4a03-9647-c927ad07c47d",
-				"source": {
-					"descriptor": "",
-					"value": {
-						"label": "3Настраиваемый лог",
-						"value": "log"
-					}
-				},
-				"type": "RESOURCE"
-			},
-			{
-				"attributeSettings": [
-					{
-						"attribute": {
-							"code": "title",
-							"title": ""
-						},
-						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
-					}
-				],
-				"communicationResourceAttribute": null,
-				"communicationWorkAttribute": null,
-				"id": "db14a929-e6af-41b2-8eb5-05c8df462cc6",
-				"level": 2,
-				"nested": true,
-				"parent": "f48bb0c2-e51f-4a03-9647-c927ad07c47d",
-				"source": {
-					"descriptor": "",
-					"value": {
-						"label": "4Настраиваемый лог",
-						"value": "log"
-					}
-				},
-				"type": "RESOURCE"
-			},
-			{
-				"attributeSettings": [
-					{
-						"attribute": {
-							"code": "title",
-							"title": ""
-						},
-						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
-					}
-				],
-				"communicationResourceAttribute": null,
-				"communicationWorkAttribute": null,
-				"id": "7097f9e6-81b7-4e09-8e7e-e38905481cdf",
-				"level": 1,
-				"nested": true,
-				"parent": "123456789",
-				"source": {
-					"descriptor": "",
-					"value": null
-				},
-				"type": "RESOURCE"
-			},
-			{
-				"attributeSettings": [
-					{
-						"attribute": {
-							"code": "title",
-							"title": ""
-						},
-						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
-					}
-				],
-				"communicationResourceAttribute": null,
-				"communicationWorkAttribute": null,
-				"id": "fe7c2b14-c74d-4d34-8365-7095528c5499",
-				"level": 2,
-				"nested": true,
-				"parent": "7097f9e6-81b7-4e09-8e7e-e38905481cdf",
-				"source": {
-					"descriptor": "",
-					"value": null
-				},
-				"type": "RESOURCE"
-			},
-			{
-				"attributeSettings": [
-					{
-						"attribute": {
-							"code": "title",
-							"title": ""
-						},
-						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
-					}
-				],
-				"communicationResourceAttribute": null,
-				"communicationWorkAttribute": null,
-				"id": "11fe24ff-267c-484e-a4cc-710d5408a4d1",
-				"level": 0,
-				"nested": false,
-				"parent": "",
-				"source": {
-					"descriptor": "",
-					"value": {
-						"label": "Документ",
-						"value": "document"
-					}
-				},
-				"type": "RESOURCE"
-			},
-			{
-				"attributeSettings": [
-					{
-						"attribute": {
-							"code": "title",
-							"title": ""
-						},
-						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
-					}
-				],
-				"communicationResourceAttribute": null,
-				"communicationWorkAttribute": null,
-				"id": "a89b1ec6-00bb-4da1-baf0-2c58b3161db8",
-				"level": 0,
-				"nested": false,
-				"parent": "",
-				"source": {
-					"descriptor": "",
-					"value": null
-				},
-				"type": "RESOURCE"
-			}
 	]
 };

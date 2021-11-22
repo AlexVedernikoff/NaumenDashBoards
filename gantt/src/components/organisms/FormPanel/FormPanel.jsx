@@ -147,6 +147,7 @@ const FormPanel = (props: Props) => {
 
 	const handleCheckboxChange = () => {
 		const {settings} = props;
+
 		handleUpdateCommonSettings('rollUp', !settings.rollUp);
 	};
 
@@ -166,11 +167,13 @@ const FormPanel = (props: Props) => {
 
 	const handleAddNewColumn = () => {
 		const newColumnSettings = deepClone(columnSettingsModal);
+
 		setColumnSettingsModal([...newColumnSettings, { ...defaultColumn, code: uuidv4() }]);
 	};
 
 	const handleDeleteColumn = (index: number) => {
 		const newColumnSettings = deepClone(columnSettingsModal);
+
 		setColumnSettingsModal([...newColumnSettings.slice(0, index), ...newColumnSettings.slice(index + 1)]);
 	};
 
@@ -206,6 +209,7 @@ const FormPanel = (props: Props) => {
 
 	const handleCancel = () => {
 		const {cancelSettings} = props;
+
 		cancelSettings();
 	};
 

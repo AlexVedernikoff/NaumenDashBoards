@@ -82,7 +82,7 @@ addMethod(mixed, 'requiredAttribute', function (text: string) {
 	);
 });
 
-addMethod(mixed, 'group', function () {
+addMethod(mixed, 'group', function (field: string = DIAGRAM_FIELDS.parameter) {
 	return this.test(
 		'check-attribute-group',
 		'Группировка данного атрибута не применима к другим полям',
@@ -90,7 +90,7 @@ addMethod(mixed, 'group', function () {
 			const {data} = this.options.values;
 			const {attribute, group} = attributeData;
 			const {DAY, HOURS, MINUTES} = DATETIME_SYSTEM_GROUP;
-			const {date, dateTime} = ATTRIBUTE_TYPES;
+			const {dateTime} = ATTRIBUTE_TYPES;
 			let result = true;
 
 			if (attribute && attribute.type === dateTime && group.way === GROUP_WAYS.SYSTEM) {
@@ -98,10 +98,20 @@ addMethod(mixed, 'group', function () {
 				const useTime = groupData === HOURS || groupData === MINUTES || (groupData === DAY && format && format.includes('hh'));
 
 				if (useTime) {
-					result = data.slice(1).findIndex(({breakdown, parameters}) => {
-						const isDate = ({atrtribute}) => attribute && (attribute.type === dateTime || attribute.type === date);
-						return parameters.findIndex(isDate) !== -1 || breakdown.findIndex(isDate) !== -1;
-					}) === -1;
+					const isDateTime = ({attribute}) => attribute && attribute.type === dateTime;
+					const idx = data.slice(1).findIndex(({breakdown, parameters}) => {
+						let result = false;
+
+						if (field === DIAGRAM_FIELDS.parameter) {
+							result = !parameters.every(isDateTime);
+						} else if (field === DIAGRAM_FIELDS.breakdown) {
+							result = breakdown && !breakdown.every(isDateTime);
+						}
+
+						return result;
+					});
+
+					result = idx === -1;
 				}
 			}
 
@@ -140,7 +150,7 @@ addMethod(array, 'parameters', function () {
 		const {data} = options.values;
 		const schema = mixed().requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.parameter));
 
-		return data[0].parameters[0] === parameter ? schema.group() : schema;
+		return data[0].parameters[0] === parameter ? schema.group(DIAGRAM_FIELDS.parameter) : schema;
 	}));
 });
 
@@ -153,7 +163,7 @@ addMethod(array, 'breakdown', function () {
 		const {parent} = options;
 		const schema = mixed().requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.breakdown));
 
-		return parent[0] === item ? schema.group() : schema;
+		return parent[0] === item ? schema.group(DIAGRAM_FIELDS.breakdown) : schema;
 	})).default(getDefaultBreakdown(''));
 });
 

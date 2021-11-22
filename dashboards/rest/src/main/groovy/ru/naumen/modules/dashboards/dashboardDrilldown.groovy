@@ -1435,11 +1435,13 @@ class Link
                 default:
                     if(attr?.attrChains()?.last()?.code == 'title' && value.contains('#'))
                     {
-                        //пришло значение с uuid-ом, хотя поиск будет идти по строке
-                        //вытаскиваем строку из всего значения c uuid-ом
-                        value = LinksAttributeMarshaller.unmarshal(value).find()
+                        //пришло значение с uuid-ом, поэтому поиск будет по uuid-у
+                        values = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last(), true)
                     }
-                    values = findObjects(attr.ref, attr.property, value)
+                    else
+                    {
+                        values = findObjects(attr.ref, attr.property, value)
+                    }
                     break
             }
             checkValuesSize(values)
