@@ -16,8 +16,10 @@ const getAttributes = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
 		const attributes = await getAttributesData(claimUUID);
 		const [attribute] = attributes;
 
-		dispatch(setVerificationCode(attribute.code));
-		dispatch(setAttributes(attributes));
+		if (attribute) {
+			dispatch(setVerificationCode(attribute.code));
+			dispatch(setAttributes(attributes));
+		}
 	} catch (error) {
 		dispatch(setErrorAttributes(error));
 	} finally {
