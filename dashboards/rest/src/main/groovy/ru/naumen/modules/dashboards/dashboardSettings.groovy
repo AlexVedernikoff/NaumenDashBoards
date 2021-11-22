@@ -533,11 +533,8 @@ class DashboardSettingsService
                                 {
                                     String fieldToRemove = fieldsToRemoveAdd.fieldToRemove
                                     String fieldToAdd = fieldsToRemoveAdd.fieldToAdd
-                                    if(obj.fqn && obj.fqn != "null")
-                                    {
-                                        Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: api.metainfo.checkAttributeExisting(obj.fqn, fieldToAdd).isEmpty()
-                                        hasBadFields = hasBadFields || (obj[fieldToRemove] && attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
-                                    }
+                                    Boolean fqnIsNotNull = obj.fqn && obj.fqn != "null"
+                                    hasBadFields = hasBadFields || (obj[fieldToRemove] && fqnIsNotNull)
                                 }
                             }
                         }

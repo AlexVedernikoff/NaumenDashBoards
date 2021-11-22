@@ -31,7 +31,13 @@ const Resource = (props: Props) => {
 	const [top, setTop] = useState(null);
 
 	useEffect(() => {
-		setTop(document.getElementById('resourcesSettingsButton' + index)?.getBoundingClientRect().top);
+		const panel = document.getElementById('panel')?.getBoundingClientRect();
+		const button = document.getElementById('resourcesSettingsButton' + index)?.getBoundingClientRect();
+
+		const maxTop = panel.top + panel.height - 320;
+		const top = button.top < maxTop ? button.top : maxTop;
+
+		setTop(top);
 	}, [showModal]);
 
 	const changeSource = (source: SourceItem) => {

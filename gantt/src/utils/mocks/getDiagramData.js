@@ -18,18 +18,23 @@ const data = {
 			{
 				"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f",
 				"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb",
+				"show":false
+			},
+			{
+				"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435\u0435",
+				"code":"d951f959-640b-4b47-b7ed-2f0daf78671",
 				"show":true
 			},
 			{
-				"title":"\u041e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439",
-				"code":"c1bac275-f9ec-47b6-af1a-6288f593d0d6",
+				"title":"\u0422\u0438\u043f\u043f",
+				"code":"5af9985a-79b4-42b9-9d0f-635f6d80561e2",
 				"show":true
 			},
 			{
-				"title":"\u0421\u0442\u0430\u0442\u0443\u0441",
-				"code":"897b5f7e-c415-4225-bdc8-aa0fca5327ed",
-				"show":true
-			}
+				"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f\u044f",
+				"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb3",
+				"show":false
+			},
 		],
 		"rollUp":false,
 		"scale":"MONTH"
@@ -93,8 +98,8 @@ export const getDiagramData = () => {
 				'parent': '4567890',
 				'd951f7': '4556',
 				'text': 'Название на календарной сетке1',
-				'start_date': '2021-04-14T00:00:50+0000',
-				'end_date': '2021-04-14T00:01:50+0000',
+				'start_date': '2021-10-14T00:00:50+0000',
+				'end_date': '2021-10-14T00:01:50+0000',
 			},
 			{
 				'id': '456789jk2' + Math.random(),
