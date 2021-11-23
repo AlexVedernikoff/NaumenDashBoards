@@ -1,7 +1,8 @@
 // @flow
 import cn from 'classnames';
-import {createContextName, createSnapshot} from 'utils/export';
 import {createDefaultUser} from './helpers';
+import exporter from 'utils/export';
+import {FILE_VARIANTS} from 'utils/export/constants';
 import FormContent from './components/FormContent';
 import FormFooter from './components/FormFooter';
 import FormHeader from './components/FormHeader';
@@ -55,15 +56,14 @@ export class Form extends PureComponent<Props, State> {
 		const {format, selectedUsers} = this.state;
 		const {current} = gridRef;
 		const type = format.value;
-		const name = await createContextName();
+		const name = await exporter.createContextName();
 
 		if (current) {
-			const file = await createSnapshot({
-				container: current,
-				fragment: false,
-				name,
-				type
-			});
+			const {PNG} = FILE_VARIANTS;
+			const file = type === PNG
+				? await exporter.exportDashboardAsPNG(current)
+				: await exporter.exportDashboardAsPDF(false);
+
 			const users = selectedUsers.filter(user => user.email);
 
 			file && sendToEmails(name, type, file, users);

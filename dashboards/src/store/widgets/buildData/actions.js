@@ -7,7 +7,7 @@ import {BUILD_DATA_EVENTS} from './constants';
 import {DEFAULT_NUMBER_AXIS_FORMAT, LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
 import {editWidgetChunkData, updateWidget} from 'store/widgets/data/actions';
-import {exportSheet, getSnapshotName} from 'utils/export';
+import exporter from 'utils/export';
 import {getAllWidgets} from 'store/widgets/data/selectors';
 import {getWidgetFilterOptionsDescriptors, removeCodesFromTableData} from './helpers';
 import {INTEGER_AGGREGATION} from 'store/widgets/constants';
@@ -91,9 +91,8 @@ const exportTableToXLSX = (widget: TableWidget): ThunkAction => async (dispatch:
 
 	if (total) {
 		const data = await getDataForTableDiagram(state, widget, 1, total);
-		const name = await getSnapshotName(widget.name);
 
-		return exportSheet(name, removeCodesFromTableData(data));
+		exporter.exportWidgetAsSheet(widget, removeCodesFromTableData(data));
 	}
 };
 

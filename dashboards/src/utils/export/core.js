@@ -1,7 +1,5 @@
 // @flow
-import {FILE_VARIANTS} from './constants';
 import {isLegacyBrowser, save} from './helpers';
-import type {Options} from './types';
 
 /*
 	Браузеры типа IE и EDGE генерируют svg с невалидными, для работы html2canvas, атрибутами. Поэтому, для отображения графиков
@@ -17,7 +15,7 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 	const serializer = new XMLSerializer();
 	const temp = [];
 
-	[].forEach.call(charts, (chart) => {
+	[].forEach.call(charts, chart => {
 		const parentNode = chart.parentNode;
 		const canvas = document.createElement('canvas');
 		const ctx = canvas.getContext('2d');
@@ -79,18 +77,18 @@ const handleShowUnnecessaryElements = (container: HTMLDivElement, show: boolean)
 
 /**
  * Создает canvas элемент снимка
- * @param {Options} options - параметры создаваемого файла
+ * @param {HTMLDivElement} container - DOM элемент с графиком виджета
+ * @param {boolean} addBackgroundColor - признка добавляения подложки
+ * @param {string} backgroundColor - цвет подложки
  * @returns {Promise<Blob>}
  */
-const createImage = async (options: Options) => {
+const createImage = async (container: HTMLDivElement, addBackgroundColor: boolean = true, backgroundColor: string = '#FFF') => {
 	const {default: html2canvas} = await import('html2canvas');
-	const {container, fragment, type} = options;
-	const backgroundColor = type === FILE_VARIANTS.PNG ? '#EFF3F8' : '#FFF';
 	let config = {
 		scrollY: 0
 	};
 
-	if (!fragment) {
+	if (addBackgroundColor) {
 		config = {
 			...config,
 			backgroundColor
@@ -107,58 +105,13 @@ const createImage = async (options: Options) => {
 };
 
 /**
- * Создает снимок в pdf формате
- * @param {HTMLCanvasElement} image - canvas элемент готового изображения
- * @param {Options} options - параметры создаваемого файла
- * @returns {Promise<Blob>}
- */
-const createPdf = async (image: HTMLCanvasElement, options: Options) => {
-	const {name, toDownload} = options;
-	const {height, width} = image;
-	const orientation = width > height ? 'l' : 'p';
-	const {default: JsPDF} = await import('jspdf');
-	const pdf = new JsPDF({compress: true, orientation, unit: 'pt'});
-	const pdfHeight = pdf.internal.pageSize.getHeight();
-	const pdfWidth = pdf.internal.pageSize.getWidth();
-	const imageWidth = width < pdfWidth ? width : pdfWidth;
-	const imageHeight = imageWidth / width * height;
-	let countPage = 0;
-
-	pdf.addImage(image, 'PNG', 0, 0, imageWidth, imageHeight);
-
-	if (imageHeight > pdfHeight) {
-		countPage = Math.floor(imageHeight / pdfHeight);
-		let nextPageNumber = 1;
-
-		while (countPage > 0) {
-			const offset = pdfHeight * nextPageNumber;
-
-			pdf.addPage();
-			pdf.setPage(pdf.getNumberOfPages());
-			pdf.addImage(image, 'PNG', 0, -offset, pdfWidth, imageHeight);
-
-			nextPageNumber++;
-			countPage--;
-		}
-	}
-
-	const blob = pdf.output('blob');
-
-	if (toDownload) {
-		save(blob, name, 'pdf');
-	}
-
-	return blob;
-};
-
-/**
  * Создает снимок в png формате
  * @param {HTMLCanvasElement} image - canvas элемент изображения
- * @param {Options} options - параметры создаваемого файла
+ * @param {string} name - название файла для экспорта
+ * @param {boolean} toDownload - признак сохранения файла
  * @returns {Promise<Blob>}
  */
-const createPng = async (image: HTMLCanvasElement, options) => {
-	const {name, toDownload} = options;
+const createPng = async (image: HTMLCanvasElement, name: string = '', toDownload: boolean = false) => {
 	let blob;
 
 	if (isLegacyBrowser()) {
@@ -177,25 +130,18 @@ const createPng = async (image: HTMLCanvasElement, options) => {
 
 /**
  * Создает снимок div-элемента
- * @param {Options} options - параметры создаваемого файла
+ * @param {HTMLDivElement} container - DOM элемент с графиком виджета
+ * @param {boolean} addBackground - признак добавления подложки
+ * @param {string} name - название файла для экспорта
+ * @param {boolean} toDownload - признак сохранения файла
  * @returns {Promise<Blob>}
  */
-const createSnapshot = async (options: Options) => {
-	const {type} = options;
-	const {PDF, PNG} = FILE_VARIANTS;
-
-	const image = await createImage(options);
-
-	if (type === PNG) {
-		return createPng(image, options);
-	}
-
-	if (type === PDF) {
-		const pdfBlob = await createPdf(image, options);
-		return pdfBlob;
-	}
+const exportPNG = async (container: HTMLDivElement, addBackground: boolean = true, name: string = '', toDownload: boolean = false) => {
+	const image = await createImage(container, addBackground, '#EFF3F8');
+	return createPng(image, name, true);
 };
 
 export {
-	createSnapshot
+	createImage,
+	exportPNG
 };

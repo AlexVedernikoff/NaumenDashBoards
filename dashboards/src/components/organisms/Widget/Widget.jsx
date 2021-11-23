@@ -1,5 +1,6 @@
 // @flow
 import cn from 'classnames';
+import exporter from 'utils/export';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -23,6 +24,19 @@ export class Widget extends PureComponent<Props, State> {
 		return {
 			hasError: true
 		};
+	}
+
+	componentDidMount () {
+		const {forwardedRef, widget} = this.props;
+
+		if (forwardedRef && forwardedRef.current) {
+			exporter.registerWidgetContainer(widget.id, forwardedRef.current);
+		}
+	}
+
+	componentWillUnmount () {
+		const {widget} = this.props;
+		return exporter.unregisterWidgetContainer(widget.id);
 	}
 
 	componentDidUpdate (prevProps: Props) {

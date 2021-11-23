@@ -1,8 +1,8 @@
 // @flow
 import {BASE_BORDER_FONT_SIZE, BASE_VALUE_FONT_SIZE, CURVE_HEIGHT, TITLE_STYLE} from './constants';
 import {calcLayout, checkFontSize, getAngleByValue, normalizingRanges} from './helpers';
-import cn from 'classnames';
 import type {Components, Props, State} from './types';
+import * as CSS from './css';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'store/widgetForms/speedometerForm/constants';
 import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
 import {LEGEND_POSITIONS} from 'utils/chart';
@@ -145,28 +145,37 @@ export class Speedometer extends PureComponent<Props, State> {
 
 		if (use && show && position === RANGES_POSITION.LEGEND) {
 			const {height, legendHeight, legendPosition, legendWidth, width} = this.state;
-			const className = cn(styles.legend, {
-				[styles.display_block]: displayType === LEGEND_DISPLAY_TYPES.BLOCK,
-				[styles.display_inline]: displayType === LEGEND_DISPLAY_TYPES.INLINE,
-				[styles.position_bottom]: legendPosition === LEGEND_POSITIONS.bottom,
-				[styles.position_left]: legendPosition === LEGEND_POSITIONS.left,
-				[styles.position_right]: legendPosition === LEGEND_POSITIONS.right,
-				[styles.position_top]: legendPosition === LEGEND_POSITIONS.top,
-				[styles.text_handler_crop]: textHandler === TEXT_HANDLERS.CROP,
-				[styles.text_handler_wrap]: textHandler === TEXT_HANDLERS.WRAP
-			});
+			let classStyle = CSS.LEGEND;
+			let inlineHorizontal = false;
+			const textHandlerCrop = textHandler === TEXT_HANDLERS.CROP;
+			const textHandlerWrap = textHandler === TEXT_HANDLERS.WRAP;
+
+			if (legendPosition === LEGEND_POSITIONS.bottom) {
+				classStyle = {...classStyle, ...CSS.POSITION_BOTTOM};
+			} else if (legendPosition === LEGEND_POSITIONS.left) {
+				classStyle = {...classStyle, ...CSS.POSITION_LEFT};
+			} else if (legendPosition === LEGEND_POSITIONS.right) {
+				classStyle = {...classStyle, ...CSS.POSITION_RIGHT};
+			}
+
+			if ((legendPosition === LEGEND_POSITIONS.bottom || legendPosition === LEGEND_POSITIONS.top) && (displayType === LEGEND_DISPLAY_TYPES.INLINE)) {
+				classStyle = {...classStyle, ...CSS.DISPLAY_INLINE_HORIZONTAL};
+				inlineHorizontal = true;
+			}
+
 			const style = {
 				fontFamily,
 				fontSize,
 				height: `${legendHeight}px`,
-				width: `${legendWidth}px`
+				width: `${legendWidth}px`,
+				...classStyle
 			};
 			const normalizeRanges = normalizingRanges(data, type, Number.parseFloat(min), Number.parseFloat(max), color, formatter);
 
 			return (
 				<foreignObject height={height} width={width} x="0" y="0">
-					<div className={className} style={style}>
-						{normalizeRanges.map(this.renderLegendItem)}
+					<div style={style}>
+						{normalizeRanges.map(this.renderLegendItem(inlineHorizontal, textHandlerCrop, textHandlerWrap))}
 					</div>
 				</foreignObject>
 			);
@@ -175,14 +184,31 @@ export class Speedometer extends PureComponent<Props, State> {
 		return null;
 	};
 
-	renderLegendItem = ({color, legendText}) => {
-		const key = `label_${legendText}`;
-		return (
-			<div className={styles.legendItem} key={key}>
-				<span className={styles.legendItemBox} style={{backgroundColor: color}}></span>
-				<span>{legendText}</span>
-			</div>
-		);
+	renderLegendItem = (inlineHorizontal: boolean, crop: boolean, wrap: boolean) => {
+		let styles = CSS.LEGEND_ITEM;
+
+		if (inlineHorizontal) {
+			styles = {...styles, ...CSS.DISPLAY_INLINE_HORIZONTAL_ITEM};
+		}
+
+		if (crop) {
+			styles = {...styles, ...CSS.CROP_LEGEND_ITEM};
+		}
+
+		if (wrap) {
+			styles = {...styles, ...CSS.WRAP_LEGEND_ITEM};
+		}
+
+		return ({color, legendText}) => {
+			const key = `label_${legendText}`;
+			const stylesBox = {...CSS.LEGEND_ITEM_BOX, backgroundColor: color};
+			return (
+				<div key={key} style={styles}>
+					<span style={stylesBox}></span>
+					<span>{legendText}</span>
+				</div>
+			);
+		};
 	};
 
 	renderNeedle = () => {

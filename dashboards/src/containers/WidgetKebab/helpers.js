@@ -3,11 +3,11 @@ import type {AnyWidget, CustomFilter, DisplayMode, Widget} from 'store/widgets/d
 import api from 'api';
 import {CLEAR_FILTER} from './constants';
 import {createFilterContext, getFilterContext} from 'store/helpers';
-import {createSnapshot, FILE_VARIANTS, getSnapshotName} from 'utils/export';
 import {deepClone} from 'helpers';
 import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import type {DropDownParams, FiltersOnWidget, NavigationData, NavigationProps, Option} from './types';
+import exporter, {FILE_VARIANTS} from 'utils/export';
 import {getPartsClassFqn} from 'store/widgets/links/helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import memoize from 'memoize-one';
@@ -334,21 +334,14 @@ const clearFiltersOnWidget = (widget: Widget) => {
 
 /**
  * Экспортирует виджет через скриншот
- * @param {string} widgetName - заголовок виджета
- * @param {HTMLDivElement} element - DOM элемент с графиком виджета
+ * @param {Widget} widget - виджет
  * @param {string} type - тип экспорта
  */
-const exportScreenShot = async (widgetName: string, element: HTMLDivElement, type: $Keys<typeof FILE_VARIANTS>) => {
-	const name = await getSnapshotName(widgetName);
-
-	if (element) {
-		createSnapshot({
-			container: element,
-			fragment: true,
-			name,
-			toDownload: true,
-			type
-		});
+const exportScreenShot = async (widget: Widget, type: $Keys<typeof FILE_VARIANTS>) => {
+	if (type === FILE_VARIANTS.PNG) {
+		await exporter.exportWidgetAsPNG(widget, true);
+	} else if (type === FILE_VARIANTS.PDF) {
+		await exporter.exportWidgetAsPDF(widget, true);
 	}
 };
 
