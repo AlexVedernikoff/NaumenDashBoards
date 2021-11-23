@@ -1135,8 +1135,8 @@ class DashboardQueryWrapperUtils
      * @param diagramType - тип диаграммы
      * @return результат выборки
      */
-    static List<List> getData(RequestData requestData, Integer top, String currentUserLocale, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT,
-                              Boolean ignoreParameterLimit = false, String templateUUID = '', PaginationSettings paginationSettings = null)
+    List<List> getData(RequestData requestData, Integer top, String currentUserLocale, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT,
+                       Boolean ignoreParameterLimit = false, String templateUUID = '', PaginationSettings paginationSettings = null)
     {
         validate(requestData)
         validate(requestData.source)
@@ -1332,7 +1332,7 @@ class DashboardQueryWrapperUtils
         }
         Aggregation type = parameter.type
         String attributeType = Attribute.getAttributeType(parameter.attribute)
-        String message = messageProvider.getMessage(NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
+
         switch (attributeType)
         {
             case AttributeType.DT_INTERVAL_TYPE:
@@ -1341,6 +1341,7 @@ class DashboardQueryWrapperUtils
                     [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ]
                 }))
                 {
+                    String message = messageProvider.getMessage(NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
                     getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
@@ -1350,6 +1351,7 @@ class DashboardQueryWrapperUtils
                     (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
                      !(type in Aggregation.with { [AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ] })))
                 {
+                    String message = messageProvider.getMessage(NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
                     getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
@@ -1371,7 +1373,7 @@ class DashboardQueryWrapperUtils
         GroupType type = parameter.type
         //Смотрим на тип последнего вложенного атрибута
         String attributeType = Attribute.getAttributeType(parameter.attribute)
-        message = messageProvider.getMessage(NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
+
         switch (attributeType)
         {
             case AttributeType.DT_INTERVAL_TYPE:
@@ -1381,6 +1383,7 @@ class DashboardQueryWrapperUtils
                 }
                 if (!(type in groupTypeSet))
                 {
+                    message = messageProvider.getMessage(NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
                     return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
@@ -1390,6 +1393,7 @@ class DashboardQueryWrapperUtils
                 }
                 if (!(type in groupTypeSet))
                 {
+                    message = messageProvider.getMessage(NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
                     return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
@@ -1399,12 +1403,14 @@ class DashboardQueryWrapperUtils
                 }
                 if (!(type in groupTypeSet))
                 {
+                    message = messageProvider.getMessage(NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
                     return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break
             default:
                 if (type != GroupType.OVERLAP)
                 {
+                    message = messageProvider.getMessage(NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
                     return getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_GROUP_AND_ATTRIBUTE_TYPE_ERROR}")
                 }
                 break

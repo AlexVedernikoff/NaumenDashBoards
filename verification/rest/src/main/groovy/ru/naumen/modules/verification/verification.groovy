@@ -178,6 +178,7 @@ class VerificationService
         Boolean fullChecked = state == TaskState.FULL_CHECK
         Boolean inprogress = state == TaskState.INPROGRESS
         String message
+        String responseAttrCode
         if(fullChecked)
         {
             message = VerificationMessages.IF_TASK_STATE_FULL_CHECK
@@ -194,13 +195,17 @@ class VerificationService
         {
             message = VerificationMessages.IF_TASK_STATE_INPROGRESS
         }
+        if(attributeCode == AttributeCode.CHECK_A16 && state == TaskState.CHECK_OTHERS)
+        {
+            responseAttrCode = AttributeCode.CHECK_OTHERS
+        }
         setTaskState(task, attributeCode, state)
 
         if(attributeCode == AttributeCode.CHECK_FIN_SERV)
         {
             createClaimTask(claim, task, values.find().code)
         }
-        return new SetValueAndTaskStateResponse(fullChecked, message)
+        return new SetValueAndTaskStateResponse(fullChecked || inprogress, message, responseAttrCode)
     }
 
     /**

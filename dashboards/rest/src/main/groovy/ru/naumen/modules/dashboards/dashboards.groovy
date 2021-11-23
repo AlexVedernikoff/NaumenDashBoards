@@ -10,16 +10,27 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules.dashboards
 
+import groovy.transform.Canonical
 import groovy.transform.Field
 import groovy.transform.InheritConstructors
+import ru.naumen.core.server.script.api.IDbApi
+import ru.naumen.core.server.script.api.IListDataApi
+import ru.naumen.core.server.script.api.IMetainfoApi
+import ru.naumen.core.server.script.api.ISearchParams
+import ru.naumen.core.server.script.api.IWebApi
+import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
+import ru.naumen.core.server.script.spi.IScriptConditionsApi
+import ru.naumen.core.server.script.spi.IScriptUtils
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 
 import static groovy.json.JsonOutput.toJson
-import ru.naumen.core.server.script.api.injection.InjectApi
 import static MessageProvider.*
 
-@Field @Lazy @Delegate Dashboards dashboards = new DashboardsImpl(binding)
+@Field @Lazy @Delegate Dashboards dashboards = new DashboardsImpl(
+    binding,
+    new DashboardsService(api.utils, api.listdata, api.metainfo, api.web, api.apps, api.db, op, sp, new DashboardUtils())
+)
 
 interface Dashboards
 {
@@ -173,7 +184,14 @@ interface Dashboards
 @InheritConstructors
 class DashboardsImpl extends BaseController implements Dashboards
 {
-    DashboardsService service = DashboardsService.instance
+    private final DashboardsService service
+
+    DashboardsImpl(Binding binding, DashboardsService service)
+    {
+        super(binding)
+        this.service = service
+    }
+
 
     Object run()
     {
@@ -202,7 +220,10 @@ class DashboardsImpl extends BaseController implements Dashboards
     @Override
     String getDataSourceAttributes(requestContent)
     {
-        return toJson(service.getDataSourceAttributes(requestContent))
+        String classFqn = requestContent.classFqn
+        String parentClassFqn = requestContent.parentClassFqn
+        List<String> types = requestContent?.types
+        return toJson(service.getDataSourceAttributes(classFqn, parentClassFqn, types))
     }
 
     @Override
@@ -280,7 +301,10 @@ class DashboardsImpl extends BaseController implements Dashboards
     @Override
     String getLinkedDataSources(requestContent)
     {
-        return toJson(service.getLinkedDataSources(requestContent))
+        String classFqn = requestContent.classFqn
+        String parentClassFqn = requestContent.parentClassFqn
+        List<String> types = requestContent?.types
+        return toJson(service.getLinkedDataSources(classFqn, parentClassFqn, types))
     }
 
     @Override
@@ -304,14 +328,43 @@ class DashboardsImpl extends BaseController implements Dashboards
     }
 }
 
-@InjectApi
-@Singleton
 class DashboardsService
 {
+    private final IScriptUtils utils
+    private final IListDataApi listdata
+    private final IMetainfoApi metainfo
+    private final IWebApi web
+    private final IEmbeddedApplicationsApi apps
+    private final IDbApi db
+    private final IScriptConditionsApi op
+    private final ISearchParams sp
+    private final DashboardUtils dashboardUtils
+
+    DashboardsService(IScriptUtils utils,
+                      IListDataApi listdata,
+                      IMetainfoApi metainfo,
+                      IWebApi web,
+                      IEmbeddedApplicationsApi apps,
+                      IDbApi db,
+                      IScriptConditionsApi op,
+                      ISearchParams sp,
+                      DashboardUtils dashboardUtils)
+    {
+        this.utils = utils
+        this.listdata = listdata
+        this.metainfo = metainfo
+        this.web = web
+        this.apps = apps
+        this.db = db
+        this.op = op
+        this.sp = sp
+        this.dashboardUtils = dashboardUtils
+    }
+
     private static final String MAIN_FQN = 'abstractBO'
     private static final String LC_PARENT_FQN = 'abstractSysObj'
     private static final String LC_FQN = 'abstractEvt'
-    MessageProvider messageProvider = MessageProvider.instance
+    MessageProvider messageProvider = new MessageProvider(utils)
 
     /**
     * Отдает список источников данных с детьми
@@ -334,17 +387,17 @@ class DashboardsService
      */
     Collection<DataSourceDescriptor> getDataSourcesForUser(String dashboardUUID, IUUIDIdentifiable user)
     {
-        def dashboard = api.utils.get(dashboardUUID)
+        def dashboard = utils.get(dashboardUUID)
         def source = dashboard.dataSourceDash
         if(!source)
         {
-            def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+            def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
             String message = messageProvider.getConstant(SOURCE_NOT_FOUND_ERROR, currentUserLocale)
-            api.utils.throwReadableException("$message#${SOURCE_NOT_FOUND_ERROR}")
+            utils.throwReadableException("$message#${SOURCE_NOT_FOUND_ERROR}")
         }
         def userUUID = user?.UUID ?: dashboard?.userReports?.UUID
 
-        def descriptor = api.listdata.createListDescriptor(source.typeCode, source.code, userUUID)
+        def descriptor = listdata.createListDescriptor(source.typeCode, source.code, userUUID)
 
         // Из дескриптора по "clazz" и "cases" получается код метакласса.
         def listContent = descriptor.unwrap().content
@@ -355,8 +408,7 @@ class DashboardsService
             title: source.title,
             children: [],
             hasDynamic: false,
-            descriptor: api.listdata.listDescriptorAsJson(descriptor)
-				)
+            descriptor: listdata.listDescriptorAsJson(descriptor))
         return [totalSource]
     }
 
@@ -370,7 +422,7 @@ class DashboardsService
     {
         String classFqn = requestContent.classFqn.toString()
         List<String> types = requestContent?.types
-        def metaInfo = api.metainfo.getMetaClass(classFqn)
+        def metaInfo = metainfo.getMetaClass(classFqn)
         List attributes = types ? metaInfo?.attributes?.findResults {
             it.type.code in types ? it : null
         } : metaInfo?.attributes?.toList()
@@ -380,26 +432,24 @@ class DashboardsService
     }
 
     /**
-    * Отдает список атрибутов для источника данных
-    * @param requestContent запрос с кодом метакласса и типами атрибутов
-    * @return json список атрибутов {заголовок, код, тип атрибута}
-    */
-    Collection<Attribute> getDataSourceAttributes(requestContent)
+     * Метод получения списка атрибутов по коду метакласса
+     * @param classFqn - код метакласса
+     * @param parentClassFqn - код родительского метакласса, если есть
+     * @param types - список необходимых типов атрибутов
+     * @return список атрибутов метакласса
+     */
+    Collection<Attribute> getDataSourceAttributes(String classFqn, String parentClassFqn, List<String> types)
     {
-        String classFqn = requestContent.classFqn.toString()
-        String parentClassFqn = requestContent.parentClassFqn
-        List<String> types = requestContent?.types
-
-        def metaInfo = api.metainfo.getMetaClass(parentClassFqn ?: classFqn)
-        def metaClassTypes = parentClassFqn ? [] : api.metainfo.getTypes(classFqn)
+        def metaInfo = metainfo.getMetaClass(parentClassFqn ?: classFqn)
+        def metaClassTypes = parentClassFqn ? [] : metainfo.getTypes(classFqn)
         String attributeTitle = ""
         if (parentClassFqn && parentClassFqn != classFqn)
         {
             //источником является ссылочный атрибут верхнего источника с кодом parentClassFqn
             def attribute = metaInfo?.getAttribute(classFqn)
             String relatedMetaClass = attribute?.type?.relatedMetaClass
-            metaClassTypes = relatedMetaClass ? api.metainfo.getTypes(relatedMetaClass) : []
-            metaInfo = relatedMetaClass ? api.metainfo.getMetaClass(relatedMetaClass) : metaInfo
+            metaClassTypes = relatedMetaClass ? metainfo.getTypes(relatedMetaClass) : []
+            metaInfo = relatedMetaClass ? metainfo.getMetaClass(relatedMetaClass) : metaInfo
             attributeTitle = attribute?.title
         }
 
@@ -448,9 +498,9 @@ class DashboardsService
 
         if (currentAttribute.metaClassFqn != classFqn)
         {
-            if(api.metainfo.checkAttributeExisting(classFqn, currentAttribute.code).isEmpty())
+            if(metainfo.checkAttributeExisting(classFqn, currentAttribute.code).isEmpty())
             {
-                def metainfo = api.metainfo.getMetaClass(classFqn)
+                def metainfo = metainfo.getMetaClass(classFqn)
                 def attrByClassFqn = metainfo.getAttribute(currentAttribute.code)
                 def attrRef = currentAttribute.ref
                 Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(classFqn, currentAttribute.code, currentAttribute.type)
@@ -480,17 +530,17 @@ class DashboardsService
         String groupCode = requestContent.groupCode
         List<String> cases = requestContent.cases
         List listOfSystemAttribute = []
-        def mainMetaClass = classFqn ? api.metainfo.getMetaClass(classFqn) : null
+        def mainMetaClass = classFqn ? metainfo.getMetaClass(classFqn) : null
 
         if(cases)
         {
-            cases = cases.findResults { clazz -> return api.metainfo.getMetaClass(clazz) }
+            cases = cases.findResults { clazz -> return metainfo.getMetaClass(clazz) }
         }
         else
         {
             if(classFqn)
             {
-                cases = [api.metainfo.getMetaClass(classFqn)] + api.metainfo.getTypes(classFqn)
+                cases = [metainfo.getMetaClass(classFqn)] + metainfo.getTypes(classFqn)
             }
         }
 
@@ -499,7 +549,7 @@ class DashboardsService
         }
 
         def attrs = listOfSystemAttribute?.unique { it?.code }?.findResults {
-            Boolean attrInMainClass = classFqn ? api.metainfo.checkAttributeExisting(classFqn, it.code).isEmpty() : false
+            Boolean attrInMainClass = classFqn ? metainfo.checkAttributeExisting(classFqn, it.code).isEmpty() : false
             if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES && !isHiddenAttribute(it))
             {
                 Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(attrInMainClass ? classFqn : it.metaClass.code, it.code, it.type.code)
@@ -508,7 +558,7 @@ class DashboardsService
         }
         if(!attrs.any {it.code == 'UUID'})
         {
-            def UUIDAttr = api.metainfo.getMetaClass(classFqn).getAttribute('UUID')
+            def UUIDAttr = metainfo.getMetaClass(classFqn).getAttribute('UUID')
             Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(classFqn, UUIDAttr.code, UUIDAttr.type.code)
             UUIDAttr = buildAttribute(UUIDAttr, mainMetaClass.title, classFqn, ableForAvg)
             attrs += UUIDAttr
@@ -527,25 +577,25 @@ class DashboardsService
         String attributeType = linkAttribute.type
         if (!(attributeType in AttributeType.LINK_TYPES))
         {
-            def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+            def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
             String message = messageProvider.getMessage(NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR, currentUserLocale, attributeType: attributeType)
-            api.utils.throwReadableException("$message#${NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR}")
+            utils.throwReadableException("$message#${NOT_SUPPORTED_ATTRIBUTE_TYPE_ERROR}")
         }
 
         String attributeClassFqn = linkAttribute.property
         boolean deep = requestContent?.deep
         List<String> types = requestContent?.types ?: AttributeType.ALL_ATTRIBUTE_TYPES
 
-        def metaInfo = api.metainfo.getMetaClass(attributeClassFqn)
+        def metaInfo = metainfo.getMetaClass(attributeClassFqn)
         List attributeTypes = linkAttribute.metaClassFqn && linkAttribute.metaClassFqn != AttributeType.TOTAL_VALUE_TYPE
-            ? getPermittedTypes(api.metainfo.getMetaClass(linkAttribute.metaClassFqn), linkAttribute.code)?.toList()
+            ? getPermittedTypes(metainfo.getMetaClass(linkAttribute.metaClassFqn), linkAttribute.code)?.toList()
             : []
-        List metaInfos = attributeTypes?.collect { api.metainfo.getMetaClass(it.toString()) }
+        List metaInfos = attributeTypes?.collect { metainfo.getMetaClass(it.toString()) }
 
         if (attributeClassFqn == AttributeType.TOTAL_VALUE_TYPE)
         {
-            String metaClass = api.utils.get(TotalValueMarshaller.unmarshal(linkAttribute.code).last()).metaClass.toString()
-            metaInfo = api.metainfo.getMetaClass(metaClass)
+            String metaClass = utils.get(TotalValueMarshaller.unmarshal(linkAttribute.code).last()).metaClass.toString()
+            metaInfo = metainfo.getMetaClass(metaClass)
         }
 
         Collection<Attribute> result = [metaInfo, *metaInfos].collectMany { meta ->
@@ -560,11 +610,11 @@ class DashboardsService
 
         if (deep)
         {
-            List childrenClasses = api.metainfo.getTypes(attributeClassFqn)?.toList()
+            List childrenClasses = metainfo.getTypes(attributeClassFqn)?.toList()
 
             Collection<Attribute> attributeList = []
             childrenClasses.each {
-                def metainfo = api.metainfo.getMetaClass(it)
+                def metainfo = metainfo.getMetaClass(it)
                 def attributes = metainfo?.attributes
                 attributeList += attributes
                     ? attributes.findResults {
@@ -584,7 +634,7 @@ class DashboardsService
                 it.title
             }
         }
-        return getTimerAttributesWithValue(attributes)
+        return getTimerAttributesWithValue(result)
     }
 
     /**
@@ -599,7 +649,7 @@ class DashboardsService
         String sourceCode = requestContent.sourceCode
         def attr =  new Attribute(requestContent.attribute)
         String attributeCode = requestContent.attribute.code
-        def metaClass = api.metainfo.getMetaClass(sourceCode)
+        def metaClass = metainfo.getMetaClass(sourceCode)
         Boolean attrIsDynamic = attr.metaClassFqn.contains(AttributeType.TOTAL_VALUE_TYPE)
         Set types
         if (attr.ref)
@@ -608,7 +658,7 @@ class DashboardsService
             //на последнем месте стоит нужный нам атрибут
             String lastAttributeCode = attr.attrChains().last().code
             types = getPermittedTypes(metaClass, firstAttributeCode).toList()
-            def metaClasses = types.collect { api.metainfo.getMetaClass(it) }
+            def metaClasses = types.collect { metainfo.getMetaClass(it) }
             //по последнему атрибуту берем правильные типы дял получения данных
             types = metaClasses.collectMany {getPermittedTypes(it, lastAttributeCode).toList()}
         }
@@ -630,10 +680,10 @@ class DashboardsService
         def intermediateData = types.collectMany {classFqn -> getTop(classFqn.toString(), condition) }.unique { it.find() }
         if(uuid)
         {
-            types += intermediateData*.get(0).findResults {api.metainfo.getMetaClass(it)?.fqn}
+            types += intermediateData*.get(0).findResults {metainfo.getMetaClass(it)?.fqn}
         }
         List values = uuid
-            ? types.collectMany { classFqn -> api.utils.find(classFqn, condition + [parent: uuid]) }.unique { it?.UUID }
+            ? types.collectMany { classFqn -> utils.find(classFqn, condition + [parent: uuid]) }.unique { it?.UUID }
             : getObjects(intermediateData, count, offset)
 
         if(attrIsDynamic)
@@ -663,10 +713,10 @@ class DashboardsService
                 title   : object.title,
                 uuid    : object.UUID,
                 property: object.metaClass as String,
-                children: api.metainfo.getMetaClass(object.metaClass.id).hasAttribute('parent')
-                    ? types.sum { attrIsDynamic && !api.metainfo.getMetaClass(it.toString()).hasAttribute('parent')
-                    ? api.utils.count(object.metaClass.id, [parent: object.UUID]) as int
-                    : api.utils.count(it, [parent: object.UUID]) as int }
+                children: metainfo.getMetaClass(object.metaClass.id).hasAttribute('parent')
+                    ? types.sum { attrIsDynamic && !metainfo.getMetaClass(it.toString()).hasAttribute('parent')
+                    ? utils.count(object.metaClass.id, [parent: object.UUID]) as int
+                    : utils.count(it, [parent: object.UUID]) as int }
                     : 0
             ]
         }
@@ -686,7 +736,7 @@ class DashboardsService
 
         def attr =  new Attribute(requestContent.attribute)
         Boolean attrIsDynamic = attr.metaClassFqn.contains(AttributeType.TOTAL_VALUE_TYPE)
-        def metaClass = api.metainfo.getMetaClass(sourceCode)
+        def metaClass = metainfo.getMetaClass(sourceCode)
         def types
         if (attr.ref)
         {
@@ -694,10 +744,10 @@ class DashboardsService
             //на последнем месте стоит нужный нам атрибут
             String lastAttributeCode = attr.attrChains().last().code
             types = getPermittedTypes(metaClass, firstAttributeCode).toList()
-            def metaClasses = types.collect { api.metainfo.getMetaClass(it) }
+            def metaClasses = types.collect { metainfo.getMetaClass(it) }
             //по последнему атрибуту берем правильные типы дял получения данных
             types = metaClasses.collectMany { getPermittedTypes(it, lastAttributeCode) }.collectMany { classFqn ->
-                return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn))
+                return getPossibleParentTypes(metainfo.getMetaClass(classFqn))
             }.unique { it.getFqn()}
         }
         else
@@ -706,7 +756,7 @@ class DashboardsService
             types = attrIsDynamic
                 ? getPermittedTypes(metaClass, AttributeType.TOTAL_VALUE_TYPE)
                 : getPermittedTypes(metaClass, attributeCode).collectMany { classFqn ->
-                return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn))
+                return getPossibleParentTypes(metainfo.getMetaClass(classFqn))
             }.unique { it.getFqn()}
         }
         def bottomValues
@@ -717,7 +767,7 @@ class DashboardsService
                 : [removed: false, linkTemplate: TotalValueMarshaller.unmarshal(attributeCode).last()]
             //на первом месте стоит тип, по которому будет поиск значений
 
-            bottomValues = types.collectMany { classFqn ->api.utils.find(classFqn.toString(), condition) }
+            bottomValues = types.collectMany { classFqn ->utils.find(classFqn.toString(), condition) }
             if( attr.type in AttributeType.LINK_SET_TYPES)
             {
                 bottomValues = bottomValues.collectMany { it.value }.unique { it.UUID }.findAll {it.title.contains(value)}
@@ -731,7 +781,7 @@ class DashboardsService
         {
             def condition = removed ? [:] : [removed: false]
             bottomValues = types.collectMany {
-                api.utils.find(it.toString(), [title: op.like("%${value}%")] + condition, sp.ignoreCase())
+                utils.find(it.toString(), [title: op.like("%${value}%")] + condition, sp.ignoreCase())
             }.unique { it.UUID }
         }
         def withParentsBottoms = []
@@ -739,7 +789,7 @@ class DashboardsService
 
         def childrenInBottomValues = []
         bottomValues.each { bottom ->
-            Boolean bottomClassHasParent = api.metainfo.getMetaClass(bottom.metaClass.id).hasAttribute('parent')
+            Boolean bottomClassHasParent = metainfo.getMetaClass(bottom.metaClass.id).hasAttribute('parent')
             def parents = bottomClassHasParent && !attrIsDynamic ? getParents(bottom) : []
             if(parents)
             {
@@ -855,9 +905,9 @@ class DashboardsService
         offset?.with {
             searchParameter.offset(offset as int)
         }
-        return getAllCatalogValues(api.utils.find(classFqn, removeCondition + parentCondition, searchParameter),
-                                         classFqn,
-                                         removeCondition)
+        return getAllCatalogValues(utils.find(classFqn, removeCondition + parentCondition, searchParameter),
+                                   classFqn,
+                                   removeCondition)
     }
 
     /**
@@ -884,9 +934,9 @@ class DashboardsService
             searchParameter.offset(offset as int)
         }
 
-        return getAllCatalogValues(api.utils.find(classFqn, removeCondition + parentCondition, searchParameter),
-                                         classFqn,
-                                         removeCondition)
+        return getAllCatalogValues(utils.find(classFqn, removeCondition + parentCondition, searchParameter),
+                                   classFqn,
+                                   removeCondition)
     }
 
     /**
@@ -897,7 +947,7 @@ class DashboardsService
     List<Map> getStates(String classFqn)
     {
         classFqn -= '__Evt'
-        def types = [api.metainfo.getMetaClass(classFqn)] + api.metainfo.getTypes(classFqn)
+        def types = [metainfo.getMetaClass(classFqn)] + metainfo.getTypes(classFqn)
         def states = []
         types.each { type ->
             type?.workflow
@@ -945,12 +995,12 @@ class DashboardsService
     */
     List<Map> getMetaClasses(String classFqn)
     {
-        return api.metainfo.getMetaClass(classFqn)
-                  ?.with(this.&getChildrenMetaClass)
-                  ?.flatten()
-                  ?.collect {
-                      [title: it.title, uuid: it.code]
-                  } ?: []
+        return metainfo.getMetaClass(classFqn)
+                       ?.with(this.&getChildrenMetaClass)
+                       ?.flatten()
+                       ?.collect {
+                           [title: it.title, uuid: it.code]
+                       } ?: []
     }
 
     /**
@@ -965,11 +1015,11 @@ class DashboardsService
             def type = getDynamicAttributeType(templateUUID)
             return type ? new Attribute(
                 code: "${AttributeType.TOTAL_VALUE_TYPE}_${templateUUID}",
-                title: api.utils.get(templateUUID).title,
+                title: utils.get(templateUUID).title,
                 type: type,
                 property: AttributeType.TOTAL_VALUE_TYPE,
                 metaClassFqn: AttributeType.TOTAL_VALUE_TYPE,
-                sourceName: api.utils.get(groupUUID).title,
+                sourceName: utils.get(groupUUID).title,
                 sourceCode: groupUUID,
                 ableForAvg: type in [*AttributeType.NUMBER_TYPES, AttributeType.DT_INTERVAL_TYPE]
             ) : null
@@ -1002,13 +1052,15 @@ class DashboardsService
     }
 
     /**
-    * Метод получения связанных источников
-    * @param requestContent - тело запроса
-    * @return - список связанных источников
-    */
-    Collection<DataSource> getLinkedDataSources(requestContent)
+     * Метод получения связанных источников
+     * @param classFqn - код метакласса
+     * @param parentClassFqn - код родительского метакласса, если есть
+     * @param types - список типов
+     * @return - список связанных источников
+     */
+    Collection<DataSource> getLinkedDataSources(String classFqn, String parentClassFqn, List<String> types)
     {
-        def linkAttributes = getDataSourceAttributes(requestContent)
+        def linkAttributes = getDataSourceAttributes(classFqn, parentClassFqn, types)
         return mappingDataSource(linkAttributes, true)
     }
 
@@ -1022,7 +1074,7 @@ class DashboardsService
         if (value && ObjectMarshaller.unmarshal(value).size() > 1)
         {
             String objectUUID = ObjectMarshaller.unmarshal(value).last()
-            def link = api.web.open(objectUUID)
+            def link = web.open(objectUUID)
             return [link: link]
         }
     }
@@ -1038,29 +1090,29 @@ class DashboardsService
     {
         //n+1-й источник может быть такой же, как и первый
         //при проверке методом checkAttributeExisting вернётся пустая строка, если атрибут есть, или сообщение об ошибке
-        Boolean isParent = parentClassFqn == childClassFqn || api.metainfo.checkAttributeExisting(parentClassFqn, childClassFqn).isEmpty()
+        Boolean isParent = parentClassFqn == childClassFqn || metainfo.checkAttributeExisting(parentClassFqn, childClassFqn).isEmpty()
         return [result : isParent]
     }
 
     /**
-    * Метод формирования ссылки для перехода на дашборд
-    * @param dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
+     * Метод формирования ссылки для перехода на дашборд
+     * @param dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
      * @param user - текущий пользователь
-    * @return ссылка на на страницу с дошбордом в json-формате.
-    */
+     * @return ссылка на на страницу с дошбордом в json-формате.
+     */
     Map getDashboardLink(String dashboardCode, IUUIDIdentifiable user)
     {
-        def root = api.utils.findFirst('root', [:])
+        def root = utils.findFirst('root', [:])
         if (root.hasProperty('dashboardCode') && root.dashboardCode)
         {
             def appCode = root.dashboardCode
             def(subjectFqn, dashboardUUID) = DashboardCodeMarshaller.unmarshal(dashboardCode)
 
-            def db = api.apps.listContents(appCode).find {
+            def db = apps.listContents(appCode).find {
                 it.contentUuid == dashboardUUID && it.subjectFqn == subjectFqn
             }
-            String usedUUID = (user && user.metaClass?.toString() == subjectFqn) ? user.UUID : api.utils.findFirst(subjectFqn, ['removed': false]).UUID
-            def webApi = api.web
+            String usedUUID = (user && user.metaClass?.toString() == subjectFqn) ? user.UUID : utils.findFirst(subjectFqn, ['removed': false]).UUID
+            def webApi = web
             def link
             if(webApi.metaClass.respondsTo(webApi, 'openContent'))
             {
@@ -1071,9 +1123,9 @@ class DashboardsService
             }
             return [link: link]
         }
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         String message = messageProvider.getConstant(EMPTY_DASHBOARD_CODE_ERROR, currentUserLocale)
-        api.utils.throwReadableException("$message#${EMPTY_DASHBOARD_CODE_ERROR}")
+        utils.throwReadableException("$message#${EMPTY_DASHBOARD_CODE_ERROR}")
     }
 
     /**
@@ -1139,7 +1191,7 @@ class DashboardsService
             [
                 title   : el.title,
                 uuid    : el.UUID,
-                children: getAllCatalogValues(api.utils.find(classFqn, removeCondition + [parent: el.UUID]),
+                children: getAllCatalogValues(utils.find(classFqn, removeCondition + [parent: el.UUID]),
                                               classFqn,
                                               removeCondition)
             ]
@@ -1212,7 +1264,7 @@ class DashboardsService
     private Boolean checkForChildren(def value)
     {
         def classFqn = value.metaClass.id
-        def hasParents = api.metainfo.getMetaClass(classFqn).hasAttribute('parent')
+        def hasParents = metainfo.getMetaClass(classFqn).hasAttribute('parent')
         def fqnsToCount = []
 
         if(hasParents && classFqn != 'employee')
@@ -1223,7 +1275,7 @@ class DashboardsService
         {
             fqnsToCount << 'employee'
         }
-        return hasParents ? fqnsToCount.any{ api.utils.findFirst(it, [parent: value]) } : false
+        return hasParents ? fqnsToCount.any{ utils.findFirst(it, [parent: value]) } : false
     }
 
     /**
@@ -1234,17 +1286,17 @@ class DashboardsService
      */
     private List getAttributeTypes(String attributeCode, String sourceCode)
     {
-        return api.metainfo.getMetaClass(sourceCode).getAttribute(attributeCode).type.attributeType.permittedTypes.toList()
+        return metainfo.getMetaClass(sourceCode).getAttribute(attributeCode).type.attributeType.permittedTypes.toList()
     }
 
     private List getTop(String classFqn, Map condition)
     {
-        return getPossibleParentTypes(api.metainfo.getMetaClass(classFqn)).findResults { metaClass ->
+        return getPossibleParentTypes(metainfo.getMetaClass(classFqn)).findResults { metaClass ->
             if(metaClass)
             {
                 def parentMetaInfo = getAttributeParent(metaClass)
                 def additionalCondition = parentMetaInfo ? [parent: op.isNull()] : [:]
-                int count = api.utils.count(metaClass.code, condition + additionalCondition)
+                int count = utils.count(metaClass.code, condition + additionalCondition)
                 return [metaClass.code, condition + additionalCondition, count]
             }
         }
@@ -1252,7 +1304,7 @@ class DashboardsService
 
     private List getChildren(String classFqn, String uuid, Map condition)
     {
-        def parentType = api.utils.get(uuid).metaClass
+        def parentType = utils.get(uuid).metaClass
         return getAllInheritanceChains().findAll {
             it*.code.contains(classFqn)
         }.collect { set ->
@@ -1266,7 +1318,7 @@ class DashboardsService
                 it.code
             }
         }.flatten().collect { clazz ->
-            int count = api.utils.count(clazz, condition)
+            int count = utils.count(clazz, condition)
             [clazz, condition, count]
         }
     }
@@ -1277,11 +1329,11 @@ class DashboardsService
      */
     private Collection getAllInheritanceChains(String classFqn = MAIN_FQN)
     {
-        return api.metainfo.getMetaClass(classFqn)
-                  ?.with(this.&getChildrenMetaClass)
-                  ?.findAll(this.&getAttributeParent)
-                  ?.collect(this.&getPossibleParentTypes)
-                  ?.with(this.&getUniqueTypeSet) ?: []
+        return metainfo.getMetaClass(classFqn)
+                       ?.with(this.&getChildrenMetaClass)
+                       ?.findAll(this.&getAttributeParent)
+                       ?.collect(this.&getPossibleParentTypes)
+                       ?.with(this.&getUniqueTypeSet) ?: []
     }
 
     /**
@@ -1308,7 +1360,7 @@ class DashboardsService
             }
 
             int realCount = requiredCount < mainCount ? requiredCount : mainCount
-            def result = mainCount ? api.utils.find(classFqn, condition, sp.limit(realCount).offset(requiredOffset)) : []
+            def result = mainCount ? utils.find(classFqn, condition, sp.limit(realCount).offset(requiredOffset)) : []
             return result
         }
     }
@@ -1331,7 +1383,7 @@ class DashboardsService
     private Set getPossibleParentTypes(def classFqn)
     {
         def tail = getAttributeParent(classFqn)?.with { parentAttribute ->
-            def parentFqn = parentAttribute.type.relatedMetaClass.with(api.metainfo.&getMetaClass)
+            def parentFqn = parentAttribute.type.relatedMetaClass.with(metainfo.&getMetaClass)
             parentFqn.code == classFqn.code ? [] : getPossibleParentTypes(parentFqn)
         } ?: []
         return [classFqn] + tail
@@ -1366,20 +1418,28 @@ class DashboardsService
             (it.code == 'parent')
         }
     }
+
+    /**
+     * Метод, возвращающй флаг на то, что метакласс валиден - т.е. не архивирован
+     * @param clazz - значение метакласса
+     * @return флаг на то, что метакласс валиден - т.е. не архивирован
+     */
+    Boolean validateClazz(def clazz)
+    {
+        return !clazz?.@metaClass?.isHidden() && clazz?.@metaClass?.status?.name() != 'REMOVED'
+    }
+
     /**
      * Временное решение для получения списка метаклассов и типов
      * @param fqn код метакласса
      * @return список детей 1 уровня
      */
-    private def getMetaClassChildren(String fqn)
+    def getMetaClassChildren(String fqn)
     {
-        Closure classValidator = { clazz ->
-            !clazz.@metaClass.isHidden() && clazz.@metaClass.status.name() != 'REMOVED'
-        }
-        def  lcMetaClass = api.metainfo.getMetaClass(LC_PARENT_FQN)?.children.find { it?.code == LC_FQN }
+        def  lcMetaClass = metainfo.getMetaClass(LC_PARENT_FQN)?.children.find { it?.code == LC_FQN }
         def fqns = [lcMetaClass]
-        fqns << api.metainfo.getMetaClass(fqn)?.children?.collectMany {
-            if (classValidator.call(it))
+        fqns << metainfo.getMetaClass(fqn)?.children?.collectMany {
+            if (validateClazz(it))
             {
                 return [it]
             }
@@ -1451,7 +1511,7 @@ class DashboardsService
      */
     private List<String> getUUIDSForTemplates(String groupUUID)
     {
-        return groupUUID ? api.utils.get(groupUUID).listTempAttr*.UUID : null
+        return groupUUID ? utils.get(groupUUID).listTempAttr*.UUID : null
     }
 
     /**
@@ -1463,9 +1523,9 @@ class DashboardsService
     {
         String totalValueFormatKey = DashboardUtils.getFormatKeyForTemplateOfDynamicAttribute(templateUUID)
 
-        String dinType = api.metainfo.getMetaClass(totalValueFormatKey)
-                            ?.attributes.findResult { it.code == 'value' ? it : null}
-                            ?.getType()
+        String dinType = metainfo.getMetaClass(totalValueFormatKey)
+                                 ?.attributes.findResult { it.code == 'value' ? it : null}
+                                 ?.getType()
         dinType = dinType?.replace("'", '')?.replace('AttributeType', '')?.trim()
         dinType = replaceDynamicAttributeType(dinType)
         return (dinType in AttributeType.ALL_ATTRIBUTE_TYPES)
@@ -1484,12 +1544,12 @@ class DashboardsService
             if (filter['properties'].attrTypeCode.find() in AttributeType.LINK_TYPES) {
                 def metaClasses = filter.dtObjectWrapper.collect { [metaInfo: it?.fqn, uuid: it?.uuid] }
                 return metaClasses?.collectMany { metaClass ->
-                    boolean hasAttribute = api.metainfo.getMetaClass(metaClass.metaInfo)?.attributes.any {
+                    boolean hasAttribute = metainfo.getMetaClass(metaClass.metaInfo)?.attributes.any {
                         it.code == 'additAttrsG'
                     }
                     if (hasAttribute)
                     {
-                        return api.utils.get(metaClass.uuid).additAttrsG?.findResults {
+                        return utils.get(metaClass.uuid).additAttrsG?.findResults {
                             it.state == 'active' ? it : null
                         }
                     }
@@ -1521,18 +1581,15 @@ class DashboardsService
         def compSource = group.formInUserCat.find()
         if (routeSource)
         {
-            return [name: api.metainfo.getMetaClass(routeSource?.metaClass).title, code:
-                routeSource?.UUID]
+            return [name: metainfo.getMetaClass(routeSource?.metaClass).title, code: routeSource?.UUID]
         }
         else if (serviceSource)
         {
-            return [name: api.metainfo.getMetaClass(serviceSource?.metaClass).title, code:
-                serviceSource?.UUID]
+            return [name: metainfo.getMetaClass(serviceSource?.metaClass).title, code: serviceSource?.UUID]
         }
         else if (compSource)
         {
-            return [name: api.metainfo.getMetaClass(compSource?.metaClass).title, code:
-                compSource?.UUID]
+            return [name: metainfo.getMetaClass(compSource?.metaClass).title, code: compSource?.UUID]
         }
         return null
     }
@@ -1544,7 +1601,7 @@ class DashboardsService
      */
     private boolean checkForDynamicAttributes(String fqn)
     {
-        List types = api.metainfo.getTypes(fqn).toList() + api.metainfo.getMetaClass(fqn)
+        List types = metainfo.getTypes(fqn).toList() + metainfo.getMetaClass(fqn)
 
         List typesWithDynamic = types?.collect {
             it?.attributes?.any {
@@ -1561,7 +1618,7 @@ class DashboardsService
      */
     private String getMaxMetaCaseId(String classFqn)
     {
-        return api.db.query("select max(metaCaseId) from ${classFqn}").list().head()
+        return db.query("select max(metaCaseId) from ${classFqn}").list().head()
     }
 }
 

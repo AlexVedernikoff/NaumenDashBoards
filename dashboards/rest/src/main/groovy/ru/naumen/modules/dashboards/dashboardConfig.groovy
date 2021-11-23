@@ -14,7 +14,6 @@ package ru.naumen.modules.dashboards
 
 import com.amazonaws.util.json.Jackson
 import groovy.transform.InheritConstructors
-import ru.naumen.core.server.script.spi.ScriptServiceImpl
 import ru.naumen.core.server.script.api.injection.InjectApi
 import static groovy.json.JsonOutput.toJson
 import groovy.json.JsonSlurper
@@ -201,7 +200,7 @@ class DashboardConfigService
      */
     void compileModules(String codeApp = null)
     {
-        def scriptService = beanFactory.getBean(ScriptServiceImpl)
+        def scriptService = beanFactory.getBean('scriptServiceImpl')
         List<String> modules = [
             'dashboardCommon',
             'dashboardErrorHandler',

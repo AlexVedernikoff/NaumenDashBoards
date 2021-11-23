@@ -10,6 +10,7 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules.dashboards
 import ru.naumen.core.server.script.api.injection.InjectApi
+import ru.naumen.core.server.script.spi.IScriptUtils
 
 /**
  * Сервис работы с локализованными сообщениями
@@ -71,6 +72,13 @@ class MessageProvider
     public static final String NO_DETAIL_DATA_ERROR = 'noDetailData'
     public static final String NO_RIGHTS_ERROR = 'noRights'
 
+    private final IScriptUtils utils
+
+    MessageProvider(IScriptUtils utils)
+    {
+        this.utils = utils
+    }
+
     /**
      * Получение локализованного сообщения
      *
@@ -83,7 +91,7 @@ class MessageProvider
     String getMessage(Map bindings = [:], String messageCode, String locale)
     {
         def message = MESSAGES[messageCode][locale]
-        return message ? api.utils.processTemplate(message, bindings) : null
+        return message ? utils.processTemplate(message, bindings) : null
     }
 
     /**

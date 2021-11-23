@@ -14,14 +14,24 @@ import groovy.json.JsonSlurper
 import groovy.transform.Field
 import groovy.transform.TupleConstructor
 import groovy.transform.InheritConstructors
+import ru.naumen.core.server.script.api.IDbApi
+import ru.naumen.core.server.script.api.IKeyValueStorageApi
+import ru.naumen.core.server.script.api.IMetainfoApi
+import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
 import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
+import ru.naumen.core.server.script.spi.IScriptUtils
 import ru.naumen.core.shared.IUUIDIdentifiable
 import static MessageProvider.*
 import static groovy.json.JsonOutput.toJson
 
-@Field @Lazy @Delegate DashboardSettings dashboardSettings = new DashboardSettingsImpl(binding)
+@Field @Lazy @Delegate DashboardSettings dashboardSettings = new DashboardSettingsImpl(binding,
+                                                                                       new DashboardSettingsService(api.metainfo,
+                                                                                                                    api.apps,
+                                                                                                                    api.utils,
+                                                                                                                    api.db,
+                                                                                                                    api.keyValue))
 
 /**
  * Интерфейс главного контроллера
@@ -228,7 +238,13 @@ interface DashboardSettings
 @InheritConstructors
 class DashboardSettingsImpl extends BaseController implements DashboardSettings
 {
-    DashboardSettingsService service = DashboardSettingsService.instance
+    private final DashboardSettingsService service
+
+    DashboardSettingsImpl(Binding binding, DashboardSettingsService service)
+    {
+        super(binding)
+        this.service = service
+    }
 
     Object run()
     {
@@ -239,7 +255,17 @@ class DashboardSettingsImpl extends BaseController implements DashboardSettings
     @Override
     String getSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        return Jackson.toJsonString(service.getSettings(requestContent, user))
+        String subjectUUID = requestContent.classFqn
+        String contentCode = requestContent.contentCode
+        Boolean isPersonal = requestContent.isPersonal
+        Boolean isMobile = requestContent.isMobile
+        Boolean isForUser = requestContent.isForUser
+        return Jackson.toJsonString(service.getSettings(subjectUUID,
+                                                        contentCode,
+                                                        isPersonal,
+                                                        isMobile,
+                                                        isForUser,
+                                                        user))
     }
 
     @Override
@@ -300,12 +326,24 @@ class DashboardSettingsImpl extends BaseController implements DashboardSettings
     @Override
     String createWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        return Jackson.toJsonString(service.createWidget(requestContent, user))
+        Map<String, Object> widget = requestContent.widget
+        String subjectUUID = requestContent.classFqn
+        String contentCode = requestContent.contentCode
+        Boolean isForUser = requestContent.isForUser
+        Boolean editable = requestContent.editable
+        Boolean isPersonal = requestContent.isPersonal
+        return Jackson.toJsonString(service.createWidget(widget, subjectUUID, contentCode, isForUser, editable, isPersonal, user))
     }
     @Override
     String editWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        return Jackson.toJsonString(service.editWidget(requestContent, user))
+        Map<String, Object> widget = requestContent.widget
+        String subjectUUID = requestContent.classFqn
+        String contentCode = requestContent.contentCode
+        Boolean isForUser = requestContent.isForUser
+        Boolean editable = requestContent.editable
+        Boolean isPersonal = requestContent.isPersonal
+        return Jackson.toJsonString(service.editWidget(widget, subjectUUID, contentCode, isForUser, editable, isPersonal, user))
     }
 
     @Override
@@ -330,7 +368,9 @@ class DashboardSettingsImpl extends BaseController implements DashboardSettings
     @Override
     String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        return toJson(service.getUserData(requestContent, user))
+        String subjectUUID = requestContent.classFqn
+        String contentCode = requestContent.contentCode
+        return toJson(service.getUserData(subjectUUID, contentCode, user))
     }
 
     @Override
@@ -384,16 +424,36 @@ class DashboardSettingsImpl extends BaseController implements DashboardSettings
     }
 }
 
-@InjectApi
-@Singleton
 class DashboardSettingsService
 {
+    private final IMetainfoApi metainfo
+    private final IEmbeddedApplicationsApi apps
+    private final IScriptUtils utils
+    private final IDbApi db
+    private final IKeyValueStorageApi keyValue
+    private final DashboardUtils dashboardUtils
+
+    DashboardSettingsService(IMetainfoApi metainfo,
+                             IEmbeddedApplicationsApi apps,
+                             IScriptUtils utils,
+                             IDbApi db,
+                             IKeyValueStorageApi keyValue,
+                             DashboardUtils dashboardUtils)
+    {
+        this.metainfo = metainfo
+        this.apps = apps
+        this.utils = utils
+        this.db = db
+        this.keyValue = keyValue
+        this.dashboardUtils = dashboardUtils
+    }
+
     private static final String DASHBOARD_NAMESPACE = 'dashboards'
     private static final String OLD_GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
     private static final String ROLE_SUPERUSER = 'ROLE_SUPERUSER'
     private static ObjectMapper mapper = new ObjectMapper()
-    MessageProvider messageProvider = MessageProvider.instance
+    MessageProvider messageProvider = new MessageProvider(utils)
 
     /**
      * Получение настроек дашборда и виджетов
@@ -401,17 +461,16 @@ class DashboardSettingsService
      * @param user - текущий пользователь
      * @return настройки автообновления вместе с настройками виджетов
      */
-    DashboardSettingsClass getSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
+    DashboardSettingsClass getSettings(String subjectUUID,
+                                       String contentCode,
+                                       Boolean isPersonal,
+                                       Boolean isMobile,
+                                       Boolean isForUser,
+                                       IUUIDIdentifiable user)
     {
-        String subjectUUID = requestContent.classFqn
-        String contentCode = requestContent.contentCode
-        Boolean isPersonal = requestContent.isPersonal
-        Boolean isMobile = requestContent.isMobile
-        Boolean isForUser = requestContent.isForUser
-
         if (isPersonal && !user?.login)
         {
-            def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+            def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
             return throwPersonalDashboardNotFoundException(currentUserLocale)
         }
 
@@ -422,7 +481,7 @@ class DashboardSettingsService
         def defaultDashboard = getSettingByLogin(null, isForUser ? subjectUUID : null) ?: new DashboardSettingsClass()
         def personalDashboard = getSettingByLogin(user?.login as String, isForUser ? subjectUUID : null)
         def result
-        Map<String, Object> variableMap = [subject: api.utils.get(subjectUUID), user: user]
+        Map<String, Object> variableMap = [subject: utils.get(subjectUUID), user: user]
         if (isPersonal)
         {
             if(personalDashboard)
@@ -477,13 +536,13 @@ class DashboardSettingsService
     private void checkAndUpdateSettings(String subjectUUID, String contentCode, String login, String dashboardUUID)
     {
         String dashboardKey = generateDashboardKey(subjectUUID, contentCode, login, dashboardUUID)
-        def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
+        def dashboardSettings = keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
         DashboardSettingsClass dashboard = Jackson.fromJsonString(dashboardSettings, DashboardSettingsClass)
         if(dashboard)
         {
             Boolean widgetsDescriptorHasBadFields = false
             dashboard.widgets.each { widget ->
-                DashboardUtils.convertWidgetToNewFormat(widget)
+                dashboardUtils.convertWidgetToNewFormat(widget)
                 widgetsDescriptorHasBadFields = widgetsDescriptorHasBadFields || checkIfWidgetDescriptorHasBadFields(widget)
             }
 
@@ -496,7 +555,7 @@ class DashboardSettingsService
                     }
                     else
                     {
-                        return DashboardUtils.updateDescriptorWithCodeAndUuid(widget, false)
+                        return dashboardUtils.updateDescriptorWithCodeAndUuid(widget, false)
                     }
                 }
                 saveJsonSettings(dashboardKey, Jackson.toJsonString(dashboard), DASHBOARD_NAMESPACE)
@@ -527,17 +586,14 @@ class DashboardSettingsService
                             if(filter.dtObjectWrapper)
                             {
                                 def obj = filter.dtObjectWrapper
-                                Map fieldsToRemoveAdd = DashboardUtils.getFieldToRemoveAndFieldToAdd(obj.keySet().toList(), attrType, false)
+                                Map fieldsToRemoveAdd = dashboardUtils.getFieldToRemoveAndFieldToAdd(obj.keySet().toList(), attrType, false)
 
                                 if(fieldsToRemoveAdd)
                                 {
                                     String fieldToRemove = fieldsToRemoveAdd.fieldToRemove
                                     String fieldToAdd = fieldsToRemoveAdd.fieldToAdd
-                                    if(obj.fqn && obj.fqn != "null")
-                                    {
-                                        Boolean attrClassHasAttrToAdd = fieldToAdd == 'uuid' ?: api.metainfo.checkAttributeExisting(obj.fqn, fieldToAdd).isEmpty()
-                                        hasBadFields = hasBadFields || (obj[fieldToRemove] && attrClassHasAttrToAdd && attrType != AttributeType.STATE_TYPE)
-                                    }
+                                    Boolean fqnIsNotNull = obj.fqn && obj.fqn != "null"
+                                    hasBadFields = hasBadFields || (obj[fieldToRemove] && fqnIsNotNull)
                                 }
                             }
                         }
@@ -608,7 +664,7 @@ class DashboardSettingsService
         def group = requestContent.group as Map<String, Object>
         group = mapper.convertValue(group, CustomGroup)
 
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user.login))
         {
             return throwPersonalDashboardNotFoundException(currentUserLocale)
@@ -661,7 +717,7 @@ class DashboardSettingsService
         boolean isPersonal = requestContent.isPersonal
         Boolean isForUser = requestContent.isForUser
 
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user?.login))
         {
             return throwPersonalDashboardNotFoundException(currentUserLocale)
@@ -669,7 +725,7 @@ class DashboardSettingsService
         if (!group)
         {
             String message = messageProvider.getConstant(GROUP_SETTINGS_NULL_ERROR, currentUserLocale)
-            api.utils.throwReadableException("${message}#${GROUP_SETTINGS_NULL_ERROR}")
+            utils.throwReadableException("${message}#${GROUP_SETTINGS_NULL_ERROR}")
         }
 
         String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
@@ -714,7 +770,7 @@ class DashboardSettingsService
         boolean isPersonal = requestContent.isPersonal
         Boolean isForUser = requestContent.isForUser
 
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user?.login))
         {
             return throwPersonalDashboardNotFoundException(currentUserLocale)
@@ -760,7 +816,7 @@ class DashboardSettingsService
 
         def colorsSettings = requestContent.colorsSettings as Map<String, Object>
         colorsSettings = mapper.convertValue(colorsSettings, CustomChartSettingsData)
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user.login))
         {
             return throwPersonalDashboardNotFoundException(currentUserLocale)
@@ -816,7 +872,7 @@ class DashboardSettingsService
         boolean isPersonal = requestContent.isPersonal
         Boolean isForUser = requestContent.isForUser
 
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         if (isPersonal && !(user?.login))
         {
             return throwPersonalDashboardNotFoundException(currentUserLocale)
@@ -844,7 +900,7 @@ class DashboardSettingsService
         else
         {
             String message = messageProvider.getConstant(COLORS_NOT_CONTAINS_IN_DASHBOARD_ERROR, currentUserLocale)
-            api.utils.throwReadableException("${message}#${COLORS_NOT_CONTAINS_IN_DASHBOARD_ERROR}")
+            utils.throwReadableException("${message}#${COLORS_NOT_CONTAINS_IN_DASHBOARD_ERROR}")
         }
     }
 
@@ -858,16 +914,16 @@ class DashboardSettingsService
     {
         def dashboard = requestContent.dashboard
         def subjectUUID = dashboard.classFqn
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
 
         SourceFilter sourceFilter = new SourceFilter(requestContent.sourceFilter)
-        Collection<SourceFilter> classFqnFilters = DashboardUtils.getSourceFiltersFromStorage()
+        Collection<SourceFilter> classFqnFilters = dashboardUtils.getSourceFiltersFromStorage()
         Boolean editFilters = sourceFilter.id //проверка, редактируем ли мы фильтры
         Boolean notUniqueName = classFqnFilters.any { it.label == sourceFilter.label }
         if(notUniqueName)
         {
             String message = messageProvider.getMessage(FILTER_NAME_NOT_UNIQUE_ERROR, currentUserLocale, label: sourceFilter.label)
-            api.utils.throwReadableException("${message}#${FILTER_NAME_NOT_UNIQUE_ERROR}")
+            utils.throwReadableException("${message}#${FILTER_NAME_NOT_UNIQUE_ERROR}")
         }
         SourceFilter sourceWithTheSameFilters
         if(!editFilters)
@@ -883,10 +939,10 @@ class DashboardSettingsService
         if(sourceWithTheSameFilters)
         {
             String message = messageProvider.getMessage(FILTER_ALREADY_EXISTS_ERROR, currentUserLocale, label: sourceWithTheSameFilters.label)
-            api.utils.throwReadableException("${message}#${FILTER_ALREADY_EXISTS_ERROR}")
+            utils.throwReadableException("${message}#${FILTER_ALREADY_EXISTS_ERROR}")
         }
 
-        if(saveJsonSettings(sourceFilter.id, toJson(sourceFilter), DashboardUtils.SOURCE_NAMESPACE))
+        if(saveJsonSettings(sourceFilter.id, toJson(sourceFilter), dashboardUtils.SOURCE_NAMESPACE))
         {
             return [result: sourceFilter.id]
         }
@@ -899,7 +955,7 @@ class DashboardSettingsService
      */
     Collection getSourceFilters(String metaClass)
     {
-        Collection<SourceFilter> filtersForClassFqn = DashboardUtils.getSourceFiltersFromStorage([[key: 'value', value: metaClass]])
+        Collection<SourceFilter> filtersForClassFqn = dashboardUtils.getSourceFiltersFromStorage([[key: 'value', value: metaClass]])
         return filtersForClassFqn.collect {
             [label: it.label, descriptor: it.descriptor, id: it.id]
         }
@@ -914,7 +970,7 @@ class DashboardSettingsService
     Map deleteSourceFilters(String sourceFilterUUID, IUUIDIdentifiable user)
     {
         List dashboardKeys = getDashboardKeys()
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         Boolean widgetsUseSourceFilter = dashboardKeys.any { dashboardKey ->
             def dbSettings
             try
@@ -936,17 +992,17 @@ class DashboardSettingsService
         if(widgetsUseSourceFilter)
         {
             String message = messageProvider.getConstant(FILTER_MUST_NOT_BE_REMOVED_ERROR, currentUserLocale)
-            api.utils.throwReadableException("${message}#${FILTER_MUST_NOT_BE_REMOVED_ERROR}")
+            utils.throwReadableException("${message}#${FILTER_MUST_NOT_BE_REMOVED_ERROR}")
         }
 
-        if(deleteJsonSettings(sourceFilterUUID, DashboardUtils.SOURCE_NAMESPACE))
+        if(deleteJsonSettings(sourceFilterUUID, dashboardUtils.SOURCE_NAMESPACE))
         {
             return [result: true]
         }
         else
         {
             String message = messageProvider.getMessage(REMOVE_FILTER_FAILED_ERROR, currentUserLocale, sourceFilterUUID: sourceFilterUUID)
-            api.utils.throwReadableException("${message}#${REMOVE_FILTER_FAILED_ERROR}")
+            utils.throwReadableException("${message}#${REMOVE_FILTER_FAILED_ERROR}")
         }
     }
 
@@ -958,13 +1014,13 @@ class DashboardSettingsService
      */
     Boolean createPersonalDashboard(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         checkRightsOnEditDashboard(requestContent.editable, currentUserLocale)
         String subjectUUID = requestContent.classFqn
         if (!user?.login)
         {
             String message = messageProvider.getConstant(LOGIN_MUST_NOT_BE_NULL_ERROR, currentUserLocale)
-            api.utils.throwReadableException("${message}#${LOGIN_MUST_NOT_BE_NULL_ERROR}")
+            utils.throwReadableException("${message}#${LOGIN_MUST_NOT_BE_NULL_ERROR}")
         }
         String contentCode = requestContent.contentCode
         String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user.login as String)
@@ -976,26 +1032,26 @@ class DashboardSettingsService
 
     /**
      * Создание виджета в дашборде
-     * @param requestContent - тело запроса (classFqn, contentCode, widget, editable, isPersonal)
-     * @param user - текущий пользователь
-     * @return ключ созданного виджета
+     * @param widget - настройки виджета для создания
+     * @param subjectUUID - UUID карточки объекта
+     * @param contentCode - код контента
+     * @param isForUser - флаг на включение пользовательского режима
+     * @param editable - флаг на возможность редактирования
+     * @param isPersonal - флаг на личный дашборд
+     * @param user -  текущий пользователь
+     * @return  ключ созданного виджета
      */
-    Widget createWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
+    Widget createWidget(def widget, String subjectUUID, String contentCode, Boolean isForUser, Boolean editable, Boolean isPersonal, IUUIDIdentifiable user)
     {
-        def widget = requestContent.widget
         widget = mapper.convertValue(widget, Widget)
         Boolean widgetTypeIsNotText = widget?.type != DiagramType.TEXT
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
-        boolean isPersonal = requestContent.isPersonal
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         if (widgetTypeIsNotText)
         {
-            validateName(requestContent, null, isPersonal, user)
+            validateName(widget, subjectUUID, contentCode, isForUser, null, isPersonal, user)
         }
 
-        String subjectUUID = requestContent.classFqn
-        String contentCode = requestContent.contentCode
-        Boolean isForUser = requestContent.isForUser
-        Map<String, Object> variableMap = [subject: api.utils.get(subjectUUID), user: user]
+        Map<String, Object> variableMap = [subject: utils.get(subjectUUID), user: user]
         def widgetWithCorrectName = widgetTypeIsNotText
             ? changeTotalWidgetName(widget, variableMap)
             : changeTextInTextWidget(widget, variableMap)
@@ -1004,11 +1060,11 @@ class DashboardSettingsService
         String dashboardKey = null
         if (isPersonal)
         {
-            checkRightsOnEditDashboard(requestContent.editable, currentUserLocale)
+            checkRightsOnEditDashboard(editable, currentUserLocale)
             if (!user?.login)
             {
                 String message = messageProvider.getConstant(LOGIN_MUST_NOT_BE_NULL_ERROR, currentUserLocale)
-                api.utils.throwReadableException("${message}#${LOGIN_MUST_NOT_BE_NULL_ERROR}")
+                utils.throwReadableException("${message}#${LOGIN_MUST_NOT_BE_NULL_ERROR}")
             }
             Closure createDashboardKeyFromLogin = this.&generateDashboardKey.curry(subjectUUID, contentCode)
             dashboardKey = createDashboardKeyFromLogin(user?.login as String, isForUser ? subjectUUID : null)
@@ -1027,40 +1083,40 @@ class DashboardSettingsService
         return prepareWidgetSettings(widgetWithCorrectName, generateKey).with { totalWidget ->
             dashboardSettings.widgets += totalWidget
             saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
-            return DashboardUtils.updateDescriptorWithCodeAndUuid(totalWidget)
+            return dashboardUtils.updateDescriptorWithCodeAndUuid(totalWidget)
         }
     }
 
     /**
      * Редактирование виджета в дашборде
-     * @param requestContent - тело запроса (classFqn, contentCode, widget, editable, isPersonal)
+     * @param widget - настройки виджета для редактирования
+     * @param subjectUUID - UUID карточки объекта
+     * @param contentCode - код контента
+     * @param isForUser - флаг на включение пользовательского режима
+     * @param editable - флаг на возможность редактирования
+     * @param isPersonal - флаг на личный дашборд
      * @param user - текущий пользователь
      * @return ключ отредактированного виджета
      */
-    Widget editWidget(Map<String, Object> requestContent, IUUIDIdentifiable user)
+    Widget editWidget(def widget, String subjectUUID, String contentCode, Boolean isForUser, Boolean editable, Boolean isPersonal, IUUIDIdentifiable user)
     {
-        String subjectUUID = requestContent.classFqn
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
-        def widget = toJson(requestContent.widget)
-        widget = Jackson.fromJsonString(widget, Widget)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
+        widget = Jackson.fromJsonString(toJson(widget), Widget)
         String widgetKey = widget.id
-        Boolean isPersonal = requestContent.isPersonal
-        Boolean isForUser = requestContent.isForUser
         Boolean widgetTypeIsNotText = widget.type != DiagramType.TEXT
         if (widgetTypeIsNotText)
         {
-            validateName(requestContent, widgetKey, isPersonal, user)
+            validateName(widget, subjectUUID, contentCode, isForUser, widgetKey, isPersonal, user)
         }
 
-        Map<String, Object> variableMap = [subject: api.utils.get(subjectUUID), user: user]
+        Map<String, Object> variableMap = [subject: utils.get(subjectUUID), user: user]
         def widgetWithCorrectName = widgetTypeIsNotText
             ? changeTotalWidgetName(widget, variableMap)
             : changeTextInTextWidget(widget, variableMap)
-        String contentCode = requestContent.contentCode
         String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
         if (isPersonal)
         {
-            checkRightsOnEditDashboard(requestContent.editable, currentUserLocale)
+            checkRightsOnEditDashboard(editable, currentUserLocale)
             Closure<DashboardSettingsClass> getSettingByLogin = this.&getDashboardSetting.curry(subjectUUID, contentCode, false)
             if (user && isPersonalWidget(widgetKey, user))
             {
@@ -1073,7 +1129,7 @@ class DashboardSettingsService
                 {
                     return throwWidgetNotSavedException(currentUserLocale, key, personalDashboardKey)
                 }
-                return DashboardUtils.updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
+                return dashboardUtils.updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
             }
             else
             {
@@ -1093,7 +1149,7 @@ class DashboardSettingsService
                     {
                         return throwWidgetNotSavedException(currentUserLocale, key, personalDashboardKey)
                     }
-                    return DashboardUtils.updateDescriptorWithCodeAndUuid(totalWidget)
+                    return dashboardUtils.updateDescriptorWithCodeAndUuid(totalWidget)
                 }
             }
         }
@@ -1118,13 +1174,13 @@ class DashboardSettingsService
                 closureReplaceWidgetKey(null)
             }
             def widgetDb = setUuidInSettings(widgetWithCorrectName, widgetKey)
-            widgetDb = DashboardUtils.updateDescriptorWithCodeAndUuid(widgetDb)
+            widgetDb = dashboardUtils.updateDescriptorWithCodeAndUuid(widgetDb)
             String defaultDashboardKey = generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
             DashboardSettingsClass dashboardSettings = getDashboardSetting(defaultDashboardKey)
             dashboardSettings.widgets.removeIf { it?.id == widgetKey }
             dashboardSettings.widgets += widgetDb
             saveJsonSettings(defaultDashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
-            return DashboardUtils.updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
+            return dashboardUtils.updateDescriptorWithCodeAndUuid(widgetWithCorrectName)
         }
     }
 
@@ -1140,7 +1196,7 @@ class DashboardSettingsService
         def mobileLayouts = requestContent.mobileLayouts as Map<String, Object>
 
         String subjectUUID = requestContent.classFqn
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
 
         String contentCode = requestContent.contentCode
         boolean isPersonal = requestContent.isPersonal
@@ -1161,7 +1217,7 @@ class DashboardSettingsService
         else
         {
             String message = messageProvider.getMessage(EMPTY_LAYOUT_SETTINGS_ERROR, currentUserLocale, dashboardKey: dashboardKey)
-            api.utils.throwReadableException("${message}#${EMPTY_LAYOUT_SETTINGS_ERROR}")
+            utils.throwReadableException("${message}#${EMPTY_LAYOUT_SETTINGS_ERROR}")
         }
         return [dashboardKey: dashboardKey]
     }
@@ -1197,11 +1253,11 @@ class DashboardSettingsService
      */
     Boolean deletePersonalDashboard(String subjectUUID, String contentCode, IUUIDIdentifiable user)
     {
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         if (!user)
         {
             String message = messageProvider.getConstant(SUPER_USER_CANT_RESET_PERSONAL_DASHBOARD_ERROR, currentUserLocale)
-            api.utils.throwReadableException("${message}#${SUPER_USER_CANT_RESET_PERSONAL_DASHBOARD_ERROR}")
+            utils.throwReadableException("${message}#${SUPER_USER_CANT_RESET_PERSONAL_DASHBOARD_ERROR}")
         }
         String personalDashboardKey = generateDashboardKey(subjectUUID, contentCode, user?.login as String)
         DashboardSettingsClass personalDashboard = getDashboardSetting(personalDashboardKey)
@@ -1224,16 +1280,15 @@ class DashboardSettingsService
 
     /**
      * Получение данных о пользователе для дашборда
-     * @param requestContent - параметры запроса (classFqn, contentCode)
+     * @param subjectUUID - UUID карточки объекта
+     * @param contentCode - код контента
      * @param user - текущий пользователь
      * @return параметры пользователя
      */
-    Map getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
+    Map getUserData(String subjectUUID, String contentCode, IUUIDIdentifiable user)
     {
-        String classFqn = requestContent.classFqn
-        String contentCode = requestContent.contentCode
         String groupUser = getUserGroup(user)
-        Boolean hasPersonalDashboard = user?.login && getDashboardSetting(classFqn, contentCode, false, user.login as String)
+        Boolean hasPersonalDashboard = user?.login && getDashboardSetting(subjectUUID, contentCode, false, user.login as String)
         return [groupUser : groupUser,
                 hasPersonalDashboard: hasPersonalDashboard,
                 name: user?.title,
@@ -1246,11 +1301,11 @@ class DashboardSettingsService
      */
     List<Map> getUsers()
     {
-        return api.db.query("FROM employee WHERE email LIKE '%@%' ORDER BY email")
-                  .list()
-                  .collect { user ->
-                      [id: user.UUID, name: user.title, email: user.email]
-                  }
+        return db.query("FROM employee WHERE email LIKE '%@%' ORDER BY email")
+                 .list()
+                 .collect { user ->
+                     [id: user.UUID, name: user.title, email: user.email]
+                 }
     }
 
     /**
@@ -1259,7 +1314,7 @@ class DashboardSettingsService
      */
     List<DashboardInfo> getDashboardsAndWidgetsTree(IUUIDIdentifiable user)
     {
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         return getDashboardsUUIDAndTitle(currentUserLocale).findResults {
             String dashboardUUID = it.uuid
             String dashboardTitle = it.title
@@ -1336,7 +1391,7 @@ class DashboardSettingsService
         String subjectUUID = requestContent.classFqn
         String contentCode = requestContent.contentCode
         String widgetKey = requestContent.widgetKey
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
 
         String sourceDashboardKey = requestContent.dashboardKey
         String destinationDashboardKey = generateDashboardKey(subjectUUID, contentCode)
@@ -1408,7 +1463,7 @@ class DashboardSettingsService
         else
         {
             String message = messageProvider.getConstant(WIDGET_SETTINGS_ARE_EMPTY_ERROR, currentUserLocale)
-            api.utils.throwReadableException("${message}#${WIDGET_SETTINGS_ARE_EMPTY_ERROR}")
+            utils.throwReadableException("${message}#${WIDGET_SETTINGS_ARE_EMPTY_ERROR}")
         }
     }
 
@@ -1489,7 +1544,7 @@ class DashboardSettingsService
             }
             else
             {
-                def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+                def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
                 return throwWidgetNotSavedException(currentUserLocale, widgetKey, dashboardKey)
             }
         }
@@ -1508,7 +1563,7 @@ class DashboardSettingsService
     private throwPersonalDashboardNotFoundException(def currentUserLocale)
     {
         String message = messageProvider.getConstant(PERSONAL_DASHBOARD_NOT_FOUND_ERROR, currentUserLocale)
-        api.utils.throwReadableException("${message}#${PERSONAL_DASHBOARD_NOT_FOUND_ERROR}")
+        utils.throwReadableException("${message}#${PERSONAL_DASHBOARD_NOT_FOUND_ERROR}")
     }
 
     /**
@@ -1519,7 +1574,7 @@ class DashboardSettingsService
     private throwDashboardSettingsNotSavedException(def currentUserLocale)
     {
         String message = messageProvider.getConstant(DASHBOARD_SETTINGS_NOT_SAVED_ERROR, currentUserLocale)
-        api.utils.throwReadableException("${message}#${DASHBOARD_SETTINGS_NOT_SAVED_ERROR}")
+        utils.throwReadableException("${message}#${DASHBOARD_SETTINGS_NOT_SAVED_ERROR}")
     }
 
     /**
@@ -1530,7 +1585,7 @@ class DashboardSettingsService
     private throwGroupNotContainsInDashboardException(def currentUserLocale)
     {
         String message = messageProvider.getConstant(GROUP_NOT_CONTAINS_IN_DASHBOARD_ERROR, currentUserLocale)
-        api.utils.throwReadableException("${message}#${GROUP_NOT_CONTAINS_IN_DASHBOARD_ERROR}")
+        utils.throwReadableException("${message}#${GROUP_NOT_CONTAINS_IN_DASHBOARD_ERROR}")
     }
 
     /**
@@ -1543,7 +1598,7 @@ class DashboardSettingsService
     private throwWidgetNotSavedException(def currentUserLocale, def widgetKey, def dashboardKey)
     {
         String message = messageProvider.getMessage(WIDGET_NOT_SAVED_ERROR, currentUserLocale, widgetKey: widgetKey, dashboardKey: dashboardKey)
-        api.utils.throwReadableException("${message}#${WIDGET_NOT_SAVED_ERROR}")
+        utils.throwReadableException("${message}#${WIDGET_NOT_SAVED_ERROR}")
     }
 
     /**
@@ -1554,7 +1609,7 @@ class DashboardSettingsService
     private throwNoRightsOnRemoveWidget(def currentUserLocale)
     {
         String message = messageProvider.getConstant(NO_RIGHTS_TO_REMOVE_WIDGET_ERROR, currentUserLocale)
-        api.utils.throwReadableException("${message}#${NO_RIGHTS_TO_REMOVE_WIDGET_ERROR}")
+        utils.throwReadableException("${message}#${NO_RIGHTS_TO_REMOVE_WIDGET_ERROR}")
     }
 
     /**
@@ -1661,12 +1716,12 @@ class DashboardSettingsService
                     if(it.attribute instanceof ComputedAttr)
                     {
                         it.attribute.computeData.each { k, v ->
-                            v.attr.ableForAvg = DashboardUtils.checkIfAbleForAvg(v.attr.sourceCode, v.attr.code, v.attr.type)
+                            v.attr.ableForAvg = dashboardUtils.checkIfAbleForAvg(v.attr.sourceCode, v.attr.code, v.attr.type)
                         }
                     }
                     else
                     {
-                        it.attribute.ableForAvg = DashboardUtils.checkIfAbleForAvg(it.attribute.sourceCode, it.attribute.code, it.attribute.type)
+                        it.attribute.ableForAvg = dashboardUtils.checkIfAbleForAvg(it.attribute.sourceCode, it.attribute.code, it.attribute.type)
                     }
                 }
             }
@@ -1674,7 +1729,7 @@ class DashboardSettingsService
 
         widget?.computedAttrs?.each {
             it?.computeData?.each { k, v ->
-                v?.attr?.ableForAvg = DashboardUtils.checkIfAbleForAvg(v.attr.sourceCode, v.attr.code, v.attr.type)
+                v?.attr?.ableForAvg = dashboardUtils.checkIfAbleForAvg(v.attr.sourceCode, v.attr.code, v.attr.type)
             }
         }
 
@@ -1877,7 +1932,7 @@ class DashboardSettingsService
                 return elements ? elements?.every { it?.group?.way == Way.CUSTOM && currentCustomGroups*.subGroups?.data?.type?.flatten()*.toLowerCase()?.every {it.contains('subject') || it.contains('object')} } : false
             default:
                 String message = messageProvider.getConstant(WRONG_ARGUMENT_ERROR, currentUserLocale)
-                api.utils.throwReadableException("${message}#${WRONG_ARGUMENT_ERROR}")
+                utils.throwReadableException("${message}#${WRONG_ARGUMENT_ERROR}")
         }
     }
 
@@ -1909,7 +1964,7 @@ class DashboardSettingsService
         if (!excludeWidgetsFromDashboard(dashboardKey, [widgetKey], currentUserLocale))
         {
             String message = messageProvider.getMessage(WIDGET_NOT_REMOVED_ERROR, currentUserLocale, widgetKey: widgetKey, dashboardKey: dashboardKey)
-            api.utils.throwReadableException("${message}#${WIDGET_NOT_REMOVED_ERROR}")
+            utils.throwReadableException("${message}#${WIDGET_NOT_REMOVED_ERROR}")
         }
         return dashboardKey
     }
@@ -1940,7 +1995,7 @@ class DashboardSettingsService
                     ? newValues.find {val -> val.key  == it }.value
                     : it
                 }.join('')
-                return api.utils.processTemplate(widgetName, variableMap)
+                return utils.processTemplate(widgetName, variableMap)
             }
             catch (Exception ex)
             {
@@ -1964,7 +2019,7 @@ class DashboardSettingsService
         if (!dashboardSettings)
         {
             String message = messageProvider.getMessage(DASHBOARD_NOT_FOUND_ERROR, currentUserLocale, dashboardKey: dashboardKey)
-            api.utils.throwReadableException("${message}#${DASHBOARD_NOT_FOUND_ERROR}")
+            utils.throwReadableException("${message}#${DASHBOARD_NOT_FOUND_ERROR}")
         }
         dashboardSettings.widgets?.removeAll { it?.id in widgets }
         return saveJsonSettings(dashboardKey, toJson(dashboardSettings), DASHBOARD_NAMESPACE)
@@ -1981,7 +2036,7 @@ class DashboardSettingsService
     {
         String key = generateCode()
         Widget widget = setUuidInSettings(widgetSettings, key)
-        return DashboardUtils.updateDescriptorWithCodeAndUuid(widget)
+        return dashboardUtils.updateDescriptorWithCodeAndUuid(widget)
     }
 
     /**
@@ -2000,7 +2055,7 @@ class DashboardSettingsService
                                      String dashboardUUID = null,
                                      String oldWidgetKey = null)
     {
-        String type = api.utils.get(classFqn)?.metaClass?.toString()
+        String type = utils.get(classFqn)?.metaClass?.toString()
         def loginKeyPart = login ? "_${login}" : ''
         def dashboardKeyPart = dashboardUUID ? "_${dashboardUUID}": ''
         String uuidWidget
@@ -2114,7 +2169,7 @@ class DashboardSettingsService
      * @param login       - логин текущего пользователя
      * @return настройки дашборда
      */
-    private DashboardSettingsClass getDashboardSetting(String classFqn, String contentCode, Boolean changeDescriptor = false,  String login = null, String dashboardUUID = '')
+    DashboardSettingsClass getDashboardSetting(String classFqn, String contentCode, Boolean changeDescriptor = false,  String login = null, String dashboardUUID = '')
     {
         return getDashboardSetting(generateDashboardKey(classFqn, contentCode, login, dashboardUUID), changeDescriptor)
     }
@@ -2128,7 +2183,7 @@ class DashboardSettingsService
      */
     private String generateDashboardKey(String classFqn, String contentCode, String login = null, String dashboardUUID = '')
     {
-        String type = api.utils.get(classFqn)?.metaClass?.toString()
+        String type = utils.get(classFqn)?.metaClass?.toString()
         String loginKeyPart = login ? "_${login}" : ''
         String dashboardKeyPart = dashboardUUID ? "_${dashboardUUID}" : ''
         return "${type}_${contentCode}${loginKeyPart}${dashboardKeyPart}"
@@ -2140,15 +2195,15 @@ class DashboardSettingsService
      * @param changeDescriptor - флаг на изменение дескриптора у виджетов
      * @return настройки дашборда
      */
-    private DashboardSettingsClass getDashboardSetting(String dashboardKey, Boolean changeDescriptor = false)
+    DashboardSettingsClass getDashboardSetting(String dashboardKey, Boolean changeDescriptor = false)
     {
-        def dashboardSettings = api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
+        def dashboardSettings = keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
 
         DashboardSettingsClass dashboard = Jackson.fromJsonString(dashboardSettings, DashboardSettingsClass)
         if(dashboard)
         {
             dashboard.widgets = dashboard.widgets.findResults { w ->
-                def widget = DashboardUtils.convertWidgetToNewFormat(w)
+                def widget = dashboardUtils.convertWidgetToNewFormat(w)
                 if(widget?.type == DiagramType.TEXT)
                 {
                     return widget
@@ -2159,7 +2214,7 @@ class DashboardSettingsService
                     widget = updateWidgetIndicators(widget)
                     if(changeDescriptor)
                     {
-                        widget = DashboardUtils.updateDescriptorWithCodeAndUuid(widget)
+                        widget = dashboardUtils.updateDescriptorWithCodeAndUuid(widget)
                     }
                     return widget
                 }
@@ -2197,10 +2252,10 @@ class DashboardSettingsService
     {
         if (!checkUserOnMasterDashboard(user) && !isForUser)
         {
-            def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+            def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
             messageError = getCorrectMessageError(messageError, currentUserLocale)
             String message = messageProvider.getMessage(MUST_NOT_ADD_EDIT_WIDGET_ERROR, currentUserLocale,messageError: messageError)
-            api.utils.throwReadableException("${message}#${MUST_NOT_ADD_EDIT_WIDGET_ERROR}")
+            utils.throwReadableException("${message}#${MUST_NOT_ADD_EDIT_WIDGET_ERROR}")
         }
     }
 
@@ -2212,8 +2267,8 @@ class DashboardSettingsService
     private boolean checkUserOnMasterDashboard(IUUIDIdentifiable user)
     {
         return user?.UUID
-            ? ((OLD_GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code) ||
-               (GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code))
+            ? ((OLD_GROUP_MASTER_DASHBOARD in utils.get(user.UUID).all_Group*.code) ||
+               (GROUP_MASTER_DASHBOARD in utils.get(user.UUID).all_Group*.code))
             : true
     }
 
@@ -2226,7 +2281,7 @@ class DashboardSettingsService
         if (!editable)
         {
             String message = messageProvider.getConstant(PERSONAL_SETTINGS_DISABLED_ERROR, currentUserLocale)
-            api.utils.throwReadableException("${message}#${PERSONAL_SETTINGS_DISABLED_ERROR}")
+            utils.throwReadableException("${message}#${PERSONAL_SETTINGS_DISABLED_ERROR}")
         }
     }
 
@@ -2265,7 +2320,7 @@ class DashboardSettingsService
      */
     private Map<String, String> findJsonSettings(String keyPart, String namespace, Closure<Boolean> predicate = { key, value -> true })
     {
-        return api.keyValue.find(namespace, keyPart, predicate)
+        return keyValue.find(namespace, keyPart, predicate)
     }
 
     /**
@@ -2275,7 +2330,7 @@ class DashboardSettingsService
      */
     private String loadJsonSettings(String key, String namespace)
     {
-        return api.keyValue.get(namespace, key)
+        return keyValue.get(namespace, key)
     }
 
     /**
@@ -2286,7 +2341,7 @@ class DashboardSettingsService
      */
     private Boolean saveJsonSettings(String key, String jsonValue, String namespace)
     {
-        return api.keyValue.put(namespace, key, jsonValue)
+        return keyValue.put(namespace, key, jsonValue)
     }
 
     /**
@@ -2296,7 +2351,7 @@ class DashboardSettingsService
      */
     private Boolean deleteJsonSettings(String key, String namespace)
     {
-        return api.keyValue.delete(namespace, key)
+        return keyValue.delete(namespace, key)
     }
 
     /**
@@ -2356,7 +2411,7 @@ class DashboardSettingsService
                                          Boolean editable,
                                          IUUIDIdentifiable user)
     {
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         if (!(checkUserOnMasterDashboard(user) || editable))
         {
             return throwNoRightsOnRemoveWidget(currentUserLocale)
@@ -2377,7 +2432,7 @@ class DashboardSettingsService
             if (!res)
             {
                 String message = messageProvider.getMessage(WIDGET_NOT_REMOVED_ERROR, currentUserLocale, widgetKey: widgetKey, dashboardKey: personalDashboardKey)
-                api.utils.throwReadableException("${message}#${WIDGET_NOT_REMOVED_ERROR}")
+                utils.throwReadableException("${message}#${WIDGET_NOT_REMOVED_ERROR}")
             }
             return res
         }
@@ -2398,7 +2453,7 @@ class DashboardSettingsService
                                         Boolean isForUser)
     {
         def dashboardKeyByLogin = this.&generateDashboardKey.curry(subjectUUID, contentCode)
-        def currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+        def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         if (!user)
         {
             // значит это супер пользователь! нет персональных виджетов и персональных дашбордов
@@ -2438,7 +2493,7 @@ class DashboardSettingsService
     {
         def slurper = new groovy.json.JsonSlurper()
 
-        return api.keyValue.find(DASHBOARD_NAMESPACE, '') { key, value ->
+        return keyValue.find(DASHBOARD_NAMESPACE, '') { key, value ->
             def settings = slurper.parseText(value)
             settings.containsKey('widgets')
         }.keySet().toList()
@@ -2453,7 +2508,7 @@ class DashboardSettingsService
     private def getMapForObject(List objKeys, String namespace)
     {
         return objKeys?.collectEntries { key ->
-            def value = api.keyValue.get(namespace, key)
+            def value = keyValue.get(namespace, key)
             return value ? [ (key) : value ] : Collections.emptyMap()
         }
     }
@@ -2467,7 +2522,7 @@ class DashboardSettingsService
      */
     private def getObjectIdsFromDashboard(String namespace, String dashboardKey, String objToFind)
     {
-        def dashboard =  api.keyValue.get(namespace, dashboardKey)
+        def dashboard =  keyValue.get(namespace, dashboardKey)
         return dashboard ? fromJson(dashboard)?.get(objToFind) : null
     }
 
@@ -2491,21 +2546,24 @@ class DashboardSettingsService
      * @param user - текущий пользователь
      * @return список названий виджетов
      */
-    private void validateName(Map<String, Object> requestContent,
+    private void validateName(def widget,
+                              String subjectUUID,
+                              String contentCode,
+                              Boolean isForUser,
                               String widgetKey = null,
                               Boolean isPersonal = false,
                               IUUIDIdentifiable user = null)
     {
-        String name = requestContent?.widget?.templateName ?: requestContent?.widget?.name
+        String name = widget?.templateName ?: widget?.name
         String dashboardKey = isPersonal
-            ? generateDashboardKey(requestContent.classFqn, requestContent.contentCode, user?.login as String, requestContent.isForUser ? requestContent.classFqn : null)
-            : generateDashboardKey(requestContent.classFqn, requestContent.contentCode, null, requestContent.isForUser ? requestContent.classFqn : null)
+            ? generateDashboardKey(subjectUUID, contentCode, user?.login as String, isForUser ? subjectUUID : null)
+            : generateDashboardKey(subjectUUID, contentCode, null, isForUser ? subjectUUID : null)
         List<String> widgetsNames = getWidgetNamesFromDashboard(dashboardKey, widgetKey)
         if (name in widgetsNames)
         {
-            String currentUserLocale = DashboardUtils.getUserLocale(user?.UUID)
+            String currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
             String message = messageProvider.getMessage(NOT_UNIQUE_WIDGET_NAME_ERROR, currentUserLocale, name: name)
-            api.utils.throwReadableException("${message}#${NOT_UNIQUE_WIDGET_NAME_ERROR}")
+            utils.throwReadableException("${message}#${NOT_UNIQUE_WIDGET_NAME_ERROR}")
         }
     }
 
@@ -2515,12 +2573,12 @@ class DashboardSettingsService
      */
     private List<Map<String, String>> getDashboardsUUIDAndTitle(def currentUserLocale)
     {
-        def root = api.utils.findFirst('root', [:])
+        def root = utils.findFirst('root', [:])
 
         if (root.hasProperty('dashboardCode') && root.dashboardCode)
         {
             def appCode = root.dashboardCode
-            def contents = api.apps.listContents(appCode)
+            def contents = apps.listContents(appCode)
             if (contents)
             {
                 def res = []
@@ -2528,7 +2586,7 @@ class DashboardSettingsService
                     def fqn = content.subjectFqn
 
                     // Собираем в список типы класса fqn (необходимо для классов, пронаследованных в тип)
-                    List<String> typeFqns = api.metainfo.getTypes(fqn)?.collect { it.code } ?: []
+                    List<String> typeFqns = metainfo.getTypes(fqn)?.collect { it.code } ?: []
 
                     // Добавляем сам класс
                     res << [uuid: (DashboardCodeMarshaller.marshal(content.subjectFqn, content.contentUuid)) , title: content.contentTitle]
@@ -2542,7 +2600,7 @@ class DashboardSettingsService
             }
         }
         String message = messageProvider.getConstant(EMPTY_DASHBOARD_CODE_ERROR, currentUserLocale)
-        api.utils.throwReadableException("${message}#${EMPTY_DASHBOARD_CODE_ERROR}")
+        utils.throwReadableException("${message}#${EMPTY_DASHBOARD_CODE_ERROR}")
     }
 
     /**
@@ -2627,7 +2685,7 @@ class DashboardSettingsService
                     {
                         dataValue.source.filterId = null
                         def metaClass = dataValue.source.value.value
-                        dataValue.source.value.label = api.metainfo.getMetaClass(metaClass)?.getTitle()
+                        dataValue.source.value.label = metainfo.getMetaClass(metaClass)?.getTitle()
                     }
                 }
                 return dataValue
@@ -2680,10 +2738,10 @@ class DashboardSettingsService
             def tempResult = null
             variableIds.collect { idx ->
                 def templateVariable = variables[idx]
-                tempResult = api.utils.processTemplate("\${${templateVariable}}",  variableMap)
+                tempResult = utils.processTemplate("\${${templateVariable}}",  variableMap)
                 tempResult = tempResult.replace('[', '').replace(']', '').tokenize(',')*.trim()
                 tempResult = tempResult.collect {
-                    api.metainfo.getMetaClass(it)?.title
+                    metainfo.getMetaClass(it)?.title
                 }.toString().replace('[', '').replace(']', '')
                 widgetName = widgetName.replace("\${${templateVariable}}", tempResult)
             }
@@ -2715,7 +2773,7 @@ class DashboardSettingsService
      */
     private Boolean checkAttributeType(String code, String classFqn)
     {
-        def attributeType = api.metainfo.getMetaClass(classFqn)?.getAttribute(code)?.getType()
+        def attributeType = metainfo.getMetaClass(classFqn)?.getAttribute(code)?.getType()
         return attributeType?.toString()?.contains('caseList')
     }
 }

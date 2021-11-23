@@ -18,7 +18,8 @@ import static groovy.json.JsonOutput.toJson
 /**
  * Класс для сериализации и десериализации объектов
  */
-class DashboardMarshaller {
+class DashboardMarshallerClass
+{
 
     /**
      * Метод для замены cardObjectUuid в объекте фильтрации. Требуется для корректной работы фильтра containsSubject

@@ -28,8 +28,10 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 const isNeedsClearedValue = (attribute: Attribute, group: Group): boolean => {
 	const {dtInterval, metaClass, state} = ATTRIBUTE_TYPES;
 	const noNeedToCleanTypes = {...ATTRIBUTE_SETS.REFERENCE, dtInterval, metaClass, state};
+	const isExcludeType = getAttributeValue(attribute, 'type') in noNeedToCleanTypes && group.way === GROUP_WAYS.SYSTEM;
+	const isRefWithTitle = attribute.type in ATTRIBUTE_SETS.REFERENCE && !!(attribute.ref && attribute.ref.code === 'title');
 
-	return !(getAttributeValue(attribute, 'type') in noNeedToCleanTypes && group.way === GROUP_WAYS.SYSTEM);
+	return !(isExcludeType || isRefWithTitle);
 };
 
 /**

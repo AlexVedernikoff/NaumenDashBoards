@@ -291,4 +291,10 @@ class SetValueAndTaskStateResponse
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String message
+
+    /**
+     * Код следующего атрибута на проверку
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String attrCode
 }
