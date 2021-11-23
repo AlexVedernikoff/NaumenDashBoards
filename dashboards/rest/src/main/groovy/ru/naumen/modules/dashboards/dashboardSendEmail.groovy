@@ -56,7 +56,7 @@ class DashboardSendEmailImpl extends BaseController implements DashboardSendEmai
 @Singleton
 class DashboardSendEmailService
 {
-    MessageProvider messageProvider = MessageProvider.instance
+    MessageProvider messageProvider = new MessageProvider(api.utils)
     /**
      * Метод отправки сообщений на почту
      * @param request - запрос на отправку скрина с дашбордом по почте
@@ -70,7 +70,7 @@ class DashboardSendEmailService
         users.each {user ->
             if (!user?.email)
             {
-                String locale = DashboardUtils.getUserLocale(CurrentUserHolder.currentUser.get()?.UUID)
+                String locale = new DashboardUtils().getUserLocale(CurrentUserHolder.currentUser.get()?.UUID)
                 String message = messageProvider.getConstant(USER_EMAIL_IS_NULL_OR_EMPTY_ERROR, locale)
                 api.utils.throwReadableException("$message#${USER_EMAIL_IS_NULL_OR_EMPTY_ERROR}")
             }

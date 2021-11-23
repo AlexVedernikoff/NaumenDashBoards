@@ -267,9 +267,9 @@ enum NumberPosition
  */
 enum FormatType
 {
-   LABEL_FORMAT,
-   NUMBER_FORMAT,
-   INTEGER_FORMAT
+    LABEL_FORMAT,
+    NUMBER_FORMAT,
+    INTEGER_FORMAT
 }
 
 /**
@@ -519,7 +519,7 @@ class DashboardUtils
      * @param offsetUTCMinutesFromBrowser - смещение в минутах относительно 0 часового пояса, полученное с фронта
      * @return смещение в минутах для вычисления запросов в БД
      */
-    static Integer getOffsetUTCMinutes(String userUUID, Integer offsetUTCMinutesFromBrowser)
+    Integer getOffsetUTCMinutes(String userUUID, Integer offsetUTCMinutesFromBrowser)
     {
         final Integer MS_IN_MINUTES = 60000
         Integer offset
@@ -527,7 +527,7 @@ class DashboardUtils
         TimeZone tzServer = TimeZone.getDefault()        // Серверный ЧП (базы данных).
 
         // Настройка пользователя на платформе.
-        def tzUserAPI = getApi().employee.getTimeZone(userUUID)
+        def tzUserAPI = api.employee.getTimeZone(userUUID)
         TimeZone tzUser = tzUserAPI ? TimeZone.getTimeZone(tzUserAPI?.code) : null
 
         // Если на платформе не задан часовой пояс у пользователя, получаем смещение по ЧП с фронта.
@@ -953,17 +953,17 @@ class DashboardUtils
      * @param subjectUUID - уникальный идентификатор пользователя
      * @return локаль для пользователя
      */
-    static getUserLocale(String userUuid)
+    String getUserLocale(String userUuid)
     {
         def userLocale
         if (userUuid)
         {
-            userLocale = getApi().employee.getPersonalSettings(userUuid).locale
+            userLocale = api.employee.getPersonalSettings(userUuid).locale
         }
 
         if (!userLocale)
         {
-            userLocale = getApi().employee.getPersonalSettings('superUser$naumen').locale ?: 'ru'
+            userLocale = api.employee.getPersonalSettings('superUser$naumen').locale ?: 'ru'
         }
         return userLocale
     }
@@ -1693,7 +1693,7 @@ class ExceptionMessageMarshaller
         def(message, type) = value ? value.tokenize(delimiter) : []
         if(message?.contains('У Вас нет прав') || message?.contains('You don\'t have permissions') || message?.contains('Sie haben keine Berechtigung'))
         {
-            String locale = DashboardUtils.getUserLocale(CurrentUserHolder.currentUser.get()?.UUID)
+            String locale = new DashboardUtils().getUserLocale(CurrentUserHolder.currentUser.get()?.UUID)
             message = MessageProvider.instance.getConstant(MessageProvider.NO_RIGHTS_ERROR, locale)
             type = MessageProvider.NO_RIGHTS_ERROR
         }
