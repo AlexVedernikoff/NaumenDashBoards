@@ -68,9 +68,16 @@ const sendVerificationValue = (): ThunkAction => async (dispatch: Dispatch, getS
 			const newIndex = index + 1;
 			const attribute = attributes[newIndex];
 
-			dispatch(setVerificationValue([]));
-			dispatch(setIndexVerification(newIndex));
-			dispatch(setVerificationCode(attribute.code));
+			if (attribute) {
+				dispatch(setVerificationValue([]));
+				dispatch(setIndexVerification(newIndex));
+				dispatch(setVerificationCode(attribute.code));
+			} else {
+				dispatch({
+					payload: {finish: true},
+					type: VERIFICATION_EVENTS.SET_VERIFICATION_RESULT
+				});
+			}
 		}
 	} catch (error) {
 		dispatch(setErrorVerification(error));

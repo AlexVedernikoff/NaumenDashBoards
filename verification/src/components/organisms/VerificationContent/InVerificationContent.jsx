@@ -11,6 +11,8 @@ import styles from './styles.less';
 
 export class VerificationContent extends PureComponent<Props> {
 	checkRenderTypeField = ({code, listType, values}: AttributesData) => {
+		const CHECKMARK = <>&#10004;</>;
+
 		return values.map((value: AttributesValue) => {
 			switch (listType) {
 				case AttributesTypeList.RADIO:
@@ -18,7 +20,7 @@ export class VerificationContent extends PureComponent<Props> {
 				case AttributesTypeList.CHECK:
 					return this.renderCheckboxField(value, code);
 				default:
-					return null;
+					return <p>{CHECKMARK} {value.title}</p>;
 			}
 		});
 	};
@@ -95,12 +97,22 @@ export class VerificationContent extends PureComponent<Props> {
 			);
 		}
 
+		if (verification?.finish) {
+			return (
+				<div className={styles.content}>
+					{this.checkRenderTypeField({code: verification.code, values: verification.values})}
+				</div>
+			);
+		}
+
 		if (attribute) {
+			const disabled = verification.code === 'checkFinServ' && !verification.values.length;
+
 			return (
 				<div className={styles.content}>
 					{this.checkRenderTypeField(attribute)}
 					<FormField small>
-						<Button onClick={this.handleNextVerification}>Проверка проведена</Button>
+						<Button disabled={disabled} onClick={this.handleNextVerification}>Проверка проведена</Button>
 					</FormField>
 				</div>
 			);
