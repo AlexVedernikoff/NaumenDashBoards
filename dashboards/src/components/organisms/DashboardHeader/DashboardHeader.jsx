@@ -1,12 +1,13 @@
 // @flow
+
 import AutoUpdateButton from 'containers/AutoUpdateButton';
 import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import ButtonGroup from 'components/atoms/ButtonGroup';
-import {createContextName} from 'utils/export/helpers';
-import {createSnapshot} from 'utils/export';
 import {DASHBOARD_HEADER_HEIGHT, EXPORT_LIST} from './constants';
 import DropDownButton from './components/DropDownButton';
 import ExportByEmailButton from './components/ExportByEmailButton';
+import exporter from 'utils/export';
+import {FILE_VARIANTS} from 'utils/export/constants';
 import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/WidgetsGrid/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
@@ -50,15 +51,15 @@ export class DashboardHeader extends Component<Props, State> {
 
 	handleExportDownload = async (type: string) => {
 		const {current} = gridRef;
-		const name = await createContextName();
 
 		if (current) {
-			await createSnapshot({
-				container: current,
-				name,
-				toDownload: true,
-				type
-			});
+			const {PDF, PNG} = FILE_VARIANTS;
+
+			if (type === PNG) {
+				await exporter.exportDashboardAsPNG(current, true);
+			} else if (type === PDF) {
+				await exporter.exportDashboardAsPDF(true);
+			}
 		}
 	};
 
@@ -79,19 +80,17 @@ export class DashboardHeader extends Component<Props, State> {
 		</NavItem>
 	);
 
-	renderControls = () => {
-		return (
-			<ul className={styles.nav}>
-				{this.renderAutoUpdateButton()}
-				{this.renderRefreshButton()}
-				{this.renderDownloadExportButton()}
-				{this.renderMailExportButton()}
-				{this.renderRemoveButton()}
-				{this.renderSaveSelfButton()}
-				{this.renderModeButton()}
-			</ul>
-		);
-	};
+	renderControls = () => (
+		<ul className={styles.nav}>
+			{this.renderAutoUpdateButton()}
+			{this.renderRefreshButton()}
+			{this.renderDownloadExportButton()}
+			{this.renderMailExportButton()}
+			{this.renderRemoveButton()}
+			{this.renderSaveSelfButton()}
+			{this.renderModeButton()}
+		</ul>
+	);
 
 	renderDisplayModeButton = () => {
 		const {isEditableContext, layoutMode, user} = this.props;

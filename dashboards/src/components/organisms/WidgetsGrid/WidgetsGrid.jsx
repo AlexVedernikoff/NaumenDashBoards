@@ -7,6 +7,7 @@ import ContextMenu from 'components/molecules/ContextMenu';
 import {debounce} from 'helpers';
 import {DESKTOP_MK_WIDTH, GRID_PROPS, gridRef} from './constants';
 import type {DivRef, Ref} from 'components/types';
+import exporter from 'utils/export';
 import {getLayoutWidgets} from 'store/widgets/helpers';
 import GridItem from './components/Item';
 import {Item as MenuItem} from 'rc-menu';
@@ -57,6 +58,7 @@ export class WidgetsGrid extends Component<Props, State> {
 
 	componentDidMount () {
 		const {editableDashboard, isUserMode, layoutMode, layouts, user} = this.props;
+		const {lg} = layouts;
 
 		if (editableDashboard && !isUserMode && user.role === USER_ROLES.REGULAR) {
 			const beforeUnloadEvent = event => {
@@ -68,11 +70,10 @@ export class WidgetsGrid extends Component<Props, State> {
 		}
 
 		if (layoutMode === LAYOUT_MODE.WEB) {
-			const {lg} = layouts;
-
 			this.setState({lastWebLGLayouts: lg});
 		}
 
+		this.setExporterLayout(lg);
 		this.setWidthByContainer();
 	}
 
@@ -112,6 +113,7 @@ export class WidgetsGrid extends Component<Props, State> {
 
 		if (layout === lg && layoutMode === LAYOUT_MODE.WEB && !isEqualsLayouts(lg, lastWebLGLayouts)) {
 			layouts.sm = generateWebSMLayout(lg, sm);
+			this.setExporterLayout(lg);
 			this.setState({lastWebLGLayouts: lg});
 		}
 
@@ -156,6 +158,11 @@ export class WidgetsGrid extends Component<Props, State> {
 				e.preventDefault();
 			}
 		}
+	};
+
+	setExporterLayout = (lg: Array<Layout>) => {
+		const ids = generateWebSMLayout(lg).map(({i}) => i);
+		return exporter.setLayout(ids);
 	};
 
 	setWidthByContainer = () => {

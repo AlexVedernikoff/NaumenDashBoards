@@ -71,10 +71,10 @@ export class WidgetKebabContainer extends PureComponent<Props, State> {
 				if (diagramWidget.type === DIAGRAM_WIDGET_TYPES.TABLE) {
 					const tableWidget: TableWidget = diagramWidget;
 
-					exportTableToXLSX((tableWidget));
+					exportTableToXLSX(tableWidget);
 				}
 			} else {
-				exportScreenShot(diagramWidget.name, element, format);
+				exportScreenShot(diagramWidget, format);
 			}
 		}
 	};
