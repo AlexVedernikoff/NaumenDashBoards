@@ -16,19 +16,26 @@ export class Startup extends Component<Props> {
 			children,
 			errorAttributes,
 			errorSetting,
+			errorVerification,
 			loadingAttributes,
-			loadingSetting} = this.props;
+			loadingSetting,
+			loadingVerification
+		} = this.props;
 
-		if (loadingAttributes || loadingSetting) {
+		if (loadingAttributes || loadingSetting || loadingVerification) {
 			return <p>Загрузка данных</p>;
 		}
 
 		if (errorSetting) {
-			return <p>Ошибка загрузки стартовых настроек</p>;
+			return <p>Ошибка загрузки стартовых данных<br />${errorSetting}</p>;
 		}
 
 		if (errorAttributes) {
-			return <p>Ошибка загрузки атрибутов проверок</p>;
+			return <p>Ошибка загрузки атрибутов проверок<br />${errorAttributes}</p>;
+		}
+
+		if (errorVerification) {
+			return <p>Ошибка верификации проверки<br />${errorVerification}</p>;
 		}
 
 		return (

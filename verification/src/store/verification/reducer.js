@@ -6,6 +6,22 @@ import {VERIFICATION_EVENTS} from './constants';
 
 const reducer = (state: VerificationState = initialVerificationState, action: VerificationAction = defaultVerificationAction): VerificationState => {
 	switch (action.type) {
+		case VERIFICATION_EVENTS.SHOW_LOADER_DATA:
+			return {
+				...state,
+				error: false,
+				loading: true
+			};
+		case VERIFICATION_EVENTS.HIDE_LOADER_DATA:
+			return {
+				...state,
+				loading: false
+			};
+		case VERIFICATION_EVENTS.SET_ERROR_DATA:
+			return {
+				...state,
+				error: true
+			};
 		case VERIFICATION_EVENTS.SET_STEP_VERIFICATION:
 			return {
 				...state,

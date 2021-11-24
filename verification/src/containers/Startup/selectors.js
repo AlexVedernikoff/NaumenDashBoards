@@ -11,12 +11,15 @@ import type {State} from 'store/types';
 export const props = (state: State): ConnectedProps => {
 	const {error: errorSetting, loading: loadingSetting} = state.setting;
 	const {error: errorAttributes, loading: loadingAttributes} = state.attributes;
+	const {error: errorVerification, loading: loadingVerification} = state.verification;
 
 	return {
 		errorAttributes,
 		errorSetting,
+		errorVerification,
 		loadingAttributes,
-		loadingSetting
+		loadingSetting,
+		loadingVerification
 	};
 };
 

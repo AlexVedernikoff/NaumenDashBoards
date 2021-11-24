@@ -1,5 +1,5 @@
 // @flow
-import {AttributesData} from 'store/attributes/types';
+import {AttributesValue} from 'store/attributes/types';
 import {VERIFICATION_EVENTS} from './constants';
 
 export type VerificationAction = {
@@ -8,10 +8,13 @@ export type VerificationAction = {
 };
 
 export type VerificationState = {
-	attribute: AttributesData,
+	attrCode: boolean,
+	code: string,
 	error: boolean,
+	finish: boolean,
 	index: number,
 	isFullChecked: boolean,
 	loading: boolean,
 	message: string,
+	values: AttributesValue,
 };
