@@ -22,7 +22,8 @@ enum VerificationState
 {
     NO_VERIFICATION,
     IN_VERIFICATION,
-    VERIFICATION_FINISHED
+    VERIFICATION_FINISHED,
+    VERIFICATION_PROGRESS
 }
 
 /**
@@ -65,6 +66,7 @@ class VerificationMessages
     static final String IF_TASK_STATE_FULL_CHECK = 'Проводится проверка обращения'
     static final String NOT_AVAILABLE = 'Недоступно'
     static final String VERIFICATION_IS_DONE = 'Проверки пройдены'
+    static final String ERROR_IN_FINANCE_SERVICE = 'Ошибка в значении финансовой услуги'
 }
 
 /**

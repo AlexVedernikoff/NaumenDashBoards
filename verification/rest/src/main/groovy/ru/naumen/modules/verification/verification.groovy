@@ -123,7 +123,7 @@ class VerificationService
         IUUIDIdentifiable claim = utils.get(claimUUID)
         IUUIDIdentifiable task = claim.tasks.find { it.metaClass.toString() == MetaClasses.TASK_METACLASS }
 
-        VerificationState verificationState = getVerificationState(task)
+        VerificationState verificationState = getVerificationState(task, claim)
         Boolean userIsAbleToVerify = checkIfUserAbleToVerify(claim)
         Collection<VerificationValue> verification = getVerificationValues(claim, verificationState)
         String message = getVerificationMessage(verificationState ,task.state, verification.any())
@@ -235,10 +235,17 @@ class VerificationService
      * @param task - задача на проверку по 123-ФЗ
      * @return статус проверки
      */
-    private VerificationState getVerificationState(IUUIDIdentifiable task)
+    private VerificationState getVerificationState(IUUIDIdentifiable task, IUUIDIdentifiable claim)
     {
         switch (task.state)
         {
+            case TaskState.CHECK_FIN_SERV:
+                // Обработка частного случая: Когда в "проверке значения финансовой услуги"
+                // выбран пункт "ошибка в значении финансовой услуги"
+                if (CheckFinServValues.VALUE_ERROR in claim.checkFinServ.code)
+                {
+                    return VerificationState.VERIFICATION_PROGRESS
+                }
             case TaskState.IN_VERIFICATION_STATES:
                 return VerificationState.IN_VERIFICATION
             case TaskState.CLOSED:
@@ -286,6 +293,10 @@ class VerificationService
         if(verificationState == VerificationState.VERIFICATION_FINISHED && !anyVerifications)
         {
             return VerificationMessages.VERIFICATION_IS_DONE
+        }
+        if (verificationState == VerificationState.VERIFICATION_PROGRESS)
+        {
+            return VerificationMessages.ERROR_IN_FINANCE_SERVICE
         }
     }
 
