@@ -3,7 +3,8 @@ import type {Content} from 'components/atoms/TextEditor/types';
 import {convertFromRaw, EditorState, Modifier, SelectionState} from 'draft-js';
 import {escapeString} from 'helpers';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'components/types';
 import styles from './styles.less';
 import TextEditor from 'components/atoms/TextEditor';
 import Widget from 'containers/Widget';
@@ -12,6 +13,8 @@ export class TextWidget extends PureComponent<Props, State> {
 	state = {
 		editorState: this.getEditorStateWithReplacedVars(this.props)
 	};
+
+	widgetRef: Ref<'div'> = createRef();
 
 	componentDidUpdate (prevProps: Props) {
 		const {widget: prevWidget} = prevProps;
@@ -82,7 +85,7 @@ export class TextWidget extends PureComponent<Props, State> {
 		const {editorState} = this.state;
 
 		return (
-			<Widget className={styles.container} widget={widget}>
+			<Widget className={styles.container} forwardedRef={this.widgetRef} widget={widget}>
 				<TextEditor
 					content={content}
 					readOnly={true}
