@@ -1445,7 +1445,7 @@ class DashboardsService
             }
             else if (it.toString() == 'userEntity')
             {
-                return it.children.findAll(classValidator)
+                return it.children.findAll { validateClazz(it) }
             }
             return []
         }

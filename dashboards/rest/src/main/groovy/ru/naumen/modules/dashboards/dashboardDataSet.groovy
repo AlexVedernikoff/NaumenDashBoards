@@ -38,6 +38,7 @@ import org.apache.commons.lang3.time.DateUtils
 
 import static DiagramType.*
 import static MessageProvider.*
+import static DashboardMarshallerClass.*
 
 
 @Field @Lazy @Delegate DashboardDataSet dashboardDataSet = new DashboardDataSetImpl(binding, new DashboardDataSetService(api.utils,

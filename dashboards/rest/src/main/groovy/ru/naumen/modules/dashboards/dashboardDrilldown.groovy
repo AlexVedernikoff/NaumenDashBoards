@@ -36,6 +36,7 @@ import ru.naumen.core.shared.IUUIDIdentifiable
 import org.apache.commons.lang3.time.DateUtils
 import static MessageProvider.*
 import static CurrentUserHolder.*
+import static DashboardMarshallerClass.*
 
 @Field @Lazy @Delegate DashboardDrilldown dashboardDrilldown = new DashboardDrilldownImpl(binding,
                                                                                           new DashboardDrilldownService(api.utils,
@@ -56,20 +57,20 @@ import static CurrentUserHolder.*
                                                                                                                                                     api.selectClause,
                                                                                                                                                     api.db,
                                                                                                                                                     api.auth,
-                                                                                                                                                    dashboardUtils,
+                                                                                                                                                    new DashboardUtils(),
                                                                                                                                                     new DashboardQueryWrapperUtils(),
                                                                                                                                                     new DashboardSettingsService(api.metainfo,
                                                                                                                                                                                  api.apps,
                                                                                                                                                                                  api.utils,
                                                                                                                                                                                  api.db,
                                                                                                                                                                                  api.keyValue,
-                                                                                                                                                                                 dashboardUtils)),
+                                                                                                                                                                                 new DashboardUtils())),
                                                                                                                         new DashboardSettingsService(api.metainfo,
                                                                                                                                                      api.apps,
                                                                                                                                                      api.utils,
                                                                                                                                                      api.db,
                                                                                                                                                      api.keyValue,
-                                                                                                                                                     dashboardUtils)))
+                                                                                                                                                     new DashboardUtils())))
 
 interface DashboardDrilldown
 {
@@ -125,8 +126,8 @@ class DashboardDrilldownService
                               ITypesApi types,
                               ISelectClauseApi selectClause,
                               IWhereClauseApi whereClause,
-                              IDbApi db,
                               IFiltersApi filters,
+                              IDbApi db,
                               IDateApi date,
                               IWebApi web,
                               DashboardUtils dashboardUtils,
@@ -169,8 +170,8 @@ class DashboardDrilldownService
         if(requestContent.widgetDescriptor)
         {
             requestContent.descriptor = dashboardDataSetService.prepareWidgetDescriptor(requestContent.descriptor, requestContent.widgetDescriptor)
-        }        
-        
+        }
+
         if (requestContent.widgetFilters)
         {
             def widgetFilters = requestContent.widgetFilters
@@ -200,7 +201,7 @@ class DashboardDrilldownService
 
         DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(requestContent.dashboardKey)
         cardObjectUuid = dashboardDataSetService.getCardObjectUUID(dbSettings, user) ?: cardObjectUuid
-        Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid)
+        Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, metainfo.getMetaClass(requestContent.classFqn))
 
         Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
 
@@ -263,7 +264,7 @@ class DashboardDrilldownService
      * @return Изменённый запрос
      */
     private GetLinkRequest transformRequest(GetLinkRequest requestContent,
-                                                 String cardObjectUuid)
+                                            String cardObjectUuid)
     {
         Closure<GetLinkRequest> transform = { GetLinkRequest request ->
             request.descriptor = DashboardMarshallerClass.substitutionCardObject(
@@ -299,7 +300,7 @@ class DashboardDrilldownService
         link.template?.with(builder.&setTemplate)
         def filterBuilder = builder.filter()
         addDescriptorInFilter(filterBuilder, link.descriptor)
-        formatFilter(filterBuilder, link.filters, link.classFqn, link.cases, offsetMinutes)
+        formatFilter(filterBuilder, link.filters, link.classFqn, link.cases, link.descriptor, offsetMinutes)
         return builder
     }
 
@@ -486,7 +487,7 @@ class DashboardDrilldownService
      * @param filterBuilder - билдер для фильтра
      * @param offsetMinutes - смещение часового пояса пользователя относительно серверного времени
      */
-    private void formatFilter(def filterBuilder, def filters, def classFqn, def cases, Integer offsetMinutes)
+    private void formatFilter(def filterBuilder, def filters, def classFqn, def cases, def descriptor, Integer offsetMinutes)
     {
         if (filters)
         {
@@ -2461,11 +2462,10 @@ class Link
      */
     private String subjectUUID
 
-    Link(GetLinkRequest map, String cardObjectUuid)
+    Link(GetLinkRequest map, String cardObjectUuid, def metaInfo)
     {
         this.subjectUUID = cardObjectUuid
         this.classFqn = map.classFqn
-        def metaInfo = metainfo.getMetaClass(this.classFqn)
         this.title = map.title ?: "Список элементов '${ this.classFqn }'"
         if(map.groupCode)
         {

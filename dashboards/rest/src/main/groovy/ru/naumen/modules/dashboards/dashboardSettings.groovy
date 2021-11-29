@@ -31,7 +31,8 @@ import static groovy.json.JsonOutput.toJson
                                                                                                                     api.apps,
                                                                                                                     api.utils,
                                                                                                                     api.db,
-                                                                                                                    api.keyValue))
+                                                                                                                    api.keyValue,
+                                                                                                                    new DashboardUtils()))
 
 /**
  * Интерфейс главного контроллера
