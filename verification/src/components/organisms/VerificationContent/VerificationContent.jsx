@@ -13,6 +13,7 @@ export class VerificationContent extends PureComponent<Props> {
 		if (setting.userIsAbleToVerify) {
 			switch (setting.verificationState) {
 				case SettingVerificationState.IN_VERIFICATION:
+				case SettingVerificationState.VERIFICATION_PROGRESS:
 					return <InVerificationContent {...this.props} />;
 				case SettingVerificationState.NO_VERIFICATION:
 					return <NoVerificationContent {...this.props} />;

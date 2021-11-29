@@ -9,7 +9,8 @@ export type SettingVerification = {
 export const SettingVerificationState = {
 	IN_VERIFICATION: 'IN_VERIFICATION',
 	NO_VERIFICATION: 'NO_VERIFICATION',
-	VERIFICATION_FINISHED: 'VERIFICATION_FINISHED'
+	VERIFICATION_FINISHED: 'VERIFICATION_FINISHED',
+	VERIFICATION_PROGRESS: 'VERIFICATION_PROGRESS'
 };
 
 export type SettingVerificationStateKeys = $Keys<SettingVerificationState>;
