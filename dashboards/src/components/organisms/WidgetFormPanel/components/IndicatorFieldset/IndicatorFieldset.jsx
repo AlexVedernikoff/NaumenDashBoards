@@ -17,10 +17,12 @@ import {getErrorPath} from 'WidgetFormPanel/helpers';
 import type {Indicator} from 'store/widgetForms/types';
 import memoize from 'memoize-one';
 import type {OnSelectEvent} from 'components/types';
-import type {Props, State} from './types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
+import type {Props, State} from './types';
 import React, {createContext, PureComponent} from 'react';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withHelpers from 'containers/DiagramWidgetForm/HOCs/withHelpers';
+import withType from 'WidgetFormPanel/HOCs/withType';
 import withValues from 'components/organisms/WidgetForm/HOCs/withValues';
 
 const Context: React$Context<Indicator> = createContext({
@@ -148,7 +150,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	};
 
 	renderAggregation = (indicator: Indicator) => {
-		const {usesNotApplicableAggregation} = this.props;
+		const {type, usesNotApplicableAggregation} = this.props;
 		const {aggregation, attribute} = indicator;
 		const {COMPUTED_ATTR, catalogItem} = ATTRIBUTE_TYPES;
 
@@ -156,10 +158,12 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			const {REFERENCE} = ATTRIBUTE_SETS;
 			// $FlowFixMe
 			const value: Attribute = attribute && attribute.type in REFERENCE && attribute?.type !== catalogItem ? attribute.ref : attribute;
+			const hasPercentAggregation = ![WIDGET_TYPES.SPEEDOMETER, WIDGET_TYPES.SUMMARY].includes(type.value);
 
 			return (
 				<AttributeAggregationField
 					attribute={value}
+					hasPercentAggregation={hasPercentAggregation}
 					onSelect={this.handleSelectAggregation}
 					tip="Агрегация"
 					usesNotApplicableAggregation={usesNotApplicableAggregation}
@@ -250,4 +254,4 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	}
 }
 
-export default compose(withHelpers, withValues(DIAGRAM_FIELDS.computedAttrs))(IndicatorFieldset);
+export default compose(withHelpers, withValues(DIAGRAM_FIELDS.computedAttrs), withType)(IndicatorFieldset);

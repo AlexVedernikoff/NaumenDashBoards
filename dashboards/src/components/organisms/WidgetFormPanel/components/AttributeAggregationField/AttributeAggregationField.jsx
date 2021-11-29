@@ -6,11 +6,12 @@ import React, {PureComponent} from 'react';
 
 export class AttributeAggregationField extends PureComponent<Props, State> {
 	static defaultProps = {
+		hasPercentAggregation: true,
 		usesNotApplicableAggregation: false
 	};
 
 	state = {
-		options: getAggregationOptions(null, false)
+		options: getAggregationOptions(null)
 	};
 
 	checkValueInOptions = (value: string) => {
@@ -23,17 +24,21 @@ export class AttributeAggregationField extends PureComponent<Props, State> {
 	};
 
 	componentDidMount () {
-		const {attribute, usesNotApplicableAggregation} = this.props;
-		const options = getAggregationOptions(attribute, usesNotApplicableAggregation);
+		const {attribute, hasPercentAggregation, usesNotApplicableAggregation, value} = this.props;
+		const options = getAggregationOptions(attribute, hasPercentAggregation, usesNotApplicableAggregation);
 
-		this.setState({options});
+		this.setState({options}, () => this.checkValueInOptions(value));
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {attribute, usesNotApplicableAggregation, value} = this.props;
+		const {attribute, hasPercentAggregation, usesNotApplicableAggregation, value} = this.props;
 
-		if (prevProps.attribute !== attribute || prevProps.usesNotApplicableAggregation !== usesNotApplicableAggregation) {
-			const options = getAggregationOptions(attribute, usesNotApplicableAggregation);
+		if (
+			prevProps.attribute !== attribute
+			|| prevProps.usesNotApplicableAggregation !== usesNotApplicableAggregation
+			|| prevProps.hasPercentAggregation !== hasPercentAggregation
+		) {
+			const options = getAggregationOptions(attribute, hasPercentAggregation, usesNotApplicableAggregation);
 
 			this.setState({options}, () => this.checkValueInOptions(value));
 		}
@@ -46,12 +51,15 @@ export class AttributeAggregationField extends PureComponent<Props, State> {
 	render () {
 		const {onSelect, renderValue, value} = this.props;
 		const {options} = this.state;
+		const showCaret = options.length > 1;
 
 		return (
 			<MiniSelect
+				isDisabled={!showCaret}
 				onSelect={onSelect}
 				options={options}
 				renderValue={renderValue}
+				showCaret={showCaret}
 				tip="Агрегация"
 				value={value}
 			/>
