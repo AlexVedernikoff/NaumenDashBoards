@@ -3,9 +3,10 @@ import type {ComputedAttr} from 'src/store/widgets/data/types';
 import type {Indicator, SourceData} from 'store/widgetForms/types';
 import type {InjectedProps as ValuesProps} from 'components/organisms/WidgetForm/HOCs/withValues/types';
 import type {InjectedProps as HelpersProps} from 'containers/DiagramWidgetForm/HOCs/withHelpers/types';
+import type {InjectedProps as TypeProps} from 'WidgetFormPanel/HOCs/withType/types';
 import type {OnSelectEvent} from 'components/types';
 
-export type Props = ValuesProps<{computedAttrs: Array<ComputedAttr>}> & HelpersProps & {
+export type Props = TypeProps & ValuesProps<{computedAttrs: Array<ComputedAttr>}> & HelpersProps & {
 	className: ?string,
 	dataKey: string,
 	dataSetIndex: number,

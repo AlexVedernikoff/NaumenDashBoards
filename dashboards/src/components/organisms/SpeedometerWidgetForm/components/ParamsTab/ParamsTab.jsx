@@ -120,21 +120,19 @@ export class ParamsTab extends PureComponent<Props> {
 		return null;
 	};
 
-	renderIndicatorsFormBox = ({children, ...props}: FormBoxProps) => {
-		return (
-			<FormBox {...props}>
-				{children}
-				<FieldDivider />
-				<BORDERS_CONTEXT.Consumer>
-					{this.renderBorderFieldSet}
-				</BORDERS_CONTEXT.Consumer>
-				<FieldDivider />
-				<RANGES_CONTEXT.Consumer>
-					{this.renderRangesFieldset}
-				</RANGES_CONTEXT.Consumer>
-			</FormBox>
-		);
-	};
+	renderIndicatorsFormBox = ({children, ...props}: FormBoxProps) => (
+		<FormBox {...props}>
+			{children}
+			<FieldDivider />
+			<BORDERS_CONTEXT.Consumer>
+				{this.renderBorderFieldSet}
+			</BORDERS_CONTEXT.Consumer>
+			<FieldDivider />
+			<RANGES_CONTEXT.Consumer>
+				{this.renderRangesFieldset}
+			</RANGES_CONTEXT.Consumer>
+		</FormBox>
+	);
 
 	renderRangesFieldset = (ranges: Ranges) => <RangesFieldset name={DIAGRAM_FIELDS.ranges} onChange={this.handleChangeRanges} value={ranges} />;
 

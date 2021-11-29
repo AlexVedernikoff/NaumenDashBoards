@@ -5,10 +5,11 @@ import {
 	AVG_APPLICABLE_OPTION,
 	DEFAULT_AGGREGATION_OPTIONS,
 	INTEGER_AGGREGATION_OPTIONS,
-	NOT_APPLICABLE_OPTION
+	NOT_APPLICABLE_OPTION,
+	PERCENT_APPLICABLE_OPTION
 } from './constants';
 
-const getAggregationOptions = (attribute: Attribute | null, withNotApplicableAggregation: boolean = false) => {
+const getAggregationOptions = (attribute: Attribute | null, hasPercentAggregation: boolean = true, withNotApplicableAggregation: boolean = false) => {
 	let options = DEFAULT_AGGREGATION_OPTIONS;
 
 	if (attribute) {
@@ -25,6 +26,10 @@ const getAggregationOptions = (attribute: Attribute | null, withNotApplicableAgg
 
 	if (withNotApplicableAggregation) {
 		options = [...options, NOT_APPLICABLE_OPTION];
+	}
+
+	if (!hasPercentAggregation) {
+		options = options.filter(item => item.value !== PERCENT_APPLICABLE_OPTION.value);
 	}
 
 	return options;
