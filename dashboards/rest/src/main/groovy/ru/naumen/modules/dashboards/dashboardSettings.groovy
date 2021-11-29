@@ -2048,7 +2048,7 @@ class DashboardSettingsService
      * @param oldWidgetKey старый ключ виджета
      * @return сгенированный ключ для виджета
      */
-    private String generateWidgetKey(Collection<String> keys,
+    String generateWidgetKey(Collection<String> keys,
                                      String classFqn,
                                      String contentCode,
                                      String login = null,
