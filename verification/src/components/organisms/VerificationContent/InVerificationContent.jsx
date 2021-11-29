@@ -7,6 +7,7 @@ import FormField from 'components/molecules/FormField';
 import type {Props} from 'containers/VerificationContent/types';
 import RadioButton from 'components/atoms/RadioButton';
 import React, {PureComponent} from 'react';
+import {SettingVerificationState} from 'store/setting/types';
 import styles from './styles.less';
 
 export class VerificationContent extends PureComponent<Props> {
@@ -86,7 +87,7 @@ export class VerificationContent extends PureComponent<Props> {
 	};
 
 	render () {
-		const {attributes, verification} = this.props;
+		const {attributes, setting, verification} = this.props;
 		const attribute = attributes[verification.index];
 
 		if (verification?.isFullChecked) {
@@ -100,7 +101,15 @@ export class VerificationContent extends PureComponent<Props> {
 		if (verification?.finish) {
 			return (
 				<div className={styles.content}>
-					{this.checkRenderTypeField({code: verification.code, values: verification.values})}
+					{this.checkRenderTypeField({values: verification.values})}
+				</div>
+			);
+		}
+
+		if (setting.verificationState === SettingVerificationState.VERIFICATION_PROGRESS) {
+			return (
+				<div className={styles.content}>
+					{this.checkRenderTypeField({values: [{title: setting.message}]})}
 				</div>
 			);
 		}

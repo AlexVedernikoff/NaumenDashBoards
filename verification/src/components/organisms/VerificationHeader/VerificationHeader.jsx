@@ -19,6 +19,9 @@ const VerificationHeader = ({attributes, setting, verification}: Props) => {
 		case SettingVerificationState.VERIFICATION_FINISHED:
 			content = 'Проверки обращения проведены';
 			break;
+		case SettingVerificationState.VERIFICATION_PROGRESS:
+			content = 'Проверка значения финансовой услуги';
+			break;
 	}
 
 	return content ? <p className={styles.header}>{content}</p> : null;
