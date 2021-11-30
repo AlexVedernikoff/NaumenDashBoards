@@ -65,13 +65,11 @@ export class SavedFilters extends Component<Props> {
 		return null;
 	};
 
-	renderFilterList = (props) => {
-		return (
-			<List {...props} components={this.getListComponents()} />
-		);
-	};
+	renderFilterList = props => (
+		<List {...props} components={this.getListComponents()} />
+	);
 
-	renderFilterListMessage = (props) => {
+	renderFilterListMessage = props => {
 		const {children, className} = props;
 		const messageCN = cn([className, styles.filterListMessage]);
 		return (
@@ -81,18 +79,16 @@ export class SavedFilters extends Component<Props> {
 		);
 	};
 
-	renderListOption = (props) => {
-		return (
-			<ListOption {...props} className={styles.filterListOption} components={this.getListOptionComponents()} />
-		);
-	};
+	renderListOption = props => (
+		<ListOption {...props} className={styles.filterListOption} components={this.getListOptionComponents()} />
+	);
 
-	renderListOptionValueContainer = (props) => {
-		const {children, className, onClick, option} = props;
+	renderListOptionValueContainer = props => {
+		const {children, className, onClick, option, style} = props;
 		const {id} = option;
 
 		return (
-			<Container className={className} onClick={onClick}>
+			<Container className={className} onClick={onClick} style={style}>
 				{children}
 				{this.renderDeleteFilterButton(id)}
 			</Container>
