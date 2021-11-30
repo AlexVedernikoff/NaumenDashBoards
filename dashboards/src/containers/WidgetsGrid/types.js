@@ -10,7 +10,8 @@ export type ConnectedFunctions = {
 	changeLayouts: (payload: LayoutsPayloadForChange) => ThunkAction,
 	focusWidget: FocusWidget,
 	resetFocusedWidget: ResetFocusedWidget,
-	resetWidget: () => void
+	resetWidget: () => void,
+	setLayoutsChanged: () => void
 };
 
 export type DispatchConnectedFunctions = {
@@ -18,7 +19,8 @@ export type DispatchConnectedFunctions = {
 	changeLayouts: (payload: LayoutsPayloadForChange) => void,
 	focusWidget: (widgetId: string) => void,
 	resetFocusedWidget: () => void,
-	resetWidget: () => void
+	resetWidget: () => void,
+	setLayoutsChanged: () => void
 };
 
 export type ConnectedProps = {

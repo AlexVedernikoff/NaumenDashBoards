@@ -26,6 +26,7 @@ const reducer = (state: LayoutsState = initialLayoutsState, action: LayoutsActio
 		case LAYOUTS_EVENTS.RESPONSE_SAVE_LAYOUTS:
 			return {
 				...state,
+				changed: false,
 				loading: false
 			};
 		case LAYOUTS_EVENTS.RECORD_SAVE_LAYOUTS_ERROR:
@@ -33,6 +34,11 @@ const reducer = (state: LayoutsState = initialLayoutsState, action: LayoutsActio
 				...state,
 				error: true,
 				loading: false
+			};
+		case LAYOUTS_EVENTS.CHANGED_LAYOUTS:
+			return {
+				...state,
+				changed: true
 			};
 		default:
 			return state;

@@ -1,7 +1,7 @@
 // @flow
 import {addNewWidget, focusWidget, resetFocusedWidget, resetWidget} from 'store/widgets/data/actions';
 import type {AppState} from 'store/types';
-import {changeLayouts} from 'store/dashboard/layouts/actions';
+import {changeLayouts, setLayoutsChanged} from 'store/dashboard/layouts/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {DASHBOARD_EDIT_MODE, USER_ROLES} from 'store/context/constants';
 import {getAllWidgets} from 'store/widgets/data/selectors';
@@ -42,5 +42,6 @@ export const functions: ConnectedFunctions = {
 	changeLayouts,
 	focusWidget,
 	resetFocusedWidget,
-	resetWidget
+	resetWidget,
+	setLayoutsChanged
 };

@@ -4,6 +4,7 @@ import type {LayoutsAction, LayoutsState} from './types';
 import {LAYOUTS_EVENTS} from './constants';
 
 export const initialLayoutsState: LayoutsState = {
+	changed: false,
 	error: false,
 	loading: false,
 	[LAYOUT_MODE.MOBILE]: {

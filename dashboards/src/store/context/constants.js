@@ -18,17 +18,18 @@ const CONTEXT_EVENTS = {
 };
 
 // типы ролей пользователя
+const INIT: 'INIT' = 'INIT';
 const MASTER: 'MASTER' = 'MASTER';
 const REGULAR: 'REGULAR' = 'REGULAR';
 const SUPER: 'SUPER' = 'SUPER';
 
 const USER_ROLES = {
+	INIT,
 	MASTER,
 	REGULAR,
 	SUPER
 };
 
-const INIT: 'init:' = 'init:';
 const EDIT: 'edit:Редактируемый' = 'edit:Редактируемый';
 const USER: 'user:Пользовательский' = 'user:Пользовательский';
 const USER_SOURCE: "userSource:Пользовательский ограниченный" = 'userSource:Пользовательский ограниченный';

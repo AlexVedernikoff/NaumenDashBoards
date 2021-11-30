@@ -13,7 +13,7 @@ export const initialContextState: ContextState = {
 		email: '',
 		hasPersonalDashboard: false,
 		name: '',
-		role: USER_ROLES.REGULAR
+		role: USER_ROLES.INIT
 	}
 };
 
