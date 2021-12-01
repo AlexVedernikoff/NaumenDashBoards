@@ -1,5 +1,5 @@
 // @flow
-import {AttributeValuesMultiSelectCodeList, AttributesData, AttributesTypeList, AttributesValue} from 'store/attributes/types';
+import {AttributeValuesMultiSelectCodeList, AttributesCodeList, AttributesData, AttributesTypeList, AttributesValue} from 'store/attributes/types';
 import Button from 'components/atoms/Button';
 import Checkbox from 'components/atoms/Checkbox';
 import FormControl from 'components/molecules/FormControl';
@@ -21,7 +21,7 @@ export class VerificationContent extends PureComponent<Props> {
 				case AttributesTypeList.CHECK:
 					return this.renderCheckboxField(value, code);
 				default:
-					return <p>{CHECKMARK} {value.title}</p>;
+					return <p key={value.title.length}>{CHECKMARK} {value.title}</p>;
 			}
 		});
 	};
@@ -29,7 +29,7 @@ export class VerificationContent extends PureComponent<Props> {
 	handleCheckboxValue = (value: AttributesValue) => {
 		const {setVerificationValue, verification} = this.props;
 		const isSave = verification.values.some(v => v.UUID === value.UUID);
-		const isMultiSelect = AttributeValuesMultiSelectCodeList.some(code => code === value.code);
+		const isMultiSelect = AttributeValuesMultiSelectCodeList.some(code => code === value.code) || verification.code === AttributesCodeList.checkA17;
 		const valuesDefault = verification.values.filter(filterItem => !AttributeValuesMultiSelectCodeList.some(code => code === filterItem.code));
 
 		if (valuesDefault.length < 1 || isMultiSelect || isSave) {
@@ -53,7 +53,7 @@ export class VerificationContent extends PureComponent<Props> {
 	renderCheckboxField = (field: AttributesValue, code: string) => {
 		const {verification} = this.props;
 		const checked = verification.values.some(value => value.UUID === field.UUID);
-		const isMultiSelect = AttributeValuesMultiSelectCodeList.some(code => code === field.code);
+		const isMultiSelect = AttributeValuesMultiSelectCodeList.some(code => code === field.code) || verification.code === AttributesCodeList.checkA17;
 		const valuesDefault = verification.values.filter(filterItem => !AttributeValuesMultiSelectCodeList.some(code => code === filterItem.code));
 
 		const onClick = () => {
