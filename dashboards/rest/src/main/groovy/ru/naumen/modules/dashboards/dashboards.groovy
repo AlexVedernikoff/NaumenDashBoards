@@ -176,7 +176,7 @@ interface Dashboards
      * Метод формирования ссылки для перехода на дашборд
      * @param requestContent - тело запроса с полем dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
      * @param user - текущий пользователь
-     * @return ссылка на на страницу с дошбордом в json-формате.
+     * @return ссылка на на страницу с дашбордом в json-формате.
      */
     String getDashboardLink(Map<String, Object> requestContent, IUUIDIdentifiable user)
 }
@@ -324,7 +324,8 @@ class DashboardsImpl extends BaseController implements Dashboards
     String getDashboardLink(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         String dashboardCode = requestContent.dashboardCode
-        return toJson(service.getDashboardLink(dashboardCode, user))
+        String subjectUUID = requestContent.subjectUUID
+        return toJson(service.getDashboardLink(dashboardCode, subjectUUID, user))
     }
 }
 
@@ -367,10 +368,10 @@ class DashboardsService
     MessageProvider messageProvider = new MessageProvider(utils)
 
     /**
-    * Отдает список источников данных с детьми
-    * @param classFqn код метакласса
-    * @return json список источников данных {заголовок, код, дети}
-    */
+     * Отдает список источников данных с детьми
+     * @param classFqn код метакласса
+     * @return json список источников данных {заголовок, код, дети}
+     */
     Collection<DataSource> getDataSources(classFqn = MAIN_FQN)
     {
         def children = getMetaClassChildren(classFqn as String)
@@ -413,10 +414,10 @@ class DashboardsService
     }
 
     /**
-    * Отдает список атрибутов для источника данных
-    * @param requestContent запрос с кодом метакласса и типами атрибутов
-    * @return json список атрибутов {заголовок, код, тип атрибута}
-    */
+     * Отдает список атрибутов для источника данных
+     * @param requestContent запрос с кодом метакласса и типами атрибутов
+     * @return json список атрибутов {заголовок, код, тип атрибута}
+     */
     @Deprecated
     Collection<Attribute> getAttributesDataSources(requestContent)
     {
@@ -567,10 +568,10 @@ class DashboardsService
     }
 
     /**
-    * Отдаёт список атрибутов метакласа ссылочного типа атрибута
-    * @param requestContent - Запрос на получение атрибутов
-    * @return json список атрибутов {заголовок, код, тип атрибута}
-    */
+     * Отдаёт список атрибутов метакласа ссылочного типа атрибута
+     * @param requestContent - Запрос на получение атрибутов
+     * @return json список атрибутов {заголовок, код, тип атрибута}
+     */
     List<Attribute> getAttributesFromLinkAttribute(requestContent, IUUIDIdentifiable user)
     {
         def linkAttribute = requestContent.attribute as Map
@@ -618,15 +619,15 @@ class DashboardsService
                 def attributes = metainfo?.attributes
                 attributeList += attributes
                     ? attributes.findResults {
-                        if (!(it.code in result*.code) &&
-                            !(it.code in attributeList*.code) &&
-                            !it.computable && it.type.code in types &&
-                            !isHiddenAttribute(it))
-                        {
-                            Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(metaInfo.code, it.code, it.type.code)
-                            return buildAttribute(it, metaInfo.title, metaInfo.code, ableForAvg)
-                        }
+                    if (!(it.code in result*.code) &&
+                        !(it.code in attributeList*.code) &&
+                        !it.computable && it.type.code in types &&
+                        !isHiddenAttribute(it))
+                    {
+                        Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(metaInfo.code, it.code, it.type.code)
+                        return buildAttribute(it, metaInfo.title, metaInfo.code, ableForAvg)
                     }
+                }
                     : []
             }
             result += attributeList
@@ -723,10 +724,10 @@ class DashboardsService
     }
 
     /**
-    * Метод асинхронного поиска значения на всех уровнях
-    * @param requestContent - тело запроса
-    * @return объекты с таким значением
-    */
+     * Метод асинхронного поиска значения на всех уровнях
+     * @param requestContent - тело запроса
+     * @return объекты с таким значением
+     */
     List searchValue(Map requestContent)
     {
         String sourceCode = requestContent.sourceCode
@@ -940,10 +941,10 @@ class DashboardsService
     }
 
     /**
-    * Метод получения статусов объекта
-    * @param classFqn - тип объекта
-    * @return список статусов
-    */
+     * Метод получения статусов объекта
+     * @param classFqn - тип объекта
+     * @return список статусов
+     */
     List<Map> getStates(String classFqn)
     {
         classFqn -= '__Evt'
@@ -989,10 +990,10 @@ class DashboardsService
     }
 
     /**
-    * Метод получения метаклассов объекта
-    * @param classFqn - тип объекта
-    * @return список метаклассов
-    */
+     * Метод получения метаклассов объекта
+     * @param classFqn - тип объекта
+     * @return список метаклассов
+     */
     List<Map> getMetaClasses(String classFqn)
     {
         return metainfo.getMetaClass(classFqn)
@@ -1004,10 +1005,10 @@ class DashboardsService
     }
 
     /**
-    * Метод получения динамических атрибутов
-    * @param groupUUID - уникальный идентификатор группы
-    * @return список динамических атрибутов в JSON-формате
-    */
+     * Метод получения динамических атрибутов
+     * @param groupUUID - уникальный идентификатор группы
+     * @return список динамических атрибутов в JSON-формате
+     */
     List<Attribute> getDynamicAttributes(String groupUUID)
     {
         List<String> templateUUIDS = getUUIDSForTemplates(groupUUID)
@@ -1029,11 +1030,11 @@ class DashboardsService
     }
 
     /**
-    * Метод получения групп динамических атрибутов
-    * @param descriptor - дескриптор из виджета
-    * @param aggregateToJson - флаг возврата данных в JSON-формате
-    * @return список групп динамических атрибутов
-    */
+     * Метод получения групп динамических атрибутов
+     * @param descriptor - дескриптор из виджета
+     * @param aggregateToJson - флаг возврата данных в JSON-формате
+     * @return список групп динамических атрибутов
+     */
     List<DynamicGroup> getDynamicAttributeGroups(def descriptor)
     {
         def slurper = new groovy.json.JsonSlurper()
@@ -1065,10 +1066,10 @@ class DashboardsService
     }
 
     /**
-    * Метод получения карточки объекта по UUID-у
-    * @param value - значение объекта типа (значение - UUID)
-    * @return ссылка на карточку объекта в Json-формате
-    */
+     * Метод получения карточки объекта по UUID-у
+     * @param value - значение объекта типа (значение - UUID)
+     * @return ссылка на карточку объекта в Json-формате
+     */
     Map getCardObject(String value)
     {
         if (value && ObjectMarshaller.unmarshal(value).size() > 1)
@@ -1080,12 +1081,12 @@ class DashboardsService
     }
 
     /**
-    * Метод проверки, является ли первый источник родительским классом для другого
-    * (для таблицы источники с 2 по n-й - ссылочные атрибуты первого)
-    * @param parentClassFqn - код класса предполагаемого родительского источника
-    * @param childClassFqn - код предполагаемого дочернего источника (атрибут первого)
-    * @return флаг true/false в json-формате
-    */
+     * Метод проверки, является ли первый источник родительским классом для другого
+     * (для таблицы источники с 2 по n-й - ссылочные атрибуты первого)
+     * @param parentClassFqn - код класса предполагаемого родительского источника
+     * @param childClassFqn - код предполагаемого дочернего источника (атрибут первого)
+     * @return флаг true/false в json-формате
+     */
     Map checkForParent(String parentClassFqn, String childClassFqn)
     {
         //n+1-й источник может быть такой же, как и первый
@@ -1098,9 +1099,10 @@ class DashboardsService
      * Метод формирования ссылки для перехода на дашборд
      * @param dashboardCode - код дашборда целиком (fqn объекта, создавшего дб_uuid дашборда)
      * @param user - текущий пользователь
-     * @return ссылка на на страницу с дошбордом в json-формате.
+     * @param subjectUUID - uuid объекта текущего дашборда
+     * @return ссылка на на страницу с дашбордом в json-формате.
      */
-    Map getDashboardLink(String dashboardCode, IUUIDIdentifiable user)
+    Map getDashboardLink(String dashboardCode, String subjectUUID, IUUIDIdentifiable user)
     {
         def root = utils.findFirst('root', [:])
         if (root.hasProperty('dashboardCode') && root.dashboardCode)
@@ -1111,15 +1113,31 @@ class DashboardsService
             def db = apps.listContents(appCode).find {
                 it.contentUuid == dashboardUUID && it.subjectFqn == subjectFqn
             }
-            String usedUUID = (user && user.metaClass?.toString() == subjectFqn) ? user.UUID : utils.findFirst(subjectFqn, ['removed': false]).UUID
+
+            def currentDashboardSubjectFqn = api.utils.get(subjectUUID)?.metaClass as String
+            String objUUID
+            if (currentDashboardSubjectFqn == subjectFqn)
+            {
+                objUUID = subjectUUID
+            }
+            else if (user && user.metaClass?.toString() == subjectFqn)
+            {
+                objUUID = user.UUID
+            }
+            else
+            {
+                objUUID = api.utils.findFirst(subjectFqn, ['removed': false]).UUID
+            }
+
             def webApi = web
             def link
-            if(webApi.metaClass.respondsTo(webApi, 'openContent'))
+            if (webApi.metaClass.respondsTo(webApi, 'openContent'))
             {
-                link = webApi.openContent(usedUUID, db.tabUuid, db.contentUuid)
-            } else
+                link = webApi.openContent(objUUID, db.tabUuid, db.contentUuid)
+            }
+            else
             {
-                link = webApi.openTab(usedUUID, db.tabUuid).replace('?anchor=', '#')
+                link = webApi.openTab(objUUID, db.tabUuid).replace('?anchor=', '#')
             }
             return [link: link]
         }
