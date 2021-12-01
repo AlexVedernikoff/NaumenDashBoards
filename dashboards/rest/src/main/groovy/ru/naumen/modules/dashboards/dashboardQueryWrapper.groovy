@@ -611,13 +611,13 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'dd.mm.YY hh:ii':
-                        criteria.addGroupColumn(column)
-                        criteria.addColumn(column)
+                        criteria.addGroupColumn(sc.truncDate(column, 'minute'))
+                        criteria.addColumn(sc.truncDate(column, 'minute'))
                         String sortingType = parameter.sortingType
                         if (sortingType)
                         {
                             Closure sorting = getSorting(sortingType)
-                            column.with(sorting).with(criteria.&addOrder)
+                            sc.truncDate(column, 'minute').with(sorting).with(criteria.&addOrder)
                         }
                         break
                     case 'WD':
