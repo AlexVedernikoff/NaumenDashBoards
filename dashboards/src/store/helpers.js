@@ -1,5 +1,6 @@
 // @flow
 import api from 'api';
+import type {AppState} from './types';
 import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
 import {isPersonalDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {isSourceType} from 'store/sources/data/helpers';
@@ -10,7 +11,7 @@ import {store} from 'app.constants';
  * @returns {void}
  */
 const getParams = () => {
-	const state = store.getState();
+	const state: AppState = store.getState();
 	const {context} = state;
 	const {contentCode, dashboardMode, subjectUuid: classFqn} = context;
 	const isPersonal = isPersonalDashboard(state);
@@ -141,6 +142,11 @@ const getFilterContext = (descriptor: string, classFqn: string) => {
 	return context;
 };
 
+const isLayoutsChanged = () => {
+	const state: AppState = store.getState();
+	return state.dashboard.layouts.changed;
+};
+
 export {
 	createFilterContext,
 	getDescriptorCases,
@@ -148,6 +154,7 @@ export {
 	getLocalStorageValue,
 	getParams,
 	getSourceTypes,
+	isLayoutsChanged,
 	getUserLocalStorageId,
 	removeLocalStorageValue,
 	setLocalStorageValue

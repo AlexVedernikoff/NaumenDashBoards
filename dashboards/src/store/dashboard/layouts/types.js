@@ -97,6 +97,7 @@ export type LayoutsAction =
 ;
 
 export type LayoutsState = {
+	changed: boolean,
 	error: boolean,
 	loading: boolean,
 	MOBILE: Layouts,

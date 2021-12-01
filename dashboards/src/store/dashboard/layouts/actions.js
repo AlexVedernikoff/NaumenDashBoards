@@ -20,9 +20,9 @@ const setCurrentLayouts = (targetLayouts: Layouts, currentLayouts: Layouts): Lay
 	const layouts = {};
 
 	Object.keys(targetLayouts).forEach(key => {
-		layouts[key] = targetLayouts[key].map(layout => {
-			return (currentLayouts[key] && currentLayouts[key].find(currentLayout => currentLayout.i === layout.i)) || layout;
-		});
+		layouts[key] = targetLayouts[key].map(layout =>
+			(currentLayouts[key] && currentLayouts[key].find(currentLayout => currentLayout.i === layout.i)) || layout
+		);
 	});
 
 	return layouts;
@@ -157,6 +157,10 @@ const removeLayouts = (payload: string) => ({
 	type: LAYOUTS_EVENTS.REMOVE_LAYOUTS
 });
 
+const setLayoutsChanged = () => ({
+	type: LAYOUTS_EVENTS.CHANGED_LAYOUTS
+});
+
 export {
 	addLayouts,
 	changeLayout,
@@ -165,5 +169,6 @@ export {
 	replaceLayoutsId,
 	setMobileLayouts,
 	saveNewLayouts,
+	setLayoutsChanged,
 	setWebLayouts
 };

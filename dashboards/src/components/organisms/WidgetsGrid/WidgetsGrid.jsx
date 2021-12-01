@@ -10,6 +10,7 @@ import type {DivRef, Ref} from 'components/types';
 import exporter from 'utils/export';
 import {getLayoutWidgets} from 'store/widgets/helpers';
 import GridItem from './components/Item';
+import {isLayoutsChanged} from 'store/helpers';
 import {Item as MenuItem} from 'rc-menu';
 import type {Layout, Layouts} from 'store/dashboard/layouts/types';
 import {LAYOUT_BREAKPOINTS, LAYOUT_MODE} from 'store/dashboard/settings/constants';
@@ -57,16 +58,28 @@ export class WidgetsGrid extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		const {editableDashboard, isUserMode, layoutMode, layouts, user} = this.props;
+		const {isUserMode, layoutMode, layouts, user} = this.props;
 		const {lg} = layouts;
 
-		if (editableDashboard && !isUserMode && user.role === USER_ROLES.REGULAR) {
-			const beforeUnloadEvent = event => {
-				event.preventDefault();
-				event.returnValue = '';
-			};
+		if (!isUserMode && user.role === USER_ROLES.REGULAR) {
+			let forceUnload = false;
 
-			window.addEventListener('beforeunload', beforeUnloadEvent);
+			window.addEventListener('beforeunload', event => {
+				if (!forceUnload && isLayoutsChanged()) {
+					event.preventDefault();
+					event.returnValue = '';
+				}
+			});
+
+			window.parent.addEventListener('popstate', event => {
+				if (isLayoutsChanged()) {
+					if (!confirm('В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?')) {
+						window.parent.history.back();
+					} else {
+						forceUnload = true;
+					}
+				}
+			}, {once: true});
 		}
 
 		if (layoutMode === LAYOUT_MODE.WEB) {
@@ -107,11 +120,12 @@ export class WidgetsGrid extends Component<Props, State> {
 	handleItemClick = e => e.stopPropagation();
 
 	handleLayoutChange = debounce((layout: Layout, layouts: Layouts) => {
-		const {changeLayouts, layoutMode} = this.props;
+		const {changeLayouts, layoutMode, setLayoutsChanged} = this.props;
 		const {lastWebLGLayouts} = this.state;
 		const {lg, sm} = layouts;
 
 		if (layout === lg && layoutMode === LAYOUT_MODE.WEB && !isEqualsLayouts(lg, lastWebLGLayouts)) {
+			setLayoutsChanged();
 			layouts.sm = generateWebSMLayout(lg, sm);
 			this.setExporterLayout(lg);
 			this.setState({lastWebLGLayouts: lg});
