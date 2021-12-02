@@ -33,13 +33,13 @@ class Tree {
 		let children = null;
 
 		if ((Array.isArray(arrayChildren) && arrayChildren.length > 0) || hasChildren) {
-			children = this.addNodes(arrayChildren, id);
+			children = this.addNodes(arrayChildren ?? [], id);
 		}
 
 		if (this.tree[id]) {
 			const treeChildren = this.tree[id].children;
 
-			if (treeChildren && treeChildren.lenght > 0) {
+			if (treeChildren && treeChildren.length > 0) {
 				children = children ? [...treeChildren, ...children] : treeChildren;
 			}
 		}
