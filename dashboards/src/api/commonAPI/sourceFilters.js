@@ -1,5 +1,5 @@
 // @flow
-import type {DashbordParams, SourceFilterDTO, Transport} from 'api/types';
+import type {DashboardParams, SourceFilterDTO, Transport} from 'api/types';
 import type {SourceFiltersAPI} from 'api/interfaces';
 
 export default class SourceFilters implements SourceFiltersAPI {
@@ -21,7 +21,7 @@ export default class SourceFilters implements SourceFiltersAPI {
 		return this.transport('dashboardSettings', 'getSourceFilters', ['metaClass'], metaClass);
 	}
 
-	save (dashboard: DashbordParams, sourceFilter: SourceFilterDTO) {
+	save (dashboard: DashboardParams, sourceFilter: SourceFilterDTO) {
 		return this.transport('dashboardSettings', 'saveSourceFilters', ['requestContent'], {dashboard, sourceFilter});
 	}
 }

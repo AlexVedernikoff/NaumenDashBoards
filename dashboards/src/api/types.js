@@ -10,7 +10,7 @@ export type ApiConfig = {
 	driver: string,
 };
 
-export type DashbordParams = {
+export type DashboardParams = {
 	classFqn: string,
 	contentCode: string,
 	editable: boolean,
