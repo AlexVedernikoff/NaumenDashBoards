@@ -440,6 +440,7 @@ enum ScaleEnum
 {
     HOUR,
     DAY,
+    WEEK,
     MONTH,
     QUARTER,
     YEAR
