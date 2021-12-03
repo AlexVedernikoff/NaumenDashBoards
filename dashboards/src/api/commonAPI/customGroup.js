@@ -1,6 +1,6 @@
 // @flow
 import type {CustomGroupAPI} from 'api/interfaces';
-import type {CustomGroupData, DashbordParams, Transport} from 'api/types';
+import type {CustomGroupData, DashboardParams, Transport} from 'api/types';
 
 export default class CustomGroup implements CustomGroupAPI {
 	transport: Transport;
@@ -9,7 +9,7 @@ export default class CustomGroup implements CustomGroupAPI {
 		this.transport = transport;
 	}
 
-	delete (dashboard: DashbordParams, groupKey: string) {
+	delete (dashboard: DashboardParams, groupKey: string) {
 		return this.transport('dashboardSettings', 'deleteCustomGroup', ['requestContent'], {...dashboard, groupKey});
 	}
 
@@ -21,11 +21,11 @@ export default class CustomGroup implements CustomGroupAPI {
 		return this.transport('dashboardSettings', 'getCustomGroup', ['requestContent'], {customGroupKey, dashboardKey});
 	}
 
-	save (dashboard: DashbordParams, data: CustomGroupData) {
+	save (dashboard: DashboardParams, data: CustomGroupData) {
 		return this.transport('dashboardSettings', 'saveCustomGroup', ['requestContent'], {...dashboard, group: data});
 	}
 
-	update (dashboard: DashbordParams, data: CustomGroupData) {
+	update (dashboard: DashboardParams, data: CustomGroupData) {
 		return this.transport('dashboardSettings', 'updateCustomGroup', ['requestContent'], {...dashboard, group: data});
 	}
 }

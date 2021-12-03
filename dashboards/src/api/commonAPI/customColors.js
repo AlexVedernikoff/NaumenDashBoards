@@ -1,6 +1,6 @@
 // @flow
 
-import type {ColorsSettingsDTO, DashbordParams, Transport} from 'api/types';
+import type {ColorsSettingsDTO, DashboardParams, Transport} from 'api/types';
 import type {CustomColorsAPI} from 'api/interfaces';
 
 export default class CustomColors implements CustomColorsAPI {
@@ -10,11 +10,11 @@ export default class CustomColors implements CustomColorsAPI {
 		this.transport = transport;
 	}
 
-	delete (dashboard: DashbordParams, customColorKey: string) {
+	delete (dashboard: DashboardParams, customColorKey: string) {
 		return this.transport('dashboardSettings', 'deleteCustomColors', ['requestContent'], {...dashboard, key: customColorKey});
 	}
 
-	save (dashboard: DashbordParams, colorsSettings: ColorsSettingsDTO) {
+	save (dashboard: DashboardParams, colorsSettings: ColorsSettingsDTO) {
 		return this.transport('dashboardSettings', 'saveCustomColors', ['requestContent'], {...dashboard, colorsSettings});
 	}
 }

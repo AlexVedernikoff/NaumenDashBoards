@@ -1,5 +1,5 @@
 // @flow
-import type {DTOValue, DashbordParams, Transport} from 'api/types';
+import type {DTOValue, DashboardParams, Transport} from 'api/types';
 import type {WidgetAPI} from 'api/interfaces';
 
 export default class Widget implements WidgetAPI {
@@ -9,27 +9,27 @@ export default class Widget implements WidgetAPI {
 		this.transport = transport;
 	}
 
-	checkToCopy (dashboard: DashbordParams, dashboardKey: string, widgetKey: string) {
+	checkToCopy (dashboard: DashboardParams, dashboardKey: string, widgetKey: string) {
 		return this.transport('dashboardSettings', 'widgetIsBadToCopy', ['requestContent'], {...dashboard, dashboardKey, widgetKey});
 	}
 
-	copyWidget (dashboard: DashbordParams, dashboardKey: string, widgetKey: string) {
+	copyWidget (dashboard: DashboardParams, dashboardKey: string, widgetKey: string) {
 		return this.transport('dashboardSettings', 'copyWidgetToDashboard', ['requestContent'], {...dashboard, dashboardKey, widgetKey});
 	}
 
-	create (dashboard: DashbordParams, widget: DTOValue) {
+	create (dashboard: DashboardParams, widget: DTOValue) {
 		return this.transport('dashboardSettings', 'createWidget', ['requestContent'], {...dashboard, widget});
 	}
 
-	delete (dashboard: DashbordParams, widgetId: string) {
+	delete (dashboard: DashboardParams, widgetId: string) {
 		return this.transport('dashboardSettings', 'deleteWidget', ['requestContent'], {...dashboard, widgetId});
 	}
 
-	edit (dashboard: DashbordParams, widget: DTOValue) {
+	edit (dashboard: DashboardParams, widget: DTOValue) {
 		return this.transport('dashboardSettings', 'editWidget', ['requestContent'], {...dashboard, widget});
 	}
 
-	editChunkData (dashboard: DashbordParams, id: string, chunkData: DTOValue) {
+	editChunkData (dashboard: DashboardParams, id: string, chunkData: DTOValue) {
 		return this.transport('dashboardSettings', 'editWidgetChunkData', ['requestContent'], {...dashboard, chunkData, id});
 	}
 }

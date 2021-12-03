@@ -25,7 +25,6 @@ import styles from './styles.less';
 import SummaryWidget from 'containers/SummaryWidget/SummaryWidget';
 import TableWidget from 'containers/TableWidget';
 import TextWidget from 'components/organisms/TextWidget';
-import {USER_ROLES} from 'store/context/constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class WidgetsGrid extends Component<Props, State> {
@@ -58,10 +57,10 @@ export class WidgetsGrid extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		const {isUserMode, layoutMode, layouts, user} = this.props;
+		const {isUserMode, layoutMode, layouts} = this.props;
 		const {lg} = layouts;
 
-		if (!isUserMode && user.role === USER_ROLES.REGULAR) {
+		if (!isUserMode) {
 			let forceUnload = false;
 
 			window.addEventListener('beforeunload', event => {
@@ -125,7 +124,10 @@ export class WidgetsGrid extends Component<Props, State> {
 		const {lg, sm} = layouts;
 
 		if (layout === lg && layoutMode === LAYOUT_MODE.WEB && !isEqualsLayouts(lg, lastWebLGLayouts)) {
-			setLayoutsChanged();
+			if (lg.length === lastWebLGLayouts?.length) {
+				setLayoutsChanged();
+			}
+
 			layouts.sm = generateWebSMLayout(lg, sm);
 			this.setExporterLayout(lg);
 			this.setState({lastWebLGLayouts: lg});

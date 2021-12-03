@@ -6,7 +6,7 @@ import type {
 	ContextObjectDTO,
 	CustomGroupData,
 	DTOValue,
-	DashbordParams,
+	DashboardParams,
 	EmailUserDTO,
 	FilterFormAnswerDTO,
 	FilterFormDescriptorDTO,
@@ -33,12 +33,12 @@ export interface FrameAPI {
 }
 
 export interface WidgetAPI {
-	checkToCopy (dashboard: DashbordParams, dashboardKey: string, widgetKey: string): Promise<DTOValue>;
-	copyWidget (dashboard: DashbordParams, dashboardKey: string, widgetKey: string): Promise<DTOValue>;
-	create (dashboard: DashbordParams, widget: DTOValue): Promise<DTOValue>;
-	delete (dashboard: DashbordParams, widgetId: string): Promise<DTOValue>;
-	edit (dashboard: DashbordParams, widget: DTOValue): Promise<DTOValue>;
-	editChunkData (dashboard: DashbordParams, id: string, widget: DTOValue): Promise<DTOValue>;
+	checkToCopy (dashboard: DashboardParams, dashboardKey: string, widgetKey: string): Promise<DTOValue>;
+	copyWidget (dashboard: DashboardParams, dashboardKey: string, widgetKey: string): Promise<DTOValue>;
+	create (dashboard: DashboardParams, widget: DTOValue): Promise<DTOValue>;
+	delete (dashboard: DashboardParams, widgetId: string): Promise<DTOValue>;
+	edit (dashboard: DashboardParams, widget: DTOValue): Promise<DTOValue>;
+	editChunkData (dashboard: DashboardParams, id: string, widget: DTOValue): Promise<DTOValue>;
 }
 
 export interface SettingsDataAPI {
@@ -51,23 +51,23 @@ export interface SettingsDataAPI {
 }
 
 export interface CustomColorsAPI {
-	delete (dashboard: DashbordParams, customColorKey: string): Promise<DTOValue>;
-	save (dashboard: DashbordParams, colorsSettings: ColorsSettingsDTO): Promise<DTOValue>;
+	delete (dashboard: DashboardParams, customColorKey: string): Promise<DTOValue>;
+	save (dashboard: DashboardParams, colorsSettings: ColorsSettingsDTO): Promise<DTOValue>;
 }
 
 export interface SourceFiltersAPI {
 	check (dashboardKey: string, sourceFilter: SourceFilterDTO): Promise<DTOValue>;
 	delete (filterId: string): Promise<DTOValue>;
 	getAll (metaClass: string): Promise<DTOValue>;
-	save (dashboard: DashbordParams, sourceFilter: SourceFilterDTO): Promise<DTOValue>;
+	save (dashboard: DashboardParams, sourceFilter: SourceFilterDTO): Promise<DTOValue>;
 }
 
 export interface CustomGroupAPI {
-	delete (dashboard: DashbordParams, groupKey: string): Promise<DTOValue>;
+	delete (dashboard: DashboardParams, groupKey: string): Promise<DTOValue>;
 	getAll (dashboardId: string): Promise<DTOValue>;
 	getItem (dashboardId: string, groupKey: string): Promise<DTOValue>;
-	save (dashboard: DashbordParams, data: CustomGroupData): Promise<DTOValue>;
-	update (dashboard: DashbordParams, data: CustomGroupData): Promise<DTOValue>;
+	save (dashboard: DashboardParams, data: CustomGroupData): Promise<DTOValue>;
+	update (dashboard: DashboardParams, data: CustomGroupData): Promise<DTOValue>;
 }
 
 export interface PersonalDashboardAPI {
