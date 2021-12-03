@@ -134,6 +134,7 @@ const Gantt = (props: Props) => {
 	}, [rollUp]);
 
 	useEffect(() => {
+		gantt.clearAll();
 		gantt.parse(JSON.stringify({data: tasks}));
 		gantt.render();
 
