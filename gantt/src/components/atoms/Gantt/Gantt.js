@@ -33,7 +33,7 @@ const Gantt = (props: Props) => {
 						const dateToStr = gantt.date.date_to_str('%d %M');
 						const endDate = gantt.date.add(date, -6, 'day');
 						const weekNum = gantt.date.date_to_str('%W')(date);
-						return '#' + weekNum + ', ' + dateToStr(date) + ' - ' + dateToStr(endDate);
+						return '#' + weekNum + ', ' + dateToStr(endDate) + ' - ' + dateToStr(date);
 					},
 					step: 1,
 					unit: 'week'},
@@ -98,7 +98,31 @@ const Gantt = (props: Props) => {
 		gantt.config.duration_unit = 'minute';
 		gantt.config.duration_step = 1;
 		gantt.config.scroll_size = 6;
-		gantt.templates.parse_date = (dateStr) => gantt.date.convert_to_utc(new Date(dateStr));
+		gantt.templates.parse_date = (dateStr) => {
+			const dateArr = dateStr.split('-');
+			const timeItem = dateArr[dateArr.length - 1];
+			const timeItemArr = timeItem.split(':');
+			const subItemTime = timeItemArr[0];
+			const subItemTimeArr = subItemTime.split('T')[0];
+			let hours = subItemTime.split('T')[1];
+			let adjustmentHours;
+
+			if (+hours < 20) {
+				adjustmentHours = (+hours + 4).toString();
+			} else {
+				adjustmentHours = (+hours - 20).toString();
+			}
+
+			hours = `0${adjustmentHours}`.substr(-2);
+			const subPiece = `${subItemTimeArr}T${hours}`;
+			const piece = `${subPiece}:${timeItemArr[1]}:${timeItemArr[2]}`;
+
+			dateArr[dateArr.length - 1] = piece;
+			const finalDate = dateArr.join('-');
+
+			return gantt.date.convert_to_utc(new Date(finalDate));
+		};
+
 		gantt.ext.zoom.init(zoomConfig);
 		gantt.showLightbox = function (id) {};
 		gantt.i18n.setLocale('ru');
@@ -136,6 +160,7 @@ const Gantt = (props: Props) => {
 	useEffect(() => {
 		gantt.clearAll();
 		gantt.parse(JSON.stringify({data: tasks}));
+		gantt.showDate(new Date());
 		gantt.render();
 
 		const dateX = gantt.posFromDate(new Date());
