@@ -1114,7 +1114,7 @@ class DashboardsService
                 it.contentUuid == dashboardUUID && it.subjectFqn == subjectFqn
             }
 
-            def currentDashboardSubjectFqn = api.utils.get(subjectUUID)?.metaClass as String
+            def currentDashboardSubjectFqn = utils.get(subjectUUID)?.metaClass as String
             String objUUID
             if (currentDashboardSubjectFqn == subjectFqn)
             {
@@ -1126,7 +1126,7 @@ class DashboardsService
             }
             else
             {
-                objUUID = api.utils.findFirst(subjectFqn, ['removed': false]).UUID
+                objUUID = utils.findFirst(subjectFqn, ['removed': false]).UUID
             }
 
             def webApi = web
