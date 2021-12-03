@@ -88,9 +88,9 @@ const data = {
 };
 
 export const getDiagramData = () => {
-  const a = deepClone(data);
+	const a = deepClone(data);
 
-  if (data && data.tasks) {
+	if (data && data.tasks) {
 		data.tasks.push(
 			{
 				'id': '4567fghgfd891' + Math.random(),
@@ -108,11 +108,8 @@ export const getDiagramData = () => {
 				'd951f9': '16-04-2019',
 				'duration': 480,
 				'start_date': null
-			});
-
-		if (Math.random() < 0.3) {
-			data.tasks.splice(1, 1)
-		}
+			}
+		);
 	}
 
 	return a;
