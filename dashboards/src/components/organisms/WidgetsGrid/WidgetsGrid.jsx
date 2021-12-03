@@ -70,15 +70,19 @@ export class WidgetsGrid extends Component<Props, State> {
 				}
 			});
 
-			window.parent.addEventListener('popstate', event => {
-				if (isLayoutsChanged()) {
-					if (!confirm('В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?')) {
-						window.parent.history.back();
-					} else {
-						forceUnload = true;
+			if (!window.dashboardPopStateEmitter) {
+				window.dashboardPopStateEmitter = event => {
+					if (isLayoutsChanged()) {
+						if (!confirm('В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?')) {
+							window.parent.history.back();
+						} else {
+							forceUnload = true;
+						}
 					}
-				}
-			}, {once: true});
+				};
+
+				window.parent.addEventListener('popstate', window.dashboardPopStateEmitter, {once: true});
+			}
 		}
 
 		if (layoutMode === LAYOUT_MODE.WEB) {
