@@ -1571,6 +1571,10 @@ class DashboardsService
                             it.state == 'active' ? it : null
                         }
                     }
+                    else
+                    {
+                        return []
+                    }
                 }
             }
             else return []
