@@ -99,28 +99,8 @@ const Gantt = (props: Props) => {
 		gantt.config.duration_step = 1;
 		gantt.config.scroll_size = 6;
 		gantt.templates.parse_date = (dateStr) => {
-			const dateArr = dateStr.split('-');
-			const timeItem = dateArr[dateArr.length - 1];
-			const timeItemArr = timeItem.split(':');
-			const subItemTime = timeItemArr[0];
-			const subItemTimeArr = subItemTime.split('T')[0];
-			let hours = subItemTime.split('T')[1];
-			let adjustmentHours;
-
-			if (+hours < 20) {
-				adjustmentHours = (+hours + 4).toString();
-			} else {
-				adjustmentHours = (+hours - 20).toString();
-			}
-
-			hours = `0${adjustmentHours}`.substr(-2);
-			const subPiece = `${subItemTimeArr}T${hours}`;
-			const piece = `${subPiece}:${timeItemArr[1]}:${timeItemArr[2]}`;
-
-			dateArr[dateArr.length - 1] = piece;
-			const finalDate = dateArr.join('-');
-
-			return gantt.date.convert_to_utc(new Date(finalDate));
+			const newDate = gantt.date.add(new Date(dateStr), 4, 'hour');
+			return gantt.date.convert_to_utc(new Date(newDate));
 		};
 
 		gantt.ext.zoom.init(zoomConfig);
@@ -134,12 +114,14 @@ const Gantt = (props: Props) => {
 			return task[codeMainColumn];
 		};
 
-		gantt.addMarker({
-			css: 'today',
-			start_date: new Date(),
-			text: dateToStr(new Date()),
-			title: dateToStr(new Date())
-		});
+		if (!gantt._markers.fullOrder.length) {
+			gantt.addMarker({
+				css: 'today',
+				start_date: new Date(),
+				text: dateToStr(new Date()),
+				title: dateToStr(new Date())
+			});
+		}
 
 		generateGridWidth();
 
