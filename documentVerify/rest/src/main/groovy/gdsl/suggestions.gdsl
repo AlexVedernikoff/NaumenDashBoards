@@ -1,0 +1,168 @@
+package gdsl
+
+def ctx = context(scope: scriptScope())
+contributor ([ctx]) {
+
+    property name:"subject",
+            type:"ru.naumen.core.server.script.spi.IScriptDtObject",
+            doc: "Объект, над которым происходит действие"
+
+    property name:"oldSubject",
+            type:"ru.naumen.core.server.script.spi.IScriptDtObject",
+            doc: "Объект до выполнения события, в случаях, если происходило его изменение"
+
+    property name:"utils",
+            type:"ru.naumen.core.server.script.spi.IScriptUtils",
+            doc: "Cиноним api.utils"
+
+    property name:"api",
+            type:"ru.naumen.core.server.script.context.SCRIPT_API_CONTEXT",
+            doc: "Содержит доступные вспомогательные методы"
+
+    property name:"logger",
+            type:"ru.naumen.core.server.script.context.ISLogger",
+            doc: "Объект консоли, для логирования"
+
+    property name:"user",
+            type:"ru.naumen.core.server.bo.employee.ISEmployee",
+            doc: "Пользователь инициализировавший событие"
+
+    property name:"sourceObject",
+            type:"ru.naumen.core.server.script.spi.IScriptDtObject",
+            doc: ""
+
+    property name:"possibleStates",
+            type:"Set",
+            doc: "Список кодов статусов, в которые возможен переход из текущего статуса объекта согласно матрице переходов. Используется в скриптах фильтрации статусов"
+
+    property name:"ip",
+            type:"String",
+            doc: "IP пользователя user"
+
+    property name:"escalationLevel",
+            type:"String",
+            doc: "Уровень эскалации(целое число, начинается с 1)"
+
+    property name:"modules",
+            type:"java.util.Map<java.util.String, groovy.lang.Script>",
+            doc: "Содержит доступные модули загруженные в интерфейсе администратора (по сути, это набор библиотек написанных на groovy)"
+
+    property name:"appVersion",
+            type:"String",
+            doc: "Версия приложения"
+
+    property name:"currentRecipient",
+            type:"ru.naumen.core.server.bo.employee.ISEmployee",
+            doc: "Сотрудник-получатель письма"
+
+    property name:"permittedFqns",
+            type:"Set",
+            doc: "Список разрешенных типов объектов"
+
+    property name:"op",
+            type:"ru.naumen.core.server.script.spi.IScriptConditionsApi",
+            doc: "Утилитарные методы для формирования объектов условных операций."
+
+    property name:"sp",
+            type:"ru.naumen.core.server.script.api.ISearchParams",
+            doc: "Методы для установки параметров поиска для utils.find / count"
+
+    property name:"attrCode",
+            type:"String",
+            doc: "Код атрибута, для которого вычисляется значение по умолчанию."
+
+    property name:"initialValues",
+            type:"Map",
+            doc: "Значение атрибута на форме добавления объекта."
+
+    property name:"process",
+            type:"String",
+            doc: "Код текущего процесса. Не null, если происходит изменение объекта (сохранение формы). Варианты значений - 'AddObject', 'EditObject' и 'DeleteObject'."
+
+    property name:"comment",
+            type:"String",
+            doc: "Текст комментария, заполненный при смене статуса либо при смене ответственного"
+
+    property name:"isFromMobile",
+            type:"Boolean",
+            doc: "Флаг, содержит информацию о том, вызвано действие по событию из мобильного клиента (МК) или нет"
+
+    property name:"currentSubject",
+            type:"ru.naumen.core.server.script.spi.IScriptDtObject",
+            doc: "Объект, над которым производится действие. В переменной currentSubject хранятся значения атрибутов объекта на момент обработки действия по событию"
+
+    property name:"result",
+            type:"ru.naumen.core.shared.userevents.IUserEventActionResult",
+            doc: "Результат действия по пользовательскому событию."
+
+    property name:"changedAttributes",
+            type:"Set",
+            doc: "Cписок кодов атрибутов, значения которых изменились при редактировании объекта"
+
+    property name:"escalationLevel",
+            type:"String",
+            doc: "Уровень эскалации (целое число, начинается с 1). Уровень эскалации характеризует текущую стадию выполнения процедуры эскалации для данного объекта."
+
+    property name:"trigger",
+            type:"ru.naumen.core.server.script.spi.IScriptDtObject",
+            doc: "Текущий триггер (совпадает с subject)"
+
+    property name:"newStatus",
+            type:"Boolean",
+            doc: "Новый статус тревоги триггера"
+
+    property name:"oldStatus",
+            type:"Boolean",
+            doc: "Предыдущий статус тревоги триггера"
+
+    property name:"metric",
+            type:"ru.naumen.core.server.script.spi.IScriptDtObject",
+            doc: "Метрика, изменение значения которой инициировало событие (совпадает с sourceObject)"
+
+    property name:"time",
+            type:"Long",
+            doc: "Время возникновения события. Представляет собой целое число миллисекунд."
+
+    property name:"message",
+            type:"ru.naumen.mailreader.server.queue.IInboundMailMessage",
+            doc: "Cодержит обрабатываемое почтовое сообщение."
+
+    property name:"currentTaskInfo",
+            type:"ru.naumen.core.server.script.api.scheduler.ISchedulerTaskWrapper",
+            doc: "Информация о текущей задаче планировщика."
+
+    property name:"table",
+            type:"ru.naumen.reports.server.script.ITableModelWrapper",
+            doc: "таблица отчета. table состоит из множества объектов row, представляющих строку таблицы."
+
+    property name:"form",
+            type:"ru.naumen.core.server.script.spi.IScriptDtObject",
+            doc: "Значения полей формы, на которой присутствует атрибут (в т.ч. текущее значение поля атрибута) Другими словами, эту переменную можно понимать как представление объекта на клиенте."
+
+    property name:"contentCode",
+            type:"String",
+            doc: "Текущий код контента встроенного приложения"
+
+    property name:"subjects",
+            type:"List",
+            doc: "Набор ссылок на объекты, к которым применяется действие "
+
+    property name:"list",
+            type:"List",
+            doc: "Набор объектов, выведенных в список"
+
+    property name:"cardObject",
+            type:"ru.naumen.core.server.script.spi.IScriptDtObject",
+            doc: "Объект, с карточки которого вызвано событие"
+
+    property name:"source",
+            type:"String",
+            doc: "откуда вызвано событие (OBJECT_CARD - карточка объекта, OBJECT_LIST - список объектов)"
+
+    property name: "beanFactory",
+             type: "org.springframework.beans.factory.support.DefaultListableBeanFactory",
+             doc: "Позволяет достовать компоненты приложения по имени"
+
+    property name: 'dispatch',
+             type: 'ru.naumen.core.server.dispatch.Dispatch'
+}

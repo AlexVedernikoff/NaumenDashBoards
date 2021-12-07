@@ -1,0 +1,29 @@
+@import '/styles/variables';
+
+:local {
+	.field {
+		padding: 8px 21px;
+	}
+
+	.label {
+		padding: 8px 24px 4px 24px;
+	}
+
+	.children {
+		padding: 8px 24px;
+	}
+
+	.row {
+		align-items: center;
+		display: flex;
+
+		& > :nth-child(n+2) {
+			margin-left: 8px;
+		}
+	}
+
+	.small {
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+}

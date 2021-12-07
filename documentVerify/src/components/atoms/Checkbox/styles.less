@@ -1,0 +1,21 @@
+@import '/styles/variables';
+
+:local {
+	.icon {
+		border-radius: @border-radius;
+		color: @grey;
+		cursor: pointer;
+		min-width: 16px;
+		padding: 4px;
+
+		&:hover,
+		&:active {
+			background-color: @silver;
+			color: @black;
+		}
+	}
+
+	.checked {
+		color: @info;
+	}
+}
