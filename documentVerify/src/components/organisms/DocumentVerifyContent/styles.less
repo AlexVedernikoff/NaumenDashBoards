@@ -1,0 +1,29 @@
+@import "/styles/variables.less";
+
+:local {
+	.container {
+		border: 1px solid #E5E5E5;
+		display: flex;
+		margin-right: 16px;
+		position: relative;
+		width: calc(100% - 652px - 16px);
+	}
+	.scroll {
+		bottom: 0;
+		background-color: #F2F2F2;
+		display: flex;
+		justify-content: center;
+		overflow: auto;
+		padding-top: 16px;
+		position: absolute;
+		top: 0;
+		width: 100%;
+	}
+	.document {
+		background-color: #FFFFFF;
+		display: flex;
+		height: 100%;
+		max-width: 790px;
+		//zoom: 0.75;
+	}
+}
