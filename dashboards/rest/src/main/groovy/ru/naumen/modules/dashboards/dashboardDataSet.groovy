@@ -180,7 +180,7 @@ class DashboardDataSetService
 
     private String currentUserLocale = 'ru'
 
-    private static final Integer maxDiagramDataSize = 1000
+    private static final Integer maxDiagramDataSize = 5000
 
     /**
      * Метод по получению тела запроса по метаданным из хранилища по ключу дашборда и виджета
