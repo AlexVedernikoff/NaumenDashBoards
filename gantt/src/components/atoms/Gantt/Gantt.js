@@ -140,15 +140,28 @@ const Gantt = (props: Props) => {
 	}, [rollUp]);
 
 	useEffect(() => {
+		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
+
 		gantt.clearAll();
 		gantt.parse(JSON.stringify({data: tasks}));
 		gantt.showDate(new Date());
 		gantt.render();
 
+		tasks
+			.filter(task => !task.parent)
+			.map(task => task.id)
+			.forEach(taskId => rollUp ? gantt.close(taskId) : gantt.open(taskId));
+
 		const dateX = gantt.posFromDate(new Date());
 		const scrollTo = Math.max(dateX - gantt.config.task_scroll_offset, 0);
 
 		gantt.scrollTo(scrollTo);
+		gantt.addMarker({
+			css: 'today',
+			start_date: new Date(),
+			text: dateToStr(new Date()),
+			title: dateToStr(new Date())
+		});
 	}, [tasks]);
 
 	const handleHeaderClick = () => {
