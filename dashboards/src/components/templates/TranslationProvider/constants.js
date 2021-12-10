@@ -5,7 +5,7 @@ import {DEFAULT_LOCALE} from 'localization/constants';
 
 const DEFAULT_CONTEXT_VALUE: ContextProps = {
 	locale: DEFAULT_LOCALE,
-	translate: (key) => key
+	translate: key => key
 };
 
 export const TRANSLATION_CONTEXT: React$Context<ContextProps> = createContext(DEFAULT_CONTEXT_VALUE);
