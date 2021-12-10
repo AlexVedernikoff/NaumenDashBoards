@@ -1128,7 +1128,7 @@ class DashboardUtils
                         }
                     }
 
-                    tempDescriptor?.filters = tempDescriptor?.filters.findResults { filter ->
+                    tempDescriptor?.filters = tempDescriptor?.filters?.findResults { filter ->
                         filtersToRemove.each {
                             filter -= it
                         }
