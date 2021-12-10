@@ -2,8 +2,8 @@
 import type {IPluralization} from 'localization/interfaces';
 
 class Pluralization implements IPluralization {
-	numberFormat = new Intl.NumberFormat('en');
-	dateFormat = new Intl.DateTimeFormat('en');
+	numberFormat = new Intl.NumberFormat('ru');
+	dateFormat = new Intl.DateTimeFormat('ru');
 
 	date (val: Date) {
 		return this.dateFormat.format(val);

@@ -5,18 +5,18 @@ export type Locales = $Values<typeof LOCALES>;
 
 export type LocalizationParams = {[id: string]: string | number | Date};
 
-export type PlurizationItemParams = Object;
+export type PluralizationItemParams = Object;
 
-export type PlurizationItem = {
-	data: string | string[] | PlurizationItemParams,
+export type PluralizationItem = {
+	data: string | string[] | PluralizationItemParams,
 	func: string
 };
 
-export type LocalItem = string | PlurizationItem;
+export type LocalItem = string | PluralizationItem;
 
-export type PluralisationFunc = (data: LocalItem, params?: LocalizationParams) => string;
+export type PluralizationFunc = (data: LocalItem, params?: LocalizationParams) => string;
 
-export type Pluralisations = {[funcName: string]: PluralisationFunc};
+export type Pluralization = {[funcName: string]: PluralizationFunc};
 
 export type Subscriber = (locale: Locales) => void;
 
