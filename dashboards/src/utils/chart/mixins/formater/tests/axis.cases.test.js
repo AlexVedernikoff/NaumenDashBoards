@@ -18,7 +18,8 @@ const makeAxisCase = (data: Object) => {
 
 	compareFormatter(data.dataLabel, formatter.dataLabel);
 	compareFormatter(data.indicator, formatter.indicator);
-	compareFormatter(data.tooltip, formatter.tooltip);
+	compareFormatter(data.tooltip, formatter.tooltip.data);
+	compareFormatter(data.tooltipTitle, formatter.tooltip.title);
 	compareFormatter(data.legend, formatter.legend);
 	compareFormatter(data.parameterDefault, formatter.parameter.default);
 	compareFormatter(data.parameterOverlapped, formatter.parameter.overlapped);
