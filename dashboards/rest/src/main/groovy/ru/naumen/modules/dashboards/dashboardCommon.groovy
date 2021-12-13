@@ -980,7 +980,8 @@ class DashboardUtils
             ? "${template.metaClass}_${template.visor.code}"
             : "${template.metaClass}"
         attrFormatToFind = attrFormatToFind.replace('_unitsLinks', '')
-        return getModules().dynamicFields.getAttrToTotalValueMap()[attrFormatToFind]
+        def dynamicFields = getModules().dynamicFields.hasProperty('controller') ? getModules().dynamicFields.controller : getModules().dynamicFields
+        return dynamicFields.getAttrToTotalValueMap()[attrFormatToFind]
     }
 
     /**
