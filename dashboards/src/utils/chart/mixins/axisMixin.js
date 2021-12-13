@@ -79,8 +79,11 @@ const axisMixin = (widget: AxisWidget, data: DiagramBuildData, container: HTMLDi
 			tooltip: {
 				intersect: true,
 				shared: false,
+				x: {
+					formatter: formatter.tooltip.title
+				},
 				y: {
-					formatter: formatter.tooltip,
+					formatter: formatter.tooltip.data,
 					title: {
 						formatter: formatter.legend
 					}

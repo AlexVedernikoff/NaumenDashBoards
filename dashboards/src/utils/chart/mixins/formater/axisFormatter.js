@@ -1,4 +1,5 @@
 // @flow
+import {AXIS_FONT_SIZE} from 'utils/chart/constants';
 import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import type {AxisFormatter, CTXValue, NumberFormatter, ValueFormatter} from './types';
 import type {AxisWidget, NumberAxisFormat} from 'store/widgets/data/types';
@@ -114,7 +115,7 @@ const getTooltipNormalizer = (widget: AxisWidget): ((number) => number) => {
 	const usesPercent = hasPercent(indicatorAttribute, aggregation);
 
 	if (stacked && usesPercent) {
-		const calculateProcent = memoize((value: number, dataPointIndex: number, series: Array<Array<number | ?string>>): number => {
+		const calculatePercent = memoize((value: number, dataPointIndex: number, series: Array<Array<number | ?string>>): number => {
 			const fullSum = series.reduce((sm, row) => {
 				const rowVal = row[dataPointIndex];
 				let parsedValue = 0;
@@ -132,11 +133,24 @@ const getTooltipNormalizer = (widget: AxisWidget): ((number) => number) => {
 
 		return (value: number, ctx: CTXValue): number => {
 			const {dataPointIndex, series} = ctx;
-			return calculateProcent(value, dataPointIndex, series);
+			return calculatePercent(value, dataPointIndex, series);
 		};
 	}
 
 	return (value: number) => value;
+};
+
+/**
+ * Создает оболочку для обрезания заголовков подсказок под размеры виджета
+ * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @returns {Function} - функция-усекатор
+ */
+const getTooltipTitlePruner = (container: HTMLDivElement): ((string) => string) => {
+	const {clientWidth: width} = container;
+	const fontWidth = AXIS_FONT_SIZE * 0.6;
+	const maxChars = (width - 12 /* padding */) / fontWidth;
+
+	return (value: string) => value.length > maxChars ? value.slice(0, maxChars - 3) + '...' : value;
 };
 
 /**
@@ -174,7 +188,10 @@ const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<
 			default: categoryFormatter,
 			overlapped: compose(categoryOverlappedSplitter, categoryFormatter)
 		},
-		tooltip: compose(getDataFormatter(widget, normalizedDataLabelsFormat, false), getTooltipNormalizer(widget))
+		tooltip: {
+			data: compose(getDataFormatter(widget, normalizedDataLabelsFormat, false), getTooltipNormalizer(widget)),
+			title: compose(categoryFormatter, getTooltipTitlePruner(container))
+		}
 	};
 };
 
@@ -197,8 +214,9 @@ const getAxisFormatterDebug = (widget: AxisWidget, labels: Array<string> | Array
 	const legend = [];
 	const parameterDefault = [];
 	const parameterOverlapped = [];
+	const tooltipTitle = [];
 
-	console.info('getAxisFormatterDebug: ', {...store, dataLabel, indicator, legend, options, parameterDefault, parameterOverlapped});
+	console.info('getAxisFormatterDebug: ', {...store, dataLabel, indicator, legend, options, parameterDefault, parameterOverlapped, tooltipTitle});
 	return {
 		dataLabel: storedFormatter(dataLabel, baseFormatter.dataLabel),
 		indicator: storedFormatter(indicator, baseFormatter.indicator),
@@ -208,7 +226,10 @@ const getAxisFormatterDebug = (widget: AxisWidget, labels: Array<string> | Array
 			default: storedFormatter(parameterDefault, baseFormatter.parameter.default),
 			overlapped: storedFormatter(parameterOverlapped, baseFormatter.parameter.overlapped)
 		},
-		tooltip: storedFormatter(indicator, baseFormatter.tooltip)
+		tooltip: {
+			data: storedFormatter(indicator, baseFormatter.tooltip.data),
+			title: storedFormatter(tooltipTitle, baseFormatter.tooltip.title)
+		}
 	};
 };
 
