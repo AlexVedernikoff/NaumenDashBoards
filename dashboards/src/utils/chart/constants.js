@@ -57,6 +57,8 @@ const DEFAULT_DATA_LABEL_COLOR = '#323232';
 
 const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
 	axis: {
+		fontFamily: FONT_FAMILIES[0],
+		fontSize: 12,
 		show: true,
 		showName: false
 	},

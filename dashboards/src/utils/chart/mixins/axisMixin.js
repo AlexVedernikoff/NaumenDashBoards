@@ -1,5 +1,6 @@
 // @flow
 import type {AxisData, AxisWidget} from 'store/widgets/data/types';
+import {AXIS_FONT_SIZE} from 'utils/chart/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'helpers';
 import {getAxisFormatter} from 'utils/chart/mixins/formater';
@@ -40,7 +41,11 @@ const axisMixin = (widget: AxisWidget, data: DiagramBuildData, container: HTMLDi
 
 		const xaxis = {
 			labels: {
-				formatter: horizontal ? formatter.indicator : formatter.parameter.overlapped
+				formatter: horizontal ? formatter.indicator : formatter.parameter.overlapped,
+				style: {
+					fontFamily: xAxisProps.fontFamily,
+					fontSize: xAxisProps.fontSize ?? AXIS_FONT_SIZE
+				}
 			},
 			title: {}
 		};
@@ -48,7 +53,11 @@ const axisMixin = (widget: AxisWidget, data: DiagramBuildData, container: HTMLDi
 			forceNiceScale: !stacked && !usesPercent,
 			labels: {
 				formatter: horizontal ? formatter.parameter.overlapped : formatter.indicator,
-				maxWidth: 140
+				maxWidth: 140,
+				style: {
+					fontFamily: yAxisProps.fontFamily,
+					fontSize: yAxisProps.fontSize ?? AXIS_FONT_SIZE
+				}
 			}
 		};
 

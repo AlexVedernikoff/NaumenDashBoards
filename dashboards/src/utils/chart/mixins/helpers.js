@@ -239,9 +239,16 @@ const getLegendOptions = (settings: Legend, container: HTMLDivElement, formatter
  * @param {HTMLDivElement} container - контейнер графика
  * @param {Legend} legend - настройки легенды графика
  * @param {boolean} horizontal - указывает является ли график горизонтальным
+ * @param {number} axisFontSize - размер шрифта
  * @returns {boolean}
  */
-const checkLabelsForOverlap = (labels: Array<string>, container: HTMLDivElement, legend: Legend, horizontal: boolean = false) => {
+const checkLabelsForOverlap = (
+	labels: Array<string>,
+	container: HTMLDivElement,
+	legend: Legend,
+	horizontal: boolean = false,
+	axisFontSize: number = AXIS_FONT_SIZE
+) => {
 	const {bottom, left, right, top} = LEGEND_POSITIONS;
 	const {position: legendPosition, show: showLegend} = legend;
 	let {clientHeight: height, clientWidth: width} = container;
@@ -256,7 +263,7 @@ const checkLabelsForOverlap = (labels: Array<string>, container: HTMLDivElement,
 
 		overlapped = !!labels.find(label => {
 			const lines = label.split(' ').length;
-			return columnHeight <= (lines * AXIS_FONT_SIZE + (lines - 1) * 0.5 * AXIS_FONT_SIZE);
+			return columnHeight <= (lines * axisFontSize + (lines - 1) * 0.5 * axisFontSize);
 		});
 	} else {
 		if (showLegend && (legendPosition === left || legendPosition === right)) {
@@ -264,7 +271,7 @@ const checkLabelsForOverlap = (labels: Array<string>, container: HTMLDivElement,
 		}
 
 		const columnWidth = width / labels.length;
-		const fontWidth = AXIS_FONT_SIZE * 0.7;
+		const fontWidth = axisFontSize * 0.7;
 
 		overlapped = !!labels.find(label => label.split(' ').find(label => columnWidth <= label.length * fontWidth));
 	}

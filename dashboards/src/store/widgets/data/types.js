@@ -238,6 +238,8 @@ export type ChartColorsSettings = {
 // График с осями
 
 export type AxisSettings = {
+	fontFamily: string,
+	fontSize: number,
 	format?: AxisFormat,
 	show: boolean,
 	showName: boolean

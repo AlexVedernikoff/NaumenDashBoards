@@ -161,13 +161,14 @@ const getTooltipTitlePruner = (container: HTMLDivElement): ((string) => string) 
  * @returns {AxisFormatter} - объект с функциями форматерами и параметрами построения
  */
 const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): AxisFormatter => {
-	const {dataLabels, legend} = widget;
+	const {dataLabels, indicator: {fontSize: indicatorFontSize}, legend, parameter: {fontSize: parameterFontSize}} = widget;
 	const horizontal = isHorizontalChart(widget.type);
 	const stacked = isStackedChart(widget.type);
 	const categoryFormatter = getCategoryFormatter(widget);
 	// $FlowFixMe - getCategoryFormatter должен сам разобраться что он обрабатывает.
 	const formatLabels = labels.map(categoryFormatter);
-	const hasOverlappedLabel = checkLabelsForOverlap(formatLabels, container, legend, horizontal);
+	const overlappedFontSize = horizontal ? indicatorFontSize : parameterFontSize;
+	const hasOverlappedLabel = checkLabelsForOverlap(formatLabels, container, legend, horizontal, overlappedFontSize);
 	const dataLabelsFormat = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
 	const normalizedDataLabelsFormat = dataLabelsFormat && dataLabelsFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
 		? dataLabelsFormat
