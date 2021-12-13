@@ -2905,6 +2905,14 @@ class IndicatorOrParameter
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Boolean showDependent
+    /**
+     * Тип шрифта на оси
+     */
+    String fontFamily = defaultFontFamily
+    /**
+     * Размер шрифта на оси
+     */
+    Integer fontSize = 12
 }
 
 /**
