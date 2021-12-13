@@ -55,7 +55,7 @@ const oldValueFormatter = (usesPercent: boolean, showZero: boolean) => {
 const getDataFormatters = (widget: ComboWidget, checkShowEmptyData?: boolean = false): ComboNumberFormatter => {
 	const formatters = {};
 
-	widget.data.forEach((dataSet) => {
+	widget.data.forEach(dataSet => {
 		const {breakdown, dataKey, indicators, parameters, showEmptyData, sourceForCompute} = dataSet;
 
 		if (!sourceForCompute) {
@@ -101,7 +101,7 @@ const getLegendFormatter = (widget: ComboWidget, container: HTMLDivElement, crop
 	const length = Math.round(getLegendWidth(container, position) / fontSize);
 	const formatters = {};
 
-	widget.data.forEach((dataSet) => {
+	widget.data.forEach(dataSet => {
 		const {breakdown, dataKey, parameters, sourceForCompute} = dataSet;
 
 		if (!sourceForCompute) {
@@ -132,13 +132,14 @@ const getLegendFormatter = (widget: ComboWidget, container: HTMLDivElement, crop
  * @returns {ComboFormatter} - объект с функциями форматерами и параметрами построения
  */
 const getComboFormatterBase = (widget: ComboWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): ComboFormatter => {
-	const {legend} = widget;
+	const {indicator: {fontSize: indicatorFontSize}, legend, parameter: {fontSize: parameterFontSize}} = widget;
 	const horizontal = isHorizontalChart(widget.type);
 	const stacked = isStackedChart(widget.type);
 	const categoryFormatter = getCategoryFormatter(widget);
 	// $FlowFixMe - getCategoryFormatter должен сам разобраться что он обрабатывает.
 	const formatLabels = labels.map(categoryFormatter);
-	const hasOverlappedLabel = checkLabelsForOverlap(formatLabels, container, legend, horizontal);
+	const overlappedFontSize = horizontal ? indicatorFontSize : parameterFontSize;
+	const hasOverlappedLabel = checkLabelsForOverlap(formatLabels, container, legend, horizontal, overlappedFontSize);
 	const categoryOverlappedSplitter = checkString(splitFormatter(!hasOverlappedLabel));
 
 	return {

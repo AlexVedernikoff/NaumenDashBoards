@@ -1,9 +1,13 @@
 // @flow
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
+import {FONT_FAMILIES} from 'store/widgets/data/constants';
+import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
+import {FONT_SIZE_OPTIONS} from './constants';
+import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
-import type {OnChangeEvent} from 'components/types';
+import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import Toggle from 'components/atoms/Toggle';
@@ -11,8 +15,12 @@ import Toggle from 'components/atoms/Toggle';
 export class AxisSettingsBox extends PureComponent<Props> {
 	handleChangeSettings = ({name: key, value}: OnChangeEvent<boolean>) => {
 		const {name, onChange, value: settings} = this.props;
+		return onChange(name, {...settings, [key]: !value});
+	};
 
-		onChange(name, {...settings, [key]: !value});
+	handleSelect = ({name: key, value}: OnSelectEvent) => {
+		const {name, onChange, value: settings} = this.props;
+		return onChange(name, {...settings, [key]: value});
 	};
 
 	renderAxisFormat = () => {
@@ -21,6 +29,21 @@ export class AxisSettingsBox extends PureComponent<Props> {
 
 		if (show && renderAxisFormat) {
 			return renderAxisFormat();
+		}
+
+		return null;
+	};
+
+	renderFontFormat =() => {
+		const {fontFamily = FONT_FAMILIES[0], fontSize = 12, show} = this.props.value;
+
+		if (show) {
+			return (
+				<FormField row>
+					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
+					<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} options={FONT_SIZE_OPTIONS} value={fontSize} />
+				</FormField>
+			);
 		}
 
 		return null;
@@ -47,6 +70,7 @@ export class AxisSettingsBox extends PureComponent<Props> {
 						<Toggle checked={show} name={DIAGRAM_FIELDS.show} onChange={this.handleChangeSettings} value={show} />
 					</FormControl>
 				</FormField>
+				{this.renderFontFormat()}
 				{this.renderAxisFormat()}
 				<FormField>
 					<FormControl label="Название оси" reverse={true}>
