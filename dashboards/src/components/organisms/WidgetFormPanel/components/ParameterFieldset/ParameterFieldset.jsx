@@ -41,7 +41,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 		const {attribute} = value;
 		const filteredOptions = filterOptions ? filterOptions(options, dataSetIndex, filterByRef) : options;
 
-		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, attribute);
+		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
 	};
 
 	getComponents = memoize(() => ({

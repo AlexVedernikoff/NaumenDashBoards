@@ -106,7 +106,7 @@ export class BreakdownFieldset extends Component<Props> {
 			}
 		}
 
-		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, attribute);
+		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
 	};
 
 	handleChangeGroup = (breakdownIndex: number) => (group: Group, attribute: Attribute) => {

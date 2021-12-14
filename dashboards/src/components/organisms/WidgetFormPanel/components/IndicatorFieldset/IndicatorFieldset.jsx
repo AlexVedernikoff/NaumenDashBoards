@@ -53,12 +53,21 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	}));
 
 	getMainOptions = (options: Array<Attribute>): Array<mixed> => {
-		const {dataSetIndex, helpers, value, values} = this.props;
+		const {dataSetIndex, helpers, type, value, values} = this.props;
+
 		const {attribute} = value;
-		let filterAttribute: ?Attribute = null;
+		let filterAttribute: Array<?Attribute> = [];
 
 		if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-			filterAttribute = (attribute: Attribute);
+			filterAttribute = [attribute];
+		}
+
+		if (type.value === WIDGET_TYPES.TABLE) {
+			values.data[dataSetIndex].indicators.forEach(({attribute}) => {
+				if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
+					filterAttribute.push(attribute);
+				}
+			});
 		}
 
 		return [...values.computedAttrs, ...helpers.filterAttributesByUsed(options, dataSetIndex, filterAttribute)];
@@ -254,4 +263,4 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	}
 }
 
-export default compose(withHelpers, withValues(DIAGRAM_FIELDS.computedAttrs), withType)(IndicatorFieldset);
+export default compose(withHelpers, withValues(DIAGRAM_FIELDS.computedAttrs, DIAGRAM_FIELDS.data), withType)(IndicatorFieldset);
