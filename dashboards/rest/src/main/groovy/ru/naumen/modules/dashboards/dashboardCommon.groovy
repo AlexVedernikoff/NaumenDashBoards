@@ -806,7 +806,8 @@ class DashboardUtils
                     id: oldFormatWidget.id,
                     type: oldFormatWidget.type as DiagramType,
                     colors: oldFormatWidget.colors,
-                    diagramType: oldFormatWidget.diagramType
+                    diagramType: oldFormatWidget.diagramType,
+                    tooltip: oldFormatWidget?.tooltip
                 )
                     : new CircleCurrentAndNew(
                     data: diagramTypeHasNoDataField
@@ -824,7 +825,8 @@ class DashboardUtils
                     id: oldFormatWidget.id,
                     type: oldFormatWidget.type as DiagramType,
                     colors: oldFormatWidget.colors,
-                    diagramType: oldFormatWidget.diagramType
+                    diagramType: oldFormatWidget.diagramType,
+                    tooltip: oldFormatWidget?.tooltip
                 )
             case [SpeedometerCurrentAndNew, CircleCurrentAndNew, AxisCurrentAndNew]:
                 if(widgetCurrentClazz == AxisCurrentAndNew && oldDataFormat == AxisCurrentData)
@@ -851,7 +853,8 @@ class DashboardUtils
                     navigation: oldFormatWidget.navigation as Navigation ?: new Navigation(),
                     templateName: oldFormatWidget.templateName,
                     type: oldFormatWidget.type as DiagramType,
-                    diagramType: oldFormatWidget.diagramType
+                    diagramType: oldFormatWidget.diagramType,
+                    tooltip: oldFormatWidget?.tooltip
                 )
             case TablePrevAndCurrentAndNew:
                 return new TablePrevAndCurrentAndNew(
@@ -875,7 +878,8 @@ class DashboardUtils
                     data: oldFormatWidget.data as Collection<DiagramNowData>,
                     top: oldFormatWidget.top as Top ?: new Top(),
                     type: oldFormatWidget.type as DiagramType,
-                    diagramType: oldFormatWidget.diagramType
+                    diagramType: oldFormatWidget.diagramType,
+                    tooltip: oldFormatWidget?.tooltip
                 )
         }
     }
@@ -2729,6 +2733,11 @@ class NewIndicator
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     BaseAttribute attribute
+    /**
+     * Настройки подсказки
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    TooltipSettings tooltip
 }
 
 /**
@@ -3167,6 +3176,11 @@ abstract class Widget
      */
     @JsonIgnore
     String diagramType
+    /**
+     * Настройки подсказки
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    TooltipSettings tooltip
 
     /**
      * Метод по преобразованию данных диаграм с форматом prev к поддерживаемому формату
@@ -4416,6 +4430,22 @@ class TableRequestSettings
      * объект, описывающий настройки сортировки
      */
     Sorting sorting = new Sorting()
+}
+
+/**
+ * Настройки подсказки для виджета
+ */
+class TooltipSettings
+{
+    /**
+     * Флаг для отображения/скрытия подсказки
+     */
+    Boolean show
+
+    /**
+     * Текст подсказки
+     */
+    String title
 }
 
 /**

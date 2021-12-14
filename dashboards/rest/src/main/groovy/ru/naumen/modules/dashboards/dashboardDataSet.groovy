@@ -4012,14 +4012,15 @@ class DashboardDataSetService
         }
         return attributes.collect { attrValue ->
             return new Column(
-                footer:      "",
-                accessor:    attrValue.name,
-                header:      attrValue.name,
-                attribute:   attrValue.attribute,
-                type:        attrValue.type,
-                group:       attrValue.group,
+                footer: "",
+                accessor: attrValue.name,
+                header: attrValue.name,
+                attribute: attrValue.attribute,
+                type: attrValue.type,
+                group: attrValue.group,
                 aggregation: attrValue.aggregation,
-                )
+                tooltip: attrValue?.tooltip
+            )
         }
     }
 
@@ -4173,9 +4174,10 @@ class DashboardDataSetService
                                 attribute?.title = "${attribute?.title} (${currentSourceName})"
                             }
                         }
-                        return [name : attribute?.title, attribute : attribute,
-                                type : ColumnType.INDICATOR,
-                                aggregation : indicator?.aggregation]
+                        return [name       : attribute?.title, attribute: attribute,
+                                type       : ColumnType.INDICATOR,
+                                aggregation: indicator?.aggregation,
+                                tooltip    : indicator?.tooltip]
                     }
                 }
             }
@@ -5692,6 +5694,10 @@ class Column
      * Агрегация (есть у показателей)
      */
     String aggregation
+    /**
+     * Настройки тултипа для показателя
+     */
+    TooltipSettings tooltip
 }
 
 class NumberColumn extends Column
