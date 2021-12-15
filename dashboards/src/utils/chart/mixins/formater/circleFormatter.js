@@ -3,6 +3,7 @@ import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT, TEXT_HANDLERS} from 'store
 import {
 	checkInfinity,
 	cropFormatter,
+	getTooltipTitlePruner,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
@@ -15,6 +16,7 @@ import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
 import {getLegendWidth} from 'utils/chart/mixins/helpers';
 import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
+import {LEGEND_POSITIONS} from 'utils/chart';
 
 const getDataFormatter = (widget: CircleWidget, format: NumberAxisFormat): NumberFormatter => {
 	const dataSet = getMainDataSet(widget.data);
@@ -81,18 +83,25 @@ const getLegendFormatter = (widget: CircleWidget, container: HTMLDivElement): Nu
  * @returns {CircleFormatter} - объект с функциями форматерами и параметрами построения
  */
 const getCircleFormatterBase = (widget: CircleWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): CircleFormatter => {
-	const {dataLabels} = widget;
+	const {dataLabels, legend} = widget;
+	const {position, show} = legend;
+	const horizontalsLegendShow = show && (position === LEGEND_POSITIONS.left || position === LEGEND_POSITIONS.right);
 	const dataLabelsFormat = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
 	const normalizedDataLabelsFormat = dataLabelsFormat && dataLabelsFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
 		? dataLabelsFormat
 		: DEFAULT_NUMBER_AXIS_FORMAT;
-	const dataLablesFormatter = getDataFormatter(widget, normalizedDataLabelsFormat);
+	const dataLabelsFormatter = getDataFormatter(widget, normalizedDataLabelsFormat);
+	const categoryFormatter = getCategoryFormatter(widget);
+	const legendFormatter = getLegendFormatter(widget, container);
 
 	return {
-		breakdown: getCategoryFormatter(widget),
-		dataLabel: getCircleDataLabelFormatter(dataLablesFormatter),
-		legend: getLegendFormatter(widget, container),
-		tooltip: dataLablesFormatter
+		breakdown: categoryFormatter,
+		dataLabel: getCircleDataLabelFormatter(dataLabelsFormatter),
+		legend: legendFormatter,
+		tooltip: {
+			data: dataLabelsFormatter,
+			title: compose(getTooltipTitlePruner(horizontalsLegendShow, container), categoryFormatter)
+		}
 	};
 };
 
@@ -112,10 +121,11 @@ const getCircleFormatterDebug = (widget: CircleWidget, labels: Array<string> | A
 	const breakdown = [];
 	const dataLabel = [];
 	const legend = [];
-	const tooltip = [];
+	const tooltipData = [];
+	const tooltipTitle = [];
 
-	console.info('getCircleFormatterBase: ', {...store, breakdown, dataLabel, legend, tooltip});
-	const dataLabelCtxExtractor = (ctx) => {
+	console.info('getCircleFormatterBase: ', {...store, breakdown, dataLabel, legend, tooltipData, tooltipTitle});
+	const dataLabelCtxExtractor = ctx => {
 		const {seriesIndex, w} = ctx;
 		const value = w.config.series[seriesIndex];
 		return {seriesIndex, w: {config: {series: {[seriesIndex]: value}}}};
@@ -124,7 +134,10 @@ const getCircleFormatterDebug = (widget: CircleWidget, labels: Array<string> | A
 		breakdown: storedFormatter(breakdown, baseFormatter.breakdown),
 		dataLabel: storedFormatter(dataLabel, baseFormatter.dataLabel, dataLabelCtxExtractor),
 		legend: storedFormatter(legend, baseFormatter.legend),
-		tooltip: storedFormatter(tooltip, baseFormatter.tooltip)
+		tooltip: {
+			data: storedFormatter(tooltipData, baseFormatter.tooltip.data),
+			title: storedFormatter(tooltipTitle, baseFormatter.tooltip.title)
+		}
 	};
 };
 

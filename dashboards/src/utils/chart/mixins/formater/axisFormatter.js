@@ -1,5 +1,4 @@
 // @flow
-import {AXIS_FONT_SIZE} from 'utils/chart/constants';
 import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import type {AxisFormatter, CTXValue, NumberFormatter, ValueFormatter} from './types';
 import type {AxisWidget, NumberAxisFormat} from 'store/widgets/data/types';
@@ -8,6 +7,7 @@ import {
 	checkString,
 	checkZero,
 	cropFormatter,
+	getTooltipTitlePruner,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
@@ -19,6 +19,7 @@ import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
 import {hasMSInterval, hasPercent, isHorizontalChart, isStackedChart, parseMSInterval} from 'store/widgets/helpers';
+import {LEGEND_POSITIONS} from 'utils/chart';
 import memoize from 'memoize-one';
 
 /**
@@ -141,19 +142,6 @@ const getTooltipNormalizer = (widget: AxisWidget): ((number) => number) => {
 };
 
 /**
- * Создает оболочку для обрезания заголовков подсказок под размеры виджета
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
- * @returns {Function} - функция-усекатор
- */
-const getTooltipTitlePruner = (container: HTMLDivElement): ((string) => string) => {
-	const {clientWidth: width} = container;
-	const fontWidth = AXIS_FONT_SIZE * 0.6;
-	const maxChars = (width - 12 /* padding */) / fontWidth;
-
-	return (value: string) => value.length > maxChars ? value.slice(0, maxChars - 3) + '...' : value;
-};
-
-/**
  * Фабрика форматеров для осевой диаграммы
  * @param {AxisWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
@@ -165,6 +153,8 @@ const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<
 	const horizontal = isHorizontalChart(widget.type);
 	const stacked = isStackedChart(widget.type);
 	const categoryFormatter = getCategoryFormatter(widget);
+	const {position, show} = legend;
+	const horizontalsLegendShow = show && (position === LEGEND_POSITIONS.left || position === LEGEND_POSITIONS.right);
 	// $FlowFixMe - getCategoryFormatter должен сам разобраться что он обрабатывает.
 	const formatLabels = labels.map(categoryFormatter);
 	const overlappedFontSize = horizontal ? indicatorFontSize : parameterFontSize;
@@ -191,7 +181,7 @@ const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<
 		},
 		tooltip: {
 			data: compose(getDataFormatter(widget, normalizedDataLabelsFormat, false), getTooltipNormalizer(widget)),
-			title: compose(categoryFormatter, getTooltipTitlePruner(container))
+			title: compose(categoryFormatter, getTooltipTitlePruner(horizontalsLegendShow, container))
 		}
 	};
 };

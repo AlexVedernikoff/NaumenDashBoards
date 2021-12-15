@@ -35,7 +35,10 @@ export type CircleFormatter = {
 	breakdown: NumberFormatter | ValueFormatter,
 	dataLabel: NumberFormatter,
 	legend: NumberFormatter | ValueFormatter,
-	tooltip: NumberFormatter,
+	tooltip: {
+		data: NumberFormatter,
+		title: NumberFormatter | ValueFormatter,
+	}
 };
 
 export type ComboFormatter = {
@@ -50,6 +53,10 @@ export type ComboFormatter = {
 		default: ComboNumberFormatter | ComboValueFormatter,
 		overlapped: ComboNumberFormatter | ComboValueFormatter
 	},
+	tooltip: {
+		data: ComboNumberFormatter,
+		title: ComboNumberFormatter | ComboValueFormatter,
+	}
 };
 
 export type TotalFormatter = {

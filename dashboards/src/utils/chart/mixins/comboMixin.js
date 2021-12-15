@@ -27,7 +27,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @param {number} index - индекс набора данных виджета
  * @param {boolean} forceHide - указывает на необходимость скрывать ось.
  * @param {ComboNumberFormatter} indicatorFormatter - форматер для значений на оси
- * @param {ComboValueFormatter} indicatorTooltipFormatter - форматер значений индикаторов для tooltips
+ * @param {ComboValueFormatter} tooltipFormatter - форматер значений индикаторов для подсказки
  * @returns {Options}
  */
 const setYAxis = (
@@ -38,7 +38,7 @@ const setYAxis = (
 	index: number,
 	forceHide: boolean,
 	indicatorFormatter: ComboNumberFormatter | ComboValueFormatter,
-	indicatorTooltipFormatter: ComboNumberFormatter | ComboValueFormatter
+	tooltipFormatter: ComboNumberFormatter | ComboValueFormatter
 ): Options => {
 	const {colorsSettings, indicator} = widget;
 	const {series} = chart;
@@ -72,7 +72,7 @@ const setYAxis = (
 	}
 
 	const ctx = {seriesIndex: index, w: {config: {series}}};
-	const bindIndicatorFormatter = (val) => indicatorFormatter(val, ctx);
+	const bindIndicatorFormatter = val => indicatorFormatter(val, ctx);
 
 	const yaxis = {
 		axisBorder: {
@@ -106,7 +106,7 @@ const setYAxis = (
 	const yTooltip = {
 		formatter: indicatorFormatter,
 		title: {
-			formatter: indicatorTooltipFormatter
+			formatter: tooltipFormatter
 		}
 	};
 
@@ -131,7 +131,7 @@ const setYAxis = (
  * @param {ComboWidget} widget - данные виджета
  * @param {DiagramBuildData} chart - данные конкретного графика
  * @param {ComboNumberFormatter} indicatorFormatter - форматер для значений на оси
- * @param {ComboValueFormatter} indicatorTooltipFormatter - форматер значений индикаторов для tooltips
+ * @param {ComboValueFormatter} tooltipFormatter - форматер значений индикаторов для подсказки
  * @returns {Options}
  */
 const setYAxises = (
@@ -139,7 +139,7 @@ const setYAxises = (
 	widget: ComboWidget,
 	chart: DiagramBuildData,
 	indicatorFormatter: ComboNumberFormatter | ComboValueFormatter,
-	indicatorTooltipFormatter: ComboNumberFormatter | ComboValueFormatter
+	tooltipFormatter: ComboNumberFormatter | ComboValueFormatter
 ): Options => {
 	const usedDataKeys = [];
 	let extendedOptions = options;
@@ -163,7 +163,7 @@ const setYAxises = (
 				usedDataKeys.push(dataKey);
 			}
 
-			extendedOptions = setYAxis(extendedOptions, widget, chart, dataSet, i, forceHide, indicatorFormatter, indicatorTooltipFormatter);
+			extendedOptions = setYAxis(extendedOptions, widget, chart, dataSet, i, forceHide, indicatorFormatter, tooltipFormatter);
 		}
 	});
 
@@ -217,13 +217,16 @@ export const comboMixin = (widget: ComboWidget, data: DiagramBuildData, containe
 			tooltip: {
 				intersect: true,
 				shared: false,
+				x: {
+					formatter: formatter.tooltip.title
+				},
 				y: []
 			},
 			xaxis: extend(xaxis, getXAxisOptions(xAxisProps, hasOverlappedLabel)),
 			yaxis: []
 		};
 
-		options = setYAxises(options, widget, data, formatter.indicator, formatter.legend.full);
+		options = setYAxises(options, widget, data, formatter.tooltip.data, formatter.tooltip.title);
 
 		return options;
 	}

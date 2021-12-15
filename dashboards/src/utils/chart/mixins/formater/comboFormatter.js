@@ -5,6 +5,7 @@ import {
 	checkString,
 	checkZero,
 	cropFormatter,
+	getTooltipTitlePruner,
 	makeFormatterByFormat,
 	percentFormat,
 	sevenDaysFormatter,
@@ -17,6 +18,7 @@ import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
 import {hasMSInterval, hasPercent, isHorizontalChart, isStackedChart, parseMSInterval} from 'store/widgets/helpers';
+import {LEGEND_POSITIONS} from 'utils/chart';
 import {TEXT_HANDLERS} from 'store/widgets/data/constants';
 
 const getDataKeyFromContext = (ctx: Object) => {
@@ -136,15 +138,18 @@ const getComboFormatterBase = (widget: ComboWidget, labels: Array<string> | Arra
 	const horizontal = isHorizontalChart(widget.type);
 	const stacked = isStackedChart(widget.type);
 	const categoryFormatter = getCategoryFormatter(widget);
+	const {position, show} = legend;
+	const horizontalsLegendShow = show && (position === LEGEND_POSITIONS.left || position === LEGEND_POSITIONS.right);
 	// $FlowFixMe - getCategoryFormatter должен сам разобраться что он обрабатывает.
 	const formatLabels = labels.map(categoryFormatter);
 	const overlappedFontSize = horizontal ? indicatorFontSize : parameterFontSize;
 	const hasOverlappedLabel = checkLabelsForOverlap(formatLabels, container, legend, horizontal, overlappedFontSize);
 	const categoryOverlappedSplitter = checkString(splitFormatter(!hasOverlappedLabel));
+	const indicatorFormatter = getDataFormatters(widget);
 
 	return {
 		dataLabel: getDataFormatters(widget, true),
-		indicator: getDataFormatters(widget),
+		indicator: indicatorFormatter,
 		legend: {
 			cropped: getLegendFormatter(widget, container, true),
 			full: getLegendFormatter(widget, container, false)
@@ -157,6 +162,10 @@ const getComboFormatterBase = (widget: ComboWidget, labels: Array<string> | Arra
 		parameter: {
 			default: categoryFormatter,
 			overlapped: compose(categoryOverlappedSplitter, categoryFormatter)
+		},
+		tooltip: {
+			data: indicatorFormatter,
+			title: compose(categoryFormatter, getTooltipTitlePruner(horizontalsLegendShow, container))
 		}
 	};
 };
