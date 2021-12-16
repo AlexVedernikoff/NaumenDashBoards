@@ -7,6 +7,7 @@
 		flex-direction: column;
 		height: 100%;
 		padding: 0 1px;
+		position: relative;
 		width: 652px;
 
 		thead, tfoot {
@@ -76,9 +77,22 @@
 			}
 		}
 	}
+	.tableSwitch {
+		margin-right: -452px;
+
+		&:after {
+			background: rgba(0, 0, 0, .5);
+			bottom: -1px;
+			content: '';
+			position: absolute;
+			top: -1px;
+			left: -17px;
+			width: 100%;
+		}
+	}
 
 	.icon {
-		margin-right: 5px;
+		margin: 0 4px 0 -4px;
 	}
 
 	.disabled {

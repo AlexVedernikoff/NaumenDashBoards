@@ -8,12 +8,11 @@ type ReceivedProps = {
 
 export type ConnectedProps = {
 	error: boolean,
-	loading: boolean,
-	personal: boolean
+	loading: boolean
 };
 
 export type ConnectedFunctions = {
-	getAttributeData: () => ThunkAction
+	getVerify: () => ThunkAction
 };
 
 export type Props = ReceivedProps & ConnectedProps & ConnectedFunctions;

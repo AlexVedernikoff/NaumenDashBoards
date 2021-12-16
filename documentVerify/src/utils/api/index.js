@@ -24,9 +24,8 @@ export const getSubjectUuid = async (): Promise<string> => {
 /**
  * Возвращает стартовые данные для отображения
  * @returns {Promise<VerifyData>} - обьект с данными
- * @param decisionUUID - Uuid Пользователя
- * @param fileUUID - Uuid Файла
+ * @param decisionUUID - Uuid решения
  */
-export const getVerifyResult = async (decisionUUID: string, fileUUID: string): Promise<VerifyData> => {
-	return await api.getVerifyResult(decisionUUID, fileUUID);
+export const getVerifyResult = async (decisionUUID: string): Promise<VerifyData> => {
+	return await api.getVerifyResult(decisionUUID);
 };
