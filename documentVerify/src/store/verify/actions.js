@@ -1,19 +1,18 @@
 // @flow
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getFileUuid, getSubjectUuid, getVerifyResult} from 'utils/api';
+import {getSubjectUuid, getVerifyResult} from 'utils/api';
 import {VERIFY_EVENTS} from './constants';
 
 /**
  * Получает данные, необходимые для работы
  * @returns {ThunkAction}
  */
-const getVerify = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getDataVerify = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		dispatch(showLoaderData());
 
-		const decisionUUID = await getSubjectUuid();
-		const fileUUID = await getFileUuid();
-		const setting = await getVerifyResult(decisionUUID, fileUUID);
+		const decisionUUID = 'decisionUUID$2'; // await getSubjectUuid(); // Временно для получение мок данных
+		const setting = await getVerifyResult(decisionUUID);
 
 		dispatch(setVerifyData(setting));
 	} catch (error) {
@@ -56,5 +55,5 @@ const setVerifyData = (payload: string) => ({
 });
 
 export {
-	getVerify
+	getDataVerify
 };

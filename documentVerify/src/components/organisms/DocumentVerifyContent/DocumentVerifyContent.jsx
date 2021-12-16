@@ -1,9 +1,11 @@
 // @flow
+import LeftIcon from 'icons/left.svg';
 import type {Props} from 'containers/DocumentVerifyTable/types';
 import React, {useEffect, useState} from 'react';
+import RightIcon from 'icons/right.svg';
 import styles from './styles.less';
 
-const DocumentVerifyContent = ({verify}: Props) => {
+const DocumentVerifyContent = ({onSwitchView, switchView, verify}: Props) => {
 	const [height, setHeight] = useState('auto');
 
 	useEffect(() => {
@@ -17,8 +19,9 @@ const DocumentVerifyContent = ({verify}: Props) => {
 	return (
 		<div className={styles.container}>
 			<div className={styles.scroll} id='scrollBlock'>
-				<div className={styles.document} dangerouslySetInnerHTML={{__html: verify?.data?.document + verify?.data?.document}} id='scrollDocument' style={{height}} />
+				<div className={styles.document} dangerouslySetInnerHTML={{__html: verify?.data?.document}} id='scrollDocument' style={{height}} />
 			</div>
+			<div className={styles.switch} onClick={onSwitchView}>{switchView ? <RightIcon /> : <LeftIcon /> }</div>
 		</div>
 	);
 };

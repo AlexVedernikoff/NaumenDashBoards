@@ -5,20 +5,14 @@ export default class Api {
 		this.jsApi = window.jsApi;
 	}
 
-	getFileUuid () {
-		return window.jsApi.getFileUuid();
-	}
-
 	getSubjectUuid () {
 		return this.jsApi.extractSubjectUuid();
 	}
 
-	async getVerifyResult (decisionUUID: string, fileUUID: string) {
-		const url = `exec-post?func=modules.documentDecisionsVerify.getVerifyResult&params=requestContent`;
-		const body = {decisionUUID, fileUUID};
+	async getVerifyResult (decisionUUID: string) {
+		const url = `exec?func=modules.documentDecisionsVerify.getVerifyResult&params='${encodeURIComponent(decisionUUID)}'`;
 		const options = {
-			body: JSON.stringify(body),
-			method: 'POST'
+			method: 'GET'
 		};
 
 		return this.jsApi.restCallAsJson(url, options);

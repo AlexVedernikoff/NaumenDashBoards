@@ -9,7 +9,7 @@ export default class FakeApi {
 		return 'root$101';
 	}
 
-	async getVerifyResult (decisionUUID, fileUUID) {
+	async getVerifyResult (decisionUUID) {
 		await new Promise(resolve => setTimeout(() => resolve(), 500));
 
 		return verifyResult;
