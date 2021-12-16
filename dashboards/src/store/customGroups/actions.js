@@ -6,6 +6,7 @@ import type {CustomGroup} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getParams} from 'store/helpers';
+import t from 'localization';
 
 /**
  * Получает данные группировки
@@ -88,7 +89,7 @@ const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup): Thun
 		dispatch(removeCustomGroup(localId));
 		dispatch(saveCustomGroup({...customGroupData, id}));
 	} catch (e) {
-		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка создания группировки';
+		const errorMessage = e instanceof ApiError ? e.message : t('store::customGroups::FailCreate');
 
 		dispatch(createToast({
 			text: errorMessage,
@@ -107,7 +108,7 @@ const deleteCustomGroup = (groupKey: string, remote: boolean = true): ThunkActio
 
 		dispatch(removeCustomGroup(groupKey));
 	} catch (e) {
-		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка удаления группировки';
+		const errorMessage = e instanceof ApiError ? e.message : t('store::customGroups::FailDelete');
 
 		dispatch(createToast({
 			text: errorMessage,
@@ -126,7 +127,7 @@ const updateCustomGroup = (group: CustomGroup, remote: boolean = false): ThunkAc
 
 		dispatch(saveCustomGroup(updatedGroup));
 	} catch (e) {
-		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка сохранения группировки';
+		const errorMessage = e instanceof ApiError ? e.message : t('store::customGroups::FailSave');
 
 		dispatch(createToast({
 			text: errorMessage,

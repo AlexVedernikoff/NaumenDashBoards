@@ -4,12 +4,14 @@ import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 
 export class TextArea extends Component<Props> {
 	static defaultProps = {
 		label: '',
 		maxLength: MAX_TEXT_LENGTH,
-		placeholder: 'Введите текст...'
+		placeholder: t('TextArea::Placeholder')
 	};
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
@@ -29,7 +31,7 @@ export class TextArea extends Component<Props> {
 		const {value} = this.props;
 
 		return (
-			<button className={styles.clearButton} disabled={!value} onClick={this.handleClear}>Очистить</button>
+			<button className={styles.clearButton} disabled={!value} onClick={this.handleClear}><T text="TextArea::Clear" /></button>
 		);
 	};
 

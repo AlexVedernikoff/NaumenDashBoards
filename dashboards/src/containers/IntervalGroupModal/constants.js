@@ -1,55 +1,56 @@
 // @flow
 import {createSchema, object} from 'GroupModal/schema';
 import {INTERVAL_SYSTEM_GROUP} from 'store/widgets/constants';
+import type {LangType} from 'localization/localize_types';
 import type {OrCondition} from 'GroupModal/types';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 
-const OR_CONDITION_OPTIONS = [
+const OR_CONDITION_OPTIONS: Array<{label: LangType, value: string}> = [
 	{
-		label: 'равно',
+		label: 'GroupModal::Equal',
 		value: OR_CONDITION_TYPES.EQUAL
 	},
 	{
-		label: 'не равно (и не пусто)',
+		label: 'GroupModal::NotEqual',
 		value: OR_CONDITION_TYPES.NOT_EQUAL
 	},
 	{
-		label: 'больше',
+		label: 'GroupModal::Greater',
 		value: OR_CONDITION_TYPES.GREATER
 	},
 	{
-		label: 'менее',
+		label: 'GroupModal::Less',
 		value: OR_CONDITION_TYPES.LESS
 	},
 	{
-		label: 'пусто',
+		label: 'GroupModal::Empty',
 		value: OR_CONDITION_TYPES.EMPTY
 	},
 	{
-		label: 'не пусто',
+		label: 'GroupModal::NotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	}
 ];
 
-const SYSTEM_OPTIONS = [
+const SYSTEM_OPTIONS: Array<{label: LangType, value: $Keys<typeof INTERVAL_SYSTEM_GROUP>}> = [
 	{
-		label: 'Секунды',
+		label: 'IntervalGroupModal::Second',
 		value: INTERVAL_SYSTEM_GROUP.SECOND
 	},
 	{
-		label: 'Минуты',
+		label: 'IntervalGroupModal::Minute',
 		value: INTERVAL_SYSTEM_GROUP.MINUTE
 	},
 	{
-		label: 'Часы',
+		label: 'IntervalGroupModal::Hour',
 		value: INTERVAL_SYSTEM_GROUP.HOUR
 	},
 	{
-		label: 'Дни',
+		label: 'IntervalGroupModal::Day',
 		value: INTERVAL_SYSTEM_GROUP.DAY
 	},
 	{
-		label: 'Недели',
+		label: 'IntervalGroupModal::Week',
 		value: INTERVAL_SYSTEM_GROUP.WEEK
 	}
 ];

@@ -1,5 +1,6 @@
 // @flow
 import type {Components, Option, OrCondition} from 'GroupModal/types';
+import type {LangType} from 'localization/localize_types';
 
 export type Props = {
 	components: Components,
@@ -16,7 +17,7 @@ export type Props = {
 
 export type State = {
 	value: {
-		label: string,
+		label: LangType,
 		value: string
 	}
 };

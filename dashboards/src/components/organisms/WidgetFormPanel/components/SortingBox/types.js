@@ -1,5 +1,6 @@
 // @flow
 import type {ChartSorting} from 'store/widgets/data/types';
+import type {LangType} from 'localization/localize_types';
 
 export type ContainerProps = {
 	children: React$Node,
@@ -12,7 +13,7 @@ export type Components = {
 
 export type SortingValueOption = {
 	disabled?: boolean,
-	label: string,
+	label: LangType,
 	value: string
 };
 
