@@ -1,9 +1,10 @@
 // @flow
 import React from 'react';
 import {TRANSLATION_CONTEXT} from './constants';
+import type {WithUtilsProps} from './types';
 
-export const withTranslation = (Component: React$ComponentType<Object>) => {
-	return class WithTranslation extends React.Component<Object> {
+export const withTranslation = <Config: {}> (Component: React$ComponentType<Config & WithUtilsProps>): React$ComponentType<Config> =>
+	class WithTranslation extends React.Component<Config> {
 		render () {
 			return (
 				<TRANSLATION_CONTEXT.Consumer>
@@ -12,6 +13,5 @@ export const withTranslation = (Component: React$ComponentType<Object>) => {
 			);
 		}
 	};
-};
 
 export default withTranslation;

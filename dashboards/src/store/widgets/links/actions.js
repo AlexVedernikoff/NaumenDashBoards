@@ -9,6 +9,7 @@ import {LINKS_EVENTS} from './constants';
 import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import {setWarningMessage} from 'store/widgets/data/actions';
 import StorageSettings from 'utils/storageSettings';
+import t from 'localization';
 import type {Widget} from 'store/widgets/data/types';
 
 const createPostData = (widget: Widget, index: number) => {
@@ -82,7 +83,7 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async 
 		dispatch(receiveLink(id));
 	} catch (exception) {
 		if (exception instanceof DrillDownBigData || exception instanceof NoDetailData) {
-			dispatch(setWarningMessage({id, message: 'Детализация данных не доступна. Слишком большое количество данных'}));
+			dispatch(setWarningMessage({id, message: t('store::widgets::links::DataLimit')}));
 			return;
 		}
 

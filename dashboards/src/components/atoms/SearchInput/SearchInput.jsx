@@ -62,7 +62,7 @@ export class SearchInput extends PureComponent<Props, State> {
 				onChange={this.handleChange}
 				onClick={this.handleClick}
 				onFocus={onFocus}
-				placeholder="Поиск"
+				placeholder={t('SearchInput::Placeholder')}
 				ref={this.inputRef}
 				value={value}
 			/>

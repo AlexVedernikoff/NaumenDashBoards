@@ -10,6 +10,7 @@ import RadioField from 'components/atoms/RadioField';
 import React, {PureComponent} from 'react';
 import {SORTING_OPTIONS, SORTING_TYPE_OPTIONS} from './constants';
 import styles from './styles.less';
+import t, {translateObjectsArray} from 'localization';
 
 export class SortingBox extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -30,12 +31,13 @@ export class SortingBox extends PureComponent<Props, State> {
 
 	renderSortingButtons = () => {
 		const {type} = this.props.value;
+		const options = translateObjectsArray('title', SORTING_TYPE_OPTIONS);
 
 		return (
 			<CheckIconButtonGroup
 				name={DIAGRAM_FIELDS.type}
 				onChange={this.handleChange}
-				options={SORTING_TYPE_OPTIONS}
+				options={options}
 				value={type}
 			/>
 		);
@@ -53,7 +55,7 @@ export class SortingBox extends PureComponent<Props, State> {
 			<div className={CN} key={index}>
 				<RadioField
 					checked={currentValue === value}
-					label={label}
+					label={t(label)}
 					name={DIAGRAM_FIELDS.value}
 					onChange={this.handleChange}
 					value={value}
@@ -76,7 +78,7 @@ export class SortingBox extends PureComponent<Props, State> {
 		const {Container} = this.props.components;
 
 		return (
-			<CollapsableFormBox title="Сортировка">
+			<CollapsableFormBox title={t('SortingBox::Title')}>
 				<Container className={styles.container}>
 					{this.renderValueFields()}
 					{this.renderSortingButtons()}

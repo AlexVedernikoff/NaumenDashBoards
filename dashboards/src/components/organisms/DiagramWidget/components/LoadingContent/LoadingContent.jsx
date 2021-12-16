@@ -22,7 +22,7 @@ export class LoadingContent extends PureComponent<Props> {
 		return error ? <div className={styles.error} title={error}>{error}</div> : null;
 	};
 
-	renderLoading = () => this.props.buildData.loading ? <p><T>LoadingContent::Loading</T></p> : null;
+	renderLoading = () => this.props.buildData.loading ? <p><T text="LoadingContent::Loading" /></p> : null;
 
 	render () {
 		return (

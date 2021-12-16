@@ -46,11 +46,9 @@ export class StyleBox extends PureComponent<Props> {
 			const selection = editorState.getSelection();
 			// Удаляем аналогичные стили у всех вложенных блоков
 			const nextContentState = Object.keys(textSettings.styleMap).filter(styleName => styleName.startsWith(name))
-				.reduce((contentState, styleName) => {
-					return Modifier.removeInlineStyle(contentState, selection, styleName);
-				}, editorState.getCurrentContent());
+				.reduce((contentState, styleName) => Modifier.removeInlineStyle(contentState, selection, styleName), editorState.getCurrentContent());
 
-			let nextEditorState = EditorState.push(
+			const nextEditorState = EditorState.push(
 				editorState,
 				nextContentState,
 				'change-inline-style'

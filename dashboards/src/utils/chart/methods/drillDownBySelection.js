@@ -16,6 +16,7 @@ import {hasUUIDsInLabels} from 'store/widgets/helpers';
 import isMobile from 'ismobilejs';
 import {setWarningMessage} from 'store/widgets/data/actions';
 import {store} from 'app.constants';
+import t from 'localization';
 import type {ThunkAction} from 'store/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -334,7 +335,7 @@ const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) => (ev
 		} else {
 			const {id} = widget;
 
-			store.dispatch(setWarningMessage({id, message: 'Для данного виджета детализация данных не доступна'}));
+			store.dispatch(setWarningMessage({id, message: t('drillDownBySelection::Fail')}));
 		}
 	}
 };

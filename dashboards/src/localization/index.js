@@ -1,10 +1,11 @@
 // @flow
+import type {LangType} from './localize_types';
 import Localization from './localization';
 import type {LocalizationParams} from './types';
 
 export const localization = new Localization();
 
-const translate = (key: string, params?: LocalizationParams) => localization.translate(key, params);
+const translate = (key: LangType, params?: LocalizationParams) => localization.translate(key, params);
 
 /**
  * Преобразует поле [key] в каждом элементе-объекте из массива array. Нужен для локализации списков
