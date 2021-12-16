@@ -29,9 +29,9 @@ export const circleMixin = (widget: CircleWidget, data: DiagramBuildData, contai
 			legend: getLegendOptions(legend, container, formatter.legend),
 			tooltip: {
 				y: {
-					formatter: formatter.tooltip,
+					formatter: formatter.tooltip.data,
 					title: {
-						formatter: formatter.breakdown
+						formatter: formatter.tooltip.title
 					}
 				}
 			}

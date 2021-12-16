@@ -1,4 +1,5 @@
 // @flow
+import {AXIS_FONT_SIZE} from 'utils/chart/constants';
 import type {AxisFormat, LabelFormat, NumberAxisFormat} from 'store/widgets/data/types';
 import {AXIS_FORMAT_TYPE, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/data/constants';
 import type {CTXValue, NumberFormatter, ValueFormatter} from './types';
@@ -284,3 +285,25 @@ export const storedFormatter = (
 		stored.push([value, result, storeCtx]);
 		return result;
 	};
+
+/**
+ * Создает оболочку для обрезания заголовков подсказок под размеры виджета
+ * @param {boolean} horizontalsLegendShow - флаг указывающий на то, что по горизонтали надо оставить место для легенды
+ * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @returns {Function} - функция-усекатор
+ */
+export const getTooltipTitlePruner = (horizontalsLegendShow: boolean, container: HTMLDivElement): ((string) => string) => {
+	let {clientWidth: width} = container;
+
+	if (horizontalsLegendShow) {
+		width = width * 0.7;
+	}
+
+	const fontWidth = AXIS_FONT_SIZE * 0.6;
+	const maxChars = (width - 12 /* padding */) / fontWidth;
+
+	return (value: string) => {
+		console.log(value, maxChars);
+		return value.length > maxChars ? value.slice(0, maxChars - 3) + '...' : value;
+	};
+};
