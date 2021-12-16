@@ -365,6 +365,7 @@ class DashboardsService
     private static final String MAIN_FQN = 'abstractBO'
     private static final String LC_PARENT_FQN = 'abstractSysObj'
     private static final String LC_FQN = 'abstractEvt'
+    private static final String ATTRIBUTE_GROUP_FOR_FILTER_FORM = 'forDashAttrList'
     MessageProvider messageProvider = new MessageProvider(utils)
 
     /**
@@ -1483,7 +1484,8 @@ class DashboardsService
                 classFqn: it.code,
                 title: it.title?.replace('Event for ', ''),
                 children: fromAttribute ? [] : mappingDataSource(it.children),
-                hasDynamic: fromAttribute ? false : checkForDynamicAttributes(it.code)
+                hasDynamic: fromAttribute ? false : checkForDynamicAttributes(it.code),
+                forDashAttrList: ATTRIBUTE_GROUP_FOR_FILTER_FORM in it.getAttributeGroupCodes() ? ATTRIBUTE_GROUP_FOR_FILTER_FORM : null
             )
         }.sort { it.title }
     }
@@ -1665,6 +1667,10 @@ class DataSource
      * Наличие динамических атрибутов
      */
     boolean hasDynamic
+    /**
+     * Код группы атрибутов для отображения в форме фильтрации
+     */
+    String forDashAttrList
 }
 
 /**
