@@ -87,3 +87,18 @@
 .gantt_grid_head_button::before {
 	content: "";
 }
+
+@supports (-moz-appearance:none) {
+	.gantt_hor_scroll {
+		height: 17px !important
+	}
+
+	.gantt_layout_x {
+		height: 669px !important;
+	}
+
+	.gantt_container {
+		overflow-x: initial !important;
+		overflow-y: initial !important;
+	}
+}
