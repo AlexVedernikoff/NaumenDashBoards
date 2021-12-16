@@ -35,10 +35,10 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 	 * Отфильтровывает атрибуты в зависимости от уже использованных
 	 * @param {Array<Attribute>} options - список атрибутов
 	 * @param {number} dataSetIndex - индекс набора данных
-	 * @param {Attribute} includeAttribute - атрибут который не надо отфильтровывать
+	 * @param {Array<Attribute>} includeAttributes - атрибут который не надо отфильтровывать
 	 * @returns {Array<Attribute>} - список отфильтрованных атрибутов
 	 */
-	filterAttributesByUsed = (options: Array<Attribute>, dataSetIndex: number, includeAttribute: Attribute): Array<Attribute> => {
+	filterAttributesByUsed = (options: Array<Attribute>, dataSetIndex: number, includeAttributes: ?Array<?Attribute>): Array<Attribute> => {
 		const {breakdown, indicators, parameters} = this.props.values.data[dataSetIndex];
 		const usedAttributes = [
 			...this.getUsedAttributes(parameters),
@@ -50,7 +50,13 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 		if (usedAttributes.length > 0) {
 			filteredOptions = options.filter(attribute => {
 				const {code, sourceCode = null} = attribute;
-				const isInclude = includeAttribute && (includeAttribute.code === code && includeAttribute.sourceCode === sourceCode);
+				let isInclude = false;
+
+				if (includeAttributes) {
+					isInclude = includeAttributes.some(
+						includeAttribute => includeAttribute && includeAttribute.code === code && includeAttribute.sourceCode === sourceCode
+					);
+				}
 
 				return isInclude || usedAttributes.findIndex(
 					usedAttribute => usedAttribute.code === code && usedAttribute.sourceCode === sourceCode
@@ -72,7 +78,7 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 		if (items) {
 			items.forEach(({attribute}) => {
 				if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-					result.push(attribute);
+					result.push(attribute.ref || attribute);
 				}
 			});
 		}

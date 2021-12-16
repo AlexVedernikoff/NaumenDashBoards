@@ -51,6 +51,46 @@ addMethod(mixed, 'singleSourceForCompute', function () {
 		});
 });
 
+addMethod(mixed, 'singleAttributeUse', function (skipDiffAggregation = false) {
+	return this.test(
+		'check-single-attribute-use',
+		'Нельзя выбрать один и тот же атрибут дважды',
+		function () {
+			const {originalValue, values} = this.options;
+			const {aggregation: targetAggregation, attribute: targetAttribute} = originalValue;
+			let result = true;
+
+			if (targetAttribute) {
+				const {code: targetCode, sourceCode: targetSourceCode} = targetAttribute.ref || targetAttribute;
+
+				const checkMatchToTargetAttribute = skipDiffAggregation => ({aggregation, attribute}) => {
+					let checkerResult = false;
+
+					if (attribute && attribute !== targetAttribute) {
+						const {code, sourceCode} = attribute.ref || attribute;
+
+						checkerResult = code === targetCode
+							&& sourceCode === targetSourceCode
+							&& (!skipDiffAggregation || aggregation === targetAggregation);
+					}
+
+					return checkerResult;
+				};
+
+				result = !values.data.some(({breakdown, indicators, parameters, sourceForCompute}) =>
+					!sourceForCompute && (
+						(parameters?.some(checkMatchToTargetAttribute()) ?? false)
+						|| (indicators?.some(checkMatchToTargetAttribute(skipDiffAggregation)) ?? false)
+						|| (breakdown?.some(checkMatchToTargetAttribute()) ?? false)
+					)
+				);
+			}
+
+			return result;
+		}
+	);
+});
+
 addMethod(mixed, 'minSourceNumbers', function () {
 	return this.test(
 		'check-min-source-numbers',
@@ -146,22 +186,32 @@ addMethod(object, 'topSettings', function () {
 });
 
 addMethod(array, 'parameters', function () {
-	return this.of(lazy((parameter: Parameter, options: Object) => {
-		const {data} = options.values;
-		const schema = mixed().requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.parameter));
+	return this.of(
+		lazy((parameter: Parameter, options: Object) => {
+			const {data} = options.values;
+			const schema = mixed()
+				.requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.parameter))
+				.singleAttributeUse();
 
-		return data[0].parameters[0] === parameter ? schema.group(DIAGRAM_FIELDS.parameter) : schema;
-	}));
+			return data[0].parameters[0] === parameter ? schema.group(DIAGRAM_FIELDS.parameter) : schema;
+		})
+	);
 });
 
 addMethod(array, 'indicators', function () {
-	return this.of(mixed().requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.indicator)));
+	return this.of(
+		mixed()
+			.requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.indicator))
+			.singleAttributeUse(true)
+	);
 });
 
 addMethod(array, 'breakdown', function () {
 	return this.of(lazy((item: BreakdownItem, options: Object) => {
 		const {parent} = options;
-		const schema = mixed().requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.breakdown));
+		const schema = mixed()
+			.requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.breakdown))
+			.singleAttributeUse();
 
 		return parent[0] === item ? schema.group(DIAGRAM_FIELDS.breakdown) : schema;
 	})).default(getDefaultBreakdown(''));

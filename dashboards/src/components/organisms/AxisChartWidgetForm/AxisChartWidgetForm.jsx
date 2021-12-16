@@ -25,7 +25,9 @@ export class AxisChartWidgetForm extends PureComponent<Props> {
 
 				return hasConditionalBreakdown ? array().conditionalBreakdown() : array().breakdown();
 			})),
-			indicators: mixed().requiredByCompute(array().indicators()),
+			indicators: mixed().requiredByCompute(
+				array().indicators()
+			),
 			parameters: array().parameters(),
 			source: object().source(),
 			top: object().topSettings()
@@ -33,7 +35,7 @@ export class AxisChartWidgetForm extends PureComponent<Props> {
 		sources: mixed().minSourceNumbers().sourceNumbers()
 	}));
 
-	handleSubmit = (values) => {
+	handleSubmit = values => {
 		const {onSave, type, widget} = this.props;
 		const {id} = widget;
 
