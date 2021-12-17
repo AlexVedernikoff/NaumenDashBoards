@@ -999,7 +999,7 @@ class DashboardUtils
     static boolean checkIfAbleForAvg(String sourceCode, String attributeCode, String attributeType)
     {
         def metaClass = getApi().metainfo.getMetaClass(sourceCode)
-        if (metaClass.getAttribute(attributeCode).type.attributeType.isAttributeOfRelatedObject())
+        if (metaClass?.getAttribute(attributeCode)?.type?.attributeType?.isAttributeOfRelatedObject())
         {
             return false
         }
