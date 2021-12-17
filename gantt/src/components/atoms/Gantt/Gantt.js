@@ -99,7 +99,17 @@ const Gantt = (props: Props) => {
 		gantt.config.duration_step = 1;
 		gantt.config.scroll_size = 6;
 		gantt.templates.parse_date = (dateStr) => {
-			const newDate = gantt.date.add(new Date(dateStr), 4, 'hour');
+			const timezone = /(GMT.*\))/.exec(new Date(dateStr));
+			const deviation = timezone[0].slice(5, 6);
+			const sign = timezone[0].slice(3, 4);
+			let deleteDeviation = `${deviation}`;
+
+			if (sign === '-') {
+				deleteDeviation = `'-'${deviation}`;
+				return deleteDeviation;
+			}
+
+			const newDate = gantt.date.add(new Date(dateStr), deleteDeviation, 'hour');
 			return gantt.date.convert_to_utc(new Date(newDate));
 		};
 
