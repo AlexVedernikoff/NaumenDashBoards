@@ -2,12 +2,16 @@
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import type {DataSet} from 'store/widgetForms/comboChartForm/types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
+import {FONT_FAMILIES} from 'store/widgets/data/constants';
+import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
+import {FONT_SIZE_OPTIONS} from './constants';
+import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
 import HorizontalLabel from 'components/atoms/HorizontalLabel';
 import LegacyCheckbox from 'components/atoms/LegacyCheckbox';
 import {MAX_TEXT_LENGTH} from 'components/constants';
-import type {OnChangeEvent} from 'components/types';
+import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
@@ -48,6 +52,11 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 
 	handleClickDependentCheckbox = (name: string, value: boolean) => this.change(name, value);
 
+	handleSelect = ({name: key, value}: OnSelectEvent) => {
+		const {name, onChange, value: settings} = this.props;
+		return onChange(name, {...settings, [key]: value});
+	};
+
 	handleToggleAdditionalSettings = () => {
 		const {name, onChange, value} = this.props;
 		const {showAdditionalSettings} = this.state;
@@ -74,6 +83,21 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 					{this.renderScaleField(DIAGRAM_FIELDS.max)}
 					{this.renderShowDependentCheckbox()}
 				</Fragment>
+			);
+		}
+
+		return null;
+	};
+
+	renderFontFormat =() => {
+		const {fontFamily = FONT_FAMILIES[0], fontSize = 12, show} = this.props.value;
+
+		if (show) {
+			return (
+				<FormField row>
+					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
+					<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} options={FONT_SIZE_OPTIONS} value={fontSize} />
+				</FormField>
 			);
 		}
 
@@ -137,6 +161,7 @@ export class IndicatorSettingsBox extends PureComponent<Props, State> {
 						<Toggle checked={show} name={DIAGRAM_FIELDS.show} onChange={this.handleCheckboxChange} value={show} />
 					</FormControl>
 				</FormField>
+				{this.renderFontFormat()}
 				<FormField>
 					<FormControl label="Выводить название" reverse={true}>
 						<Toggle checked={showName} name={DIAGRAM_FIELDS.showName} onChange={this.handleCheckboxChange} value={showName} />
