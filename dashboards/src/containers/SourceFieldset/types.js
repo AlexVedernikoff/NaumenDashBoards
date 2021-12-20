@@ -12,6 +12,7 @@ import type {
 	SourceFiltersItem,
 	UpdateSourcesFilter
 } from 'store/sources/sourcesFilters/types';
+import type {ClearDynamicAttributeGroups} from 'store/sources/dynamicGroups/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {OnLoadCallback} from 'store/sources/types';
 import type {Props as ComponentProps} from 'WidgetFormPanel/components/SourceFieldset/types';
@@ -50,6 +51,7 @@ export type ConnectedFunctions = {
 };
 
 export type DispatchConnectedFunctions = {
+	clearDynamicAttributeGroups: ClearDynamicAttributeGroups,
 	fetchAttributeByCode: DispatchFetchSourcesFilters,
 	fetchSourcesFilters: DispatchFetchSourcesFilters,
 	onCheckApplyFilter: DispatchCheckApplyFilter,

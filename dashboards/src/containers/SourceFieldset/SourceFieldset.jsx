@@ -63,7 +63,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 	};
 
 	setContext = async (): Promise<string | null> => {
-		const {isUserMode, value} = this.props;
+		const {clearDynamicAttributeGroups, isUserMode, value} = this.props;
 		const {value: sourceValue} = value.source;
 
 		if (sourceValue) {
@@ -86,6 +86,8 @@ export class SourceFieldsetContainer extends Component<Props> {
 				}
 
 				const {serializedContext} = await api.instance.filterForm.openForm(context, useAttrFilter);
+
+				clearDynamicAttributeGroups(value.dataKey);
 
 				return serializedContext;
 			} catch (e) {

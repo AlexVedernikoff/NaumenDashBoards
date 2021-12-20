@@ -49,7 +49,7 @@ const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filter
 	};
 
 /**
- * Получаем динамические атрибуты конкретной группы
+ * Получает динамические атрибуты конкретной группы
  * @param {string} dataKey - ключ набора данных
  * @param {string} groupCode - код группы динамических атрибутов
  * @returns {ThunkAction}
@@ -79,7 +79,18 @@ const fetchDynamicAttributes = (dataKey: string, groupCode: string): ThunkAction
 	}
 };
 
+/**
+ * Очищает динамические атрибуты конкретной группы
+ * @param {string} dataKey - ключ набора данных
+ * @returns {ThunkAction}
+ */
+const clearDynamicAttributeGroups = (dataKey: string) => ({
+	payload: dataKey,
+	type: DYNAMIC_GROUPS_EVENTS.CLEAR_DYNAMIC_ATTRIBUTE_GROUPS
+});
+
 export {
+	clearDynamicAttributeGroups,
 	fetchDynamicAttributeGroups,
 	fetchDynamicAttributes
 };
