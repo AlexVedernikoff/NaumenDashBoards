@@ -2,9 +2,10 @@
 import api from 'api';
 import type {BreakdownItem, Parameter} from 'store/widgetForms/types';
 import {connect} from 'react-redux';
-import {createFilterContext, getFilterContext} from 'src/store/helpers';
+import {createFilterContext, getFilterContext} from 'utils/descriptorUtils';
 import type {DataSet, Props} from './types';
 import {functions, props} from './selectors';
+import {getDescriptorCases, getSourceFilterAttributeGroup} from 'store/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import React, {Component} from 'react';
@@ -69,7 +70,9 @@ export class SourceFieldsetContainer extends Component<Props> {
 		if (sourceValue) {
 			const {value: classFqn} = sourceValue;
 			const descriptor = this.getSourceDescriptor();
-			const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
+			const context = descriptor
+				? getFilterContext(descriptor, classFqn, getDescriptorCases)
+				: createFilterContext(classFqn, getDescriptorCases);
 
 			try {
 				let useAttrFilter;
@@ -83,6 +86,13 @@ export class SourceFieldsetContainer extends Component<Props> {
 						context['attrGroupCode'] = groupCode;
 						useAttrFilter = true;
 					}
+				}
+
+				const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(classFqn);
+
+				if (sourceFilterAttributeGroup) {
+					context['attrGroupCode'] = sourceFilterAttributeGroup;
+					useAttrFilter = true;
 				}
 
 				const {serializedContext} = await api.instance.filterForm.openForm(context, useAttrFilter);

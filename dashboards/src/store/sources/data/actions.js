@@ -5,10 +5,11 @@ import {DATA_SOURCES_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {RawDataSource} from './types';
 
-const getDataSourceValue = ({classFqn: value, descriptor, hasDynamic, title: label}: RawDataSource) => ({
+const getDataSourceValue = ({classFqn: value, descriptor, hasDynamic, sourceFilterAttributeGroup, title: label}: RawDataSource) => ({
 	descriptor,
 	hasDynamic,
 	label,
+	sourceFilterAttributeGroup,
 	value
 });
 

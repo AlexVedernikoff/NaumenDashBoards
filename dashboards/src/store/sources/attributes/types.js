@@ -1,5 +1,5 @@
 // @flow
-import type {AttrSetConditions} from 'store/widgetForms/types';
+import type {AttrSetConditions} from 'utils/descriptorUtils/types';
 import {ATTRIBUTES_EVENTS, SOURCE_ATTRIBUTE_TYPES, TIMER_VALUE} from './constants';
 import type {OnLoadCallback} from 'store/sources/types';
 import type {ThunkAction} from 'store/types';

@@ -1,7 +1,9 @@
 // @flow
-import type {AttrSetConditions, Breakdown, Indicator, SourceData} from './types';
+import type {AttrSetConditions} from 'utils/descriptorUtils/types';
+import type {Breakdown, Indicator, SourceData} from './types';
 import type {DataSet as TableDataSet} from 'store/widgetForms/tableForm/types';
 import {DEFAULT_AGGREGATION, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import {parseCasesAndGroupCode} from 'utils/descriptorUtils';
 
 /**
  * Возвращает разбивку по умолчанию
@@ -26,17 +28,8 @@ const getDefaultBreakdown = (dataKey: string): Breakdown => [{
 const parseAttrSetConditions = (data: ?SourceData): ?AttrSetConditions => {
 	let result = null;
 
-	if (data) {
-		try {
-			const {descriptor} = data;
-			const descriptorObject = JSON.parse(descriptor);
-
-			const {attrGroupCode: groupCode, cases} = descriptorObject;
-
-			result = {cases, groupCode};
-		} catch (e) {
-			result = null;
-		}
+	if (data && data.descriptor) {
+		result = parseCasesAndGroupCode(data.descriptor);
 	}
 
 	return result;
@@ -47,22 +40,20 @@ const parseAttrSetConditions = (data: ?SourceData): ?AttrSetConditions => {
  * @param {Array<Indicator>} indicators - массив индикаторов
  * @returns {Array<Indicator>}
  */
-const fixIndicatorsAgregation = (indicators: ?Array<Indicator>): Array<Indicator> =>
-	indicators?.map(indicator => {
-		return indicator.aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE
-			? {...indicator, aggregation: DEFAULT_AGGREGATION.COUNT}
-			: indicator;
-	}) ?? [];
+const fixIndicatorsAggregation = (indicators: ?Array<Indicator>): Array<Indicator> =>
+	indicators?.map(indicator => indicator.aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE
+		? {...indicator, aggregation: DEFAULT_AGGREGATION.COUNT}
+		: indicator) ?? [];
 
 /**
  * Заменяет агрегацию N/A на агрегацию CNT в индикаторах источника данных
  * @param {TableDataSet} dataSet - изначальный источник данных
  * @returns {TableDataSet}
  */
-const fixIndicatorsAgregationDataSet = (dataSet: TableDataSet): TableDataSet =>
+const fixIndicatorsAggregationDataSet = (dataSet: TableDataSet): TableDataSet =>
 	({
 		...dataSet,
-		indicators: fixIndicatorsAgregation(dataSet.indicators)
+		indicators: fixIndicatorsAggregation(dataSet.indicators)
 	});
 
 /**
@@ -104,8 +95,8 @@ const fixLeaveOneIndicator = (dataSet: TableDataSet): TableDataSet => {
 export {
 	getDefaultBreakdown,
 	fixLeaveOneParameters,
-	fixIndicatorsAgregation,
-	fixIndicatorsAgregationDataSet,
+	fixIndicatorsAggregation,
+	fixIndicatorsAggregationDataSet,
 	fixLeaveOneIndicator,
 	parseAttrSetConditions
 };

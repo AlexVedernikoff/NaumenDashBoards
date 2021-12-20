@@ -1,7 +1,7 @@
 // @flow
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_SOURCE} from 'store/widgetForms/constants';
-import {fixIndicatorsAgregation} from 'store/widgetForms/helpers';
+import {fixIndicatorsAggregation} from 'store/widgetForms/helpers';
 import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
 import type {Values as CircleChartValues} from 'store/widgetForms/circleChartForm/types';
 import type {Values as ComboChartValues} from 'store/widgetForms/comboChartForm/types';
@@ -45,7 +45,7 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 
 			return {
 				dataKey,
-				indicators: fixIndicatorsAgregation(indicators).slice(0, 1),
+				indicators: fixIndicatorsAggregation(indicators).slice(0, 1),
 				source,
 				sourceForCompute
 			};

@@ -302,8 +302,5 @@ export const getTooltipTitlePruner = (horizontalsLegendShow: boolean, container:
 	const fontWidth = AXIS_FONT_SIZE * 0.6;
 	const maxChars = (width - 12 /* padding */) / fontWidth;
 
-	return (value: string) => {
-		console.log(value, maxChars);
-		return value.length > maxChars ? value.slice(0, maxChars - 3) + '...' : value;
-	};
+	return (value: string) => value.length > maxChars ? value.slice(0, maxChars - 3) + '...' : value;
 };

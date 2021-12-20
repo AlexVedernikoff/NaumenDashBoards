@@ -3,7 +3,7 @@ import {COMBO_TYPES} from 'store/widgets/data/constants';
 import {compose} from 'redux';
 import {createAxisDataSet} from 'store/widgetForms/axisChartForm/helpers';
 import type {DataSet, State} from './types';
-import {fixIndicatorsAgregationDataSet, fixLeaveOneIndicator, fixLeaveOneParameters} from 'store/widgetForms/helpers';
+import {fixIndicatorsAggregationDataSet, fixLeaveOneIndicator, fixLeaveOneParameters} from 'store/widgetForms/helpers';
 import {omit} from 'helpers';
 import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
 import type {Values as CircleChartValues} from 'store/widgetForms/circleChartForm/types';
@@ -158,7 +158,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		showTotalAmount,
 		templateName
 	} = values;
-	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAgregationDataSet);
+	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAggregationDataSet);
 
 	return {
 		...state,

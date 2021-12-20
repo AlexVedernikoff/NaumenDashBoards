@@ -2,12 +2,13 @@
 import type {AnyWidget, CustomFilter, DisplayMode, Widget} from 'store/widgets/data/types';
 import api from 'api';
 import {CLEAR_FILTER} from './constants';
-import {createFilterContext, getFilterContext} from 'store/helpers';
+import {createFilterContext, descriptorContainsFilter, getFilterContext} from 'utils/descriptorUtils';
 import {deepClone} from 'helpers';
 import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
 import type {DropDownParams, FiltersOnWidget, NavigationData, NavigationProps, Option} from './types';
 import exporter, {FILE_VARIANTS} from 'utils/export';
+import {getDescriptorCases} from 'src/store/helpers';
 import {getPartsClassFqn} from 'store/widgets/links/helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import memoize from 'memoize-one';
@@ -166,26 +167,7 @@ const dataSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
  * @param {Widget} widget - виджет
  * @returns {boolean}
  */
-const hasUserFilters = (widget: Widget) => widget.data.some(item => item.source.widgetFilterOptions?.some(filter => isNotEmptyDescriptor(filter.descriptor)));
-
-/**
- * Проверка того, что в описании источника установлены фильтры
- * @param {string} descriptor - строка описания источника
- * @returns {boolean}
- */
-const isNotEmptyDescriptor = (descriptor: ?string) => {
-	if (descriptor) {
-		try {
-			const {filters} = JSON.parse(descriptor);
-			return Array.isArray(filters) && filters.length > 0;
-		} catch (e) {
-			console.error('Filters on widgets has unparsed descriptor');
-			return false;
-		}
-	}
-
-	return false;
-};
+const hasUserFilters = (widget: Widget) => widget.data.some(item => item.source.widgetFilterOptions?.some(filter => descriptorContainsFilter(filter.descriptor)));
 
 /**
  * Формирует список пользовательских фильтров на виджете
@@ -208,7 +190,7 @@ const getFiltersOnWidget = (widget: Widget): FiltersOnWidget => {
 
 				subResult.push(option);
 
-				if (isNotEmptyDescriptor(descriptor)) {
+				if (descriptorContainsFilter(descriptor)) {
 					selected = value;
 				}
 			});
@@ -267,7 +249,9 @@ const getNewDescriptor = async (filter: CustomFilter, classFqn: string): Promise
 	let newDescriptor = '';
 
 	try {
-		const context = descriptor ? getFilterContext(descriptor, classFqn) : createFilterContext(classFqn);
+		const context = descriptor
+			? getFilterContext(descriptor, classFqn, getDescriptorCases)
+			: createFilterContext(classFqn, getDescriptorCases);
 
 		if (context) {
 			context['attrCodes'] = filter.attributes.map(attr => {
@@ -299,7 +283,7 @@ const changeFiltersOnWidget = async (widget: Widget, value: string) => {
 
 	if (filter) {
 		const newDescriptor = await getNewDescriptor(filter, source.value.value);
-		const updateDescriptor = isNotEmptyDescriptor(newDescriptor) ? newDescriptor : '';
+		const updateDescriptor = descriptorContainsFilter(newDescriptor) ? newDescriptor : '';
 		const newWidget = deepClone(widget);
 		const widgetFilter = newWidget.data[dataSetIndex]?.source.widgetFilterOptions?.[filterIndex];
 
@@ -355,7 +339,6 @@ export {
 	getDataForNavigation,
 	getNewDescriptor,
 	hasUserFilters,
-	isNotEmptyDescriptor,
 	modeSelector,
 	navigationSelector,
 	parseDiagramWidget

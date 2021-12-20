@@ -1,6 +1,6 @@
 // @flow
 import api from 'api';
-import type {AttrSetConditions} from 'store/widgetForms/types';
+import type {AttrSetConditions} from 'utils/descriptorUtils/types';
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {OnLoadCallback} from 'store/sources/types';
