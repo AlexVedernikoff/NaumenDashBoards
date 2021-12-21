@@ -14,6 +14,7 @@ import type {OnChangeEvent, OnChangeInputEvent, OnSelectEvent} from 'components/
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 import TextAlignControl from 'WidgetFormPanel/components/TextAlignControl';
 
 export class StyleBox extends PureComponent<Props> {
@@ -126,19 +127,19 @@ export class StyleBox extends PureComponent<Props> {
 			{
 				active: currentStyle.has(FONT_STYLES.BOLD),
 				name: ICON_NAMES.BOLD,
-				title: 'Жирный',
+				title: t('TextWidgetForm::StyleBox::Bold'),
 				value: FONT_STYLES.BOLD
 			},
 			{
 				active: currentStyle.has(FONT_STYLES.ITALIC),
 				name: ICON_NAMES.ITALIC,
-				title: 'Курсив',
+				title: t('TextWidgetForm::StyleBox::Italic'),
 				value: FONT_STYLES.ITALIC
 			},
 			{
 				active: currentStyle.has(FONT_STYLES.UNDERLINE),
 				name: ICON_NAMES.UNDERLINE,
-				title: 'Подчеркнутый',
+				title: t('TextWidgetForm::StyleBox::Underline'),
 				value: FONT_STYLES.UNDERLINE
 			}
 		];
@@ -152,7 +153,7 @@ export class StyleBox extends PureComponent<Props> {
 
 		return (
 			<FormBox className={styles.box}>
-				<FormField label="Шрифт" row>
+				<FormField label={t('TextWidgetForm::StyleBox::Font')} row>
 					<FontFamilySelect
 						name={TEXT_FIELDS.fontFamily}
 						onSelect={this.handleSelectStyle}

@@ -11,6 +11,8 @@ import React, {Component, Fragment} from 'react';
 import {SIZES} from 'components/molecules/Modal/constants';
 import type {State} from './types';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 import Text from 'components/atoms/Text';
 import {TEXT_TYPES} from 'components/atoms/Text/constants';
 import {USER_ROLES} from 'store/context/constants';
@@ -78,32 +80,30 @@ export class WidgetAddPanel extends Component<Props, State> {
 		}
 	};
 
-	renderAddButtons = () => {
-		return (
-			<div className={styles.title}>
-				<div className={styles.titleRow}>
-					<span>Добавить текст</span>
-					<IconButton
-						active={true}
-						icon={ICON_NAMES.PLUS}
-						onClick={this.addTextWidget}
-						round={false}
-						variant={VARIANTS.INFO}
-					/>
-				</div>
-				<div className={styles.titleRow}>
-					<span>Добавить виджет</span>
-					<IconButton
-						active={true}
-						icon={ICON_NAMES.PLUS}
-						onClick={this.addDiagramWidget}
-						round={false}
-						variant={VARIANTS.INFO}
-					/>
-				</div>
+	renderAddButtons = () => (
+		<div className={styles.title}>
+			<div className={styles.titleRow}>
+				<span><T text="WidgetAddPanel::AddText" /></span>
+				<IconButton
+					active={true}
+					icon={ICON_NAMES.PLUS}
+					onClick={this.addTextWidget}
+					round={false}
+					variant={VARIANTS.INFO}
+				/>
 			</div>
-		);
-	};
+			<div className={styles.titleRow}>
+				<span><T text="WidgetAddPanel::AddWidget" /></span>
+				<IconButton
+					active={true}
+					icon={ICON_NAMES.PLUS}
+					onClick={this.addDiagramWidget}
+					round={false}
+					variant={VARIANTS.INFO}
+				/>
+			</div>
+		</div>
+	);
 
 	renderCancelButton = () => null;
 
@@ -115,7 +115,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 			return (
 				<Fragment>
 					<Text className={styles.field} type={TEXT_TYPES.SMALL}>
-						Или выберите виджет из существующих вариантов для копирования
+						<T text="WidgetAddPanel::OrChoiceVariant" />
 					</Text>
 					<MultiDropDownList
 						items={items}
@@ -132,23 +132,23 @@ export class WidgetAddPanel extends Component<Props, State> {
 		const {invalidCopyData} = this.state;
 
 		if (invalidCopyData) {
-			let message = 'Виджет будет скопирован не полностью. Продолжить копирование?';
+			let message = t('WidgetAddPanel::NoFullCopy');
 			const {reasons} = invalidCopyData;
 			const hasSubjectFilters = reasons.includes(COPY_WIDGET_ERRORS.HAS_SUBJECT_FILTERS);
 			const hasCustomGroupsWithRelativeCriteria = reasons.includes(COPY_WIDGET_ERRORS.HAS_CUSTOM_GROUPS_WITH_RELATIVE_CRITERIA);
 			const hasOnlyRelativeCriteriaCustomGroups = reasons.includes(COPY_WIDGET_ERRORS.HAS_ONLY_RELATIVE_CRITERIA_CUSTOM_GROUPS);
 
 			if (hasSubjectFilters && hasOnlyRelativeCriteriaCustomGroups) {
-				message = 'Виджет будет скопирован без относительных критериев фильтрации. Настроенные пользовательские группировки будут заменены на системные. Продолжить копирование?';
+				message = t('WidgetAddPanel::NoReferenceAndUserGroupCopy');
 			} else if (hasSubjectFilters || hasCustomGroupsWithRelativeCriteria) {
-				message = 'Виджет будет скопирован без относительных критериев фильтрации. Продолжить копирование?';
+				message = t('WidgetAddPanel::NoReferenceCopy');
 			} else if (hasOnlyRelativeCriteriaCustomGroups) {
-				message = 'В виджете использована пользовательская настройка группировки и будет изменена на системную. Продолжить копирование?';
+				message = t('WidgetAddPanel::NoUserGroupCopy');
 			}
 
 			return (
 				<Modal
-					header="Подтверждение копирования"
+					header={t('WidgetAddPanel::Confirm')}
 					notice={true}
 					onClose={this.handleCloseModal}
 					onSubmit={this.handleSubmitModal}
@@ -163,7 +163,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 	renderSubmitButton = (props: Object) => {
 		const {onSubmit} = props;
 
-		return <Button onClick={onSubmit}>Создать</Button>;
+		return <Button onClick={onSubmit}><T text="WidgetAddPanel::Create" /></Button>;
 	};
 
 	render () {

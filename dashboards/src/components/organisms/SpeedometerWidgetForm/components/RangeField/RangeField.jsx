@@ -10,6 +10,7 @@ import type {Props as ColorInputProps} from 'components/molecules/ColorInput/com
 import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 import TextInput from 'components/atoms/TextInput';
 
 export class RangeField extends PureComponent<Props> {
@@ -82,7 +83,7 @@ export class RangeField extends PureComponent<Props> {
 		});
 
 		return (
-			<div className={iconCN} onClick={this.handleRemove} title="Удалить">
+			<div className={iconCN} onClick={this.handleRemove} title={t('BorderRangeField::Delete')}>
 				<Icon name={ICON_NAMES.BASKET} />
 			</div>
 		);

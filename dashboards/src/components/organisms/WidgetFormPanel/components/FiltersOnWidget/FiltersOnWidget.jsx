@@ -7,6 +7,7 @@ import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class FiltersOnWidget extends PureComponent<Props> {
 	/**
@@ -25,7 +26,7 @@ export class FiltersOnWidget extends PureComponent<Props> {
 			return p;
 		}, {});
 
-		return Object.keys(dataSetIndexCounter).filter((index) => dataSetIndexCounter[index] > 2);
+		return Object.keys(dataSetIndexCounter).filter(index => dataSetIndexCounter[index] > 2);
 	};
 
 	handleAddSource = () => {
@@ -110,7 +111,7 @@ export class FiltersOnWidget extends PureComponent<Props> {
 
 	render () {
 		return (
-			<FormBox rightControl={this.renderAddSourceFilter()} title="Фильтрация на виджете">
+			<FormBox rightControl={this.renderAddSourceFilter()} title={t('FiltersOnWidget::FilterOnWidget')}>
 				{this.renderFilterItems()}
 			</FormBox>
 		);

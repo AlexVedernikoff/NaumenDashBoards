@@ -10,6 +10,7 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 
 export class DataTopField extends PureComponent<Props> {
 	static defaultProps = {
@@ -69,7 +70,7 @@ export class DataTopField extends PureComponent<Props> {
 		const {show} = this.props.value;
 
 		return (
-			<FormControl label="Вывести топ">
+			<FormControl label={t('DataTopField::ShowTop')}>
 				<Checkbox checked={show} name={DIAGRAM_FIELDS.show} onChange={this.handleToggleShow} value={show} />
 			</FormControl>
 		);

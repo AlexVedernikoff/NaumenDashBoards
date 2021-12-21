@@ -10,6 +10,7 @@ import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import {POSITION_OPTIONS} from './constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t, {translateObjectsArray} from 'localization';
 import TextAlignControl from 'WidgetFormPanel/components/TextAlignControl';
 import TextHandlerControl from 'WidgetFormPanel/components/TextHandlerControl/TextHandlerControl';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
@@ -30,12 +31,14 @@ export class HeaderBox extends PureComponent<Props> {
 
 	renderPositionControl = () => {
 		const {position} = this.props.value;
+		const options = translateObjectsArray('title', POSITION_OPTIONS);
 
 		return (
 			<CheckIconButtonGroup
 				name={DIAGRAM_FIELDS.position}
 				onChange={this.handleSelect}
-				options={POSITION_OPTIONS} value={position}
+				options={options}
+				value={position}
 			/>
 		);
 	};
@@ -45,7 +48,7 @@ export class HeaderBox extends PureComponent<Props> {
 		const {fontColor, fontFamily, fontSize, fontStyle, show, textAlign, textHandler} = value;
 
 		return (
-			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleChange} showContent={show} title="Заголовок">
+			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleChange} showContent={show} title={t('HeaderBox::Title')}>
 				<FormField row>
 					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
 					<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} value={fontSize} />

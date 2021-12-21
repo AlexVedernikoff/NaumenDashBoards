@@ -3,6 +3,7 @@ import {getAggregationOptions} from './helpers';
 import MiniSelect from 'components/molecules/MiniSelect';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class AttributeAggregationField extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -60,7 +61,7 @@ export class AttributeAggregationField extends PureComponent<Props, State> {
 				options={options}
 				renderValue={renderValue}
 				showCaret={showCaret}
-				tip="Агрегация"
+				tip={t('AttributeAggregationField::Aggregation')}
 				value={value}
 			/>
 		);

@@ -6,6 +6,7 @@ import type {OnSelectEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
+import t from 'localization';
 import {USER_ROLES} from 'store/context/constants';
 
 export class DisplayModeSelectBox extends PureComponent<Props, State> {
@@ -36,12 +37,13 @@ export class DisplayModeSelectBox extends PureComponent<Props, State> {
 
 		if (user.role !== USER_ROLES.REGULAR && !personalDashboard && !isUserMode) {
 			return (
-				<FormBox title="Область отображения">
+				<FormBox title={t('DisplayModeSelectBox::DisplayMode')}>
 					<FormField>
 						<Select
+							getOptionLabel={option => t(option.label)}
 							onSelect={this.handleChange}
 							options={DISPLAY_MODE_OPTIONS}
-							placeholder="Отображение виджета в мобильной версии"
+							placeholder={t('DisplayModeSelectBox::DisplayInMobile')}
 							value={value}
 						/>
 					</FormField>

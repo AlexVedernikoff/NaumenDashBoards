@@ -1,8 +1,9 @@
 // @flow
-import {addMethod} from 'yup';
+import {addMethod, lazy} from 'yup';
 import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
 import {checkSourceForParent} from './helpers';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
+import t from 'localization';
 
 const defaultValue = 'defaultValue';
 const indicatorSettings = 'indicatorSettings';
@@ -24,7 +25,7 @@ const TABLE_FIELDS = {
 addMethod(mixed, 'singleAttributeUse', function () {
 	return this.test(
 		'check-single-attribute-use',
-		'Нельзя выбрать один и тот же атрибут дважды',
+		t('TableWidgetForm::Scheme::DoubleAttribute'),
 		function () {
 			const {originalValue, values} = this.options;
 			const {attribute: targetAttribute} = originalValue;
@@ -65,11 +66,11 @@ const schema = object({
 		breakdown: mixed().requiredByCompute(array().conditionalBreakdown()),
 		indicators: mixed().requiredByCompute(array().indicators().of(mixed().singleAttributeUse())),
 		parameters: array().parameters().of(mixed().singleAttributeUse()),
-		source: object().source().test(
+		source: lazy(() => object().source().test(
 			'check-source-for-parent',
-			'Для данного типа выбранный источник не доступен - выберите другой',
+			t('TableWidgetForm::Scheme::WrongSource'),
 			checkSourceForParent
-		)
+		))
 	})),
 	sources: mixed().minSourceNumbers(),
 	top: object().topSettings()

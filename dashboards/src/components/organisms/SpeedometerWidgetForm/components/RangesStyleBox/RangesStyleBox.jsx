@@ -14,6 +14,7 @@ import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
+import t, {translateObjectsArray} from 'localization';
 import TextHandlerControl from 'WidgetFormPanel/components/TextHandlerControl';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
@@ -29,7 +30,7 @@ export class RangesStyleBox extends Component<Props> {
 
 	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, !value);
 
-	handleChangeFormat = (format) => this.change(DIAGRAM_FIELDS.format, format);
+	handleChangeFormat = format => this.change(DIAGRAM_FIELDS.format, format);
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 
@@ -101,7 +102,9 @@ export class RangesStyleBox extends Component<Props> {
 
 	renderPositionButtons = () => {
 		const {position} = this.props.value;
-		return <CheckIconButtonGroup name={DIAGRAM_FIELDS.position} onChange={this.handleSelect} options={RANGES_POSITION_OPTIONS} value={position} />;
+		const options = translateObjectsArray('title', RANGES_POSITION_OPTIONS);
+
+		return <CheckIconButtonGroup name={DIAGRAM_FIELDS.position} onChange={this.handleSelect} options={options} value={position} />;
 	};
 
 	render () {
@@ -109,7 +112,7 @@ export class RangesStyleBox extends Component<Props> {
 		const {fontFamily, fontSize, show, format = DEFAULT_NUMBER_AXIS_FORMAT} = value;
 
 		return (
-			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleChange} showContent={show} title="Подпись диапазонов">
+			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleChange} showContent={show} title={t('BordersRangesStyleBox::Range')}>
 				<FormField row>
 					{this.renderPositionButtons()}
 				</FormField>

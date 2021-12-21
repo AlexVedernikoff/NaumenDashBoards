@@ -13,12 +13,14 @@ import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import ParameterFormat from 'components/molecules/ParameterFormatPanel';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
 export class DataLabelsBox extends PureComponent<Props> {
 	static defaultProps: DefaultProps = {
 		name: '',
-		showForamt: true
+		showFormat: true
 	};
 
 	componentDidUpdate (prevProps: Props) {
@@ -63,7 +65,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 
 	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, !value);
 
-	handleChangeFormat = (format) => {
+	handleChangeFormat = format => {
 		const {name, onChange, value} = this.props;
 
 		onChange(name, {
@@ -75,9 +77,9 @@ export class DataLabelsBox extends PureComponent<Props> {
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 
 	renderFormat = () => {
-		const {showForamt, value} = this.props;
+		const {showFormat, value} = this.props;
 
-		if (showForamt) {
+		if (showFormat) {
 			const {computedFormat, format} = value;
 			const dataLabelFormat = format ?? computedFormat ?? DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.NUMBER_FORMAT];
 
@@ -97,7 +99,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 
 		if (disabled) {
 			return (
-				<div className={styles.isDisabledLabels}>Метки данных отключены из-за большого количества данных</div>
+				<div className={styles.isDisabledLabels}><T text="DataLabelsBox::DataLabelsDisabled" /></div>
 			);
 		}
 
@@ -110,7 +112,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 		return (
 			<div className={styles.shadowInput}>
 				<Checkbox checked={showShadow} name={DIAGRAM_FIELDS.showShadow} onChange={this.handleChange} value={showShadow} />
-				<span className={styles.shadowInputLabel}>Тень</span>
+				<span className={styles.shadowInputLabel}><T text="DataLabelsBox::Shadow" /></span>
 			</div>
 		);
 	};
@@ -125,7 +127,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 				name={DIAGRAM_FIELDS.show}
 				onToggle={this.handleChange}
 				showContent={show}
-				title="Метки данных"
+				title={t('DataLabelsBox::DataLabels')}
 			>
 				<FormField row>
 					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />

@@ -4,6 +4,7 @@ import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 
 export class Total extends PureComponent<Props> {
 	renderColumn = (lastParameterIdx: number) => (column: Column, index: number, columns: Array<Column>) => {
@@ -16,7 +17,7 @@ export class Total extends PureComponent<Props> {
 		let value = '';
 
 		if (index === lastParameterIdx) {
-			value = 'Всего';
+			value = t('Table::Total::Total');
 		} else if (index === lastParameterIdx + 1) {
 			value = countTotals.toString();
 		}

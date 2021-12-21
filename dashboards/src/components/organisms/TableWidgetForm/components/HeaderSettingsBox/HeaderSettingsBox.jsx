@@ -6,6 +6,7 @@ import FormField from 'components/molecules/FormField';
 import type {InputValue, OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import t from 'localization';
 import TextAlignControl from 'WidgetFormPanel/components/TextAlignControl';
 import TextHandlerControl from 'WidgetFormPanel/components/TextHandlerControl';
 
@@ -40,7 +41,7 @@ export class HeaderSettingsBox extends PureComponent<Props> {
 
 		return (
 			<Fragment>
-				<FormField label="Шапка таблицы" row>
+				<FormField label={t('TableWidgetForm::HeaderSettingsBox::TableHead')} row>
 					<FontStyleControl name={DIAGRAM_FIELDS.fontStyle} onChange={this.handleChangeFontStyle} value={fontStyle} />
 					<ColorInput name={DIAGRAM_FIELDS.fontColor} onChange={this.handleChange} portable={true} value={fontColor} />
 				</FormField>
