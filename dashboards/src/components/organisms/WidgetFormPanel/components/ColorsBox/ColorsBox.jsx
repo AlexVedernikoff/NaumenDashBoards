@@ -14,6 +14,7 @@ import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import RadioField from 'components/atoms/RadioField';
 import React, {Fragment, PureComponent} from 'react';
+import t from 'localization';
 
 export class ColorsBox extends PureComponent<Props> {
 	static defaultProps = {
@@ -107,15 +108,15 @@ export class ColorsBox extends PureComponent<Props> {
 
 		return (
 			<Fragment>
-				{this.renderSettingsTypeControl(AUTO, 'Автоматически')}
-				{this.renderSettingsTypeControl(CUSTOM, 'Вручную', disabledCustomSettings)}
+				{this.renderSettingsTypeControl(AUTO, t('ColorsBox::Automatically'))}
+				{this.renderSettingsTypeControl(CUSTOM, t('ColorsBox::Manually'), disabledCustomSettings)}
 			</Fragment>
 		);
 	};
 
 	render () {
 		return (
-			<CollapsableFormBox showContent={true} title="Цвета диаграммы">
+			<CollapsableFormBox showContent={true} title={t('ColorsBox::ColorsOfChart')}>
 				{this.renderSettingsTypeControls()}
 				{this.renderSettings()}
 			</CollapsableFormBox>

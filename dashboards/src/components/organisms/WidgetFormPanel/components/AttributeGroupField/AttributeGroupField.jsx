@@ -18,6 +18,7 @@ import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import StateGroupModal from 'containers/StateGroupModal';
 import StringGroupModal from 'containers/StringGroupModal';
+import t from 'localization';
 import TimerGroupModal from 'containers/TimerGroupModal';
 import TimerValueGroupModal from 'containers/TimerValueGroupModal';
 
@@ -95,7 +96,7 @@ export class AttributeGroupField extends PureComponent<Props, State> {
 	};
 
 	renderButton = () => (
-		<FieldButton disabled={this.props.disabled} onClick={this.handleClickFieldButton} tip="Группировка">
+		<FieldButton disabled={this.props.disabled} onClick={this.handleClickFieldButton} tip={t('AttributeGroupField::Group')}>
 			<Icon name={this.getIconName()} />
 		</FieldButton>
 	);

@@ -14,6 +14,7 @@ import RangesTypeFieldset from 'components/organisms/SpeedometerWidgetForm/compo
 import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 
 export class RangesFieldset extends PureComponent<Props> {
 	handleChangeRange = (index: number, newRange: Range) => {
@@ -68,7 +69,7 @@ export class RangesFieldset extends PureComponent<Props> {
 			active={true}
 			className={styles.addRangeButton}
 			onClick={this.handleClickAddButton}
-			text="Добавить"
+			text={t('BordersRangesFieldset::Add')}
 		/>
 	);
 
@@ -112,7 +113,7 @@ export class RangesFieldset extends PureComponent<Props> {
 		const {data} = this.props.value;
 		return (
 			<Fragment>
-				{this.renderLabel('Диапазоны')}
+				{this.renderLabel(t('BordersRangesFieldset::Ranges'))}
 				{data.map(this.renderRangeField)}
 			</Fragment>
 		);
@@ -125,7 +126,7 @@ export class RangesFieldset extends PureComponent<Props> {
 
 		return (
 			<FormField small>
-				<FormControl label="Использовать диапазоны">
+				<FormControl label={t('BordersRangesFieldset::UseRanges')}>
 					<Checkbox checked={use} name={DIAGRAM_FIELDS.use} onChange={this.handleChangeUse} value={use} />
 				</FormControl>
 			</FormField>

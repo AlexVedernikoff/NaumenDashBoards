@@ -8,6 +8,7 @@ import ParameterFieldset from 'WidgetFormPanel/components/ParameterFieldset';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import SortableList from 'TableWidgetForm/components/SortableList';
+import t from 'localization';
 
 export class ParametersBox extends PureComponent<Props> {
 	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter) => {
@@ -62,7 +63,7 @@ export class ParametersBox extends PureComponent<Props> {
 		const {value} = this.props;
 
 		return (
-			<FormBox rightControl={this.renderRightControl()} title="Параметры">
+			<FormBox rightControl={this.renderRightControl()} title={t('TableWidgetForm::ParametersBox::Parameters')}>
 				<SortableList
 					list={value}
 					onChangeOrder={this.handleChangeOrder}

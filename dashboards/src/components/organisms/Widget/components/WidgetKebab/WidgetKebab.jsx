@@ -3,6 +3,7 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import Kebab, {KebabDropdownButton, KebabIconButton} from 'components/molecules/Kebab';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class WidgetKebab extends PureComponent<Props> {
 	handleExport = ({value}) => {
@@ -40,7 +41,7 @@ export class WidgetKebab extends PureComponent<Props> {
 		const {editable, onSelect} = this.props;
 
 		if (editable) {
-			return <KebabIconButton icon={ICON_NAMES.EDIT} onClick={onSelect} text="Редактировать" />;
+			return <KebabIconButton icon={ICON_NAMES.EDIT} onClick={onSelect} text={t('WidgetKebab::Edit')} />;
 		}
 
 		return null;
@@ -84,7 +85,7 @@ export class WidgetKebab extends PureComponent<Props> {
 		const {editable, onRemove} = this.props;
 
 		if (editable) {
-			return <KebabIconButton icon={ICON_NAMES.BASKET} onClick={onRemove} text="Удалить виджет" />;
+			return <KebabIconButton icon={ICON_NAMES.BASKET} onClick={onRemove} text={t('WidgetKebab::Delete')} />;
 		}
 
 		return null;

@@ -18,6 +18,7 @@ import Row from './components/Row';
 import {SORTING_TYPES} from 'store/widgets/data/constants';
 import styles from './styles.less';
 import {sumColumnsWidth} from './helpers';
+import T from 'components/atoms/Translation';
 import type {TableSorting} from 'store/widgets/data/types';
 import Total from './components/Total';
 
@@ -365,12 +366,12 @@ export class Table extends PureComponent<Props, State> {
 		);
 	};
 
-	renderLoading = () => this.props.loading && <div className={styles.loading}>Загрузка...</div>;
+	renderLoading = () => this.props.loading && <div className={styles.loading}><T text="Table::Loading" /></div>;
 
 	renderNoData = () => {
 		const {data} = this.props;
 
-		return data.length === 0 ? <div className={styles.noData}>Данные отсутствуют</div> : null;
+		return data.length === 0 ? <div className={styles.noData}><T text="Table::EmptyData" /></div> : null;
 	};
 
 	renderPagination = () => {

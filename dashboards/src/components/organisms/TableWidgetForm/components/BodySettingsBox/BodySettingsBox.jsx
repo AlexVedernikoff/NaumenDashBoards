@@ -10,6 +10,8 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 import {TABLE_FIELDS} from 'TableWidgetForm/constants';
 import TextAlignControl from 'WidgetFormPanel/components/TextAlignControl';
 import TextHandlerControl from 'WidgetFormPanel/components/TextHandlerControl';
@@ -38,9 +40,9 @@ export class BodySettingsBox extends PureComponent<Props> {
 
 		return (
 			<div className={styles.container}>
-				<Label className={styles.label}>Тело таблицы</Label>
+				<Label className={styles.label}><T text="TableWidgetForm::BodySettingsBox::TableBody" /></Label>
 				<FormField>
-					<FormControl label="Отображать номер строки">
+					<FormControl label={t('TableWidgetForm::BodySettingsBox::ShowRowNumber')}>
 						<Checkbox
 							checked={showRowNum}
 							name={TABLE_FIELDS.showRowNum}
@@ -58,25 +60,26 @@ export class BodySettingsBox extends PureComponent<Props> {
 						value={pageSize}
 					/>
 					<div className={styles.pageSizeSelectLabel}>
-						Число отображаемых строк на странице
+						<T text="TableWidgetForm::BodySettingsBox::RowCountLimit" />
 					</div>
 				</FormField>
-				<FormField label="Перенос слов">
+				<FormField label={t('TableWidgetForm::BodySettingsBox::Wrap')}>
 					<TextHandlerControl name={TABLE_FIELDS.textHandler} onChange={this.handleChange} value={textHandler} />
 				</FormField>
-				<FormField label="Отсутствуют данные">
+				<FormField label={t('TableWidgetForm::BodySettingsBox::EmptyData')}>
 					<Select
+						getOptionLabel={({label}) => t(label)}
 						name={TABLE_FIELDS.defaultValue}
 						onSelect={this.handleSelect}
 						options={EMPTY_DATA_OPTIONS}
 						value={defaultValue}
 					/>
 				</FormField>
-				<FormField label="Выравнивание данных в таблице">
+				<FormField label={t('TableWidgetForm::BodySettingsBox::AligningData')}>
 					<TextAlignControl name={TABLE_FIELDS.textAlign} onChange={this.handleChange} value={textAlign} />
 				</FormField>
-				{this.renderCellSettingsBox(TABLE_FIELDS.parameterSettings, 'Стили значений параметра')}
-				{this.renderCellSettingsBox(TABLE_FIELDS.indicatorSettings, 'Стили значений показателя')}
+				{this.renderCellSettingsBox(TABLE_FIELDS.parameterSettings, t('TableWidgetForm::BodySettingsBox::ParameterStyle'))}
+				{this.renderCellSettingsBox(TABLE_FIELDS.indicatorSettings, t('TableWidgetForm::BodySettingsBox::IndicatorStyle'))}
 			</div>
 		);
 	}

@@ -4,6 +4,7 @@ import exporter from 'utils/export';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 import WidgetKebab from 'containers/WidgetKebab';
 
 export class Widget extends PureComponent<Props, State> {
@@ -70,7 +71,7 @@ export class Widget extends PureComponent<Props, State> {
 
 	renderError = () => {
 		const {hasError} = this.state;
-		const message = 'Ошибка построения.';
+		const message = t('Widget::Error');
 
 		return hasError && <div className={styles.error} title={message}>{message}</div>;
 	};
