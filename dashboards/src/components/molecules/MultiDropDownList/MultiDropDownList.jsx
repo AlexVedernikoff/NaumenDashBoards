@@ -6,6 +6,7 @@ import type {Props, Root, State} from './types';
 import React, {PureComponent} from 'react';
 import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 import Text, {TEXT_TYPES} from 'components/atoms/Text';
 
 export class MultiDropDownList extends PureComponent<Props, State> {
@@ -33,7 +34,9 @@ export class MultiDropDownList extends PureComponent<Props, State> {
 	handleSearch = (searchValue: string) => this.setState({searchValue});
 
 	renderEmptyMessage = () => (
-		<Text className={styles.emptyMessage} type={TEXT_TYPES.SMALL}>Нет совпадений.</Text>
+		<Text className={styles.emptyMessage} type={TEXT_TYPES.SMALL}>
+			<T text="MultiDropDownList::EmptyMessage" />
+		</Text>
 	);
 
 	renderList = (): Array<React$Node> | React$Node => {

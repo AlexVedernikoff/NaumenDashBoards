@@ -6,6 +6,7 @@ import type {Node} from 'react';
 import type {Option, Props, State} from './types';
 import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class MultiValueContainer extends Component<Props, State> {
@@ -31,7 +32,9 @@ export class MultiValueContainer extends Component<Props, State> {
 
 	renderClearButton = () => (
 		<div className={styles.clearButtonContainer}>
-			<Button onClick={this.props.onClear} variant={BUTTON_VARIANTS.SIMPLE}>Очистить</Button>
+			<Button onClick={this.props.onClear} variant={BUTTON_VARIANTS.SIMPLE}>
+				<T text="MultiValueContainer::Clear" />
+			</Button>
 		</div>
 	);
 
@@ -44,8 +47,12 @@ export class MultiValueContainer extends Component<Props, State> {
 
 			return (
 				<div className={styles.moreTagsInfoContainer}>
-					<span className={styles.moreTagsInfo}>И еще {left}</span>
-					<button className={styles.moreTagsButton} onClick={this.handleClickMoreButton}>Показать все</button>
+					<span className={styles.moreTagsInfo}>
+						<T left={left} text="MultiValueContainer::AndMore" />
+					</span>
+					<button className={styles.moreTagsButton} onClick={this.handleClickMoreButton}>
+						<T text="MultiValueContainer::ShowAll" />
+					</button>
 				</div>
 			);
 		}
@@ -62,11 +69,12 @@ export class MultiValueContainer extends Component<Props, State> {
 	};
 
 	renderTag = (option: Option, index) => {
-		const {getOptionLabel} = this.props;
+		const {getOptionLabel, getOptionValue} = this.props;
 		const label = getOptionLabel(option);
+		const value = getOptionValue(option);
 
 		return (
-			<div className={styles.tagContainer} data-index={index} onClick={this.handleClickTag} title={label}>
+			<div className={styles.tagContainer} data-index={index} key={value} onClick={this.handleClickTag} title={label}>
 				<div className={styles.tagLabel}>{label}</div>
 				<Icon className={styles.clearTagIcon} name={ICON_NAMES.REMOVE} />
 			</div>

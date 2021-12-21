@@ -4,12 +4,13 @@ import Container from 'components/atoms/Container';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
-import type {Props, State} from './types';
 import type {Props as ValueProps} from 'components/molecules/Select/components/Value/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
+import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 import TextInput from 'components/atoms/TextInput';
 import type {User} from 'store/users/types';
 
@@ -58,13 +59,11 @@ export class UserField extends PureComponent<Props, State> {
 		onSelect(index, value);
 	};
 
-	renderCaret = (props: IconButtonProps) => {
-		return (
-			<Container className={styles.caret}>
-				<IconButton icon={ICON_NAMES.USER} onClick={props.onClick} round={false} />
-			</Container>
-		);
-	};
+	renderCaret = (props: IconButtonProps) => (
+		<Container className={styles.caret}>
+			<IconButton icon={ICON_NAMES.USER} onClick={props.onClick} round={false} />
+		</Container>
+	);
 
 	renderIndicatorsContainer = (props: ContainerProps) => {
 		const {children} = props;
@@ -86,7 +85,7 @@ export class UserField extends PureComponent<Props, State> {
 					icon={ICON_NAMES.MINUS}
 					onClick={this.handleRemoveUser}
 					round={false}
-					tip="Удалить получателя"
+					tip={t('ExportByEmailForm::UserField::DeleteRecipient')}
 				/>
 			);
 		}

@@ -8,6 +8,7 @@ import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 import {WIDGET_SETS} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
@@ -33,7 +34,7 @@ export class Chart extends PureComponent<Props> {
 		}
 	}
 
-	getClassname = () => {
+	getClassName = () => {
 		const {legend} = this.props.widget;
 		const {BLOCK, INLINE} = LEGEND_DISPLAY_TYPES;
 		const {displayType} = legend;
@@ -77,7 +78,7 @@ export class Chart extends PureComponent<Props> {
 			const {countTotals = 0} = data;
 			return (
 				<div className={styles.total} style={style}>
-					Итого: {countTotals}
+					<T countTotals={countTotals} text="Chart::CountTotals" />
 				</div>
 			);
 		}
@@ -93,7 +94,7 @@ export class Chart extends PureComponent<Props> {
 		return (
 			<ResizeDetector onResize={this.handleResize} skipOnMount={true}>
 				<div className={className}>
-					<div className={this.getClassname()} >
+					<div className={this.getClassName()} >
 						<div ref={this.containerRef} />
 					</div>
 					{this.renderTotal()}

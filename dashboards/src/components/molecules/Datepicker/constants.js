@@ -1,12 +1,14 @@
 // @flow
-const WEEK_LABELS = [
-	'пн',
-	'вт',
-	'ср',
-	'чт',
-	'пт',
-	'сб',
-	'вс'
+import type {LangType} from 'localization/localize_types';
+
+const WEEK_LABELS: Array<LangType> = [
+	'Datepicker::Mon',
+	'Datepicker::Tue',
+	'Datepicker::Wed',
+	'Datepicker::Thu',
+	'Datepicker::Fri',
+	'Datepicker::Sat',
+	'Datepicker::Sun'
 ];
 
 const WEEKEND_DAYS = [6, 7];

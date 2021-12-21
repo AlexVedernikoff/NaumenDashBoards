@@ -59,7 +59,7 @@ const generateWebSMLayout = (layouts: Layout[], oldLayouts: ?Layout[]): Layout[]
 		widgetIdsByPosition.forEach(({i}) => {
 			const h = (i in heights) ? heights[i] : DEFAULT_WIDGET_LAYOUT_SIZE.h;
 
-			result.push({ h, i, w: 1, x: 0, y: top });
+			result.push({h, i, w: 1, x: 0, y: top});
 			top += h;
 		});
 

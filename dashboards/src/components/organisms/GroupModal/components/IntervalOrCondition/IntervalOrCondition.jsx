@@ -7,6 +7,7 @@ import {OPTIONS} from './constants';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 
 export class IntervalOrCondition extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -79,6 +80,7 @@ export class IntervalOrCondition extends PureComponent<Props, State> {
 		return (
 			<div className={styles.field}>
 				<MaterialSelect
+					getOptionLabel={option => t(option.label)}
 					onSelect={this.handleSelect}
 					options={options}
 					placeholder=""

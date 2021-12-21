@@ -16,6 +16,8 @@ import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {createRef, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 
 export class CustomGroupSelect extends PureComponent<Props> {
 	selectRef: Ref<typeof Select> = createRef();
@@ -45,7 +47,7 @@ export class CustomGroupSelect extends PureComponent<Props> {
 	};
 
 	renderInfoIcon = () => (
-		<div title="Название для сохранения группировки">
+		<div title={t('CustomGroupSelect::NameForSave')}>
 			<Icon className={mainStyles.infoIcon} name={ICON_NAMES.INFO} />
 		</div>
 	);
@@ -56,7 +58,7 @@ export class CustomGroupSelect extends PureComponent<Props> {
 		return (
 			<Container className={className}>
 				{children}
-				<CreationPanel onClick={this.handleCreate} text="Добавить группировку" />
+				<CreationPanel onClick={this.handleCreate} text={t('CustomGroupSelect::AddGroup')} />
 			</Container>
 		);
 	};
@@ -64,7 +66,9 @@ export class CustomGroupSelect extends PureComponent<Props> {
 	renderRemovalButton = () => {
 		const {onRemove, value} = this.props;
 
-		return value ? <Button onClick={onRemove} variant={BUTTON_VARIANTS.SIMPLE}>Удалить</Button> : null;
+		return value
+			? <Button onClick={onRemove} variant={BUTTON_VARIANTS.SIMPLE}><T text='CustomGroupSelect::DeleteGroup' /></Button>
+			: null;
 	};
 
 	renderSelect = () => {
@@ -93,7 +97,7 @@ export class CustomGroupSelect extends PureComponent<Props> {
 
 	render () {
 		return (
-			<FormField className={styles.field} label="Название группировки">
+			<FormField className={styles.field} label={t('CustomGroupSelect::GroupName')}>
 				<div className={styles.container}>
 					{this.renderSelect()}
 					{this.renderInfoIcon()}

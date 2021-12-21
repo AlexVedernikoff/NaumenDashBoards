@@ -6,6 +6,7 @@ import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 
 export class ExportByEmailButton extends PureComponent<Props, State> {
 	state = {
@@ -16,7 +17,13 @@ export class ExportByEmailButton extends PureComponent<Props, State> {
 
 	handleToggleForm = () => this.setState({show: !this.state.show});
 
-	renderButton = () => <IconButton name={ICON_NAMES.MAIL} onClick={this.handleToggleForm} tip="Отправить на почту" />;
+	renderButton = () => (
+		<IconButton
+			name={ICON_NAMES.MAIL}
+			onClick={this.handleToggleForm}
+			tip={t('ExportByEmailButton::SendToEmail')}
+		/>
+	);
 
 	renderForm = () => this.state.show && <ExportByEmailForm className={styles.form} />;
 

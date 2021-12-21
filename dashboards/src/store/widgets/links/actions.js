@@ -20,7 +20,7 @@ const createPostData = (widget: Widget, index: number) => {
 	if (source) {
 		const {label: title, value} = sourceValue;
 		const {cases, classFqn} = getPartsClassFqn(value, getDescriptorCases);
-		const widgetFilters = widgetFilterOptions?.filter(({descriptor}) => !!descriptor).map(({descriptor}) => ({ dataKey, descriptor })) ?? [];
+		const widgetFilters = widgetFilterOptions?.filter(({descriptor}) => !!descriptor).map(({descriptor}) => ({dataKey, descriptor})) ?? [];
 
 		postData = {
 			cases,

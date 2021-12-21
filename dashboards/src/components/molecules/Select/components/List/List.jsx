@@ -7,6 +7,7 @@ import ListOption from 'components/molecules/Select/components/ListOption';
 import type {Option, Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class List extends PureComponent<Props> {
@@ -83,7 +84,7 @@ export class List extends PureComponent<Props> {
 					className={styles.showMoreButton}
 					onClick={this.handleClickShowMore}
 					variant={BUTTON_VARIANTS.SIMPLE}>
-					Показать еще
+					<T text="Select::List::ShowMore" />
 				</Button>
 			);
 		}
@@ -91,7 +92,7 @@ export class List extends PureComponent<Props> {
 		return null;
 	};
 
-	renderVertualizedList = () => {
+	renderVirtualizedList = () => {
 		const {itemSize, maxHeight, options, value, values} = this.props;
 		const height = Math.min(itemSize * options.length, maxHeight);
 
@@ -112,7 +113,7 @@ export class List extends PureComponent<Props> {
 	render () {
 		return (
 			<div className={styles.list}>
-				{this.renderVertualizedList()}
+				{this.renderVirtualizedList()}
 				{this.renderShowMoreButton()}
 			</div>
 		);

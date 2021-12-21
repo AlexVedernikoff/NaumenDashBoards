@@ -14,7 +14,7 @@ const getProps = mixin => ({
 	loading: false,
 	multiple: false,
 	name: 'name',
-	placeholder: 'Выберите значение',
+	placeholder: 'TreeSelect::DefaultPlaceholder',
 	removable: false,
 	showMore: false,
 	value: null,

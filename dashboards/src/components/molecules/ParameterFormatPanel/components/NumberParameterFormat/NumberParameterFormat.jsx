@@ -1,16 +1,17 @@
 // @flow
-import {ADDITIONAL_OPTIONS, ADDITIONAL_OPTIONS_UNDEFINED, NOTATION_FORMATS_OPTIONS} from './constants';
 import Checkbox from 'components/atoms/Checkbox';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
 import {LABEL_FORMAT_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import {NOTATION_FORMATS} from 'store/widgets/data/constants';
+import {NOTATION_FORMATS_OPTIONS} from './constants';
 import NumberInput from 'components/atoms/NumberInput';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import SelectWithCustomEdit from 'components/molecules/SelectWithCustomEdit';
 import styles from './styles.less';
+import t from 'localization';
 import Toggle from 'components/atoms/Toggle';
 
 export class NumberParameterFormat extends PureComponent<Props> {
@@ -42,14 +43,15 @@ export class NumberParameterFormat extends PureComponent<Props> {
 	renderAdditional = () => {
 		const {value} = this.props;
 		const {additional} = value;
+		const options = t('NumberParameterFormat::AdditionalOptions');
 
 		return (
-			<FormField label="Дополнительные обозначения" small>
+			<FormField label={t('NumberParameterFormat::Additional')} small>
 				<SelectWithCustomEdit
 					name={LABEL_FORMAT_FIELDS.additional}
 					onSelect={this.handleChange}
-					options={ADDITIONAL_OPTIONS}
-					placeholder={ADDITIONAL_OPTIONS_UNDEFINED}
+					options={options}
+					placeholder={t('NumberParameterFormat::AdditionalOptionsUndefined')}
 					value={additional}
 				/>
 			</FormField>
@@ -63,7 +65,7 @@ export class NumberParameterFormat extends PureComponent<Props> {
 
 		return (
 			<FormField className={styles.singleControl} small>
-				<FormControl label="Формат числа" reverse={true}>
+				<FormControl label={t('NumberParameterFormat::NumberFormat')} reverse={true}>
 					<Toggle checked={showNotation} name={LABEL_FORMAT_FIELDS.notation} onChange={this.toggleNotation} value={showNotation} />
 				</FormControl>
 			</FormField>
@@ -75,13 +77,14 @@ export class NumberParameterFormat extends PureComponent<Props> {
 		const {notation} = value;
 
 		if (notation) {
-			const notationValue = NOTATION_FORMATS_OPTIONS.find(item => item.value === notation);
+			const options = NOTATION_FORMATS_OPTIONS.map(({label, value}) => ({label: t(label), value}));
+			const notationValue = options.find(item => item.value === notation);
 			return (
 				<FormField small>
 					<Select
 						name={LABEL_FORMAT_FIELDS.notation}
 						onSelect={this.handleNotationValue}
-						options={NOTATION_FORMATS_OPTIONS}
+						options={options}
 						value={notationValue}
 					/>
 				</FormField>
@@ -97,7 +100,7 @@ export class NumberParameterFormat extends PureComponent<Props> {
 
 		return (
 			<FormField className={styles.singleControl} small>
-				<FormControl label="Разделить разряды" small>
+				<FormControl label={t('NumberParameterFormat::SplitDigits')} small>
 					<Checkbox
 						checked={splitDigits}
 						name={LABEL_FORMAT_FIELDS.splitDigits}
@@ -115,7 +118,7 @@ export class NumberParameterFormat extends PureComponent<Props> {
 
 		if (showSymbolCount) {
 			return (
-				<FormField label="Количество знаков после запятой" small>
+				<FormField label={t('NumberParameterFormat::SymbolsAfterComma')} small>
 					<NumberInput
 						max={5}
 						min={0}

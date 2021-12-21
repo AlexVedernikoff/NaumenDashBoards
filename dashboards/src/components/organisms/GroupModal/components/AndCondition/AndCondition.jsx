@@ -7,6 +7,7 @@ import type {OrCondition as OrConditionType} from 'GroupModal/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 export class AndCondition extends PureComponent<Props> {
 	handleCreateOrCondition = () => {
@@ -44,7 +45,7 @@ export class AndCondition extends PureComponent<Props> {
 		return (
 			<div className={andOperatorCN}>
 				<Button disabled={disabled} onClick={onCreate} variant={BUTTON_VARIANTS.SIMPLE}>
-					И
+					<T text="AndCondition::And" />
 				</Button>
 			</div>
 		);

@@ -15,6 +15,8 @@ import type {Ref} from 'components/types';
 import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import SourceControl from './components/SourceControl';
 import styles from './styles.less';
+import t from 'localization';
+import T from 'components/atoms/Translation';
 import uuid from 'tiny-uuid';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
@@ -274,7 +276,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 		return (
 			<div className={styles.nameContainer}>
-				<div className={styles.nameLabel}>Название поля</div>
+				<div className={styles.nameLabel}><T text="AttributeCreatingModal::FieldName" /></div>
 				<Icon className={styles.nameClearIcon} name={ICON_NAMES.REMOVE} onClick={this.handleClickClearIcon} />
 				<input
 					className={styles.nameInput}
@@ -291,8 +293,12 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 		return (
 			<div className={styles.footer}>
-				<Button className={styles.saveButton} disabled={showFormulaError} onClick={this.handleClickSaveButton}>Сохранить</Button>
-				<Button onClick={onClose} variant={BUTTON_VARIANTS.ADDITIONAL}>Отмена</Button>
+				<Button className={styles.saveButton} disabled={showFormulaError} onClick={this.handleClickSaveButton}>
+					<T text="AttributeCreatingModal::Save" />
+				</Button>
+				<Button onClick={onClose} variant={BUTTON_VARIANTS.ADDITIONAL}>
+					<T text="AttributeCreatingModal::Cancel" />
+				</Button>
 				{this.renderFooterRemoveButton()}
 			</div>
 		);
@@ -307,7 +313,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 					className={styles.footerRemoveButton}
 					onClick={this.showRemovalInfo}
 					variant={BUTTON_VARIANTS.SIMPLE}>
-					Удалить
+					<T text="AttributeCreatingModal::Delete" />
 				</Button>
 			);
 		}
@@ -315,7 +321,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	renderFormulaError = () => {
 		const {showFormulaError} = this.state;
-		const text = 'Формула введена некорректно';
+		const text = t('AttributeCreatingModal::FormulaError');
 
 		if (showFormulaError) {
 			return (
@@ -328,7 +334,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	renderLegacyFormatInfo = () => {
 		const {showLegacyFormatInfo} = this.state;
-		const text = 'Формат данных формулы является устаревшим. Редактирование не доступно.';
+		const text = t('AttributeCreatingModal::OldFormat');
 
 		if (showLegacyFormatInfo) {
 			return (
@@ -368,7 +374,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 
 	renderRemoveInfo = () => {
 		const {showRemoveInfo} = this.state;
-		const text = 'Вычислимый атрибут будет удален без возможности восстановления. Подтвердите операцию';
+		const text = t('AttributeCreatingModal::Confirm');
 
 		if (showRemoveInfo) {
 			return (
@@ -403,7 +409,7 @@ export class AttributeCreatingModal extends PureComponent<Props, State> {
 	render () {
 		this.constantsInputs = [];
 		return (
-			<Modal header="Создать поле" renderFooter={this.renderFooter} size={MODAL_SIZES.LARGE}>
+			<Modal header={t('AttributeCreatingModal::CreateField')} renderFooter={this.renderFooter} size={MODAL_SIZES.LARGE}>
 				<div className={styles.container}>
 					{this.renderFormulaError()}
 					{this.renderRemoveInfo()}

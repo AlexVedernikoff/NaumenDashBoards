@@ -7,6 +7,7 @@ import type {Node} from 'components/molecules/TreeSelect/types';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 export class Tree extends Component<Props> {
 	static defaultProps = {
@@ -64,7 +65,7 @@ export class Tree extends Component<Props> {
 		const loaded = !loading;
 		const noOptions = Object.keys(options).length === 0;
 
-		return loaded && noOptions ? <div className={styles.message}>Список пуст</div> : null;
+		return loaded && noOptions ? <div className={styles.message}><T text="Tree::ListEmpty" /></div> : null;
 	};
 
 	renderNode = (node: Node) => {
@@ -85,7 +86,7 @@ export class Tree extends Component<Props> {
 				selected={selected}
 				showMore={showMore}
 			>
-				{(children) => this.renderChildren(children)}
+				{children => this.renderChildren(children)}
 			</NodeComponent>
 		);
 	};
@@ -100,7 +101,7 @@ export class Tree extends Component<Props> {
 					onClick={this.handleClickShowMore}
 					variant={BUTTON_VARIANTS.SIMPLE}
 				>
-					Показать еще
+					<T text="Tree::ShowMore" />
 				</Button>
 			);
 		}

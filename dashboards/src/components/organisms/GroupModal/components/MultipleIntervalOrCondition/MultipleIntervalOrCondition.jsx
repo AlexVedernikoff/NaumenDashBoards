@@ -9,6 +9,7 @@ import {OPTIONS} from './constants';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 
 export class MultipleIntervalOrCondition extends PureComponent<Props> {
 	static defaultProps = {
@@ -116,6 +117,7 @@ export class MultipleIntervalOrCondition extends PureComponent<Props> {
 		return (
 			<div className={styles.field}>
 				<MaterialSelect
+					getOptionLabel={option => t(option.label)}
 					onSelect={this.getHandleSelect(idx)}
 					options={options}
 					placeholder=""
