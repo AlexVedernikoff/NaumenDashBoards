@@ -21,6 +21,7 @@ import {SORTING_VALUES, WIDGET_TYPES} from 'store/widgets/data/constants';
 import SourceBox from 'WidgetFormPanel/components/SourceBox';
 import SourceFieldset from 'containers/SourceFieldset';
 import styles from './styles.less';
+import t from 'localization';
 import uuid from 'tiny-uuid';
 import WidgetNameBox from 'WidgetFormPanel/components/WidgetNameBox';
 import WidgetSelectBox from 'WidgetFormPanel/components/WidgetSelectBox';
@@ -119,7 +120,7 @@ export class ParamsTab extends PureComponent<Props> {
 						options={CHART_OPTIONS}
 						renderLabel={this.renderChartFieldLabel}
 						showCaret={false}
-						tip="Тип графика"
+						tip={t('ComboChartParamsTab::GraphType')}
 						value={type}
 					/>
 				</div>

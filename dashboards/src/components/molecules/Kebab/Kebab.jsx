@@ -8,6 +8,7 @@ import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
+import t from 'localization';
 
 export class Kebab extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -54,10 +55,10 @@ export class Kebab extends PureComponent<Props, State> {
 	handleResize = (placeWidth, height) => {
 		const children = this.getChildren(this.props.children);
 		const buttonPlaceWidth = placeWidth - 8;
-		const availibleButtonsCount = Math.max(Math.floor(buttonPlaceWidth / 28), 1);
+		const availableButtonsCount = Math.max(Math.floor(buttonPlaceWidth / 28), 1);
 		const kebabElementsCount = children.length;
-		const showKebab = kebabElementsCount > availibleButtonsCount;
-		const elements = showKebab ? availibleButtonsCount - 1 : kebabElementsCount;
+		const showKebab = kebabElementsCount > availableButtonsCount;
+		const elements = showKebab ? availableButtonsCount - 1 : kebabElementsCount;
 		const width = showKebab ? (elements + 1) * 28 - 4 : elements * 28 - 4;
 
 		this.setState({
@@ -76,7 +77,9 @@ export class Kebab extends PureComponent<Props, State> {
 		let result = children.slice(0, elements);
 
 		if (showKebab) {
-			result.push((<KebabIconButton active={activeKebab} icon={ICON_NAMES.KEBAB} key={'menu'} onClick={this.toggleActiveKebab} text='Меню' />));
+			result.push(
+				<KebabIconButton active={activeKebab} icon={ICON_NAMES.KEBAB} key={'menu'} onClick={this.toggleActiveKebab} text={t('Kebab::Menu')} />
+			);
 		}
 
 		if (activeKebab) {

@@ -5,6 +5,7 @@ import type {Props, State, Value} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from 'GroupModal/components/SystemGroup/styles.less';
+import t from 'localization';
 
 export class SystemDateGroupFormat extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -55,8 +56,14 @@ export class SystemDateGroupFormat extends PureComponent<Props, State> {
 		const disabled = options.length === 1;
 
 		return (
-			<FormField className={styles.field} label="Выберите значение">
-				<Select disabled={disabled} onSelect={this.handleSelectFormat} options={options} value={value} />
+			<FormField className={styles.field} label={t('SystemDateGroupFormat::ChoiceValue')}>
+				<Select
+					disabled={disabled}
+					getOptionLabel={option => t(option.label)}
+					onSelect={this.handleSelectFormat}
+					options={options}
+					value={value}
+				/>
 			</FormField>
 		);
 	}

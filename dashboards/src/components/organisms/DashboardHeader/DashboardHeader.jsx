@@ -1,5 +1,4 @@
 // @flow
-
 import AutoUpdateButton from 'containers/AutoUpdateButton';
 import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import ButtonGroup from 'components/atoms/ButtonGroup';
@@ -20,6 +19,8 @@ import type {Props} from 'containers/DashboardHeader/types';
 import React, {Component} from 'react';
 import type {State} from './types';
 import styles from './styles.less';
+import t from 'localization';
+import T from 'components/atoms/Translation';
 import {USER_ROLES} from 'store/context/constants';
 import {VARIANTS as ICON_BUTTON_VARIANTS} from './components/IconButton/constants';
 
@@ -95,7 +96,7 @@ export class DashboardHeader extends Component<Props, State> {
 	renderDisplayModeButton = () => {
 		const {isEditableContext, layoutMode, user} = this.props;
 		const isMobileLayoutMode = layoutMode === LAYOUT_MODE.MOBILE;
-		const customTip = isMobileLayoutMode ? 'Переключиться в WEB представление' : 'Переключиться в мобильное представление';
+		const customTip = isMobileLayoutMode ? t('DashboardHeader::WebSwitch') : t('DashboardHeader::MobileSwitch');
 
 		if (user.role !== USER_ROLES.REGULAR && !isEditableContext) {
 			return (
@@ -120,7 +121,7 @@ export class DashboardHeader extends Component<Props, State> {
 				menu={EXPORT_LIST}
 				name={ICON_NAMES.DOWNLOAD}
 				onSelect={this.handleExportDownload}
-				tip="Скачать"
+				tip={t('DashboardHeader::Download')}
 			/>
 		</NavItem>
 	);
@@ -137,16 +138,16 @@ export class DashboardHeader extends Component<Props, State> {
 		if (showModal) {
 			return (
 				<Modal
-					cancelText="Нет"
+					cancelText={t('DashboardHeader::No')}
 					footerPosition={FOOTER_POSITIONS.RIGHT}
-					header="Подтверждение удаления"
+					header={t('DashboardHeader::DeleteConfirmation')}
 					notice={true}
 					onClose={this.hideModal}
 					onSubmit={this.removePersonalDashboard}
 					size={MODAL_SIZES.SMALL}
-					submitText="Да"
+					submitText={t('DashboardHeader::Yes')}
 				>
-					Вы действительно хотите удалить персональный дашборд?
+					<T text="DashboardHeader::DeleteYourPersonalDashboard" />
 				</Modal>
 			);
 		}
@@ -157,8 +158,8 @@ export class DashboardHeader extends Component<Props, State> {
 
 		if (user.role !== USER_ROLES.REGULAR || isEditableContext) {
 			return editMode
-				? this.renderNavButton('Просмотреть', seeDashboard)
-				: this.renderNavButton('Редактировать', editDashboard);
+				? this.renderNavButton(t('DashboardHeader::View'), seeDashboard)
+				: this.renderNavButton(t('DashboardHeader::Edit'), editDashboard);
 		}
 
 		return null;
@@ -172,7 +173,7 @@ export class DashboardHeader extends Component<Props, State> {
 
 	renderRefreshButton = () => (
 		<NavItem>
-			<IconButton name={ICON_NAMES.REFRESH} onClick={this.handleClickRefreshButton} tip="Обновить виджеты" />
+			<IconButton name={ICON_NAMES.REFRESH} onClick={this.handleClickRefreshButton} tip={t('DashboardHeader::RefreshWidgets')} />
 		</NavItem>
 	);
 
@@ -184,7 +185,7 @@ export class DashboardHeader extends Component<Props, State> {
 				<NavItem>
 					<Button disabled={personalDashboardDeleting} onClick={this.showModal} outline>
 						<Icon className={styles.removeIcon} name={ICON_NAMES.CLOSE} />
-						<span>Удалить</span>
+						<span><T text="DashboardHeader::Delete" /></span>
 					</Button>
 					{this.renderModal()}
 				</NavItem>
@@ -205,7 +206,7 @@ export class DashboardHeader extends Component<Props, State> {
 		const {SUPER} = USER_ROLES;
 
 		if (role !== SUPER && !isUserMode && !hasPersonalDashboard && !personalDashboard && editableDashboard) {
-			return this.renderNavButton('Сохранить себе', createPersonalDashboard, personalDashboardCreating);
+			return this.renderNavButton(t('DashboardHeader::SaveYourself'), createPersonalDashboard, personalDashboardCreating);
 		}
 	};
 
@@ -217,8 +218,12 @@ export class DashboardHeader extends Component<Props, State> {
 			return (
 				<NavItem>
 					<ButtonGroup disabled={switching}>
-						<Button onClick={this.handleClickSwitchButton(true)} outline={!personalDashboard} variant={BUTTON_VARIANTS.GREEN}>Личный</Button>
-						<Button onClick={this.handleClickSwitchButton(false)} outline={personalDashboard} variant={BUTTON_VARIANTS.GREEN}>Общий</Button>
+						<Button onClick={this.handleClickSwitchButton(true)} outline={!personalDashboard} variant={BUTTON_VARIANTS.GREEN}>
+							<T text="DashboardHeader::Personal" />
+						</Button>
+						<Button onClick={this.handleClickSwitchButton(false)} outline={personalDashboard} variant={BUTTON_VARIANTS.GREEN}>
+							<T text="DashboardHeader::Common" />
+						</Button>
 					</ButtonGroup>
 				</NavItem>
 			);

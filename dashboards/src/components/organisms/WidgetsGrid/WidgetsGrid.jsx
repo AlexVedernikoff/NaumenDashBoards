@@ -172,7 +172,7 @@ export class WidgetsGrid extends Component<Props, State> {
 				if (container) {
 					const {top} = container.getBoundingClientRect();
 
-					this.setState({ contextMenu: { x: clientX - marginLeft, y: clientY - top + scrollTop } });
+					this.setState({contextMenu: {x: clientX - marginLeft, y: clientY - top + scrollTop}});
 				}
 
 				e.preventDefault();

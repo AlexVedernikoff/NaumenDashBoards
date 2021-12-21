@@ -1,25 +1,26 @@
 // @flow
 import {INTERVAL_SYSTEM_GROUP} from 'src/store/widgets/constants';
+import type {LangType} from 'localization/localize_types';
 
-const OPTIONS = [
+const OPTIONS: Array<{label: LangType, value: $Keys<typeof INTERVAL_SYSTEM_GROUP>}> = [
 	{
-		label: 'Секунд',
+		label: 'IntervalOrCondition::Seconds',
 		value: INTERVAL_SYSTEM_GROUP.SECOND
 	},
 	{
-		label: 'Минут',
+		label: 'IntervalOrCondition::Minutes',
 		value: INTERVAL_SYSTEM_GROUP.MINUTE
 	},
 	{
-		label: 'Часов',
+		label: 'IntervalOrCondition::Hours',
 		value: INTERVAL_SYSTEM_GROUP.HOUR
 	},
 	{
-		label: 'Дней',
+		label: 'IntervalOrCondition::Days',
 		value: INTERVAL_SYSTEM_GROUP.DAY
 	},
 	{
-		label: 'Недель',
+		label: 'IntervalOrCondition::Weeks',
 		value: INTERVAL_SYSTEM_GROUP.WEEK
 	}
 ];

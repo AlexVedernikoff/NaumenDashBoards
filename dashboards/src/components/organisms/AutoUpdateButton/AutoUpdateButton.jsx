@@ -10,6 +10,8 @@ import Popover from 'components/atoms/Popover';
 import type {Props, State, Values} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 import TimerButton from 'components/atoms/TimerButton';
 import {USER_ROLES} from 'store/context/constants';
 
@@ -108,7 +110,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	renderErrorIcon = () => {
 		const {defaultInterval} = this.props.settings;
 		const {errors} = this.state;
-		const text = `Необходимо задать целое число минут от ${defaultInterval} до ${MAX_INTERVAL}`;
+		const text = t('AutoUpdateButton::ErrorMessage', {max: MAX_INTERVAL, min: defaultInterval});
 		const iconCN = errors.interval ? cn(styles.infoIcon, styles.iconError) : styles.infoIcon;
 
 		return (
@@ -171,10 +173,10 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	renderSubmitButton = () => {
 		const {errors} = this.state;
 
-		return <Button className={styles.submit} disabled={Boolean(errors.interval)} type="submit">Применить</Button>;
+		return <Button className={styles.submit} disabled={Boolean(errors.interval)} type="submit"><T text="AutoUpdateButton::Apply" /></Button>;
 	};
 
-	renderText = () => <span className={styles.text}> минут</span>;
+	renderText = () => <span className={styles.text}> <T text="AutoUpdateButton::Minutes" /></span>;
 
 	renderTimerButton = () => {
 		const {onChangeRemainder, personalDashboard, role, settings} = this.props;
@@ -183,7 +185,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 
 		if (enabled) {
 			return (
-				<TimerButton duration={remainder} onChangeDuration={onChangeRemainder} tip="Автообновление включено" />
+				<TimerButton duration={remainder} onChangeDuration={onChangeRemainder} tip={t('AutoUpdateButton::AutoRefreshOn')} />
 			);
 		}
 
@@ -193,7 +195,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 					className={buttonCN}
 					name={ICON_NAMES.TIMER_OFF}
 					outline
-					tip="Автообновление выключено"
+					tip={t('AutoUpdateButton::AutoRefreshOff')}
 				/>
 			);
 		}
@@ -208,7 +210,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 			<Checkbox
 				activeColor="info"
 				className={styles.checkbox}
-				label="Автообновление диаграмм"
+				label={t('AutoUpdateButton::DiagramAutoRefresh')}
 				name="enabled"
 				onClick={this.handleClick}
 				value={values.enabled}

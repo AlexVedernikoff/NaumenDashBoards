@@ -9,6 +9,7 @@ import React, {Component, Fragment} from 'react';
 import styles from './styles.less';
 import type {SubGroup as SubGroupType} from 'GroupModal/types';
 import SubGroup from 'GroupModal/components/SubGroup';
+import T from 'components/atoms/Translation';
 
 export class SubGroupSection extends Component<Props> {
 	handleClickCreateButton = () => {
@@ -37,7 +38,7 @@ export class SubGroupSection extends Component<Props> {
 	renderCreateButton = () => (
 		<Button className={styles.createButton} onClick={this.handleClickCreateButton} variant={BUTTON_VARIANTS.GRAY}>
 			<Icon name={ICON_NAMES.PLUS} />
-			Добавить группу
+			<T text="SubGroupSection::AddGroup" />
 		</Button>
 	);
 
