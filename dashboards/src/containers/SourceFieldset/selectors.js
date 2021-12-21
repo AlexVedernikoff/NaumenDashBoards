@@ -6,6 +6,7 @@ import {
 	fetchSourcesFilters,
 	updateSourcesFilter
 } from 'store/sources/sourcesFilters/actions';
+import {clearDynamicAttributeGroups} from 'store/sources/dynamicGroups/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {fetchAttributeByCode, fetchAttributes} from 'store/sources/attributes/actions';
 import {getSourceFilters, getSourcesFilters} from 'store/sources/sourcesFilters/selectors';
@@ -38,6 +39,7 @@ export const props = (state: AppState, props: ComponentProps): ConnectedProps =>
 };
 
 export const functions: ConnectedFunctions = {
+	clearDynamicAttributeGroups,
 	fetchAttributeByCode,
 	fetchSourcesFilters,
 	onCheckApplyFilter: checkApplyFilter,

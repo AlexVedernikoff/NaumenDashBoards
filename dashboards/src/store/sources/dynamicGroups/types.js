@@ -83,3 +83,5 @@ export type DynamicGroupsState = DynamicGroupsMap;
 export type FetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filterId?: string) => ThunkAction;
 
 export type FetchDynamicAttributes = (dataKey: string, groupCode: string) => ThunkAction;
+
+export type ClearDynamicAttributeGroups = (dataKey: string) => ThunkAction;

@@ -130,6 +130,11 @@ const reducer = (
 					loading: true
 				}
 			};
+		case DYNAMIC_GROUPS_EVENTS.CLEAR_DYNAMIC_ATTRIBUTE_GROUPS:
+			return {
+				...state,
+				[action.payload]: null
+			};
 		default:
 			return state;
 	}
