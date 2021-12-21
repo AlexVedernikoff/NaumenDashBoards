@@ -2969,28 +2969,21 @@ class DashboardDataSetService
      */
     List prepareResultListListForTop(List res, Integer filterListSize,  Integer top, List parameterFilters = [], List breakdownFilters = [], Integer i = 0)
     {
-        if(filterListSize == 1)
+        if (top && res.size() > top)
         {
-            if ((parameterFilters && i < top) || !top)
-            {
-                return res
-            }
-            else if(breakdownFilters && top)
-            {
-                return res.size() > top ? res[0..top-1] : res
-            }
-            else
-            {
-                return []
-            }
+            return res[0..top - 1]
+        }
+        if ((parameterFilters && i < top) || !top)
+        {
+            return res
+        }
+        else if (breakdownFilters && top)
+        {
+            return res.size() > top ? res[0..top - 1] : res
         }
         else
         {
-            if (top && res.size() > top)
-            {
-                return res[0..top - 1]
-            }
-            return res
+            return []
         }
     }
 
