@@ -3,6 +3,7 @@ import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/sch
 import DiagramWidgetForm from 'containers/DiagramWidgetForm';
 import {lazy} from 'yup';
 import memoize from 'memoize-one';
+import OptionsTab from './components/OptionsTab';
 import ParamsTab from './components/ParamsTab';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -12,6 +13,7 @@ import {WIDGET_TYPES} from 'src/store/widgets/data/constants';
 
 export class AxisChartWidgetForm extends PureComponent<Props> {
 	components = {
+		OptionsTab,
 		ParamsTab,
 		StyleTab
 	};

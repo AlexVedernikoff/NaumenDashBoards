@@ -33,7 +33,7 @@ export class Chart extends PureComponent<Props> {
 		}
 	}
 
-	getClassname = () => {
+	getClassName = () => {
 		const {legend} = this.props.widget;
 		const {BLOCK, INLINE} = LEGEND_DISPLAY_TYPES;
 		const {displayType} = legend;
@@ -93,7 +93,7 @@ export class Chart extends PureComponent<Props> {
 		return (
 			<ResizeDetector onResize={this.handleResize} skipOnMount={true}>
 				<div className={className}>
-					<div className={this.getClassname()} >
+					<div className={this.getClassName()} >
 						<div ref={this.containerRef} />
 					</div>
 					{this.renderTotal()}

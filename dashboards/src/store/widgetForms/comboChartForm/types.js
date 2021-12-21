@@ -1,11 +1,17 @@
 // @flow
 import type {
 	AxisSettings,
-	ChartColorsSettings, ChartSorting,
+	ChartColorsSettings,
+	ChartSorting,
 	ComboIndicatorSettings,
 	ComboType,
 	ComputedAttr,
-	DataLabels, DisplayMode, Header, Legend, NavigationSettings
+	DataLabels,
+	DisplayMode,
+	Header,
+	Legend,
+	NavigationSettings,
+	WidgetTooltip
 } from 'store/widgets/data/types';
 import type {DataSet as AxisDataSet} from 'store/widgetForms/axisChartForm/types';
 
@@ -28,7 +34,8 @@ export type Values = $Exact<{
 	parameter: AxisSettings,
 	showTotalAmount: boolean,
 	sorting: ChartSorting,
-	templateName: string
+	templateName: string,
+	tooltip: WidgetTooltip
 }>;
 
 export type State = Values;

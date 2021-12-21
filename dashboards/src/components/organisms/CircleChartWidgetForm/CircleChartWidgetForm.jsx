@@ -1,5 +1,6 @@
 // @flow
 import DiagramWidgetForm from 'containers/DiagramWidgetForm';
+import OptionsTab from './components/OptionsTab';
 import ParamsTab from './components/ParamsTab';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -8,11 +9,12 @@ import StyleTab from './components/StyleTab';
 
 export class CircleChartWidgetForm extends PureComponent<Props> {
 	components = {
+		OptionsTab,
 		ParamsTab,
 		StyleTab
 	};
 
-	handleSubmit = (values) => {
+	handleSubmit = values => {
 		const {onSave, type, widget} = this.props;
 		const {id} = widget;
 

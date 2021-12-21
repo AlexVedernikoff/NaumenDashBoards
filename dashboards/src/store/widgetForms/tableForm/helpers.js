@@ -35,7 +35,8 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -59,7 +60,8 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 
@@ -79,7 +81,8 @@ const changeValuesByAxisOrComboCharts = (state: State, values: AxisChartValues |
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -107,6 +110,7 @@ const changeValuesByAxisOrComboCharts = (state: State, values: AxisChartValues |
 		sorting,
 		table,
 		templateName,
+		tooltip,
 		top
 	};
 };
@@ -126,7 +130,8 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -151,6 +156,7 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		sorting,
 		table,
 		templateName,
+		tooltip,
 		top
 	};
 };

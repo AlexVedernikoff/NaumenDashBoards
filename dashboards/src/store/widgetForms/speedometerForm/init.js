@@ -1,7 +1,7 @@
 // @flow
 import {createSpeedometerDataSet} from './helpers';
 import {DEFAULT_DATA_KEY} from 'store/widgetForms/constants';
-import {DEFAULT_HEADER_SETTINGS, DEFAULT_NAVIGATION_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
+import {DEFAULT_HEADER_SETTINGS, DEFAULT_NAVIGATION_SETTINGS, DEFAULT_TOOLTIP_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from './constants';
 import type {State} from './types';
 
@@ -16,5 +16,6 @@ export const initialState: State = {
 	navigation: DEFAULT_NAVIGATION_SETTINGS,
 	parameter: DEFAULT_SPEEDOMETER_SETTINGS.axis,
 	ranges: DEFAULT_SPEEDOMETER_SETTINGS.ranges,
-	templateName: ''
+	templateName: '',
+	tooltip: DEFAULT_TOOLTIP_SETTINGS
 };

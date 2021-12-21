@@ -4,7 +4,7 @@ import {FONT_SIZE_AUTO_OPTION, RANGES_TYPES} from 'store/widgets/data/constants'
 import type {Range, RangesTypes} from 'store/widgets/data/types';
 
 /**
- * Расчитывает координаты из полярных координат
+ * Рассчитывает координаты из полярных координат
  * @param {number} centerX - X центр полярных координат
  * @param {number} centerY - Y центр полярных координат
  * @param {number} radius - радиус
@@ -21,14 +21,14 @@ const polarToCartesian = (centerX: number, centerY: number, radius: number, angl
 };
 
 /**
- * Преобразует и очищает разряженый массив отрезков в процентные отрезки от 0 до 100
+ * Преобразует и очищает разряженный массив отрезков в процентные отрезки от 0 до 100
  * @param {Array<Range>} ranges - массив отрезков
  * @param {RangesTypes} type - тип отрезков (процент/абсолютные)
- * @param {number} min - абсолютное знаечение минимума (0 - при проценте)
+ * @param {number} min - абсолютное значение минимума (0 - при проценте)
  * @param {number} max - абсолютное значение максимума (100 - при проценте)
  * @param {string} defaultColor - цвет не указанного отрезка
  * @param {number} formatter - форматтер для текстов
- * @returns {Array<Range>} - полный отсортированый массив отрезков
+ * @returns {Array<Range>} - полный отсортированный массив отрезков
  */
 const normalizingRanges = (ranges: Array<Range>, type: RangesTypes, min: number, max: number, defaultColor: string, formatter: (value: number) => string) => {
 	const result = [];
@@ -102,16 +102,16 @@ const normalizingRanges = (ranges: Array<Range>, type: RangesTypes, min: number,
 
 	if (type === RANGES_TYPES.ABSOLUTE) {
 		const diff = max - min;
-		const calcProcent = value => (value - min) * 100 / diff;
+		const calculatePercent = value => (value - min) * 100 / diff;
 
-		normalizingResult = result.map(({from, to, ...data}) => ({from: calcProcent(from), to: calcProcent(to), ...data}));
+		normalizingResult = result.map(({from, to, ...data}) => ({from: calculatePercent(from), to: calculatePercent(to), ...data}));
 	}
 
 	return normalizingResult;
 };
 
 /**
- * Расчитывает угол по значению
+ * Рассчитывает угол по значению
  * @param {number} value - значение, от 0 до 100
  * @returns {number} - значение угла от -90 до 90
  */
@@ -121,7 +121,7 @@ const getAngleByValue = (value: number) => {
 };
 
 /**
- * Расчитывает сетку размещения для спидометра (см calcLayout.drawio.svg)
+ * Рассчитывает сетку размещения для спидометра (см calcLayout.drawio.svg)
  * @param {number} width - ширина спидометра
  * @param {number} height - высота спидометра
  * @param {number} curveFontSize - размер шрифта на диаграмме

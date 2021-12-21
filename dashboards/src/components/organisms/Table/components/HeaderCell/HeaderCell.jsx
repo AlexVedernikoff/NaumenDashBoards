@@ -57,6 +57,7 @@ export class HeaderCell extends PureComponent<Props> {
 
 	render () {
 		const {column, components, fontColor, fontStyle, last, left, sorting, textAlign, textHandler, value, width} = this.props;
+		const {tooltip} = column;
 		const {ASC, DESC} = SORTING_TYPES;
 		const {Cell} = components;
 		const fixed = !isNaN(parseFloat(left));
@@ -78,6 +79,7 @@ export class HeaderCell extends PureComponent<Props> {
 					textAlign={textAlign}
 					textHandler={textHandler}
 					tip={value}
+					tooltip={tooltip}
 					value={value}
 					width={width}
 				/>

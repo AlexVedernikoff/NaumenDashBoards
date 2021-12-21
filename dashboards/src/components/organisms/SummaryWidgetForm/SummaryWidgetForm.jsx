@@ -6,6 +6,7 @@ import {getCountGridColumns} from 'components/organisms/WidgetsGrid/helpers';
 import {GRID_LAYOUT_HEIGHT} from 'components/organisms/WidgetsGrid/constants';
 import type {Layout} from 'store/dashboard/layouts/types';
 import NewWidget from 'store/widgets/data/NewWidget';
+import OptionsTab from './components/OptionsTab';
 import ParamsTab from './components/ParamsTab';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -14,6 +15,7 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class SummaryWidgetForm extends PureComponent<Props> {
 	components = {
+		OptionsTab,
 		ParamsTab,
 		StyleTab
 	};
@@ -40,7 +42,7 @@ export class SummaryWidgetForm extends PureComponent<Props> {
 		};
 	};
 
-	handleSubmit = (values) => {
+	handleSubmit = values => {
 		const {onSave, widget} = this.props;
 		const {id} = widget;
 

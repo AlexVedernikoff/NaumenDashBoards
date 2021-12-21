@@ -3,10 +3,9 @@ import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {Breakdown, Indicator, Parameter} from 'store/widgetForms/types';
 import {connect} from 'react-redux';
-import FiltersOnWidget from 'containers/FiltersOnWidget';
-import type {FiltersOnWidgetErrors, Props, State} from './types';
 import {functions, props} from './selectors';
 import {HELPERS_CONTEXT} from 'containers/DiagramWidgetForm/HOCs/withHelpers/constants';
+import type {InnerFormErrors, Props, State} from './types';
 import memoize from 'memoize-one';
 import React, {PureComponent} from 'react';
 import type {RenderProps} from 'components/organisms/WidgetForm/types';
@@ -18,13 +17,16 @@ import WidgetForm from 'components/organisms/WidgetForm';
 export class DiagramWidgetForm extends PureComponent<Props, State> {
 	static defaultProps = {
 		components: {
+			OptionsTab: () => null,
 			ParamsTab: () => null,
 			StyleTab: () => null
 		}
 	};
 
 	state = {
-		filtersOnWidgetErrors: {}
+		optionsTabErrors: {},
+		paramsTabErrors: {},
+		styleTabErrors: {}
 	};
 
 	getHelpers = memoize(() => ({
@@ -86,13 +88,17 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 		return result;
 	};
 
-	handleFiltersOnWidgetErrors = (filtersOnWidgetErrors: FiltersOnWidgetErrors) => this.setState({filtersOnWidgetErrors});
+	handleOptionsTabErrors = (optionsTabErrors: InnerFormErrors) => this.setState({optionsTabErrors});
+
+	handleParamsTabErrors = (paramsTabErrors: InnerFormErrors) => this.setState({paramsTabErrors});
+
+	handleStyleTabErrors = (styleTabErrors: InnerFormErrors) => this.setState({styleTabErrors});
 
 	validate = async (values: Values) => {
 		const environment = process.env.NODE_ENV;
-		const {filtersOnWidgetErrors} = this.state;
+		const {optionsTabErrors, paramsTabErrors, styleTabErrors} = this.state;
 		const {schema, widgets} = this.props;
-		let errors = {...filtersOnWidgetErrors};
+		let errors = {...optionsTabErrors, ...styleTabErrors, ...paramsTabErrors};
 
 		try {
 			await schema.validate(values, {abortEarly: false, values, widgets});
@@ -123,17 +129,17 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 
 	renderTab = (tab: string, props: RenderProps<Values>) => {
 		const {components} = this.props;
-		const {ParamsTab, StyleTab} = components;
+		const {OptionsTab, ParamsTab, StyleTab} = components;
 		const {setFieldValue: onChange, values} = props;
 		const {OPTIONS, PARAMS, STYLE} = TAB_TYPES;
 
 		switch (tab) {
 			case OPTIONS:
-				return <FiltersOnWidget onChange={onChange} raiseErrors={this.handleFiltersOnWidgetErrors} values={values} />;
+				return <OptionsTab onChange={onChange} raiseErrors={this.handleOptionsTabErrors} values={values} />;
 			case PARAMS:
-				return <ParamsTab onChange={onChange} values={values} />;
+				return <ParamsTab onChange={onChange} raiseErrors={this.handleParamsTabErrors} values={values} />;
 			case STYLE:
-				return <StyleTab onChange={onChange} values={values} />;
+				return <StyleTab onChange={onChange} raiseErrors={this.handleStyleTabErrors} values={values} />;
 			default:
 				return null;
 		}

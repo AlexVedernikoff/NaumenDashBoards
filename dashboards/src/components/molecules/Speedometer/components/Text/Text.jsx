@@ -15,7 +15,7 @@ export class Text extends PureComponent<Props> {
 	};
 
 	render () {
-		const {fontSizeScale, style, ...transparentProps} = this.props;
+		const {fontSizeScale, forwardedRef, style, ...transparentProps} = this.props;
 		const {fontColor, fontFamily, fontSize: styleFontSize, fontStyle, show} = style;
 
 		if (show) {
@@ -36,15 +36,22 @@ export class Text extends PureComponent<Props> {
 				}
 			}
 
+			const textStyle = {
+				color: fontColor,
+				fontFamily: `${fontFamily}, Helvetica, Arial, sans-serif`,
+				fontSize
+			};
+
 			const textProps = {
 				...transparentProps,
 				className,
 				fill: fontColor,
 				fontFamily,
-				fontSize
+				fontSize,
+				style: textStyle
 			};
 
-			return <text {...textProps} />;
+			return <text {...textProps} ref={forwardedRef} />;
 		}
 
 		return null;

@@ -2,6 +2,7 @@
 import DiagramWidgetForm from 'containers/DiagramWidgetForm';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import memoize from 'memoize-one';
+import OptionsTab from './components/OptionsTab';
 import ParamsTab from './components/ParamsTab';
 import type {Props, Values} from './types';
 import React, {PureComponent} from 'react';
@@ -11,7 +12,7 @@ import type {TabProps} from 'containers/DiagramWidgetForm/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class ComboChartWidgetForm extends PureComponent<Props> {
-	handleSubmit = (values) => {
+	handleSubmit = values => {
 		const {onSave, widget} = this.props;
 		const {id} = widget;
 
@@ -26,6 +27,7 @@ export class ComboChartWidgetForm extends PureComponent<Props> {
 	};
 
 	getComponents = memoize(() => ({
+		OptionsTab: OptionsTab,
 		ParamsTab: this.renderParamsTab,
 		StyleTab: this.renderStyleTab
 	}));

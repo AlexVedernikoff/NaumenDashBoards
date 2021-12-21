@@ -2,13 +2,14 @@
 import type {DefaultProps as DefaultCellProps, Props as CellProps} from './components/Cell/types';
 import type {Props as HeaderProps} from './components/HeaderCell/types';
 import type {Props as RowProps} from './components/Row/types';
-import type {Table, TableSorting} from 'store/widgets/data/types';
+import type {Table, TableSorting, WidgetTooltip} from 'store/widgets/data/types';
 
 export type Column = {
 	accessor: string,
 	columns?: Array<Column>,
 	footer: string,
 	header: string,
+	tooltip: WidgetTooltip,
 	width?: number,
 	[string]: any
 };

@@ -35,7 +35,8 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -58,7 +59,8 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 		navigation,
 		parameter,
 		ranges,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 

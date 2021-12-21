@@ -81,7 +81,9 @@ const style = 'style';
 const template = 'template';
 const templateName = 'templateName';
 const tip = 'tip';
+const title = 'title';
 const to = 'to';
+const tooltip = 'tooltip';
 const top = 'top';
 const type = 'type';
 const use = 'use';
@@ -138,7 +140,9 @@ const DIAGRAM_FIELDS = {
 	template,
 	templateName,
 	tip,
+	title,
 	to,
+	tooltip,
 	top,
 	type,
 	use,

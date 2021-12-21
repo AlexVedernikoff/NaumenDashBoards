@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {BUILD_DATA_EVENTS, COLUMN_TYPES} from './constants';
-import type {Group, SetCreatedWidget, TableWidget, UpdateWidget, Widget} from 'store/widgets/data/types';
+import type {Group, SetCreatedWidget, TableWidget, UpdateWidget, Widget, WidgetTooltip} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 
 export type BaseColumn = {
@@ -9,6 +9,7 @@ export type BaseColumn = {
 	columns?: Array<BaseColumn>,
 	footer: string,
 	header: string,
+	tooltip: WidgetTooltip,
 	type?: string,
 	width?: number
 };

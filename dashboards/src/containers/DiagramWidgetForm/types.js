@@ -4,7 +4,9 @@ import type {Schema} from 'components/types';
 import type {SetFieldValue, Values} from 'components/organisms/WidgetForm/types';
 import type {Widget} from 'store/widgets/data/types';
 
-export type FiltersOnWidgetErrors = {[key: string]: string};
+export type InnerFormErrors = {[key: string]: string};
+
+export type RaiseErrors = (errors: InnerFormErrors) => void;
 
 export type ConnectedProps = {
 	saving: boolean,
@@ -18,10 +20,12 @@ export type ConnectedFunctions = {
 
 export type TabProps = {
 	onChange: SetFieldValue,
+	raiseErrors?: RaiseErrors,
 	values: Values
 };
 
 export type Components = {
+	OptionsTab: React$ComponentType<TabProps>,
 	ParamsTab: React$ComponentType<TabProps>,
 	StyleTab: React$ComponentType<TabProps>
 };
@@ -35,5 +39,7 @@ export type Props = {
 } & ConnectedProps & ConnectedFunctions;
 
 export type State = {
-	filtersOnWidgetErrors: FiltersOnWidgetErrors
+	optionsTabErrors: InnerFormErrors,
+	paramsTabErrors: InnerFormErrors,
+	styleTabErrors: InnerFormErrors
 };

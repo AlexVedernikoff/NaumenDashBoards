@@ -8,7 +8,8 @@ import type {
 	NavigationSettings,
 	Ranges,
 	SpeedometerData,
-	SpeedometerIndicatorSettings
+	SpeedometerIndicatorSettings,
+	WidgetTooltip
 } from 'store/widgets/data/types';
 import type {Indicator, SourceData} from 'store/widgetForms/types';
 
@@ -29,7 +30,8 @@ export type Values = $Exact<{
 	navigation: NavigationSettings,
 	parameter: AxisSettings,
 	ranges: Ranges,
-	templateName: string
+	templateName: string,
+	tooltip: WidgetTooltip
 }>;
 
 export type State = Values;

@@ -14,6 +14,7 @@ import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
 import Text from './components/Text';
 import type {TextProps as RangeTextProps} from './components/Range/types';
+import Title from './components/Title';
 
 export class Speedometer extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -40,6 +41,7 @@ export class Speedometer extends PureComponent<Props, State> {
 		graphHeight: 0,
 		graphWidth: 0,
 		height: 0,
+		indicatorTooltipX: 0,
 		legendHeight: 0,
 		legendPosition: '',
 		legendWidth: 0,
@@ -301,35 +303,24 @@ export class Speedometer extends PureComponent<Props, State> {
 	};
 
 	renderTitle = () => {
-		const {options: {borders, data: {title}}} = this.props;
+		const {options: {borders, data: {title, tooltip}}} = this.props;
 		const {arcX, arcY, fontSizeScale, graphWidth, radius} = this.state;
 		const fontSize = TITLE_STYLE.fontSize * fontSizeScale;
-		const {Text} = this.getComponents();
 		const borderFontSize = borders.style.show
 			? checkFontSize(borders.style.fontSize, BASE_BORDER_FONT_SIZE) * fontSizeScale
 			: 0;
-
 		const y = arcY + borderFontSize + fontSize;
-		let displayTitle = title;
-
-		if (fontSize * title.length > graphWidth + radius) {
-			const end = Math.round(graphWidth / fontSize) - 3;
-
-			displayTitle = `${displayTitle.substring(0, end)}...`;
-		}
 
 		return (
-			<Text
-				dominantBaseline="middle"
+			<Title
+				centerX={arcX}
 				fontSizeScale={fontSizeScale}
 				style={TITLE_STYLE}
-				textAnchor="middle"
-				x={arcX}
+				title={title}
+				tooltip={tooltip}
+				width={graphWidth + radius}
 				y={y}
-			>
-				<title>{title}</title>
-				{displayTitle}
-			</Text>
+			/>
 		);
 	};
 
