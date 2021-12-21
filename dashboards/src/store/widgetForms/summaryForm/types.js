@@ -5,7 +5,8 @@ import type {
 	Header,
 	NavigationSettings,
 	SummaryData,
-	SummaryIndicator
+	SummaryIndicator,
+	WidgetTooltip
 } from 'store/widgets/data/types';
 import type {Indicator, SourceData} from 'store/widgetForms/types';
 
@@ -23,7 +24,8 @@ export type Values = $Exact<{
 	indicator: SummaryIndicator,
 	name: string,
 	navigation: NavigationSettings,
-	templateName: string
+	templateName: string,
+	tooltip: WidgetTooltip
 }>;
 
 export type State = Values;

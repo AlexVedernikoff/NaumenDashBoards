@@ -1,6 +1,7 @@
 // @flow
 import type {Column, Components, OnClickCell, Row} from 'Table/types';
-import type {DefaultTableValue, FontStyle, TextAlign, TextHandler} from 'store/widgets/data/types';
+import type {DefaultTableValue, FontStyle, TextAlign, TextHandler, WidgetTooltip} from 'store/widgets/data/types';
+import type {Position} from 'src/components/molecules/WidgetTooltip/components/Message/types.js';
 
 export type DefaultProps = {|
 	children: React$Node,
@@ -22,5 +23,10 @@ export type Props = {
 	components: Components,
 	fontStyle?: FontStyle,
 	last: boolean,
-	onClick?: OnClickCell
+	onClick?: OnClickCell,
+	tooltip?: WidgetTooltip
+};
+
+export type State = {
+	position: Position | null,
 };

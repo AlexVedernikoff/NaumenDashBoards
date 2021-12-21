@@ -1,12 +1,13 @@
 // @flow
 import cn from 'classnames';
-import type {DefaultProps, Props} from './types';
+import type {DefaultProps, Props, State} from './types';
 import {DEFAULT_TABLE_VALUE, FONT_STYLES, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/constants';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import settingsStyles from 'styles/settings.less';
 import styles from './styles.less';
+import WidgetTooltip from 'components/molecules/WidgetTooltip';
 
-export class Cell extends PureComponent<Props> {
+export class Cell extends PureComponent<Props, State> {
 	static defaultProps: DefaultProps = {
 		children: null,
 		className: '',
@@ -19,6 +20,10 @@ export class Cell extends PureComponent<Props> {
 		tip: '',
 		value: '',
 		width: '100%'
+	};
+
+	state = {
+		position: null
 	};
 
 	getDefaultValue = () => {
@@ -37,6 +42,8 @@ export class Cell extends PureComponent<Props> {
 		}
 	};
 
+	handleClearTooltip = () => this.setState({position: null});
+
 	handleClick = (e: MouseEvent) => {
 		const {column, onClick, row, value} = this.props;
 
@@ -51,16 +58,37 @@ export class Cell extends PureComponent<Props> {
 		}
 	};
 
+	handleTooltipShow = ({clientX: x, clientY: y}: MouseEvent) => {
+		this.setState({position: {x, y}});
+	};
+
 	renderValue = () => {
-		const {components, fontColor, value} = this.props;
+		const {components, fontColor, tooltip, value} = this.props;
+		const {position} = this.state;
 		const {Value} = components;
 		const renderValue = value || this.getDefaultValue();
 
-		return <Value fontColor={fontColor} value={renderValue} />;
+		if (tooltip?.show) {
+			return (
+				<Fragment>
+					<div
+						onMouseEnter={this.handleTooltipShow}
+						onMouseLeave={this.handleClearTooltip}
+					>
+						<Value fontColor={fontColor} value={renderValue} />
+						<WidgetTooltip position={position} tooltip={tooltip} />
+					</div>
+				</Fragment>
+			);
+		}
+
+		return (
+			<Value fontColor={fontColor} value={renderValue} />
+		);
 	};
 
 	render () {
-		const {children, className, fontColor, fontStyle, last, left, textAlign, textHandler, tip, width} = this.props;
+		const {children, className, fontColor, fontStyle, last, left, textAlign, textHandler, tip, tooltip, width} = this.props;
 		const {BOLD, ITALIC, UNDERLINE} = FONT_STYLES;
 		const {CROP, WRAP} = TEXT_HANDLERS;
 		const fixed = !isNaN(parseFloat(left));
@@ -81,9 +109,10 @@ export class Cell extends PureComponent<Props> {
 			textAlign,
 			width
 		};
+		const title = tooltip && tooltip.show ? null : tip;
 
 		return (
-			<div className={cellCN} onClick={this.handleClick} style={style} title={tip}>
+			<div className={cellCN} onClick={this.handleClick} style={style} title={title}>
 				{this.renderValue()}
 				{children}
 			</div>

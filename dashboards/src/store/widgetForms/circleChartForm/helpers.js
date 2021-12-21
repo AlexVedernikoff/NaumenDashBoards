@@ -45,7 +45,8 @@ const changeValuesByAxisOrComboChart = (state: State, values: AxisValues | Combo
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -73,7 +74,8 @@ const changeValuesByAxisOrComboChart = (state: State, values: AxisValues | Combo
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 
@@ -91,7 +93,8 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -105,7 +108,8 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 
@@ -123,7 +127,8 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAgregationDataSet);
 
@@ -140,7 +145,8 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 

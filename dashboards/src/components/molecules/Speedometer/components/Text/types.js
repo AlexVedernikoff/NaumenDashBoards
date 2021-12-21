@@ -1,6 +1,6 @@
 // @flow
-
 import type {FontStyle} from 'store/widgets/data/types';
+import type {Ref} from 'components/types';
 
 export type DefaultProps = {
 	className: string,
@@ -21,6 +21,7 @@ export type TextStyle = {
 export type Props = {
 	...$Shape<DefaultProps>,
 	children: React$Node,
+	forwardedRef?: Ref<'text'>,
 	style: TextStyle,
 	x: number,
 	y: number

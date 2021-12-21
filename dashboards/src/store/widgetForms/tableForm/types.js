@@ -8,7 +8,8 @@ import type {
 	NavigationSettings,
 	Table,
 	TableData,
-	TableSorting
+	TableSorting,
+	WidgetTooltip
 } from 'store/widgets/data/types';
 
 export type DataSet = $Exact<{
@@ -33,7 +34,8 @@ export type Values = $Exact<{
 	sorting: TableSorting,
 	table: Table,
 	templateName: string,
-	top: DataTopSettings,
+	tooltip: WidgetTooltip,
+	top: DataTopSettings
 }>;
 
 export type State = Values;

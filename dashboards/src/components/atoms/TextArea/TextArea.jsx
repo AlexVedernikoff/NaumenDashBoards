@@ -2,15 +2,26 @@
 import Label from 'components/atoms/Label';
 import {MAX_TEXT_LENGTH} from 'components/constants';
 import type {Props} from './types';
-import React, {Component, Fragment} from 'react';
+import React, {Component, createRef, Fragment} from 'react';
+import type {Ref} from 'components/types';
 import styles from './styles.less';
 
 export class TextArea extends Component<Props> {
+	inputRef: Ref<'textarea'> = createRef();
+
 	static defaultProps = {
+		focusOnMount: false,
 		label: '',
 		maxLength: MAX_TEXT_LENGTH,
 		placeholder: 'Введите текст...'
 	};
+
+	componentDidMount () {
+		const {focusOnMount} = this.props;
+		const input = this.inputRef?.current;
+
+		focusOnMount && input && input.focus();
+	}
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {name, onChange} = this.props;
@@ -61,6 +72,7 @@ export class TextArea extends Component<Props> {
 				onBlur={onBlur}
 				onChange={this.handleChange}
 				placeholder={placeholder}
+				ref={this.inputRef}
 				rows={1}
 				value={value}
 			/>

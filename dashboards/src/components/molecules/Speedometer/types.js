@@ -25,6 +25,7 @@ export type State = {
 	graphHeight: number,
 	graphWidth: number,
 	height: number,
+	indicatorTooltipX: number,
 	legendHeight: number,
 	legendPosition: string,
 	legendWidth: number,

@@ -28,10 +28,12 @@ const speedometerMixin = (widget: SpeedometerWidget, data: DiagramBuildData, con
 		const formatter = getSpeedometerFormatter(widget, container);
 		const {indicator, ranges} = widget;
 		const {title, total} = data;
+		const widgetTooltip = buildDataSet.indicators?.[0]?.tooltip;
+		const tooltip = widgetTooltip && widgetTooltip.show ? widgetTooltip.title : null;
 
 		return {
 			borders: getBorders(widget, data, formatter.borders),
-			data: {formatter: formatter.total, style: indicator, title, total},
+			data: {formatter: formatter.total, style: indicator, title, tooltip, total},
 			ranges: {
 				...ranges,
 				formatter: formatter.ranges

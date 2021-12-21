@@ -1,16 +1,20 @@
 // @flow
 import cn from 'classnames';
 import {FONT_SIZE_AUTO_OPTION, FONT_STYLES} from 'store/widgets/data/constants';
+import Message from 'components/molecules/WidgetTooltip/components/Message';
 import type {Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import settingsStyles from 'styles/settings.less';
 import styles from './styles.less';
 
 export class Summary extends PureComponent<Props, State> {
+	tooltipPositionTimer = null;
+
 	state = {
 		fontSize: null,
-		height: 0
+		height: 0,
+		tooltipPosition: null
 	};
 
 	getTextHeight = (value: string, fontSize: number) => {
@@ -74,6 +78,11 @@ export class Summary extends PureComponent<Props, State> {
 		return data?.formatter?.(value) ?? value;
 	};
 
+	handleClearTooltip = () => {
+		clearTimeout(this.tooltipPositionTimer);
+		this.setState({tooltipPosition: null});
+	};
+
 	handleResize = (width: number, height: number) => {
 		const value = this.getValue();
 
@@ -98,6 +107,34 @@ export class Summary extends PureComponent<Props, State> {
 		}
 	};
 
+	handleTooltipShow = (e: MouseEvent) => {
+		const {clientX: x, clientY: y} = e;
+
+		clearTimeout(this.tooltipPositionTimer);
+		this.tooltipPositionTimer = setTimeout(() => this.setState({tooltipPosition: {x, y}}), 300);
+	};
+
+	renderTooltip = () => {
+		const {options: {data: {tooltip}}} = this.props;
+		const {tooltipPosition} = this.state;
+
+		if (tooltip) {
+			return (
+				<Fragment>
+					<span
+						className={styles.tooltip}
+						title=""
+					>
+					[?]
+					</span>
+					<Message position={tooltipPosition} text={tooltip} />
+				</Fragment>
+			);
+		}
+
+		return null;
+	};
+
 	renderValue = (fontSize: number) => {
 		const {onClickValue} = this.props;
 		const {height: textHeight} = this.state;
@@ -105,7 +142,18 @@ export class Summary extends PureComponent<Props, State> {
 			height: textHeight > 0 ? `${textHeight}px` : 'auto'
 		};
 
-		return <span className={styles.value} onClick={onClickValue} style={style}>{this.getValue()}</span>;
+		return (
+			<span
+				className={styles.value}
+				onClick={onClickValue}
+				onMouseLeave={this.handleClearTooltip}
+				onMouseMove={this.handleTooltipShow}
+				style={style}
+			>
+				{this.getValue()}
+				{this.renderTooltip()}
+			</span>
+		);
 	};
 
 	renderWithResize = (className: string, style: Object) => {

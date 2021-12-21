@@ -47,7 +47,8 @@ const changeValuesByCircleChart = (state: State, values: CircleValues): State =>
 		navigation,
 		showTotalAmount,
 		sorting,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -74,7 +75,8 @@ const changeValuesByCircleChart = (state: State, values: CircleValues): State =>
 		navigation,
 		showTotalAmount,
 		sorting,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 
@@ -97,7 +99,8 @@ const changeValuesByComboChart = (state: State, values: ComboValues): State => {
 		navigation,
 		showTotalAmount,
 		sorting,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -117,7 +120,8 @@ const changeValuesByComboChart = (state: State, values: ComboValues): State => {
 		navigation,
 		showTotalAmount,
 		sorting,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 
@@ -135,7 +139,8 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -150,7 +155,8 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 
@@ -169,7 +175,8 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAgregationDataSet);
 
@@ -189,7 +196,8 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 

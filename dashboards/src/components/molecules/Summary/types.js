@@ -2,6 +2,7 @@
 import type {DivRef} from 'components/types';
 import type {FontStyle} from 'store/widgets/data/types';
 import type {Options} from 'utils/chart/types';
+import type {Position} from 'components/molecules/WidgetTooltip/components/Message/types';
 
 export type Props = {
 	color: string,
@@ -15,5 +16,6 @@ export type Props = {
 
 export type State = {
 	fontSize: number | null,
-	height: number
+	height: number,
+	tooltipPosition: ?Position
 };

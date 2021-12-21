@@ -61,7 +61,7 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 
 		await this.validateFilters();
 
-		dataSets.forEach((dataSet) => {
+		dataSets.forEach(dataSet => {
 			const {dataSetIndex} = dataSet;
 			let widgetFilterOptions = null;
 

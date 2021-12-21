@@ -9,7 +9,8 @@ import type {
 	DisplayMode,
 	Header,
 	Legend,
-	NavigationSettings
+	NavigationSettings,
+	WidgetTooltip
 } from 'store/widgets/data/types';
 import type {Breakdown, Indicator, SourceData} from 'store/widgetForms/types';
 
@@ -33,7 +34,8 @@ export type Values = $Exact<{
 	navigation: NavigationSettings,
 	showTotalAmount: boolean,
 	sorting: ChartSorting,
-	templateName: string
+	templateName: string,
+	tooltip: WidgetTooltip
 }>;
 
 export type State = Values;

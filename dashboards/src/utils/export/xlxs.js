@@ -79,9 +79,9 @@ const exportSheet = async (name: string, data: TableBuildData) => {
 	const columnsArray: Array<BaseColumn> = [];
 
 	data.columns.forEach(column => {
-		const {accessor, columns, footer = '', header = ''} = column;
+		const {accessor, columns, footer = '', header = '', tooltip = {show: false, title: ''}} = column;
 
-		columnsArray.push({accessor, columns, footer, header});
+		columnsArray.push({accessor, columns, footer, header, tooltip});
 	});
 
 	const tableData: TableData = {...data, columns: columnsArray};

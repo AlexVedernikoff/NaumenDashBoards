@@ -5,6 +5,7 @@ import {
 	DEFAULT_COLORS_SETTINGS,
 	DEFAULT_HEADER_SETTINGS,
 	DEFAULT_NAVIGATION_SETTINGS,
+	DEFAULT_TOOLTIP_SETTINGS,
 	DISPLAY_MODE
 } from 'store/widgets/data/constants';
 import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
@@ -27,5 +28,6 @@ export const initialState: State = {
 	showSubTotalAmount: false,
 	showTotalAmount: false,
 	sorting: DEFAULT_AXIS_SORTING_SETTINGS,
-	templateName: ''
+	templateName: '',
+	tooltip: DEFAULT_TOOLTIP_SETTINGS
 };

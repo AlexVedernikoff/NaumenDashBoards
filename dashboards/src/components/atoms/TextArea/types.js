@@ -2,6 +2,7 @@
 import type {InputValue, OnChangeInputEvent} from 'components/types';
 
 export type Props = {
+	focusOnMount: boolean | null,
 	label: string,
 	maxLength: number | null,
 	name: string,

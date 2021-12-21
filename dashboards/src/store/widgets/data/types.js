@@ -125,9 +125,15 @@ export type BreakdownItem = {
 
 export type Breakdown = Array<BreakdownItem>;
 
+export type WidgetTooltip = {
+	show: boolean,
+	title: string
+};
+
 export type Indicator = {
 	aggregation: string,
-	attribute: MixedAttribute | null
+	attribute: MixedAttribute | null,
+	tooltip?: WidgetTooltip
 };
 
 export type DataTopSettings = {
@@ -171,6 +177,7 @@ type BaseWidget = {|
 	showSubTotalAmount: boolean,
 	showTotalAmount: boolean,
 	templateName: string,
+	tooltip: WidgetTooltip,
 	warningMessage?: string
 |};
 

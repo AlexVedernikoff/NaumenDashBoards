@@ -42,7 +42,8 @@ const changeValuesByAxisChart = (state: State, values: AxisChartValues): State =
 		parameter,
 		showTotalAmount,
 		sorting,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -63,7 +64,8 @@ const changeValuesByAxisChart = (state: State, values: AxisChartValues): State =
 		parameter: omit(parameter, 'format'),
 		showTotalAmount,
 		sorting,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 
@@ -85,7 +87,8 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -104,7 +107,8 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 
@@ -122,7 +126,8 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 
 	return {
@@ -137,7 +142,8 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		header,
 		name,
 		navigation,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 
@@ -156,7 +162,8 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	} = values;
 	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAgregationDataSet);
 
@@ -176,7 +183,8 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		name,
 		navigation,
 		showTotalAmount,
-		templateName
+		templateName,
+		tooltip
 	};
 };
 

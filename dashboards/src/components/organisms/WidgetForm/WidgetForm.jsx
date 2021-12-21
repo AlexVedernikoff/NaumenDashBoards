@@ -1,4 +1,5 @@
 // @flow
+import {deepClone} from 'helpers';
 import {ERRORS_CONTEXT} from './HOCs/withErrors/constants';
 import memoize from 'memoize-one';
 import type {Props, State} from './types';
@@ -52,11 +53,48 @@ class WidgetForm extends Component<Props, State> {
 
 	handleSubmit = async () => {
 		const {onSubmit} = this.props;
+
+		await this.normalizeValues();
+
 		const {values} = this.state;
 
 		this.setState({submitted: true});
 		await this.validate() && onSubmit(values);
 	};
+
+	normalizeValues = (): Promise<void> => new Promise(resolve => {
+		const {values} = this.state;
+		const newValues = deepClone(values);
+		const {data, tooltip} = newValues;
+		let changed = false;
+
+		if (tooltip && tooltip.show && tooltip.title === '') {
+			newValues.tooltip = {
+				show: false,
+				title: ''
+			};
+			changed = true;
+		}
+
+		if (data) {
+			data.forEach(({indicators}) => {
+				indicators && indicators.forEach(indicator => {
+					const {tooltip} = indicator;
+
+					if (tooltip && tooltip.show && tooltip.title === '') {
+						indicator.tooltip = {show: false, title: ''};
+						changed = true;
+					}
+				});
+			});
+		}
+
+		if (changed) {
+			this.setState({values: newValues}, resolve);
+		} else {
+			resolve();
+		}
+	});
 
 	setErrorFocusRef = (ref: Ref<'div'>) => {
 		if (!this.errorFocusRef) this.errorFocusRef = ref;

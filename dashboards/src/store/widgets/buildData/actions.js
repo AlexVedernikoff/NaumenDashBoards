@@ -18,7 +18,7 @@ import t from 'localization';
  * @param {AppState} state - данные по окружению
  * @param {TableWidget} widget - данные виджета
  * @param {number} pageNumber - номер текущей строки
- * @param {number} pageSize - размер страицы
+ * @param {number} pageSize - размер страницы
  * @returns {Promise<TableBuildData>}
  */
 const getDataForTableDiagram = async (state: AppState, widget: TableWidget, pageNumber: number, pageSize: number): Promise<TableBuildData> => {
