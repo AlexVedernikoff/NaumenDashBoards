@@ -1,8 +1,7 @@
 // @flow
-
+import {AXIS_FONT_SIZE, DEFAULT_Y_AXIS_MIN} from 'utils/chart/constants';
 import type {ComboData, ComboWidget} from 'store/widgets/data/types';
 import type {ComboNumberFormatter, ComboValueFormatter} from './formater/types';
-import {DEFAULT_Y_AXIS_MIN} from 'utils/chart/constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {extend} from 'helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
@@ -45,7 +44,7 @@ const setYAxis = (
 	const {dataKey, type, yAxisName: name} = dataSet;
 	const color = colorsSettings.auto.colors[index];
 	const stacked = type === WIDGET_TYPES.COLUMN_STACKED;
-	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName} = indicator;
+	let {max, min = DEFAULT_Y_AXIS_MIN, show, showName, fontSize, fontFamily} = indicator;
 	let maxValue;
 
 	if (widget.indicator.showDependent) {
@@ -87,7 +86,9 @@ const setYAxis = (
 			formatter: bindIndicatorFormatter,
 			maxWidth: 140,
 			style: {
-				colors: color
+				colors: color,
+				fontFamily,
+				fontSize: fontSize ?? AXIS_FONT_SIZE
 			}
 		},
 		max,
@@ -191,7 +192,11 @@ export const comboMixin = (widget: ComboWidget, data: DiagramBuildData, containe
 
 		const xaxis = {
 			labels: {
-				formatter: formatter.parameter.overlapped
+				formatter: formatter.parameter.overlapped,
+				style: {
+					fontFamily: xAxisProps.fontFamily,
+					fontSize: xAxisProps.fontSize ?? AXIS_FONT_SIZE
+				}
 			},
 			tickPlacement: 'between'
 		};

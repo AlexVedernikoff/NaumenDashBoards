@@ -16,7 +16,7 @@ import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
 import {getLegendWidth} from 'utils/chart/mixins/helpers';
 import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
-import {LEGEND_POSITIONS} from 'utils/chart';
+import {LEGEND_POSITIONS} from 'utils/chart/constants';
 
 const getDataFormatter = (widget: CircleWidget, format: NumberAxisFormat): NumberFormatter => {
 	const dataSet = getMainDataSet(widget.data);
