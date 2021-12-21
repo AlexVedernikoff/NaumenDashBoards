@@ -3,6 +3,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 import Checkbox from 'components/atoms/Checkbox';
 import type {ContainerProps} from 'components/molecules/TreeSelect/types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER} from 'store/widgetForms/constants';
+import {descriptorContainsFilter} from 'utils/descriptorUtils';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import FieldError from 'src/components/atoms/FieldError';
@@ -192,7 +193,7 @@ export class SourceFieldset extends Component<Props, State> {
 			};
 
 			if (newSourceValue) {
-				onFetchAttributes(newSourceValue.value, parentClassFqn, attrSetConditions, (attributes) => { this.updateAttributes(attributes); });
+				onFetchAttributes(newSourceValue.value, parentClassFqn, attrSetConditions, attributes => { this.updateAttributes(attributes); });
 			}
 		}
 
@@ -234,7 +235,7 @@ export class SourceFieldset extends Component<Props, State> {
 	isCurrentFilterChanged = (): boolean => {
 		const {value: {source}} = this.props;
 		const {descriptor} = source;
-		return source.filterId === null && (descriptor && !!JSON.parse(descriptor).filters);
+		return source.filterId === null && descriptorContainsFilter(descriptor);
 	};
 
 	isDynamicAttribute = (attribute: ?Attribute) => attribute?.property === DYNAMIC_ATTRIBUTE_PROPERTY;
@@ -323,7 +324,7 @@ export class SourceFieldset extends Component<Props, State> {
 		const {usesFilter, value} = this.props;
 		const {FILLED_FILTER, FILTER} = ICON_NAMES;
 		const {descriptor, filterId} = value.source;
-		const active = !!filterId || JSON.parse(descriptor || '{}').filters?.length > 0;
+		const active = !!filterId || descriptorContainsFilter(descriptor);
 		const iconName = active ? FILLED_FILTER : FILTER;
 
 		if (usesFilter) {

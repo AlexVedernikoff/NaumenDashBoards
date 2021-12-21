@@ -10,11 +10,6 @@ import type {DataSet as TableDataSet, State as TableFormState, Values as TableVa
 import {EVENTS} from 'store/widgetForms/constants';
 import type {State as TextFormState, Values as TextValues} from './textForm/types';
 
-export type AttrSetConditions = {
-	cases: ?string[],
-	groupCode: ?string
-};
-
 export type SourceData = {
 	descriptor: string,
 	filterId: string | null,

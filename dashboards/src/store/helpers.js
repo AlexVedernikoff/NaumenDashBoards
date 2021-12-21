@@ -3,7 +3,6 @@ import api from 'api';
 import type {AppState} from './types';
 import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
 import {isPersonalDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
-import {isSourceType} from 'store/sources/data/helpers';
 import {store} from 'app.constants';
 
 /**
@@ -116,30 +115,21 @@ const removeLocalStorageValue = (storageKey: string, key: string) => {
  */
 const getDescriptorCases = (classFqn: string) => [classFqn, ...getSourceTypes(classFqn)];
 
-const createFilterContext = (classFqn: string) => {
-	const context: Object = {};
+/**
+ * Возвращает массив для окна фильтрации, содержащий код источника и все его подтипы
+ * @param {string} classFqn - код источника
+ * @returns {Array<string>}
+ */
+const getSourceFilterAttributeGroup = (classFqn: string): string | null => {
+	const {map: sources} = store.getState().sources.data;
+	const source = sources[classFqn];
+	let result = null;
 
-	if (isSourceType(classFqn)) {
-		context.cases = getDescriptorCases(classFqn);
-	} else {
-		context.clazz = classFqn;
+	if (source) {
+		result = source.value.sourceFilterAttributeGroup;
 	}
 
-	return context;
-};
-
-const getFilterContext = (descriptor: string, classFqn: string) => {
-	let context = JSON.parse(descriptor);
-
-	if (!context.clazz) {
-		const cases = context.cases ?? [];
-
-		getDescriptorCases(classFqn).forEach(item => cases.push(item));
-
-		context = { ...context, cases };
-	}
-
-	return context;
+	return result;
 };
 
 const isLayoutsChanged = () => {
@@ -148,13 +138,12 @@ const isLayoutsChanged = () => {
 };
 
 export {
-	createFilterContext,
 	getDescriptorCases,
-	getFilterContext,
 	getLocalStorageValue,
 	getParams,
 	getSourceTypes,
 	isLayoutsChanged,
+	getSourceFilterAttributeGroup,
 	getUserLocalStorageId,
 	removeLocalStorageValue,
 	setLocalStorageValue

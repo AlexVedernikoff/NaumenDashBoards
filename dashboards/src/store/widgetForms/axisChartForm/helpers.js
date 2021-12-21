@@ -3,7 +3,7 @@ import {compose} from 'redux';
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
-import {fixIndicatorsAgregationDataSet, fixLeaveOneIndicator, fixLeaveOneParameters} from 'store/widgetForms/helpers';
+import {fixIndicatorsAggregationDataSet, fixLeaveOneIndicator, fixLeaveOneParameters} from 'store/widgetForms/helpers';
 import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
 import type {Values as CircleValues} from 'store/widgetForms/circleChartForm/types';
 import type {Values as ComboValues} from 'store/widgetForms/comboChartForm/types';
@@ -178,7 +178,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		templateName,
 		tooltip
 	} = values;
-	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAgregationDataSet);
+	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAggregationDataSet);
 
 	return {
 		...state,

@@ -7,6 +7,7 @@ export type RawDataSource = {
 	classFqn: string,
 	descriptor?: string,
 	hasDynamic: boolean,
+	sourceFilterAttributeGroup: string | null,
 	title: string
 };
 

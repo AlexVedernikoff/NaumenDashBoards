@@ -1,6 +1,7 @@
 // @flow
-import type {AttrSetConditions, Breakdown, Indicator, Parameter, SourceData} from 'store/widgetForms/types';
+import type {AttrSetConditions} from 'utils/descriptorUtils/types';
 import type {Attribute, FetchAttributeByCode, FetchAttributes} from 'store/sources/attributes/types';
+import type {Breakdown, Indicator, Parameter, SourceData} from 'store/widgetForms/types';
 import type {
 	CheckApplyFilter,
 	DeleteSourcesFilter,

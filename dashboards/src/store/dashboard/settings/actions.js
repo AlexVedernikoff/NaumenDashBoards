@@ -24,6 +24,7 @@ import {
 import {getDashboardDescription} from './selectors';
 import {getDataSources} from 'store/sources/data/actions';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
+import {getValueFromDescriptor} from 'utils/descriptorUtils';
 import {isPersonalDashboard, isRestrictUserModeDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -145,7 +146,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			dispatch(setMobileLayouts(widgets, refresh, mobileLayouts));
 
 			if (refresh) {
-				widgets.forEach((widget) => {
+				widgets.forEach(widget => {
 					dispatch(fetchBuildData(widget));
 				});
 			}
@@ -382,16 +383,8 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 	});
 
 	if (descriptorStr && foundKey) {
-		const descriptor = JSON.parse(descriptorStr);
 		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode, WIDGET_TYPES.BAR);
-		let classFqn;
-
-		if (Array.isArray(descriptor.cases) && descriptor.cases.length > 1) {
-			classFqn = descriptor.cases[0].split('$').shift();
-		} else {
-			classFqn = descriptor.clazz || descriptor.cases[0];
-		}
-
+		const classFqn = getValueFromDescriptor(descriptorStr);
 		const {label, value} = sources.data.map[classFqn].value;
 		const {axisChartForm: values} = widgetForms;
 		const newData = values.data.map((dataSet, i) => i === 0 ? ({
