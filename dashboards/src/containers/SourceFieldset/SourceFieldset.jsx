@@ -88,7 +88,9 @@ export class SourceFieldsetContainer extends Component<Props> {
 					}
 				}
 
-				const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(classFqn);
+				// TODO: открыть в 18 релизе
+				// const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(classFqn);
+				const sourceFilterAttributeGroup = false;
 
 				if (sourceFilterAttributeGroup) {
 					context['attrGroupCode'] = sourceFilterAttributeGroup;
