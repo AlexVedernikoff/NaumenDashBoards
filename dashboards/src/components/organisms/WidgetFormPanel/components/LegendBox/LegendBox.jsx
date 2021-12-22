@@ -9,6 +9,7 @@ import {LEGEND_POSITIONS} from 'utils/chart/constants';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t, {translateObjectsArray} from 'localization';
 import TextHandlerControl from 'WidgetFormPanel/components/TextHandlerControl';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
@@ -30,13 +31,14 @@ export class LegendBox extends PureComponent<Props> {
 		const {displayType, position} = this.props.value;
 		const {left, right} = LEGEND_POSITIONS;
 		const disabled = position === left || position === right;
+		const options = translateObjectsArray('title', DISPLAY_TYPE_OPTIONS);
 
 		return (
 			<CheckIconButtonGroup
 				disabled={disabled}
 				name={DIAGRAM_FIELDS.displayType}
 				onChange={this.handleSelect}
-				options={DISPLAY_TYPE_OPTIONS}
+				options={options}
 				value={displayType}
 			/>
 		);
@@ -44,15 +46,16 @@ export class LegendBox extends PureComponent<Props> {
 
 	renderLegendPositionButtons = () => {
 		const {position} = this.props.value;
+		const options = translateObjectsArray('title', POSITION_OPTIONS);
 
-		return <CheckIconButtonGroup name={DIAGRAM_FIELDS.position} onChange={this.handleSelect} options={POSITION_OPTIONS} value={position} />;
+		return <CheckIconButtonGroup name={DIAGRAM_FIELDS.position} onChange={this.handleSelect} options={options} value={position} />;
 	};
 
 	render () {
 		const {fontFamily, fontSize, show, textHandler} = this.props.value;
 
 		return (
-			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleChange} showContent={show} title="Легенда">
+			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleChange} showContent={show} title={t('LegendBox::Title')}>
 				<FormField row>
 					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
 					<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} value={fontSize} />

@@ -10,8 +10,12 @@ import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 import {props} from './selectors';
 import type {Props} from './types';
 import React, {Component} from 'react';
+import {translateObjectsArray} from 'localization';
 
 export class TimerValueGroupModal extends Component<Props> {
+	options = translateObjectsArray('label', OPTIONS);
+	orConditionOptions = translateObjectsArray('label', OR_CONDITION_OPTIONS);
+
 	getComponents = memoize(() => ({
 		...defaultComponents,
 		OrCondition: this.renderOrCondition,
@@ -28,7 +32,7 @@ export class TimerValueGroupModal extends Component<Props> {
 			case NOT_EQUAL:
 			case GREATER:
 			case LESS:
-				return <MultipleIntervalOrCondition data={data} onChange={onChange} options={OPTIONS} type={type} />;
+				return <MultipleIntervalOrCondition data={data} onChange={onChange} options={this.options} type={type} />;
 		}
 		return null;
 	};
@@ -45,7 +49,7 @@ export class TimerValueGroupModal extends Component<Props> {
 				customType={attribute.type}
 				onClose={onClose}
 				onSubmit={onSubmit}
-				orConditionOptions={OR_CONDITION_OPTIONS}
+				orConditionOptions={this.orConditionOptions}
 				schema={SCHEMA}
 				value={value}
 			/>

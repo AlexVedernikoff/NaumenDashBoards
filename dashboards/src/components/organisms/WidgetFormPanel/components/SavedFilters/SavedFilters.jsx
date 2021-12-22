@@ -12,6 +12,8 @@ import type {Props, SourceFiltersItem} from './types';
 import React, {Component} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 
 export class SavedFilters extends Component<Props> {
 	static defaultProps = {
@@ -99,7 +101,7 @@ export class SavedFilters extends Component<Props> {
 		const selectCN = cn([className, styles.savedFilters]);
 		return (
 			<Container className={selectCN} onClick={onClick}>
-				Сохраненные фильтры
+				<T text='SavedFilters::Title' />
 			</Container>
 		);
 	};
@@ -117,11 +119,11 @@ export class SavedFilters extends Component<Props> {
 				getOptionValue={(item: SourceFiltersItem) => item.id}
 				isSearching={true}
 				loading={loading}
-				menuHeaderMessage="Выберите сохраненный фильтр"
-				notFoundMessage="Нет совпадений"
+				menuHeaderMessage={t('SavedFilters::HeaderMessage')}
+				notFoundMessage={t('SavedFilters::NotFoundMessage')}
 				onSelect={this.handleSelect}
 				options={filters}
-				placeholder="Не выбрано"
+				placeholder={t('SavedFilters::Placeholder')}
 			/>
 		);
 	}

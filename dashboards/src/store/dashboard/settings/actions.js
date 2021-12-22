@@ -9,7 +9,7 @@ import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
-import {DASHBOARD_EVENTS, FETCH_DASHBOARD_ERROR_TEXT} from './constants';
+import {DASHBOARD_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
@@ -31,6 +31,7 @@ import {resetState, switchState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
 import StorageSettings from 'utils/storageSettings';
+import t from 'localization';
 import type {User} from 'store/users/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -80,7 +81,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 			type: DASHBOARD_EVENTS.RECEIVE_DASHBOARD
 		});
 	} catch (exception) {
-		let error = FETCH_DASHBOARD_ERROR_TEXT;
+		let error = t('store::dashboard::settings::FetchDashboardErrorText');
 
 		if (exception instanceof ApiError || process.env.NODE_ENV === 'development') {
 			error = exception.message;
@@ -229,7 +230,7 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 			type: DASHBOARD_EVENTS.ERROR_CREATE_PERSONAL_DASHBOARD
 		});
 
-		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка сохранения персонального дашборда';
+		const errorMessage = e instanceof ApiError ? e.message : t('store::dashboard::settings::ErrorSavingPersonalDashboard');
 
 		dispatch(createToast({
 			text: errorMessage,
@@ -264,7 +265,7 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		dispatch({
 			type: DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD
 		});
-		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка удаления';
+		const errorMessage = e instanceof ApiError ? e.message : t('store::dashboard::settings::DeleteError');
 
 		dispatch(createToast({
 			text: errorMessage,
@@ -345,13 +346,13 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 			type: DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
 		});
 		dispatch(createToast({
-			text: 'Файл успешно отправлен'
+			text: t('store::dashboard::settings::FileSentSuccessfully')
 		}));
 	} catch (e) {
 		dispatch({
 			type: DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR
 		});
-		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка отправки файла';
+		const errorMessage = e instanceof ApiError ? e.message : t('store::dashboard::settings::FileSendingError');
 
 		dispatch(createToast({
 			text: errorMessage,
@@ -461,10 +462,10 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 
 		dispatch(setAutoUpdateSettings(autoUpdateSetting));
 		dispatch(createToast({
-			text: 'Настройки успешно изменены!'
+			text: t('store::dashboard::settings::SettingsSuccessfullyChanged')
 		}));
 	} catch (e) {
-		const errorMessage = e instanceof ApiError ? e.message : 'Ошибка сохранения настроек';
+		const errorMessage = e instanceof ApiError ? e.message : t('store::dashboard::settings::ErrorSavingSettings');
 
 		dispatch(createToast({
 			text: errorMessage,

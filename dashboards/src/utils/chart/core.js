@@ -9,7 +9,7 @@ import {extend} from 'helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import isMobile from 'ismobilejs';
 import {setColors} from './helpers';
-import t from 'localization';
+import t, {getLocale} from 'localization';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
@@ -184,7 +184,7 @@ const getOptions = (
 				enabled: false
 			},
 			background: 'white',
-			defaultLocale: 'ru',
+			defaultLocale: getLocale(),
 			events: {
 				dataPointSelection: drillDownBySelection(widget, data)
 			},

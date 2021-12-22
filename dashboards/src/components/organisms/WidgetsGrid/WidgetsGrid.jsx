@@ -23,6 +23,7 @@ import {Responsive as Grid} from 'react-grid-layout';
 import SpeedometerWidget from 'components/organisms/SpeedometerWidget';
 import styles from './styles.less';
 import SummaryWidget from 'containers/SummaryWidget/SummaryWidget';
+import T from 'components/atoms/Translation';
 import TableWidget from 'containers/TableWidget';
 import TextWidget from 'components/organisms/TextWidget';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -208,8 +209,8 @@ export class WidgetsGrid extends Component<Props, State> {
 		if (contextMenu) {
 			return (
 				<ContextMenu {...contextMenu} hideContextMenu={this.hideContextMenu}>
-					<MenuItem key='widget' onClick={this.addNewDiagram}>Добавить виджет</MenuItem>
-					<MenuItem key='text' onClick={this.addNewText}>Добавить текст</MenuItem>
+					<MenuItem key='widget' onClick={this.addNewDiagram}><T text="WidgetsGrid::ContextMenuCreateWidget" /></MenuItem>
+					<MenuItem key='text' onClick={this.addNewText}><T text="WidgetsGrid::ContextMenuCreateText" /></MenuItem>
 				</ContextMenu>
 			);
 		}
@@ -234,11 +235,11 @@ export class WidgetsGrid extends Component<Props, State> {
 	renderDesktopCreateInfo = () => (
 		<div className={styles.createButtonPlace}>
 			<div className={styles.creationButtonInfo}>
-				Отсутствуют данные для отображения. Чтобы создать виджет, нажмите
+				<T text="WidgetsGrid::EmptyGridPart1" />
 				<a aria-pressed="false" className={styles.creationButton} onClick={this.addNewDiagram} role="button">
-					здесь
+					<T text="WidgetsGrid::EmptyGridAction" />
 				</a>
-				или кликнете правой кнопкой мыши на свободное пространство
+				<T text="WidgetsGrid::EmptyGridPart2" />
 			</div>
 		</div>
 	);
@@ -293,7 +294,7 @@ export class WidgetsGrid extends Component<Props, State> {
 	renderMobileInfo = () => (
 		<div className={styles.createButtonPlace}>
 			<div className={styles.creationButtonInfo}>
-				Отсутствуют данные для отображения. Для редактирования дашборда необходимо открыть полную версию приложения на компьютере
+				<T text="WidgetsGrid::EmptyMobileMessage" />
 			</div>
 		</div>
 	);

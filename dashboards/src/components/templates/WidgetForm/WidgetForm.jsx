@@ -5,6 +5,7 @@ import cn from 'classnames';
 import {isLegacyBrowser} from 'utils/export/helpers';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 export class WidgetForm extends PureComponent<Props> {
 	static defaultProps = {
@@ -32,7 +33,7 @@ export class WidgetForm extends PureComponent<Props> {
 
 		return (
 			<Button className={className} onClick={onCancel} variant={BUTTON_VARIANTS.ADDITIONAL}>
-				Отмена
+				<T text="WidgetForm::Cancel" />
 			</Button>
 		);
 	}
@@ -82,7 +83,7 @@ export class WidgetForm extends PureComponent<Props> {
 
 		return (
 			<Button disabled={updating} onClick={onSubmit} variant={BUTTON_VARIANTS.SIMPLE}>
-				Сохранить
+				<T text="WidgetForm::Save" />
 			</Button>
 		);
 	}
@@ -107,8 +108,8 @@ export class WidgetForm extends PureComponent<Props> {
 			<Container className={formCN} forwardedRef={forwardedRef}>
 				<Content className={styles.content}>{children}</Content>
 				<Footer className={styles.footer}>
-					<SubmitButton onSubmit={onSubmit} updating={updating}>Сохранить</SubmitButton>
-					<CancelButton className={styles.cancelButton} onCancel={onCancel}>Отмена</CancelButton>
+					<SubmitButton onSubmit={onSubmit} updating={updating}><T text="WidgetForm::Save" /></SubmitButton>
+					<CancelButton className={styles.cancelButton} onCancel={onCancel}><T text="WidgetForm::Cancel" /></CancelButton>
 				</Footer>
 			</Container>
 		);
