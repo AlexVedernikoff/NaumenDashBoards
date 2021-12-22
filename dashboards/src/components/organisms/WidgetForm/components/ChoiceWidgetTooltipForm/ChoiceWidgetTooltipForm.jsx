@@ -9,7 +9,7 @@ import FormField from 'components/molecules/FormField';
 import type {OnChangeEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import TextInput from 'components/atoms/TextInput';
+import TextArea from 'components/atoms/TextArea';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 import type {Values} from 'components/organisms/AxisChartWidgetForm/types';
 
@@ -99,7 +99,8 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 					/>
 				</FormField>
 				<FormField>
-					<TextInput
+					<TextArea
+						focusOnMount={true}
 						name={selected}
 						onChange={this.handleChangeText}
 						value={value} />
