@@ -139,10 +139,27 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const {breakdown, parameters} = state.data[index] ?? createTableDataSet(dataSet.dataKey);
+			const {indicators: oldIndicators} = dataSet;
+			const indicators = [];
+
+			oldIndicators.forEach(indicator => {
+				const {tooltip} = indicator;
+
+				if (tooltip && !tooltip.show) {
+					const newIndicator = {
+						...indicator,
+						tooltip: {show: false, title: ''}
+					};
+					return indicators.push(newIndicator);
+				}
+
+				indicators.push(indicator);
+			});
 
 			return {
 				...dataSet,
 				breakdown,
+				indicators,
 				parameters
 			};
 		}),

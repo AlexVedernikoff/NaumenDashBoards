@@ -6,15 +6,26 @@ import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import ExtendButton from 'components/atoms/ExtendButton';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
+import IconButton from 'components/atoms/IconButton';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Indicator} from 'store/widgetForms/types';
 import type {OnChangeEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
+import styles from './styles.less';
 import TextArea from 'components/atoms/TextArea';
 import Toggle from 'components/atoms/Toggle';
 
 class TableTooltipForm extends PureComponent<Props, State> {
+	state = {
+		indicatorRefs: [],
+		newValue: [],
+		showIndicators: false,
+		tooltip: DEFAULT_TOOLTIP_SETTINGS,
+		unusedIndicators: []
+	};
+
 	static getDerivedStateFromProps (props: Props) {
 		const {tooltip = DEFAULT_TOOLTIP_SETTINGS, data} = props.value;
 		const newValue = deepClone(data);
@@ -37,6 +48,15 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		const {newValue} = this.state;
 
 		indicatorRef.tooltip = {show: true, title};
+
+		onChange(DIAGRAM_FIELDS.data, newValue);
+	};
+
+	getHandleClickRemoveButton = indicatorRef => () => {
+		const {onChange} = this.props;
+		const {newValue} = this.state;
+
+		indicatorRef.tooltip = {show: false, title: ''};
 
 		onChange(DIAGRAM_FIELDS.data, newValue);
 	};
@@ -110,27 +130,40 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		onChange(DIAGRAM_FIELDS.data, newValue);
 	};
 
-	renderIndicator = (indicator: Indicator) => {
-		const {unusedIndicators} = this.state;
-		const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = indicator;
+	renderIndicator = (showDeleteButton: boolean) => (indicator: Indicator, idx: number) => {
+		const {aggregation, attribute} = indicator;
 
-		if (tooltip.show) {
-			return (
-				<Fragment>
-					<FormField label="Показатель">
-						<Select
-							getOptionLabel={(option: Indicator) => option.attribute?.title ?? ''}
-							getOptionValue={option => option}
-							onSelect={this.getHandleSelectIndicator(indicator)}
-							options={unusedIndicators}
-							value={indicator}
-						/>
-					</FormField>
-					<FormField label="Текст подсказки">
-						<TextArea name={DIAGRAM_FIELDS.title} onChange={this.getHandleChangeIndicatorText(indicator)} value={tooltip.title} />
-					</FormField>
-				</Fragment>
-			);
+		if (attribute) {
+			const {code, sourceCode = ''} = attribute;
+			const key = `${sourceCode} ${code} ${aggregation} ${idx}`;
+			const {unusedIndicators} = this.state;
+			const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = indicator;
+			const focus = tooltip.title === '';
+
+			if (tooltip.show) {
+				return (
+					<Fragment key={key}>
+						<FormField className={styles.tooltipIndicator} label="Показатель">
+							<Select
+								getOptionLabel={(option: Indicator) => option.attribute?.title ?? ''}
+								getOptionValue={option => option}
+								onSelect={this.getHandleSelectIndicator(indicator)}
+								options={unusedIndicators}
+								value={indicator}
+							/>
+							{showDeleteButton && this.renderIndicatorRemoveButton(indicator)}
+						</FormField>
+						<FormField label="Текст подсказки">
+							<TextArea
+								focusOnMount={focus}
+								name={DIAGRAM_FIELDS.title}
+								onChange={this.getHandleChangeIndicatorText(indicator)}
+								value={tooltip.title}
+							/>
+						</FormField>
+					</Fragment>
+				);
+			}
 		}
 
 		return null;
@@ -151,9 +184,14 @@ class TableTooltipForm extends PureComponent<Props, State> {
 	renderIndicatorList = () => {
 		const {indicatorRefs, showIndicators} = this.state;
 		const indicators = indicatorRefs.filter(indicator => indicator.tooltip?.show);
+		const showDeleteButton = indicators.length > 1;
 
-		return showIndicators ? indicators.map(this.renderIndicator) : null;
+		return showIndicators ? indicators.map(this.renderIndicator(showDeleteButton)) : null;
 	};
+
+	renderIndicatorRemoveButton = (indicator: Indicator) => (
+		<IconButton className={styles.removeButton} icon={ICON_NAMES.BASKET} onClick={this.getHandleClickRemoveButton(indicator)} />
+	);
 
 	renderIndicatorToggle = () => {
 		const {showIndicators} = this.state;
@@ -168,7 +206,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 
 	renderIndicators = () => (
 		<Fragment>
-			{this.renderIndicatorToggle()};
+			{this.renderIndicatorToggle()}
 			{this.renderIndicatorList()}
 			{this.renderIndicatorAdd()}
 		</Fragment>

@@ -65,21 +65,17 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 	handleChangeText = ({value: title}: OnChangeEvent<string>) => {
 		const {onChange, value: {data}} = this.props;
 		const {selected} = this.state;
+		const isTooltipSelected = selected === DIAGRAM_FIELDS.tooltip;
+		const newTitleValue = {show: isTooltipSelected, title};
+		const newDataValue: Array<DataSet> = deepClone(data);
+		const indicator = newDataValue.find(data => !data.sourceForCompute)?.indicators?.[0];
 
-		if (selected === DIAGRAM_FIELDS.tooltip) {
-			const newValue = {show: true, title};
-
-			onChange(DIAGRAM_FIELDS.tooltip, newValue);
-		} else if (selected === DIAGRAM_FIELDS.indicator) {
-			const newValue: Array<DataSet> = deepClone(data);
-			const indicator = newValue.find(data => !data.sourceForCompute)?.indicators?.[0];
-
-			if (indicator) {
-				indicator.tooltip = {show: true, title};
-			}
-
-			onChange(DIAGRAM_FIELDS.data, newValue);
+		if (indicator) {
+			indicator.tooltip = {show: !isTooltipSelected, title};
 		}
+
+		onChange(DIAGRAM_FIELDS.tooltip, newTitleValue);
+		onChange(DIAGRAM_FIELDS.data, newDataValue);
 	};
 
 	handleShow = ({value: change}: OnChangeEvent<boolean>) => this.changeShow(!change, false);
