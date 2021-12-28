@@ -1,5 +1,6 @@
 // @flow
 import cn from 'classnames';
+import {FORCE_TO_SHOW_CONTEXT} from './constants';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import KebabIconButton from './components/KebabIconButton';
 import memoize from 'memoize-one';
@@ -17,6 +18,7 @@ export class Kebab extends PureComponent<Props, State> {
 	state = {
 		activeKebab: false,
 		elements: 0,
+		forceShow: false,
 		showKebab: true,
 		width: 24
 	};
@@ -51,13 +53,17 @@ export class Kebab extends PureComponent<Props, State> {
 		return result;
 	});
 
+	forceToShow = (force: boolean) => {
+		this.setState({forceShow: force});
+	};
+
 	handleResize = (placeWidth, height) => {
 		const children = this.getChildren(this.props.children);
 		const buttonPlaceWidth = placeWidth - 8;
-		const availibleButtonsCount = Math.max(Math.floor(buttonPlaceWidth / 28), 1);
+		const availableButtonsCount = Math.max(Math.floor(buttonPlaceWidth / 28), 1);
 		const kebabElementsCount = children.length;
-		const showKebab = kebabElementsCount > availibleButtonsCount;
-		const elements = showKebab ? availibleButtonsCount - 1 : kebabElementsCount;
+		const showKebab = kebabElementsCount > availableButtonsCount;
+		const elements = showKebab ? availableButtonsCount - 1 : kebabElementsCount;
 		const width = showKebab ? (elements + 1) * 28 - 4 : elements * 28 - 4;
 
 		this.setState({
@@ -87,9 +93,12 @@ export class Kebab extends PureComponent<Props, State> {
 	};
 
 	renderKebabPlace = () => {
-		const {width} = this.state;
+		const {forceShow, width} = this.state;
+		const className = cn(styles.kebabPlace, {
+			[styles.kebabPlaceForceShow]: forceShow
+		});
 		return (
-			<div className={styles.kebabPlace} style={{width}}>
+			<div className={className} style={{width}}>
 				{this.renderElements()}
 			</div>
 		);
@@ -113,11 +122,13 @@ export class Kebab extends PureComponent<Props, State> {
 		const {className} = this.props;
 		const cls = cn(className, styles.kebab);
 		return (
-			<ResizeDetector onResize={this.handleResize} skipOnMount={false}>
-				<div className={cls}>
-					{this.renderKebabPlaceHandle()}
-				</div>
-			</ResizeDetector>
+			<FORCE_TO_SHOW_CONTEXT.Provider value={this.forceToShow}>
+				<ResizeDetector onResize={this.handleResize} skipOnMount={false}>
+					<div className={cls}>
+						{this.renderKebabPlaceHandle()}
+					</div>
+				</ResizeDetector>
+			</FORCE_TO_SHOW_CONTEXT.Provider>
 		);
 	}
 }

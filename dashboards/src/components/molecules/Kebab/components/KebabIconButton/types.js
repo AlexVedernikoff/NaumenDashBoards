@@ -5,5 +5,5 @@ export type Props = {
 	active: boolean,
 	icon: IconName,
 	onClick: ?() => void,
-	text: string,
+	text: string
 };

@@ -16,4 +16,31 @@
 		position: absolute;
 		right: 8px;
 	}
+
+	.dropdownMenu {
+		background-color: @white;
+		border: none !important;
+		box-shadow: @box-shadow !important;
+		color: @black !important;
+		font-size: 13px;
+		margin-top: 6px;
+		padding: 6px 0 !important;
+		position: absolute;
+		top: 16px;
+		z-index: 2;
+
+		&.submenuRight {
+			right: 0;
+		}
+
+		li {
+			cursor: pointer;
+			padding: 8px 36px 9px 12px !important;
+
+			> div {
+				display: flex;
+				justify-content: space-between;
+			}
+		}
+	}
 }

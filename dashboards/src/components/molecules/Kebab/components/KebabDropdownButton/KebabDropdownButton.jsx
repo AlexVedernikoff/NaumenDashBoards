@@ -1,13 +1,20 @@
 // @flow
-import DropdownMenu from 'components/atoms/DropdownMenu';
+import AbsolutePortal from 'components/molecules/AbsolutePortal';
+import type {DivRef} from 'components/types';
+import {FORCE_TO_SHOW_CONTEXT} from 'components/molecules/Kebab/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
-import {Item as MenuItem} from 'rc-menu';
 import KebabIconButton from 'components/molecules/Kebab/components/KebabIconButton';
+import Menu, {Item as MenuItem} from 'rc-menu';
 import type {Option, Props, State} from './types';
-import React, {PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
+import type {Ref} from 'react';
 import styles from './styles.less';
 
 class KebabDropdownButton extends PureComponent<Props, State> {
+	ref: DivRef = createRef();
+	menuRef: Ref<typeof Menu> = createRef();
+	forceShow: ((force: boolean) => void) | null;
+
 	static defaultProps = {
 		active: false,
 		onClick: null,
@@ -43,25 +50,35 @@ class KebabDropdownButton extends PureComponent<Props, State> {
 	handleMenuItemClick = (option: Option) => () => {
 		const {onSelect} = this.props;
 
-		this.setState({toggle: false});
 		onSelect && onSelect(option);
 	};
 
-	handleToggleDropdownMenu = () => this.setState(({toggle}) => ({toggle: !toggle}));
+	handleToggleDropdownMenu = () => {
+		this.setState(({toggle}) => ({toggle: !toggle}), () => this.forceShow?.(this.state.toggle));
+	};
 
 	renderDropdownMenu = () => {
 		const {toggle} = this.state;
 
 		if (toggle) {
 			return (
-				<DropdownMenu onSelect={this.handleToggleDropdownMenu} onToggle={this.handleToggleDropdownMenu}>
-					{this.getItems()}
-				</DropdownMenu>
+				<AbsolutePortal elementRef={this.ref} onClickOutside={this.handleToggleDropdownMenu}>
+					<Menu className={styles.dropdownMenu} onSelect={this.handleToggleDropdownMenu} ref={this.menuRef}>
+						{this.getItems()}
+					</Menu>
+				</AbsolutePortal>
 			);
 		}
 
 		return null;
 	};
+
+	renderElement = () => (
+		<div className={styles.outerBox} ref={this.ref}>
+			{this.renderIconButton()}
+			{this.renderDropdownMenu()}
+		</div>
+	);
 
 	renderIconButton = () => {
 		const {active, icon, options, text} = this.props;
@@ -82,10 +99,14 @@ class KebabDropdownButton extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<div className={styles.outerBox}>
-				{this.renderIconButton()}
-				{this.renderDropdownMenu()}
-			</div>
+			<FORCE_TO_SHOW_CONTEXT.Consumer>
+				{
+					forceShow => {
+						this.forceShow = forceShow;
+						return this.renderElement();
+					}
+				}
+			</FORCE_TO_SHOW_CONTEXT.Consumer>
 		);
 	}
 }

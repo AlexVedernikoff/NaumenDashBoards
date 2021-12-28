@@ -18,8 +18,8 @@ export class WidgetKebab extends PureComponent<Props> {
 		const {mode, onChangeMode} = this.props;
 
 		if (mode) {
-			const {availibleOptions, icon, text, value} = mode;
-			return <KebabDropdownButton icon={icon} onSelect={onChangeMode} options={availibleOptions} text={text} value={value} />;
+			const {availableOptions, icon, text, value} = mode;
+			return <KebabDropdownButton icon={icon} onSelect={onChangeMode} options={availableOptions} text={text} value={value} />;
 		}
 
 		return null;
@@ -29,8 +29,8 @@ export class WidgetKebab extends PureComponent<Props> {
 		const {data, onDrillDown} = this.props;
 
 		if (data) {
-			const {availibleOptions, icon, text, value} = data;
-			return <KebabDropdownButton icon={icon} onSelect={onDrillDown} options={availibleOptions} text={text} value={value} />;
+			const {availableOptions, icon, text, value} = data;
+			return <KebabDropdownButton icon={icon} onSelect={onDrillDown} options={availableOptions} text={text} value={value} />;
 		}
 
 		return null;
@@ -50,8 +50,8 @@ export class WidgetKebab extends PureComponent<Props> {
 		const {exportParams} = this.props;
 
 		if (exportParams) {
-			const {availibleOptions, icon, text, value} = exportParams;
-			return <KebabDropdownButton icon={icon} onSelect={this.handleExport} options={availibleOptions} text={text} value={value} />;
+			const {availableOptions, icon, text, value} = exportParams;
+			return <KebabDropdownButton icon={icon} onSelect={this.handleExport} options={availableOptions} text={text} value={value} />;
 		}
 
 		return null;
@@ -61,8 +61,8 @@ export class WidgetKebab extends PureComponent<Props> {
 		const {filtersOnWidget, onChangeFiltersOnWidget} = this.props;
 
 		if (filtersOnWidget) {
-			const {availibleOptions, icon, text, value} = filtersOnWidget;
-			return <KebabDropdownButton icon={icon} onSelect={onChangeFiltersOnWidget} options={availibleOptions} text={text} value={value} />;
+			const {availableOptions, icon, text, value} = filtersOnWidget;
+			return <KebabDropdownButton icon={icon} onSelect={onChangeFiltersOnWidget} options={availableOptions} text={text} value={value} />;
 		}
 
 		return null;

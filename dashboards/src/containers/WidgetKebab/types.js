@@ -9,7 +9,7 @@ export type Option = {
 };
 
 export type DropDownParams = {
-	availibleOptions: Array<Option>,
+	availableOptions: Array<Option>,
 	icon: string,
 	text: string,
 	value: ?string

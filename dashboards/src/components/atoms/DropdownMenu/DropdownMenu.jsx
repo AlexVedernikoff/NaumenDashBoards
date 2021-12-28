@@ -27,7 +27,7 @@ export class DropdownMenu extends PureComponent<Props, State> {
 		const {current} = this.menuRef;
 
 		if (current) {
-			// нет возможности внедрить ref вовнуть сторонней библиотеки
+			// нет возможности внедрить ref внутрь сторонней библиотеки
 			// eslint-disable-next-line react/no-find-dom-node
 			const node = findDOMNode(current);
 			const {x} = node.getBoundingClientRect();
