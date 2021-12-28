@@ -210,7 +210,7 @@
 			<title lang="ru">selectmode</title>
 			<mimeType>application/x-groovy</mimeType>
 			<scriptBody>
-				<![CDATA[ return [edit: 'Редактируемый', viewOnly: 'Для просмотра'] ]]>
+				<![CDATA[ return [edit: 'Редактируемый', user: 'Пользовательский', usersource: 'Пользовательский с выбором источников', viewOnly: 'Для просмотра'] ]]>
 			</scriptBody>
 			<defaultCategories/>
 			<subjectDependencies/>

@@ -4,7 +4,7 @@ import Checkbox from 'components/atoms/LegacyCheckbox';
 import cn from 'classnames';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from 'components/organisms/DashboardHeader/components/IconButton';
-import {MAX_INTERVAL} from './constants';
+import {MAX_AUTO_UPDATE_INTERVAL} from 'store/dashboard/settings/constants';
 import {number, object} from 'yup';
 import Popover from 'components/atoms/Popover';
 import type {Props, State, Values} from './types';
@@ -89,7 +89,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 		const errors = {};
 
 		const schema = object({
-			interval: number().min(defaultInterval).max(MAX_INTERVAL).required()
+			interval: number().min(defaultInterval).max(MAX_AUTO_UPDATE_INTERVAL).required()
 		});
 
 		try {
@@ -108,7 +108,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	renderErrorIcon = () => {
 		const {defaultInterval} = this.props.settings;
 		const {errors} = this.state;
-		const text = `Необходимо задать целое число минут от ${defaultInterval} до ${MAX_INTERVAL}`;
+		const text = `Необходимо задать целое число минут от ${defaultInterval} до ${MAX_AUTO_UPDATE_INTERVAL}`;
 		const iconCN = errors.interval ? cn(styles.infoIcon, styles.iconError) : styles.infoIcon;
 
 		return (

@@ -5,19 +5,23 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {UserData} from './types';
 
 /**
- * Получает и устанавливает параметер редактируемости дашборда
+ * Получает и устанавливает параметр редактируемости дашборда
  * @returns {ThunkAction}
  */
 const getEditableParam = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {editable = [DASHBOARD_EDIT_MODE.EDIT]} = await api.instance.frame.getCurrentContentParameters();
-	let mode;
+	const {editable = true, select = null} = await api.instance.frame.getCurrentContentParameters();
 
-	if (Array.isArray(editable)) {
-		mode = editable[0];
-	} else {
-		// старый режим отображения
-		// В части случаев значение приходит строкой
-		mode = editable.toString() === 'true' ? DASHBOARD_EDIT_MODE.EDIT : DASHBOARD_EDIT_MODE.VIEW_ONLY;
+	// Версии 2.3+. Версии 2.1, 2.2 (после hotfix)
+	let mode = select && Array.isArray(select) ? select[0] : null;
+
+	if (mode === null) {
+		// Версии 2.1, 2.2 (до hotfix)
+		if (Array.isArray(editable)) {
+			mode = editable[0];
+		} else {
+			// версия до 2.1. В части случаев значение приходит строкой
+			mode = editable.toString() === 'true' ? DASHBOARD_EDIT_MODE.EDIT : DASHBOARD_EDIT_MODE.VIEW_ONLY;
+		}
 	}
 
 	if (mode === DASHBOARD_EDIT_MODE.USER || mode === DASHBOARD_EDIT_MODE.USER_SOURCE) {

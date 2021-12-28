@@ -1,7 +1,7 @@
 'use strict';
 const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
-const {development, license, storybook} = require('./define');
+const {development, isUserModeInclude, license, storybook} = require('./define');
 const Dotenv = require('dotenv-webpack');
 const GroovyWebpackPlugin = require('groovy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -27,7 +27,7 @@ const devPlugins = storybook ? devPluginsStorybook : devPluginsProject;
 const prodPlugins = [
 	new ParametersXMLWebpackPlugin({
 		output: './dist/parameters.xml',
-		path: 'metainfo.xml'
+		path: isUserModeInclude ? 'metainfo.usermode.xml' : 'metainfo.xml'
 	})
 ];
 
@@ -41,7 +41,8 @@ const plugins = [
 	new HtmlWebpackPlugin({
 		filename: 'index.html',
 		template: './src/index.html',
-		title: 'SMP Embedded Application'
+		title: 'SMP Embedded Application',
+		version: `${packagejson.name} ${packagejson.version}`
 	}),
 	new CopyPlugin([
 		{from: './public', to: './public'}
