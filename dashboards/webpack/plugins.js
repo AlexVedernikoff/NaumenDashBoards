@@ -42,7 +42,7 @@ const plugins = [
 		filename: 'index.html',
 		template: './src/index.html',
 		title: 'SMP Embedded Application',
-		version: `${packagejson.name} ${packagejson.version}`
+		version: `${packagejson.name}_v${packagejson.version}`
 	}),
 	new CopyPlugin([
 		{from: './public', to: './public'}
