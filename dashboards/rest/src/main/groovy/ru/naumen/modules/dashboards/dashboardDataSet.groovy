@@ -2765,6 +2765,7 @@ class DashboardDataSetService
                                     return titleValue
                                 }
                             }
+                            filtersTitle = filtersTitle.unique()
                             def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filtersTitle): res]
 
                             partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
