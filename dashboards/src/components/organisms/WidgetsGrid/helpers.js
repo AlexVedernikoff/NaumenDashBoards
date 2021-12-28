@@ -80,7 +80,7 @@ const isEqualsLayouts = (firstLayouts: ?Layout[], secondLayouts: ?Layout[]): boo
 		return false;
 	}
 
-	return firstLayouts.every((firstLayout) => {
+	return firstLayouts.every(firstLayout => {
 		const secondLayout = secondLayouts.find(({i}) => i === firstLayout.i);
 		return secondLayout
 			&& firstLayout.h === secondLayout.h
@@ -133,15 +133,13 @@ const calculatePosition = (
  * @param {Array<Layout>} layouts - макет расположения
  * @returns  {Array<string>} - отсортированный список идентификаторов элементов
  */
-const getIndexForLayout = (layouts: Array<Layout>) => {
-	return layouts
-		.map(({i, x, y}) => ({i, val: y * 100 + x}))
-		.sort((a, b) => a.val - b.val)
-		.map(({i}) => i);
-};
+const getIndexForLayout = (layouts: Array<Layout>) => layouts
+	.map(({i, x, y}) => ({i, val: y * 100 + x}))
+	.sort((a, b) => a.val - b.val)
+	.map(({i}) => i);
 
 /**
- * Сортирует виджеты в обратном порядке, согласно указанному расположению
+ * Сортирует виджеты, согласно указанному расположению
  * @param {Array<Widget>} widgets - список виджетов
  * @param {Array<Layout>} layout - макет расположения виджетов
  * @returns {Array<Widget>} - отсортированный список виджетов
@@ -150,8 +148,8 @@ const getSortedWidgetsByLayout = (widgets: Array<Widget>, layout: Array<Layout>)
 	const result = [];
 	const indexes = layout && layout.length > 0 ? getIndexForLayout(layout) : widgets.map(({id}) => id);
 
-	indexes.reverse().forEach((key) => {
-		const widget = widgets.find((w) => w.id === key);
+	indexes.forEach(key => {
+		const widget = widgets.find(w => w.id === key);
 
 		if (widget) {
 			result.push(widget);

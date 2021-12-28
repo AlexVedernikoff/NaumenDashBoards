@@ -97,7 +97,7 @@ const modeSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 	const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
 	const text = `Отображается ${value.label}`;
 	return {
-		availibleOptions: DISPLAY_MODE_OPTIONS,
+		availableOptions: DISPLAY_MODE_OPTIONS,
 		icon: getDisplayModeIcon(displayMode),
 		text,
 		value: displayMode
@@ -114,14 +114,14 @@ const exportParamsSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 
 	if (widget) {
 		const {PDF, PNG, XLSX} = FILE_VARIANTS;
-		const availibleOptions = [PDF, PNG];
+		const availableOptions = [PDF, PNG];
 
 		if (widget.type === DIAGRAM_WIDGET_TYPES.TABLE) {
-			availibleOptions.push(XLSX);
+			availableOptions.push(XLSX);
 		}
 
 		return {
-			availibleOptions: availibleOptions.map(value => ({ label: value.toUpperCase(), value })),
+			availableOptions: availableOptions.map(value => ({ label: value.toUpperCase(), value })),
 			icon: ICON_NAMES.EXPORT,
 			text: 'Экспорт',
 			value: null
@@ -140,11 +140,11 @@ const dataSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 	const widget = parseDiagramWidget(awidget);
 
 	if (widget) {
-		const availibleOptions = [];
+		const availableOptions = [];
 
 		widget.data.forEach(({source, sourceForCompute}, value) => {
 			if (!sourceForCompute) {
-				availibleOptions.push({
+				availableOptions.push({
 					label: source.value.label,
 					value
 				});
@@ -152,7 +152,7 @@ const dataSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 		});
 
 		return {
-			availibleOptions,
+			availableOptions,
 			icon: ICON_NAMES.DATA,
 			text: 'Источники',
 			value: null
@@ -219,15 +219,15 @@ const filtersOnWidgetSelector = memoize((awidget: AnyWidget): ?DropDownParams =>
 	const widget = parseDiagramWidget(awidget);
 
 	if (widget) {
-		const {options: availibleOptions, selected: value} = getFiltersOnWidget(widget);
+		const {options: availableOptions, selected: value} = getFiltersOnWidget(widget);
 
 		if (value) {
-			availibleOptions.push({label: 'Очистить фильтры', value: CLEAR_FILTER});
+			availableOptions.push({label: 'Очистить фильтры', value: CLEAR_FILTER});
 		}
 
-		if (availibleOptions.length > 0) {
+		if (availableOptions.length > 0) {
 			return {
-				availibleOptions,
+				availableOptions,
 				icon: value ? ICON_NAMES.FILLED_FILTER : ICON_NAMES.FILTER,
 				text: 'Пользовательские фильтры',
 				value
@@ -240,7 +240,7 @@ const filtersOnWidgetSelector = memoize((awidget: AnyWidget): ?DropDownParams =>
 
 /**
  * Асинхронное открытие окна платформы для установки фильтрации на виджете
- * @param {CustomFilter} filter - пользовательскиq фильтр на виджете
+ * @param {CustomFilter} filter - пользовательский фильтр на виджете
  * @param {string} classFqn - класс источника
  * @returns {Promise<string>} - новый дескриптор с установленным фильтром
  */
