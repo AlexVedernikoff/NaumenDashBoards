@@ -9,7 +9,7 @@ import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
-import {DASHBOARD_EVENTS, FETCH_DASHBOARD_ERROR_TEXT} from './constants';
+import {DASHBOARD_EVENTS, FETCH_DASHBOARD_ERROR_TEXT, MAX_AUTO_UPDATE_INTERVAL} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
@@ -40,13 +40,25 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @returns {ThunkAction}
  */
 const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {MinTimeIntervalUpdate: defaultInterval} = await api.instance.frame.getCurrentContentParameters();
+	const {MinTimeIntervalUpdate: value} = await api.instance.frame.getCurrentContentParameters();
 
-	if (defaultInterval) {
-		dispatch(changeAutoUpdateSettings({
-			defaultInterval,
-			interval: defaultInterval
-		}));
+	if (value) {
+		let defaultInterval = 3;
+
+		if (typeof value === 'number') { // 1.0-2.2
+			defaultInterval = value;
+		} else if (typeof value === 'string') { // Вероятно когда то встречалось
+			defaultInterval = Number.parseInt(value);
+		}
+
+		if (!isNaN(defaultInterval)) {
+			defaultInterval = Math.min(Math.max(defaultInterval, 1), MAX_AUTO_UPDATE_INTERVAL);
+
+			dispatch(changeAutoUpdateSettings({
+				defaultInterval,
+				interval: defaultInterval
+			}));
+		}
 	}
 };
 

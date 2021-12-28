@@ -10,10 +10,12 @@ const license = process.env.LICENSE;
 const production = environment === 'production';
 const src = resolve(__dirname, '../src');
 const storybook = !!process.env.STORYBOOK;
+const isUserModeInclude = process.env.USER_MODE === 'true';
 
 module.exports = {
 	development,
 	dist,
+	isUserModeInclude,
 	license,
 	mode: environment,
 	production,
