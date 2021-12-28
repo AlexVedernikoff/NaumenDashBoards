@@ -25,6 +25,7 @@ import React, {Component} from 'react';
 import RefObjectGroupModal from 'containers/RefObjectGroupModal';
 import SearchInput from 'components/atoms/SearchInput';
 import type {SelectProps} from 'containers/RefObjectGroupModal/types';
+import {translateObjectsArray} from 'localization';
 
 export class ObjectGroupModal extends Component<Props, State> {
 	static defaultProps = {
@@ -86,11 +87,11 @@ export class ObjectGroupModal extends Component<Props, State> {
 
 		switch (attribute.type) {
 			case backBOLinks:
-				return BACK_BO_LINKS_OR_CONDITION_OPTIONS;
+				return translateObjectsArray('label', BACK_BO_LINKS_OR_CONDITION_OPTIONS);
 			case boLinks:
-				return BO_LINKS_OR_CONDITION_OPTIONS;
+				return translateObjectsArray('label', BO_LINKS_OR_CONDITION_OPTIONS);
 			default:
-				return OBJECT_OR_CONDITION_OPTIONS;
+				return translateObjectsArray('label', OBJECT_OR_CONDITION_OPTIONS);
 		}
 	};
 

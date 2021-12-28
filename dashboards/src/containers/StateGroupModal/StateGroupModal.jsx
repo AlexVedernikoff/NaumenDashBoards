@@ -10,8 +10,11 @@ import React, {Component} from 'react';
 import RefObjectGroupModal from 'containers/RefObjectGroupModal';
 import type {SelectProps} from 'containers/RefObjectGroupModal/types';
 import type {StateData} from 'store/sources/attributesData/states/types';
+import {translateObjectsArray} from 'localization';
 
 export class StateGroupModal extends Component<Props> {
+	orConditionOptions = translateObjectsArray('label', OR_CONDITION_OPTIONS);
+
 	static defaultProps = {
 		stateData: DEFAULT_DATA
 	};
@@ -46,7 +49,7 @@ export class StateGroupModal extends Component<Props> {
 					customType={customType}
 					onClose={onClose}
 					onSubmit={onSubmit}
-					orConditionOptions={OR_CONDITION_OPTIONS}
+					orConditionOptions={this.orConditionOptions}
 					value={value}
 				/>
 			</DATA_CONTEXT.Provider>

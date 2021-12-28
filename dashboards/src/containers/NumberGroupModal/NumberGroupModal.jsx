@@ -12,8 +12,11 @@ import {props} from './selectors';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import SimpleOrCondition from 'GroupModal/components/SimpleOrCondition';
+import {translateObjectsArray} from 'localization';
 
 export class NumberGroupModal extends Component<Props> {
+	orConditionOptions = translateObjectsArray('label', OR_CONDITION_OPTIONS);
+
 	getComponents = memoize(() => ({
 		...defaultComponents,
 		OrCondition: this.renderOrCondition,
@@ -62,7 +65,7 @@ export class NumberGroupModal extends Component<Props> {
 				customType={attribute.type}
 				onClose={onClose}
 				onSubmit={onSubmit}
-				orConditionOptions={OR_CONDITION_OPTIONS}
+				orConditionOptions={this.orConditionOptions}
 				schema={this.getSchema(attribute.type)}
 				value={value}
 			/>

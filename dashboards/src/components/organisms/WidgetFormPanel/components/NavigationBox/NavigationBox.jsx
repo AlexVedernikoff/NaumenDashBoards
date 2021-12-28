@@ -10,6 +10,7 @@ import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {createRef, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 import TextArea from 'components/atoms/TextArea';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 import {USER_ROLES} from 'store/context/constants';
@@ -84,7 +85,7 @@ export class NavigationBox extends PureComponent<Props> {
 					loading={loading}
 					onSelect={this.handleSelect}
 					options={items}
-					placeholder="Укажите дашборд или виджет"
+					placeholder={t('NavigationBox::SelectPlaceholder')}
 					ref={this.selectRef}
 					value={selectValue}
 				/>
@@ -96,7 +97,7 @@ export class NavigationBox extends PureComponent<Props> {
 		const {showTip} = this.props.value;
 
 		return (
-			<FormControl className={styles.checkbox} label="Отображать всплывающую подсказку">
+			<FormControl className={styles.checkbox} label={t('NavigationBox::ShowTip')}>
 				<Checkbox checked={showTip} name="showTip" onChange={this.handleToggleShow} value={showTip} />
 			</FormControl>
 		);
@@ -128,7 +129,7 @@ export class NavigationBox extends PureComponent<Props> {
 					name={DIAGRAM_FIELDS.show}
 					onToggle={this.handleToggleShow}
 					showContent={show}
-					title="Навигация с виджета"
+					title={t('NavigationBox::Title')}
 				>
 					{this.renderSelect()}
 					{this.renderShowTipCheckbox()}

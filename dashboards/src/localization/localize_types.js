@@ -17,13 +17,13 @@ type ColorPicker = 'ColorPicker::Apply' | 'ColorPicker::Cancel';
 
 // components/molecules/Datepicker
 type Datepicker =
-  | 'Datepicker::mon'
-  | 'Datepicker::tue'
-  | 'Datepicker::wed'
-  | 'Datepicker::thu'
-  | 'Datepicker::fri'
-  | 'Datepicker::sat'
-  | 'Datepicker::sun';
+  | 'Datepicker::Mon'
+  | 'Datepicker::Tue'
+  | 'Datepicker::Wed'
+  | 'Datepicker::Thu'
+  | 'Datepicker::Fri'
+  | 'Datepicker::Sat'
+  | 'Datepicker::Sun';
 
 // components/molecules/Kebab
 type Kebab = 'Kebab::Menu';

@@ -6,24 +6,25 @@ import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import {getDefaultBreakdown} from 'store/widgetForms/helpers';
+import t from 'localization';
 
 const getErrorMessage = (key: string) => {
 	const messages = {
-		[DIAGRAM_FIELDS.breakdown]: 'Укажите атрибут для разбивки',
-		[DIAGRAM_FIELDS.diagramName]: 'Укажите название диаграммы',
-		[DIAGRAM_FIELDS.indicator]: 'Укажите атрибут для показателя',
-		[DIAGRAM_FIELDS.name]: 'Укажите название виджета',
-		[DIAGRAM_FIELDS.parameter]: 'Укажите атрибут для параметра',
-		[DIAGRAM_FIELDS.source]: 'Укажите источник данных'
+		[DIAGRAM_FIELDS.breakdown]: t('DiagramWidgetForm::Scheme::EmptyBreakdown'),
+		[DIAGRAM_FIELDS.diagramName]: t('DiagramWidgetForm::Scheme::EmptyDiagramName'),
+		[DIAGRAM_FIELDS.indicator]: t('DiagramWidgetForm::Scheme::EmptyIndicator'),
+		[DIAGRAM_FIELDS.name]: t('DiagramWidgetForm::Scheme::EmptyName'),
+		[DIAGRAM_FIELDS.parameter]: t('DiagramWidgetForm::Scheme::EmptyParameter'),
+		[DIAGRAM_FIELDS.source]: t('DiagramWidgetForm::Scheme::EmptySource')
 	};
 
-	return messages[key] || 'Ошибка заполнения';
+	return messages[key] || t('DiagramWidgetForm::Scheme::Error');
 };
 
 addMethod(mixed, 'sourceNumbers', function () {
 	return this.test(
 		'check-sources-number',
-		'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
+		t('DiagramWidgetForm::Scheme::CheckSourcesNumber'),
 		function () {
 			const {data} = this.options.parent;
 
@@ -34,7 +35,7 @@ addMethod(mixed, 'sourceNumbers', function () {
 addMethod(mixed, 'singleSourceForCompute', function () {
 	return this.test(
 		'check-sources-number',
-		'Для данного типа диаграммы источник может быть один, дополнительные можно использовать для вычисления',
+		t('DiagramWidgetForm::Scheme::SingleSourceForCompute'),
 		function () {
 			const {parent, values} = this.options;
 
@@ -54,7 +55,7 @@ addMethod(mixed, 'singleSourceForCompute', function () {
 addMethod(mixed, 'minSourceNumbers', function () {
 	return this.test(
 		'check-min-source-numbers',
-		'Должен быть выбран как минимум один источник для построения',
+		t('DiagramWidgetForm::Scheme::MinSourceNumbers'),
 		function () {
 			const {data} = this.options.parent;
 
@@ -85,7 +86,7 @@ addMethod(mixed, 'requiredAttribute', function (text: string) {
 addMethod(mixed, 'group', function (field: string = DIAGRAM_FIELDS.parameter) {
 	return this.test(
 		'check-attribute-group',
-		'Группировка данного атрибута не применима к другим полям',
+		t('DiagramWidgetForm::Scheme::CheckAttributeGroup'),
 		function (attributeData: Parameter | BreakdownItem) {
 			const {data} = this.options.values;
 			const {attribute, group} = attributeData;
@@ -122,14 +123,14 @@ addMethod(mixed, 'group', function (field: string = DIAGRAM_FIELDS.parameter) {
 
 addMethod(object, 'source', function () {
 	return object({
-		value: mixed().required('Укажите источник данных'),
+		value: mixed().required(t('DiagramWidgetForm::Scheme::CheckSourceValue')),
 		widgetFilterOptions: array().of(
 			object({
-				attributes: array().min(1, 'Укажите атрибут для фильтрации на виджете'),
-				label: string().required('Укажите название фильтра')
+				attributes: array().min(1, t('DiagramWidgetForm::Scheme::CheckSourceWidgetFilterAttributes')),
+				label: string().required(t('DiagramWidgetForm::Scheme::CheckSourceWidgetFilterLabel'))
 			})
 		).nullable()
-	}).required('Укажите источник данных');
+	}).required(t('DiagramWidgetForm::Scheme::CheckSourceValue'));
 });
 
 addMethod(object, 'topSettings', function () {
@@ -137,8 +138,10 @@ addMethod(object, 'topSettings', function () {
 		count: number().when(
 			'show', {
 				is: true,
-				otherwise: number().typeError('Значение ТОП должно быть числом').nullable(),
-				then: number().required('Укажите значение для ТОП показателя').typeError('Значение ТОП должно быть числом')
+				otherwise: number().typeError(t('DiagramWidgetForm::Scheme::TopSettings::TypeError')).nullable(),
+				then: number()
+					.required(t('DiagramWidgetForm::Scheme::TopSettings::Required'))
+					.typeError(t('DiagramWidgetForm::Scheme::TopSettings::TypeError'))
 			}
 		),
 		show: boolean()
@@ -190,7 +193,7 @@ const baseSchema = {
 	}),
 	[DIAGRAM_FIELDS.templateName]: lazy((value: string, context: Object) => string().test(
 		'name-rule',
-		`Виджет с названием "${value}" не может быть сохранен. Название виджета должно быть уникально в рамках дашборда`,
+		t('DiagramWidgetForm::Scheme::UniqWidget', {name: value}),
 		name => context.widgets.findIndex(widget => widget.name === name) === -1
 	).required(getErrorMessage(DIAGRAM_FIELDS.name)))
 };

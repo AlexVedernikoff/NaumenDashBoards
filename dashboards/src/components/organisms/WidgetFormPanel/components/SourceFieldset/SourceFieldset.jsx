@@ -23,6 +23,8 @@ import SavedFilters from 'WidgetFormPanel/components/SavedFilters';
 import type {SourceData} from 'store/widgetForms/types';
 import type {SourceFiltersItem} from 'store/sources/sourcesFilters/types';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 import TreeSelect from 'components/molecules/TreeSelect';
 import {withCommonDialog} from 'containers/CommonDialogs/withCommonDialog';
 
@@ -134,7 +136,7 @@ export class SourceFieldset extends Component<Props, State> {
 						}
 					}
 				} else {
-					error = `Фильтр с названием ${label} не может быть сохранен. Название фильтра должно быть уникально`;
+					error = t('SourceFieldset::ChangeFilterDuplicate', {name: label});
 				}
 			}
 		}
@@ -156,7 +158,7 @@ export class SourceFieldset extends Component<Props, State> {
 			const data = await onDeleteSourcesFilter(source.value.value, id);
 
 			if (!data.result) {
-				error = `Удаление данного сохраненного фильтра невозможно, т.к. он применен в других виджетах`;
+				error = t('SourceFieldset::DeleteSavedFilterError');
 			}
 		}
 
@@ -192,7 +194,7 @@ export class SourceFieldset extends Component<Props, State> {
 			};
 
 			if (newSourceValue) {
-				onFetchAttributes(newSourceValue.value, parentClassFqn, attrSetConditions, (attributes) => { this.updateAttributes(attributes); });
+				onFetchAttributes(newSourceValue.value, parentClassFqn, attrSetConditions, attributes => { this.updateAttributes(attributes); });
 			}
 		}
 
@@ -213,8 +215,8 @@ export class SourceFieldset extends Component<Props, State> {
 			if (
 				approvalToApply.result
 				|| await confirm(
-					'Ошибка применения фильтра',
-					'Выбранный фильтр не может быть применен полностью, т.к. содержит условия, связанные с текущим объектом. Применить частично?'
+					t('SourceFieldset::ConfirmFilterTitle'),
+					t('SourceFieldset::ConfirmFilterMessage')
 				)
 			) {
 				this.changeSource({
@@ -308,7 +310,7 @@ export class SourceFieldset extends Component<Props, State> {
 		const {sourceForCompute} = value;
 
 		return (
-			<FormControl label="Только для вычислений">
+			<FormControl label={t('SourceFieldset::ComputeCheckbox')}>
 				<Checkbox
 					checked={sourceForCompute}
 					className={styles.sourceForCompute}
@@ -364,7 +366,7 @@ export class SourceFieldset extends Component<Props, State> {
 		if (removable) {
 			return (
 				<button className={styles.removeButton} onClick={this.handleClickRemoveButton} type="button">
-					удалить
+					<T text="SourceFieldset::RemoveButton" />
 				</button>
 			);
 		}
@@ -432,7 +434,7 @@ export class SourceFieldset extends Component<Props, State> {
 	renderSourceSelectLabel = (props: ContainerProps): React$Node => {
 		const {isPersonal, value} = this.props;
 		const {className} = props;
-		const label = value.source.value?.label ?? 'Выберите значение';
+		const label = value.source.value?.label ?? t('SourceFieldset::SourceSelectLabel');
 		const isChanged = this.isCurrentFilterChanged();
 
 		return (

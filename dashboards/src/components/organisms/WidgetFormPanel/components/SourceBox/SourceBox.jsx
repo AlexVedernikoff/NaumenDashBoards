@@ -7,6 +7,7 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React from 'react';
 import styles from 'WidgetFormPanel/styles.less';
+import t from 'localization';
 
 export class SourceBox extends React.Component<Props> {
 	renderAddSourceInput = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.props.onAdd} />;
@@ -15,7 +16,7 @@ export class SourceBox extends React.Component<Props> {
 		const {children} = this.props;
 
 		return (
-			<FormBox rightControl={this.renderAddSourceInput()} title="Источник">
+			<FormBox rightControl={this.renderAddSourceInput()} title={t('SourceBox::Title')}>
 				{children}
 				<FieldError className={styles.errorField} path={DIAGRAM_FIELDS.sources} />
 			</FormBox>

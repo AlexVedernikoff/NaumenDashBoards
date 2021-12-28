@@ -1,61 +1,62 @@
 // @flow
 import {ICON_NAMES} from 'components/atoms/Icon';
+import type {LangType} from 'localization/localize_types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
-const WIDGET_OPTIONS = [
+const WIDGET_OPTIONS: Array<{icon: $Keys<typeof ICON_NAMES>, tip: LangType, value: $Keys<typeof WIDGET_TYPES>}> = [
 	{
 		icon: ICON_NAMES.COLUMN_CHART,
-		tip: 'Столбчатая',
+		tip: 'WidgetSelectBox::ColumnChart',
 		value: WIDGET_TYPES.COLUMN
 	},
 	{
 		icon: ICON_NAMES.STACKED_COLUMN_CHART,
-		tip: 'Столбчатая c накоплением',
+		tip: 'WidgetSelectBox::StackedColumnChart',
 		value: WIDGET_TYPES.COLUMN_STACKED
 	},
 	{
 		icon: ICON_NAMES.STACKED_BAR_CHART,
-		tip: 'Гистограмма c накоплением',
+		tip: 'WidgetSelectBox::StackedBarChart',
 		value: WIDGET_TYPES.BAR_STACKED
 	},
 	{
 		icon: ICON_NAMES.BAR_CHART,
-		tip: 'Гистограмма',
+		tip: 'WidgetSelectBox::BarChart',
 		value: WIDGET_TYPES.BAR
 	},
 	{
 		icon: ICON_NAMES.LINE_CHART,
-		tip: 'Линейная',
+		tip: 'WidgetSelectBox::LineChart',
 		value: WIDGET_TYPES.LINE
 	},
 	{
 		icon: ICON_NAMES.PIE_CHART,
-		tip: 'Круговая',
+		tip: 'WidgetSelectBox::PieChart',
 		value: WIDGET_TYPES.PIE
 	},
 	{
 		icon: ICON_NAMES.DONUT_CHART,
-		tip: 'Кольцевая',
+		tip: 'WidgetSelectBox::DonutChart',
 		value: WIDGET_TYPES.DONUT
 	},
 	{
 		icon: ICON_NAMES.COMBO_CHART,
-		tip: 'Комбо',
+		tip: 'WidgetSelectBox::ComboChart',
 		value: WIDGET_TYPES.COMBO
 	},
 	{
 		icon: ICON_NAMES.SUMMARY,
-		tip: 'Сводка',
+		tip: 'WidgetSelectBox::Summary',
 		value: WIDGET_TYPES.SUMMARY
 	},
 	{
 		icon: ICON_NAMES.TABLE,
-		tip: 'Таблица',
+		tip: 'WidgetSelectBox::Table',
 		value: WIDGET_TYPES.TABLE
 	},
 	{
 		icon: ICON_NAMES.SPEEDOMETER,
-		tip: 'Спидометр',
+		tip: 'WidgetSelectBox::Speedometer',
 		value: WIDGET_TYPES.SPEEDOMETER
 	}
 ];

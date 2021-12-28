@@ -16,8 +16,7 @@ export class SortingBox extends PureComponent<Props, State> {
 	static defaultProps = {
 		components: {
 			Container
-		},
-		options: SORTING_OPTIONS
+		}
 	};
 
 	handleChange = ({name: valueName, value}: OnChangeInputEvent) => {
@@ -65,7 +64,7 @@ export class SortingBox extends PureComponent<Props, State> {
 	};
 
 	renderValueFields = () => {
-		const {options} = this.props;
+		const {options = SORTING_OPTIONS} = this.props;
 
 		return (
 			<div className={styles.typeFieldset}>
