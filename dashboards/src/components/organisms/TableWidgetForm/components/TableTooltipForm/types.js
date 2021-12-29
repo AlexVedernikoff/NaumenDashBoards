@@ -10,6 +10,7 @@ export type Props = {
 };
 
 export type State = {
+	indicatorPositions: Array<string>,
 	indicatorRefs: Array<Indicator>,
 	newValue: Array<DataSet>,
 	showIndicators: boolean,
