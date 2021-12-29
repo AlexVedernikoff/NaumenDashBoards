@@ -357,7 +357,9 @@ class DashboardDataSetService
                 def aggregationsSize = aggregations.size()
                 if(fullRes?.find())
                 {
-                    def transposeRes = fullRes?.find()?.transpose()[0..aggregationsSize - 1]
+                    def tempTransponseRes = fullRes?.find()?.transpose()
+                    def finalIndex = aggregationsSize > tempTransponseRes.size() ? tempTransponseRes.size() : aggregationsSize
+                    def transposeRes = tempTransponseRes[0..finalIndex - 1]
 
                     tableTotals = transposeRes?.withIndex()?.collect { val, i ->
                         if (i in listIdsOfNormalAggregations)
