@@ -174,13 +174,55 @@ const removeCodesFromTableData = (tableData: DiagramBuildData): DiagramBuildData
 	};
 };
 
+/**
+ * Сообщает о том, что в колонке содержатся значения, которые агрегированы как PERCENT_CNT
+ * @param {AttributeColumn} column - колонка
+ * @returns {boolean} - true - агрегация как PERCENT_CNT, false - другая
+ */
+const isPercentCountColumn = (column: AttributeColumn): boolean => {
+	let aggregation;
+
+	if (column.type === COLUMN_TYPES.INDICATOR) {
+		({aggregation} = column);
+	}
+
+	if (column.type === COLUMN_TYPES.BREAKDOWN) {
+		({aggregation} = column.indicator);
+	}
+
+	return aggregation === DEFAULT_AGGREGATION.PERCENT_CNT;
+};
+
+/**
+ * Преобразует значение PERCENT_CNT в понятный для пользователя вид
+ * @param {string} value - значение PERCENT_CNT в формате `CNT PERCENT`
+ * @returns {string}
+ */
+const parsePercentCountColumnValueForTable = (value: string): string => {
+	let result = value;
+
+	if (value !== '') {
+		const values = value.split(' ');
+
+		if (values.length === 2) {
+			const [valStr, percentStr] = values;
+
+			result = `${valStr} (${percentStr}%)`;
+		}
+	}
+
+	return result;
+};
+
 export {
 	getSeparatedLabel,
 	getWidgetFilterOptionsDescriptors,
 	hasIndicatorsWithAggregation,
 	isCardObjectColumn,
 	isIndicatorColumn,
+	isPercentCountColumn,
 	removeCodesFromTableData,
+	parsePercentCountColumnValueForTable,
 	setWidgetError,
 	updateWidgetData
 };

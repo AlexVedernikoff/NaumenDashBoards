@@ -8,7 +8,8 @@ import {
 	makeFormatterByFormat,
 	percentFormat,
 	sevenDaysFormatter,
-	splitFormatter
+	splitFormatter,
+	totalPercentFormatter
 } from './helpers';
 import {checkLabelsForOverlap, getLegendWidth} from 'utils/chart/mixins/helpers';
 import type {ComboFormatter, ComboNumberFormatter, ComboValueFormatter, NumberFormatter, ValueFormatter} from './types';
@@ -16,7 +17,7 @@ import type {ComboWidget} from 'store/widgets/data/types';
 import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasMSInterval, hasPercent, isHorizontalChart, isStackedChart, parseMSInterval} from 'store/widgets/helpers';
+import {hasCountPercent, hasMSInterval, hasPercent, isHorizontalChart, isStackedChart, parseMSInterval} from 'store/widgets/helpers';
 import {LEGEND_POSITIONS} from 'utils/chart/constants';
 import {TEXT_HANDLERS} from 'store/widgets/data/constants';
 
@@ -53,7 +54,11 @@ const oldValueFormatter = (usesPercent: boolean, showZero: boolean) => {
 	return formatter;
 };
 
-const getDataFormatters = (widget: ComboWidget, checkShowEmptyData?: boolean = false): ComboNumberFormatter => {
+const getDataFormatters = (
+	widget: ComboWidget,
+	checkShowEmptyData: boolean,
+	totalCalculator: ((dataKey: string) => number) | null
+): ComboNumberFormatter => {
 	const formatters = {};
 
 	widget.data.forEach(dataSet => {
@@ -63,6 +68,7 @@ const getDataFormatters = (widget: ComboWidget, checkShowEmptyData?: boolean = f
 			const {aggregation, attribute: indicatorAttribute} = indicators[0];
 			const usesMSInterval = hasMSInterval(indicatorAttribute, aggregation);
 			const usesPercent = hasPercent(indicatorAttribute, aggregation);
+			const usesCountPercent = hasCountPercent(indicatorAttribute, aggregation);
 			const {CUSTOM} = GROUP_WAYS;
 			const hasCustomGroup = parameters[0].group.way === CUSTOM || breakdown?.[0].group.way === CUSTOM;
 			const showZero = checkShowEmptyData && hasCustomGroup && showEmptyData;
@@ -72,6 +78,12 @@ const getDataFormatters = (widget: ComboWidget, checkShowEmptyData?: boolean = f
 				formatter = parseMSInterval;
 			} else {
 				formatter = oldValueFormatter(usesPercent, showZero);
+
+				if (totalCalculator !== null && usesCountPercent) {
+					const total = totalCalculator(dataKey);
+
+					formatter = totalPercentFormatter(formatter, total);
+				}
 			}
 
 			formatters[dataKey] = formatter;
@@ -130,9 +142,15 @@ const getLegendFormatter = (widget: ComboWidget, container: HTMLDivElement, crop
  * @param {ComboWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @param {() => number} totalCalculator -  расчет общего количества элементов на диаграмме
  * @returns {ComboFormatter} - объект с функциями форматерами и параметрами построения
  */
-const getComboFormatterBase = (widget: ComboWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): ComboFormatter => {
+const getComboFormatterBase = (
+	widget: ComboWidget,
+	labels: Array<string> | Array<number>,
+	container: HTMLDivElement,
+	totalCalculator: (dataKey: string) => number
+): ComboFormatter => {
 	const {indicator: {fontSize: indicatorFontSize}, legend, parameter: {fontSize: parameterFontSize}} = widget;
 	const horizontal = isHorizontalChart(widget.type);
 	const stacked = isStackedChart(widget.type);
@@ -144,10 +162,10 @@ const getComboFormatterBase = (widget: ComboWidget, labels: Array<string> | Arra
 	const overlappedFontSize = horizontal ? indicatorFontSize : parameterFontSize;
 	const hasOverlappedLabel = checkLabelsForOverlap(formatLabels, container, legend, horizontal, overlappedFontSize);
 	const categoryOverlappedSplitter = checkString(splitFormatter(!hasOverlappedLabel));
-	const indicatorFormatter = getDataFormatters(widget);
+	const indicatorFormatter = getDataFormatters(widget, false, null);
 
 	return {
-		dataLabel: getDataFormatters(widget, true),
+		dataLabel: getDataFormatters(widget, true, totalCalculator),
 		indicator: indicatorFormatter,
 		legend: {
 			cropped: getLegendFormatter(widget, container, true),

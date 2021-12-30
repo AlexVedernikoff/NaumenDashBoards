@@ -8,7 +8,14 @@ import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
 import {EMPTY_VALUE, ID_ACCESSOR} from './constants';
-import {getSeparatedLabel, hasIndicatorsWithAggregation, isCardObjectColumn, isIndicatorColumn} from 'store/widgets/buildData/helpers';
+import {
+	getSeparatedLabel,
+	hasIndicatorsWithAggregation,
+	isCardObjectColumn,
+	isIndicatorColumn,
+	isPercentCountColumn,
+	parsePercentCountColumnValueForTable
+} from 'store/widgets/buildData/helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import HeaderCell from 'Table/components/HeaderCell';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
@@ -329,6 +336,8 @@ export class TableWidget extends PureComponent<Props, State> {
 
 		if (hasMSInterval(attribute, aggregation)) {
 			cellValue = parseMSInterval(Number(value));
+		} else if (isPercentCountColumn(column)) {
+			cellValue = parsePercentCountColumnValueForTable(value);
 		} else if (value && hasPercent(attribute, aggregation)) {
 			cellValue = `${value}%`;
 		} else if (isCardObjectColumn(column)) {

@@ -54,14 +54,13 @@ const generateCustomFiltersValues = (data: DataSetTypes): Array<CustomFilterValu
 };
 
 /**
- * Сформировать спавочные данные для отображения источника
- *
+ * Сформировать справочные данные для отображения источника
  * @param {DataSetTypes} data - источник
  * @param {AttributesState} attributes - справочник атрибутов для источников из стора
  * @returns {Array<CustomFilterDataSet>}
  */
-const generateCustomFilterItems = (data: DataSetTypes, attributes: AttributesState): Array<CustomFilterDataSet> => {
-	return data.map(({dataKey, source}, dataSetIndex) => {
+const generateCustomFilterItems = (data: DataSetTypes, attributes: AttributesState): Array<CustomFilterDataSet> =>
+	data.map(({dataKey, source}, dataSetIndex) => {
 		const classFqn = source.value?.value;
 		const {loading: attributesLoading = false, options = []} = attributes?.[classFqn] || {};
 
@@ -72,7 +71,6 @@ const generateCustomFilterItems = (data: DataSetTypes, attributes: AttributesSta
 			source
 		};
 	});
-};
 
 export const props = (state: AppState, props: ContainerProps): ConnectedProps => {
 	const {values: {data}} = props;

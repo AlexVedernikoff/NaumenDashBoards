@@ -8,8 +8,7 @@ import {SOURCES_FILTERS_EVENTS} from './constants';
 
 /**
  * Старт загрузки данных
- * @returns {object} Action cтарта загрузки данных
- *
+ * @returns {object} Action старта загрузки данных
  */
 const requestSourceFilters = () => ({type: SOURCES_FILTERS_EVENTS.REQUEST_SOURCE_FILTERS});
 
@@ -59,8 +58,7 @@ const fetchSourcesFilters = (metaClass: string): ThunkAction =>
 	};
 
 /**
- * Обновляет список предустановленных фильтров для указаного источника
- *
+ * Обновляет список предустановленных фильтров для указанного источника
  * @param {string} source - идентификатор источника
  * @param {object} sourceFilter - список новых фильтров
  * @returns {ThunkAction}
@@ -95,8 +93,7 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 	};
 
 /**
- * Удаляет указаный фильтр
- *
+ * Удаляет указанный фильтр
  * @param {string} source - идентификатор источника
  * @param {string} filterId - ключ фильтра
  * @returns {ThunkAction}
@@ -126,7 +123,6 @@ const deleteSourcesFilter = (source: string, filterId: string): ThunkAction =>
 
 /**
  * Проверка возможности применить данный фильтр на данном дашборде
- *
  * @param {string} source - идентификатор источника
  * @param {string} sourceFilter - ключ фильтра
  * @returns {ThunkAction}
