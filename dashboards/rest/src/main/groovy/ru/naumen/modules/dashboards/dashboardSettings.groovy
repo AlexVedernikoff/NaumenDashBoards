@@ -433,13 +433,15 @@ class DashboardSettingsService
     private final IDbApi db
     private final IKeyValueStorageApi keyValue
     private final DashboardUtils dashboardUtils
+    private final def logger
 
     DashboardSettingsService(IMetainfoApi metainfo,
                              IEmbeddedApplicationsApi apps,
                              IScriptUtils utils,
                              IDbApi db,
                              IKeyValueStorageApi keyValue,
-                             DashboardUtils dashboardUtils)
+                             DashboardUtils dashboardUtils,
+                             def logger = null)
     {
         this.metainfo = metainfo
         this.apps = apps
@@ -447,6 +449,7 @@ class DashboardSettingsService
         this.db = db
         this.keyValue = keyValue
         this.dashboardUtils = dashboardUtils
+        this.logger = logger
     }
 
     private static final String DASHBOARD_NAMESPACE = 'dashboards'
