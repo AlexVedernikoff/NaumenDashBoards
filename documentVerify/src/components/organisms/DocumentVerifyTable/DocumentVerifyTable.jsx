@@ -7,11 +7,19 @@ import React, {useEffect, useState} from 'react';
 import styles from './styles.less';
 import SuccessIcon from 'icons/success.svg';
 
-const DocumentVerifyTable = ({switchView, verify: {data: {entities}}}: Props) => {
-	const [errors, setErrors] = useState(entities);
+
+const DocumentVerifyTable = ({switchView, verify: {data: {entities, html}}}: Props) => {
+	const [activeUUID, setActiveUUID] = useState(null);
+
+	const scrollToTable = UUID => {
+		const {height: trHeight, top: trTop} = document.getElementById(UUID).getBoundingClientRect();
+		const tableScroll = document.getElementById('tableScroll');
+		const {height, top} = tableScroll.getBoundingClientRect();
+		tableScroll.scrollTop += Math.floor(trTop - top - height / 2 + trHeight / 2);
+	};
 
 	const animate = (element, opacity = 0) => {
-		element.scrollIntoView();
+		element.scrollIntoView({block: 'center'});
 		window.setTimeout(function () {
 			const style = (element.getAttribute('style') || '').replace(/opacity[^;]+;\s+/gi, '');
 			element.setAttribute('style', `opacity: ${opacity}; ${style}`);
@@ -26,44 +34,47 @@ const DocumentVerifyTable = ({switchView, verify: {data: {entities}}}: Props) =>
 		const del = document.querySelector(`del[style*="${UUID}"]`);
 		const ins = document.querySelector(`ins[style*="${UUID}"]`);
 
-		const delStyle = del && del.getAttribute('style');
-		const insStyle = ins && ins.getAttribute('style');
 
 		if (ins) {
-			ins.style.backgroundColor = '#348416';
+			const insStyle = ins.getAttribute('style');
 
 			if (state === 'error' || state === 'skipped') {
 				ins.style.display = 'none';
 			} else {
 				ins.onclick = () => {
-					animate(document.getElementById(UUID));
+					scrollToTable(UUID);
+					setActiveUUID(UUID);
 				};
 			}
 
+			ins.style.backgroundColor = '#94D1AD';
+			ins.style.cursor = 'pointer';
+			ins.style.padding = '0 5px';
 			ins.setAttribute('style', `${ins.style.cssText} ${insStyle}`);
 		}
 
 		if (del) {
-			del.style.backgroundColor = '#cb2d2d';
+			const delStyle = del.getAttribute('style');
 
 			if (state === 'fixed') {
 				del.style.display = 'none';
 			} else {
 				del.onclick = () => {
-					animate(document.getElementById(UUID));
+					scrollToTable(UUID);
+					setActiveUUID(UUID);
 				};
 			}
 
+			del.style.backgroundColor = '#E08A85';
+			del.style.cursor = 'pointer';
+			ins.style.padding = '0 5px';
 			del.setAttribute('style', `${del.style.cssText} ${delStyle}`);
 		}
-
-		return {
-			entityValueFromSC: del?.innerText || '-',
-			entityValueFromText: ins?.innerText || '-'
-		};
 	};
 
 	const scrollToError = ({UUID}) => {
+		setActiveUUID(UUID);
+
 		const del = document.querySelector(`del[style*="${UUID}"]`);
 		const ins = document.querySelector(`ins[style*="${UUID}"]`);
 
@@ -88,48 +99,55 @@ const DocumentVerifyTable = ({switchView, verify: {data: {entities}}}: Props) =>
 	};
 
 	useEffect(() => {
-		setErrors(entities.map(entity => {
-			return {...entity, ...searchValueError(entity)};
-		}));
-	}, [entities]);
+		const timer = setTimeout(() => {
+			if (html) {
+				entities.forEach(searchValueError);
+			}
+		}, 100);
+
+		return () => clearTimeout(timer);
+	}, [html]);
 
 	return (
-		<table className={cn({
-			[styles.table]: true,
-			[styles.tableSwitch]: switchView
+		<div className={cn({
+			[styles.container]: true,
+			[styles.containerSwitch]: switchView
 		})}>
-			<thead>
-				<tr>
-					<td>Проверка документа</td>
-					<td>&nbsp;</td>
-					<td>Ошибок в документе: {entities.filter(({equal}) => !equal).length}</td>
-				</tr>
-				<tr>
-					<td>Наименование</td>
-					<td>Рекомендуемое значение</td>
-					<td>Значение в документе</td>
-				</tr>
-			</thead>
-			<tbody>
-
-				{errors.map(entity => {
-					return (
-						<tr id={entity.UUID} key={entity.UUID} onClick={() => { scrollToError(entity); }}>
-							<td>{getTypeIcon(entity)}{entity.title}</td>
-							<td>{entity.entityValueFromText}</td>
-							<td>{entity.entityValueFromSC}</td>
-						</tr>
-					);
-				})}
-			</tbody>
-			<tfoot>
-				<tr>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-					<td>&nbsp;</td>
-				</tr>
-			</tfoot>
-		</table>
+			<table className={styles.table}>
+				<thead>
+					<tr>
+						<td>Проверка документа</td>
+						<td>&nbsp;</td>
+						<td>Ошибок в документе: {entities.filter(({state}) => state === 'error').length}</td>
+					</tr>
+					<tr>
+						<td>Наименование</td>
+						<td>Рекомендуемое значение</td>
+						<td>Значение в документе</td>
+					</tr>
+				</thead>
+				<tbody id='tableScroll'>
+					{entities.map(entity => {
+						return (
+							<tr className={cn({
+								[styles.active]: activeUUID === entity.UUID
+							})} id={entity.UUID} key={entity.UUID} onClick={() => { scrollToError(entity); }}>
+								<td>{getTypeIcon(entity)}<span className={styles.title}>{entity.title}</span></td>
+								<td>{entity.valueAdvice}</td>
+								<td>{entity.valueDoc}</td>
+							</tr>
+						);
+					})}
+				</tbody>
+				<tfoot>
+					<tr>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+						<td>&nbsp;</td>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
 	);
 };
 

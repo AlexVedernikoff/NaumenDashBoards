@@ -1,6 +1,6 @@
 // @flow
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getSubjectUuid, getVerifyResult} from 'utils/api';
+import {getSubjectUuid, getVerifyDocument, getVerifyResult, getWsDocument} from 'utils/api';
 import {VERIFY_EVENTS} from './constants';
 
 /**
@@ -11,11 +11,15 @@ const getDataVerify = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
 	try {
 		dispatch(showLoaderData());
 
-		const decisionUUID = 'decisionUUID$2'; // await getSubjectUuid(); // Временно для получение мок данных
+		const decisionUUID = await getSubjectUuid();
 		const setting = await getVerifyResult(decisionUUID);
+		const html = await getVerifyDocument(setting.document);
 
-		dispatch(setVerifyData(setting));
+		await getWsDocument(setting.document);
+
+		dispatch(setVerifyData({...setting, html}));
 	} catch (error) {
+		console.error(error);
 		dispatch(setErrorData(error));
 	} finally {
 		dispatch(hideLoaderData());

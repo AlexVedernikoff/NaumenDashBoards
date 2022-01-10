@@ -29,3 +29,21 @@ export const getSubjectUuid = async (): Promise<string> => {
 export const getVerifyResult = async (decisionUUID: string): Promise<VerifyData> => {
 	return await api.getVerifyResult(decisionUUID);
 };
+
+/**
+ * Возвращает тело документа для проверки
+ * @returns {Promise<VerifyData>} - обьект с данными
+ * @param documentUUID - Uuid документа
+ */
+export const getVerifyDocument = async (documentUUID: string): Promise<VerifyData> => {
+	return await api.getVerifyDocument(documentUUID);
+};
+
+/**
+ * Возвращает тело документа для проверки
+ * @returns {Promise<VerifyData>} - обьект с данными
+ * @param documentUUID - Uuid документа
+ */
+export const getWsDocument = async (documentUUID: string): Promise<VerifyData> => {
+	return await api.getWsDocument(documentUUID);
+};
