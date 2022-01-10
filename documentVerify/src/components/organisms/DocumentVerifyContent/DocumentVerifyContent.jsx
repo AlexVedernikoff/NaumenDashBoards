@@ -19,7 +19,8 @@ const DocumentVerifyContent = ({onSwitchView, switchView, verify}: Props) => {
 	return (
 		<div className={styles.container}>
 			<div className={styles.scroll} id='scrollBlock'>
-				<div className={styles.document} dangerouslySetInnerHTML={{__html: verify?.data?.document}} id='scrollDocument' style={{height}} />
+
+				<div className={styles.document} dangerouslySetInnerHTML={{__html: verify?.data?.html}} id='scrollDocument' style={{height}} />
 			</div>
 			<div className={styles.switch} onClick={onSwitchView}>{switchView ? <RightIcon /> : <LeftIcon /> }</div>
 		</div>
