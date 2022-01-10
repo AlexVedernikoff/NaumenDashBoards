@@ -12,7 +12,7 @@ const getSourceFilters = createSelector(
 );
 
 const findFilterById = createSelector(
-	getSourceFilters,
+	getSourcesFilters,
 	(sourcesFilters: SourcesFiltersState) => (filterId: string): (SourceFiltersItem | null) => {
 		const allSourceFiltersItem = getMapValues(sourcesFilters.map).flat();
 		return allSourceFiltersItem.find(filter => filter.id === filterId) ?? null;

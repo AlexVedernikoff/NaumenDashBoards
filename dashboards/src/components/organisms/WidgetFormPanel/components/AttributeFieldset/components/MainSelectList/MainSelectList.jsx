@@ -25,11 +25,11 @@ export class MainSelectList extends PureComponent<Props, State> {
 
 	handleChangeShowDynamicAttributes = ({value: show}: OnChangeEvent<boolean>) => {
 		const {dataKey, dynamicGroups, fetchDynamicAttributeGroups, source} = this.props;
-		const {descriptor} = source;
+		const {descriptor, filterId} = source;
 
-		if (descriptor || show) {
+		if (descriptor || filterId || show) {
 			if (!dynamicGroups[dataKey] && !dynamicGroups[dataKey]?.loading) {
-				fetchDynamicAttributeGroups(dataKey, descriptor);
+				fetchDynamicAttributeGroups(dataKey, descriptor, filterId);
 			}
 
 			this.setState({showDynamicAttributes: !show});

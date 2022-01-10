@@ -12,7 +12,7 @@ import {findFilterById} from 'store/sources/sourcesFilters/selectors';
  * @param {string} filterId - (optional) сохраненный фильтр источника
  * @returns {ThunkAction}
  */
-const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filterId?: string): ThunkAction =>
+const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filterId: ?string): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 		let actualDescriptor = descriptor;
 
