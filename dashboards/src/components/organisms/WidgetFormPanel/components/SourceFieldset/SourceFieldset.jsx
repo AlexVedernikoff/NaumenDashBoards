@@ -204,7 +204,7 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	handleSelectFilters = async (sourceFilter: SourceFiltersItem) => {
-		const {confirm, onCheckApplyFilter, value: dataSet} = this.props;
+		const {clearDynamicAttributeGroups, confirm, onCheckApplyFilter, value: dataSet} = this.props;
 		const {id, label} = sourceFilter;
 		const {value} = dataSet.source;
 
@@ -226,6 +226,7 @@ export class SourceFieldset extends Component<Props, State> {
 						label
 					}
 				});
+				clearDynamicAttributeGroups(dataSet.dataKey);
 			}
 		}
 	};

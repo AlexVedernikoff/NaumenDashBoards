@@ -5,7 +5,7 @@ import {connect} from 'react-redux';
 import {createFilterContext, getFilterContext} from 'utils/descriptorUtils';
 import type {DataSet, Props} from './types';
 import {functions, props} from './selectors';
-import {getDescriptorCases, getSourceFilterAttributeGroup} from 'store/helpers';
+import {getDescriptorCases} from 'store/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import React, {Component} from 'react';
