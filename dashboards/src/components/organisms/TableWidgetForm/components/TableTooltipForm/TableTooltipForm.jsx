@@ -9,6 +9,7 @@ import FormField from 'components/molecules/FormField';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Indicator} from 'store/widgetForms/types';
+import {indicatorToKey} from './helpers';
 import type {OnChangeEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
@@ -19,12 +20,23 @@ import Toggle from 'components/atoms/Toggle';
 
 class TableTooltipForm extends PureComponent<Props, State> {
 	state = {
+		indicatorPositions: [],
 		indicatorRefs: [],
 		newValue: [],
 		showIndicators: false,
 		tooltip: DEFAULT_TOOLTIP_SETTINGS,
 		unusedIndicators: []
 	};
+
+	componentDidMount () {
+		const {indicatorRefs} = this.state;
+		const indicatorPositions = indicatorRefs
+			.filter(indicator => indicator.tooltip?.show)
+			.map(indicatorToKey)
+			.filter(Boolean);
+
+		this.setState({indicatorPositions});
+	}
 
 	static getDerivedStateFromProps (props: Props) {
 		const {tooltip = DEFAULT_TOOLTIP_SETTINGS, data} = props.value;
@@ -54,21 +66,31 @@ class TableTooltipForm extends PureComponent<Props, State> {
 
 	getHandleClickRemoveButton = indicatorRef => () => {
 		const {onChange} = this.props;
-		const {newValue} = this.state;
+		const {indicatorPositions, newValue} = this.state;
+		const removeKey = indicatorToKey(indicatorRef);
+		const newIndicatorPositions = indicatorPositions.filter(key => removeKey !== key);
 
 		indicatorRef.tooltip = {show: false, title: ''};
 
 		onChange(DIAGRAM_FIELDS.data, newValue);
+		this.setState({indicatorPositions: newIndicatorPositions});
 	};
 
 	getHandleSelectIndicator = (oldSelectRef: Indicator) => ({value: newSelectRef}: OnChangeEvent<Indicator>) => {
 		const {onChange} = this.props;
-		const {newValue} = this.state;
+		const {indicatorPositions, newValue} = this.state;
+		const removeKey = indicatorToKey(oldSelectRef);
+		const addKey = indicatorToKey(newSelectRef);
 
-		newSelectRef.tooltip = {show: true, title: oldSelectRef.tooltip?.title ?? ''};
-		oldSelectRef.tooltip = {show: false, title: ''};
+		if (addKey && removeKey) {
+			newSelectRef.tooltip = {show: true, title: oldSelectRef.tooltip?.title ?? ''};
+			oldSelectRef.tooltip = {show: false, title: ''};
+			const newIndicatorPositions = indicatorPositions.filter(key => removeKey !== key);
 
-		onChange(DIAGRAM_FIELDS.data, newValue);
+			onChange(DIAGRAM_FIELDS.data, newValue);
+			newIndicatorPositions.push(addKey);
+			this.setState({indicatorPositions: newIndicatorPositions});
+		}
 	};
 
 	handleChangeIndicatorText = (indicator: Indicator) => ({value: title}: OnChangeEvent<string>) => {
@@ -78,6 +100,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 	handleChangeIndicatorsShow = ({value: change}: OnChangeEvent<boolean>) => {
 		const {onChange} = this.props;
 		const {indicatorRefs, newValue} = this.state;
+		let newIndicatorPositions = [];
 
 		if (change) {
 			indicatorRefs.forEach(indicator => {
@@ -104,9 +127,15 @@ class TableTooltipForm extends PureComponent<Props, State> {
 					indicator.tooltip = {show: true, title};
 				}
 			}
+
+			newIndicatorPositions = indicatorRefs
+				.filter(indicator => indicator.tooltip?.show)
+				.map(indicatorToKey)
+				.filter(Boolean);
 		}
 
 		onChange(DIAGRAM_FIELDS.data, newValue);
+		this.setState({indicatorPositions: newIndicatorPositions});
 	};
 
 	handleChangeTooltipShow = ({value: change}: OnChangeEvent<boolean>) => {
@@ -121,10 +150,16 @@ class TableTooltipForm extends PureComponent<Props, State> {
 
 	handleClickIndicatorAdd = () => {
 		const {onChange} = this.props;
-		const {newValue, unusedIndicators} = this.state;
+		const {indicatorPositions, newValue, unusedIndicators} = this.state;
 
 		if (unusedIndicators.length > 0) {
-			unusedIndicators[0].tooltip = {show: true, title: ''};
+			const firstUnused = unusedIndicators[0];
+			const key = indicatorToKey(firstUnused);
+
+			if (key) {
+				firstUnused.tooltip = {show: true, title: ''};
+				this.setState({indicatorPositions: [...indicatorPositions, key]});
+			}
 		}
 
 		onChange(DIAGRAM_FIELDS.data, newValue);
@@ -182,11 +217,28 @@ class TableTooltipForm extends PureComponent<Props, State> {
 	};
 
 	renderIndicatorList = () => {
-		const {indicatorRefs, showIndicators} = this.state;
-		const indicators = indicatorRefs.filter(indicator => indicator.tooltip?.show);
-		const showDeleteButton = indicators.length > 1;
+		const {indicatorPositions, indicatorRefs, showIndicators} = this.state;
 
-		return showIndicators ? indicators.map(this.renderIndicator(showDeleteButton)) : null;
+		if (showIndicators) {
+			const indicators = indicatorRefs.filter(indicator => indicator.tooltip?.show).sort((a, b) => {
+				const aKey = indicatorToKey(a);
+				const bKey = indicatorToKey(b);
+
+				if (aKey && bKey) {
+					const aPosition = indicatorPositions.indexOf(aKey);
+					const bPosition = indicatorPositions.indexOf(bKey);
+
+					return aPosition - bPosition;
+				}
+
+				return 0;
+			});
+			const showDeleteButton = indicators.length > 1;
+
+			return indicators.map(this.renderIndicator(showDeleteButton));
+		}
+
+		return null;
 	};
 
 	renderIndicatorRemoveButton = (indicator: Indicator) => (
