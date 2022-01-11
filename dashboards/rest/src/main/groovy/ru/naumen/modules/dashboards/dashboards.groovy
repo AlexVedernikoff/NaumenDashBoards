@@ -1500,7 +1500,8 @@ class DashboardsService
     private Collection<Attribute> mappingAttribute(List attributes, String sourceName, String sourceCode)
     {
         return attributes.findResults {
-            if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
+            def isAttributeOfRelatedObject = it.metaClass?.getAttribute(it.code)?.type?.attributeType?.isAttributeOfRelatedObject()
+            if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES && !isAttributeOfRelatedObject)
             {
                 Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(it.metaClass.code, it.code, it.type.code)
                 buildAttribute(it, sourceName?.replace('Event for ', ''), sourceCode, ableForAvg)
