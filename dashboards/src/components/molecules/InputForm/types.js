@@ -1,10 +1,12 @@
 // @flow
 import type {InputRef} from 'components/types';
-export type Props = {
+import type {SubscribeContext} from 'components/organisms/WidgetForm/HOCs/withSubscriptions/types';
+
+export type Props = SubscribeContext & {
 	className: string,
 	forwardedRef?: InputRef,
 	onClose: () => void,
-	onSubmit: (value: string) => any,
+	onSubmit: (value: string, callback?: Function) => any,
 	value: string | number
 };
 
