@@ -3,8 +3,11 @@ import './styles.less';
 import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
+import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
 import React, {useEffect, useRef, useState} from 'react';
+import {setColumnSettings}  from 'store/App/actions';
+import {useDispatch} from 'react-redux';
 
 const HEIGHT_HEADER = 70;
 
@@ -228,11 +231,22 @@ const Gantt = (props: Props) => {
 		gantt.render();
 	};
 
+	const dispatch = useDispatch();
 	const generateGridWidth = () => {
 		const countColumns = gantt.config.columns.filter((col) => col.show).length;
 		const isShowButton = gantt.config.columns.some((col) => !col.hide && col.name === 'button');
 
 		gantt.config.grid_width = countColumns * 200 + (isShowButton ? 50 : 0);
+
+		let newColums = deepClone(gantt.config.columns);
+		let columnSettings = [];
+
+		newColums.forEach((i) => {
+			let {hide, label, minWidth, name, resize, width, tree, ...colum} = i;
+			columnSettings.push(colum)
+		});
+		columnSettings.pop();
+		dispatch(setColumnSettings(columnSettings));
 	};
 
 	const renderCheckedMenu = () => {

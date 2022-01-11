@@ -104,7 +104,12 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 				...state,
 				loading: true,
 				masterResources: deepClone(state.resources),
-				masterSettings: deepClone(state.settings)
+				masterSettings: deepClone(state.settings),
+			};
+		case APP_EVENTS.SET_COLUMN_SETTINGS:
+			return {
+				...state,
+				settings: {...state.settings, columnSettings: action.payload}
 			};
 		default:
 			return state;
