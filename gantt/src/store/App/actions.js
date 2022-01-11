@@ -221,12 +221,18 @@ const cancelSettings = () => ({
 	type: APP_EVENTS.CANCEL_SETTINGS
 });
 
+const setColumnSettings = payload => ({
+	payload,
+	type: APP_EVENTS.SET_COLUMN_SETTINGS
+});
+
 export {
 	cancelSettings,
 	getAppConfig,
 	hideLoaderData,
 	hideLoaderSettings,
 	saveSettings,
+	setColumnSettings,
 	setCommonSettings,
 	getGanttData,
 	setDiagramData,
