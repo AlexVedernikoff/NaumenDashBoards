@@ -42,19 +42,16 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 		}), this.updateDataSets);
 	};
 
-	handleChangeFilter = (index: number, newFilter: CustomFilterValue) => {
+	handleChangeFilter = (index: number, newFilter: CustomFilterValue, callback?: Function) =>
 		this.setState(({filters}) => ({
 			filters: [...filters.slice(0, index), newFilter, ...filters.slice(index + 1)]
-		}), this.updateDataSets);
-	};
+		}), () => this.updateDataSets(callback));
 
-	handleDeleteFilterItem = (index: number) => {
-		this.setState(({filters}) => ({
-			filters: [...filters.slice(0, index), ...filters.slice(index + 1)]
-		}), this.updateDataSets);
-	};
+	handleDeleteFilterItem = (index: number) => this.setState(({filters}) => ({
+		filters: [...filters.slice(0, index), ...filters.slice(index + 1)]
+	}), this.updateDataSets);
 
-	updateDataSets = async () => {
+	updateDataSets = async (callback?: Function) => {
 		const {dataSets, onChange, values} = this.props;
 		const {filters} = this.state;
 		let newData = values.data;
@@ -96,7 +93,7 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 			});
 		});
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
 	validateFilters = async () => {

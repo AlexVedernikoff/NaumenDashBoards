@@ -5,11 +5,16 @@ import memoize from 'memoize-one';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import type {Ref} from 'components/types';
+import SubscribeManager, {SUBSCRIBE_COMMANDS} from './HOCs/withSubscriptions/SubscribeManager';
 import {VALUES_CONTEXT} from './HOCs/withValues/constants';
 
 class WidgetForm extends Component<Props, State> {
 	static defaultProps = {
 		validate: () => null
+	};
+
+	emitterRef = {
+		emit: null
 	};
 
 	errorFocusRef: Ref<'div'> | null = null;
@@ -55,6 +60,7 @@ class WidgetForm extends Component<Props, State> {
 		const {onSubmit} = this.props;
 
 		await this.normalizeValues();
+		await this.emitterRef.emit?.(SUBSCRIBE_COMMANDS.FORCE_SAVE);
 
 		const {values} = this.state;
 
@@ -132,11 +138,13 @@ class WidgetForm extends Component<Props, State> {
 		this.errorFocusRef = null;
 
 		return (
-			<VALUES_CONTEXT.Provider value={this.getValuesContext(values)}>
-				<ERRORS_CONTEXT.Provider value={this.getErrorsContext(errors)}>
-					{render(props)}
-				</ERRORS_CONTEXT.Provider>
-			</VALUES_CONTEXT.Provider>
+			<SubscribeManager emitterRef={this.emitterRef}>
+				<VALUES_CONTEXT.Provider value={this.getValuesContext(values)}>
+					<ERRORS_CONTEXT.Provider value={this.getErrorsContext(errors)}>
+						{render(props)}
+					</ERRORS_CONTEXT.Provider>
+				</VALUES_CONTEXT.Provider>
+			</SubscribeManager>
 		);
 	}
 }

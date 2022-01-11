@@ -6,6 +6,6 @@ export type Props = {
 	fetchAttributes: (dataSetIndex: number) => void,
 	filters: CustomFilterValue[],
 	onAddNewFilterItem: () => void,
-	onChangeFilter: (idx: number, filter: CustomFilterValue) => void,
+	onChangeFilter: (idx: number, filter: CustomFilterValue, callback?: Function) => void,
 	onDeleteFilter: (idx: number) => void,
 };

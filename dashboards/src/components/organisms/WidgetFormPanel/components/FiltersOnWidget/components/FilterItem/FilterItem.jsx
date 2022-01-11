@@ -50,11 +50,13 @@ export class FilterItem extends PureComponent<Props, State> {
 		return onChangeDataSet(dataSetIndex);
 	};
 
-	handleChangeLabel = (value) => {
+	handleChangeLabel = (value: string, callback?: Function) => {
 		const {onChangeLabel} = this.props;
 
-		onChangeLabel(value);
-		this.handleCloseLabelEditor();
+		onChangeLabel(value, () => {
+			this.handleCloseLabelEditor();
+			callback && callback();
+		});
 	};
 
 	handleCloseLabelEditor = () => this.setState({isEditLabel: false});
@@ -115,8 +117,8 @@ export class FilterItem extends PureComponent<Props, State> {
 			<FormField label="Источник" path={`filtersOnWidget[${idx}].dataSetIndex`} small>
 				<Select
 					editable={false}
-					getOptionLabel={(dataSet) => dataSet.source.value?.label}
-					getOptionValue={(dataSet) => dataSet.dataSetIndex}
+					getOptionLabel={dataSet => dataSet.source.value?.label}
+					getOptionValue={dataSet => dataSet.dataSetIndex}
 					onSelect={this.handleChangeDataSet}
 					options={dataSets}
 					placeholder='Выберите источник'

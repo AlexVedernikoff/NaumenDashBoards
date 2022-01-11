@@ -4,6 +4,7 @@ import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
+import withSubscriptions, {SUBSCRIBE_COMMANDS} from 'components/organisms/WidgetForm/HOCs/withSubscriptions/withSubscriptions';
 
 export class InputForm extends Component<Props, State> {
 	static defaultProps = {
@@ -15,10 +16,20 @@ export class InputForm extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		const {value} = this.props;
+		const {subscribe, value} = this.props;
 
 		this.setState({value: value.toString()});
+		subscribe(SUBSCRIBE_COMMANDS.FORCE_SAVE, this.forceSave);
 	}
+
+	componentWillUnmount () {
+		const {unsubscribe} = this.props;
+		return unsubscribe(SUBSCRIBE_COMMANDS.FORCE_SAVE, this.forceSave);
+	}
+
+	forceSave = (): Promise<void> => new Promise(resolve => {
+		this.handleClick(resolve);
+	});
 
 	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
 		const {value} = e.currentTarget;
@@ -26,12 +37,12 @@ export class InputForm extends Component<Props, State> {
 		this.setState({value});
 	};
 
-	handleClick = () => {
+	handleClick = (callback?: Function) => {
 		const {onSubmit} = this.props;
 		const {value} = this.state;
 
 		if (value) {
-			onSubmit(value);
+			onSubmit(value, callback);
 		}
 	};
 
@@ -80,4 +91,4 @@ export class InputForm extends Component<Props, State> {
 	}
 }
 
-export default InputForm;
+export default withSubscriptions(InputForm);
