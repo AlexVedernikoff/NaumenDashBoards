@@ -41,9 +41,9 @@ export class ParamsTab extends PureComponent<Props> {
 		onChange(DIAGRAM_FIELDS.data, [...values.data, createSpeedometerDataSet(uuid())]);
 	};
 
-	handleChangeBorders = (name: string, value: Borders) => {
+	handleChangeBorders = (name: string, value: Borders, callback?: Function) => {
 		const {onChange} = this.props;
-		return onChange(DIAGRAM_FIELDS.borders, value);
+		return onChange(DIAGRAM_FIELDS.borders, value, callback);
 	};
 
 	handleChangeDataSet = (index: number, newDataSet: DataSet) => {
@@ -53,11 +53,11 @@ export class ParamsTab extends PureComponent<Props> {
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
 
-	handleChangeIndicators = (index: number, indicators: Array<Indicator>) => {
+	handleChangeIndicators = (index: number, indicators: Array<Indicator>, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? {...dataSet, indicators} : dataSet);
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
 	handleChangeRanges = (name: string, ranges: Ranges) => {

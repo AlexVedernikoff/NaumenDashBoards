@@ -16,11 +16,11 @@ export class IndicatorsBox extends PureComponent<Props> {
 		}
 	};
 
-	handleChange = (index: number, newIndicator: Indicator) => {
+	handleChange = (index: number, newIndicator: Indicator, callback?: Function) => {
 		const {index: dataSetIndex, onChange, value} = this.props;
 		const newValue = value.map((indicator, i) => i === index ? newIndicator : indicator);
 
-		onChange(dataSetIndex, newValue);
+		onChange(dataSetIndex, newValue, callback);
 	};
 
 	handleChangeOrder = (indicators: Array<Object>) => {

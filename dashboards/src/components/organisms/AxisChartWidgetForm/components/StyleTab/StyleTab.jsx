@@ -30,14 +30,6 @@ export class StyleTab extends Component<Props> {
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
 
-	handleChangeFormat = (format) => {
-		const {onChange, values} = this.props;
-		const {parameter} = values;
-		const newValue = {...parameter, format};
-
-		onChange(DIAGRAM_FIELDS.parameter, newValue);
-	};
-
 	hasCustomGroup = () => {
 		const {values} = this.props;
 		const {CUSTOM} = GROUP_WAYS;

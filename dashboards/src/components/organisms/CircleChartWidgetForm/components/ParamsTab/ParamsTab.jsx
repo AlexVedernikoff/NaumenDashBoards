@@ -24,7 +24,7 @@ export class ParamsTab extends PureComponent<Props> {
 		onChange(DIAGRAM_FIELDS.data, [...values.data, createCircleDataSet(uuid())]);
 	};
 
-	handleChangeDataSet = (index: number, newDataSet: DataSet) => {
+	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const {data, sorting} = values;
 		const newData = data.map((dataSet, i) => i === index ? newDataSet : dataSet);
@@ -51,7 +51,7 @@ export class ParamsTab extends PureComponent<Props> {
 			}
 		});
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
 	handleRemoveDataSet = (index: number) => {

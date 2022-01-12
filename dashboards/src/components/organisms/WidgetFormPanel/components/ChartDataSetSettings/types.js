@@ -23,7 +23,7 @@ export type BreakdownFieldsetProps = {
 	dataKey: string,
 	index: number,
 	indicator: MixedAttribute | null,
-	onChange: (value: Breakdown) => void,
+	onChange: (value: Breakdown, callback?: Function) => void,
 	onRemove: () => void,
 	removable: boolean,
 	required: boolean,
@@ -38,7 +38,7 @@ export type Components = {
 export type Props = {
 	components: Components,
 	index: number,
-	onChange: (index: number, value: DataSet) => void,
+	onChange: (index: number, value: DataSet, callback?: Function) => void,
 	requiredBreakdown: boolean,
 	usesBlankData: boolean,
 	usesEmptyData: boolean,

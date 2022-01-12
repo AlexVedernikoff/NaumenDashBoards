@@ -38,7 +38,7 @@ class SelectWithCustomEdit extends Component<Props, State> {
 
 			return {
 				options: extendedOptions,
-				value: extendedOptions.find((item) => item.value === value)
+				value: extendedOptions.find(item => item.value === value)
 			};
 		}
 
@@ -77,13 +77,11 @@ class SelectWithCustomEdit extends Component<Props, State> {
 		}
 	};
 
-	handleSubmitForm = (value) => {
+	handleSubmitForm = (value: string, callback?: Function) => {
 		const {name, onSelect} = this.props;
 
-		if (value !== '' && onSelect) {
-			onSelect({name, value});
-		} else {
-			this.handleClearValue();
+		if (onSelect) {
+			onSelect({name, value: value !== '' ? value : null}, callback);
 		}
 
 		this.setState({showForm: false});
@@ -121,7 +119,7 @@ class SelectWithCustomEdit extends Component<Props, State> {
 		);
 	};
 
-	renderIndicatorsContainer = (props) => {
+	renderIndicatorsContainer = props => {
 		const {children, ...containerProps} = props;
 		return (
 			<Container {...containerProps}>

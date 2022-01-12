@@ -11,24 +11,24 @@ import React, {Component} from 'react';
 import styles from './styles.less';
 
 export class StyleTab extends Component<Props> {
-	handleChange = (name: string, data: Object) => {
+	handleChange = (name: string, data: Object, callback?: Function) => {
 		const {onChange} = this.props;
 
-		onChange(name, data);
+		onChange(name, data, callback);
 	};
 
-	handleChangeBorderStyle = (name: string, style: BordersStyle) => {
+	handleChangeBorderStyle = (name: string, style: BordersStyle, callback?: Function) => {
 		const {onChange, values: {borders}} = this.props;
 		const newBorders = {...borders, style};
 
-		onChange(DIAGRAM_FIELDS.borders, newBorders);
+		onChange(DIAGRAM_FIELDS.borders, newBorders, callback);
 	};
 
-	handleChangeRangesStyle = (name: string, style: RangesStyle) => {
+	handleChangeRangesStyle = (name: string, style: RangesStyle, callback?: Function) => {
 		const {onChange, values: {ranges}} = this.props;
 		const newRanges = {...ranges, style};
 
-		onChange(DIAGRAM_FIELDS.ranges, newRanges);
+		onChange(DIAGRAM_FIELDS.ranges, newRanges, callback);
 	};
 
 	render () {

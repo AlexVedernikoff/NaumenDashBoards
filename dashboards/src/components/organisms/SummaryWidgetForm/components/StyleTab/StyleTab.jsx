@@ -7,10 +7,10 @@ import React, {Component} from 'react';
 import styles from './styles.less';
 
 export class StyleTab extends Component<Props> {
-	handleChange = (name: string, data: Object) => {
+	handleChange = (name: string, data: Object, callback?: Function) => {
 		const {onChange} = this.props;
 
-		onChange(name, data);
+		onChange(name, data, callback);
 	};
 
 	render () {
