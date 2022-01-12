@@ -9,6 +9,7 @@ import type {ComputedAttr} from 'store/widgets/data/types';
 import ComputedAttributeEditor from 'WidgetFormPanel/components/ComputedAttributeEditor';
 import Container from 'components/atoms/Container';
 import CreationPanel from 'components/atoms/CreationPanel';
+import {deepClone} from 'helpers';
 import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FormField from 'WidgetFormPanel/components/FormField';
@@ -117,7 +118,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 		this.change({
 			...newIndicator,
-			attribute
+			attribute: deepClone(attribute)
 		});
 	};
 
