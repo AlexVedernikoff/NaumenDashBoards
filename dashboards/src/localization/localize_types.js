@@ -353,6 +353,15 @@ type TextWidgetFormStyleBox =
   | 'TextWidgetForm::StyleBox::Underline'
   | 'TextWidgetForm::StyleBox::Font';
 
+/// components/organisms/TableWidgetForm/components/TableTooltipForm
+type TableWidgetFormTableTooltipForm =
+  | 'TableWidgetForm::TableTooltipForm::Indicator'
+  | 'TableWidgetForm::TableTooltipForm::TooltipText'
+  | 'TableWidgetForm::TableTooltipForm::AddTooltip'
+  | 'TableWidgetForm::TableTooltipForm::AtIndicator'
+  | 'TableWidgetForm::TableTooltipForm::AtTitle'
+  | 'TableWidgetForm::TableTooltipForm::Tooltip';
+
 // components/organisms/Widget
 type Widget = 'Widget::Error';
 
@@ -552,15 +561,27 @@ type WidgetSelectBox =
 
 // components/organisms/WidgetsGrid
 type WidgetsGrid =
-  | 'WidgetsGrid::ContextMenuCreateWidget'
+  | 'WidgetsGrid::ConfirmCloseWindow'
   | 'WidgetsGrid::ContextMenuCreateText'
-  | 'WidgetsGrid::EmptyGridPart1'
+  | 'WidgetsGrid::ContextMenuCreateWidget'
   | 'WidgetsGrid::EmptyGridAction'
+  | 'WidgetsGrid::EmptyGridPart1'
   | 'WidgetsGrid::EmptyGridPart2'
   | 'WidgetsGrid::EmptyMobileMessage';
 
 // components/templates/WidgetForm
 type WidgetForm = 'WidgetForm::Save' | 'WidgetForm::Cancel';
+
+// components/organisms/WidgetForm/components/ChoiceWidgetTooltipForm
+type WidgetFormChoiceWidgetTooltipForm =
+  | 'WidgetForm::ChoiceWidgetTooltipForm::AtIndicator'
+  | 'WidgetForm::ChoiceWidgetTooltipForm::AtTitle'
+  | 'WidgetForm::ChoiceWidgetTooltipForm::Tooltip';
+
+// components/organisms/WidgetForm/components/SimpleWidgetTooltipForm/SimpleWidgetTooltipForm
+type WidgetFormSimpleWidgetTooltipForm =
+  | 'WidgetForm::SimpleWidgetTooltipForm::Tooltip'
+  | 'WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle';
 
 // containers/DashboardPanel
 type DashboardPanelContainers =
@@ -876,6 +897,7 @@ export type LangType =
   | TableWidgetFormParamsTab
   | TableWidgetFormScheme
   | TableWidgetFormTableBox
+  | TableWidgetFormTableTooltipForm
   | TextAlignControl
   | TextArea
   | TextHandlerControl
@@ -890,6 +912,8 @@ export type LangType =
   | Widget
   | WidgetAddPanel
   | WidgetForm
+  | WidgetFormChoiceWidgetTooltipForm
+  | WidgetFormSimpleWidgetTooltipForm
   | WidgetFormPanel
   | WidgetKebab
   | WidgetKebabContainers

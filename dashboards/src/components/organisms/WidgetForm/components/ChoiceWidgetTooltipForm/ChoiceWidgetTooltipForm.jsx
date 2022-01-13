@@ -9,6 +9,7 @@ import FormField from 'components/molecules/FormField';
 import type {OnChangeEvent} from 'components/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
+import t, {translateObjectsArray} from 'localization';
 import TextArea from 'components/atoms/TextArea';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 import type {Values} from 'components/organisms/AxisChartWidgetForm/types';
@@ -84,13 +85,14 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 		const {indicator, selected, tooltip} = this.state;
 		const show = indicator.show || tooltip.show;
 		const value = selected === DIAGRAM_FIELDS.tooltip ? tooltip.title : indicator.title;
+		const options = translateObjectsArray('title', CHOOSE_OPTIONS);
 
 		return (
-			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleShow} showContent={show} title="Подсказка" >
+			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleShow} showContent={show} title={t('WidgetForm::ChoiceWidgetTooltipForm::Tooltip')} >
 				<FormField>
 					<CheckIconButtonGroup
 						onChange={this.handleChangeShowType}
-						options={CHOOSE_OPTIONS}
+						options={options}
 						value={selected}
 					/>
 				</FormField>

@@ -5,6 +5,7 @@ import FormField from 'components/molecules/FormField';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 import TextArea from 'components/atoms/TextArea';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
@@ -33,8 +34,8 @@ class SimpleWidgetTooltipForm extends PureComponent<Props> {
 	render () {
 		const {show, title} = this.props.value;
 		return (
-			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleShow} showContent={show} title="Подсказка" >
-				<FormField label="Подсказка в заголовке">
+			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleShow} showContent={show} title={t('WidgetForm::SimpleWidgetTooltipForm::Tooltip')}>
+				<FormField label={t('WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle')}>
 					<TextArea focusOnMount={true} name={DIAGRAM_FIELDS.title} onChange={this.handleChange} value={title} />
 				</FormField>
 			</ToggableFormBox>

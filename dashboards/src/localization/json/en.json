@@ -300,8 +300,14 @@
 	"WidgetsGrid::EmptyGridAction": "there",
 	"WidgetsGrid::EmptyGridPart2": "or click right mouse button on empty space",
 	"WidgetsGrid::EmptyMobileMessage": "There is no data to display. To edit the dashboard you need to open the desktop version\n",
+	"WidgetsGrid::ConfirmCloseWindow": "If you close the window, all changes on this dashboard will be reset. Switch to another tab?",
 	"WidgetForm::Save": "Save",
 	"WidgetForm::Cancel": "Cancel",
+	"WidgetForm::ChoiceWidgetTooltipForm::Tooltip": "Tooltip",
+	"WidgetForm::ChoiceWidgetTooltipForm::AtTitle": "At title",
+	"WidgetForm::ChoiceWidgetTooltipForm::AtIndicator": "At indicator",
+	"WidgetForm::SimpleWidgetTooltipForm::Tooltip": "Tooltip",
+	"WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle": "Tooltip at title",
 	"DashboardPanel::Dashboards": "Dashboards",
 	"DashboardPanel::NewWidget": "New widget",
 	"DateGroupModal::Day": "Days",
@@ -445,5 +451,11 @@
 	"GroupModal::Stopped": "Stopped",
 	"GroupModal::TimeOver": "Time over",
 	"GroupModal::TitleContains": "Title contains",
-	"GroupModal::TitleNotContains": "Title not contains"
+	"GroupModal::TitleNotContains": "Title not contains",
+	"TableWidgetForm::TableTooltipForm::Indicator": "Indicator",
+	"TableWidgetForm::TableTooltipForm::TooltipText": "Text",
+	"TableWidgetForm::TableTooltipForm::AddTooltip": "Add tooltip",
+	"TableWidgetForm::TableTooltipForm::AtIndicator": "At indicator",
+	"TableWidgetForm::TableTooltipForm::AtTitle": "At title",
+	"TableWidgetForm::TableTooltipForm::Tooltip": "Tooltip"
 }

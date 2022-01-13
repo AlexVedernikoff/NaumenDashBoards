@@ -191,5 +191,8 @@
 		["В процессе (просрочен)#expired", "expired"],
 		["В процессе#registered", "registered"]
 	],
-	"tooltip": [[333, "333.00"]]
+	"tooltip": {
+		"data": [[333, "333.00"]],
+		"title": [[333, "333"]]
+	}
 }
