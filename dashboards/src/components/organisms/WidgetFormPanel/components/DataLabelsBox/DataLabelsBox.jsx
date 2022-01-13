@@ -1,8 +1,8 @@
 // @flow
+import type {AxisFormat, DataLabels} from 'store/widgets/data/types';
 import {AXIS_FORMAT_TYPE, DEFAULT_AXIS_FORMAT} from 'store/widgets/data/constants';
 import Checkbox from 'components/atoms/Checkbox';
 import ColorInput from 'components/molecules/ColorInput';
-import type {DataLabels} from 'store/widgets/data/types';
 import deepEqual from 'fast-deep-equal';
 import type {DefaultProps, Props} from './types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
@@ -63,13 +63,13 @@ export class DataLabelsBox extends PureComponent<Props> {
 
 	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, !value);
 
-	handleChangeFormat = (format) => {
+	handleChangeFormat = (format: AxisFormat, callback?: Function) => {
 		const {name, onChange, value} = this.props;
 
 		onChange(name, {
 			...value,
 			[DIAGRAM_FIELDS.format]: format
-		});
+		}, callback);
 	};
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);

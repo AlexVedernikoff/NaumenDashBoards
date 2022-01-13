@@ -27,32 +27,28 @@ export class InputForm extends Component<Props, State> {
 		return unsubscribe(SUBSCRIBE_COMMANDS.FORCE_SAVE, this.forceSave);
 	}
 
-	forceSave = (): Promise<void> => new Promise(resolve => {
-		this.handleClick(resolve);
-	});
+	forceSave = (): Promise<void> => new Promise(resolve => { this.handleSubmit(resolve); });
 
-	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {value} = e.currentTarget;
+	handleChange = ({currentTarget: {value}}: SyntheticInputEvent<HTMLInputElement>) => this.setState({value});
 
-		this.setState({value});
-	};
-
-	handleClick = (callback?: Function) => {
-		const {onSubmit} = this.props;
-		const {value} = this.state;
-
-		if (value) {
-			onSubmit(value, callback);
-		}
-	};
+	handleClick = (event: MouseEvent) => this.handleSubmit();
 
 	handleSpecialKeysDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
 		const {onClose} = this.props;
 
 		if (event.key === 'Enter') {
-			this.handleClick();
+			this.handleSubmit();
 		} else if (event.key === 'Escape') {
 			onClose();
+		}
+	};
+
+	handleSubmit = (callback?: Function) => {
+		const {onSubmit} = this.props;
+		const {value} = this.state;
+
+		if (value) {
+			onSubmit(value, callback);
 		}
 	};
 

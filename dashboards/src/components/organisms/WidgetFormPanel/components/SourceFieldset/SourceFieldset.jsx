@@ -87,10 +87,10 @@ export class SourceFieldset extends Component<Props, State> {
 		}
 	};
 
-	changeSource = (source: SourceData) => {
+	changeSource = (source: SourceData, callback?: Function) => {
 		const {index, onChange, value} = this.props;
 
-		onChange(index, {...value, source});
+		onChange(index, {...value, source}, callback);
 	};
 
 	getSourceSelectComponents = memoize(() => ({
@@ -109,7 +109,7 @@ export class SourceFieldset extends Component<Props, State> {
 		});
 	};
 
-	handleChangeFilterLabel = async (label: string): Promise<void> => {
+	handleChangeFilterLabel = async (label: string, callback?: Function): Promise<void> => {
 		const {filterList, onUpdateSourcesFilter, value: {source}} = this.props;
 		const {mode} = this.state;
 		let error = null;
@@ -118,7 +118,7 @@ export class SourceFieldset extends Component<Props, State> {
 			const {descriptor, filterId, value} = source;
 
 			if (mode === MODE.EDIT && filterId === null) {
-				this.changeSource({...source, value: { ...value, label }});
+				this.changeSource({...source, value: { ...value, label }}, callback);
 				this.hideEditForm();
 			} else {
 				if (!filterList.find(filter => filter.label === label) || mode === MODE.EDIT) {
@@ -128,7 +128,7 @@ export class SourceFieldset extends Component<Props, State> {
 						if (data.result) {
 							const {filterId} = data;
 
-							this.changeSource({...source, filterId, value: {...value, label}});
+							this.changeSource({...source, filterId, value: {...value, label}}, callback);
 							this.hideEditForm();
 						} else {
 							error = data.message;

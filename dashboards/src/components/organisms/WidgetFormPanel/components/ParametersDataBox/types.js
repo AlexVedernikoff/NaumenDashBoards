@@ -9,6 +9,6 @@ export type DataSet = {
 
 export type Props = {
 	onChange: (data: Array<DataSet>) => void,
-	onChangeParameters: (index: number, parameters: Array<Parameter>) => void,
+	onChangeParameters: (index: number, parameters: Array<Parameter>, callback?: Function) => void,
 	value: Array<DataSet>
 };

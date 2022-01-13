@@ -6,11 +6,11 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 
 export class ParameterFormat extends PureComponent<Props> {
-	handleChangeFormat = (format) => {
+	handleChangeFormat = (format, callback) => {
 		const {onChange, parameter} = this.props;
 		const newValue = {...parameter, format};
 
-		onChange(DIAGRAM_FIELDS.parameter, newValue);
+		onChange(DIAGRAM_FIELDS.parameter, newValue, callback);
 	};
 
 	render () {

@@ -55,7 +55,7 @@ export type Props = {
 	components: Components,
 	fetchOptions?: () => any,
 	forwardedLabelInputRef?: InputRef,
-	onChangeLabel?: OnChangeEvent<string> => void,
+	onChangeLabel?: (event: OnChangeEvent<string>, callback?: Function) => void,
 	onSelect: SelectEvent => void,
 };
 

@@ -88,7 +88,7 @@ export class ParametersDataBox extends PureComponent<Props> {
 
 	getMainParameter = (props: Props) => props.value[this.mainIndex].parameters[this.mainIndex];
 
-	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter) => {
+	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter, callback?: Function) => {
 		const {onChangeParameters, value} = this.props;
 		const parameters = value[dataSetIndex].parameters;
 		let newParameterByMain = newParameter;
@@ -106,7 +106,7 @@ export class ParametersDataBox extends PureComponent<Props> {
 
 		const newParameters = parameters.map((parameter, i) => i === parameterIndex ? newParameterByMain : parameter);
 
-		onChangeParameters(dataSetIndex, newParameters);
+		onChangeParameters(dataSetIndex, newParameters, callback);
 	};
 
 	isEqualMainAttribute = (attribute: ?Attribute) => {
@@ -141,9 +141,8 @@ export class ParametersDataBox extends PureComponent<Props> {
 		);
 	};
 
-	renderParameters = (dataSet: DataSet, index: number): Array<React$Node> => {
-		return dataSet.parameters.map(this.renderParameterFieldset(dataSet, index));
-	};
+	renderParameters = (dataSet: DataSet, index: number): Array<React$Node> =>
+		dataSet.parameters.map(this.renderParameterFieldset(dataSet, index));
 
 	render () {
 		const {value} = this.props;

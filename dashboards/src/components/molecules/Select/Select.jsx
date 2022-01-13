@@ -81,10 +81,10 @@ export class Select extends Component<Props, State> {
 		};
 	};
 
-	handleChangeLabel = ({value}: OnChangeEvent<string>) => {
+	handleChangeLabel = ({value}: OnChangeEvent<string>, callback?: Function) => {
 		const {name, onChangeLabel} = this.props;
 
-		onChangeLabel && onChangeLabel({name, value});
+		onChangeLabel && onChangeLabel({name, value}, callback);
 	};
 
 	handleChangeSearchInput = (searchValue: string) => {

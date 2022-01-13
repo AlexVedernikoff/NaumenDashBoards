@@ -30,18 +30,17 @@ export class AttributeFieldset extends PureComponent<Props> {
 
 	getRefOptions = (options: Array<Attribute>): Array<Attribute> => {
 		const {dataSetIndex, getRefOptions} = this.props;
-
 		return getRefOptions ? getRefOptions(options, dataSetIndex) : options;
 	};
 
-	handleChangeLabelMain = (title: string) => {
+	handleChangeLabelMain = (title: string, callback?: Function) => {
 		const {index, name, onChangeLabel, value} = this.props;
 		const newValue = {...value, title};
 
-		onChangeLabel({name, value: newValue}, index);
+		onChangeLabel({name, value: newValue}, index, callback);
 	};
 
-	handleChangeLabelRef = (title: string) => {
+	handleChangeLabelRef = (title: string, callback?: Function) => {
 		const {index, name, onChangeLabel, value} = this.props;
 
 		if (value?.ref) {
@@ -53,7 +52,7 @@ export class AttributeFieldset extends PureComponent<Props> {
 				}
 			};
 
-			onChangeLabel({name, value: newValue}, index);
+			onChangeLabel({name, value: newValue}, index, callback);
 		}
 	};
 

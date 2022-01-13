@@ -3,6 +3,6 @@ import type {AxisFormat} from 'store/widgets/data/types';
 
 export type Props = {
 	label?: string,
-	onChange: (value: AxisFormat) => void,
+	onChange: (value: AxisFormat, callback?: Function) => void,
 	value: ?AxisFormat
 };

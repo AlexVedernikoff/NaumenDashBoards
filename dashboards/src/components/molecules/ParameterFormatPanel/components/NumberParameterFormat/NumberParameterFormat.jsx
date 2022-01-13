@@ -14,10 +14,10 @@ import styles from './styles.less';
 import Toggle from 'components/atoms/Toggle';
 
 export class NumberParameterFormat extends PureComponent<Props> {
-	handleChange = ({name, value: changeValue}) => {
+	handleChange = ({name, value: changeValue}, callback?: Function) => {
 		const {onChange, value} = this.props;
 
-		onChange({...value, [name]: changeValue});
+		onChange({...value, [name]: changeValue}, callback);
 	};
 
 	handleChangeChecked = ({name, value: changeValue}) => {
