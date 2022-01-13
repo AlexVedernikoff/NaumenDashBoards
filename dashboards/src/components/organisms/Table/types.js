@@ -21,6 +21,7 @@ export type Row = {
 export type CellConfigProps = React$Config<CellProps, DefaultCellProps>;
 
 export type ValueProps = {
+	column: Column,
 	fontColor: string,
 	value: string | number
 };

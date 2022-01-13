@@ -7,6 +7,7 @@ import {getAxisFormatter} from 'utils/chart/mixins/formater';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {
 	getLegendOptions,
+	getTotalCalculator,
 	getXAxisOptions,
 	getYAxisOptions
 } from './helpers';
@@ -27,7 +28,8 @@ const axisMixin = (widget: AxisWidget, data: DiagramBuildData, container: HTMLDi
 	const buildDataSet: AxisData = getBuildSet(widget);
 
 	if (buildDataSet) {
-		const formatter = getAxisFormatter(widget, labels, container);
+		const totalCalculator = getTotalCalculator(data);
+		const formatter = getAxisFormatter(widget, labels, container, totalCalculator);
 		const {hasOverlappedLabel, horizontal, stacked} = formatter.options;
 		const {indicators, xAxisName, yAxisName} = buildDataSet;
 		const {aggregation, attribute: indicatorAttribute} = indicators[0];

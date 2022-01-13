@@ -63,7 +63,7 @@ export class Cell extends PureComponent<Props, State> {
 	};
 
 	renderValue = () => {
-		const {components, fontColor, tooltip, value} = this.props;
+		const {column, components, fontColor, tooltip, value} = this.props;
 		const {position} = this.state;
 		const {Value} = components;
 		const renderValue = value || this.getDefaultValue();
@@ -75,7 +75,7 @@ export class Cell extends PureComponent<Props, State> {
 						onMouseEnter={this.handleTooltipShow}
 						onMouseLeave={this.handleClearTooltip}
 					>
-						<Value fontColor={fontColor} value={renderValue} />
+						<Value column={column} fontColor={fontColor} value={renderValue} />
 						<WidgetTooltip position={position} tooltip={tooltip} />
 					</div>
 				</Fragment>
@@ -83,7 +83,7 @@ export class Cell extends PureComponent<Props, State> {
 		}
 
 		return (
-			<Value fontColor={fontColor} value={renderValue} />
+			<Value column={column} fontColor={fontColor} value={renderValue} />
 		);
 	};
 

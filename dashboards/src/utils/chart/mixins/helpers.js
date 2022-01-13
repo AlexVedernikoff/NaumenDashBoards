@@ -3,6 +3,7 @@ import type {ApexLabels, ApexLegend, AxisProps, Series} from 'utils/chart/types'
 import {AXIS_FONT_SIZE, LEGEND_HEIGHT, LEGEND_POSITIONS} from 'utils/chart/constants';
 import type {AxisWidget, ComboWidget, Legend, LegendPosition} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getMainDataSet} from 'store/widgets/data/helpers';
 import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
 import moment from 'utils/moment.config';
@@ -279,8 +280,35 @@ const checkLabelsForOverlap = (
 	return overlapped;
 };
 
+/**
+ * Возвращает отложенный расчет общего количества данных на диаграмме
+ * @param {DiagramBuildData} data - данные конкретного графика
+ * @returns {() => number}
+ */
+const getTotalCalculator = (data: DiagramBuildData) => (targetDataKey?: ?string = null) => {
+	let result = 0;
+
+	data.series.forEach(({data, dataKey}) => {
+		if (targetDataKey === null || dataKey === targetDataKey) {
+			data.forEach(item => {
+				if (typeof item === 'number') {
+					result += item;
+				} else if (typeof item === 'string') {
+					const itemValue = Number.parseInt(item);
+
+					if (!isNaN(itemValue)) {
+						result += itemValue;
+					}
+				}
+			});
+		}
+	});
+	return result;
+};
+
 export {
 	axisLabelFormatter,
+	getTotalCalculator,
 	checkLabelsForOverlap,
 	formatLabels,
 	getLegendOptions,
