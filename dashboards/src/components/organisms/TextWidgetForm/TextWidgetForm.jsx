@@ -13,6 +13,7 @@ import React, {createRef, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import StyleBox from './components/StyleBox';
 import styles from './styles.less';
+import t from 'localization';
 import TextEditor from 'components/atoms/TextEditor';
 import type {TextSettings} from 'store/widgets/data/types';
 import WidgetForm from 'components/templates/WidgetForm';
@@ -101,13 +102,14 @@ export class TextWidgetForm extends PureComponent<Props> {
 		const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
 
 		return (
-			<FormBox title="Область отображения">
+			<FormBox title={t('TextWidgetForm::DisplayMode')}>
 				<FormField>
 					<Select
+						getOptionLabel={option => t(option.label)}
 						name={TEXT_FIELDS.displayMode}
 						onSelect={this.handleChangeDisplayMode}
 						options={DISPLAY_MODE_OPTIONS}
-						placeholder="Отображение виджета в мобильной версии"
+						placeholder={t('TextWidgetForm::DisplayModePlaceholder')}
 						value={value}
 					/>
 				</FormField>
@@ -163,7 +165,7 @@ export class TextWidgetForm extends PureComponent<Props> {
 			<WidgetForm
 				onCancel={handleCancel}
 				onSubmit={handleSubmit}
-				title="Текст"
+				title={t('TextWidgetForm::Text')}
 				updating={submitting}
 			>
 				{this.renderTextEditor()}

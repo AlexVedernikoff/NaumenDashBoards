@@ -3,6 +3,7 @@ import type {ComponentProps as IconButtonProps} from 'components/atoms/IconButto
 import type {ComponentProps as ListProps} from './components/List/types';
 import type {ComponentProps as ListOptionProps} from './components/ListOption/types';
 import type {InputRef, OnChangeEvent} from 'components/types';
+import type {LangType} from 'localization/localize_types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props as SearchInputProps} from 'components/atoms/SearchInput/types';
 import type {Props as ValueProps} from './components/Value/types';
@@ -38,12 +39,12 @@ export type DefaultProps = {|
 	getOptionValue: (option: Option) => any,
 	isSearching: boolean,
 	loading: boolean,
-	loadingMessage: string,
+	loadingMessage: LangType,
 	menuHeaderMessage: ?string,
 	multiple: boolean,
 	name: string,
-	noOptionsMessage: string,
-	notFoundMessage: string,
+	noOptionsMessage: LangType,
+	notFoundMessage: LangType,
 	options: Array<Option>,
 	placeholder: string,
 	value: Value,

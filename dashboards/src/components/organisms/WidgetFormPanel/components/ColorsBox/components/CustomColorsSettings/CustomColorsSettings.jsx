@@ -9,6 +9,7 @@ import FormField from 'components/molecules/FormField';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import t from 'localization';
 
 export class CustomColorsSettings extends PureComponent<Props> {
 	handleChange = (data: CustomChartColorsSettingsData) => {
@@ -28,7 +29,7 @@ export class CustomColorsSettings extends PureComponent<Props> {
 
 		return (
 			<FormField>
-				<FormControl label="Применить для всех виджетов на дашборде">
+				<FormControl label={t('CustomColorsSettings::ApplyForAllWidgets')}>
 					<Checkbox checked={useGlobal} onChange={this.handleChangeApplyToAllCheckbox} value={useGlobal} />
 				</FormControl>
 			</FormField>

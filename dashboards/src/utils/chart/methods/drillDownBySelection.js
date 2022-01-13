@@ -16,6 +16,7 @@ import {hasUUIDsInLabels} from 'store/widgets/helpers';
 import isMobile from 'ismobilejs';
 import {setWarningMessage} from 'store/widgets/data/actions';
 import {store} from 'app.constants';
+import t from 'localization';
 import type {ThunkAction} from 'store/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -72,7 +73,7 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
 const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const {attribute, group} = dataSet.parameters[0];
 
-	return addGroupFilter(mixin, { attribute, group, value });
+	return addGroupFilter(mixin, {attribute, group, value});
 };
 
 /**
@@ -91,7 +92,7 @@ const addBreakdownFilter = (dataSet: ChartDataSet, value: string, mixin: DrillDo
 	if (breakdownSet) {
 		const {attribute, group} = breakdownSet;
 
-		newMixin = addGroupFilter(mixin, { attribute, group, value });
+		newMixin = addGroupFilter(mixin, {attribute, group, value});
 	}
 
 	return newMixin;
@@ -334,7 +335,7 @@ const drillDownBySelection = (widget: Chart, buildData: DiagramBuildData) => (ev
 		} else {
 			const {id} = widget;
 
-			store.dispatch(setWarningMessage({id, message: 'Для данного виджета детализация данных не доступна'}));
+			store.dispatch(setWarningMessage({id, message: t('drillDownBySelection::Fail')}));
 		}
 	}
 };

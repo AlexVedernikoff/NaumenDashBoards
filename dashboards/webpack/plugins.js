@@ -1,5 +1,5 @@
 'use strict';
-const { BundleStatsWebpackPlugin } = require('bundle-stats-webpack-plugin');
+const {BundleStatsWebpackPlugin} = require('bundle-stats-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 const {development, isUserModeInclude, license, storybook} = require('./define');
 const Dotenv = require('dotenv-webpack');

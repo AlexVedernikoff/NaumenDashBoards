@@ -12,6 +12,7 @@ import type {OnChangeEvent} from 'src/components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 import TextInput from 'src/components/atoms/TextInput';
 
 export class SubGroup extends PureComponent<Props> {
@@ -88,7 +89,7 @@ export class SubGroup extends PureComponent<Props> {
 	);
 
 	renderInfoIcon = () => (
-		<div title="Подпись группы для отображения на оси" >
+		<div title={t('SubGroup::GroupLabel')} >
 			<Icon className={mainStyles.infoIcon} name={ICON_NAMES.INFO} />
 		</div>
 	);
@@ -102,7 +103,7 @@ export class SubGroup extends PureComponent<Props> {
 
 	renderNameField = () => (
 		<Fragment>
-			<FormField className={styles.nameField} label="Название группы">
+			<FormField className={styles.nameField} label={t('SubGroup::GroupName')}>
 				<div className={styles.nameInputContainer}>
 					{this.renderNameTextInput()}
 					{this.renderInfoIcon()}

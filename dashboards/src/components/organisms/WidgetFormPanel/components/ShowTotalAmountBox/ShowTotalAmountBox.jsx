@@ -6,6 +6,7 @@ import FormField from 'components/molecules/FormField';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import t from 'localization';
 
 class ShowTotalAmountBox extends PureComponent<Props> {
 	static defaultProps = {
@@ -23,7 +24,7 @@ class ShowTotalAmountBox extends PureComponent<Props> {
 		if (subTotalAmountView) {
 			return (
 				<FormField>
-					<FormControl label="Отображать промежуточные итоги">
+					<FormControl label={t('ShowTotalAmountBox::ShowSubTotalAmount')}>
 						<Checkbox
 							checked={showSubTotalAmount}
 							name={DIAGRAM_FIELDS.showSubTotalAmount}
@@ -42,7 +43,7 @@ class ShowTotalAmountBox extends PureComponent<Props> {
 		const {showTotalAmount} = this.props;
 		return (
 			<FormField>
-				<FormControl label="Отображать общую сумму объектов">
+				<FormControl label={t('ShowTotalAmountBox::ShowTotalAmount')}>
 					<Checkbox
 						checked={showTotalAmount}
 						name={DIAGRAM_FIELDS.showTotalAmount}

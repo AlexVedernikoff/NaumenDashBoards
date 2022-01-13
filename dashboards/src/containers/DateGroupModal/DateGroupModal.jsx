@@ -17,12 +17,15 @@ import type {Props, State} from './types';
 import React, {Component, createContext, Fragment} from 'react';
 import SimpleOrCondition from 'GroupModal/components/SimpleOrCondition';
 import SystemDateGroupFormat from 'GroupModal/components/SystemDateGroupFormat';
+import {translateObjectsArray} from 'localization';
 
 const FORMAT_CONTEXT = createContext('');
 
 FORMAT_CONTEXT.displayName = 'FORMAT_CONTEXT';
 
 export class DateGroupModal extends Component<Props, State> {
+	orConditionOptions = translateObjectsArray('label', OR_CONDITION_OPTIONS);
+
 	state = {
 		format: ''
 	};
@@ -38,9 +41,7 @@ export class DateGroupModal extends Component<Props, State> {
 		return format && this.setState({format});
 	}
 
-	getSystemOptions = () => {
-		return this.props.attribute.type === ATTRIBUTE_TYPES.dateTime ? DATETIME_SYSTEM_OPTIONS : SYSTEM_OPTIONS;
-	};
+	getSystemOptions = () => this.props.attribute.type === ATTRIBUTE_TYPES.dateTime ? DATETIME_SYSTEM_OPTIONS : SYSTEM_OPTIONS;
 
 	getFormatOptions (group: string) {
 		const {attribute} = this.props;
@@ -105,7 +106,7 @@ export class DateGroupModal extends Component<Props, State> {
 			<Fragment>
 				<SystemGroup {...props} />
 				<FORMAT_CONTEXT.Consumer>
-					{(format) => this.renderSystemGroupFormat(props.value, format)}
+					{format => this.renderSystemGroupFormat(props.value, format)}
 				</FORMAT_CONTEXT.Consumer>
 			</Fragment>
 		);
@@ -122,6 +123,7 @@ export class DateGroupModal extends Component<Props, State> {
 	render () {
 		const {attribute, customGroups, onClose, value} = this.props;
 		const {format} = this.state;
+		const options = translateObjectsArray('label', this.getSystemOptions());
 
 		return (
 			<FORMAT_CONTEXT.Provider value={format}>
@@ -132,9 +134,9 @@ export class DateGroupModal extends Component<Props, State> {
 					customType={attribute.type}
 					onClose={onClose}
 					onSubmit={this.handleSubmit}
-					orConditionOptions={OR_CONDITION_OPTIONS}
+					orConditionOptions={this.orConditionOptions}
 					schema={SCHEMA}
-					systemOptions={this.getSystemOptions()}
+					systemOptions={options}
 					value={value}
 				/>
 			</FORMAT_CONTEXT.Provider>

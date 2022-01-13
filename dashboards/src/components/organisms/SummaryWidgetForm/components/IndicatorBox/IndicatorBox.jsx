@@ -11,6 +11,7 @@ import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class IndicatorBox extends PureComponent<Props> {
 	static defaultProps = {
@@ -38,8 +39,8 @@ export class IndicatorBox extends PureComponent<Props> {
 		const parameterFormat = format ?? computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
 
 		return (
-			<CollapsableFormBox title="Показатель">
-				<FormField label="Шрифт" row>
+			<CollapsableFormBox title={t('SummaryWidgetForm::IndicatorBox::Indicator')}>
+				<FormField label={t('SummaryWidgetForm::IndicatorBox::Font')} row>
 					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
 					<FontSizeSelect
 						name={DIAGRAM_FIELDS.fontSize}

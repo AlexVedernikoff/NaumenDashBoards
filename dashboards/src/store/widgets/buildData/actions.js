@@ -70,7 +70,7 @@ const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update
 				receiveBuildData({data: {...data, page: pageNumber}, id: widget.id})
 			);
 		} catch (e) {
-			let error = t('store::buildData::DEFAULT_RECORD_BUILD_DATA_ERROR');
+			let error = t('store::buildData::DefaultRecordBuildDataError');
 
 			if (e instanceof ApiError) {
 				error = e.message;
@@ -120,7 +120,7 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 			await dispatch(checkComputedFormat(widget.id, data));
 			dispatch(receiveBuildData({data, id: widget.id}));
 		} catch (e) {
-			let error = t('store::buildData::DEFAULT_RECORD_BUILD_DIAGRAM_ERROR');
+			let error = t('store::buildData::DefaultRecordBuildDiagramError');
 
 			if (e instanceof ApiError) {
 				error = e.message;

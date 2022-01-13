@@ -7,6 +7,7 @@ import Loader from 'components/atoms/Loader';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 export class Node extends PureComponent<Props, State> {
 	state = {
@@ -126,7 +127,7 @@ export class Node extends PureComponent<Props, State> {
 		if (children && showMore && !(loading || uploaded || error)) {
 			return (
 				<Button className={styles.showMoreButton} onClick={this.handleClickShowMore} variant={BUTTON_VARIANTS.SIMPLE}>
-					Показать еще
+					<T text="TreeSelectNode::ShowMore" />
 				</Button>
 			);
 		}

@@ -22,6 +22,7 @@ import type {Props} from './types';
 import React, {createContext, Fragment, PureComponent} from 'react';
 import ShowTotalAmountBox from 'WidgetFormPanel/components/ShowTotalAmountBox';
 import styles from './styles.less';
+import t from 'localization';
 import Toggle from 'components/atoms/Toggle';
 import uuid from 'tiny-uuid';
 import WidgetNameBox from 'WidgetFormPanel/components/WidgetNameBox';
@@ -179,7 +180,7 @@ export class ParamsTab extends PureComponent<Props> {
 
 		return (
 			<FormField>
-				<FormControl label="Показывать незаполненные данные" reverse>
+				<FormControl label={t('TableWidgetForm::ParamsTab::ShowBlankValues')} reverse>
 					<Toggle
 						checked={showBlankData}
 						name={DIAGRAM_FIELDS.showBlankData}
@@ -201,7 +202,7 @@ export class ParamsTab extends PureComponent<Props> {
 						icon={ICON_NAMES.SUM}
 						onClick={this.handleClickSumButton}
 						round={false}
-						tip="Подсчитывать итоги"
+						tip={t('TableWidgetForm::ParamsTab::CalculateTotal')}
 					/>
 					{rightControl}
 				</Fragment>

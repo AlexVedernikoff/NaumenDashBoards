@@ -8,11 +8,12 @@ import LabelEditingForm from 'components/molecules/InputForm';
 import React, {Component, createRef} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 
 class SelectWithCustomEdit extends Component<Props, State> {
 	static defaultProps: DefaultProps = {
 		clearing: false,
-		customOptionsLabel: 'Пользовательская настройка',
+		customOptionsLabel: 'SelectWithCustomEdit::UserOption',
 		emptyAsNotUsed: true,
 		name: '',
 		placeholder: ''
@@ -29,7 +30,7 @@ class SelectWithCustomEdit extends Component<Props, State> {
 		if (options) {
 			const customOptions = value && !options.includes(value)
 				? {label: value, value}
-				: {label: customOptionsLabel, value: ''};
+				: {label: t(customOptionsLabel), value: ''};
 			const extendedOptions = [
 				{label: placeholder, value: null},
 				...options.map(item => ({label: item.trimLeft(), value: item})),

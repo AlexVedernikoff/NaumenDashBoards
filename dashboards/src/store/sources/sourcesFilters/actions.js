@@ -5,6 +5,7 @@ import {FilterAlreadyExists, FilterNameNotUnique, RemoveFilterFailed} from 'api/
 import {getDashboardDescription} from 'store/dashboard/settings/selectors';
 import type {ResultWithMessage, SourceFiltersItem, UpdateSourcesFilterResult} from './types';
 import {SOURCES_FILTERS_EVENTS} from './constants';
+import t from 'localization';
 
 /**
  * Старт загрузки данных
@@ -88,7 +89,7 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 				return {message: exception.message, result: false};
 			}
 
-			return {message: 'Ошибка сохранения фильтра', result: false};
+			return {message: t('store::sources::sourcesFilters::FilterSavingError'), result: false};
 		}
 	};
 
@@ -118,7 +119,7 @@ const deleteSourcesFilter = (source: string, filterId: string): ThunkAction =>
 				return {message: exception.message, result: false};
 			}
 		}
-		return {message: 'Ошибка удаления фильтра', result: false};
+		return {message: t('store::sources::sourcesFilters::FilterRemovalError'), result: false};
 	};
 
 /**
@@ -144,9 +145,9 @@ const checkApplyFilter = (source: string, sourceFilter: SourceFiltersItem): Thun
 				type: SOURCES_FILTERS_EVENTS.UPDATE_SOURCE_FILTER
 			});
 
-			return {message: 'Ошибка применения фильтра', result: false};
+			return {message: t('store::sources::sourcesFilters::FilterApplicationError'), result: false};
 		} catch (ex) {
-			return {message: 'Ошибка применения фильтра', result: false};
+			return {message: t('store::sources::sourcesFilters::FilterApplicationError'), result: false};
 		}
 	};
 

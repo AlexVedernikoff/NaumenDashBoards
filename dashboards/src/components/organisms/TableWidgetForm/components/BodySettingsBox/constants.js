@@ -1,21 +1,22 @@
 // @flow
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
+import type {LangType} from 'localization/localize_types';
 
-const EMPTY_DATA_OPTIONS = [
+const EMPTY_DATA_OPTIONS: Array<{label: LangType, value: $Keys<typeof DEFAULT_TABLE_VALUE>}> = [
 	{
-		label: 'Показывать "0"',
+		label: 'TableWidgetForm::BodySettingsBox::ShowZero',
 		value: DEFAULT_TABLE_VALUE.ZERO
 	},
 	{
-		label: 'Показывать "-"',
+		label: 'TableWidgetForm::BodySettingsBox::ShowDash',
 		value: DEFAULT_TABLE_VALUE.DASH
 	},
 	{
-		label: 'Показывать "null"',
+		label: 'TableWidgetForm::BodySettingsBox::ShowNull',
 		value: DEFAULT_TABLE_VALUE.NULL
 	},
 	{
-		label: 'Показывать пустую строку " "',
+		label: 'TableWidgetForm::BodySettingsBox::ShowEmptyString',
 		value: DEFAULT_TABLE_VALUE.EMPTY_ROW
 	}
 ];

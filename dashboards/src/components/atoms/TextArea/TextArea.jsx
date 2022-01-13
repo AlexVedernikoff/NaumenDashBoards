@@ -5,6 +5,8 @@ import type {Props} from './types';
 import React, {Component, createRef, Fragment} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 
 export class TextArea extends Component<Props> {
 	inputRef: Ref<'textarea'> = createRef();
@@ -13,7 +15,7 @@ export class TextArea extends Component<Props> {
 		focusOnMount: false,
 		label: '',
 		maxLength: MAX_TEXT_LENGTH,
-		placeholder: 'Введите текст...'
+		placeholder: t('TextArea::Placeholder')
 	};
 
 	componentDidMount () {
@@ -40,7 +42,7 @@ export class TextArea extends Component<Props> {
 		const {value} = this.props;
 
 		return (
-			<button className={styles.clearButton} disabled={!value} onClick={this.handleClear}>Очистить</button>
+			<button className={styles.clearButton} disabled={!value} onClick={this.handleClear}><T text="TextArea::Clear" /></button>
 		);
 	};
 

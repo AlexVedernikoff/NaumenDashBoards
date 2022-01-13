@@ -19,7 +19,7 @@ export class Startup extends Component<Props> {
 		}
 
 		if (loading) {
-			return (<p><T>Startup::Loading</T></p>);
+			return (<p><T text="Startup::Loading" /></p>);
 		}
 
 		return (

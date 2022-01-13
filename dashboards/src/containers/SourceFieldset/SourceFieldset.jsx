@@ -103,7 +103,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 
 				return serializedContext;
 			} catch (e) {
-				console.error('Ошибка окна фильтрации: ', e);
+				console.error('Filtration error: ', e);
 			}
 		}
 

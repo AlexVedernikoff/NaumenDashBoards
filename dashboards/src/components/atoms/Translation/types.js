@@ -1,7 +1,6 @@
 // @flow
-import type {LocalizationParams} from 'localization/types';
+import type {LangType} from 'localization/localize_types';
 
-export type Props = $Shape<{
-	children: string,
-	t: (key: string, params?: LocalizationParams) => string,
-}>;
+export type Props = {
+	text: LangType,
+};

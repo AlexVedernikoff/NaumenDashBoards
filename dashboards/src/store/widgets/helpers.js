@@ -14,6 +14,7 @@ import {DISPLAY_MODE, WIDGET_TYPES} from './data/constants';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
+import t from 'localization';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
 	if (!data || typeof data !== 'string') {
@@ -112,7 +113,7 @@ const parseMSInterval = (ms: number) => {
 
 		intervalValue = ms > INTERVALS[INTERVALS.length - 1].min ? intervalValue.toFixed(2) : Math.round(intervalValue);
 
-		return `${intervalValue} ${label}`;
+		return t(label, {value: intervalValue});
 	}
 
 	return ms;

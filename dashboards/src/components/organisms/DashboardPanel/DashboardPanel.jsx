@@ -9,6 +9,7 @@ import type {Props, State} from './types';
 import React, {createRef, PureComponent, Suspense} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 const WidgetAddPanel = React.lazy(() => import('containers/WidgetAddPanel'));
 const WidgetFormPanel = React.lazy(() => import('containers/WidgetFormPanel'));
@@ -113,7 +114,7 @@ export class DashboardPanel extends PureComponent<Props, State> {
 		);
 	};
 
-	renderFallback = () => <div className={styles.fallback}>Загрузка...</div>;
+	renderFallback = () => <div className={styles.fallback}><T text="DashboardPanel::LoadingContent" /></div>;
 
 	renderHeader = () => {
 		const {position, title} = this.props;

@@ -15,6 +15,7 @@ import React, {createContext, Fragment, PureComponent} from 'react';
 import type {RenderValueProps} from 'components/molecules/MiniSelect/types';
 import SourceControlTree from 'components/organisms/AttributeCreatingModal/components/SoucreControlTree';
 import styles from './styles.less';
+import t from 'localization';
 import TreeSelect from 'components/molecules/TreeSelect';
 
 const AGGREGATION_CONTEXT = createContext();
@@ -83,7 +84,7 @@ export class SourceControl extends PureComponent<Props> {
 					attribute={attribute}
 					onSelect={this.handleSelectAggregation}
 					renderValue={this.renderAggregationValue}
-					tip="Агрегация"
+					tip={t('SourceControl::Aggregation')}
 					value={value}
 				/>
 			)}
@@ -118,7 +119,7 @@ export class SourceControl extends PureComponent<Props> {
 		</div>
 	);
 
-	renderTree = (props) => (
+	renderTree = props => (
 		<SourceControlTree{...props} onAddConstant={this.handleAddConstant} originalOptions={this.props.options} />
 	);
 

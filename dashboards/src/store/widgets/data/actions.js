@@ -1,5 +1,4 @@
 // @flow
-
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
 import type {AnyWidget, Chart, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
 import api from 'api';
@@ -24,6 +23,7 @@ import {isPersonalDashboard} from 'store/dashboard/settings/selectors';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resizer as dashboardResizer} from 'app.constants';
 import {saveCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
+import t from 'localization';
 
 /**
  * Добавляет новый виджет
@@ -35,8 +35,7 @@ const checkWidgetsCount = () => (dispatch: Dispatch, getState: GetState): void =
 
 	if (Object.keys(map).length >= LIMIT) {
 		throw dispatch(createToast({
-			text: `На дашборд можно вывести не больше ${LIMIT} виджетов.
-			Чтобы добавить на текущий дашборд виджет, удалите один из существующих.`,
+			text: t('store::widgets::data::Limit', {limit: LIMIT}),
 			type: 'error'
 		}));
 	}
@@ -130,7 +129,7 @@ const editWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Dispat
 		dispatch(saveNewLayouts());
 		dispatch(fetchBuildData(widget));
 	} catch (e) {
-		validationErrors = e instanceof ApiError ? e.message : 'Ошибка сервера';
+		validationErrors = e instanceof ApiError ? e.message : t('store::widgets::data::ServerError');
 
 		dispatch(recordSaveError());
 	}
@@ -246,7 +245,7 @@ const createWidget = (settings: AnyWidget): ThunkAction => async (dispatch: Disp
 		});
 		dispatch(saveNewLayouts());
 	} catch (e) {
-		validationErrors = e instanceof ApiError ? e.message : 'Ошибка сервера';
+		validationErrors = e instanceof ApiError ? e.message : t('store::widgets::data::ServerError');
 
 		dispatch(recordSaveError());
 	}
@@ -303,14 +302,18 @@ const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction => asy
  */
 const removeWidgetWithConfirm = (widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	const confirmOptions = {
-		cancelText: 'Нет',
+		cancelText: t('store::widgets::data::RemoveWidgetConfirmNo'),
 		defaultButton: DEFAULT_BUTTONS.CANCEL_BUTTON,
 		footerPosition: FOOTER_POSITIONS.RIGHT,
 		size: SIZES.SMALL,
-		submitText: 'Да'
+		submitText: t('store::widgets::data::RemoveWidgetConfirmYes')
 	};
 
-	if (await dispatch(confirmDialog('Подтверждение удаления', 'Вы действительно хотите удалить виджет?', confirmOptions))) {
+	if (await dispatch(confirmDialog(
+		t('store::widgets::data::RemoveWidgetConfirmTitle'),
+		t('store::widgets::data::RemoveWidgetConfirmText'),
+		confirmOptions
+	))) {
 		dispatch(removeWidget(widgetId));
 	}
 };

@@ -25,7 +25,7 @@ export class MaterialDateInput extends PureComponent<Props, State> {
 	handleSelect = (date: string) => {
 		const {name, onSelect} = this.props;
 
-		this.setState({ showDatepicker: false });
+		this.setState({showDatepicker: false});
 		onSelect(name, date);
 	};
 

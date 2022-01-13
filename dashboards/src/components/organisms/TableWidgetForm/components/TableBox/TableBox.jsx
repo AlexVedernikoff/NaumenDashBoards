@@ -4,6 +4,7 @@ import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import HeaderSettingsBox from 'TableWidgetForm/components/HeaderSettingsBox';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 import type {TableBodySettings, TableHeaderSettings} from 'store/widgets/data/types';
 
 export class TableBox extends PureComponent<Props> {
@@ -29,7 +30,7 @@ export class TableBox extends PureComponent<Props> {
 		const {body, columnHeader} = this.props.value;
 
 		return (
-			<CollapsableFormBox title="Таблица">
+			<CollapsableFormBox title={t('TableWidgetForm::TableBox::Table')}>
 				<HeaderSettingsBox onChange={this.handleChangeHeaderSettings} value={columnHeader} />
 				<BodySettingsBox onChange={this.handleChangeBodySettings} value={body} />
 			</CollapsableFormBox>

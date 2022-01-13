@@ -18,6 +18,7 @@ import type {Props} from './types';
 import React, {Component} from 'react';
 import SortingBox from 'WidgetFormPanel/components/SortingBox';
 import styles from './styles.less';
+import t from 'localization';
 import TextInput from 'components/atoms/TextInput';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withWidget from 'WidgetFormPanel/HOCs/withWidget';
@@ -93,14 +94,14 @@ export class StyleTab extends Component<Props> {
 					onChange={onChange}
 					renderAxisFormat={this.renderParameterFormat}
 					renderNameField={() => this.renderAxisNameField(index, DIAGRAM_FIELDS.xAxisName, xAxisName)}
-					title="Параметр"
+					title={t('AxisChartStyleTab::Parameter')}
 					value={parameter}
 				/>
 				<AxisSettingsBox
 					name={DIAGRAM_FIELDS.indicator}
 					onChange={onChange}
 					renderNameField={() => this.renderAxisNameField(index, DIAGRAM_FIELDS.yAxisName, yAxisName)}
-					title="Показатель"
+					title={t('AxisChartStyleTab::Indicator')}
 					value={indicator}
 				/>
 				<BreakdownFormat breakdown={breakdownFormat} data={data} onChange={onChange} />

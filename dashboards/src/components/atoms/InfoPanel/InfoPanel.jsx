@@ -4,6 +4,7 @@ import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 import {VARIANTS} from './constants';
 
 export class InfoPanel extends PureComponent<Props> {
@@ -29,7 +30,7 @@ export class InfoPanel extends PureComponent<Props> {
 		const {onConfirm} = this.props;
 
 		if (onConfirm) {
-			return <button className={styles.confirmButton} onClick={onConfirm}>Подтвердить</button>;
+			return <button className={styles.confirmButton} onClick={onConfirm}><T text="InfoPanel::onConfirm" /></button>;
 		}
 	};
 
@@ -40,7 +41,7 @@ export class InfoPanel extends PureComponent<Props> {
 		</div>
 	);
 
-	renderText = () => <div><b>Внимание!</b> {this.props.text}</div>;
+	renderText = () => <div><b><T text="InfoPanel::Attention" /></b> {this.props.text}</div>;
 
 	render () {
 		return (

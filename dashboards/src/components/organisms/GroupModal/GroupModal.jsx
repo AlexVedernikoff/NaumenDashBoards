@@ -15,6 +15,8 @@ import type {Props, State} from './types';
 import RadioField from 'components/atoms/RadioField';
 import React, {Component, createRef, Fragment} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 import TextInput from 'components/atoms/TextInput';
 
 export class GroupModal extends Component<Props, State> {
@@ -130,7 +132,7 @@ export class GroupModal extends Component<Props, State> {
 		const {attribute} = this.state;
 
 		return (
-			<FormField label="Название поля">
+			<FormField label={t('GroupModal::FieldName')}>
 				<TextInput onChange={this.handleChangeAttributeTitle} value={attribute.title} />
 			</FormField>
 		);
@@ -147,9 +149,9 @@ export class GroupModal extends Component<Props, State> {
 
 	renderWayControl = () => (
 		<Fragment>
-			<Label className={styles.wayLabel}>Тип группировки</Label>
-			{this.renderWayField(GROUP_WAYS.SYSTEM, 'Системная', this.renderSystemGroup())}
-			{this.renderWayField(GROUP_WAYS.CUSTOM, 'Пользовательская', this.renderCustomGroup())}
+			<Label className={styles.wayLabel}><T text='GroupModal::GroupType' /></Label>
+			{this.renderWayField(GROUP_WAYS.SYSTEM, t('GroupModal::SystemGroup'), this.renderSystemGroup())}
+			{this.renderWayField(GROUP_WAYS.CUSTOM, t('GroupModal::CustomGroup'), this.renderCustomGroup())}
 		</Fragment>
 	);
 
@@ -179,7 +181,7 @@ export class GroupModal extends Component<Props, State> {
 		return (
 			<Modal
 				className={styles.modal}
-				header="Настройка группировки"
+				header={t('GroupModal::GroupConfig')}
 				onClose={onClose}
 				onSubmit={this.handleSubmit}
 				size={920}

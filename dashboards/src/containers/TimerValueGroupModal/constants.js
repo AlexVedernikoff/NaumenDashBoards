@@ -1,43 +1,44 @@
 // @flow
 import {array, createSchema} from 'GroupModal/schema';
 import {INTERVAL_SYSTEM_GROUP} from 'src/store/widgets/constants';
+import type {LangType} from 'localization/localize_types';
 import type {OrCondition} from 'GroupModal/types';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 
-const OR_CONDITION_OPTIONS = [
+const OR_CONDITION_OPTIONS: Array<{label: LangType, value: string}> = [
 	{
-		label: 'равен',
+		label: 'TimerValueGroupModal::Equal',
 		value: OR_CONDITION_TYPES.EQUAL
 	},
 	{
-		label: 'не равен',
+		label: 'TimerValueGroupModal::NotEqual',
 		value: OR_CONDITION_TYPES.NOT_EQUAL
 	},
 	{
-		label: 'больше',
+		label: 'TimerValueGroupModal::Greater',
 		value: OR_CONDITION_TYPES.GREATER
 	},
 	{
-		label: 'меньше',
+		label: 'TimerValueGroupModal::Less',
 		value: OR_CONDITION_TYPES.LESS
 	},
 	{
-		label: 'пусто',
+		label: 'TimerValueGroupModal::Empty',
 		value: OR_CONDITION_TYPES.EMPTY
 	},
 	{
-		label: 'не пусто',
+		label: 'TimerValueGroupModal::NotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	}
 ];
 
-const OPTIONS = [
+const OPTIONS: Array<{label: LangType, value: string}> = [
 	{
-		label: 'Минут',
+		label: 'TimerValueGroupModal::Minute',
 		value: INTERVAL_SYSTEM_GROUP.MINUTE
 	},
 	{
-		label: 'Часов',
+		label: 'TimerValueGroupModal::Hour',
 		value: INTERVAL_SYSTEM_GROUP.HOUR
 	}
 ];

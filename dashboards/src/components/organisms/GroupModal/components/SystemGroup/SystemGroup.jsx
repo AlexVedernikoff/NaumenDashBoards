@@ -5,6 +5,7 @@ import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 
 export class SystemGroup extends PureComponent<Props, State> {
 	state = {
@@ -33,11 +34,11 @@ export class SystemGroup extends PureComponent<Props, State> {
 		const {value} = this.state;
 
 		return (
-			<FormField className={styles.field} label="Форматирование">
+			<FormField className={styles.field} label={t('SystemGroup::Format')}>
 				<Select
 					onSelect={this.handleSelect}
 					options={options}
-					placeholder="Форматирование"
+					placeholder={t('SystemGroup::Format')}
 					value={value}
 				/>
 			</FormField>

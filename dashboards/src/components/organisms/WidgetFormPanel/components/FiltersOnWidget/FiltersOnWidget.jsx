@@ -7,6 +7,7 @@ import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class FiltersOnWidget extends PureComponent<Props> {
 	/**
@@ -100,15 +101,18 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		const usedDataSets: string[] = this.getUsedDataSets();
 
 		return filters.map((value, idx) => {
-			const availableDataSetsForItem = dataSets.filter(dataSet => value.dataSetIndex === dataSet.dataSetIndex
-					|| !usedDataSets.includes(dataSet.dataSetIndex));
+			const availableDataSetsForItem = dataSets.filter(
+				dataSet =>
+					value.dataSetIndex === dataSet.dataSetIndex
+					|| !usedDataSets.includes(dataSet.dataSetIndex)
+			);
 			return this.renderFilterItem(idx, value, availableDataSetsForItem);
 		});
 	};
 
 	render () {
 		return (
-			<FormBox rightControl={this.renderAddSourceFilter()} title="Фильтрация на виджете">
+			<FormBox rightControl={this.renderAddSourceFilter()} title={t('FiltersOnWidget::FilterOnWidget')}>
 				{this.renderFilterItems()}
 			</FormBox>
 		);

@@ -6,6 +6,7 @@ import type {CTXValue, NumberFormatter, ValueFormatter} from './types';
 import {compose} from 'redux';
 import moment from 'utils/moment.config';
 import {SEPARATOR, TITLE_SEPARATOR} from 'store/widgets/buildData/constants';
+import t from 'localization';
 
 /**
  * logger
@@ -186,16 +187,16 @@ export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, ad
 
 	switch (notation) {
 		case THOUSAND:
-			[divider, additional] = [1e3, 'тыс.'];
+			[divider, additional] = [1e3, t('Formatter::Thousand')];
 			break;
 		case MILLION:
-			[divider, additional] = [1e6, 'млн.'];
+			[divider, additional] = [1e6, t('Formatter::Million')];
 			break;
 		case BILLION:
-			[divider, additional] = [1e9, 'млрд.'];
+			[divider, additional] = [1e9, t('Formatter::Billion')];
 			break;
 		case TRILLION:
-			[divider, additional] = [1e12, 'трлн.'];
+			[divider, additional] = [1e12, t('Formatter::Trillion')];
 			break;
 	}
 

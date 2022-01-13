@@ -8,6 +8,7 @@ import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import SpeedometerWidgetForm from 'containers/SpeedometerWidgetForm';
 import SummaryWidgetForm from 'containers/SummaryWidgetForm/SummaryWidgetForm';
+import t from 'localization';
 import TableWidgetForm from 'containers/TableWidgetForm';
 import TextWidgetForm from 'containers/TextWidgetForm';
 import {TYPE_CONTEXT} from './HOCs/withType/constants';
@@ -27,7 +28,7 @@ export class WidgetFormPanel extends PureComponent<Props, State> {
 		console.error(e);
 
 		createToast({
-			text: 'Ошибка формы редактирования',
+			text: t('WidgetFormPanel::FormError'),
 			type: 'error'
 		});
 		cancelForm();

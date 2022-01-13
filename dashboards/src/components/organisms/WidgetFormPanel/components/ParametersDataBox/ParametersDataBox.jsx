@@ -9,6 +9,7 @@ import {GROUP_WAYS} from 'store/widgets/constants';
 import type {Parameter} from 'store/widgetForms/types';
 import ParameterFieldset from 'WidgetFormPanel/components/ParameterFieldset';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class ParametersDataBox extends PureComponent<Props> {
 	mainIndex: number = 0;
@@ -148,7 +149,7 @@ export class ParametersDataBox extends PureComponent<Props> {
 		const {value} = this.props;
 
 		return (
-			<FormBox title="Параметр">
+			<FormBox title={t('ParametersDataBox::Parameter')}>
 				{value.map(this.renderParameters)}
 			</FormBox>
 		);

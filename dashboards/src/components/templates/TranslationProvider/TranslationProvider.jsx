@@ -1,5 +1,6 @@
 // @flow
 import api from 'api';
+import {LOCALES} from 'localization/constants';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import translate, {localization} from 'localization';
@@ -12,13 +13,17 @@ class TranslationProvider extends PureComponent<Props, State> {
 	};
 
 	async componentDidMount () {
-		const locale = api.instance.frame.getCurrentLocale();
+		let locale = api.instance.frame.getCurrentLocale();
+
+		if (!Object.values(LOCALES).includes(locale)) {
+			locale = LOCALES.CLIENT;
+		}
 
 		localization.addEventChange(this.changeLocale);
 		localization.changeLocale(locale);
 	}
 
-	changeLocale = (locale) => this.setState({
+	changeLocale = locale => this.setState({
 		locale,
 		translate: (key, params) => translate(key, params)
 	});

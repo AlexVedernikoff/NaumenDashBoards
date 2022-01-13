@@ -3,10 +3,12 @@ const RU: 'ru' = 'ru';
 const EN: 'en' = 'en';
 const DE: 'de' = 'de';
 const PL: 'pl' = 'pl';
+const CLIENT: 'client' = 'client';
 
 export const DEFAULT_LOCALE = RU;
 
 export const LOCALES = {
+	CLIENT,
 	DE,
 	EN,
 	PL,

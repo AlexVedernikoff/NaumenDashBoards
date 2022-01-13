@@ -4,7 +4,7 @@ import NewWidget from 'store/widgets/data/NewWidget';
 
 export type DefaultProps = {
 	name: string,
-	showForamt: boolean,
+	showFormat: boolean,
 };
 
 export type Props = {

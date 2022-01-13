@@ -3,6 +3,7 @@ import Container from 'components/atoms/Container';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 import {TIMER_VALUE} from 'store/sources/attributes//constants';
 
 export class TimerValueListOptionValue extends PureComponent<Props> {
@@ -11,9 +12,9 @@ export class TimerValueListOptionValue extends PureComponent<Props> {
 
 		switch (attribute.timerValue) {
 			case TIMER_VALUE.STATUS:
-				return 'Статус';
+				return t('TimerValueListOptionValue::Status');
 			case TIMER_VALUE.VALUE:
-				return 'Значение';
+				return t('TimerValueListOptionValue::Value');
 			default:
 				return '';
 		}

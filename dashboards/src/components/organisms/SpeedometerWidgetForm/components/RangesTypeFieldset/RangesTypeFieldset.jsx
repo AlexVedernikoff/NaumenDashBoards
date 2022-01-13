@@ -6,6 +6,8 @@ import RadioField from 'components/atoms/RadioField';
 import {RANGES_TYPES} from 'store/widgets/data/constants';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 
 export class RangesTypeFieldset extends PureComponent<Props> {
 	handleChangeType = ({value: type}) => {
@@ -19,11 +21,11 @@ export class RangesTypeFieldset extends PureComponent<Props> {
 
 		return (
 			<Fragment>
-				<Label className={styles.label}>Тип шкалы</Label>
+				<Label className={styles.label}><T text="BordersRangesTypeFieldset::RangeType" /></Label>
 				<FormField>
 					<RadioField
 						checked={type === PERCENT}
-						label="Проценты"
+						label={t('BordersRangesTypeFieldset::Percent')}
 						name={name}
 						onChange={this.handleChangeType}
 						value={PERCENT}
@@ -32,7 +34,7 @@ export class RangesTypeFieldset extends PureComponent<Props> {
 				<FormField>
 					<RadioField
 						checked={type === ABSOLUTE}
-						label="Абсолютное значение"
+						label={t('BordersRangesTypeFieldset::Absolute')}
 						name={name}
 						onChange={this.handleChangeType}
 						value={ABSOLUTE}

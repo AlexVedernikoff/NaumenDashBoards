@@ -8,6 +8,8 @@ import type {OnChangeEvent, TreeNode} from 'components/types';
 import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 import Toggle from 'components/atoms/Toggle';
 import TreeList from 'components/molecules/TreeSelect/components/Tree';
 import withAttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withAttributeFieldset';
@@ -93,7 +95,7 @@ export class MainSelectList extends PureComponent<Props, State> {
 		if (!descriptor && !filterId && showDynamicAttributesError) {
 			return (
 				<div className={styles.dynamicError}>
-					Для отображения списка, установите, пожалуйста, параметры фильтрации
+					<T text="MainSelectList::DynamicAttributesError" />
 				</div>
 			);
 		}
@@ -108,7 +110,10 @@ export class MainSelectList extends PureComponent<Props, State> {
 		if (hasDynamic) {
 			return (
 				<Fragment>
-					<FormControl className={styles.dynamicAttributesShowHandler} label="Динамические атрибуты">
+					<FormControl
+						className={styles.dynamicAttributesShowHandler}
+						label={t('MainSelectList::DynamicAttributes')}
+					>
 						<Toggle
 							checked={showDynamicAttributes}
 							onChange={this.handleChangeShowDynamicAttributes}

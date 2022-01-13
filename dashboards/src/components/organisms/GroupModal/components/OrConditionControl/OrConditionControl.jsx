@@ -12,6 +12,7 @@ import type {OrCondition as OrConditionType} from 'GroupModal/types';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 import {VARIANTS as BUTTON_VARIANTS} from 'src/components/atoms/Button/constants';
 import withComponents from 'GroupModal/HOCs/withComponents';
 import withOrConditionOptions from 'GroupModal/HOCs/withOrConditionOptions';
@@ -91,7 +92,7 @@ export class OrConditionControl extends PureComponent<Props, State> {
 		return (
 			<div className={styles.orOperator}>
 				<Button disabled={disabled} onClick={onCreate} variant={BUTTON_VARIANTS.SIMPLE}>
-					ИЛИ
+					<T text="OrConditionControl::OR" />
 				</Button>
 			</div>
 		);

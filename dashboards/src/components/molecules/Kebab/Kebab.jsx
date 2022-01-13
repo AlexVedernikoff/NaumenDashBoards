@@ -9,6 +9,7 @@ import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
+import t from 'localization';
 
 export class Kebab extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -82,7 +83,9 @@ export class Kebab extends PureComponent<Props, State> {
 		let result = children.slice(0, elements);
 
 		if (showKebab) {
-			result.push((<KebabIconButton active={activeKebab} icon={ICON_NAMES.KEBAB} key={'menu'} onClick={this.toggleActiveKebab} text='Меню' />));
+			result.push(
+				<KebabIconButton active={activeKebab} icon={ICON_NAMES.KEBAB} key={'menu'} onClick={this.toggleActiveKebab} text={t('Kebab::Menu')} />
+			);
 		}
 
 		if (activeKebab) {

@@ -1,5 +1,5 @@
 // @flow
-import {ANNOTATION_POINT, CHART_TYPES, DATA_LABELS_TEXT_ANCHOR, LOCALES} from './constants';
+import {ANNOTATION_POINT, CHART_TYPES, DATA_LABELS_TEXT_ANCHOR} from './constants';
 import {axisMixin, circleMixin, comboMixin} from './mixins';
 import type {Chart, DataLabels, WidgetType} from 'store/widgets/data/types';
 import type {DataLabelsTextAnchor, Options, Series} from './types';
@@ -9,6 +9,7 @@ import {extend} from 'helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import isMobile from 'ismobilejs';
 import {setColors} from './helpers';
+import t, {getLocale} from 'localization';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
@@ -183,12 +184,12 @@ const getOptions = (
 				enabled: false
 			},
 			background: 'white',
-			defaultLocale: 'ru',
+			defaultLocale: getLocale(),
 			events: {
 				dataPointSelection: drillDownBySelection(widget, data)
 			},
 			height: '100%',
-			locales: LOCALES,
+			locales: [t('axios::Locales')],
 			parentHeightOffset: 0,
 			redrawOnWindowResize: false,
 			type,
@@ -211,9 +212,7 @@ const getOptions = (
  * @param {Series} series - данные построения осей
  * @returns {string}
  */
-const getComboType = (series: Series) => {
-	return series.length === 1 ? series[0].type : CHART_TYPES.line;
-};
+const getComboType = (series: Series) => series.length === 1 ? series[0].type : CHART_TYPES.line;
 
 /**
  * Возвращает тип графика на основе типа виджета

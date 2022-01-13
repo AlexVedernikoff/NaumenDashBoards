@@ -25,3 +25,4 @@ rest/stand.json
 .DS_Store
 stats.json
 bundle-stats.html
+.~lock*

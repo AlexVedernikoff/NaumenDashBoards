@@ -61,7 +61,7 @@ describe('TreeSelect Tree', () => {
 
 	it('handles onFetch when clicked "showMore" link and calls provided callback', () => {
 		const mockOnFetch = jest.fn();
-		const wrapper = shallow(<Tree {...getProps()} onFetch={mockOnFetch} options={{}} />, { disableLifecycleMethods: true });
+		const wrapper = shallow(<Tree {...getProps()} onFetch={mockOnFetch} options={{}} />, {disableLifecycleMethods: true});
 
 		wrapper.instance().handleClickShowMore();
 
@@ -74,7 +74,7 @@ describe('TreeSelect Tree', () => {
 		const mockOnFetch = jest.fn();
 		const children = ['child'];
 		const node = getNode({children, uploaded: false});
-		const wrapper = shallow(<Tree {...getProps()} onFetch={mockOnFetch} />, { disableLifecycleMethods: true });
+		const wrapper = shallow(<Tree {...getProps()} onFetch={mockOnFetch} />, {disableLifecycleMethods: true});
 
 		wrapper.instance().handleLoadChildren(node);
 

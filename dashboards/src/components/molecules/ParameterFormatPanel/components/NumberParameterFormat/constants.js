@@ -1,28 +1,14 @@
 // @flow
+import type {LangType} from 'localization/localize_types';
 import {NOTATION_FORMATS} from 'store/widgets/data/constants';
 
-const ADDITIONAL_OPTIONS_UNDEFINED: 'Не указано' = 'Не указано';
-const PERCENT: '%' = '%';
-const RUB: 'руб.' = 'руб.';
-const USD: '$' = '$';
-const EURO: '€' = '€';
-
-const ADDITIONAL_OPTIONS = [
-	PERCENT,
-	RUB,
-	USD,
-	EURO
-];
-
-const NOTATION_FORMATS_OPTIONS = [
-	{label: 'тыс.', value: NOTATION_FORMATS.THOUSAND},
-	{label: 'млн.', value: NOTATION_FORMATS.MILLION},
-	{label: 'млрд.', value: NOTATION_FORMATS.BILLION},
-	{label: 'трлн.', value: NOTATION_FORMATS.TRILLION}
+const NOTATION_FORMATS_OPTIONS: Array<{label: LangType, value: $Keys<typeof NOTATION_FORMATS>}> = [
+	{label: 'Formatter::Thousand', value: NOTATION_FORMATS.THOUSAND},
+	{label: 'Formatter::Million', value: NOTATION_FORMATS.MILLION},
+	{label: 'Formatter::Billion', value: NOTATION_FORMATS.BILLION},
+	{label: 'Formatter::Trillion', value: NOTATION_FORMATS.TRILLION}
 ];
 
 export {
-	NOTATION_FORMATS_OPTIONS,
-	ADDITIONAL_OPTIONS_UNDEFINED,
-	ADDITIONAL_OPTIONS
+	NOTATION_FORMATS_OPTIONS
 };

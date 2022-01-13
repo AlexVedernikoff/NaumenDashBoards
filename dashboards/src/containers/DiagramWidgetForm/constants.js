@@ -1,4 +1,6 @@
 // @flow
+import type {LangType} from 'localization/localize_types';
+
 const OPTIONS = 'OPTIONS';
 const PARAMS = 'PARAMS';
 const STYLE = 'STYLE';
@@ -9,29 +11,29 @@ const TAB_TYPES = {
 	STYLE
 };
 
-const TABS = [
+const TABS: Array<{key: $Keys<typeof TAB_TYPES>, title: LangType}> = [
 	{
 		key: PARAMS,
-		title: 'Параметры'
+		title: 'DiagramWidgetForm::Parameters'
 	},
 	{
 		key: STYLE,
-		title: 'Стиль'
+		title: 'DiagramWidgetForm::Style'
 	},
 	{
 		key: OPTIONS,
-		title: 'Опции'
+		title: 'DiagramWidgetForm::Options'
 	}
 ];
 
-const REGULAR_TABS = [
+const REGULAR_TABS: Array<{key: $Keys<typeof TAB_TYPES>, title: LangType}> = [
 	{
 		key: PARAMS,
-		title: 'Параметры'
+		title: 'DiagramWidgetForm::Parameters'
 	},
 	{
 		key: STYLE,
-		title: 'Стиль'
+		title: 'DiagramWidgetForm::Style'
 	}
 ];
 

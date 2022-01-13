@@ -10,6 +10,7 @@ import type {OnChangeEvent, OnChangeInputEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 import TextArea from 'components/atoms/TextArea';
 
 export class WidgetNameBox extends PureComponent<Props> {
@@ -58,7 +59,7 @@ export class WidgetNameBox extends PureComponent<Props> {
 			return (
 				<FormField path={getErrorPath(DIAGRAM_FIELDS.header, DIAGRAM_FIELDS.template)}>
 					<TextArea
-						label="Заголовок диаграммы"
+						label={t('WidgetNameBox::DiagramName')}
 						maxLength={MAX_TEXT_LENGTH}
 						name={DIAGRAM_FIELDS.template}
 						onBlur={this.handleBlur}
@@ -78,7 +79,7 @@ export class WidgetNameBox extends PureComponent<Props> {
 		return (
 			<FormField path={DIAGRAM_FIELDS.templateName} >
 				<TextArea
-					label="Название виджета"
+					label={t('WidgetNameBox::NameField')}
 					name={DIAGRAM_FIELDS.templateName}
 					onBlur={this.handleBlur}
 					onChange={this.handleChangeName}
@@ -92,7 +93,7 @@ export class WidgetNameBox extends PureComponent<Props> {
 		const {useName: value} = this.props.values.header;
 
 		return (
-			<FormControl className={styles.checkbox} label="Использовать для заголовка диаграммы">
+			<FormControl className={styles.checkbox} label={t('WidgetNameBox::UseName')}>
 				<Checkbox checked={value} name={DIAGRAM_FIELDS.useName} onChange={this.handleChangeUseName} value={value} />
 			</FormControl>
 		);

@@ -6,6 +6,7 @@ import type {Option, Props, State} from './types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 
 export class MiniSelect extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -18,7 +19,7 @@ export class MiniSelect extends PureComponent<Props, State> {
 	state = {
 		active: false,
 		currentOption: {
-			label: '[Не выбрано]',
+			label: t('MiniSelect::NoSelect'),
 			value: ''
 		}
 	};

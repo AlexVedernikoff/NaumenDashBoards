@@ -11,6 +11,7 @@ import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props} from './types';
 import React, {Component} from 'react';
+import t from 'localization';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
 export class BorderStyleBox extends Component<Props> {
@@ -34,7 +35,12 @@ export class BorderStyleBox extends Component<Props> {
 		const {fontColor, fontFamily, fontSize, fontStyle, format = DEFAULT_NUMBER_AXIS_FORMAT, show} = value;
 
 		return (
-			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleChange} showContent={show} title="Подпись пределов шкалы">
+			<ToggableFormBox
+				name={DIAGRAM_FIELDS.show}
+				onToggle={this.handleChange}
+				showContent={show}
+				title={t('BorderStyleBox::ScaleLimitsSignature')}
+			>
 				<FormField row>
 					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
 					<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleSelect} options={FONT_SIZE_OPTIONS} value={fontSize} />

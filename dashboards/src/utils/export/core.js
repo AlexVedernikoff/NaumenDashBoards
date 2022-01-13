@@ -1,12 +1,16 @@
 // @flow
 import {isLegacyBrowser, save} from './helpers';
 
-/*
-	Браузеры типа IE и EDGE генерируют svg с невалидными, для работы html2canvas, атрибутами. Поэтому, для отображения графиков
-	на итоговом изображении, используюется следующее обходное решение. Функция получает узлы графиков по селектору. Далее каждый узел
-	сереализуется в строку и проходит фильтрацию на удаление всех невалидных атрибутов. По полученной строке создается
-	png представление, которое подставляется на место svg-графика. После преобразования и замены всех графиков на png, создается
-	общее изображение контейнера. После этого происходит удаление всех png представлений и возврат svg-графиков на место.
+/**
+ * Браузеры типа IE и EDGE генерируют svg с невалидными, для работы html2canvas, атрибутами. Поэтому, для отображения графиков
+ * на итоговом изображении, используются следующее обходное решение. Функция получает узлы графиков по селектору.
+ * Далее каждый узел сериализуется в строку и проходит фильтрацию на удаление всех невалидных атрибутов.
+ * По полученной строке создается png представление, которое подставляется на место svg-графика.
+ * После преобразования и замены всех графиков на png, создается общее изображение контейнера.
+ * После этого происходит удаление всех png представлений и возврат svg-графиков на место.
+ * @param {HTMLDivElement} container - элемент-контейнер
+ * @param {object} options - опции для html2canvas
+ * @returns {object} - картинка
  */
 const createIEImage = async (container: HTMLDivElement, options: Object) => {
 	const Canvg = await import('canvg');
@@ -39,7 +43,7 @@ const createIEImage = async (container: HTMLDivElement, options: Object) => {
 			parentNode.removeChild(chart);
 			parentNode.appendChild(canvas);
 		} catch (e) {
-			console.error('ошибка canvg: ', e);
+			console.error('Canvg error: ', e);
 		}
 	});
 
@@ -78,7 +82,7 @@ const handleShowUnnecessaryElements = (container: HTMLDivElement, show: boolean)
 /**
  * Создает canvas элемент снимка
  * @param {HTMLDivElement} container - DOM элемент с графиком виджета
- * @param {boolean} addBackgroundColor - признка добавляения подложки
+ * @param {boolean} addBackgroundColor - признак добавления подложки
  * @param {string} backgroundColor - цвет подложки
  * @returns {Promise<Blob>}
  */

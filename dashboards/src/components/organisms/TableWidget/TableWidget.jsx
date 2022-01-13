@@ -7,7 +7,6 @@ import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
-import {EMPTY_VALUE, ID_ACCESSOR} from './constants';
 import {
 	getSeparatedLabel,
 	hasIndicatorsWithAggregation,
@@ -18,6 +17,7 @@ import {
 } from 'store/widgets/buildData/helpers';
 import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import HeaderCell from 'Table/components/HeaderCell';
+import {ID_ACCESSOR} from './constants';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
 import type {Props as HeaderCellProps} from 'components/organisms/Table/components/HeaderCell/types';
 import type {Props, State} from './types';
@@ -25,6 +25,7 @@ import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
 import {sumColumnsWidth} from 'components/organisms/Table/helpers';
+import t from 'localization';
 import Table from 'components/organisms/Table';
 import ValueWithLimitWarning from './components/ValueWithLimitWarning';
 
@@ -83,10 +84,10 @@ export class TableWidget extends PureComponent<Props, State> {
 			let rowValue = '';
 
 			if (row) {
-				({[accessor]: rowValue = EMPTY_VALUE} = row);
+				({[accessor]: rowValue = t('TableWidget::EmptyValue')} = row);
 
 				if (rowValue === '') {
-					rowValue = EMPTY_VALUE;
+					rowValue = t('TableWidget::EmptyValue');
 				}
 			}
 
@@ -352,7 +353,7 @@ export class TableWidget extends PureComponent<Props, State> {
 			name={LIMIT_NAMES.BREAKDOWN}
 			onSubmit={this.handleSubmitLimitWarningModal}
 			value={props.value}
-			warningText="Результат превышает 30 столбцов и может быть труден для восприятия. Вы уверены, что хотите выгрузить данные на диаграмму?"
+			warningText={t('TableWidget::ColumnsLimit', {limit: 30})}
 		/>
 	);
 
@@ -390,7 +391,7 @@ export class TableWidget extends PureComponent<Props, State> {
 			name={LIMIT_NAMES.PARAMETER}
 			onSubmit={this.handleSubmitLimitWarningModal}
 			value={props.value}
-			warningText="Результат превышает 10000 значений. Вы уверены, что хотите выгрузить данные на диаграмму?"
+			warningText={t('TableWidget::ValueCountLimit', {limit: 10000})}
 		/>
 	);
 

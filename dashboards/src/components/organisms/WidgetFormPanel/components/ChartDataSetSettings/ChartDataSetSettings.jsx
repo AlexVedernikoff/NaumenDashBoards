@@ -15,6 +15,7 @@ import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 
 export class ChartDataSetSettings extends PureComponent<Props> {
 	static defaultProps = {
@@ -131,7 +132,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		if (usesBlankData) {
 			return (
 				<FormField>
-					<FormControl label="Показывать незаполненные данные">
+					<FormControl label={t('ChartDataSetSettings::ShowEmptyData')}>
 						<Checkbox
 							checked={showBlankData}
 							className={styles.checkbox}
@@ -154,7 +155,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		if (usesEmptyData) {
 			return (
 				<FormField>
-					<FormControl label="Показывать нулевые значения">
+					<FormControl label={t('ChartDataSetSettings::ShowZeroValues')}>
 						<Checkbox
 							checked={showEmptyData}
 							className={styles.checkbox}

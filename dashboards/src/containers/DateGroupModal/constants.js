@@ -1,183 +1,187 @@
 // @flow
 import {createSchema, number, object} from 'GroupModal/schema';
 import {DATETIME_SYSTEM_GROUP} from 'store/widgets/constants';
+import type {LangType} from 'localization/localize_types';
 import type {OrCondition} from 'GroupModal/types';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 
-const SYSTEM_OPTIONS = [
+const SYSTEM_OPTIONS: Array<{hasReferenceToCurrentObject?: boolean, label: LangType, value: string}> = [
 	{
-		label: 'День',
+		label: 'DateGroupModal::Day',
 		value: DATETIME_SYSTEM_GROUP.DAY
 	},
 	{
-		label: 'Неделя',
+		label: 'DateGroupModal::Week',
 		value: DATETIME_SYSTEM_GROUP.WEEK
 	},
 	{
-		label: '7 дней',
+		label: 'DateGroupModal::SevenDays',
 		value: DATETIME_SYSTEM_GROUP.SEVEN_DAYS
 	},
 	{
-		label: 'Месяц',
+		label: 'DateGroupModal::Month',
 		value: DATETIME_SYSTEM_GROUP.MONTH
 	},
 	{
-		label: 'Квартал',
+		label: 'DateGroupModal::Quarter',
 		value: DATETIME_SYSTEM_GROUP.QUARTER
 	},
 	{
-		label: 'Год',
+		label: 'DateGroupModal::Year',
 		value: DATETIME_SYSTEM_GROUP.YEAR
 	}
 ];
 
-const DATETIME_SYSTEM_OPTIONS = [
+const DATETIME_SYSTEM_OPTIONS: Array<{hasReferenceToCurrentObject?: boolean, label: LangType, value: string}> = [
 	{
-		label: 'Минуты',
+		label: 'DateGroupModal::Minutes',
 		value: DATETIME_SYSTEM_GROUP.MINUTES
 	},
 	{
-		label: 'Часы',
+		label: 'DateGroupModal::Hours',
 		value: DATETIME_SYSTEM_GROUP.HOURS
 	},
 	...SYSTEM_OPTIONS
 ];
 
-const OR_CONDITION_OPTIONS = [
+const OR_CONDITION_OPTIONS: Array<{hasReferenceToCurrentObject?: boolean, label: LangType, value: string}> = [
 	{
-		label: 'с ...по',
+		label: 'DateGroupModal::Between',
 		value: OR_CONDITION_TYPES.BETWEEN
 	},
 	{
-		label: 'за последние "n" дней',
+		label: 'DateGroupModal::Last',
 		value: OR_CONDITION_TYPES.LAST
 	},
 	{
-		label: 'в ближайшие "n" дней',
+		label: 'DateGroupModal::Near',
 		value: OR_CONDITION_TYPES.NEAR
 	},
 	{
-		label: 'за последние "n" часов',
+		label: 'DateGroupModal::LastHours',
 		value: OR_CONDITION_TYPES.LAST_HOURS
 	},
 	{
-		label: 'в ближайшие "n" часов',
+		label: 'DateGroupModal::NearHours',
 		value: OR_CONDITION_TYPES.NEAR_HOURS
 	},
 	{
-		label: 'сегодня',
+		label: 'DateGroupModal::Today',
 		value: OR_CONDITION_TYPES.TODAY
 	},
 	{
-		label: 'пусто',
+		label: 'DateGroupModal::Empty',
 		value: OR_CONDITION_TYPES.EMPTY
 	},
 	{
-		label: 'не пусто',
+		label: 'DateGroupModal::NotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	}
 ];
 
-const FORMATS = {
+type p = Array<{label: LangType, value: string}>;
+type D = {[id: string]: p};
+
+const FORMATS: D = {
 	DATETIME_DAY: [
 		{
-			label: 'ДД ММ (1 января)',
+			label: 'DateGroupModal::DateTimeDay::ddMM',
 			value: 'dd MM'
 		},
 		{
-			label: 'ДД.ММ.ГГГГ чч:мм (01.01.2020 11:11)',
+			label: 'DateGroupModal::DateTimeDay::ddmmYYhhii',
 			value: 'dd.mm.YY hh:ii'
 		},
 		{
-			label: 'ДД.ММ.ГГГГ чч (01.01.2020, 11ч)',
+			label: 'DateGroupModal::DateTimeDay::ddmmYYhh',
 			value: 'dd.mm.YY hh'
 		},
 		{
-			label: 'ДД.MM.ГГГГ (01.01.2020)',
+			label: 'DateGroupModal::DateTimeDay::ddmmYY',
 			value: 'dd.mm.YY'
 		},
 		{
-			label: 'День недели (понедельник)',
+			label: 'DateGroupModal::DateTimeDay::WD',
 			value: 'WD'
 		},
 		{
-			label: 'День месяца (1-й)',
+			label: 'DateGroupModal::DateTimeDay::dd',
 			value: 'dd'
 		}
 	],
 	DAY: [
 		{
-			label: 'ДД ММ (1 января)',
+			label: 'DateGroupModal::DateTimeDay::ddMM',
 			value: 'dd MM'
 		},
 		{
-			label: 'ДД.MM.ГГГГ (01.01.2020)',
+			label: 'DateGroupModal::DateTimeDay::ddmmYY',
 			value: 'dd.mm.YY'
 		},
 		{
-			label: 'День недели (понедельник)',
+			label: 'DateGroupModal::DateTimeDay::WD',
 			value: 'WD'
 		},
 		{
-			label: 'День месяца (1-й)',
+			label: 'DateGroupModal::DateTimeDay::dd',
 			value: 'dd'
 		}
 	],
 	HOURS: [
 		{
-			label: 'чч (11)',
+			label: 'DateGroupModal::DateTimeDay::hh',
 			value: 'hh'
 		},
 		{
-			label: 'чч:мм (11:11)',
+			label: 'DateGroupModal::DateTimeDay::hhii',
 			value: 'hh:ii'
 		}
 	],
 	MINUTES: [
 		{
-			label: 'мм (15 мин)',
+			label: 'DateGroupModal::DateTimeDay::ii',
 			value: 'ii'
 		}
 	],
 	MONTH: [
 		{
-			label: 'ММ (январь)',
+			label: 'DateGroupModal::DateTimeDay::MM',
 			value: 'MM'
 		},
 		{
-			label: 'ММ ГГГГ (январь 2020)',
+			label: 'DateGroupModal::DateTimeDay::MMYY',
 			value: 'MM YY'
 		}
 	],
 	QUARTER: [
 		{
-			label: 'Квартал (1 кв-л)',
+			label: 'DateGroupModal::DateTimeDay::QQ',
 			value: 'QQ'
 		},
 		{
-			label: 'Квартал и год (1 кв-л 2020)',
+			label: 'DateGroupModal::DateTimeDay::QQYY',
 			value: 'QQ YY'
 		}
 	],
 	SEVEN_DAYS: [
 		{
-			label: 'ДД ММ - ДД ММ (2 января - 8 января)',
+			label: 'DateGroupModal::DateTimeDay::7D',
 			value: 'dd mm - dd mm'
 		}
 	],
 	WEEK: [
 		{
-			label: '№ недели (1-я)',
+			label: 'DateGroupModal::DateTimeDay::WW',
 			value: 'ww'
 		},
 		{
-			label: 'Неделя и год (1 неделя 2020)',
+			label: 'DateGroupModal::DateTimeDay::WWYY',
 			value: 'WW YY'
 		}
 	],
 	YEAR: [
 		{
-			label: 'ГГГГ (2020)',
+			label: 'DateGroupModal::DateTimeDay::YYYY',
 			value: 'yyyy'
 		}
 	]

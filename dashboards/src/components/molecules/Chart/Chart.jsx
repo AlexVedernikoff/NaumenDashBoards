@@ -8,6 +8,7 @@ import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 import {WIDGET_SETS} from 'store/widgets/data/constants';
 
 export class Chart extends PureComponent<Props> {
@@ -77,7 +78,7 @@ export class Chart extends PureComponent<Props> {
 			const {countTotals = 0} = data;
 			return (
 				<div className={styles.total} style={style}>
-					Итого: {countTotals}
+					<T countTotals={countTotals} text="Chart::CountTotals" />
 				</div>
 			);
 		}
