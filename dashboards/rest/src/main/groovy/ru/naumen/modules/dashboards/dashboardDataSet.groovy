@@ -180,7 +180,7 @@ class DashboardDataSetService
 
     private String currentUserLocale = 'ru'
 
-    private static final Integer maxDiagramDataSize = 5000
+    private static final Integer maxDiagramDataSize = 10000
 
     /**
      * Метод по получению тела запроса по метаданным из хранилища по ключу дашборда и виджета
@@ -3803,7 +3803,7 @@ class DashboardDataSetService
     private void checkAggregationAndBreakdownListSize(Set groupResult, Set breakdownResult, Integer dataSetNum = 1)
     {
         def maxSize = maxDiagramDataSize * dataSetNum
-        if ((groupResult.size() * breakdownResult.size()) >= maxSize)
+        if ((groupResult.size() * breakdownResult.size()) > maxSize)
         {
             String message = messageProvider.getConstant(OVERFLOW_DATA_ERROR, currentUserLocale)
             utils.throwReadableException("$message#${ OVERFLOW_DATA_ERROR }")

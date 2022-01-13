@@ -44,7 +44,7 @@ trait CriteriaWrapper
             }
 
         }
-        return api.db.query(criteria).setMaxResults(hasBreakdown ? 1000 : 100).list()
+        return api.db.query(criteria).setMaxResults(hasBreakdown ? 5000 : 100).list()
     }
 }
 
