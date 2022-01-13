@@ -14,7 +14,7 @@ export type Props = {
 	components: Components,
 	dataKey: string,
 	index: number,
-	onChange: (index: number, value: Array<Indicator>) => void,
+	onChange: (index: number, value: Array<Indicator>, callback?: Function) => void,
 	source: SourceData,
 	value: Array<Indicator>
 };

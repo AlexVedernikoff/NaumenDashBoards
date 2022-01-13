@@ -17,18 +17,18 @@ export class IndicatorBox extends PureComponent<Props> {
 		useAutoFontSize: false
 	};
 
-	change = (key: string, value: any) => {
+	change = (key: string, value: any, callback?: Function) => {
 		const {name, onChange, value: settings} = this.props;
 
 		onChange(name, {
 			...settings,
 			[key]: value
-		});
+		}, callback);
 	};
 
 	handleChange = ({name, value}: OnChangeEvent<string>) => this.change(name, value);
 
-	handleChangeParameterFormat = (value) => this.change(DIAGRAM_FIELDS.format, value);
+	handleChangeParameterFormat = (value, callback?) => this.change(DIAGRAM_FIELDS.format, value, callback);
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 

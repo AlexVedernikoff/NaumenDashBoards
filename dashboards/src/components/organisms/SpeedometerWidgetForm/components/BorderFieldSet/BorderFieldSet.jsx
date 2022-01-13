@@ -20,15 +20,15 @@ export class BorderFieldSet extends PureComponent<Props> {
 		filterAttributesByUsed: (options, dataSetIndex) => options
 	}));
 
-	handleChange = (borderName: string) => (name: string, value) => {
+	handleChange = (borderName: string) => (name: string, value, callback?: Function) => {
 		const {name: propName, onChange, value: borders} = this.props;
 		const newData = {...borders, [borderName]: {...borders[borderName], [name]: value}};
 
-		onChange(propName, newData);
+		onChange(propName, newData, callback);
 	};
 
-	handleChangeIndicator = (borderName: string) => (index: number, indicator: Indicator) => {
-		this.handleChange(borderName)(DIAGRAM_FIELDS.indicator, indicator);
+	handleChangeIndicator = (borderName: string) => (index: number, indicator: Indicator, callback?: Function) => {
+		this.handleChange(borderName)(DIAGRAM_FIELDS.indicator, indicator, callback);
 	};
 
 	handleChangeValue = (borderName: string) => ({name, value}) => {

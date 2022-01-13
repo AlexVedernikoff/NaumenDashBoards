@@ -116,11 +116,11 @@ export class BreakdownFieldset extends Component<Props> {
 		onChange(newBreakdown);
 	};
 
-	handleChangeLabel = ({value: attribute}: OnSelectEvent, breakdownIndex: number) => {
+	handleChangeLabel = ({value: attribute}: OnSelectEvent, breakdownIndex: number, callback?: Function) => {
 		const {onChange, value: breakdown} = this.props;
 		const newBreakdown = breakdown.map((item, i) => i === breakdownIndex ? {...item, attribute} : item);
 
-		onChange(newBreakdown);
+		onChange(newBreakdown, callback);
 	};
 
 	handleClickAddButton = () => {

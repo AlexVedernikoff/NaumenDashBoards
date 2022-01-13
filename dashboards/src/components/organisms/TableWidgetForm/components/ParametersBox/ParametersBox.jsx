@@ -10,11 +10,11 @@ import React, {PureComponent} from 'react';
 import SortableList from 'TableWidgetForm/components/SortableList';
 
 export class ParametersBox extends PureComponent<Props> {
-	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter) => {
+	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter, callback?: Function) => {
 		const {onChange, value} = this.props;
 		const newParameters = value.map((parameter, index) => index === parameterIndex ? newParameter : parameter);
 
-		onChange(dataSetIndex, newParameters);
+		onChange(dataSetIndex, newParameters, callback);
 	};
 
 	handleChangeOrder = (parameters: Array<Parameter>) => {

@@ -13,7 +13,7 @@ type FetchAttributesByCode = (
 export type Props = CommonDialogContextProps & ContainerProps & {
 	fetchAttributesByCode: FetchAttributesByCode,
 	index: number,
-	onChange: (index: number, dataSet: DataSet) => void,
+	onChange: (index: number, dataSet: DataSet, callback?: Function) => void,
 	onOpenFilterForm: () => Promise<string>,
 	value: DataSet
 };

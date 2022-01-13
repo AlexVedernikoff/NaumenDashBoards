@@ -96,7 +96,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		let error = FETCH_DASHBOARD_ERROR_TEXT;
 
 		if (exception instanceof ApiError || process.env.NODE_ENV === 'development') {
-			error = exception.message;
+			error = exception.message ?? FETCH_DASHBOARD_ERROR_TEXT;
 		}
 
 		dispatch({

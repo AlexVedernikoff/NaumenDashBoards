@@ -21,10 +21,10 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		components: DefaultComponents
 	};
 
-	handleChangeBreakdown = (breakdown: Breakdown) => {
+	handleChangeBreakdown = (breakdown: Breakdown, callback?: Function) => {
 		const {index, onChange, value} = this.props;
 
-		onChange(index, {...value, breakdown});
+		onChange(index, {...value, breakdown}, callback);
 	};
 
 	handleChangeCheckbox = ({name, value}: OnChangeEvent<boolean>) => {
@@ -32,7 +32,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		return onChange(index, {...dataSet, [name]: !value});
 	};
 
-	handleChangeIndicators = (index: number, newIndicators: Array<Indicator>) => {
+	handleChangeIndicators = (index: number, newIndicators: Array<Indicator>, callback?: Function) => {
 		const {index: dataSetIndex, onChange, value} = this.props;
 		const {top} = value;
 		let newValue = value;
@@ -47,7 +47,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 			};
 		}
 
-		onChange(dataSetIndex, {...newValue, indicators: newIndicators});
+		onChange(dataSetIndex, {...newValue, indicators: newIndicators}, callback);
 	};
 
 	handleChangeTopSettings = (top: DataTopSettings) => {

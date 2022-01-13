@@ -8,7 +8,7 @@ export type Components = {|
 export type OwnProps = {
 	components: $Shape<Components>,
 	droppable: boolean,
-	onChangeLabel: (label: string) => void,
+	onChangeLabel: (label: string, callback?: Function) => void,
 	onDrop?: (name: string) => void,
 	onRemove?: (name: string) => void,
 	removable: boolean,

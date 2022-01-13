@@ -42,10 +42,9 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		showCreatingModal: false
 	};
 
-	change = (indicator: Indicator) => {
+	change = (indicator: Indicator, callback?: Function) => {
 		const {index, onChange} = this.props;
-
-		onChange(index, indicator);
+		return onChange(index, indicator, callback);
 	};
 
 	getComponents = memoize(() => ({
@@ -74,10 +73,10 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		return [...values.computedAttrs, ...helpers.filterAttributesByUsed(options, dataSetIndex, filterAttribute)];
 	};
 
-	handleChangeLabel = ({value: attribute}: OnSelectEvent) => this.change({
+	handleChangeLabel = ({value: attribute}: OnSelectEvent, index: number, callback?: Function) => this.change({
 		...this.props.value,
 		attribute
-	});
+	}, callback);
 
 	handleClickCreationPanel = () => this.setState({showCreatingModal: true});
 

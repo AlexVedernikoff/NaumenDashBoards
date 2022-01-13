@@ -10,7 +10,7 @@ export type DefaultProps = {
 };
 
 export type Props = DefaultProps & {
-	onSelect?: SelectEvent => void,
+	onSelect?: (e: SelectEvent, callback?: Function) => void,
 	options: string[],
 	value: ?string,
 };

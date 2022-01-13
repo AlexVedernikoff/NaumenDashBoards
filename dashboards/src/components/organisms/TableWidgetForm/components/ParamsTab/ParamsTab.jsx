@@ -54,7 +54,7 @@ export class ParamsTab extends PureComponent<Props> {
 		onChange(DIAGRAM_FIELDS.data, [...values.data, createTableDataSet(uuid())]);
 	};
 
-	handleChangeDataSet = (index: number, newDataSet: DataSet) => {
+	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 
@@ -62,7 +62,7 @@ export class ParamsTab extends PureComponent<Props> {
 			this.setBreakdown();
 		}
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
 	handleChangeTopSettings = (top: DataTopSettings) => {
@@ -107,11 +107,11 @@ export class ParamsTab extends PureComponent<Props> {
 		}
 	};
 
-	setBreakdown = (breakdown?: Breakdown) => {
+	setBreakdown = (breakdown?: Breakdown, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === this.mainIndex ? {...dataSet, breakdown} : dataSet);
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
 	renderBreakdownFieldSet = () => {
@@ -191,25 +191,23 @@ export class ParamsTab extends PureComponent<Props> {
 		);
 	};
 
-	renderSumButton = (rightControl: React$Node) => {
-		return (
-			<CALC_TOTAL_CONTEXT.Consumer>
-				{active => (
-					<Fragment>
-						<IconButton
-							active={active}
-							className={styles.sumInput}
-							icon={ICON_NAMES.SUM}
-							onClick={this.handleClickSumButton}
-							round={false}
-							tip="Подсчитывать итоги"
-						/>
-						{rightControl}
-					</Fragment>
-				)}
-			</CALC_TOTAL_CONTEXT.Consumer>
-		);
-	};
+	renderSumButton = (rightControl: React$Node) => (
+		<CALC_TOTAL_CONTEXT.Consumer>
+			{active => (
+				<Fragment>
+					<IconButton
+						active={active}
+						className={styles.sumInput}
+						icon={ICON_NAMES.SUM}
+						onClick={this.handleClickSumButton}
+						round={false}
+						tip="Подсчитывать итоги"
+					/>
+					{rightControl}
+				</Fragment>
+			)}
+		</CALC_TOTAL_CONTEXT.Consumer>
+	);
 
 	render () {
 		const {onChange, values} = this.props;

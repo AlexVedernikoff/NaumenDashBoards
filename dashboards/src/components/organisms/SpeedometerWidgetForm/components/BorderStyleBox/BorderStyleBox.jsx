@@ -14,18 +14,18 @@ import React, {Component} from 'react';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
 export class BorderStyleBox extends Component<Props> {
-	change = (key: string, value: any) => {
+	change = (key: string, value: any, callback?: Function) => {
 		const {name, onChange, value: settings} = this.props;
 
 		onChange(name, {
 			...settings,
 			[key]: value
-		});
+		}, callback);
 	};
 
 	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, !value);
 
-	handleChangeFormat = (format) => this.change(DIAGRAM_FIELDS.format, format);
+	handleChangeFormat = (format, callback?) => this.change(DIAGRAM_FIELDS.format, format, callback);
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 

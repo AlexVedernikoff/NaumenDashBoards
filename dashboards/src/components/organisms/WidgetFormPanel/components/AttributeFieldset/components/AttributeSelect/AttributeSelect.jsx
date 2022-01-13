@@ -78,10 +78,10 @@ export class AttributeSelect extends Component<Props, State> {
 
 	handleCloseForm = () => this.setState({showForm: false});
 
-	handleSubmitForm = (label: string) => {
+	handleSubmitForm = (label: string, callback?: Function) => {
 		const {onChangeLabel} = this.props;
 
-		onChangeLabel(label);
+		onChangeLabel(label, callback);
 		this.setState({showForm: false});
 	};
 

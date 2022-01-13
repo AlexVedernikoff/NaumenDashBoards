@@ -10,7 +10,7 @@ export type Props = InjectedProps & {
 	disabledGroup: boolean,
 	filterOptions?: (Array<Attribute>, index: number, filterByRef: boolean) => Array<Attribute>,
 	index: number,
-	onChange: (dataSetIndex: number, index: number, value: Parameter) => void,
+	onChange: (dataSetIndex: number, index: number, value: Parameter, callback?: Function) => void,
 	onRemove?: (index: number) => void,
 	removable: boolean,
 	source: SourceData,
