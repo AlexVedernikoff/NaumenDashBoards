@@ -47,7 +47,7 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is n
     onOpenMenu={null}
     onSelect={[Function]}
     options={Object {}}
-    placeholder="Выберите значение"
+    placeholder="TreeSelect::DefaultPlaceholder"
     removable={false}
     showMore={false}
     value={
@@ -76,6 +76,7 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is n
                 "title": "attribute",
               }
             }
+            hasPercentAggregation={true}
             onSelect={[Function]}
             renderValue={[Function]}
             tip="Агрегация"
@@ -200,7 +201,7 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is s
     onOpenMenu={null}
     onSelect={[Function]}
     options={Object {}}
-    placeholder="Выберите значение"
+    placeholder="TreeSelect::DefaultPlaceholder"
     removable={false}
     showMore={false}
     value={null}

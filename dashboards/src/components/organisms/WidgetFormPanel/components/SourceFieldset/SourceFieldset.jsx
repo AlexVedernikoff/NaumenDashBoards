@@ -119,7 +119,7 @@ export class SourceFieldset extends Component<Props, State> {
 			const {descriptor, filterId, value} = source;
 
 			if (mode === MODE.EDIT && filterId === null) {
-				this.changeSource({...source, value: { ...value, label }});
+				this.changeSource({...source, value: {...value, label}});
 				this.hideEditForm();
 			} else {
 				if (!filterList.find(filter => filter.label === label) || mode === MODE.EDIT) {

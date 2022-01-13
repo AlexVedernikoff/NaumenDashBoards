@@ -136,7 +136,7 @@ const getFilterContext = (descriptor: string, classFqn: string) => {
 
 		getDescriptorCases(classFqn).forEach(item => cases.push(item));
 
-		context = { ...context, cases };
+		context = {...context, cases};
 	}
 
 	return context;

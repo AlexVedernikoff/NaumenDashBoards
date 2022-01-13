@@ -13,7 +13,7 @@ export class SpeedometerWidgetForm extends PureComponent<Props> {
 		StyleTab
 	};
 
-	handleSubmit = (values) => {
+	handleSubmit = values => {
 		const {onSave, widget} = this.props;
 		const {id} = widget;
 

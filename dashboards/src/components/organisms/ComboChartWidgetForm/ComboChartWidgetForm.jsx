@@ -11,7 +11,7 @@ import type {TabProps} from 'containers/DiagramWidgetForm/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class ComboChartWidgetForm extends PureComponent<Props> {
-	handleSubmit = (values) => {
+	handleSubmit = values => {
 		const {onSave, widget} = this.props;
 		const {id} = widget;
 

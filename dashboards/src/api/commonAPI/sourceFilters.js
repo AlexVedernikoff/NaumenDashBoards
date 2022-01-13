@@ -10,7 +10,7 @@ export default class SourceFilters implements SourceFiltersAPI {
 	}
 
 	check (dashboardKey: string, sourceFilter: SourceFilterDTO) {
-		return this.transport('dashboardSettings', 'filterIsBadToApply', ['requestContent'], { dashboardKey, sourceFilter });
+		return this.transport('dashboardSettings', 'filterIsBadToApply', ['requestContent'], {dashboardKey, sourceFilter});
 	}
 
 	delete (filterId: string) {

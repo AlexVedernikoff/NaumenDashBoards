@@ -21,7 +21,7 @@ const confirmDialog = (header: string, text: string, options?: $Shape<ConfirmDia
 		const dialogOption = {header, text, ...defaultConfirmDialogOption, ...options};
 		return new Promise<boolean>(resolve => {
 			dispatch({
-				payload: { options: dialogOption, resolve },
+				payload: {options: dialogOption, resolve},
 				type: COMMON_DIALOG_EVENTS.SHOW_CONFIRM_DIALOG
 			});
 		});
@@ -40,7 +40,7 @@ const showAlert = (header: string, text: string, options?: $Shape<AlertDialogOpt
 		const dialogOption = {header, text, ...defaultAlertOption, ...options};
 		return new Promise<boolean>(resolve => {
 			dispatch({
-				payload: { options: dialogOption, resolve },
+				payload: {options: dialogOption, resolve},
 				type: COMMON_DIALOG_EVENTS.SHOW_ALERT
 			});
 		});

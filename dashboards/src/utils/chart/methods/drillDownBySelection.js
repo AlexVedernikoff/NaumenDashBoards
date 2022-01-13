@@ -73,7 +73,7 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
 const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMixin): DrillDownMixin => {
 	const {attribute, group} = dataSet.parameters[0];
 
-	return addGroupFilter(mixin, { attribute, group, value });
+	return addGroupFilter(mixin, {attribute, group, value});
 };
 
 /**
@@ -92,7 +92,7 @@ const addBreakdownFilter = (dataSet: ChartDataSet, value: string, mixin: DrillDo
 	if (breakdownSet) {
 		const {attribute, group} = breakdownSet;
 
-		newMixin = addGroupFilter(mixin, { attribute, group, value });
+		newMixin = addGroupFilter(mixin, {attribute, group, value});
 	}
 
 	return newMixin;

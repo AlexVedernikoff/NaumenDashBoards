@@ -38,9 +38,9 @@ exports[`TreeSelect Node renders "showMore" link when "showMore" property is set
       type="button"
       variant="SIMPLE"
     >
-      <WithTranslation>
-        TreeSelectNode::ShowMore
-      </WithTranslation>
+      <Translation
+        text="TreeSelectNode::ShowMore"
+      />
     </Button>
   </div>
 </Fragment>
