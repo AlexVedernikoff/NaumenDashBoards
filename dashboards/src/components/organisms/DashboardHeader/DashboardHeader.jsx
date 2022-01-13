@@ -1,5 +1,4 @@
 // @flow
-
 import AutoUpdateButton from 'containers/AutoUpdateButton';
 import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import ButtonGroup from 'components/atoms/ButtonGroup';
@@ -25,6 +24,7 @@ import {VARIANTS as ICON_BUTTON_VARIANTS} from './components/IconButton/constant
 
 export class DashboardHeader extends Component<Props, State> {
 	state = {
+		show: true,
 		showModal: false
 	};
 
@@ -73,6 +73,8 @@ export class DashboardHeader extends Component<Props, State> {
 	};
 
 	showModal = () => this.setState({showModal: true});
+
+	togglePanel = () => this.setState(({show}) => ({ show: !show }));
 
 	renderAutoUpdateButton = () => (
 		<NavItem className={styles.autoUpdateItem}>
@@ -124,6 +126,19 @@ export class DashboardHeader extends Component<Props, State> {
 			/>
 		</NavItem>
 	);
+
+	renderDrawControl = () => {
+		const {show} = this.state;
+		const top = (show ? DASHBOARD_HEADER_HEIGHT : 0) - 12;
+		const style = {top};
+		const icon = show ? ICON_NAMES.SIDEBAR_ROUND_UP : ICON_NAMES.SIDEBAR_ROUND_DOWN;
+
+		return (
+			<div className={styles.drawControl} onClick={this.togglePanel} style={style}>
+				<Icon name={icon} />
+			</div>
+		);
+	};
 
 	renderMailExportButton = () => (
 		<NavItem>
@@ -227,15 +242,22 @@ export class DashboardHeader extends Component<Props, State> {
 
 	render () {
 		if (!isMobile().any) {
-			return (
-				<header className={styles.header} style={{height: DASHBOARD_HEADER_HEIGHT}}>
-					<ul className={styles.nav}>
-						{this.renderSwitchDashboardButton()}
-					</ul>
-					{this.renderDisplayModeButton()}
-					{this.renderControls()}
-				</header>
-			);
+			const {show} = this.state;
+
+			if (show) {
+				return (
+					<header className={styles.header} style={{height: DASHBOARD_HEADER_HEIGHT}}>
+						<ul className={styles.nav}>
+							{this.renderSwitchDashboardButton()}
+						</ul>
+						{this.renderDisplayModeButton()}
+						{this.renderControls()}
+						{this.renderDrawControl()}
+					</header>
+				);
+			} else {
+				return this.renderDrawControl();
+			}
 		}
 
 		return null;
