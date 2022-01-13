@@ -76,9 +76,9 @@ export type SourcesFiltersState = {
 	map: SourcesFiltersMap,
 };
 
-export type ResultWithMessage = { result: true } | { message: string, result: false };
+export type ResultWithMessage = {result: true} | {message: string, result: false};
 
-export type UpdateSourcesFilterResult = { filterId: string, result: true } | { message: string, result: false };
+export type UpdateSourcesFilterResult = {filterId: string, result: true} | {message: string, result: false};
 
 export type CheckApplyFilter = (source: string, sourceFilter: SourceFiltersItem) => ThunkAction;
 

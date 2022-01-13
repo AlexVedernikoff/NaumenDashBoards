@@ -146,7 +146,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			dispatch(setMobileLayouts(widgets, refresh, mobileLayouts));
 
 			if (refresh) {
-				widgets.forEach((widget) => {
+				widgets.forEach(widget => {
 					dispatch(fetchBuildData(widget));
 				});
 			}

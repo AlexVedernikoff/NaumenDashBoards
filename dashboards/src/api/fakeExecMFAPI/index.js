@@ -17,7 +17,7 @@ const fakeTtransport: Transport = async (module: string, method: string, paramNa
 		}
 
 		// eslint-disable-next-line no-throw-literal
-		throw { responseText: await response.text(), status, statusText };
+		throw {responseText: await response.text(), status, statusText};
 	} catch (e) {
 		console.error('Fake transport: ', e);
 		throw e;

@@ -12,7 +12,7 @@ export class CircleChartWidgetForm extends PureComponent<Props> {
 		StyleTab
 	};
 
-	handleSubmit = (values) => {
+	handleSubmit = values => {
 		const {onSave, type, widget} = this.props;
 		const {id} = widget;
 

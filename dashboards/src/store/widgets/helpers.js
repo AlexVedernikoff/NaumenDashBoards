@@ -51,9 +51,7 @@ const getDefaultSystemGroup = (attribute?: Object) => {
  * @param {LayoutMode} mode - режим отображения
  * @returns {Array<Widget>}
  */
-const getLayoutWidgets = (widgets: Array<Widget>, mode: LayoutMode): Array<Widget> => {
-	return widgets.filter(item => (!item.displayMode && mode === LAYOUT_MODE.WEB) || item.displayMode === mode || item.displayMode === DISPLAY_MODE.ANY);
-};
+const getLayoutWidgets = (widgets: Array<Widget>, mode: LayoutMode): Array<Widget> => widgets.filter(item => (!item.displayMode && mode === LAYOUT_MODE.WEB) || item.displayMode === mode || item.displayMode === DISPLAY_MODE.ANY);
 
 /**
  * Сообщает используется ли в наборе данных виджета агрегация в процентах
@@ -61,9 +59,7 @@ const getLayoutWidgets = (widgets: Array<Widget>, mode: LayoutMode): Array<Widge
  * @param {string} aggregation - агрегация атрибута
  * @returns {boolean}
  */
-const hasPercent = (attribute: MixedAttribute | null, aggregation: string): boolean => {
-	return Boolean(attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && aggregation === DEFAULT_AGGREGATION.PERCENT);
-};
+const hasPercent = (attribute: MixedAttribute | null, aggregation: string): boolean => Boolean(attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && aggregation === DEFAULT_AGGREGATION.PERCENT);
 
 /**
  * Сообщает об использовании uuid в лейблах
@@ -87,9 +83,7 @@ const hasUUIDsInLabels = (attribute?: Attribute, group?: Group): boolean => {
  * @param {string} aggregation - агрегация атрибута
  * @returns {boolean}
  */
-const hasMSInterval = (attribute: MixedAttribute | null, aggregation: string): boolean => {
-	return Boolean(attribute && attribute.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION);
-};
+const hasMSInterval = (attribute: MixedAttribute | null, aggregation: string): boolean => Boolean(attribute && attribute.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION);
 
 /**
  * Преобразует интервал из миллисекунд в понятный для пользователя вид

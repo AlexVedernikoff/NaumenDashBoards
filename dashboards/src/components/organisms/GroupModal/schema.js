@@ -4,11 +4,12 @@ import {AVAILABLE_DATE_FORMATS} from './components/BetweenOrCondition/constants'
 import moment from 'utils/moment.config';
 import type {OrCondition} from 'GroupModal/types';
 import type {Schema} from 'components/types';
+import t from 'localization';
 
 addMethod(string, 'name', function () {
 	return this.test(
 		'check-name',
-		'Поле должно быть заполнено',
+		t('GroupModal::scheme::NotEmpty'),
 		value => string().required().isValidSync(value)
 	);
 });
@@ -16,7 +17,7 @@ addMethod(string, 'name', function () {
 addMethod(string, 'isString', function () {
 	return this.test(
 		'check-string',
-		'Введите значение',
+		t('GroupModal::scheme::EnterValue'),
 		value => string().required().isValidSync(value)
 	);
 });
@@ -24,7 +25,7 @@ addMethod(string, 'isString', function () {
 addMethod(number, 'isFloat', function () {
 	return this.test(
 		'check-float',
-		'Поле должно содержать вещественное число',
+		t('GroupModal::scheme::FloatField'),
 		value => number().required().isValidSync(value)
 	);
 });
@@ -32,7 +33,7 @@ addMethod(number, 'isFloat', function () {
 addMethod(number, 'isInteger', function () {
 	return this.test(
 		'check-integer',
-		'Поле должно содержать целое число',
+		t('GroupModal::scheme::IntField'),
 		value => number().integer().required().isValidSync(value)
 	);
 });
@@ -40,7 +41,7 @@ addMethod(number, 'isInteger', function () {
 addMethod(object, 'between', function () {
 	return this.test(
 		'check-between-date',
-		'Поля должны содержать даты, первая дата должна быть не больше второй',
+		t('GroupModal::scheme::DateRangeField'),
 		value => {
 			const isValidDate = date => date && moment(date, AVAILABLE_DATE_FORMATS, true).isValid();
 			const {endDate, startDate} = value;
@@ -56,7 +57,7 @@ addMethod(object, 'between', function () {
 addMethod(object, 'interval', function () {
 	return this.test(
 		'check-interval',
-		'Поле должно содержать целое число',
+		t('GroupModal::scheme::IntField'),
 		data => number().integer().isValidSync(data?.value)
 	);
 });
@@ -64,7 +65,7 @@ addMethod(object, 'interval', function () {
 addMethod(array, 'intervalArray', function () {
 	return this.test(
 		'check-interval',
-		'Поле должно содержать вещественное число',
+		t('GroupModal::scheme::FloatField'),
 		data => array().required().of(object({value: number().required()})).isValidSync(data)
 	);
 });

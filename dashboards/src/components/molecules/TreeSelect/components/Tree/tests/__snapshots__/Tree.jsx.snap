@@ -22,7 +22,9 @@ exports[`TreeSelect Tree renders when "showMore" property is set to "true" 1`] =
   <div
     className="message"
   >
-    Список пуст
+    <Translation
+      text="Tree::ListEmpty"
+    />
   </div>
   <Button
     block={false}
@@ -33,7 +35,9 @@ exports[`TreeSelect Tree renders when "showMore" property is set to "true" 1`] =
     type="button"
     variant="SIMPLE"
   >
-    Показать еще
+    <Translation
+      text="Tree::ShowMore"
+    />
   </Button>
 </div>
 `;
@@ -45,7 +49,9 @@ exports[`TreeSelect Tree renders when no options provided 1`] = `
   <div
     className="message"
   >
-    Список пуст
+    <Translation
+      text="Tree::ListEmpty"
+    />
   </div>
 </div>
 `;

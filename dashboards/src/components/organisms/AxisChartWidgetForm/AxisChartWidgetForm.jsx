@@ -33,7 +33,7 @@ export class AxisChartWidgetForm extends PureComponent<Props> {
 		sources: mixed().minSourceNumbers().sourceNumbers()
 	}));
 
-	handleSubmit = (values) => {
+	handleSubmit = values => {
 		const {onSave, type, widget} = this.props;
 		const {id} = widget;
 

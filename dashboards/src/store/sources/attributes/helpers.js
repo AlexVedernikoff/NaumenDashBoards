@@ -3,8 +3,10 @@ import type {Attribute} from './types';
 import {ATTRIBUTE_SETS} from './constants';
 import type {MixedAttribute} from 'store/widgets/data/types';
 
-/*
-	Получаем необходимый атрибут для применения группировки и агрегации
+/**
+ * Получаем необходимый атрибут для применения группировки и агрегации
+ * @param {Attribute} attribute - базовый атрибут
+ * @returns {Attribute} - attribute если это обычный атрибут, attribute.ref - если атрибут ссылочный
  */
 const getProcessedAttribute = (attribute: Attribute) => {
 	if (attribute.type in ATTRIBUTE_SETS.REFERENCE) {

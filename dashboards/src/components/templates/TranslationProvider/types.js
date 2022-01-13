@@ -18,5 +18,4 @@ export type State = {
 export type ContextProps = {
 	locale: ?Locales,
 	translate: ?(key: LangType, params?: LocalizationParams) => string
-}
-;
+};

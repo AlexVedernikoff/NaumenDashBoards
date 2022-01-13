@@ -4,7 +4,7 @@ import moment from 'utils/moment.config';
 import t from 'localization';
 
 /**
- * Cоздает имя файла
+ * Создает имя файла
  * @returns {Promise<string>}
  */
 const createContextName = async () => {

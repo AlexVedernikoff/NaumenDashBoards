@@ -9,7 +9,7 @@ import t from 'localization';
 
 /**
  * Старт загрузки данных
- * @returns {object} Action cтарта загрузки данных
+ * @returns {object} Action старта загрузки данных
  *
  */
 const requestSourceFilters = () => ({type: SOURCES_FILTERS_EVENTS.REQUEST_SOURCE_FILTERS});
@@ -60,7 +60,7 @@ const fetchSourcesFilters = (metaClass: string): ThunkAction =>
 	};
 
 /**
- * Обновляет список предустановленных фильтров для указаного источника
+ * Обновляет список предустановленных фильтров для указанного источника
  *
  * @param {string} source - идентификатор источника
  * @param {object} sourceFilter - список новых фильтров

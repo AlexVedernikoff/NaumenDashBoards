@@ -142,9 +142,7 @@ export class ParametersDataBox extends PureComponent<Props> {
 		);
 	};
 
-	renderParameters = (dataSet: DataSet, index: number): Array<React$Node> => {
-		return dataSet.parameters.map(this.renderParameterFieldset(dataSet, index));
-	};
+	renderParameters = (dataSet: DataSet, index: number): Array<React$Node> => dataSet.parameters.map(this.renderParameterFieldset(dataSet, index));
 
 	render () {
 		const {value} = this.props;

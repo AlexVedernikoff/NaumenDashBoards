@@ -8,7 +8,7 @@ const updateSourceFilterReducer = (state: SourcesFiltersState, sourceFilter: Sou
 	const oldSavedFilters = state.map[source] ?? [];
 	const newSavedFilters = [];
 
-	oldSavedFilters.forEach((item) => {
+	oldSavedFilters.forEach(item => {
 		if (item.id === filter.id) {
 			newSavedFilters.push(filter);
 			return;
@@ -22,7 +22,7 @@ const updateSourceFilterReducer = (state: SourcesFiltersState, sourceFilter: Sou
 		[source]: newSavedFilters
 	};
 
-	return { ...state, map };
+	return {...state, map};
 };
 
 const updateSourcesFiltersReducer = (state: SourcesFiltersState, sourceFilters: SourceFilters): SourcesFiltersState => {
@@ -32,7 +32,7 @@ const updateSourcesFiltersReducer = (state: SourcesFiltersState, sourceFilters: 
 		[source]: filters
 	};
 
-	return { ...state, map };
+	return {...state, map};
 };
 
 const deleteSourcesFiltersReducer = (state: SourcesFiltersState, deleteSourceFilter: DeleteSourceFilter): SourcesFiltersState => {
@@ -43,7 +43,7 @@ const deleteSourcesFiltersReducer = (state: SourcesFiltersState, deleteSourceFil
 		[source]: newSourceFilters
 	};
 
-	return { ...state, map };
+	return {...state, map};
 };
 
 const reducer = (state: SourcesFiltersState = initialSourcesFiltersState, action: SourcesFiltersActions = defaultSourcesFiltersAction): SourcesFiltersState => {

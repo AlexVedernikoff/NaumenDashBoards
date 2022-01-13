@@ -41,9 +41,7 @@ export class DateGroupModal extends Component<Props, State> {
 		return format && this.setState({format});
 	}
 
-	getSystemOptions = () => {
-		return this.props.attribute.type === ATTRIBUTE_TYPES.dateTime ? DATETIME_SYSTEM_OPTIONS : SYSTEM_OPTIONS;
-	};
+	getSystemOptions = () => this.props.attribute.type === ATTRIBUTE_TYPES.dateTime ? DATETIME_SYSTEM_OPTIONS : SYSTEM_OPTIONS;
 
 	getFormatOptions (group: string) {
 		const {attribute} = this.props;
@@ -108,7 +106,7 @@ export class DateGroupModal extends Component<Props, State> {
 			<Fragment>
 				<SystemGroup {...props} />
 				<FORMAT_CONTEXT.Consumer>
-					{(format) => this.renderSystemGroupFormat(props.value, format)}
+					{format => this.renderSystemGroupFormat(props.value, format)}
 				</FORMAT_CONTEXT.Consumer>
 			</Fragment>
 		);

@@ -15,7 +15,7 @@ class TranslationProvider extends PureComponent<Props, State> {
 	async componentDidMount () {
 		let locale = api.instance.frame.getCurrentLocale();
 
-		if (!(locale in LOCALES)) {
+		if (!Object.values(LOCALES).includes(locale)) {
 			locale = LOCALES.CLIENT;
 		}
 

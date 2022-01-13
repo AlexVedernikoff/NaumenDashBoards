@@ -79,11 +79,11 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		return null;
 	};
 
-	renderFilterItem = (filterItemIdx: number, value: CustomFilterValue, availibleDataSets: CustomFilterDataSet[]): React$Node => {
+	renderFilterItem = (filterItemIdx: number, value: CustomFilterValue, availableDataSets: CustomFilterDataSet[]): React$Node => {
 		const {fetchAttributes} = this.props;
 		return (
 			<FilterItem
-				dataSets={availibleDataSets}
+				dataSets={availableDataSets}
 				fetchAttributes={fetchAttributes}
 				idx={filterItemIdx}
 				key={filterItemIdx}
@@ -101,11 +101,12 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		const usedDataSets: string[] = this.getUsedDataSets();
 
 		return filters.map((value, idx) => {
-			const availibleDataSetsForItem = dataSets.filter(dataSet => {
-				return value.dataSetIndex === dataSet.dataSetIndex
-					|| !usedDataSets.includes(dataSet.dataSetIndex);
-			});
-			return this.renderFilterItem(idx, value, availibleDataSetsForItem);
+			const availableDataSetsForItem = dataSets.filter(
+				dataSet =>
+					value.dataSetIndex === dataSet.dataSetIndex
+					|| !usedDataSets.includes(dataSet.dataSetIndex)
+			);
+			return this.renderFilterItem(idx, value, availableDataSetsForItem);
 		});
 	};
 
