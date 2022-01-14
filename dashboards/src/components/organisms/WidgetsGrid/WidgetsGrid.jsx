@@ -244,14 +244,17 @@ export class WidgetsGrid extends Component<Props, State> {
 	);
 
 	renderGrid = () => {
-		const {layoutMode, layouts, selectedWidget, widgets} = this.props;
+		const {isMobileDevice, layoutMode, layouts, selectedWidget, widgets} = this.props;
 		const {width} = this.state;
 
 		if (width) {
 			const isEditable = Boolean(selectedWidget);
 			const containerWidth = this.isDesktopMK() ? DESKTOP_MK_WIDTH : width;
 			const layoutWidgets = getLayoutWidgets(widgets, layoutMode);
-			const sortedLayoutWidgets = getSortedWidgetsByLayout(layoutWidgets, layouts[LAYOUT_BREAKPOINTS.LG]);
+			const sortedLayoutWidgets = getSortedWidgetsByLayout(
+				layoutWidgets,
+				layouts[isMobileDevice ? LAYOUT_BREAKPOINTS.SM : LAYOUT_BREAKPOINTS.LG]
+			);
 
 			return (
 				<ResizeDetector forwardedRefKey="innerRef" onResize={this.handleResize}>
