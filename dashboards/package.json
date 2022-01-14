@@ -171,7 +171,6 @@
   },
   "scripts": {
     "build": "npm run clear && cross-env NODE_ENV=production LICENSE=use webpack --config ./webpack/config.js && npm run zip",
-    "build-usermode": "npm run clear && cross-env NODE_ENV=production USER_MODE=true LICENSE=use webpack --config ./webpack/config.js && npm run zip",
     "build-no-module": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
     "build-dev": "npm run clear && cross-env NODE_ENV=development webpack --config ./webpack/config.js && npm run zip",
     "build-stats": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js --json > stats.json",

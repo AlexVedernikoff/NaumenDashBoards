@@ -9,19 +9,15 @@ import type {UserData} from './types';
  * @returns {ThunkAction}
  */
 const getEditableParam = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {editable = true, select = null} = await api.instance.frame.getCurrentContentParameters();
+	const {editable = [DASHBOARD_EDIT_MODE.EDIT]} = await api.instance.frame.getCurrentContentParameters();
+	let mode;
 
-	// Версии 2.3+. Версии 2.1, 2.2 (после hotfix)
-	let mode = select && Array.isArray(select) ? select[0] : null;
-
-	if (mode === null) {
-		// Версии 2.1, 2.2 (до hotfix)
-		if (Array.isArray(editable)) {
-			mode = editable[0];
-		} else {
-			// версия до 2.1. В части случаев значение приходит строкой
-			mode = editable.toString() === 'true' ? DASHBOARD_EDIT_MODE.EDIT : DASHBOARD_EDIT_MODE.VIEW_ONLY;
-		}
+	// Версии 2.1+
+	if (Array.isArray(editable)) {
+		mode = editable[0];
+	} else {
+		// версия до 2.1. В части случаев значение приходит строкой
+		mode = editable.toString() === 'true' ? DASHBOARD_EDIT_MODE.EDIT : DASHBOARD_EDIT_MODE.VIEW_ONLY;
 	}
 
 	if (mode === DASHBOARD_EDIT_MODE.USER || mode === DASHBOARD_EDIT_MODE.USER_SOURCE) {

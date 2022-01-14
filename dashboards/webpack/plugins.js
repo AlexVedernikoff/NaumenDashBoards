@@ -27,7 +27,7 @@ const devPlugins = storybook ? devPluginsStorybook : devPluginsProject;
 const prodPlugins = [
 	new ParametersXMLWebpackPlugin({
 		output: './dist/parameters.xml',
-		path: isUserModeInclude ? 'metainfo.usermode.xml' : 'metainfo.xml'
+		path: 'metainfo.xml'
 	})
 ];
 
