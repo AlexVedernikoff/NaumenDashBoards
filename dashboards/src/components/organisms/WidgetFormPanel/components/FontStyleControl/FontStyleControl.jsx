@@ -4,6 +4,7 @@ import type {OnChangeEvent} from 'components/types';
 import {options} from './constants';
 import type {Props} from 'components/molecules/CheckIconButtonGroup/types';
 import React, {PureComponent} from 'react';
+import {translateObjectsArray} from 'localization';
 
 export class FontStyleControl extends PureComponent<Props> {
 	static defaultProps = {
@@ -22,8 +23,9 @@ export class FontStyleControl extends PureComponent<Props> {
 
 	render () {
 		const {name, options, value} = this.props;
+		const tOptions = translateObjectsArray('title', options);
 
-		return <CheckIconButtonGroup name={name} onChange={this.handleChange} options={options} value={value} />;
+		return <CheckIconButtonGroup name={name} onChange={this.handleChange} options={tOptions} value={value} />;
 	}
 }
 

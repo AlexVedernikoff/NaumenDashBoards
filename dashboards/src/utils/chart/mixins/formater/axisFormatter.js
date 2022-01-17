@@ -12,13 +12,14 @@ import {
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
 	splitFormatter,
-	storedFormatter
+	storedFormatter,
+	totalPercentFormatter
 } from './helpers';
 import {checkLabelsForOverlap, getLegendWidth} from 'utils/chart/mixins/helpers';
 import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasMSInterval, hasPercent, isHorizontalChart, isStackedChart, parseMSInterval} from 'store/widgets/helpers';
+import {hasCountPercent, hasMSInterval, hasPercent, isHorizontalChart, isStackedChart, parseMSInterval} from 'store/widgets/helpers';
 import {LEGEND_POSITIONS} from 'utils/chart/constants';
 import memoize from 'memoize-one';
 
@@ -50,6 +51,7 @@ const getLegendFormatter = (widget: AxisWidget, container: HTMLDivElement): Numb
  * Создает форматер для меток и оси индикатора
  * @param {AxisWidget} widget - виджет
  * @param {NumberAxisFormat} format - установленный пользователем формат, используется только для меток данных
+ * @param {() => number} totalCalculator -  расчет общего количества элементов на диаграмме
  * @param {boolean} checkShowEmptyData - указывает на необходимость показывать скрытые данные
  * @param {boolean} checkPercentAggregation - указывает на необходимость добавлять % по умолчанию, при процентной агрегации
  * @returns {NumberFormatter | ValueFormatter} - функция-форматер
@@ -57,6 +59,7 @@ const getLegendFormatter = (widget: AxisWidget, container: HTMLDivElement): Numb
 const getDataFormatter = (
 	widget: AxisWidget,
 	format: NumberAxisFormat,
+	totalCalculator: (() => number) | null,
 	checkShowEmptyData: boolean,
 	checkPercentAggregation: boolean = true
 ): NumberFormatter => {
@@ -65,6 +68,7 @@ const getDataFormatter = (
 	const {aggregation, attribute: indicatorAttribute} = indicators[0];
 	const usesMSInterval = hasMSInterval(indicatorAttribute, aggregation);
 	const usesPercent = checkPercentAggregation && hasPercent(indicatorAttribute, aggregation);
+	const usesCntPercent = hasCountPercent(indicatorAttribute, aggregation);
 	const {CUSTOM} = GROUP_WAYS;
 	const hasCustomGroup = parameters[0].group.way === CUSTOM || breakdown?.[0].group.way === CUSTOM;
 	const showZero = checkShowEmptyData && hasCustomGroup && showEmptyData;
@@ -76,6 +80,15 @@ const getDataFormatter = (
 		const numberFormat = !format.additional && format.additional !== '' && usesPercent ? {...format, additional: '%'} : format;
 
 		formatter = makeFormatterByNumberFormat(numberFormat);
+
+		if (usesCntPercent && totalCalculator != null) {
+			const total = totalCalculator();
+
+			if (total !== 0) {
+				formatter = totalPercentFormatter(formatter, total);
+			}
+		}
+
 		formatter = checkInfinity(formatter);
 
 		if (!showZero) {
@@ -146,9 +159,15 @@ const getTooltipNormalizer = (widget: AxisWidget): ((number) => number) => {
  * @param {AxisWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @param {() => number} totalCalculator - расчет общего количества элементов на диаграмме
  * @returns {AxisFormatter} - объект с функциями форматерами и параметрами построения
  */
-const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): AxisFormatter => {
+const getAxisFormatterBase = (
+	widget: AxisWidget,
+	labels: Array<string> | Array<number>,
+	container: HTMLDivElement,
+	totalCalculator: () => number
+): AxisFormatter => {
 	const {dataLabels, indicator: {fontSize: indicatorFontSize}, legend, parameter: {fontSize: parameterFontSize}} = widget;
 	const horizontal = isHorizontalChart(widget.type);
 	const stacked = isStackedChart(widget.type);
@@ -167,8 +186,8 @@ const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<
 	const categoryOverlappedSplitter = checkString(splitFormatter(!hasOverlappedLabel));
 
 	return {
-		dataLabel: getDataFormatter(widget, normalizedDataLabelsFormat, true),
-		indicator: getDataFormatter(widget, indicatorsFormat, false, false),
+		dataLabel: getDataFormatter(widget, normalizedDataLabelsFormat, totalCalculator, true, true),
+		indicator: getDataFormatter(widget, indicatorsFormat, null, false, false),
 		legend: getLegendFormatter(widget, container),
 		options: {
 			hasOverlappedLabel,
@@ -180,7 +199,7 @@ const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<
 			overlapped: compose(categoryOverlappedSplitter, categoryFormatter)
 		},
 		tooltip: {
-			data: compose(getDataFormatter(widget, normalizedDataLabelsFormat, false), getTooltipNormalizer(widget)),
+			data: compose(getDataFormatter(widget, normalizedDataLabelsFormat, totalCalculator, false, true), getTooltipNormalizer(widget)),
 			title: compose(categoryFormatter, getTooltipTitlePruner(horizontalsLegendShow, container))
 		}
 	};
@@ -192,13 +211,19 @@ const getAxisFormatterBase = (widget: AxisWidget, labels: Array<string> | Array<
  * @param {AxisWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @param {() => number} totalCalculator - расчет общего количества элементов на диаграмме
  * @returns {AxisFormatter} - объект с функциями форматерами и параметрами построения
  */
 // eslint-disable-next-line no-unused-vars
-const getAxisFormatterDebug = (widget: AxisWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): AxisFormatter => {
+const getAxisFormatterDebug = (
+	widget: AxisWidget,
+	labels: Array<string> | Array<number>,
+	container: HTMLDivElement,
+	totalCalculator: () => number
+): AxisFormatter => {
 	const {clientWidth} = container;
 	const store = {container: {clientWidth}, labels, widget};
-	const baseFormatter = getAxisFormatterBase(widget, labels, container);
+	const baseFormatter = getAxisFormatterBase(widget, labels, container, totalCalculator);
 	const {options} = baseFormatter;
 	const dataLabel = [];
 	const indicator = [];

@@ -78,12 +78,14 @@ const MAX: 'MAX' = 'MAX';
 const MIN: 'MIN' = 'MIN';
 const NOT_APPLICABLE: 'NOT_APPLICABLE' = 'NOT_APPLICABLE';
 const PERCENT: 'PERCENT' = 'PERCENT';
+const PERCENT_CNT: 'PERCENT_CNT' = 'PERCENT_CNT';
 const SUM: 'SUM' = 'SUM';
 
 const DEFAULT_AGGREGATION = {
 	COUNT,
 	NOT_APPLICABLE,
-	PERCENT
+	PERCENT,
+	PERCENT_CNT
 };
 
 const INTEGER_AGGREGATION = {
@@ -96,27 +98,27 @@ const INTEGER_AGGREGATION = {
 // Периоды атрибута типа dtInterval
 const INTERVALS = [
 	{
-		label: 'c',
+		label: 'store::widgets::Seconds',
 		max: 60000,
 		min: 1000
 	},
 	{
-		label: 'мин',
+		label: 'store::widgets::Minutes',
 		max: 36e5,
 		min: 60000
 	},
 	{
-		label: 'ч',
+		label: 'store::widgets::Hours',
 		max: 864e5,
 		min: 36e5
 	},
 	{
-		label: 'д',
+		label: 'store::widgets::Days',
 		max: 6048e5,
 		min: 864e5
 	},
 	{
-		label: 'нед',
+		label: 'store::widgets::Weeks',
 		max: Infinity,
 		min: 6048e5
 	}
@@ -125,15 +127,15 @@ const INTERVALS = [
 // Режимы отображения виджета
 const DISPLAY_MODE_OPTIONS = [
 	{
-		label: 'Web приложение',
+		label: 'store::widgets::Web',
 		value: DISPLAY_MODE.WEB
 	},
 	{
-		label: 'Везде',
+		label: 'store::widgets::Any',
 		value: DISPLAY_MODE.ANY
 	},
 	{
-		label: 'Мобильное приложение',
+		label: 'store::widgets::Mobile',
 		value: DISPLAY_MODE.MOBILE
 	}
 ];

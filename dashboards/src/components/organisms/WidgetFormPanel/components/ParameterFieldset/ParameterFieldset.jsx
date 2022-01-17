@@ -30,10 +30,9 @@ export class ParameterFieldset extends PureComponent<Props> {
 		removable: false
 	};
 
-	change = (parameter: Parameter) => {
+	change = (parameter: Parameter, callback?: Function) => {
 		const {dataSetIndex, index, onChange} = this.props;
-
-		onChange(dataSetIndex, index, parameter);
+		return onChange(dataSetIndex, index, parameter, callback);
 	};
 
 	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, dataSetIndex: number): Array<Attribute> => {
@@ -54,10 +53,11 @@ export class ParameterFieldset extends PureComponent<Props> {
 		group
 	});
 
-	handleChangeLabel = ({value: attribute}: OnChangeEvent<Attribute>) => this.change({
-		...this.props.value,
-		attribute
-	});
+	handleChangeLabel = ({value: attribute}: OnChangeEvent<Attribute>, index: number, callback?: Function) =>
+		this.change({
+			...this.props.value,
+			attribute
+		}, callback);
 
 	handleSelect = ({value: newAttribute}: OnSelectEvent) => {
 		const {dataSetIndex, value} = this.props;

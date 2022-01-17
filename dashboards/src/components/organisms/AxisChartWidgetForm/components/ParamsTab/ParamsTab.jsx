@@ -31,20 +31,21 @@ export class ParamsTab extends PureComponent<Props> {
 		BreakdownFieldset: this.renderBreakdownFieldset
 	}));
 
-	breakdownChangeDecorator = (onChangeBreakdown: OnChangeBreakdown) => (breakdown: Breakdown) => {
-		const {onChange} = this.props;
-		const breakdownItem = breakdown?.[0] ?? null;
-		let format = null;
+	breakdownChangeDecorator = (onChangeBreakdown: OnChangeBreakdown) =>
+		(breakdown: Breakdown, callback?: Function) => {
+			const {onChange} = this.props;
+			const breakdownItem = breakdown?.[0] ?? null;
+			let format = null;
 
-		if (breakdownItem) {
-			const {attribute, group} = breakdownItem;
+			if (breakdownItem) {
+				const {attribute, group} = breakdownItem;
 
-			format = getDefaultFormatForAttribute(attribute, group);
-		}
+				format = getDefaultFormatForAttribute(attribute, group);
+			}
 
-		onChange(DIAGRAM_FIELDS.breakdownFormat, format);
-		onChangeBreakdown(breakdown);
-	};
+			onChange(DIAGRAM_FIELDS.breakdownFormat, format);
+			onChangeBreakdown(breakdown, callback);
+		};
 
 	handleAddDataSet = () => {
 		const {onChange, values} = this.props;
@@ -52,16 +53,17 @@ export class ParamsTab extends PureComponent<Props> {
 		onChange(DIAGRAM_FIELDS.data, [...values.data, createAxisDataSet(uuid())]);
 	};
 
-	handleChangeData = (data: Array<DataSet>) => this.props.onChange(DIAGRAM_FIELDS.data, data);
+	handleChangeData = (data: Array<DataSet>, callback?: Function) =>
+		this.props.onChange(DIAGRAM_FIELDS.data, data, callback);
 
-	handleChangeDataSet = (index: number, newDataSet: DataSet) => {
+	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
-	handleChangeParameters = (index: number, parameters: Array<Parameter>) => {
+	handleChangeParameters = (index: number, parameters: Array<Parameter>, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const {sorting = DEFAULT_AXIS_SORTING_SETTINGS, parameter} = values;
 		const dataSet = values.data[index];
@@ -79,7 +81,7 @@ export class ParamsTab extends PureComponent<Props> {
 			...dataSet,
 			parameters,
 			xAxisName: getAttributeValue(attribute, 'title')
-		});
+		}, callback);
 	};
 
 	handleRemoveDataSet = (index: number) => {

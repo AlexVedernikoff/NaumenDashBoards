@@ -3,15 +3,16 @@ import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {getSelectedWidget, getSelectedWidgetId} from 'store/widgets/data/selectors';
 import {setEditPanelPosition, setHideEditPanel, setWidthEditPanel} from 'store/dashboard/settings/actions';
+import t from 'localization';
 
 export const props = (state: AppState): ConnectedProps => {
 	const selectedWidgetId = getSelectedWidgetId(state);
-	let title = 'Дашборды';
+	let title = t('DashboardPanel::Dashboards');
 
 	if (selectedWidgetId) {
 		const selectedWidget = getSelectedWidget(state);
 
-		title = selectedWidget.templateName || 'Новый виджет';
+		title = selectedWidget.templateName || t('DashboardPanel::NewWidget');
 	}
 
 	return {

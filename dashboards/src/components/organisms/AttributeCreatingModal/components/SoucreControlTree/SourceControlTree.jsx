@@ -4,6 +4,7 @@ import {getMapValues} from 'helpers';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 import Tree from 'components/molecules/TreeSelect/components/Tree';
 import type {Tree as TreeType} from 'components/molecules/TreeSelect/types';
 
@@ -13,7 +14,7 @@ export class SourceControlTree extends PureComponent<Props> {
 	renderAddConstantButton = () => {
 		const {onAddConstant, searchValue} = this.props;
 
-		return !searchValue ? <CreationPanel onClick={onAddConstant} text="Добавить константу" /> : null;
+		return !searchValue ? <CreationPanel onClick={onAddConstant} text={t('SourceControlTree::AddConstants')} /> : null;
 	};
 
 	renderFoundInfo = () => {
@@ -22,7 +23,7 @@ export class SourceControlTree extends PureComponent<Props> {
 		if (searchValue) {
 			const countAttributes = this.countAttributes(originalOptions);
 			const countFoundAttributes = this.countAttributes(options);
-			const info = `Найдено ${countFoundAttributes} из ${countAttributes}`;
+			const info = t('SourceControlTree::Find', {countAttributes, countFoundAttributes});
 
 			return <div className={styles.searchInfo}>{info}</div>;
 		}
@@ -34,7 +35,7 @@ export class SourceControlTree extends PureComponent<Props> {
 		if (searchValue) {
 			return (
 				<div className={styles.searchValue}>
-					<span>Содержащее: </span>
+					<span>{t('SourceControlTree::Contains')}</span>
 					{searchValue}
 				</div>
 			);

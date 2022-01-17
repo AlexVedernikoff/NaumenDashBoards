@@ -11,8 +11,11 @@ import type {Props} from './types';
 import React, {Component} from 'react';
 import RefObjectGroupModal from 'containers/RefObjectGroupModal';
 import type {SelectProps} from 'src/containers/RefObjectGroupModal/types';
+import {translateObjectsArray} from 'localization';
 
 export class CatalogItemSetGroupModal extends Component<Props> {
+	orConditionOptions = translateObjectsArray('label', OR_CONDITION_OPTIONS);
+
 	static defaultProps = {
 		catalogItemSetData: DEFAULT_DATA
 	};
@@ -49,7 +52,7 @@ export class CatalogItemSetGroupModal extends Component<Props> {
 					customType={customType}
 					onClose={onClose}
 					onSubmit={onSubmit}
-					orConditionOptions={OR_CONDITION_OPTIONS}
+					orConditionOptions={this.orConditionOptions}
 					transform={this.getNodeValue}
 					value={value}
 				/>

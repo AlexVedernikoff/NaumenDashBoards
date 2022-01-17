@@ -27,25 +27,25 @@ const COMMON_DIALOG_EVENTS = {
 };
 
 const DEFAULT_CONFIRM_DIALOG_OPTION: CommonDialogsOptionsOptional = {
-	cancelText: 'Отмена',
+	cancelText: 'store::commonDialogs::CancelText',
 	className: '',
 	defaultButton: DEFAULT_BUTTONS.SUBMIT_BUTTON,
 	footerPosition: FOOTER_POSITIONS.LEFT,
 	notice: true,
 	showCancelButton: true,
 	size: SIZES.NORMAL,
-	submitText: 'Подтвердить'
+	submitText: 'store::commonDialogs::SubmitText'
 };
 
 const DEFAULT_ALERT_OPTION: CommonDialogsOptionsOptional = {
-	cancelText: '',
+	cancelText: 'store::commonDialogs::CancelText',
 	className: '',
 	defaultButton: DEFAULT_BUTTONS.SUBMIT_BUTTON,
 	footerPosition: FOOTER_POSITIONS.LEFT,
 	notice: true,
 	showCancelButton: false,
 	size: SIZES.NORMAL,
-	submitText: 'Ok'
+	submitText: 'store::commonDialogs::AlertSubmitText'
 };
 
 export {

@@ -9,6 +9,7 @@ import type {InnerFormErrors, Props, State} from './types';
 import memoize from 'memoize-one';
 import React, {PureComponent} from 'react';
 import type {RenderProps} from 'components/organisms/WidgetForm/types';
+import t from 'localization';
 import {TAB_TYPES} from 'src/containers/DiagramWidgetForm/constants';
 import {TabbedWidgetForm} from 'components/templates/WidgetForm';
 import type {Values} from 'store/widgetForms/axisChartForm/types';
@@ -118,7 +119,7 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 	renderForm = (props: RenderProps<Values>) => {
 		const {tabs} = this.props;
 		const {handleCancel, handleSubmit, values} = props;
-		const title = values.templateName || 'Новый виджет';
+		const title = values.templateName || t('DiagramWidgetForm::NewWidget');
 
 		return (
 			<TabbedWidgetForm onCancel={handleCancel} onSubmit={handleSubmit} tabs={tabs} title={title}>

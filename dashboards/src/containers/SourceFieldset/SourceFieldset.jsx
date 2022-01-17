@@ -51,7 +51,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 		return result;
 	};
 
-	handleChange = (dataSetIndex: number, dataSet: DataSet) => {
+	handleChange = (dataSetIndex: number, dataSet: DataSet, callback?: Function) => {
 		const {fetchSourcesFilters, onChange, value: {source: oldDataSet}} = this.props;
 		const newClassFqn = dataSet.source.value?.value ?? null;
 		const oldClassFqn = oldDataSet.value?.value ?? null;
@@ -60,7 +60,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 			fetchSourcesFilters(newClassFqn);
 		}
 
-		onChange(dataSetIndex, dataSet);
+		onChange(dataSetIndex, dataSet, callback);
 	};
 
 	setContext = async (): Promise<string | null> => {
@@ -103,7 +103,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 
 				return serializedContext;
 			} catch (e) {
-				console.error('Ошибка окна фильтрации: ', e);
+				console.error('Filtration error: ', e);
 			}
 		}
 

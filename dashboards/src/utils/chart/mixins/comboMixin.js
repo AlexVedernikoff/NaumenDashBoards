@@ -11,6 +11,7 @@ import {
 	getMaxStackedValue,
 	getMaxValue,
 	getNiceScale,
+	getTotalCalculator,
 	getXAxisOptions
 } from './helpers';
 import type {Options} from 'utils/chart/types';
@@ -18,7 +19,6 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Устанавливает настройки оси Y
- *
  * @param {Options} options - опции графика
  * @param {ComboWidget} widget - виджет
  * @param {DiagramBuildData} chart - данные конкретного графика
@@ -127,7 +127,6 @@ const setYAxis = (
 
 /**
  * Устанавливает настройки осей Y относительно каждого объекта данных series
- *
  * @param {Options} options - опции графика
  * @param {ComboWidget} widget - данные виджета
  * @param {DiagramBuildData} chart - данные конкретного графика
@@ -184,7 +183,7 @@ export const comboMixin = (widget: ComboWidget, data: DiagramBuildData, containe
 	const buildDataSet = getBuildSet(widget);
 
 	if (buildDataSet) {
-		const formatter = getComboFormatter(widget, labels, container);
+		const formatter = getComboFormatter(widget, labels, container, getTotalCalculator(data));
 		const {hasOverlappedLabel} = formatter.options;
 		const strokeWidth = series.find(dataSet => dataSet.type.toUpperCase() === WIDGET_TYPES.LINE) ? 4 : 0;
 		const {xAxisName} = buildDataSet;

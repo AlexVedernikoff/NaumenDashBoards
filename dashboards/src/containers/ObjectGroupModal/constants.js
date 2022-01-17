@@ -1,147 +1,148 @@
 // @flow
 import {createContext} from 'react';
+import type {LangType} from 'localization/localize_types';
 import type {ObjectsState} from 'src/store/sources/attributesData/objects/types';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 
-const OBJECT_OR_CONDITION_OPTIONS = [
+const OBJECT_OR_CONDITION_OPTIONS: Array<{hasReferenceToCurrentObject?: boolean, label: LangType, value: string}> = [
 	{
-		label: 'Содержит',
+		label: 'GroupModal::Contains',
 		value: OR_CONDITION_TYPES.CONTAINS
 	},
 	{
-		label: 'Не содержит',
+		label: 'GroupModal::NotContains',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS
 	},
 	{
-		label: 'Содержит любое из значений',
+		label: 'GroupModal::ContainsAny',
 		value: OR_CONDITION_TYPES.CONTAINS_ANY
 	},
 	{
-		label: 'Название содержит',
+		label: 'GroupModal::TitleContains',
 		value: OR_CONDITION_TYPES.TITLE_CONTAINS
 	},
 	{
-		label: 'Название не содержит',
+		label: 'GroupModal::TitleNotContains',
 		value: OR_CONDITION_TYPES.TITLE_NOT_CONTAINS
 	},
 	{
-		label: 'пусто',
+		label: 'GroupModal::Empty',
 		value: OR_CONDITION_TYPES.EMPTY
 	},
 	{
-		label: 'не пусто',
+		label: 'GroupModal::NotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	},
 	{
-		label: 'Содержит (включая архивные)',
+		label: 'GroupModal::ContainsIncludingArchival',
 		value: OR_CONDITION_TYPES.CONTAINS_INCLUDING_ARCHIVAL
 	},
 	{
-		label: 'Не содержит (включая архивные)',
+		label: 'GroupModal::NotContainsIncludingArchival',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS_INCLUDING_ARCHIVAL
 	},
 	{
 		hasReferenceToCurrentObject: true,
-		label: 'Равно текущему объекту',
+		label: 'GroupModal::EqualCurrentObject',
 		value: OR_CONDITION_TYPES.EQUAL_CURRENT_OBJECT
 	},
 	{
 		hasReferenceToCurrentObject: true,
-		label: 'Равно атрибуту текущего объекта',
+		label: 'GroupModal::EqualAttrCurrentObject',
 		value: OR_CONDITION_TYPES.EQUAL_ATTR_CURRENT_OBJECT
 	}
 ];
 
-const BO_LINKS_OR_CONDITION_OPTIONS = [
+const BO_LINKS_OR_CONDITION_OPTIONS: Array<{label: LangType, value: string}> = [
 	{
-		label: 'Содержит',
+		label: 'GroupModal::Contains',
 		value: OR_CONDITION_TYPES.CONTAINS
 	},
 	{
-		label: 'Не содержит',
+		label: 'GroupModal::NotContains',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS
 	},
 	{
-		label: 'Название содержит',
+		label: 'GroupModal::TitleContains',
 		value: OR_CONDITION_TYPES.TITLE_CONTAINS
 	},
 	{
-		label: 'Название не содержит',
+		label: 'GroupModal::TitleNotContains',
 		value: OR_CONDITION_TYPES.TITLE_NOT_CONTAINS
 	},
 	{
-		label: 'пусто',
+		label: 'GroupModal::Empty',
 		value: OR_CONDITION_TYPES.EMPTY
 	},
 	{
-		label: 'не пусто',
+		label: 'GroupModal::NotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	},
 	{
-		label: 'Содержит (включая архивные)',
+		label: 'GroupModal::ContainsIncludingArchival',
 		value: OR_CONDITION_TYPES.CONTAINS_INCLUDING_ARCHIVAL
 	},
 	{
-		label: 'Не содержит (включая архивные)',
+		label: 'GroupModal::NotContainsIncludingArchival',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS_INCLUDING_ARCHIVAL
 	},
 	{
-		label: 'Содержит (включая вложенные)',
+		label: 'GroupModal::ContainsIncludingNested',
 		value: OR_CONDITION_TYPES.CONTAINS_INCLUDING_NESTED
 	},
 	{
 		hasReferenceToCurrentObject: true,
-		label: 'Содержит текущий объект',
+		label: 'GroupModal::ContainsCurrentObject',
 		value: OR_CONDITION_TYPES.CONTAINS_CURRENT_OBJECT
 	},
 	{
 		hasReferenceToCurrentObject: true,
-		label: 'Содержит атрибут текущего объекта',
+		label: 'GroupModal::ContainsAttrCurrentObject',
 		value: OR_CONDITION_TYPES.CONTAINS_ATTR_CURRENT_OBJECT
 	}
 ];
 
-const BACK_BO_LINKS_OR_CONDITION_OPTIONS = [
+const BACK_BO_LINKS_OR_CONDITION_OPTIONS: Array<{label: LangType, value: string}> = [
 	{
-		label: 'Содержит',
+		label: 'GroupModal::Contains',
 		value: OR_CONDITION_TYPES.CONTAINS
 	},
 	{
-		label: 'Не содержит',
+		label: 'GroupModal::NotContains',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS
 	},
 	{
-		label: 'Название содержит',
+		label: 'GroupModal::TitleContains',
 		value: OR_CONDITION_TYPES.TITLE_CONTAINS
 	},
 	{
-		label: 'Название не содержит',
+		label: 'GroupModal::TitleNotContains',
 		value: OR_CONDITION_TYPES.TITLE_NOT_CONTAINS
 	},
 	{
-		label: 'пусто',
+		label: 'GroupModal::Empty',
 		value: OR_CONDITION_TYPES.EMPTY
 	},
 	{
-		label: 'не пусто',
+		label: 'GroupModal::NotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	},
 	{
-		label: 'Содержит (включая архивные)',
+		label: 'GroupModal::ContainsIncludingArchival',
 		value: OR_CONDITION_TYPES.CONTAINS_INCLUDING_ARCHIVAL
 	},
 	{
-		label: 'Не содержит (включая архивные)',
+		label: 'GroupModal::NotContainsIncludingArchival',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS_INCLUDING_ARCHIVAL
 	},
 	{
 		hasReferenceToCurrentObject: true,
-		label: 'Содержит текущий объект',
+		label: 'GroupModal::ContainsCurrentObject',
 		value: OR_CONDITION_TYPES.CONTAINS_CURRENT_OBJECT
 	},
 	{
 		hasReferenceToCurrentObject: true,
-		label: 'Содержит атрибут текущего объекта',
+		label: 'GroupModal::ContainsAttrCurrentObject',
 		value: OR_CONDITION_TYPES.CONTAINS_ATTR_CURRENT_OBJECT
 	}
 ];

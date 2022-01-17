@@ -13,6 +13,7 @@ import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import React, {Component} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 import {TIMER_VALUE} from 'store/sources/attributes/constants';
 import TimerValueListOptionValue from 'components/organisms/WidgetFormPanel/components/AttributeFieldset/components/TimerValueListOptionValue';
 
@@ -78,10 +79,10 @@ export class AttributeSelect extends Component<Props, State> {
 
 	handleCloseForm = () => this.setState({showForm: false});
 
-	handleSubmitForm = (label: string) => {
+	handleSubmitForm = (label: string, callback?: Function) => {
 		const {onChangeLabel} = this.props;
 
-		onChangeLabel(label);
+		onChangeLabel(label, callback);
 		this.setState({showForm: false});
 	};
 
@@ -172,7 +173,7 @@ export class AttributeSelect extends Component<Props, State> {
 				loading={loading}
 				onSelect={onSelect}
 				options={options}
-				placeholder="Не выбрано"
+				placeholder={t('AttributeSelect::Empty')}
 				removable={removable}
 				value={value}
 			/>

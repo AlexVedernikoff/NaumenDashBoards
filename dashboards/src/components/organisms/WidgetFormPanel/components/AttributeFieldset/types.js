@@ -16,7 +16,7 @@ export type Props = {
 	getRefOptions?: GetAttributeOptions,
 	index: number,
 	name: string,
-	onChangeLabel: (event: OnSelectEvent, index: number) => void,
+	onChangeLabel: (event: OnSelectEvent, index: number, callback?: Function) => void,
 	onRemove?: (index: number) => void,
 	onSelect: (event: OnSelectEvent, index: number) => void,
 	removable: boolean,

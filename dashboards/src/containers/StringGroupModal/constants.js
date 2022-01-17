@@ -1,27 +1,28 @@
 // @flow
 import {createSchema, string} from 'GroupModal/schema';
+import type {LangType} from 'localization/localize_types';
 import type {OrCondition} from 'GroupModal/types';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 
-const OR_CONDITION_OPTIONS = [
+const OR_CONDITION_OPTIONS: Array<{label: LangType, value: string}> = [
 	{
-		label: 'Содержит',
+		label: 'GroupModal::Contains',
 		value: OR_CONDITION_TYPES.CONTAINS
 	},
 	{
-		label: 'Не содержит',
+		label: 'GroupModal::NotContains',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS
 	},
 	{
-		label: 'Не содержит (включая пустые)',
+		label: 'GroupModal::NotContainsIncludingEmpty',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS_INCLUDING_EMPTY
 	},
 	{
-		label: 'пусто',
+		label: 'GroupModal::Empty',
 		value: OR_CONDITION_TYPES.EMPTY
 	},
 	{
-		label: 'не пусто',
+		label: 'GroupModal::NotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	}
 ];

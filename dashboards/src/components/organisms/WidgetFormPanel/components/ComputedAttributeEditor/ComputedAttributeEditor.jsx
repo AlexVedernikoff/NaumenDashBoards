@@ -4,6 +4,7 @@ import type {ComputedAttr} from 'store/widgets/data/types';
 import FieldButton from 'components/atoms/FieldButton';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class ComputedAttributeEditor extends PureComponent<Props, State> {
 	state = {
@@ -46,7 +47,7 @@ export class ComputedAttributeEditor extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<FieldButton onClick={this.handleClickFieldButton} tip="Редактировать поле">
+			<FieldButton onClick={this.handleClickFieldButton} tip={t('ComputedAttributeEditor::EditField')}>
 				f(x)
 				{this.renderModal()}
 			</FieldButton>

@@ -2,6 +2,7 @@
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 export class Pagination extends PureComponent<Props> {
 	renderCenter = () => {
@@ -9,7 +10,7 @@ export class Pagination extends PureComponent<Props> {
 
 		return (
 			<div className={styles.center}>
-				<span>Страница {page} из {total}</span>
+				<span><T page={page} text="Table::Paginator::PageNumber" total={total} /></span>
 			</div>
 		);
 	};
@@ -20,7 +21,7 @@ export class Pagination extends PureComponent<Props> {
 
 		return (
 			<button className={styles.button} disabled={disabled} onClick={onNextClick}>
-				Следующая
+				<T text="Table::Paginator::Next" />
 			</button>
 		);
 	};
@@ -31,7 +32,7 @@ export class Pagination extends PureComponent<Props> {
 
 		return (
 			<button className={styles.button} disabled={disabled} onClick={onPrevClick}>
-				Предыдущая
+				<T text="Table::Paginator::Previous" />
 			</button>
 		);
 	};

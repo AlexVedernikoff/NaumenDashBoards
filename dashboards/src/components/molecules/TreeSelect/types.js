@@ -1,5 +1,6 @@
 // @flow
 import type {ComponentProps as TreeProps} from './components/Tree/types';
+import type {LangType} from 'localization/localize_types';
 import type {OnSelectEvent, TreeNode} from 'components/types';
 import type {Props as NodeProps} from './components/Node/types';
 
@@ -51,7 +52,7 @@ export type Props = {
 	onRemove?: (name: string) => void,
 	onSelect: OnSelectEvent => void | Promise<void>,
 	options: Tree,
-	placeholder: string,
+	placeholder: LangType,
 	removable: boolean,
 	showMore: boolean,
 	value: Option | null,

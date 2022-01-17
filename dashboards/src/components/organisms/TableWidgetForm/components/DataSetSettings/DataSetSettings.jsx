@@ -33,16 +33,16 @@ export class DataSetSettings extends PureComponent<Props> {
 		return sources;
 	};
 
-	handleChangeIndicators = (index: number, indicators: Array<Indicator>) => {
+	handleChangeIndicators = (index: number, indicators: Array<Indicator>, callback?: Function) => {
 		const {onChange, value} = this.props;
 
-		onChange(index, {...value, indicators});
+		onChange(index, {...value, indicators}, callback);
 	};
 
-	handleChangeParameters = (index: number, parameters: Array<Parameter>) => {
+	handleChangeParameters = (index: number, parameters: Array<Parameter>, callback?: Function) => {
 		const {onChange, value} = this.props;
 
-		onChange(index, {...value, parameters});
+		onChange(index, {...value, parameters}, callback);
 	};
 
 	renderIndicatorsBox = () => {

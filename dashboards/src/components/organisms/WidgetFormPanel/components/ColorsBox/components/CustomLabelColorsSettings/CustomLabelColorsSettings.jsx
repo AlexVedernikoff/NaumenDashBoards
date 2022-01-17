@@ -10,6 +10,8 @@ import React, {Fragment, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import {SEPARATOR} from 'store/widgets/buildData/constants';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 
 export class CustomLabelColorsSettings extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -104,10 +106,12 @@ export class CustomLabelColorsSettings extends PureComponent<Props, State> {
 	setOptionsByUsedLabels = () => {
 		const {labels, value} = this.props;
 		const usedIndexes = [];
-		const options = labels.filter((label) => {
-			const foundIndex = value.colors.findIndex((colorSettings, index) => {
-				return this.getOptionValue(colorSettings.key) === this.getOptionValue(label) && !usedIndexes.includes(index);
-			});
+		const options = labels.filter(label => {
+			const foundIndex = value.colors.findIndex(
+				(colorSettings, index) =>
+					this.getOptionValue(colorSettings.key) === this.getOptionValue(label)
+					&& !usedIndexes.includes(index)
+			);
 			const founded = foundIndex !== -1;
 
 			founded && usedIndexes.push(foundIndex);
@@ -125,7 +129,7 @@ export class CustomLabelColorsSettings extends PureComponent<Props, State> {
 			return (
 				<button className={styles.addButton} onClick={this.handleClickAddButton}>
 					<Icon className={styles.addButtonIcon} name={ICON_NAMES.PLUS} />
-					<span className={styles.addButtonLabel}>Добавить</span>
+					<span className={styles.addButtonLabel}><T text='CustomLabelColorsSettings::Add' /></span>
 				</button>
 			);
 		}
@@ -136,7 +140,13 @@ export class CustomLabelColorsSettings extends PureComponent<Props, State> {
 	renderDefaultColorField = () => {
 		const {defaultColor} = this.props.value;
 
-		return <ColorField label="Все параметры" onChange={this.handleChangeDefaultColor} value={defaultColor} />;
+		return (
+			<ColorField
+				label={t('CustomLabelColorsSettings::AllParameters')}
+				onChange={this.handleChangeDefaultColor}
+				value={defaultColor}
+			/>
+		);
 	};
 
 	renderField = (colorSettings: ChartColorSettings, index: number) => {

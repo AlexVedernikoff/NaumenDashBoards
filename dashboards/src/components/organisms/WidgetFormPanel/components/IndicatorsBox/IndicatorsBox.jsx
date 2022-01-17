@@ -5,6 +5,7 @@ import type {Indicator} from 'store/widgetForms/types';
 import IndicatorFieldset from 'WidgetFormPanel/components/IndicatorFieldset';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class IndicatorsBox extends PureComponent<Props> {
 	static defaultProps = {
@@ -13,11 +14,11 @@ export class IndicatorsBox extends PureComponent<Props> {
 		}
 	};
 
-	handleChange = (index: number, newIndicator: Indicator) => {
+	handleChange = (index: number, newIndicator: Indicator, callback?: Function) => {
 		const {index: dataSetIndex, onChange, value} = this.props;
 		const newIndicators = value.map((indicator, i) => i === index ? newIndicator : indicator);
 
-		onChange(dataSetIndex, newIndicators);
+		onChange(dataSetIndex, newIndicators, callback);
 	};
 
 	renderIndicatorFieldSet = (indicator: Indicator, indicatorIndex: number) => {
@@ -41,7 +42,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 		const {components, value} = this.props;
 
 		return (
-			<components.FormBox title="Показатель">
+			<components.FormBox title={t('IndicatorsBox::Indicator')}>
 				{value.map(this.renderIndicatorFieldSet)}
 			</components.FormBox>
 		);

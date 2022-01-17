@@ -1,4 +1,5 @@
 // @flow
 export type State = {
-	showModal: boolean
+	show: boolean,
+	showModal: boolean,
 };

@@ -2,6 +2,7 @@
 import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
 import {checkSourceForParent} from './helpers';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
+import t from 'localization';
 
 const defaultValue = 'defaultValue';
 const indicatorSettings = 'indicatorSettings';
@@ -29,7 +30,7 @@ const schema = object({
 			parameters: array().parameters(),
 			source: object().source().test(
 				'check-source-for-parent',
-				'Для данного типа выбранный источник не доступен - выберите другой',
+				t('TableWidgetForm::Scheme::WrongSource'),
 				checkSourceForParent
 			)
 		})),

@@ -8,6 +8,7 @@ import IndicatorFieldset from 'WidgetFormPanel/components/IndicatorFieldset';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import SortableList from 'TableWidgetForm/components/SortableList';
+import t from 'localization';
 
 export class IndicatorsBox extends PureComponent<Props> {
 	static defaultProps = {
@@ -16,11 +17,11 @@ export class IndicatorsBox extends PureComponent<Props> {
 		}
 	};
 
-	handleChange = (index: number, newIndicator: Indicator) => {
+	handleChange = (index: number, newIndicator: Indicator, callback?: Function) => {
 		const {index: dataSetIndex, onChange, value} = this.props;
 		const newValue = value.map((indicator, i) => i === index ? newIndicator : indicator);
 
-		onChange(dataSetIndex, newValue);
+		onChange(dataSetIndex, newValue, callback);
 	};
 
 	handleChangeOrder = (indicators: Array<Object>) => {
@@ -69,7 +70,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 		const {components, value} = this.props;
 
 		return (
-			<components.FormBox rightControl={this.renderRightControl()} title="Показатели">
+			<components.FormBox rightControl={this.renderRightControl()} title={t('TableWidgetForm::IndicatorsBox::Indicators')}>
 				<SortableList
 					list={value}
 					onChangeOrder={this.handleChangeOrder}

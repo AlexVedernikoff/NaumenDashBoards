@@ -7,6 +7,7 @@ import NewWidget from 'store/widgets/data/NewWidget';
 import OuterSelect from 'components/molecules/OuterSelect';
 import type {Props} from 'WidgetFormPanel/HOCs/withType/types';
 import React, {PureComponent} from 'react';
+import t, {translateObjectsArray} from 'localization';
 import {WIDGET_OPTIONS} from './constants';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withType from 'WidgetFormPanel/HOCs/withType';
@@ -30,11 +31,12 @@ export class WidgetSelectBox extends PureComponent<Props> {
 
 	render () {
 		const {value} = this.props.type;
+		const options = translateObjectsArray('tip', WIDGET_OPTIONS);
 
 		return (
 			<FormBox>
-				<FormField label="Тип диаграммы">
-					<OuterSelect onSelect={this.handleChange} options={WIDGET_OPTIONS} value={value} />
+				<FormField label={t('WidgetSelectBox::Title')}>
+					<OuterSelect onSelect={this.handleChange} options={options} value={value} />
 				</FormField>
 			</FormBox>
 		);

@@ -7,6 +7,7 @@ import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class FiltersOnWidget extends PureComponent<Props> {
 	/**
@@ -25,7 +26,7 @@ export class FiltersOnWidget extends PureComponent<Props> {
 			return p;
 		}, {});
 
-		return Object.keys(dataSetIndexCounter).filter((index) => dataSetIndexCounter[index] > 2);
+		return Object.keys(dataSetIndexCounter).filter(index => dataSetIndexCounter[index] > 2);
 	};
 
 	handleAddSource = () => {
@@ -36,27 +37,27 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		}
 	};
 
-	handleChangeAttribute = (idx: number) => (attributes: Attribute[]) => {
+	handleChangeAttribute = (idx: number) => (attributes: Attribute[], callback?: Function) => {
 		const {filters, onChangeFilter} = this.props;
 
 		if (idx < filters.length) {
-			onChangeFilter(idx, {...filters[idx], attributes});
+			onChangeFilter(idx, {...filters[idx], attributes}, callback);
 		}
 	};
 
-	handleChangeDataSet = (idx: number) => (dataSetIndex: number) => {
+	handleChangeDataSet = (idx: number) => (dataSetIndex: number, callback?: Function) => {
 		const {filters, onChangeFilter} = this.props;
 
 		if (idx < filters.length) {
-			onChangeFilter(idx, {...filters[idx], dataSetIndex});
+			onChangeFilter(idx, {...filters[idx], dataSetIndex}, callback);
 		}
 	};
 
-	handleChangeLabel = (idx: number) => (label: string) => {
+	handleChangeLabel = (idx: number) => (label: string, callback?: Function) => {
 		const {filters, onChangeFilter} = this.props;
 
 		if (idx < filters.length) {
-			onChangeFilter(idx, {...filters[idx], label});
+			onChangeFilter(idx, {...filters[idx], label}, callback);
 		}
 	};
 
@@ -78,11 +79,11 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		return null;
 	};
 
-	renderFilterItem = (filterItemIdx: number, value: CustomFilterValue, availibleDataSets: CustomFilterDataSet[]): React$Node => {
+	renderFilterItem = (filterItemIdx: number, value: CustomFilterValue, availableDataSets: CustomFilterDataSet[]): React$Node => {
 		const {fetchAttributes} = this.props;
 		return (
 			<FilterItem
-				dataSets={availibleDataSets}
+				dataSets={availableDataSets}
 				fetchAttributes={fetchAttributes}
 				idx={filterItemIdx}
 				key={filterItemIdx}
@@ -100,17 +101,18 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		const usedDataSets: string[] = this.getUsedDataSets();
 
 		return filters.map((value, idx) => {
-			const availibleDataSetsForItem = dataSets.filter(dataSet => {
-				return value.dataSetIndex === dataSet.dataSetIndex
-					|| !usedDataSets.includes(dataSet.dataSetIndex);
-			});
-			return this.renderFilterItem(idx, value, availibleDataSetsForItem);
+			const availableDataSetsForItem = dataSets.filter(
+				dataSet =>
+					value.dataSetIndex === dataSet.dataSetIndex
+					|| !usedDataSets.includes(dataSet.dataSetIndex)
+			);
+			return this.renderFilterItem(idx, value, availableDataSetsForItem);
 		});
 	};
 
 	render () {
 		return (
-			<FormBox rightControl={this.renderAddSourceFilter()} title="Фильтрация на виджете">
+			<FormBox rightControl={this.renderAddSourceFilter()} title={t('FiltersOnWidget::FilterOnWidget')}>
 				{this.renderFilterItems()}
 			</FormBox>
 		);

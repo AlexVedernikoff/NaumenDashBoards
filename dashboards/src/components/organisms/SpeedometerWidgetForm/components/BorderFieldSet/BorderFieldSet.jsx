@@ -13,6 +13,8 @@ import memoize from 'memoize-one';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 import TextInput from 'components/atoms/TextInput';
 
 export class BorderFieldSet extends PureComponent<Props> {
@@ -20,15 +22,15 @@ export class BorderFieldSet extends PureComponent<Props> {
 		filterAttributesByUsed: (options, dataSetIndex) => options
 	}));
 
-	handleChange = (borderName: string) => (name: string, value) => {
+	handleChange = (borderName: string) => (name: string, value, callback?: Function) => {
 		const {name: propName, onChange, value: borders} = this.props;
 		const newData = {...borders, [borderName]: {...borders[borderName], [name]: value}};
 
-		onChange(propName, newData);
+		onChange(propName, newData, callback);
 	};
 
-	handleChangeIndicator = (borderName: string) => (index: number, indicator: Indicator) => {
-		this.handleChange(borderName)(DIAGRAM_FIELDS.indicator, indicator);
+	handleChangeIndicator = (borderName: string) => (index: number, indicator: Indicator, callback?: Function) => {
+		this.handleChange(borderName)(DIAGRAM_FIELDS.indicator, indicator, callback);
 	};
 
 	handleChangeValue = (borderName: string) => ({name, value}) => {
@@ -42,7 +44,7 @@ export class BorderFieldSet extends PureComponent<Props> {
 			<Fragment>
 				<Checkbox
 					className={styles.isNumber}
-					label="Использовать числовое значение"
+					label={t('BorderFieldSet::UseNumericValue')}
 					name={DIAGRAM_FIELDS.isNumber}
 					onClick={this.handleChange(name)}
 					value={isNumber}
@@ -96,9 +98,9 @@ export class BorderFieldSet extends PureComponent<Props> {
 
 		return (
 			<Fragment>
-				<Label className={styles.scaleBorderField}>Границы шкал</Label>
-				{this.renderScaleBorderField('Минимум', DIAGRAM_FIELDS.min, min)}
-				{this.renderScaleBorderField('Максимум', DIAGRAM_FIELDS.max, max)}
+				<Label className={styles.scaleBorderField}><T text='BorderFieldSet::ScaleBoundaries' /></Label>
+				{this.renderScaleBorderField(t('BorderFieldSet::Minimum'), DIAGRAM_FIELDS.min, min)}
+				{this.renderScaleBorderField(t('BorderFieldSet::Maximum'), DIAGRAM_FIELDS.max, max)}
 			</Fragment>
 		);
 	}

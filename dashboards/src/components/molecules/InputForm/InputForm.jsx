@@ -4,6 +4,7 @@ import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './styles.less';
+import withSubscriptions, {SUBSCRIBE_COMMANDS} from 'components/organisms/WidgetForm/HOCs/withSubscriptions/withSubscriptions';
 
 export class InputForm extends Component<Props, State> {
 	static defaultProps = {
@@ -15,33 +16,39 @@ export class InputForm extends Component<Props, State> {
 	};
 
 	componentDidMount () {
-		const {value} = this.props;
+		const {subscribe, value} = this.props;
 
 		this.setState({value: value.toString()});
+		subscribe(SUBSCRIBE_COMMANDS.FORCE_SAVE, this.forceSave);
 	}
 
-	handleChange = (e: SyntheticInputEvent<HTMLInputElement>) => {
-		const {value} = e.currentTarget;
+	componentWillUnmount () {
+		const {unsubscribe} = this.props;
+		return unsubscribe(SUBSCRIBE_COMMANDS.FORCE_SAVE, this.forceSave);
+	}
 
-		this.setState({value});
-	};
+	forceSave = (): Promise<void> => new Promise(resolve => { this.handleSubmit(resolve); });
 
-	handleClick = () => {
-		const {onSubmit} = this.props;
-		const {value} = this.state;
+	handleChange = ({currentTarget: {value}}: SyntheticInputEvent<HTMLInputElement>) => this.setState({value});
 
-		if (value) {
-			onSubmit(value);
-		}
-	};
+	handleClick = (event: MouseEvent) => this.handleSubmit();
 
 	handleSpecialKeysDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
 		const {onClose} = this.props;
 
 		if (event.key === 'Enter') {
-			this.handleClick();
+			this.handleSubmit();
 		} else if (event.key === 'Escape') {
 			onClose();
+		}
+	};
+
+	handleSubmit = (callback?: Function) => {
+		const {onSubmit} = this.props;
+		const {value} = this.state;
+
+		if (value) {
+			onSubmit(value, callback);
 		}
 	};
 
@@ -80,4 +87,4 @@ export class InputForm extends Component<Props, State> {
 	}
 }
 
-export default InputForm;
+export default withSubscriptions(InputForm);

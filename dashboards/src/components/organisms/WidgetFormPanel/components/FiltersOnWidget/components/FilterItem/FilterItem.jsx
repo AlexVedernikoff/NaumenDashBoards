@@ -9,6 +9,7 @@ import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 
 export class FilterItem extends PureComponent<Props, State> {
 	state = {
@@ -50,11 +51,13 @@ export class FilterItem extends PureComponent<Props, State> {
 		return onChangeDataSet(dataSetIndex);
 	};
 
-	handleChangeLabel = (value) => {
+	handleChangeLabel = (value: string, callback?: Function) => {
 		const {onChangeLabel} = this.props;
 
-		onChangeLabel(value);
-		this.handleCloseLabelEditor();
+		onChangeLabel(value, () => {
+			this.handleCloseLabelEditor();
+			callback && callback();
+		});
 	};
 
 	handleCloseLabelEditor = () => this.setState({isEditLabel: false});
@@ -86,7 +89,12 @@ export class FilterItem extends PureComponent<Props, State> {
 				);
 
 				return (
-					<FormField className={styles.attributeFormField} label="Атрибут" path={`filtersOnWidget[${idx}].attributes`} small>
+					<FormField
+						className={styles.attributeFormField}
+						label={t('FiltersOnWidget::FilterItem::Attribute')}
+						path={`filtersOnWidget[${idx}].attributes`}
+						small
+					>
 						<Select
 							fetchOptions={this.fetchOptions}
 							getOptionLabel={(attribute: Attribute) => attribute.title}
@@ -95,7 +103,7 @@ export class FilterItem extends PureComponent<Props, State> {
 							loading={attributesLoading}
 							onSelect={this.handleChangeAttribute}
 							options={filterAttributes}
-							placeholder="Укажите атрибут"
+							placeholder={t('FiltersOnWidget::FilterItem::AttributePlaceholder')}
 							value={attribute}
 						/>
 					</FormField>
@@ -112,14 +120,18 @@ export class FilterItem extends PureComponent<Props, State> {
 		const selected = dataSetIndex !== undefined && dataSetIndex !== null ? dataSets[dataSetIndex] : null;
 
 		return (
-			<FormField label="Источник" path={`filtersOnWidget[${idx}].dataSetIndex`} small>
+			<FormField
+				label={t('FiltersOnWidget::FilterItem::Source')}
+				path={`filtersOnWidget[${idx}].dataSetIndex`}
+				small
+			>
 				<Select
 					editable={false}
-					getOptionLabel={(dataSet) => dataSet.source.value?.label}
-					getOptionValue={(dataSet) => dataSet.dataSetIndex}
+					getOptionLabel={dataSet => dataSet.source.value?.label}
+					getOptionValue={dataSet => dataSet.dataSetIndex}
 					onSelect={this.handleChangeDataSet}
 					options={dataSets}
-					placeholder='Выберите источник'
+					placeholder={t('FiltersOnWidget::FilterItem::SourcePlaceholder')}
 					value={selected}
 				/>
 			</FormField>

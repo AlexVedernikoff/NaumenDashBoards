@@ -16,7 +16,7 @@ export type Props = TypeProps & ValuesProps<ValuesPropsParams> & HelpersProps & 
 	dataKey: string,
 	dataSetIndex: number,
 	index: number,
-	onChange: (index: number, indicator: Indicator) => void,
+	onChange: (index: number, indicator: Indicator, callback?: Function) => void,
 	onChangeLabel: (event: OnSelectEvent, index: number) => void,
 	onRemove: (index: number) => void,
 	removable: boolean,

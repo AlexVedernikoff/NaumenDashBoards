@@ -20,6 +20,7 @@ import type {Props, State} from './types';
 import React, {Component} from 'react';
 import type {RenderProps} from 'GroupModal/components/SelectOrCondition/types';
 import SelectOrCondition from 'GroupModal/components/SelectOrCondition';
+import {translateObjectsArray} from 'localization';
 
 export class TimerGroupModal extends Component<Props, State> {
 	state = this.initState(this.props);
@@ -29,13 +30,13 @@ export class TimerGroupModal extends Component<Props, State> {
 
 		if (props.attribute.type === ATTRIBUTE_TYPES.timer) {
 			state = {
-				orConditionOptions: TIMER_OR_CONDITION_OPTIONS,
-				statusOptions: TIMER_STATUS_OPTIONS
+				orConditionOptions: translateObjectsArray('label', TIMER_OR_CONDITION_OPTIONS),
+				statusOptions: translateObjectsArray('label', TIMER_STATUS_OPTIONS)
 			};
 		} else {
 			state = {
-				orConditionOptions: BACK_TIMER_OR_CONDITION_OPTIONS,
-				statusOptions: BACK_TIMER_STATUS_OPTIONS
+				orConditionOptions: translateObjectsArray('label', BACK_TIMER_OR_CONDITION_OPTIONS),
+				statusOptions: translateObjectsArray('label', BACK_TIMER_STATUS_OPTIONS)
 			};
 		}
 

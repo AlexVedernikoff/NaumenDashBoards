@@ -4,12 +4,12 @@ import NewWidget from 'store/widgets/data/NewWidget';
 
 export type DefaultProps = {
 	name: string,
-	showForamt: boolean,
+	showFormat: boolean,
 };
 
 export type Props = {
 	...DefaultProps,
-	onChange: (name: string, value: DataLabels) => void,
+	onChange: (name: string, value: DataLabels, callback?: Function) => void,
 	value: DataLabels,
 	widget: AnyWidget | NewWidget
 };

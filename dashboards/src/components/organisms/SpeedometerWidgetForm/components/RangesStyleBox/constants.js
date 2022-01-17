@@ -1,14 +1,14 @@
 // @flow
-// import {ICON_NAMES} from 'components/atoms/Icon';
+import type {LangType} from 'localization/localize_types';
 import {RANGES_POSITION} from 'store/widgets/data/constants';
 
-const RANGES_POSITION_OPTIONS = [
+const RANGES_POSITION_OPTIONS: Array<{title: LangType, value: $Keys<typeof RANGES_POSITION>}> = [
 	{
-		title: 'На дуге',
+		title: 'BordersRangesStyleBox::OnArc',
 		value: RANGES_POSITION.CURVE
 	},
 	{
-		title: 'В легенде',
+		title: 'BordersRangesStyleBox::OnArc',
 		value: RANGES_POSITION.LEGEND
 	}
 ];

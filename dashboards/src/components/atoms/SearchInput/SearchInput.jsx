@@ -5,6 +5,7 @@ import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import styles from './styles.less';
+import t from 'localization';
 
 export class SearchInput extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -62,7 +63,7 @@ export class SearchInput extends PureComponent<Props, State> {
 				onChange={this.handleChange}
 				onClick={this.handleClick}
 				onFocus={onFocus}
-				placeholder="Поиск"
+				placeholder={t('SearchInput::Placeholder')}
 				ref={this.inputRef}
 				value={value}
 			/>

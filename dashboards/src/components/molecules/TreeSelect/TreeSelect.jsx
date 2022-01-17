@@ -10,6 +10,7 @@ import type {Node, Props, State, Tree} from './types';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 
 export class TreeSelect extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -23,7 +24,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 		name: '',
 		onCloseMenu: null,
 		onOpenMenu: null,
-		placeholder: 'Выберите значение',
+		placeholder: 'TreeSelect::DefaultPlaceholder',
 		removable: false,
 		showMore: false,
 		value: null,
@@ -141,7 +142,7 @@ export class TreeSelect extends PureComponent<Props, State> {
 		const {LabelContainer} = this.components;
 		const valueLabel = getOptionLabel(value);
 		const hasValue = !!value;
-		const label = hasValue ? valueLabel : placeholder;
+		const label = hasValue ? valueLabel : t(placeholder);
 		const CN = cn({
 			[styles.label]: true,
 			[styles.placeholder]: !hasValue

@@ -8,11 +8,12 @@ import LabelEditingForm from 'components/molecules/InputForm';
 import React, {Component, createRef} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 
 class SelectWithCustomEdit extends Component<Props, State> {
 	static defaultProps: DefaultProps = {
 		clearing: false,
-		customOptionsLabel: 'Пользовательская настройка',
+		customOptionsLabel: 'SelectWithCustomEdit::UserOption',
 		emptyAsNotUsed: true,
 		name: '',
 		placeholder: ''
@@ -29,7 +30,7 @@ class SelectWithCustomEdit extends Component<Props, State> {
 		if (options) {
 			const customOptions = value && !options.includes(value)
 				? {label: value, value}
-				: {label: customOptionsLabel, value: ''};
+				: {label: t(customOptionsLabel), value: ''};
 			const extendedOptions = [
 				{label: placeholder, value: null},
 				...options.map(item => ({label: item.trimLeft(), value: item})),
@@ -38,7 +39,7 @@ class SelectWithCustomEdit extends Component<Props, State> {
 
 			return {
 				options: extendedOptions,
-				value: extendedOptions.find((item) => item.value === value)
+				value: extendedOptions.find(item => item.value === value)
 			};
 		}
 
@@ -77,13 +78,11 @@ class SelectWithCustomEdit extends Component<Props, State> {
 		}
 	};
 
-	handleSubmitForm = (value) => {
+	handleSubmitForm = (value: string, callback?: Function) => {
 		const {name, onSelect} = this.props;
 
-		if (value !== '' && onSelect) {
-			onSelect({name, value});
-		} else {
-			this.handleClearValue();
+		if (onSelect) {
+			onSelect({name, value: value !== '' ? value : null}, callback);
 		}
 
 		this.setState({showForm: false});
@@ -121,7 +120,7 @@ class SelectWithCustomEdit extends Component<Props, State> {
 		);
 	};
 
-	renderIndicatorsContainer = (props) => {
+	renderIndicatorsContainer = props => {
 		const {children, ...containerProps} = props;
 		return (
 			<Container {...containerProps}>

@@ -1,36 +1,37 @@
 // @flow
 import type {CatalogItemSetData} from 'store/sources/attributesData/catalogItemSets/types';
 import {createContext} from 'react';
+import type {LangType} from 'localization/localize_types';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 
-const OR_CONDITION_OPTIONS = [
+const OR_CONDITION_OPTIONS: Array<{hasReferenceToCurrentObject?: boolean, label: LangType, value: string}> = [
 	{
-		label: 'Содержит',
+		label: 'GroupModal::Contains',
 		value: OR_CONDITION_TYPES.CONTAINS
 	},
 	{
-		label: 'Не содержит',
+		label: 'GroupModal::NotContains',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS
 	},
 	{
-		label: 'Название содержит',
+		label: 'GroupModal::TitleContains',
 		value: OR_CONDITION_TYPES.TITLE_CONTAINS
 	},
 	{
-		label: 'Название не содержит',
+		label: 'GroupModal::TitleNotContains',
 		value: OR_CONDITION_TYPES.TITLE_NOT_CONTAINS
 	},
 	{
-		label: 'пусто',
+		label: 'GroupModal::Empty',
 		value: OR_CONDITION_TYPES.EMPTY
 	},
 	{
-		label: 'не пусто',
+		label: 'GroupModal::NotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	},
 	{
 		hasReferenceToCurrentObject: true,
-		label: 'Содержит атрибут текущего объекта',
+		label: 'GroupModal::ContainsAttrCurrentObject',
 		value: OR_CONDITION_TYPES.CONTAINS_ATTR_CURRENT_OBJECT
 	}
 ];

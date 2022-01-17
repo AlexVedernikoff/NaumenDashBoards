@@ -1,9 +1,10 @@
 // @flow
 import api from 'api';
 import moment from 'utils/moment.config';
+import t from 'localization';
 
 /**
- * Cоздает имя файла
+ * Создает имя файла
  * @returns {Promise<string>}
  */
 const createContextName = async () => {
@@ -14,7 +15,7 @@ const createContextName = async () => {
 
 		name = context['card_caption'].replace(/(\|\||\|\|\|\|\*:|\*)/g, '');
 	} catch (e) {
-		name = 'Дашборд';
+		name = t('export::Dashboard');
 	}
 
 	return `${name} (${moment().format('DD-MM-YYYY')})`;

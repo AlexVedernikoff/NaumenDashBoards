@@ -1,33 +1,34 @@
 // @flow
+import type {LangType} from 'localization/localize_types';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 
-const OR_CONDITION_OPTIONS = [
+const OR_CONDITION_OPTIONS: Array<{label: LangType, value: string}> = [
 	{
-		label: 'равно',
+		label: 'GroupModal::Equal',
 		value: OR_CONDITION_TYPES.EQUAL
 	},
 	{
-		label: 'не равно (и не пусто)',
+		label: 'GroupModal::NotEqual',
 		value: OR_CONDITION_TYPES.NOT_EQUAL
 	},
 	{
-		label: 'не равно (включая пустые)',
+		label: 'GroupModal::NotEqualNotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EQUAL_NOT_EMPTY
 	},
 	{
-		label: 'больше',
+		label: 'GroupModal::Greater',
 		value: OR_CONDITION_TYPES.GREATER
 	},
 	{
-		label: 'менее',
+		label: 'GroupModal::Less',
 		value: OR_CONDITION_TYPES.LESS
 	},
 	{
-		label: 'пусто',
+		label: 'GroupModal::Empty',
 		value: OR_CONDITION_TYPES.EMPTY
 	},
 	{
-		label: 'не пусто',
+		label: 'GroupModal::NotEmpty',
 		value: OR_CONDITION_TYPES.NOT_EMPTY
 	}
 ];

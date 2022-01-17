@@ -221,10 +221,8 @@ const replaceLayoutsId = (state: LayoutsState, payload: ReplaceLayoutsIdPayload)
  */
 const removeLayouts = (state: LayoutsState, widgetId: string): LayoutsState => {
 	Object.keys(LAYOUT_MODE).forEach(mode => {
-		/*
-			Клонирование необходимо, т.к. библиотека react-grid-layout сохраняет у себя в state данный объект
-			и в дальнейшем производит сравнение относительно него.
-		 */
+		// Клонирование необходимо, т.к. библиотека react-grid-layout сохраняет у себя в state данный объект
+		// и в дальнейшем производит сравнение относительно него.
 		const layouts = deepClone(state[mode]);
 
 		Object.keys(layouts).forEach(breakpoint => {

@@ -11,24 +11,25 @@ import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class IndicatorBox extends PureComponent<Props> {
 	static defaultProps = {
 		useAutoFontSize: false
 	};
 
-	change = (key: string, value: any) => {
+	change = (key: string, value: any, callback?: Function) => {
 		const {name, onChange, value: settings} = this.props;
 
 		onChange(name, {
 			...settings,
 			[key]: value
-		});
+		}, callback);
 	};
 
 	handleChange = ({name, value}: OnChangeEvent<string>) => this.change(name, value);
 
-	handleChangeParameterFormat = (value) => this.change(DIAGRAM_FIELDS.format, value);
+	handleChangeParameterFormat = (value, callback?) => this.change(DIAGRAM_FIELDS.format, value, callback);
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 
@@ -38,8 +39,8 @@ export class IndicatorBox extends PureComponent<Props> {
 		const parameterFormat = format ?? computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
 
 		return (
-			<CollapsableFormBox title="Показатель">
-				<FormField label="Шрифт" row>
+			<CollapsableFormBox title={t('SummaryWidgetForm::IndicatorBox::Indicator')}>
+				<FormField label={t('SummaryWidgetForm::IndicatorBox::Font')} row>
 					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleSelect} value={fontFamily} />
 					<FontSizeSelect
 						name={DIAGRAM_FIELDS.fontSize}

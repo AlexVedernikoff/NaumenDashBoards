@@ -12,6 +12,7 @@ import {getDescriptorCases} from 'src/store/helpers';
 import {getPartsClassFqn} from 'store/widgets/links/helpers';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import memoize from 'memoize-one';
+import t, {translateObjectsArray} from 'localization';
 
 /**
  * Преобразует AnyWidget в Widget
@@ -94,12 +95,12 @@ const getDisplayModeIcon = (displayMode: DisplayMode) => {
  */
 const modeSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 	const {displayMode} = awidget;
-	const value = DISPLAY_MODE_OPTIONS.find(item => item.value === displayMode) || DISPLAY_MODE_OPTIONS[0];
-	const text = `Отображается ${value.label}`;
+	const availableOptions = translateObjectsArray('label', DISPLAY_MODE_OPTIONS);
+	const value = availableOptions.find(item => item.value === displayMode) || availableOptions[0];
 	return {
-		availableOptions: DISPLAY_MODE_OPTIONS,
+		availableOptions,
 		icon: getDisplayModeIcon(displayMode),
-		text,
+		text: t('WidgetKebab::Mode', {mode: value.label}),
 		value: displayMode
 	};
 });
@@ -123,7 +124,7 @@ const exportParamsSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 		return {
 			availableOptions: availableOptions.map(value => ({ label: value.toUpperCase(), value })),
 			icon: ICON_NAMES.EXPORT,
-			text: 'Экспорт',
+			text: t('WidgetKebab::Export'),
 			value: null
 		};
 	}
@@ -154,7 +155,7 @@ const dataSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 		return {
 			availableOptions,
 			icon: ICON_NAMES.DATA,
-			text: 'Источники',
+			text: t('WidgetKebab::Data'),
 			value: null
 		};
 	}
@@ -222,14 +223,14 @@ const filtersOnWidgetSelector = memoize((awidget: AnyWidget): ?DropDownParams =>
 		const {options: availableOptions, selected: value} = getFiltersOnWidget(widget);
 
 		if (value) {
-			availableOptions.push({label: 'Очистить фильтры', value: CLEAR_FILTER});
+			availableOptions.push({label: t('WidgetKebab::ClearFilter'), value: CLEAR_FILTER});
 		}
 
 		if (availableOptions.length > 0) {
 			return {
 				availableOptions,
 				icon: value ? ICON_NAMES.FILLED_FILTER : ICON_NAMES.FILTER,
-				text: 'Пользовательские фильтры',
+				text: t('WidgetKebab::FiltersOnWidget'),
 				value
 			};
 		}
@@ -264,7 +265,7 @@ const getNewDescriptor = async (filter: CustomFilter, classFqn: string): Promise
 			({serializedContext: newDescriptor} = await api.instance.filterForm.openForm(context, true));
 		}
 	} catch (ex) {
-		console.error('Ошибка формы фильтрации', ex);
+		console.error('Filtration error', ex);
 	}
 
 	return newDescriptor;

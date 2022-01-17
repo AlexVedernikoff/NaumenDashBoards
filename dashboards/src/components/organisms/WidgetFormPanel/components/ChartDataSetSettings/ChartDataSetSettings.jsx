@@ -15,16 +15,17 @@ import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 
 export class ChartDataSetSettings extends PureComponent<Props> {
 	static defaultProps = {
 		components: DefaultComponents
 	};
 
-	handleChangeBreakdown = (breakdown: Breakdown) => {
+	handleChangeBreakdown = (breakdown: Breakdown, callback?: Function) => {
 		const {index, onChange, value} = this.props;
 
-		onChange(index, {...value, breakdown});
+		onChange(index, {...value, breakdown}, callback);
 	};
 
 	handleChangeCheckbox = ({name, value}: OnChangeEvent<boolean>) => {
@@ -32,7 +33,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		return onChange(index, {...dataSet, [name]: !value});
 	};
 
-	handleChangeIndicators = (index: number, newIndicators: Array<Indicator>) => {
+	handleChangeIndicators = (index: number, newIndicators: Array<Indicator>, callback?: Function) => {
 		const {index: dataSetIndex, onChange, value} = this.props;
 		const {top} = value;
 		let newValue = value;
@@ -47,7 +48,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 			};
 		}
 
-		onChange(dataSetIndex, {...newValue, indicators: newIndicators});
+		onChange(dataSetIndex, {...newValue, indicators: newIndicators}, callback);
 	};
 
 	handleChangeTopSettings = (top: DataTopSettings) => {
@@ -131,7 +132,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		if (usesBlankData) {
 			return (
 				<FormField>
-					<FormControl label="Показывать незаполненные данные">
+					<FormControl label={t('ChartDataSetSettings::ShowEmptyData')}>
 						<Checkbox
 							checked={showBlankData}
 							className={styles.checkbox}
@@ -154,7 +155,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		if (usesEmptyData) {
 			return (
 				<FormField>
-					<FormControl label="Показывать нулевые значения">
+					<FormControl label={t('ChartDataSetSettings::ShowZeroValues')}>
 						<Checkbox
 							checked={showEmptyData}
 							className={styles.checkbox}

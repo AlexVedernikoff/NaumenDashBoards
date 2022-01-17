@@ -5,9 +5,10 @@ import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/h
 import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class BreakdownFormat extends PureComponent<Props> {
-	handleChangeBreakdownFormat = (format) => {
+	handleChangeBreakdownFormat = format => {
 		const {onChange} = this.props;
 
 		onChange(DIAGRAM_FIELDS.breakdownFormat, format);
@@ -23,7 +24,7 @@ export class BreakdownFormat extends PureComponent<Props> {
 
 			if (format) {
 				return (
-					<CollapsableFormBox title='Разбивка'>
+					<CollapsableFormBox title={t('BreakdownFormat::Breakdown')}>
 						<ParameterFormatPanel
 							onChange={this.handleChangeBreakdownFormat}
 							value={format}

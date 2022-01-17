@@ -2,6 +2,7 @@
 import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import {
 	checkInfinity,
+	checkNumber,
 	cropFormatter,
 	getTooltipTitlePruner,
 	makeFormatterByFormat,
@@ -12,7 +13,7 @@ import {
 import type {CircleFormatter, NumberFormatter, ValueFormatter} from './types';
 import type {CircleWidget, NumberAxisFormat} from 'store/widgets/data/types';
 import {compose} from 'redux';
-import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import {DATETIME_SYSTEM_GROUP, DEFAULT_AGGREGATION, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
 import {getLegendWidth} from 'utils/chart/mixins/helpers';
 import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
@@ -40,9 +41,27 @@ const getDataFormatter = (widget: CircleWidget, format: NumberAxisFormat): Numbe
 	return formatter;
 };
 
-const getCircleDataLabelFormatter = (formatter: NumberFormatter) => (percent, options: Object) => {
-	const value = options.w.config.series[options.seriesIndex];
-	return formatter(value);
+const getCircleDataLabelFormatter = (formatter: NumberFormatter, showPercent: boolean) => {
+	let innerFormatter: (value: number, percent?: number) => string = formatter;
+
+	if (showPercent) {
+		const percentFormatter = checkNumber(makeFormatterByNumberFormat({
+			additional: '%',
+			symbolCount: null,
+			type: AXIS_FORMAT_TYPE.NUMBER_FORMAT
+		}));
+
+		innerFormatter = (value: number, percent?: number) => {
+			const resultValue = formatter(value);
+			const percentValue = percentFormatter(percent);
+			return `${resultValue} (${percentValue})`;
+		};
+	}
+
+	return (percent, options: Object) => {
+		const value = options.w.config.series[options.seriesIndex];
+		return innerFormatter(value, percent);
+	};
 };
 
 /**
@@ -84,19 +103,22 @@ const getLegendFormatter = (widget: CircleWidget, container: HTMLDivElement): Nu
  */
 const getCircleFormatterBase = (widget: CircleWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): CircleFormatter => {
 	const {dataLabels, legend} = widget;
+	const dataSet = getMainDataSet(widget.data);
 	const {position, show} = legend;
 	const horizontalsLegendShow = show && (position === LEGEND_POSITIONS.left || position === LEGEND_POSITIONS.right);
 	const dataLabelsFormat = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
 	const normalizedDataLabelsFormat = dataLabelsFormat && dataLabelsFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
 		? dataLabelsFormat
 		: DEFAULT_NUMBER_AXIS_FORMAT;
-	const dataLabelsFormatter = getDataFormatter(widget, normalizedDataLabelsFormat);
 	const categoryFormatter = getCategoryFormatter(widget);
 	const legendFormatter = getLegendFormatter(widget, container);
+	const doubleAggregation = dataSet.indicators?.[0]?.aggregation === DEFAULT_AGGREGATION.PERCENT_CNT;
+	const dataLabelsFormatter = getDataFormatter(widget, normalizedDataLabelsFormat);
+	const normalizeDataLabelsFormatter = getCircleDataLabelFormatter(dataLabelsFormatter, doubleAggregation);
 
 	return {
 		breakdown: categoryFormatter,
-		dataLabel: getCircleDataLabelFormatter(dataLabelsFormatter),
+		dataLabel: normalizeDataLabelsFormatter,
 		legend: legendFormatter,
 		tooltip: {
 			data: dataLabelsFormatter,

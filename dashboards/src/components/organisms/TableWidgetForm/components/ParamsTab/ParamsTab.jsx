@@ -22,6 +22,7 @@ import type {Props} from './types';
 import React, {createContext, Fragment, PureComponent} from 'react';
 import ShowTotalAmountBox from 'WidgetFormPanel/components/ShowTotalAmountBox';
 import styles from './styles.less';
+import t from 'localization';
 import Toggle from 'components/atoms/Toggle';
 import uuid from 'tiny-uuid';
 import WidgetNameBox from 'WidgetFormPanel/components/WidgetNameBox';
@@ -54,7 +55,7 @@ export class ParamsTab extends PureComponent<Props> {
 		onChange(DIAGRAM_FIELDS.data, [...values.data, createTableDataSet(uuid())]);
 	};
 
-	handleChangeDataSet = (index: number, newDataSet: DataSet) => {
+	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 
@@ -62,7 +63,7 @@ export class ParamsTab extends PureComponent<Props> {
 			this.setBreakdown();
 		}
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
 	handleChangeTopSettings = (top: DataTopSettings) => {
@@ -107,11 +108,11 @@ export class ParamsTab extends PureComponent<Props> {
 		}
 	};
 
-	setBreakdown = (breakdown?: Breakdown) => {
+	setBreakdown = (breakdown?: Breakdown, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === this.mainIndex ? {...dataSet, breakdown} : dataSet);
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
 	renderBreakdownFieldSet = () => {
@@ -179,7 +180,7 @@ export class ParamsTab extends PureComponent<Props> {
 
 		return (
 			<FormField>
-				<FormControl label="Показывать незаполненные данные" reverse>
+				<FormControl label={t('TableWidgetForm::ParamsTab::ShowBlankValues')} reverse>
 					<Toggle
 						checked={showBlankData}
 						name={DIAGRAM_FIELDS.showBlankData}
@@ -191,25 +192,23 @@ export class ParamsTab extends PureComponent<Props> {
 		);
 	};
 
-	renderSumButton = (rightControl: React$Node) => {
-		return (
-			<CALC_TOTAL_CONTEXT.Consumer>
-				{active => (
-					<Fragment>
-						<IconButton
-							active={active}
-							className={styles.sumInput}
-							icon={ICON_NAMES.SUM}
-							onClick={this.handleClickSumButton}
-							round={false}
-							tip="Подсчитывать итоги"
-						/>
-						{rightControl}
-					</Fragment>
-				)}
-			</CALC_TOTAL_CONTEXT.Consumer>
-		);
-	};
+	renderSumButton = (rightControl: React$Node) => (
+		<CALC_TOTAL_CONTEXT.Consumer>
+			{active => (
+				<Fragment>
+					<IconButton
+						active={active}
+						className={styles.sumInput}
+						icon={ICON_NAMES.SUM}
+						onClick={this.handleClickSumButton}
+						round={false}
+						tip={t('TableWidgetForm::ParamsTab::CalculateTotal')}
+					/>
+					{rightControl}
+				</Fragment>
+			)}
+		</CALC_TOTAL_CONTEXT.Consumer>
+	);
 
 	render () {
 		const {onChange, values} = this.props;

@@ -6,6 +6,7 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import {STATE_FORMAT_OPTIONS} from './constants';
+import t from 'localization';
 
 export class LabelParameterFormat extends PureComponent<Props> {
 	handleChange = ({value}) => {
@@ -19,16 +20,17 @@ export class LabelParameterFormat extends PureComponent<Props> {
 
 	render () {
 		const {label, value} = this.props;
+		const options = STATE_FORMAT_OPTIONS.map(({label, value}) => ({label: t(label), value}));
 		const labelFormat = value && value.type === AXIS_FORMAT_TYPE.LABEL_FORMAT ? value.labelFormat : LABEL_FORMATS.TITLE;
-		const selectedItem = STATE_FORMAT_OPTIONS.find(item => item.value === labelFormat);
-		const fieldLabel = label ? `${label} (формат)` : '';
+		const selectedItem = options.find(item => item.value === labelFormat);
+		const fieldLabel = label ? t('LabelParameterFormat::FieldLabel', {label}) : '';
 
 		return (
 			<FormField label={fieldLabel} small>
 				<Select
 					name={LABEL_FORMAT_FIELDS.labelFormat}
 					onSelect={this.handleChange}
-					options={STATE_FORMAT_OPTIONS}
+					options={options}
 					value={selectedItem}
 				/>
 			</FormField>

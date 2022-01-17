@@ -16,6 +16,7 @@ import type {Props, XAxisNameContext} from './types';
 import React, {Component, createContext} from 'react';
 import SortingBox from 'components/organisms/ComboChartWidgetForm/components/SortingBox';
 import styles from './styles.less';
+import t from 'localization';
 import TextInput from 'components/atoms/TextInput';
 import withWidget from 'WidgetFormPanel/HOCs/withWidget';
 
@@ -40,7 +41,7 @@ export class StyleTab extends Component<Props> {
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
 
-	handleChangeFormat = (format) => {
+	handleChangeFormat = format => {
 		const {onChange, values} = this.props;
 		const {parameter} = values;
 		const newValue = {...parameter, format};
@@ -62,7 +63,7 @@ export class StyleTab extends Component<Props> {
 					onChange={this.handleChange}
 					renderAxisFormat={this.renderParameterFormat}
 					renderNameField={this.renderXAxisNameField}
-					title="Параметр"
+					title={t('ComboChartStyleTab::Parameter')}
 					value={parameter}
 				/>
 			</XAXISNAME_CONTEXT.Provider>
@@ -131,7 +132,7 @@ export class StyleTab extends Component<Props> {
 					options={getSortingOptions(!hasCustomGroup)}
 					value={sorting}
 				/>
-				<DataLabelsBox name={DIAGRAM_FIELDS.dataLabels} onChange={this.handleChange} showForamt={false} value={dataLabels} widget={widget} />
+				<DataLabelsBox name={DIAGRAM_FIELDS.dataLabels} onChange={this.handleChange} showFormat={false} value={dataLabels} widget={widget} />
 				<ColorsBox
 					disabledCustomSettings={true}
 					name={DIAGRAM_FIELDS.colorsSettings}

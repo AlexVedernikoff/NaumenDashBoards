@@ -2,6 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import CustomGroupComponent from './components/CustomGroup';
 import type {Group, GroupWay} from 'store/widgets/data/types';
+import type {LangType} from 'localization/localize_types';
 import type {Props as SystemPropsProps} from './components/SystemGroup/types';
 import type {Ref, Schema} from 'components/types';
 
@@ -31,7 +32,7 @@ export type CustomGroup = {|
 
 export type Option = {
 	hasReferenceToCurrentObject?: boolean,
-	label: string,
+	label: LangType,
 	value: string
 };
 

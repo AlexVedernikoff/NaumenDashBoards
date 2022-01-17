@@ -5,11 +5,11 @@ import {FilterAlreadyExists, FilterNameNotUnique, RemoveFilterFailed} from 'api/
 import {getDashboardDescription} from 'store/dashboard/settings/selectors';
 import type {ResultWithMessage, SourceFiltersItem, UpdateSourcesFilterResult} from './types';
 import {SOURCES_FILTERS_EVENTS} from './constants';
+import t from 'localization';
 
 /**
  * Старт загрузки данных
- * @returns {object} Action cтарта загрузки данных
- *
+ * @returns {object} Action старта загрузки данных
  */
 const requestSourceFilters = () => ({type: SOURCES_FILTERS_EVENTS.REQUEST_SOURCE_FILTERS});
 
@@ -59,8 +59,7 @@ const fetchSourcesFilters = (metaClass: string): ThunkAction =>
 	};
 
 /**
- * Обновляет список предустановленных фильтров для указаного источника
- *
+ * Обновляет список предустановленных фильтров для указанного источника
  * @param {string} source - идентификатор источника
  * @param {object} sourceFilter - список новых фильтров
  * @returns {ThunkAction}
@@ -90,13 +89,12 @@ const updateSourcesFilter = (source: string, sourceFilter: SourceFiltersItem): T
 				return {message: exception.message, result: false};
 			}
 
-			return {message: 'Ошибка сохранения фильтра', result: false};
+			return {message: t('store::sources::sourcesFilters::FilterSavingError'), result: false};
 		}
 	};
 
 /**
- * Удаляет указаный фильтр
- *
+ * Удаляет указанный фильтр
  * @param {string} source - идентификатор источника
  * @param {string} filterId - ключ фильтра
  * @returns {ThunkAction}
@@ -121,12 +119,11 @@ const deleteSourcesFilter = (source: string, filterId: string): ThunkAction =>
 				return {message: exception.message, result: false};
 			}
 		}
-		return {message: 'Ошибка удаления фильтра', result: false};
+		return {message: t('store::sources::sourcesFilters::FilterRemovalError'), result: false};
 	};
 
 /**
  * Проверка возможности применить данный фильтр на данном дашборде
- *
  * @param {string} source - идентификатор источника
  * @param {string} sourceFilter - ключ фильтра
  * @returns {ThunkAction}
@@ -148,9 +145,9 @@ const checkApplyFilter = (source: string, sourceFilter: SourceFiltersItem): Thun
 				type: SOURCES_FILTERS_EVENTS.UPDATE_SOURCE_FILTER
 			});
 
-			return {message: 'Ошибка применения фильтра', result: false};
+			return {message: t('store::sources::sourcesFilters::FilterApplicationError'), result: false};
 		} catch (ex) {
-			return {message: 'Ошибка применения фильтра', result: false};
+			return {message: t('store::sources::sourcesFilters::FilterApplicationError'), result: false};
 		}
 	};
 

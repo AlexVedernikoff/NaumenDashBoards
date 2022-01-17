@@ -21,6 +21,7 @@ import {SORTING_VALUES, WIDGET_TYPES} from 'store/widgets/data/constants';
 import SourceBox from 'WidgetFormPanel/components/SourceBox';
 import SourceFieldset from 'containers/SourceFieldset';
 import styles from './styles.less';
+import t from 'localization';
 import uuid from 'tiny-uuid';
 import WidgetNameBox from 'WidgetFormPanel/components/WidgetNameBox';
 import WidgetSelectBox from 'WidgetFormPanel/components/WidgetSelectBox';
@@ -44,9 +45,10 @@ export class ParamsTab extends PureComponent<Props> {
 		onChange(DIAGRAM_FIELDS.data, [...values.data, createComboDataSet(uuid())]);
 	};
 
-	handleChangeData = (data: Array<DataSet>) => this.props.onChange(DIAGRAM_FIELDS.data, data);
+	handleChangeData = (data: Array<DataSet>, callback?: Function) =>
+		this.props.onChange(DIAGRAM_FIELDS.data, data, callback);
 
-	handleChangeDataSet = (index: number, newDataSet: DataSet) => {
+	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 
@@ -61,10 +63,10 @@ export class ParamsTab extends PureComponent<Props> {
 			};
 		}
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
-	handleChangeParameters = (index: number, parameters: Array<Parameter>) => {
+	handleChangeParameters = (index: number, parameters: Array<Parameter>, callback: Function) => {
 		const {onChange, values} = this.props;
 		const {DEFAULT, INDICATOR} = SORTING_VALUES;
 		const {sorting} = values;
@@ -81,7 +83,7 @@ export class ParamsTab extends PureComponent<Props> {
 			...dataSet,
 			parameters,
 			xAxisName: getAttributeValue(attribute, 'title')
-		});
+		}, callback);
 	};
 
 	handleRemoveDataSet = (index: number) => {
@@ -119,7 +121,7 @@ export class ParamsTab extends PureComponent<Props> {
 						options={CHART_OPTIONS}
 						renderLabel={this.renderChartFieldLabel}
 						showCaret={false}
-						tip="Тип графика"
+						tip={t('ComboChartParamsTab::GraphType')}
 						value={type}
 					/>
 				</div>

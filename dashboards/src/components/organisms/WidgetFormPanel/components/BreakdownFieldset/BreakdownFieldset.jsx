@@ -17,6 +17,7 @@ import type {Group} from 'store/widgets/data/types';
 import type {OnSelectEvent} from 'components/types';
 import React, {Component, createContext} from 'react';
 import styles from './styles.less';
+import t from 'localization';
 import withHelpers from 'containers/DiagramWidgetForm/HOCs/withHelpers';
 import withValues from 'components/organisms/WidgetForm/HOCs/withValues';
 
@@ -116,11 +117,11 @@ export class BreakdownFieldset extends Component<Props> {
 		onChange(newBreakdown);
 	};
 
-	handleChangeLabel = ({value: attribute}: OnSelectEvent, breakdownIndex: number) => {
+	handleChangeLabel = ({value: attribute}: OnSelectEvent, breakdownIndex: number, callback?: Function) => {
 		const {onChange, value: breakdown} = this.props;
 		const newBreakdown = breakdown.map((item, i) => i === breakdownIndex ? {...item, attribute} : item);
 
-		onChange(newBreakdown);
+		onChange(newBreakdown, callback);
 	};
 
 	handleClickAddButton = () => {
@@ -154,7 +155,7 @@ export class BreakdownFieldset extends Component<Props> {
 		const {value} = this.props;
 		const active = !!value;
 
-		return <ExtendButton active={active} onClick={this.handleClickAddButton} text="Разбивка" />;
+		return <ExtendButton active={active} onClick={this.handleClickAddButton} text={t('BreakdownFieldset::Breakdown')} />;
 	};
 
 	renderBreakdown = () => {

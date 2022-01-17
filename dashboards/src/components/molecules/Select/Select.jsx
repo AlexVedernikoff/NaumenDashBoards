@@ -14,6 +14,7 @@ import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import React, {Component, createRef} from 'react';
 import SearchInput from 'components/atoms/SearchInput';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 import TextInput from 'components/atoms/TextInput';
 import Value from './components/Value';
 
@@ -81,10 +82,10 @@ export class Select extends Component<Props, State> {
 		};
 	};
 
-	handleChangeLabel = ({value}: OnChangeEvent<string>) => {
+	handleChangeLabel = ({value}: OnChangeEvent<string>, callback?: Function) => {
 		const {name, onChangeLabel} = this.props;
 
-		onChangeLabel && onChangeLabel({name, value});
+		onChangeLabel && onChangeLabel({name, value}, callback);
 	};
 
 	handleChangeSearchInput = (searchValue: string) => {
@@ -186,7 +187,7 @@ export class Select extends Component<Props, State> {
 		const {Message} = this.components;
 		const {loading, loadingMessage} = this.props;
 
-		return loading && <Message className={styles.message}>{loadingMessage}</Message>;
+		return loading && <Message className={styles.message}><T text={loadingMessage} /></Message>;
 	};
 
 	renderMenu = (): React$Node => {
@@ -228,7 +229,7 @@ export class Select extends Component<Props, State> {
 		const {loading, noOptionsMessage, options} = this.props;
 		const {Message} = this.components;
 
-		return !loading && options.length === 0 ? <Message className={styles.message}>{noOptionsMessage}</Message> : null;
+		return !loading && options.length === 0 ? <Message className={styles.message}><T text={noOptionsMessage} /></Message> : null;
 	};
 
 	renderNotFoundMessage = (): React$Node => {
@@ -237,7 +238,7 @@ export class Select extends Component<Props, State> {
 		const {Message} = this.components;
 
 		return !loading && searchValue && foundOptions.length === 0
-			? <Message className={styles.message}>{notFoundMessage}</Message>
+			? <Message className={styles.message}><T text={notFoundMessage} /></Message>
 			: null;
 	};
 

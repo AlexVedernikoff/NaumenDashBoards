@@ -2,11 +2,7 @@
 import {addMethod, number} from 'yup';
 import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
 import type {Border} from 'src/store/widgets/data/types';
-
-const borderRequiredMessage = 'В поле границы шкал необходимо указать либо число либо атрибут';
-const borderValueRequiredMessage = 'В поле границы шкал необходимо указать число';
-const borderRequiredAttributeMessage = 'В поле границы шкал необходимо указать атрибут';
-const borderMinMaxMessage = 'Значение в поле min не может превышать значение в поле max';
+import t from 'localization';
 
 /**
  * Проверяет числовые значения границ
@@ -29,12 +25,12 @@ addMethod(object, 'bordersMinMax', function () {
 		indicator: mixed().when(
 			'isNumber', {
 				is: false,
-				then: mixed().requiredAttribute(borderRequiredAttributeMessage).typeError(borderRequiredAttributeMessage)
+				then: mixed().requiredAttribute(t('SpeedometerWidgetForm::RequiredAttributeMessage')).typeError(t('SpeedometerWidgetForm::RequiredAttributeMessage'))
 			}),
 		value: number().when(
 			'isNumber', {
 				is: true,
-				then: number().required(borderValueRequiredMessage).typeError(borderValueRequiredMessage)
+				then: number().required(t('SpeedometerWidgetForm::ValueRequiredMessage')).typeError(t('SpeedometerWidgetForm::ValueRequiredMessage'))
 			})
 	});
 });
@@ -43,10 +39,10 @@ addMethod(object, 'borders', function () {
 	return object({
 		max: object().bordersMinMax().test(
 			'check-border-min-max',
-			borderMinMaxMessage,
+			t('SpeedometerWidgetForm::MinMaxMessage'),
 			checkBorderMinMax
-		).typeError(borderRequiredMessage),
-		min: object().bordersMinMax().typeError(borderRequiredMessage)
+		).typeError(t('SpeedometerWidgetForm::RequiredMessage')),
+		min: object().bordersMinMax().typeError(t('SpeedometerWidgetForm::RequiredMessage'))
 	});
 });
 

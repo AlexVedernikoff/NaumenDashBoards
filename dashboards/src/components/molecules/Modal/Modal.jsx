@@ -7,11 +7,11 @@ import type {Props} from './types';
 import React, {Component, Fragment} from 'react';
 import {root} from 'app.constants';
 import styles from './styles.less';
+import t from 'localization';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class Modal extends Component<Props> {
 	static defaultProps = {
-		cancelText: 'Отмена',
 		children: null,
 		className: '',
 		defaultButton: DEFAULT_BUTTONS.SUBMIT_BUTTON,
@@ -19,7 +19,6 @@ export class Modal extends Component<Props> {
 		notice: false,
 		showCancelButton: true,
 		size: SIZES.NORMAL,
-		submitText: 'Сохранить',
 		submitting: false
 	};
 
@@ -38,7 +37,7 @@ export class Modal extends Component<Props> {
 	prevent = (e: SyntheticMouseEvent<HTMLDivElement>) => e.stopPropagation();
 
 	renderCancelButton = () => {
-		const {cancelText, defaultButton, onClose, showCancelButton} = this.props;
+		const {cancelText = t('Modal::Cancel'), defaultButton, onClose, showCancelButton} = this.props;
 		const variant = defaultButton === DEFAULT_BUTTONS.CANCEL_BUTTON ? BUTTON_VARIANTS.INFO : BUTTON_VARIANTS.ADDITIONAL;
 
 		if (showCancelButton) {
@@ -50,14 +49,12 @@ export class Modal extends Component<Props> {
 		return null;
 	};
 
-	renderDefaultFooter = () => {
-		return (
-			<Fragment>
-				{this.renderSubmitButton()}
-				{this.renderCancelButton()}
-			</Fragment>
-		);
-	};
+	renderDefaultFooter = () => (
+		<Fragment>
+			{this.renderSubmitButton()}
+			{this.renderCancelButton()}
+		</Fragment>
+	);
 
 	renderModal = () => {
 		const {size} = this.props;
@@ -104,7 +101,7 @@ export class Modal extends Component<Props> {
 	renderModalHeader = () => <div className={styles.header}>{this.props.header}</div>;
 
 	renderSubmitButton = () => {
-		const {defaultButton, onSubmit, submitText, submitting} = this.props;
+		const {defaultButton, onSubmit, submitText = t('Modal::Save'), submitting} = this.props;
 		const variant = defaultButton === DEFAULT_BUTTONS.SUBMIT_BUTTON ? BUTTON_VARIANTS.INFO : BUTTON_VARIANTS.ADDITIONAL;
 
 		return (

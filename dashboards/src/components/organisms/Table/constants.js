@@ -1,5 +1,6 @@
 // @flow
 import {DEFAULT_TABLE_VALUE, SORTING_TYPES, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/constants';
+import type {LangType} from 'localization/localize_types';
 
 const DEFAULT_CELL_SETTINGS = Object.freeze({
 	fontColor: 'black',
@@ -15,7 +16,7 @@ const DEFAULT_HEADER_CELL_SETTINGS = Object.freeze({
 const DEFAULT_TABLE_SETTINGS = {
 	body: {
 		defaultValue: {
-			label: 'Показывать " "',
+			label: ('TableWidgetForm::BodySettingsBox::ShowEmptyString': LangType),
 			value: DEFAULT_TABLE_VALUE.EMPTY_ROW
 		},
 		indicatorSettings: DEFAULT_CELL_SETTINGS,

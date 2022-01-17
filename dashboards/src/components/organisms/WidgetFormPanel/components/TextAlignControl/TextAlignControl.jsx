@@ -1,19 +1,21 @@
 // @flow
+import {ALIGN_OPTIONS} from './constants';
 import CheckIconButtonGroup from 'components/molecules/CheckIconButtonGroup';
-import {options} from './constants';
 import type {Props} from 'components/molecules/CheckIconButtonGroup/types';
 import React, {PureComponent} from 'react';
+import {translateObjectsArray} from 'localization';
 
 export class TextAlignControl extends PureComponent<Props> {
 	static defaultProps = {
 		...CheckIconButtonGroup.defaultProps,
-		options: options
+		options: ALIGN_OPTIONS
 	};
 
 	render () {
 		const {name, onChange, options, value} = this.props;
+		const tOptions = translateObjectsArray('title', options);
 
-		return <CheckIconButtonGroup name={name} onChange={onChange} options={options} value={value} />;
+		return <CheckIconButtonGroup name={name} onChange={onChange} options={tOptions} value={value} />;
 	}
 }
 

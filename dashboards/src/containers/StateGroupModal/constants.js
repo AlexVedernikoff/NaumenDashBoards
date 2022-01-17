@@ -1,32 +1,33 @@
 // @flow
 import {createContext} from 'react';
+import type {LangType} from 'localization/localize_types';
 import {OR_CONDITION_TYPES} from 'store/customGroups/constants';
 import type {StateData} from 'store/sources/attributesData/states/types';
 
-const OR_CONDITION_OPTIONS = [
+const OR_CONDITION_OPTIONS: Array<{hasReferenceToCurrentObject?: boolean, label: LangType, value: string}> = [
 	{
-		label: 'Содержит',
+		label: 'GroupModal::Contains',
 		value: OR_CONDITION_TYPES.CONTAINS
 	},
 	{
-		label: 'Не содержит',
+		label: 'GroupModal::NotContains',
 		value: OR_CONDITION_TYPES.NOT_CONTAINS
 	},
 	{
-		label: 'Содержит любое из значений',
+		label: 'GroupModal::ContainsAny',
 		value: OR_CONDITION_TYPES.CONTAINS_ANY
 	},
 	{
-		label: 'Название содержит',
+		label: 'GroupModal::TitleContains',
 		value: OR_CONDITION_TYPES.TITLE_CONTAINS
 	},
 	{
-		label: 'Название не содержит',
+		label: 'GroupModal::TitleNotContains',
 		value: OR_CONDITION_TYPES.TITLE_NOT_CONTAINS
 	},
 	{
 		hasReferenceToCurrentObject: true,
-		label: 'Равно атрибуту текущего объекта',
+		label: 'GroupModal::EqualAttrCurrentObject',
 		value: OR_CONDITION_TYPES.EQUAL_ATTR_CURRENT_OBJECT
 	}
 ];

@@ -5,6 +5,6 @@ import type {DataSet} from 'store/widgetForms/speedometerForm/types';
 export type Props = {
 	dataSet: ?DataSet,
 	name: string,
-	onChange: (name: string, value: Borders) => void,
+	onChange: (name: string, value: Borders, callback?: Function) => void,
 	value: Borders
 };

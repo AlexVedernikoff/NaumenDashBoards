@@ -1,7 +1,7 @@
 // @flow
 import {DEFAULT_LOCALE, FETCH_STATUS, LOCALES} from './constants';
 import type {ILocalization, IPluralization} from './interfaces';
-import type {LocaleData, Locales, LocalizationParams, PlurizationItem, Subscriber} from './types';
+import type {LocaleData, Locales, LocalizationParams, PluralizationItem, Subscriber} from './types';
 
 class Localization implements ILocalization {
 	status = FETCH_STATUS.IDLE;
@@ -33,26 +33,30 @@ class Localization implements ILocalization {
 		try {
 			switch (this.locale) {
 				case LOCALES.EN:
-					this.localeData = (await import('./json/en.json'));
-					this.pluralization = (await import('./pluralization/en')).default;
+					this.localeData = (await import(/* webpackChunkName: "localization/en.js" */ './json/en.json'));
+					this.pluralization = (await import(/* webpackChunkName: "localization/en.pluralization.js" */ './pluralization/en')).default;
 					break;
 				case LOCALES.RU:
-					this.localeData = (await import('./json/ru.json'));
-					this.pluralization = (await import('./pluralization/ru')).default;
+					this.localeData = (await import(/* webpackChunkName: "localization/ru.js" */ './json/ru.json'));
+					this.pluralization = (await import(/* webpackChunkName: "localization/ru.pluralization.js" */ './pluralization/ru')).default;
 					break;
 				case LOCALES.DE:
-					this.localeData = (await import('./json/de.json'));
-					this.pluralization = (await import('./pluralization/de')).default;
+					this.localeData = (await import(/* webpackChunkName: "localization/de.js" */'./json/de.json'));
+					this.pluralization = (await import(/* webpackChunkName: "localization/de.pluralization.js" */'./pluralization/de')).default;
 					break;
 				case LOCALES.PL:
-					this.localeData = (await import('./json/pl.json'));
-					this.pluralization = (await import('./pluralization/pl')).default;
+					this.localeData = (await import(/* webpackChunkName: "localization/pl.js" */'./json/pl.json'));
+					this.pluralization = (await import(/* webpackChunkName: "localization/pl.pluralization.js" */'./pluralization/pl')).default;
+					break;
+				case LOCALES.CLIENT:
+					this.localeData = (await import(/* webpackChunkName: "localization/client.js" */ './json/client.json'));
+					this.pluralization = (await import(/* webpackChunkName: "localization/client.pluralization.js" */ './pluralization/client')).default;
 					break;
 				default:
 					throw new Error('Undefined language');
 			}
 			this.status = FETCH_STATUS.SUCCESS;
-			this.subscribers.forEach((func) => func(this.locale));
+			this.subscribers.forEach(func => func(this.locale));
 		} catch (exception) {
 			if (process.env.NODE_ENV === 'development') {
 				console.error(exception);
@@ -79,14 +83,14 @@ class Localization implements ILocalization {
 					val = this.pluralization.date(val);
 				}
 
-				result = value.replace(regexp, val);
+				result = result.replace(regexp, val);
 			}
 		}
 
 		return result;
 	}
 
-	translatePlurization (value: PlurizationItem, params?: LocalizationParams): string {
+	translatePluralization (value: PluralizationItem, params?: LocalizationParams): string {
 		let result = '';
 		const {data, func: funcName} = value;
 		const objPluralization = (this.pluralization: Object);
@@ -114,7 +118,7 @@ class Localization implements ILocalization {
 			}
 
 			if (typeof result === 'object') {
-				result = this.translatePlurization(result, params);
+				result = this.translatePluralization(result, params);
 			}
 		}
 

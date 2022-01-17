@@ -12,6 +12,8 @@ import React, {Component} from 'react';
 import styles from './styles.less';
 import type {SubGroup} from 'GroupModal/types';
 import SubGroupSection from 'GroupModal/components/SubGroupSection';
+import T from 'components/atoms/Translation';
+import t from 'localization';
 import Text, {TEXT_TYPES} from 'components/atoms/Text';
 import uuid from 'tiny-uuid';
 import {VARIANTS} from 'components/atoms/InfoPanel/constants';
@@ -195,7 +197,7 @@ export class CustomGroup extends Component<Props, State> {
 		const {showLimitInfo} = this.state;
 		const props = {
 			onClose: this.handleCloseLimitInfo,
-			text: 'Количество созданных на дашборде пользовательских группировок достигло максимума (30 шт)'
+			text: t('CustomGroup::MaxCount', {count: 30})
 		};
 
 		if (showLimitInfo) {
@@ -212,7 +214,7 @@ export class CustomGroup extends Component<Props, State> {
 			return this.renderInfoPanel({
 				onClose: this.handleCloseRemovalInfo,
 				onConfirm: this.handleConfirmRemovalInfo,
-				text: 'Группировка будет удалена без возможности восстановления.'
+				text: t('CustomGroup::DeleteConfirmation')
 			});
 		}
 
@@ -223,7 +225,7 @@ export class CustomGroup extends Component<Props, State> {
 		const {showSaveInfo} = this.state;
 
 		if (showSaveInfo) {
-			const text = 'Изменения применятся к этой группировке во всех виджетах.';
+			const text = t('CustomGroup::ChangeConfirmation');
 
 			return (
 				<InfoPanel
@@ -259,7 +261,7 @@ export class CustomGroup extends Component<Props, State> {
 		return value && <SubGroupSection onUpdate={this.handleUpdate} subGroups={value.subGroups} />;
 	};
 
-	renderTitle = () => <Text className={styles.title} type={TEXT_TYPES.TITLE}>Настройка пользовательской группировки</Text>;
+	renderTitle = () => <Text className={styles.title} type={TEXT_TYPES.TITLE}><T text="CustomGroup::ConfigurationGroup" /></Text>;
 
 	renderUseInfo = () => {
 		const {showUseInfo, usedInWidgets} = this.state;
@@ -267,7 +269,7 @@ export class CustomGroup extends Component<Props, State> {
 		if (showUseInfo) {
 			const props = {
 				onClose: this.handleCloseUseInfo,
-				text: `Группировка используется в виджетах: ${usedInWidgets.join(', ')}.`
+				text: t('CustomGroup::UsedInWidgets', {usedInWidgets: usedInWidgets.join(', ')})
 			};
 
 			return this.renderInfoPanel(props);

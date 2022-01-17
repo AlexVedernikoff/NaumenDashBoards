@@ -6,6 +6,7 @@ import type {CTXValue, NumberFormatter, ValueFormatter} from './types';
 import {compose} from 'redux';
 import moment from 'utils/moment.config';
 import {SEPARATOR, TITLE_SEPARATOR} from 'store/widgets/buildData/constants';
+import t from 'localization';
 
 /**
  * logger
@@ -186,16 +187,16 @@ export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, ad
 
 	switch (notation) {
 		case THOUSAND:
-			[divider, additional] = [1e3, 'тыс.'];
+			[divider, additional] = [1e3, t('Formatter::Thousand')];
 			break;
 		case MILLION:
-			[divider, additional] = [1e6, 'млн.'];
+			[divider, additional] = [1e6, t('Formatter::Million')];
 			break;
 		case BILLION:
-			[divider, additional] = [1e9, 'млрд.'];
+			[divider, additional] = [1e9, t('Formatter::Billion')];
 			break;
 		case TRILLION:
-			[divider, additional] = [1e12, 'трлн.'];
+			[divider, additional] = [1e12, t('Formatter::Trillion')];
 			break;
 	}
 
@@ -303,4 +304,33 @@ export const getTooltipTitlePruner = (horizontalsLegendShow: boolean, container:
 	const maxChars = (width - 12 /* padding */) / fontWidth;
 
 	return (value: string) => value.length > maxChars ? value.slice(0, maxChars - 3) + '...' : value;
+};
+
+/**
+ * Создание форматера для CNT(%) типа агрегации
+ * @param {NumberFormatter} valueFormatter - функция-форматер для значения
+ * @param {number} total - общее количество элементов в ряду
+ * @returns {Function} - функция-форматер
+ */
+export const totalPercentFormatter = (valueFormatter: NumberFormatter, total: number): NumberFormatter => {
+	if (total !== 0) {
+		const percentFormatter = makeFormatterByNumberFormat({
+			additional: '%',
+			symbolCount: null,
+			type: AXIS_FORMAT_TYPE.NUMBER_FORMAT
+		});
+
+		return (value: number) => {
+			const valueStr = valueFormatter(value);
+
+			if (valueStr !== '') {
+				const percentStr = percentFormatter(value / total * 100);
+				return `${valueStr} (${percentStr})`;
+			}
+
+			return '';
+		};
+	}
+
+	return valueFormatter;
 };

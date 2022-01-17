@@ -14,14 +14,14 @@ if (data.length > 0) {
 	const langs = Object.keys(data[0]).filter(name => name !== EMPTY);
 	const files = {};
 
-	langs.forEach((name) => {
+	langs.forEach(name => {
 		files[name] = {};
 	});
 
-	data.forEach((row) => {
+	data.forEach(row => {
 		const key = row[EMPTY];
 
-		langs.forEach((lang) => {
+		langs.forEach(lang => {
 			let val = row[lang] ?? '';
 
 			// Объекты плюризации

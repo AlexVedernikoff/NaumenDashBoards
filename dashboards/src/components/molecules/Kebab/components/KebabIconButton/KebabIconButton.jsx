@@ -2,7 +2,7 @@
 import cn from 'classnames';
 import IconButton from 'components/atoms/IconButton';
 import type {Props} from './types';
-import React, { PureComponent} from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 class KebabIconButton extends PureComponent<Props> {

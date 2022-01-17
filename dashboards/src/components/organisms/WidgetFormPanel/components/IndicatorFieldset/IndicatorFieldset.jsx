@@ -21,6 +21,7 @@ import type {OnSelectEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props, State} from './types';
 import React, {createContext, PureComponent} from 'react';
+import t from 'localization';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 import withHelpers from 'containers/DiagramWidgetForm/HOCs/withHelpers';
 import withType from 'WidgetFormPanel/HOCs/withType';
@@ -42,10 +43,9 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		showCreatingModal: false
 	};
 
-	change = (indicator: Indicator) => {
+	change = (indicator: Indicator, callback?: Function) => {
 		const {index, onChange} = this.props;
-
-		onChange(index, indicator);
+		return onChange(index, indicator, callback);
 	};
 
 	getComponents = memoize(() => ({
@@ -74,10 +74,10 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		return [...values.computedAttrs, ...helpers.filterAttributesByUsed(options, dataSetIndex, filterAttribute)];
 	};
 
-	handleChangeLabel = ({value: attribute}: OnSelectEvent) => this.change({
+	handleChangeLabel = ({value: attribute}: OnSelectEvent, index: number, callback?: Function) => this.change({
 		...this.props.value,
 		attribute
-	});
+	}, callback);
 
 	handleClickCreationPanel = () => this.setState({showCreatingModal: true});
 
@@ -175,7 +175,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 					attribute={value}
 					hasPercentAggregation={hasPercentAggregation}
 					onSelect={this.handleSelectAggregation}
-					tip="Агрегация"
+					tip={t('IndicatorFieldset::Aggregation')}
 					usesNotApplicableAggregation={usesNotApplicableAggregation}
 					value={aggregation}
 				/>
@@ -232,7 +232,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		return (
 			<Container className={className}>
 				{children}
-				<CreationPanel onClick={this.handleClickCreationPanel} text="Создать поле" />
+				<CreationPanel onClick={this.handleClickCreationPanel} text={t('IndicatorFieldset::CreateField')} />
 			</Container>
 		);
 	};

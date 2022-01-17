@@ -5,6 +5,7 @@ import type {Color, Props, State} from './types';
 import React, {Component} from 'react';
 import {SketchPicker} from 'react-color';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 export class ColorPicker extends Component<Props, State> {
 	static defaultProps = {
@@ -72,8 +73,12 @@ export class ColorPicker extends Component<Props, State> {
 					/>
 				</div>
 				<div className={styles.buttonsContainer}>
-					<Button onClick={this.handleChangeComplete} type="button">Применить</Button>
-					<Button className={styles.cancelButton} onClick={onClose} type="button" variant={VARIANTS.ADDITIONAL}>Отмена</Button>
+					<Button onClick={this.handleChangeComplete} type="button">
+						<T text="ColorPicker::Apply" />
+					</Button>
+					<Button className={styles.cancelButton} onClick={onClose} type="button" variant={VARIANTS.ADDITIONAL}>
+						<T text="ColorPicker::Cancel" />
+					</Button>
 				</div>
 			</div>
 		);
