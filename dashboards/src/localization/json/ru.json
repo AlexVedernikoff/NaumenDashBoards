@@ -300,8 +300,14 @@
 	"WidgetsGrid::EmptyGridAction": "здесь",
 	"WidgetsGrid::EmptyGridPart2": "или кликнете правой кнопкой мыши на свободное пространство",
 	"WidgetsGrid::EmptyMobileMessage": "Отсутствуют данные для отображения. Для редактирования дашборда необходимо открыть полную версию приложения на компьютере",
+	"WidgetsGrid::ConfirmCloseWindow": "В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?",
 	"WidgetForm::Save": "Сохранить",
 	"WidgetForm::Cancel": "Отмена",
+	"WidgetForm::ChoiceWidgetTooltipForm::Tooltip": "Подсказка",
+	"WidgetForm::ChoiceWidgetTooltipForm::AtTitle": "В заголовке",
+	"WidgetForm::ChoiceWidgetTooltipForm::AtIndicator": "В показателе",
+	"WidgetForm::SimpleWidgetTooltipForm::Tooltip": "Подсказка",
+	"WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle": "Подсказка в заголовке",
 	"DashboardPanel::Dashboards": "Дашборды",
 	"DashboardPanel::NewWidget": "Новый виджет",
 	"DateGroupModal::Day": "День",
@@ -445,5 +451,11 @@
 	"GroupModal::Stopped": "Остановлен",
 	"GroupModal::TimeOver": "Кончился запас времени",
 	"GroupModal::TitleContains": "Название содержит",
-	"GroupModal::TitleNotContains": "Название не содержит"
+	"GroupModal::TitleNotContains": "Название не содержит",
+	"TableWidgetForm::TableTooltipForm::Indicator": "Показатель",
+	"TableWidgetForm::TableTooltipForm::TooltipText": "Текст подсказки",
+	"TableWidgetForm::TableTooltipForm::AddTooltip": "Добавить подсказку",
+	"TableWidgetForm::TableTooltipForm::AtIndicator": "В показателе",
+	"TableWidgetForm::TableTooltipForm::AtTitle": "В заголовке",
+	"TableWidgetForm::TableTooltipForm::Tooltip": "Подсказка"
 }

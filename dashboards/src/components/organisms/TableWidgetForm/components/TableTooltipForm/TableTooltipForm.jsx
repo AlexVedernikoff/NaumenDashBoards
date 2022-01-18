@@ -15,6 +15,7 @@ import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 import TextArea from 'components/atoms/TextArea';
 import Toggle from 'components/atoms/Toggle';
 
@@ -178,7 +179,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 			if (tooltip.show) {
 				return (
 					<Fragment key={key}>
-						<FormField className={styles.tooltipIndicator} label="Показатель">
+						<FormField className={styles.tooltipIndicator} label={t('TableWidgetForm::TableTooltipForm::Indicator')}>
 							<Select
 								getOptionLabel={(option: Indicator) => option.attribute?.title ?? ''}
 								getOptionValue={option => option}
@@ -188,7 +189,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 							/>
 							{showDeleteButton && this.renderIndicatorRemoveButton(indicator)}
 						</FormField>
-						<FormField label="Текст подсказки">
+						<FormField label={t('TableWidgetForm::TableTooltipForm::TooltipText')}>
 							<TextArea
 								focusOnMount={focus}
 								name={DIAGRAM_FIELDS.title}
@@ -209,7 +210,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 
 		if (showIndicators && unusedIndicators.length > 0) {
 			return (
-				<ExtendButton onClick={this.handleClickIndicatorAdd} text="Добавить подсказку" />
+				<ExtendButton onClick={this.handleClickIndicatorAdd} text={t('TableWidgetForm::TableTooltipForm::AddTooltip')} />
 			);
 		}
 
@@ -249,7 +250,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		const {showIndicators} = this.state;
 		return (
 			<FormField>
-				<FormControl label="В показателе" reverse={true}>
+				<FormControl label={t('TableWidgetForm::TableTooltipForm::AtIndicator')} reverse={true}>
 					<Toggle checked={showIndicators} onChange={this.handleChangeIndicatorsShow} value={showIndicators} />
 				</FormControl>
 			</FormField>
@@ -281,7 +282,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		const {show} = tooltip;
 		return (
 			<FormField>
-				<FormControl label="В заголовке" reverse={true}>
+				<FormControl label={t('TableWidgetForm::TableTooltipForm::AtTitle')} reverse={true}>
 					<Toggle checked={show} name={DIAGRAM_FIELDS.show} onChange={this.handleChangeTooltipShow} value={show} />
 				</FormControl>
 			</FormField>
@@ -297,7 +298,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<CollapsableFormBox title="Подсказка" >
+			<CollapsableFormBox title={t('TableWidgetForm::TableTooltipForm::Tooltip')} >
 				{this.renderWidgetTooltip()}
 				{this.renderIndicators()}
 			</CollapsableFormBox>

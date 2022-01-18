@@ -43,4 +43,13 @@ if (data.length > 0) {
 
 		fs.writeFileSync(filePath, fileData);
 	});
+
+	const allKeys = Object.keys(files[langs[0]]).sort().map(key => `'${key}'`).join(',\n\t');
+	const keysFilePath = path.join(BASE_PATH, `keys.js`);
+	const keyFileData
+		= `// @flow\n`
+		+ `import type {LangType} from 'localization/localize_types';\n\n`
+		+ `export const data: LangType[] = [\n\t${allKeys}\n];\n`;
+
+	fs.writeFileSync(keysFilePath, keyFileData);
 }

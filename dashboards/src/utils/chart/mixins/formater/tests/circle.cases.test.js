@@ -11,7 +11,8 @@ const makeCircleCase = (data: Object) => {
 	compareFormatter(data.breakdown, formatter.breakdown);
 	compareFormatter(data.dataLabel, formatter.dataLabel);
 	compareFormatter(data.legend, formatter.legend);
-	compareFormatter(data.tooltip, formatter.tooltip);
+	compareFormatter(data.tooltip.data, formatter.tooltip.data);
+	compareFormatter(data.tooltip.title, formatter.tooltip.title);
 };
 
 describe('Circle cases test', () => {

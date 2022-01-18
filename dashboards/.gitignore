@@ -23,6 +23,11 @@ rest/stand.json
 .env.develop
 
 .DS_Store
+
+# statistic
 stats.json
 bundle-stats.html
+
+# localization temp file
 .~lock*
+src/localization/json/keys.js

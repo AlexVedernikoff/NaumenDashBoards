@@ -97,6 +97,10 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is n
                     "label": "%",
                     "value": "PERCENT",
                   },
+                  Object {
+                    "label": "CNT(%)",
+                    "value": "PERCENT_CNT",
+                  },
                 ]
               }
               renderValue={[Function]}

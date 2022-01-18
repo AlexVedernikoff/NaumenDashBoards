@@ -23,6 +23,7 @@ import {Responsive as Grid} from 'react-grid-layout';
 import SpeedometerWidget from 'components/organisms/SpeedometerWidget';
 import styles from './styles.less';
 import SummaryWidget from 'containers/SummaryWidget/SummaryWidget';
+import t from 'localization';
 import T from 'components/atoms/Translation';
 import TableWidget from 'containers/TableWidget';
 import TextWidget from 'components/organisms/TextWidget';
@@ -74,7 +75,7 @@ export class WidgetsGrid extends Component<Props, State> {
 			if (!window.dashboardPopStateEmitter) {
 				window.dashboardPopStateEmitter = event => {
 					if (isLayoutsChanged()) {
-						if (!confirm('В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?')) {
+						if (!confirm(t('WidgetsGrid::ConfirmCloseWindow'))) {
 							window.parent.history.back();
 						} else {
 							forceUnload = true;

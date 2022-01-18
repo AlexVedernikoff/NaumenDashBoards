@@ -300,8 +300,14 @@
 	"WidgetsGrid::EmptyGridAction": "",
 	"WidgetsGrid::EmptyGridPart2": "",
 	"WidgetsGrid::EmptyMobileMessage": "",
+	"WidgetsGrid::ConfirmCloseWindow": "",
 	"WidgetForm::Save": "",
 	"WidgetForm::Cancel": "",
+	"WidgetForm::ChoiceWidgetTooltipForm::Tooltip": "",
+	"WidgetForm::ChoiceWidgetTooltipForm::AtTitle": "",
+	"WidgetForm::ChoiceWidgetTooltipForm::AtIndicator": "",
+	"WidgetForm::SimpleWidgetTooltipForm::Tooltip": "",
+	"WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle": "",
 	"DashboardPanel::Dashboards": "",
 	"DashboardPanel::NewWidget": "",
 	"DateGroupModal::Day": "",
@@ -445,5 +451,11 @@
 	"GroupModal::Stopped": "",
 	"GroupModal::TimeOver": "",
 	"GroupModal::TitleContains": "",
-	"GroupModal::TitleNotContains": ""
+	"GroupModal::TitleNotContains": "",
+	"TableWidgetForm::TableTooltipForm::Indicator": "",
+	"TableWidgetForm::TableTooltipForm::TooltipText": "",
+	"TableWidgetForm::TableTooltipForm::AddTooltip": "",
+	"TableWidgetForm::TableTooltipForm::AtIndicator": "",
+	"TableWidgetForm::TableTooltipForm::AtTitle": "",
+	"TableWidgetForm::TableTooltipForm::Tooltip": ""
 }
