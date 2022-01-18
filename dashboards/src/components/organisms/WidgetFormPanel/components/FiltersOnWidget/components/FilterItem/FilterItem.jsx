@@ -144,10 +144,11 @@ export class FilterItem extends PureComponent<Props, State> {
 	};
 
 	renderLabelEditor = (): React$Node => {
-		const {idx, value: {label}} = this.props;
+		const {value: {label}} = this.props;
 		return (
-			<FormField className={styles.labelEditorForm} path={`filtersOnWidget[${idx}].label`}>
+			<FormField className={styles.labelEditorForm}>
 				<LabelEditingForm
+					canEmpty={true}
 					className={styles.form}
 					forwardedRef={this.labelEditRef}
 					onClose={this.handleCloseLabelEditor}

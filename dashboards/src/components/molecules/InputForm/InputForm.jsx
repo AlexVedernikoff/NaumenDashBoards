@@ -8,6 +8,7 @@ import withSubscriptions, {SUBSCRIBE_COMMANDS} from 'components/organisms/Widget
 
 export class InputForm extends Component<Props, State> {
 	static defaultProps = {
+		canEmpty: false,
 		className: ''
 	};
 
@@ -44,10 +45,10 @@ export class InputForm extends Component<Props, State> {
 	};
 
 	handleSubmit = (callback?: Function) => {
-		const {onSubmit} = this.props;
+		const {canEmpty, onSubmit} = this.props;
 		const {value} = this.state;
 
-		if (value) {
+		if (value || canEmpty) {
 			onSubmit(value, callback);
 		}
 	};
