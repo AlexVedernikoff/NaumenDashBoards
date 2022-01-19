@@ -5,7 +5,7 @@ import {connect} from 'react-redux';
 import {createFilterContext, getFilterContext} from 'utils/descriptorUtils';
 import type {DataSet, Props} from './types';
 import {functions, props} from './selectors';
-import {getDescriptorCases} from 'store/helpers';
+import {getDescriptorCases, getSourceFilterAttributeGroup} from 'store/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import React, {Component} from 'react';
@@ -88,9 +88,7 @@ export class SourceFieldsetContainer extends Component<Props> {
 					}
 				}
 
-				// TODO: открыть в 18 релизе
-				// const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(classFqn);
-				const sourceFilterAttributeGroup = false;
+				const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(classFqn);
 
 				if (sourceFilterAttributeGroup) {
 					context['attrGroupCode'] = sourceFilterAttributeGroup;
