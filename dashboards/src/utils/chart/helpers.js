@@ -31,9 +31,19 @@ const getLegendSettings = (widget: Chart) => {
  * @param {string} label2 - значение лейбла
  * @returns {boolean}
  */
-const equalLabels = (label1: string, label2: string) => label1?.includes(SEPARATOR) && label2?.includes(SEPARATOR)
-	? label1.split(SEPARATOR)[1] === label2.split(SEPARATOR)[1]
-	: label1 === label2;
+const equalLabels = (label1: string, label2: string) => {
+	let result = label1 === label2;
+
+	if (label1?.includes(SEPARATOR) && label2?.includes(SEPARATOR)) {
+		result = label1.split(SEPARATOR)[1] === label2.split(SEPARATOR)[1];
+	} else if (label1?.includes(SEPARATOR)) {
+		result = label1.split(SEPARATOR)[0] === label2;
+	} else if (label2?.includes(SEPARATOR)) {
+		result = label2.split(SEPARATOR)[0] === label1;
+	}
+
+	return result;
+};
 
 /**
  * Возвращает список цветов для значений разбивки
@@ -95,9 +105,7 @@ const setColors = (
 		const usedLabels = [];
 
 		labelColors.forEach(({color, key}) => {
-			const index = labels.findIndex((label, index) => {
-				return equalLabels(label, key) && !usedLabels.includes(index);
-			});
+			const index = labels.findIndex((label, index) => equalLabels(label, key) && !usedLabels.includes(index));
 
 			if (index > -1) {
 				colors[index] = color;
