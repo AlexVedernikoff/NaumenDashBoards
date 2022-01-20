@@ -1723,7 +1723,7 @@ class DashboardSettingsService
                             v.attr.ableForAvg = dashboardUtils.checkIfAbleForAvg(v.attr.sourceCode, v.attr.code, v.attr.type)
                         }
                     }
-                    else
+                    else if (!(it.attribute instanceof PercentageRelativeAttr))
                     {
                         it.attribute.ableForAvg = dashboardUtils.checkIfAbleForAvg(it.attribute.sourceCode, it.attribute.code, it.attribute.type)
                     }

@@ -328,14 +328,17 @@ class DashboardDataSetService
             {
                 //а здесь уже важно знать, выводить пустые значения или нет
                 showTableNulls = widgetSettings.showEmptyData
-                res = prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
 
-                rowCount = requestHasBreakdown
-                    ? rowCount
-                    : prepareDataSet(getDiagramData(request, diagramType, templateUUID,
-                                                    aggregationCnt, widgetSettings,
-                                                    tableRequestSettings?.ignoreLimits), widgetSettings,
-                                     showTableNulls, requestHasBreakdown)?.find()?.size()
+                if (!widgetSettings.data.sourceRowName.findAll())
+                {
+                    res = prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
+                    rowCount = requestHasBreakdown
+                        ? rowCount
+                        : prepareDataSet(getDiagramData(request, diagramType, templateUUID,
+                                                        aggregationCnt, widgetSettings,
+                                                        tableRequestSettings?.ignoreLimits), widgetSettings,
+                                         showTableNulls, requestHasBreakdown)?.find()?.size()
+                }
             }
             countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings,
                                          tableRequestSettings?.ignoreLimits)
@@ -419,7 +422,7 @@ class DashboardDataSetService
                                            showRowNum as boolean, rowCount, tableTop,
                                            paginationSettings, tableSorting, reverseRowCount,
                                            widgetSettings, request, tableRequestSettings?.ignoreLimits,
-                                           countTotals, tableTotals)
+                                           countTotals, tableTotals, widgetSettings.data.sourceRowName)
             case COMBO:
                 Integer sortingDataIndex = getSortingDataIndex(widgetSettings)
                 //нашли источник, по которому должна быть сортировка
@@ -980,7 +983,7 @@ class DashboardDataSetService
         //поставим агрегацию N/A второй после исходной агрегации на подсчёт
         List aggregationsNoneAggr = defaultRequestData?.aggregations?.findAll { it.type == Aggregation.NOT_APPLICABLE }
         Map dataMaps = computeAggregations.withIndex().collect { aggregation, i ->
-            def tempRequestData = requestData.clone()
+            RequestData tempRequestData = requestData.clone()
             tempRequestData.aggregations = [aggregation] + aggregationsNoneAggr
             Requisite tempRequisite = new Requisite(
                 title: 'DEFAULT',
@@ -999,6 +1002,112 @@ class DashboardDataSetService
             intermediateData = dataMap + [*:dataMaps]
         }
         return intermediateData
+    }
+
+    /**
+     * Метод по переподготовке промежуточных данных для формирования запроса для таблиц без параметра
+     * @param intermediateData - текущие промежуточные данные для формирования запроса
+     * @return подготовленные промежуточные данные для формирования запроса
+     */
+    Map<String, Map> updateIntermediateDataForTableWithoutParameters(Map<String, Map> intermediateData)
+    {
+        Map<String, Map> preparedIntermediateData = [:]
+        List<String> usedComputeDataKeys = []
+        intermediateData.eachWithIndex { data, sourceIndex ->
+            RequestData requestData = data.value.requestData
+            List computationData = data.value.computeData
+            Requisite originalRequisite = data.value.requisite
+
+            RequestData defaultRequestData = requestData.clone()
+            List computeAggregations = defaultRequestData.aggregations.findAll {
+                it.attribute.type == 'COMPUTED_ATTR'
+            }
+            defaultRequestData.aggregations -= computeAggregations
+
+            // Выделение обычных аггрегаций (не вычислений) для каждого из источников - начало
+            if (defaultRequestData.aggregations.any())
+            {
+                String keyForData = 'not-сompute-data_' + sourceIndex
+                DefaultRequisiteNode defaultRequisiteNode = new DefaultRequisiteNode(
+                    title: null,
+                    type: 'DEFAULT',
+                    dataKey: keyForData
+                )
+                Requisite defaultRequisite = new Requisite(
+                    title: 'DEFAULT',
+                    nodes: [defaultRequisiteNode],
+                    showNulls: originalRequisite.showNulls
+                )
+                preparedIntermediateData[keyForData] = [
+                    requestData: defaultRequestData,
+                    computeData: null,
+                    customGroup: null,
+                    requisite  : defaultRequisite
+                ]
+            }
+            // Выделение обычных аггрегаций (не вычислений) для каждого из источников - конец
+
+            // Выделение вычислений для каждого из источников - начало
+            List aggregationsNoneAggr = defaultRequestData?.aggregations?.findAll {
+                it.type == Aggregation.NOT_APPLICABLE
+            }
+
+            Map dataMaps = [:]
+            if (computeAggregations)
+            {
+                dataMaps = computeAggregations.withIndex().collect { aggregation, i ->
+                    RequestData tempRequestData = requestData.clone()
+                    tempRequestData.aggregations = [aggregation] + aggregationsNoneAggr
+                    ComputationRequisiteNode compositeRequisiteNode = new ComputationRequisiteNode(
+                        title: null,
+                        type: 'COMPUTATION',
+                        formula: "[${ aggregation.attribute.stringForCompute }]"
+                    )
+
+                    Map newComputationData = computationData[i].clone()
+                    newComputationData = newComputationData.collectEntries {
+                        String key = it.key
+                        if (usedComputeDataKeys.contains(it.key))
+                        {
+                            key = UUID.randomUUID().toString()
+                            compositeRequisiteNode.formula = compositeRequisiteNode.formula.replaceAll(it.key, key)
+                        }
+                        return [key, it.value]
+                    }
+
+                    Requisite tempRequisite = new Requisite(
+                        title: 'DEFAULT',
+                        nodes: [compositeRequisiteNode],
+                        showNulls: originalRequisite.showNulls,
+                        top: originalRequisite.top
+                    )
+
+                    String dataKey = "сompute-data_${ sourceIndex }_${ i }"
+                    newComputationData.each {
+                        it.value = it.value.clone()
+                        it.value.dataKey = dataKey
+                        usedComputeDataKeys << it.key
+                    }
+
+                    return [(dataKey): [
+                        requestData: tempRequestData,
+                        computeData: newComputationData,
+                        customGroup: null,
+                        requisite  : tempRequisite]
+                    ]
+                }.inject { first, second ->
+                    first + second
+                }
+
+                if (dataMaps.any())
+                {
+                    preparedIntermediateData = preparedIntermediateData + [*:dataMaps]
+                }
+            }
+            // Выделение вычислений для каждого из источников - конец
+
+        }
+        return preparedIntermediateData
     }
 
     /**
@@ -1057,6 +1166,7 @@ class DashboardDataSetService
         Boolean hasTableNotOnlyBaseSources = (tempWidgetSettings?.data*.source.value.value as Set).size() > 1
         Boolean isDiagramTypeNotCount = !(diagramType in [DiagramType.CountTypes, DiagramType.RoundTypes])
         Boolean isDiagramTypeCount = diagramType in DiagramType.CountTypes
+        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
         def commonBreakdown
         if(!isDiagramTypeCount && !isDiagramTypeTable)
         {
@@ -1310,14 +1420,21 @@ class DashboardDataSetService
         Boolean manySources = isDiagramTypeTable &&
                               tempWidgetSettings?.data*.sourceForCompute?.count { !it } > 1
         def prevData = intermediateData
-        if(manySources || (hasTableNotOnlyBaseSources && computationInTableRequest))
+        if (isSourceForEachRow)
+        {
+            mergeDataAmongSources(intermediateData)
+        }
+        else if (!isSourceForEachRow && manySources || (hasTableNotOnlyBaseSources && computationInTableRequest))
         {
             Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(tempWidgetSettings)
             intermediateData = updateIntermediateDataToOneSource(intermediateData, computationInTableRequest, countOfCustomsInFirstSource)
         }
         if(computationInTableRequest)
         {
-            intermediateData = updateIntermediateData(intermediateData)
+            intermediateData = isSourceForEachRow ?
+                updateIntermediateDataForTableWithoutParameters(intermediateData) :
+                updateIntermediateData(intermediateData)
+
             def request = buildDiagramRequest(intermediateData, subjectUUID, diagramType)
 
             List<RequestData> requestData = prevData.findResults { key, value -> value?.requestData?.aggregations ? value?.requestData : null }
@@ -1343,6 +1460,78 @@ class DashboardDataSetService
             return request
         }
         return buildDiagramRequest(intermediateData, subjectUUID, diagramType)
+    }
+
+    /**
+     * Метод объединения данных у всех источников
+     * @param intermediateData - данные для формирования запроса
+     */
+    private void mergeDataAmongSources(Map intermediateData)
+    {
+        List<GroupParameter> allGroups = []
+
+        intermediateData.each { key, request ->
+            request.requestData.groups.each { group ->
+                if (!checkDuplicateGroup(allGroups, group))
+                {
+                    allGroups << group
+                }
+            }
+        }
+
+        intermediateData.each { key, request ->
+            String sourceClassFqn = request.requestData.source.classFqn
+            List<GroupParameter> groups = allGroups.collect {
+                GroupParameter group = it.deepClone()
+                group.attribute.sourceCode = sourceClassFqn
+                group.attribute.metaClassFqn = sourceClassFqn
+                return group
+            }
+
+            request.requestData.groups = groups
+        }
+    }
+
+    /**
+     * Метод проверки дупликатов группировки
+     * @param groups - список группировок
+     * @param group - проверяемая группировка
+     * @return показатель дупликат или нет
+     */
+    private Boolean checkDuplicateGroup(List<GroupParameter> groups, GroupParameter group)
+    {
+        Boolean isGroupDuplicate = false
+        groups.each {
+            if (group.type == it.type && group.attribute.code == it.attribute.code)
+            {
+                isGroupDuplicate = true
+            }
+        }
+        return isGroupDuplicate
+    }
+
+    /**
+     * Метод проверки дупликатов аггрегации
+     * @param aggregations - список агрегаций
+     * @param aggregation - проверяемая агрегация
+     * @return показатель дупликат или нет
+     */
+    private Boolean checkDuplicateAggregation(List<AggregationParameter> aggregations,
+                                              AggregationParameter aggregation)
+    {
+        Boolean isAggregationDuplicate = false
+
+        aggregations.each {
+            if (aggregation.type ==
+                it.type &&
+                aggregation.attribute.code ==
+                it.attribute.code && aggregation.attribute.sourceCode == it.attribute.sourceCode)
+            {
+                isAggregationDuplicate = true
+            }
+        }
+
+        return isAggregationDuplicate
     }
 
     /**
@@ -3945,10 +4134,13 @@ class DashboardDataSetService
      * @param showRowNum - флаг для вывода номера строки
      * @param rowCount - количество строк в полном запросе
      * @param tableTop - настройки топа для таблицы
-     * @param pagingSettings -
+     * @param pagingSettings - настройки пагинации
      * @param requestContent - тело запроса с фронта
      * @param request - тело обработанного запроса
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
+     * @param countTotals - итог по количеству данных на виджете
+     * @param tableTotals - итоговые данные по таблице
+     * @param sourceRowNames - список заголовков для источников
      * @return сформированная таблица
      */
     private TableDiagram mappingTableDiagram(List list,
@@ -3963,12 +4155,44 @@ class DashboardDataSetService
                                              DiagramRequest request,
                                              IgnoreLimits ignoreLimits = new IgnoreLimits(),
                                              Integer countTotals = 0,
-                                             List tableTotals = [])
+                                             List tableTotals = [],
+                                             List sourceRowNames = [])
     {
-        def resultDataSet = list.head() as List<List>
+        Boolean hasBreakdown = checkForBreakdown(requestContent)
+        List<List> resultDataSet
+        if (sourceRowNames.findAll())
+        {
+            if (hasBreakdown)
+            {
+                Integer i = 0
+                resultDataSet = list.collectMany {
+                    it.each { results ->
+                        results << results[results.size() - 1]
+                        results[results.size() - 2] = sourceRowNames[i]
+                    }
+                    i++
+                    return it
+                } as List<List>
+            }
+            else
+            {
+                resultDataSet = list.collect { it.size() ? it.head() : [0] } as List<List>
+            }
+        }
+        else
+        {
+            resultDataSet = list.head() as List<List>
+        }
         def transposeDataSet = resultDataSet.transpose()
         Integer aggregationCnt = getSpecificAggregationsList(requestContent).count { it.aggregation !=  Aggregation.NOT_APPLICABLE }
         List<Map> attributes = getAttributeNamesAndValuesFromRequest(requestContent)
+
+        if (sourceRowNames.findAll())
+        {
+            attributes = attributes[(aggregationCnt - 1)..-1]
+            attributes.head().name = 'Показатель'
+        }
+
         List<String> allAggregationAttributes = getSpecificAggregationsList(requestContent).name
         if (transposeDataSet.size() == 0)
         {
@@ -3977,7 +4201,6 @@ class DashboardDataSetService
         else
         {
             Set<Map> innerCustomGroupNames = getInnerCustomGroupNames(requestContent)
-            Boolean hasBreakdown = checkForBreakdown(requestContent)
 
             List<String> attributeNames = attributes.name
             List customValuesInBreakdown = []
@@ -4008,7 +4231,7 @@ class DashboardDataSetService
                                 aggregationCnt,
                                 allAggregationAttributes,
                                 ignoreLimits,
-                                request, countTotals, tableTotals)
+                                request, countTotals, tableTotals, sourceRowNames)
         }
     }
 
@@ -4245,7 +4468,7 @@ class DashboardDataSetService
 
         List usual = list[0] //на первом месте в списке  результатов, нужно внедрить на нужные места данные из результатов вычислений
 
-        if (!(aggregations.size() == compAggregations.size() && compAggregations.size() == 1))
+        if (!(aggregations.size() == compAggregations.size() && compAggregations.size() == 1)) // если результат не состоит из одного вычисления
         {
             List indexesOfComputeInRequest = aggregations.findIndexValues { it.name in compAggregations.name }
 
@@ -4293,6 +4516,57 @@ class DashboardDataSetService
             }
         }
         return [usual]
+    }
+
+    /**
+     * Метод преобразования всех датасетов различных данных к одному для таблиц без параметра
+     * @param list - исходных датасет
+     * @param requestContent - тело запроса
+     * @return итоговый датасет
+     */
+    List prepareDataSetForTableWithoutParameters(List list, Widget requestContent)
+    {
+        List listsGroupedBySources = []
+        List sourcesList = []
+        List dataSet
+        Integer sourcesCount = requestContent.data.sourceRowName.findAll().size()
+        Integer elementsPerSource = list.size() / sourcesCount
+        list.eachWithIndex { value, index ->
+            sourcesList << value
+            if ((index + 1) % (elementsPerSource as Double) == 0)
+            {
+                listsGroupedBySources << sourcesList
+                sourcesList = []
+            }
+        }
+
+        List compAggregations = getSpecificAggregationsList(requestContent, true)
+        List aggregations = getSpecificAggregationsList(requestContent)
+
+        if (compAggregations.size() == aggregations.size() && compAggregations.size() == 1)
+        {
+            dataSet = list
+        }
+        else
+        {
+            List indexesOfComputeInRequest = aggregations.findIndexValues {
+                it.name in compAggregations.name
+            }
+            dataSet = listsGroupedBySources.collect { groupedList ->
+                def usual = groupedList[0]
+                def computeResults = groupedList[1..-1]
+
+                computeResults.eachWithIndex { currentComputations, i1 ->
+                    int indexOfCurrentComputation = indexesOfComputeInRequest[i1]
+                    currentComputations.eachWithIndex { it, i2 ->
+                        usual[i2].add(indexOfCurrentComputation, it[0])
+                    }
+                }
+                return usual
+            }
+        }
+
+        return dataSet
     }
 
     /**
@@ -4359,13 +4633,14 @@ class DashboardDataSetService
      * @param allAggregationAttributes - названия всех атрибутов агрегации
      * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
      * @param request тело обработанного запроса
+     * @param sourceRowNames - список заголовков для источников
      * @return TableDiagram
      */
     private TableDiagram mappingTable(List resultDataSet, List transposeDataSet, List attributes, Boolean totalColumn,
                                       Boolean showRowNum, Integer rowCount, Integer tableTop, PaginationSettings paginationSettings, Sorting sorting,
                                       Boolean reverseRowCount, Set<Map> innerCustomGroupNames, Boolean hasBreakdown, List customValuesInBreakdown,
                                       Integer aggregationCnt, List<String> allAggregationAttributes, IgnoreLimits ignoreLimits,
-                                      DiagramRequest request, Integer countTotals, List tableTotals = [])
+                                      DiagramRequest request, Integer countTotals, List tableTotals = [], List sourceRowNames = [])
     {
         List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
         Boolean valuesInBasicBreakdownExceedLimit = !customValuesInBreakdown && breakdownValues.size() > DashboardUtils.tableBreakdownLimit && !ignoreLimits.breakdown
@@ -4375,21 +4650,33 @@ class DashboardDataSetService
 
         Collection <Column> columns = collectColumns(attributes, hasBreakdown, customValuesInBreakdown ?: breakdownValues)
 
-        int cnt = attributes.size()
         List<String> attributeNames = attributes.name
+        if (sourceRowNames.findAll() && hasBreakdown)
+        {
+            attributeNames << attributeNames[attributeNames.size() - 1]
+            attributeNames[attributeNames.size() - 2] = 'Источник'
+        }
+        int cnt = attributeNames.size()
+
         List notAggregatedAttributeNames = notAggregationAttributeNames(attributes)
         Integer notAggregatedAttributeSize = notAggregatedAttributeNames.size()
         List<Map<String, Object>> tempMaps = getTempMaps(resultDataSet, attributeNames, cnt)
         List data = []
         int id = reverseRowCount ? rowCount - paginationSettings.firstElementIndex : paginationSettings.firstElementIndex
-        Integer parameterIndex = aggregationCnt + notAggregatedAttributeSize //индекс,
-        // с которого в строке начинаются значения параметров
+
+        if (sourceRowNames.findAll())
+        {
+            aggregationCnt = 1
+        }
+
+        Integer parameterIndex = aggregationCnt + notAggregatedAttributeSize //индекс, с которого в строке начинаются значения параметров
+
         //подготовка данных
         if (hasBreakdown)
         {
             Integer indexToFind = 2 //берём до предпоследнего значения в строке, на последнем месте - разбивка
             def groups = tempMaps.groupBy { it[parameterIndex..-(indexToFind)] }//группируем данные по параметрам (их значениям)
-            data =  formatDataForTableWithBreakdown(groups, valuesInBasicBreakdownExceedLimit, breakdownValues,
+            data = formatDataForTableWithBreakdown(groups, valuesInBasicBreakdownExceedLimit, breakdownValues,
                                                     aggregationCnt, notAggregatedAttributeNames, parameterIndex, showRowNum)
             rowCount = data.size()
             if(tableTop && tableTop < rowCount)
@@ -4406,6 +4693,18 @@ class DashboardDataSetService
                     it.ID = reverseId--
                 }
             }
+
+            if (sourceRowNames)
+            {
+                Map<String, List> dataGroupedBySources = data.groupBy { it['Источник'] }
+                Integer dataId = 1
+                data = dataGroupedBySources.collect {
+                    Map dataItem = [:]
+                    it.value.each { dataItem += it }
+                    dataItem['ID'] = dataId++
+                    return dataItem
+                }
+            }
         }
         else
         {
@@ -4417,8 +4716,22 @@ class DashboardDataSetService
                 tempMaps = sortTableDataSetWithMaps(tempMaps, attributes, sorting)
                 tempMaps = getDataSetWithPagination(tempMaps, paginationSettings)
             }
+
+            if (sourceRowNames.findAll())
+            {
+                aggregationCnt = 1
+            }
+
             data = tempMaps.collect { map ->
-                def value = map[aggregationCnt..-1] + map[0..aggregationCnt -1].collect { it.findResult {k,v -> [(k): v ?: "0"]} }
+                def value = map[0..aggregationCnt - 1].collect {
+                    it.findResult { k, v -> [(k): v ?: "0"]
+                    }
+                }
+                if (map.size() >= aggregationCnt + 1)
+                {
+                    value = map[aggregationCnt..-1] + value
+                }
+
                 if(showRowNum)
                 {
                     return [ID: reverseRowCount ? id-- : ++id, *:value.sum()]
@@ -4428,10 +4741,27 @@ class DashboardDataSetService
                     return [*:value.sum()]
                 }
             }
+
+            if (sourceRowNames)
+            {
+                data.eachWithIndex { value, i ->
+                    value['Источник'] = sourceRowNames[i]
+                }
+            }
         }
 
         //подготовка колонок
-        Collection<Column> aggregationColumns = allAggregationAttributes.collect { name -> columns.find { it.header == name } }
+        List takenAggregationColumns = []
+        Collection<Column> aggregationColumns = allAggregationAttributes.collect { name ->
+            columns.find {
+                Boolean match = it.header == name && !takenAggregationColumns.contains(it)
+                if (match)
+                {
+                    takenAggregationColumns << it
+                }
+                return match
+            }
+        }
         //убираем, чтобы потом подставить правильно
         columns -= aggregationColumns
         if (totalColumn)
@@ -4479,13 +4809,18 @@ class DashboardDataSetService
             columns.add(0, new NumberColumn(header: "", accessor: "ID", footer: "", show: showRowNum))
         }
 
+        if (sourceRowNames.findAll())
+        {
+            columns.add(1, new NumberColumn(header: "Источник", accessor: "Источник", footer: ""))
+        }
+
         def source = request.data.findResult { k, v -> v.source }
 
         def parameterAttribute = attributes[parameterIndex]
         boolean isDynamicParameter = parameterAttribute?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
         Boolean customValuesInParameter = innerCustomGroupNames.any { it.attributeName == attributeNames[parameterIndex] }
         Boolean limitParameter = false
-        if(!customValuesInParameter)
+        if(!customValuesInParameter && parameterAttribute)
         {
             limitParameter = !ignoreLimits?.parameter &&
                              isDynamicParameter
@@ -4523,7 +4858,7 @@ class DashboardDataSetService
 
         LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
 
-        return new TableDiagram(columns: columns, data: data, limitsExceeded: limitsExceeded, total: rowCount, countTotals: countTotals)
+        return new TableDiagram(columns: columns.findAll(), data: data, limitsExceeded: limitsExceeded, total: rowCount, countTotals: countTotals)
     }
 
     /**

@@ -1436,6 +1436,28 @@ class AggregationParameter extends Parameter<Aggregation> {}
 class GroupParameter extends Parameter<GroupType>
 {
     String format
+
+    GroupParameter deepClone()
+    {
+        BaseAttribute attribute
+
+        if (this.attribute instanceof Attribute)
+        {
+            attribute = this.attribute.deepClone()
+        }
+        else
+        {
+            attribute = this.attribute
+        }
+
+        return new GroupParameter(
+            format: this.format,
+            title: this.title,
+            type: this.type,
+            sortingType: this.sortingType,
+            attribute: attribute
+        )
+    }
 }
 
 class FilterParameter extends Parameter<Comparison>
@@ -2022,6 +2044,11 @@ class DeserializationHelper
                 return use(JacksonUtils) {
                     value.hasField('computeData')
                 }
+            },
+            (PercentageRelativeAttr) : { value ->
+                return use(JacksonUtils) {
+                    value.hasField('descriptor')
+                }
             }
         ]
         module.addDeserializer(BaseAttribute, baseAttributeDeserializer)
@@ -2330,6 +2357,48 @@ class BaseAttribute
     @JsonCreator
     static BaseAttribute create(String json) {
         return mapper.readValue(json, BaseAttribute)
+    }
+}
+
+/**
+ * Класс для атрибута с вычислением процента относительно источника
+ */
+@Canonical
+class PercentageRelativeAttr extends BaseAttribute
+{
+    /**
+     * Код атрибута
+     */
+    String code
+    /**
+     * Название атрибута
+     */
+    String title
+    /**
+     * Тип атрибута
+     */
+    String type
+    /**
+     * Дескриптор индикатора для расчета процента относительно источника
+     */
+    String descriptor
+    /**
+     * Код источника
+     */
+    String sourceCode = ''
+
+    /**
+     * Полное копирование атрибута включая вложенные
+     * @return
+     */
+    PercentageRelativeAttr deepClone()
+    {
+        return new PercentageRelativeAttr(
+            code: this.code,
+            title: this.title,
+            type: this.type,
+            descriptor: this.descriptor,
+        )
     }
 }
 
@@ -3542,6 +3611,10 @@ abstract class DiagramNowData
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Group breakdownGroup
+    /**
+     * Заголовок для источника
+     */
+    String sourceRowName
 }
 
 /**
