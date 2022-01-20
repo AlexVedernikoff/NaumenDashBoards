@@ -10,25 +10,15 @@ const CheckedMenu = (props: Props) => {
 	const {items, onCheck, onToggle, position} = props;
 	const {left, top} = position;
 
-	const handleCheck = (target, value) => onCheck(target, value);
-
-	const renderItems = () => items.map(item =>
-		<Item key={item.code}>
-			{renderCheckbox(item)}
-		</Item>
+	const renderItems = () => items.map(item => <Item key={item.code}>{renderCheckbox(item)}</Item>
 	);
 
-	const handleCheckbox = (setValueToLocalState, object) => {
-		setValueToLocalState(!object.show);
-		handleCheck(object, !object.show);
-	};
+	const handleCheckboxChange = (item) => ({value}) => onCheck(item, !value);
 
 	const renderCheckbox = item => {
-		const [value, setValue] = useState(item.show);
-
 		return (
 			<FormControl label={item.label}>
-				<Checkbox checked={value} name='Checkbox' onChange={() => handleCheckbox(setValue, item)} value={value} />
+				<Checkbox checked={item.show} name='Checkbox' onChange={handleCheckboxChange(item)} value={item.show} />
 			</FormControl>
 		);
 	};

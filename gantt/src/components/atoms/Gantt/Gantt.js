@@ -238,13 +238,13 @@ const Gantt = (props: Props) => {
 
 		gantt.config.grid_width = countColumns * 200 + (isShowButton ? 50 : 0);
 
-		let newColums = deepClone(gantt.config.columns);
-		let columnSettings = [];
+		const newColums = deepClone(gantt.config.columns);
 
-		newColums.forEach((i) => {
-			let {hide, label, minWidth, name, resize, width, tree, ...colum} = i;
-			columnSettings.push(colum)
+		const columnSettings = newColums.map(i => {
+			const {hide, label, minWidth, name, resize, tree, width, ...column} = i;
+			return column;
 		});
+
 		columnSettings.pop();
 		dispatch(setColumnSettings(columnSettings));
 	};
@@ -257,6 +257,10 @@ const Gantt = (props: Props) => {
 			if (columns[i].hide) {
 				items.push(columns[i]);
 			}
+		}
+
+		if (items.length !== 0 && items[0].name === 'button') {
+			setShowMenu(false);
 		}
 
 		return <CheckedMenu items={items} onCheck={checkItemMenuHide} onToggle={() => setShowMenu(!showMenu)} position={position} />;
