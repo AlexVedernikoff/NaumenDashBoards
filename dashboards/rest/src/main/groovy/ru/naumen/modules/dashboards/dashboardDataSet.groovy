@@ -361,11 +361,18 @@ class DashboardDataSetService
                     def finalIndex = aggregationsSize > tempTransponseRes.size() ? tempTransponseRes.size() : aggregationsSize
                     def transposeRes = tempTransponseRes[0..finalIndex - 1]
 
+                    Integer percentCntAggregationIndex = getPercentCntAggregationIndexForTable(request, diagramType)
                     tableTotals = transposeRes?.withIndex()?.collect { val, i ->
                         if (i in listIdsOfNormalAggregations)
                         {
                             return val.sum {
-                                it as Double
+                                List<String> countAndPercentValuesForTable
+                                if (i == percentCntAggregationIndex)
+                                {
+                                    countAndPercentValuesForTable = it.split(' ')
+                                    return countAndPercentValuesForTable[1] as Double
+                                }
+                                return it as Double
                             }
                         }
                         else
@@ -2730,7 +2737,11 @@ class DashboardDataSetService
                             return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, onlyFilled, diagramType, requestContent, ignoreLimits, paginationSettings)
                         }
                         RequestData newRequestData = requestData.clone()
-                        Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, onlyFilled)
+                        Closure formatAggregation = this.&formatAggregationSet.rcurry(
+                            listIdsOfNormalAggregations,
+                            onlyFilled,
+                            getPercentCntAggregationIndexForTable(request, diagramType)
+                        )
                         Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                         def res = filtering?.withIndex()?.collectMany { filters, i ->
                             newRequestData.filters = filters
@@ -2863,7 +2874,12 @@ class DashboardDataSetService
                             }]]
                             def title = fullFilterList.find().value.title.grep()
                             def id = fullFilterList.find().value.id.grep()
-                            res = formatAggregationSet(res, listIdsOfNormalAggregations, onlyFilled)
+                            res = formatAggregationSet(
+                                res,
+                                listIdsOfNormalAggregations,
+                                onlyFilled,
+                                getPercentCntAggregationIndexForTable(request, diagramType)
+                            )
                             def filtersTitle = title.any {it[0] != ''}
                                 ? (title[i] as Set)?.withIndex().findResults { val, idx ->
                                 return val.findResults {
@@ -3101,9 +3117,13 @@ class DashboardDataSetService
      * @param listOfLists - список данных
      * @param listIdsOfNormalAggregations - список индексов агрегаций в датасете
      * @param exceptNulls - убирать 0
+     * @param percentCntAggregationIndex - индекс агрегации типа PERCENT_CNT
      * @return список округлённых числовых значений
      */
-    List formatAggregationSet(List listOfLists, List listIdsOfNormalAggregations, Boolean exceptNulls = false)
+    List formatAggregationSet(List listOfLists,
+                              List listIdsOfNormalAggregations,
+                              Boolean exceptNulls = false,
+                              Integer percentCntAggregationIndex = null)
     {
         if (listIdsOfNormalAggregations.size() < 1)
         {
@@ -3119,13 +3139,49 @@ class DashboardDataSetService
             if (listIdsOfNormalAggregations.size() > 0)
             {
                 listIdsOfNormalAggregations.each { index ->
+                    List<String> countAndPercentValuesForTable
+                    if (index == percentCntAggregationIndex)
+                    {
+                        countAndPercentValuesForTable = list[index].split(' ')
+                        list[index] = countAndPercentValuesForTable[1]
+                    }
+
                     list[index] = list[index] = list[index] && !(list[index].toDouble().isNaN() || list[index].toDouble().isInfinite())
                         ? DECIMAL_FORMAT.format(list[index] as Double)
                         : DECIMAL_FORMAT.format(0)
+
+                    if (index == percentCntAggregationIndex)
+                    {
+                        list[index] = countAndPercentValuesForTable[0] + ' ' + list[index]
+                    }
                 }
                 return list
             }
         }
+    }
+
+    /**
+     * Метод получения индекса агрегации типа PERCENT_CNT для таблицы
+     * @param request - запрос
+     * @param diagramType - тип диаграммы
+     * @return - индекс агрегации типа PERCENT_CNT для таблицы
+     */
+    Integer getPercentCntAggregationIndexForTable(DiagramRequest request, DiagramType diagramType)
+    {
+        Integer percentCntAggregationIndex
+        if (diagramType == DiagramType.TABLE)
+        {
+            percentCntAggregationIndex = request?.data?.findResult { key, value ->
+                value?.aggregations?.withIndex()?.findResult { val, index ->
+                    if (val.type == Aggregation.PERCENT_CNT)
+                    {
+                        return index
+                    }
+                }
+            }
+        }
+
+        return percentCntAggregationIndex
     }
 
     /**
@@ -5390,7 +5446,11 @@ class DashboardDataSetService
                 Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
 
                 //важно для таблицы
-                Closure formatAggregation = this.&formatAggregationSet.rcurry(listIdsOfNormalAggregations, diagramType in DiagramType.CountTypes ? false : onlyFilled)
+                Closure formatAggregation = this.&formatAggregationSet.rcurry(
+                    listIdsOfNormalAggregations,
+                    diagramType in DiagramType.CountTypes ? false : onlyFilled,
+                    getPercentCntAggregationIndexForTable(request, diagramType)
+                )
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
                 def res = dashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
                                                     .with(formatGroup)
@@ -5463,7 +5523,12 @@ class DashboardDataSetService
                     } : [[calculator.execute { key ->
                     variables[key as String].head().head() as Double
                 }]]
-                def total = [(node.title): formatAggregationSet(res, listIdsOfNormalAggregations, diagramType in DiagramType.CountTypes ? false : onlyFilled)]
+                List total = [(node.title): formatAggregationSet(
+                    res,
+                    listIdsOfNormalAggregations,
+                    diagramType in DiagramType.CountTypes ? false : onlyFilled,
+                    getPercentCntAggregationIndexForTable(request, diagramType)
+                )]
                 total = formatResult(total, aggregationCnt)
                 return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
                                                       parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
