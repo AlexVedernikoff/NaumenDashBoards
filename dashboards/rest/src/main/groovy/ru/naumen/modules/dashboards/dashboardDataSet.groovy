@@ -1407,13 +1407,13 @@ class DashboardDataSetService
     {
         //фильтры основного фильтра  покрывает фильтры от пользовательского целиком -
         // нужно заменить фильтры основного, где атрибуты одни и те же, на те, что есть в пользовательском фильтре
-        if(baseDescriptorAttributes - userDescriptorAttributes && !(userDescriptorAttributes - baseDescriptorAttributes))
+        if(baseDescriptorAttributes - userDescriptorAttributes && baseDescriptorAttributes.containsAll(userDescriptorAttributes))
         {
             def filters = descriptorMap.filters
             def userFilters = userDescriptorMap.filters
             descriptorMap.filters = putUserFiltersIntoBase(userFilters, filters, userDescriptorAttributes)
         }
-        else if(userDescriptorAttributes - baseDescriptorAttributes && !(baseDescriptorAttributes - userDescriptorAttributes))
+        else if(userDescriptorAttributes.containsAll(baseDescriptorAttributes))
         {
             //иначе пользовательский покрыл все фильтры основного, то логично применить фильтры от пользовательского целиком
             descriptorMap = userDescriptorMap
@@ -1438,26 +1438,15 @@ class DashboardDataSetService
      * @param userDescriptorAttributes - атрибуты пользовательского дескриптора
      * @return базовый фильтр со значениями пользовательского в нужных атрибутах
      */
-    List<List> putUserFiltersIntoBase(def userFilters, def filters, List userDescriptorAttributes)
+    List<List> putUserFiltersIntoBase( List<List> userFilters,  List<List> filters, List userDescriptorAttributes)
     {
-        return filters.collect { filterValue->
-            filterValue.each { filtering ->
+        List<List> result = filters.collect { filterValue ->
+            return filterValue.findAll { filtering ->
                 def attribute = filtering.properties.attributeFqn
-                if(attribute in userDescriptorAttributes)
-                {
-                    def newFilter = userFilters.collectMany {userFilterValue->
-                        userFilterValue.findResults { filter ->
-                            if(filter.properties.attributeFqn == attribute)
-                            {
-                                return filter
-                            }
-                        }
-                    }
-                    filterValue = newFilter
-                }
+                return !(attribute in userDescriptorAttributes)
             }
-            return filterValue
         }
+        return result.findAll() + userFilters
     }
 
     /**
