@@ -35,6 +35,11 @@ const data = {
 				"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb3",
 				"show":false
 			},
+			{
+				"title":"",
+				"code":"add",
+				"show":true
+			},
 		],
 		"rollUp":false,
 		"scale":"MONTH"

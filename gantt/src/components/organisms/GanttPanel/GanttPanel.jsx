@@ -7,11 +7,6 @@ import React, {PureComponent, Suspense} from 'react';
 import styles from './styles.less';
 
 export class GanttPanel extends PureComponent<Props, State> {
-	state = {
-		swiped: false
-	};
-
-	handleToggle = () => this.setState({swiped: !this.state.swiped});
 
 	renderContent = () => {
 		const content = <FormPanel />;
@@ -25,14 +20,13 @@ export class GanttPanel extends PureComponent<Props, State> {
 	};
 
 	renderDrawerControl = () => {
-		const {swiped} = this.state;
 		const CN = cn({
 			[styles.drawerControl]: true,
-			[styles.activeDrawerControl]: swiped
+			[styles.activeDrawerControl]: this.props.swiped
 		});
 
 		return (
-			<div className={CN} onClick={this.handleToggle}>
+			<div className={CN} onClick={this.props.handleToggle}>
 				<Icon className={styles.drawerIcon} name="DRAWER" />
 			</div>
 		);
@@ -47,10 +41,9 @@ export class GanttPanel extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {swiped} = this.state;
 		const CN = cn({
 			[styles.container]: true,
-			[styles.swipedContainer]: swiped
+			[styles.swipedContainer]: this.props.swiped
 		});
 
 		return (

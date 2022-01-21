@@ -40,7 +40,7 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		dispatch(showLoaderData());
-
+		
 		const {contentCode, subjectUuid} = getContext();
 		const user = await getCurrentUser();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -221,6 +221,17 @@ const cancelSettings = () => ({
 	type: APP_EVENTS.CANCEL_SETTINGS
 });
 
+/**
+ * Изминение масштаба на диаграмме
+ */
+const changeScale = (payload: CommonSettings) => ({
+	payload,
+	type: APP_EVENTS.CHANGE_SCALE
+});
+
+/**
+ * Изменение отображения табов
+ */
 const setColumnSettings = payload => ({
 	payload,
 	type: APP_EVENTS.SET_COLUMN_SETTINGS
@@ -228,6 +239,7 @@ const setColumnSettings = payload => ({
 
 export {
 	cancelSettings,
+	changeScale,
 	getAppConfig,
 	hideLoaderData,
 	hideLoaderSettings,

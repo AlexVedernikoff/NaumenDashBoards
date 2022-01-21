@@ -20,7 +20,15 @@ const GanttGrid = (props: Props) => {
 	return (
 		<div style={{height: '100vh', width: '100%'}}>
 			<div className="gantt-container" style={{height: '100%', position: 'absolute', width: '100%'}}>
-				<Gantt columns={columns} rollUp={rollUp} scale={scale} style={{height: '100%', width: '100%'}} tasks={tasks} />
+				<Gantt
+					columns={columns}
+					flag={props.flag}
+					refresh={props.refresh}
+					rollUp={rollUp}
+					scale={scale}
+					style={{height: '100%', width: '100%'}}
+					tasks={tasks}
+				/>
 			</div>
 		</div>
 	);

@@ -5,8 +5,9 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
 import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
+import './gant-export';
 import React, {useEffect, useRef, useState} from 'react';
-import {setColumnSettings}  from 'store/App/actions';
+import {setColumnSettings} from 'store/App/actions';
 import {useDispatch} from 'react-redux';
 
 const HEIGHT_HEADER = 70;
@@ -14,6 +15,7 @@ const HEIGHT_HEADER = 70;
 const Gantt = (props: Props) => {
 	const {columns, rollUp, scale, tasks} = props;
 	const [showMenu, setShowMenu] = useState(false);
+	const [initPage, setinitPage] = useState(false);
 	const [position, setPosition] = useState({left: 0, top: 0});
 	const ganttContainer = useRef(null);
 	const zoomConfig = {
@@ -176,6 +178,21 @@ const Gantt = (props: Props) => {
 			title: dateToStr(new Date())
 		});
 	}, [tasks]);
+
+	useEffect(() => {
+		if (initPage) {
+			gantt.exportToPDF({
+				name: "mygantt.pdf"
+			});
+		}
+
+		setinitPage(true);
+	}, [props.flag]);
+
+	useEffect(() => {
+		gantt.render();
+		gantt.showLightbox('serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887');
+	}, [props.refresh]);
 
 	const handleHeaderClick = () => {
 		gantt.attachEvent('onGridHeaderClick', function (name, e) {

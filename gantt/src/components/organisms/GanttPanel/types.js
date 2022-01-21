@@ -1,6 +1,7 @@
 // @flow
 export type Props = {
-	selectedWidget: string
+	selectedWidget: string,
+	swiped: boolean
 };
 
 export type State = {

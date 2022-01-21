@@ -48,8 +48,8 @@ export class Modal extends Component<Props> {
 		return (
 			<div className={styles.modal}>
 				<div className={this.getContainerCN()} onClick={this.prevent}>
+					{this.renderModalButtons()}	
 					{this.renderModalBody()}
-					{this.renderModalButtons()}
 				</div>
 			</div>
 		);
@@ -86,7 +86,7 @@ export class Modal extends Component<Props> {
 		const {notice, onSubmit, submitText, submitting} = this.props;
 
 		return (
-			<Button disabled={submitting} onClick={onSubmit} outline={notice} variant={notice ? 'INFO' : 'SIMPLE'}>
+			<Button disabled={submitting} onClick={onSubmit} outline={notice} variant="INFO">
 				{submitText}
 			</Button>
 		);

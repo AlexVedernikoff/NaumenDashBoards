@@ -1,0 +1,78 @@
+@import '/styles/variables';
+
+:local {
+
+	.btn {
+		align-items: center;
+		display: flex;
+		height: 24px;
+		line-height: 1;
+		margin-left: 12px;
+		padding: 0 12px;
+	}
+
+	.calendar {
+		position: absolute;
+		right: 8px;
+		top: 5px;
+	}
+
+	.container {
+		align-items: center;
+		box-sizing: border-box;
+		display: flex;
+		height: 100%;
+		justify-content: right;
+		padding: 8px 10px;
+		width: 100%;
+	}
+
+	.icon {
+		padding: 0;
+
+		&:not(:first-child) {
+			margin-left: 12px;
+		}
+
+		&:nth-child(2) {
+			margin-right: 14px;
+			position: relative;
+
+			&:after {
+				background: #E4E4E4;
+				border-radius: 2px;
+				content: '';
+				height: 24px;
+				position: absolute;
+				right: -14px;
+				top: -4px;
+				width: 1px;
+				
+			}
+		}
+
+		&:hover {
+			border-radius: 0;
+			height: 24px;
+		}
+
+		& > svg {            
+			padding-left: 2.7px;
+			padding-top: 1.5px;
+		}
+	}
+
+	.inputwrapper {
+		position: relative;
+
+		&:first-child {
+			margin-bottom: 40px;
+		}
+	}
+
+	.wrapper {
+		background-color: @white;
+		height: 40px;
+		width: 100%;
+	}
+}

@@ -1,0 +1,36 @@
+@import "/styles/variables.less";
+
+:local {
+	.container {
+		background-color: #d4d4d4;
+		display: flex;
+	}
+
+	.transparentContainer {
+		background-color: transparent;
+	}
+
+	.iconContainer {
+		align-items: center;
+		color: @darkgrey;
+		display: flex;
+		justify-content: center;
+		width: 30%;
+
+		svg {
+			cursor: pointer;
+		}
+	}
+
+	.valueContainer {
+		align-items: center;
+		background-color: #f7f7f7;
+		border-radius: 4px;
+		box-sizing: border-box;
+		display: flex;
+		justify-content: center;
+		margin: 2px;
+		user-select: none;
+		width: 40%;
+	}
+}
