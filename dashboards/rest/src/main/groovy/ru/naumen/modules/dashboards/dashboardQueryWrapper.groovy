@@ -122,7 +122,7 @@ class QueryWrapper implements CriteriaWrapper
     }
 
     //Костыльный метод. Потому что логика выходит за пределы стандартного алгоритма
-    QueryWrapper percentAggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, int totalCount)
+    QueryWrapper percentAggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, int totalCount, boolean withCount = false)
     {
         def attribute = parameter.attribute
         def sc = api.selectClause
@@ -138,7 +138,19 @@ class QueryWrapper implements CriteriaWrapper
                            .with(sc.&count)
                            .with(sc.&columnMultiply.rcurry(sc.constant(100.00)))
                            .with(sc.&columnDivide.rcurry(sc.constant(totalCount)))
+
+            if (withCount)
+            {
+                IApiCriteriaColumn countColumn = sc.property(attributeCodes).with(sc.&count)
+                column = sc.concat(
+                    sc.cast(countColumn, 'string'),
+                    sc.constant(' '),
+                    sc.cast(column, 'string')
+                )
+            }
+
             column.with(criteria.&addColumn)
+
             String sortingType = parameter.sortingType
             if (sortingType)
             {
@@ -403,7 +415,7 @@ class QueryWrapper implements CriteriaWrapper
                                     RequestData requestData, AggregationParameter parameter,
                                     DiagramType diagramType, Integer top, Boolean onlyFilled)
     {
-        if (parameter.type == Aggregation.PERCENT)
+        if (parameter.type == Aggregation.PERCENT || (diagramType == DiagramType.TABLE && parameter.type == Aggregation.PERCENT_CNT))
         {
             def totalAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
             def totalParameter = new AggregationParameter(
@@ -429,7 +441,7 @@ class QueryWrapper implements CriteriaWrapper
             int totalCount = wrappedQuery.aggregate(wrappedCriteria, totalValueCriteria, totalParameter, false, top)
                                          .result.head().head()
 
-            wrapper.percentAggregate(criteria, totalValueCriteria, parameter, totalCount)
+            wrapper.percentAggregate(criteria, totalValueCriteria, parameter, totalCount, parameter.type == Aggregation.PERCENT_CNT)
         }
         else if (parameter.type == Aggregation.NOT_APPLICABLE)
         {
@@ -1031,10 +1043,11 @@ class QueryWrapper implements CriteriaWrapper
 
     private Closure getAggregation(Aggregation type)
     {
-        Closure getMessage = { String aggregationType -> messageProvider.getMessage(NOT_SUPPORTED_AGGREGATION_TYPE_ERROR, locale, aggregationType: aggregationType)}
+        Closure getMessage = { Aggregation aggregationType -> messageProvider.getMessage(NOT_SUPPORTED_AGGREGATION_TYPE_ERROR, locale, aggregationType: aggregationType)}
         switch (type)
         {
             case Aggregation.COUNT_CNT:
+            case Aggregation.PERCENT_CNT:
                 return api.selectClause.&countDistinct
             case Aggregation.SUM:
                 return api.selectClause.&sum
@@ -1338,7 +1351,7 @@ class DashboardQueryWrapperUtils
             case AttributeType.DT_INTERVAL_TYPE:
             case AttributeType.NUMBER_TYPES:
                 if (!(type in Aggregation.with {
-                    [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ]
+                    [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE, PERCENT_CNT ]
                 }))
                 {
                     String message = messageProvider.getMessage(NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
@@ -1346,10 +1359,10 @@ class DashboardQueryWrapperUtils
                 }
                 break
             default:
-                if ((!(type in [Aggregation.COUNT_CNT, Aggregation.PERCENT, Aggregation.NOT_APPLICABLE ]) &&
+                if ((!(type in Aggregation.with { [COUNT_CNT, PERCENT, NOT_APPLICABLE, PERCENT_CNT ] }) &&
                      parameter.attribute.type != AttributeType.CATALOG_ITEM_TYPE) ||
                     (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
-                     !(type in Aggregation.with { [AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE ] })))
+                     !(type in Aggregation.with { [AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE, PERCENT_CNT ] })))
                 {
                     String message = messageProvider.getMessage(NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR, locale, type: type, attributeType: attributeType)
                     getApi().utils.throwReadableException("${message}#${NOT_SUITABLE_AGGREGATION_AND_ATTRIBUTE_TYPE_ERROR}")

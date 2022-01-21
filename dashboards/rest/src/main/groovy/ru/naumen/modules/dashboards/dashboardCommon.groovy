@@ -146,6 +146,7 @@ enum Aggregation
     NONE(''),
     COUNT_CNT('COUNT(%s)'),
     PERCENT('COUNT(%s)*100.00/%s'),
+    PERCENT_CNT('PERCENT_CNT'),
     SUM('SUM(%s)'),
     AVG('AVG(%s)'),
     MAX('MAX(%s)'),
