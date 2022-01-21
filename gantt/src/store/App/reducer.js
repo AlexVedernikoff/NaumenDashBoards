@@ -95,7 +95,7 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 			};
 		case APP_EVENTS.CANCEL_SETTINGS:
 			return {
-				...state,
+				...state, 
 				resources: deepClone(state.masterResources),
 				settings: deepClone(state.masterSettings)
 			};
@@ -111,6 +111,11 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 				...state,
 				settings: {...state.settings, columnSettings: action.payload}
 			};
+		case APP_EVENTS.CHANGE_SCALE:
+			return {
+				...state,
+				settings: action.payload
+			}
 		default:
 			return state;
 	}
