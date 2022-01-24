@@ -19,6 +19,11 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 				...state,
 				layoutMode: state.isMobileDevice ? LAYOUT_MODE.MOBILE : action.payload ?? LAYOUT_MODE.WEB
 			};
+		case DASHBOARD_EVENTS.CHANGE_SHOW_HEADER:
+			return {
+				...state,
+				showHeader: action.payload
+			};
 		case DASHBOARD_EVENTS.CREATE_PERSONAL_DASHBOARD:
 			return {
 				...state,

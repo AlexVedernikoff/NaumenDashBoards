@@ -28,6 +28,11 @@ type ChangeAutoUpdateSettings = {
 	type: typeof DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
 };
 
+type ChangeShowHeader = {
+	payload: boolean,
+	type: typeof DASHBOARD_EVENTS.CHANGE_SHOW_HEADER
+};
+
 type CreatePersonalDashboard = {
 	type: typeof DASHBOARD_EVENTS.CREATE_PERSONAL_DASHBOARD
 };
@@ -127,6 +132,7 @@ export type SettingsAction =
 	| ChangeAutoUpdateSettings
 	| ChangeIntervalReminder
 	| ChangeLayoutMode
+	| ChangeShowHeader
 	| CreatePersonalDashboard
 	| CreatedPersonalDashboard
 	| DeletePersonalDashboard
@@ -165,5 +171,6 @@ export type SettingsState = {
 	personalCreating: boolean,
 	personalDeleting: boolean,
 	reloadInterval?: number,
+	showHeader: boolean,
 	widthEditPanel: number
 };

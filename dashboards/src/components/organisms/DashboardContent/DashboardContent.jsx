@@ -68,8 +68,9 @@ export class DashboardContent extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {isMobileDevice} = this.props;
+		const {isMobileDevice, showHeader} = this.props;
 		const className = cn(styles.content, {
+			[styles.fullScreen]: !showHeader,
 			[styles.contentMobile]: isMobileDevice
 		});
 

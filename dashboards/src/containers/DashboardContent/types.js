@@ -4,6 +4,7 @@ export type ConnectedProps = {
 	editableDashboard: boolean,
 	editMode: boolean,
 	isMobileDevice: boolean,
+	showHeader: boolean,
 	user: UserData
 };
 

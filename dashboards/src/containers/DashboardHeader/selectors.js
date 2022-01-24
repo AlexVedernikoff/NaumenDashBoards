@@ -2,6 +2,7 @@
 import type {AppState} from 'store/types';
 import {
 	changeLayoutMode,
+	changeShowHeader,
 	createPersonalDashboard,
 	editDashboard,
 	getSettings,
@@ -16,7 +17,7 @@ import {isEditableDashboardContext, isUserModeDashboard} from 'store/dashboard/s
 
 export const props = (state: AppState): ConnectedProps => {
 	const {context, dashboard} = state;
-	const {autoUpdate, editMode, layoutMode, personal, personalCreating, personalDeleting} = dashboard.settings;
+	const {autoUpdate, editMode, layoutMode, personal, personalCreating, personalDeleting, showHeader} = dashboard.settings;
 	const {dashboardMode, switching, user} = context;
 	const editableDashboard = dashboardMode === DASHBOARD_EDIT_MODE.EDIT;
 
@@ -30,6 +31,7 @@ export const props = (state: AppState): ConnectedProps => {
 		personalDashboard: personal,
 		personalDashboardCreating: personalCreating,
 		personalDashboardDeleting: personalDeleting,
+		showHeader,
 		switching,
 		user
 	};
@@ -37,6 +39,7 @@ export const props = (state: AppState): ConnectedProps => {
 
 export const functions: ConnectedFunctions = {
 	changeLayoutMode,
+	changeShowHeader,
 	createPersonalDashboard,
 	editDashboard,
 	getSettings,
