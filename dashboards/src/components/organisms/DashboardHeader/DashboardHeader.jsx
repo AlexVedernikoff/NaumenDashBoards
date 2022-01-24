@@ -26,7 +26,6 @@ import {VARIANTS as ICON_BUTTON_VARIANTS} from './components/IconButton/constant
 
 export class DashboardHeader extends Component<Props, State> {
 	state = {
-		show: true,
 		showModal: false
 	};
 
@@ -76,7 +75,10 @@ export class DashboardHeader extends Component<Props, State> {
 
 	showModal = () => this.setState({showModal: true});
 
-	togglePanel = () => this.setState(({show}) => ({ show: !show }));
+	togglePanel = () => {
+		const {changeShowHeader, showHeader} = this.props;
+		return changeShowHeader(!showHeader);
+	};
 
 	renderAutoUpdateButton = () => (
 		<NavItem className={styles.autoUpdateItem}>
@@ -130,10 +132,10 @@ export class DashboardHeader extends Component<Props, State> {
 	);
 
 	renderDrawControl = () => {
-		const {show} = this.state;
-		const top = (show ? DASHBOARD_HEADER_HEIGHT : 0) - 12;
+		const {showHeader} = this.props;
+		const top = (showHeader ? DASHBOARD_HEADER_HEIGHT : 0) - 12;
 		const style = {top};
-		const icon = show ? ICON_NAMES.SIDEBAR_ROUND_UP : ICON_NAMES.SIDEBAR_ROUND_DOWN;
+		const icon = showHeader ? ICON_NAMES.SIDEBAR_ROUND_UP : ICON_NAMES.SIDEBAR_ROUND_DOWN;
 
 		return (
 			<div className={styles.drawControl} onClick={this.togglePanel} style={style}>
@@ -248,9 +250,9 @@ export class DashboardHeader extends Component<Props, State> {
 
 	render () {
 		if (!isMobile().any) {
-			const {show} = this.state;
+			const {showHeader} = this.props;
 
-			if (show) {
+			if (showHeader) {
 				return (
 					<header className={styles.header} style={{height: DASHBOARD_HEADER_HEIGHT}}>
 						<ul className={styles.nav}>
