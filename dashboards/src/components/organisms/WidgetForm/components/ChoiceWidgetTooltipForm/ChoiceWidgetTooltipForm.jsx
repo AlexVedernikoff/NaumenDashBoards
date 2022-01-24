@@ -99,9 +99,11 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 				<FormField>
 					<TextArea
 						focusOnMount={true}
+						maxLength={1000}
 						name={selected}
 						onChange={this.handleChangeText}
-						value={value} />
+						value={value}
+					/>
 				</FormField>
 			</ToggableFormBox>
 		);

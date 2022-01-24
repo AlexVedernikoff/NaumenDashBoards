@@ -271,7 +271,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		if (show) {
 			return (
 				<FormField>
-					<TextArea name={DIAGRAM_FIELDS.title} onChange={this.handleChangeTooltipText} value={title} />
+					<TextArea maxLength={1000} name={DIAGRAM_FIELDS.title} onChange={this.handleChangeTooltipText} value={title} />
 				</FormField>
 			);
 		}
