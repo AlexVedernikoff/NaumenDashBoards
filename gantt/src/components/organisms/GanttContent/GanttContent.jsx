@@ -14,6 +14,7 @@ export class GanttContent extends PureComponent<Props> {
 		this.handleToggle = this.handleToggle.bind(this);
 		this.state = {
 			flag: false,
+			name: 'Просмотреть',
 			refresh: false,
 			swiped: false
 		};
@@ -21,7 +22,7 @@ export class GanttContent extends PureComponent<Props> {
 
 	handleToggle = () => {
 		this.setState({swiped: !this.state.swiped});
-		this.renderPanel();
+		this.state.name === 'Просмотреть' ? this.setState({name: 'Редактировать'}) : this.setState({name: 'Просмотреть'});
 	};
 
 	onRefresh () {
@@ -46,7 +47,7 @@ export class GanttContent extends PureComponent<Props> {
 
 	renderАctionBar = () => {
 		const {editMode} = this.props;
-		return editMode ? <АctionBar handleToggle={() => this.handleToggle()} onClick={() => this.onMove()} refresh={() => this.onRefresh()} /> : null;
+		return editMode ? <АctionBar handleToggle={() => this.handleToggle()} name={this.state.name} onClick={() => this.onMove()} refresh={() => this.onRefresh()} /> : null;
 	};
 
 	render () {

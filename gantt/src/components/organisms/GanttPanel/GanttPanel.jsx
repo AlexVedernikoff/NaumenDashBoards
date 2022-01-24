@@ -48,7 +48,6 @@ export class GanttPanel extends PureComponent<Props, State> {
 
 		return (
 			<div className={CN} id='panel'>
-				{this.renderDrawerControl()}
 				{this.renderContent()}
 			</div>
 		);
