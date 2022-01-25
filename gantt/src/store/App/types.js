@@ -66,6 +66,12 @@ type SetError = {
 	type: typeof APP_EVENTS.SET_ERROR
 };
 
+type Task = {
+	endDate: string,
+	startDate: string,
+	subjectUuid: string | number
+};
+
 type DefaultAppAction = {
 	payload: null,
 	type: typeof APP_EVENTS.UNKNOWN_APP_ACTION
@@ -85,5 +91,6 @@ export type AppState = {
 	metaClass: string,
 	params: Params,
 	subjectUuid: string,
-	user: UserData
+	task: Task,
+	user: UserData,
 };

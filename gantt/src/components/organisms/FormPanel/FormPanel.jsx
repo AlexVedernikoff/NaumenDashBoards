@@ -262,6 +262,8 @@ const FormPanel = (props: Props) => {
 			<div className={styles.field}>
 				{renderHeaderCommonBlock()}
 				{renderSelectCommonBlock()}
+				{renderCheckboxProgress()}
+				{renderCheckboxСonnections()}
 				{renderCheckboxCommonBlock()}
 				<div className={styles.form} id='panelSettingsButton'>
 					{renderButtonCommonBlock()}
@@ -373,6 +375,26 @@ const FormPanel = (props: Props) => {
 				options={sources}
 				value={item}
 			/>
+		);
+	};
+
+	const renderCheckboxProgress = () => {
+		return (
+			<div onClick={props.handleToggleProgress}>
+				<FormControl className={cn(styles.checkbox)} label='Отображать прогресс выполнения работ на диаграмме' small={true}>
+					<Checkbox checked={props.progress} name='Checkbox' onChange={props.handleToggleProgress} value={props.progress} />
+				</FormControl>
+			</div>
+		);
+	};
+
+	const renderCheckboxСonnections = () => {
+		return (
+			<div onClick={props.handleToggleLinks}>
+				<FormControl className={cn(styles.checkbox)} label='Отображать связи работ на диаграмме' small={true}>
+					<Checkbox checked={props.allLinks} name='Checkbox' onChange={props.handleToggleLinks} value={props.allLinks} />
+				</FormControl>
+			</div>
 		);
 	};
 
