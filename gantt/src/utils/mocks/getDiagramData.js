@@ -51,7 +51,10 @@ const data = {
 			"text":"INC63",
 			"d951f959-640b-4b47-b7ed-2f0daf7867":"INC63",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
+			"start_date":"2021-11-11T12:55:26",
+			"end_date": "2021-11-13T12:55:26",
 			"level":0,
+			"progress":0.8,
 			"type":"RESOURCE"
 		},
 		{
@@ -59,6 +62,8 @@ const data = {
 			"text":"SD111",
 			"d951f959-640b-4b47-b7ed-2f0daf7867":"SD111",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u041e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u0435",
+			"start_date":"2021-11-11T11:55:26",
+			"end_date": "2021-11-13T11:55:26",
 			"level":0,
 			"type":"project"
 		},
@@ -89,7 +94,10 @@ const data = {
 			"level":0,
 			"type":"RESOURCE"
 		},
-	]
+	],
+	"links":[
+        { "id":1, "source":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887", "target":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a", "type":"1"}
+    ]
 };
 
 export const getDiagramData = () => {

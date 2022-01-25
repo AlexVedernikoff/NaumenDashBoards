@@ -2,7 +2,7 @@
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, saveData} from 'utils/api';
+import {getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, saveData, saveDataTask} from 'utils/api';
 import {v4 as uuidv4} from 'uuid';
 
 /**
@@ -34,23 +34,44 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 };
 
 /**
+ * Получает данные, необходимые для измененной задачи
+ * @returns {ThunkAction}
+ */
+const getCommonTask = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const {endDate, startDate, subjectUuid} = await saveDataTask();
+		const task = {
+			endDate: endDate,
+			startDate: startDate,
+			subjectUuid: subjectUuid
+		};
+
+		dispatch(setTask(task));
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderData());
+	}
+};
+/**
  * Получает данные, необходимые для отображения данных ВП
  * @returns {ThunkAction}
  */
 const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		dispatch(showLoaderData());
-		
+
 		const {contentCode, subjectUuid} = getContext();
 		const user = await getCurrentUser();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const {commonSettings, diagramKey, tasks} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
+		const {commonSettings, diagramKey, links, tasks} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
 
 		dispatch(setContentCode(contentCode));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setSubjectUuid(subjectUuid));
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
 		dispatch(setDiagramData(tasks || []));
+		dispatch(setDiagramLinksData(links || []));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -197,6 +218,15 @@ const setResourceSettings = (payload: ResourceSettings) => ({
 });
 
 /**
+ * Сохраняет данные связей диаграммы
+ * @param {DiagramData} payload - данные диаграммы
+ */
+ const setDiagramLinksData = (payload: []) => ({
+	payload,
+	type: APP_EVENTS.SET_LINKS_DIAGRAM_DATA
+});
+
+/**
  * Сохраняет данные диаграммы
  * @param {DiagramData} payload - данные диаграммы
  */
@@ -212,6 +242,15 @@ const setDiagramData = (payload: DiagramData) => ({
 const setSources = (payload: Array<Source>) => ({
 	payload,
 	type: APP_EVENTS.SET_SOURCES
+});
+
+/**
+ * Сохраняет источники
+ * @param {Array<Source>} payload - массив из источников
+ */
+ const setTask = (payload: Task) => ({
+	payload,
+	type: APP_EVENTS.SET_TASK
 });
 
 /**
@@ -247,8 +286,11 @@ export {
 	setColumnSettings,
 	setCommonSettings,
 	getGanttData,
+	getCommonTask,
+	setDiagramLinksData,
 	setDiagramData,
 	setResourceSettings,
 	showLoaderData,
-	showLoaderSettings
+	showLoaderSettings,
+	setTask
 };

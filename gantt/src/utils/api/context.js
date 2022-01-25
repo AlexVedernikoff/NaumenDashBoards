@@ -2,7 +2,7 @@
 import {api} from './';
 import {arrayToTree} from 'utils/arrayToTree';
 import {FilterFormDescriptorDTO} from './types';
-import type {Params, Settings, Source, UserData} from 'store/app/types';
+import type {Params, Settings, Source, Task, UserData} from 'store/app/types';
 
 const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
 	hasDynamic,
@@ -102,6 +102,19 @@ const saveData = async (subjectUuid: string, contentCode: string, data: Settings
 };
 
 /**
+ * Отправляет обновленную задачу
+ * @param {string} endDate - конец дедлайна
+ * @param {string | number} subjectUuid - идентификатор объекта
+ * @param {string} startDate - начало дедлайна
+ * @returns {Promise<Task>} - новые настройки [Уточнить у Данила]
+ */
+ const saveDataTask = async (subjectUuid: string, startDate: string, endDate: string): Promise<Task> => {
+	console.log(subjectUuid);
+	const task = await api.postDataTasks(endDate, startDate, subjectUuid);
+	return task;
+};
+
+/**
  * Открывает окно фильтрации
  *
  * @returns {string} - JSON объект с настройкой фильтрации
@@ -139,5 +152,6 @@ export {
 	getInitialSettings,
 	openFilterForm,
 	getUserData,
-	saveData
+	saveData,
+	saveDataTask
 };

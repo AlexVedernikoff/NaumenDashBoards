@@ -9,7 +9,12 @@ import styles from './styles.less';
 export class GanttPanel extends PureComponent<Props, State> {
 
 	renderContent = () => {
-		const content = <FormPanel />;
+		const content = <FormPanel
+			allLinks={this.props.allLinks}
+			handleToggleLinks={this.props.handleToggleLinks}
+			handleToggleProgress={this.props.handleToggleProgress}
+			progress={this.props.progress}
+		/>;
 		return (
 			<div className={styles.content}>
 				<Suspense fallback={this.renderFallback()}>

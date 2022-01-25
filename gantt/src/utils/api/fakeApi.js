@@ -87,6 +87,15 @@ export default class FakeApi {
 		return data;
 	}
 
+	async postDataTasks (endDate, startDate, subjectUuid) {
+		const answer = await new Promise(resolve => setTimeout(() => resolve({
+			endDate: '2021-11-13T15:55:26',
+			startDate: '2021-11-11T15:55:26',
+			subjectUuid: 'serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a'
+		}), 300));
+		return answer;
+	}
+
 	getContentCode () {
 		return 'GantTest';
 	}
