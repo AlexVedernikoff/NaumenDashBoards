@@ -115,12 +115,7 @@ export class WidgetsGrid extends Component<Props, State> {
 
 	handleDragStop = () => this.toggleGrid(false);
 
-	handleFocus = (element: HTMLDivElement) => {
-		const {resetFocusedWidget} = this.props;
-
-		element.scrollIntoView();
-		resetFocusedWidget();
-	};
+	handleFocus = (element: HTMLDivElement) => element.scrollIntoView();
 
 	handleItemClick = e => e.stopPropagation();
 

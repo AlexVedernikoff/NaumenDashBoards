@@ -30,7 +30,8 @@ export class Item extends PureComponent<Props> {
 	render () {
 		const {children, className, focused, onFocus, selected, ...props} = this.props;
 		const CN = cn({
-			[styles.selectedItem]: selected
+			[styles.selectedItem]: selected,
+			[styles.focusedItem]: focused
 		}, styles.item, className);
 
 		return (

@@ -451,11 +451,15 @@ const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidget
 const setSelectedWidget = (widgetId: string) => (dispatch: Dispatch, getState: GetState) => {
 	const state = getState();
 	const {data: widgetsData} = state.widgets;
-	const {selectedWidget} = widgetsData;
+	const {focusedWidget, selectedWidget} = widgetsData;
 
 	if (selectedWidget === NewWidget.id) {
 		dispatch(deleteWidget(selectedWidget));
 		dispatch(removeLayouts(selectedWidget));
+	}
+
+	if (focusedWidget) {
+		dispatch(resetFocusedWidget());
 	}
 
 	dispatch({
