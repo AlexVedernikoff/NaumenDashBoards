@@ -525,7 +525,8 @@ type SourceFieldset =
   | 'SourceFieldset::ConfirmFilterMessage'
   | 'SourceFieldset::ComputeCheckbox'
   | 'SourceFieldset::RemoveButton'
-  | 'SourceFieldset::SourceSelectLabel';
+  | 'SourceFieldset::SourceSelectLabel'
+  | 'SourceFieldset::SaveButton';
 
 // components/organisms/WidgetFormPanel/components/TextAlignControl
 type TextAlignControl =

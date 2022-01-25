@@ -274,6 +274,7 @@
 	"SourceFieldset::ComputeCheckbox": "For calculations only",
 	"SourceFieldset::RemoveButton": "delete",
 	"SourceFieldset::SourceSelectLabel": "Select a value.",
+	"SourceFieldset::SaveButton": "Add to saved filters",
 	"TextAlignControl::AlignLeft": "Align left",
 	"TextAlignControl::AlignCenter": "Align center",
 	"TextAlignControl::AlignRight": "Align right",
