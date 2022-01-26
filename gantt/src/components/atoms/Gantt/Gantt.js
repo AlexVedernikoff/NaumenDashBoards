@@ -14,10 +14,10 @@ import './gant-export';
 const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
+	let ID;
 	const {columns, links, rollUp, scale, tasks} = props;
 	const [showMenu, setShowMenu] = useState(false);
 	const [showModalConfirm, setShowModalConfirm] = useState(true);
-	let ID;
 	const [openModal, setOpenModal] = useState(false);
 	const [initPage, setinitPage] = useState(false);
 	const [position, setPosition] = useState({left: 0, top: 0});
@@ -132,6 +132,25 @@ const Gantt = (props: Props) => {
 
 		gantt.attachEvent('onTaskSelected', function (id) {
 			gantt.showLightbox(id);
+		});
+
+		gantt.attachEvent('onLightboxSave', function (id, obj) {
+			const newTasks = deepClone(tasks);
+			const resultTasks = [];
+
+			obj.code1 = obj.text;
+			newTasks.map((i) => {
+				if (i.id !== id) {
+					resultTasks.push(i);
+				} else {
+					i.code1 = obj.text;
+					i.text = obj.text;
+					resultTasks.push(i);
+				}
+			});
+			gantt.render();
+			dispatch(setColumnTask(newTasks));
+			return true;
 		});
 
 		gantt.attachEvent('onAfterTaskDrag', function (id, mode, e) {
@@ -260,7 +279,6 @@ const Gantt = (props: Props) => {
 
 			newTasks.push(tasksTwoo[tasksTwoo.length - 1]);
 			setinitPage(true);
-
 			dispatch(setColumnTask(newTasks));
 		}
 	}, [props.newTask]);
@@ -313,6 +331,7 @@ const Gantt = (props: Props) => {
 				for (const key in i) {
 					if (key === state.columnName) {
 						i[key] = state.newValue;
+						i.text = i.code1;
 					}
 				}
 			}
