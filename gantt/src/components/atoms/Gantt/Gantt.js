@@ -7,8 +7,8 @@ import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
 import './gant-export';
 import React, {useEffect, useRef, useState} from 'react';
-import {setColumnSettings} from 'store/App/actions';
-import {useDispatch} from 'react-redux';
+import {setColumnSettings, setColumnTask} from 'store/App/actions';
+import {useDispatch, useSelector} from 'react-redux';
 
 const HEIGHT_HEADER = 70;
 
@@ -17,6 +17,8 @@ const Gantt = (props: Props) => {
 	const [showMenu, setShowMenu] = useState(false);
 	const [initPage, setinitPage] = useState(false);
 	const [position, setPosition] = useState({left: 0, top: 0});
+	const store = useSelector((state) => state);
+	const dispatch = useDispatch();
 	const ganttContainer = useRef(null);
 	const zoomConfig = {
 		levels: [
@@ -193,23 +195,62 @@ const Gantt = (props: Props) => {
 		gantt.render();
 		gantt.showLightbox('serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887');
 	}, [props.refresh]);
-
 	const handleHeaderClick = () => {
 		gantt.attachEvent('onGridHeaderClick', function (name, e) {
-			const column = gantt.getGridColumn(name);
+			let ids;
 
-			if (column && !column.tree && column.name !== 'button') {
+			if (!e.target.childNodes[1]) {
+				ids = e.target.id;
+			}
+
+			const column = gantt.getGridColumn(ids);
+
+			if (column && !column.tree && name !== 'button') {
 				gantt.getGridColumn('button').hide = false;
 				column.hide = true;
 				column.show = false;
 				generateGridWidth();
 				gantt.render();
-			} else if (column.name === 'button') {
+			} else if (name === 'button') {
 				setPosition({left: e.x, top: e.y - 52});
 				setShowMenu(!showMenu);
 			}
 		});
 	};
+
+	const debounce = (f, t) => {
+		return function (args) {
+			const previousCall = this.lastCall;
+
+			this.lastCall = Date.now();
+
+			if (previousCall && ((this.lastCall - previousCall) <= t)) {
+				clearTimeout(this.lastCallTimer);
+			}
+
+			this.lastCallTimer = setTimeout(() => f(args), t);
+		};
+	};
+
+	const inlineEditors = gantt.ext.inlineEditors;
+
+	inlineEditors.attachEvent('onBeforeSave', debounce(function (state) {
+		console.log(1);
+		const newTasks = deepClone(tasks);
+
+		newTasks.map(function (i) {
+			if (i.id === state.id) {
+				for (const key in i) {
+					if (key === state.columnName) {
+						i[key] = state.newValue;
+					}
+				}
+			}
+		});
+
+		dispatch(setColumnTask(newTasks));
+		return true;
+	}, 100));
 
 	const configureAdaptedColumns = () => {
 		const adaptedColumns = [];
@@ -217,8 +258,9 @@ const Gantt = (props: Props) => {
 		if (columns && columns.length) {
 			columns.forEach(item => adaptedColumns.push({
 				...item,
+				editor: item.editor,
 				hide: !item.show,
-				label: item.title,
+				label: item.title + `<div id=${item.code}></div>`,
 				minWidth: 100,
 				name: item.code,
 				resize: true,
@@ -248,7 +290,6 @@ const Gantt = (props: Props) => {
 		gantt.render();
 	};
 
-	const dispatch = useDispatch();
 	const generateGridWidth = () => {
 		const countColumns = gantt.config.columns.filter((col) => col.show).length;
 		const isShowButton = gantt.config.columns.some((col) => !col.hide && col.name === 'button');

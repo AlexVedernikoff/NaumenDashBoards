@@ -40,7 +40,7 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		dispatch(showLoaderData());
-		
+
 		const {contentCode, subjectUuid} = getContext();
 		const user = await getCurrentUser();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -237,6 +237,14 @@ const setColumnSettings = payload => ({
 	type: APP_EVENTS.SET_COLUMN_SETTINGS
 });
 
+/**
+ * Изменение колонки задачи
+ */
+const setColumnTask = payload => ({
+	payload,
+	type: APP_EVENTS.SET_COLUMN_TASK
+});
+
 export {
 	cancelSettings,
 	changeScale,
@@ -246,6 +254,7 @@ export {
 	saveSettings,
 	setColumnSettings,
 	setCommonSettings,
+	setColumnTask,
 	getGanttData,
 	setDiagramData,
 	setResourceSettings,

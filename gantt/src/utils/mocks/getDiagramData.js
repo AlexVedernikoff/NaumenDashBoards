@@ -8,12 +8,14 @@ const data = {
 			{
 				"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
 				"code":"d951f959-640b-4b47-b7ed-2f0daf7867",
-				"show":true
+				"show":true,
+				"editor":{"type": "text", "map_to": "text"}
 			},
 			{
 				"title":"\u0422\u0438\u043f",
 				"code":"5af9985a-79b4-42b9-9d0f-635f6d80561e",
-				"show":true
+				"show":true,
+				"editor":{"type": "text", "map_to": "text"}
 			},
 			{
 				"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f",
@@ -52,7 +54,8 @@ const data = {
 			"d951f959-640b-4b47-b7ed-2f0daf7867":"INC63",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
 			"level":0,
-			"type":"RESOURCE"
+			"type":"RESOURCE",
+			"editor": {"map_to": "text", "type": "text"},
 		},
 		{
 			"id":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",

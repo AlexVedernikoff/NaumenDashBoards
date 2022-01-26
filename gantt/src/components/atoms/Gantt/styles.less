@@ -37,7 +37,7 @@
 
 .gantt_tree_content,
 .gantt_grid_head_cell {
-	overflow:hidden;
+	overflow: hidden;
 	text-overflow: ellipsis;
 	text-align: center;
 	padding: 2px;
@@ -46,6 +46,11 @@
 .gantt_task_progress_drag,
 .gantt_link_control {
 	display: none !important;
+}
+
+.gantt_grid_editor_placeholder input {
+	border: 2px solid #000000;
+	background-color: #ffffff;
 }
 
 .gantt_grid_head_cell:not(:first-child) {
@@ -64,15 +69,23 @@
 	}
 }
 
-.gantt_grid_head_cell::before {
-	content: "\02DF";
-	cursor: pointer;
-	display: none;
-	font-size: 20px;
+.gantt_grid_head_cell > div {
+	top: -20px;
+    right: 10px;
 	position: absolute;
-	right: 5px;
-	top: 11px;
-	transform: translateY(-50%);
+	display: none;
+}
+
+.gantt_grid_head_cell > div::before {
+	content: "\2DF";
+    cursor: pointer;
+    font-size: 20px;
+    right: 0;
+    top: 0;
+}
+
+.gantt_grid_head_cell:not(:first-child):hover div {
+	display: block;
 }
 
 // кнопка-плюсик для добавления скрытого столбца
