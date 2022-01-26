@@ -274,6 +274,7 @@
 	"SourceFieldset::ComputeCheckbox": "Только для вычислений",
 	"SourceFieldset::RemoveButton": "удалить",
 	"SourceFieldset::SourceSelectLabel": "Выберите значение",
+	"SourceFieldset::SaveButton": "Добавить к сохранённым фильтрам",
 	"TextAlignControl::AlignLeft": "По левому краю",
 	"TextAlignControl::AlignCenter": "По центру",
 	"TextAlignControl::AlignRight": "По правому краю",

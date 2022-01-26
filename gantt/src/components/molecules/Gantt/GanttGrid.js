@@ -7,7 +7,7 @@ import React from 'react';
 import styles from './styles.less';
 
 const GanttGrid = (props: Props) => {
-	const {columns, loading, rollUp, scale, tasks} = props;
+	const {allLinks, columns, links, loading, newTask, progress, rollUp, scale, tasks} = props;
 
 	if (loading) {
 		return (
@@ -21,8 +21,12 @@ const GanttGrid = (props: Props) => {
 		<div style={{height: '100vh', width: '100%'}}>
 			<div className="gantt-container" style={{height: '100%', position: 'absolute', width: '100%'}}>
 				<Gantt
+					allLinks={allLinks}
 					columns={columns}
 					flag={props.flag}
+					links={links}
+					newTask={newTask}
+					progress={progress}
 					refresh={props.refresh}
 					rollUp={rollUp}
 					scale={scale}

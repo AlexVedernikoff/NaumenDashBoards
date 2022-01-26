@@ -12,7 +12,8 @@ import {
 	getInitialSettings,
 	getUserData,
 	openFilterForm,
-	saveData
+	saveData,
+	saveDataTask
 } from './context';
 
 export {
@@ -26,7 +27,8 @@ export {
 	getInitialSettings,
 	getUserData,
 	openFilterForm,
-	saveData
+	saveData,
+	saveDataTask
 };
 
 export const api = process.env.NODE_ENV === 'development' ? new FakeApi() : new Api();

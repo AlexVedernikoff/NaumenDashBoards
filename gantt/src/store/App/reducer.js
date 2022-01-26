@@ -82,6 +82,12 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 				loading: true,
 				resources: action.payload
 			};
+		case APP_EVENTS.SET_LINKS_DIAGRAM_DATA:
+			return {
+				...state,
+				links: action.payload,
+				loading: true
+			};
 		case APP_EVENTS.SET_DIAGRAM_DATA:
 			return {
 				...state,
@@ -98,6 +104,11 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 				...state, 
 				resources: deepClone(state.masterResources),
 				settings: deepClone(state.masterSettings)
+			};
+		case APP_EVENTS.SET_TASK:
+			return {
+				...state,
+				task: action.payload
 			};
 		case APP_EVENTS.SAVE_MASTER_SETTINGS:
 			return {

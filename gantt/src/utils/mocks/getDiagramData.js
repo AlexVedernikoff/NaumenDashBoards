@@ -7,7 +7,7 @@ const data = {
 		"columnSettings":[
 			{
 				"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
-				"code":"d951f959-640b-4b47-b7ed-2f0daf7867",
+				"code":"code1",
 				"show":true,
 				"editor":{"type": "text", "map_to": "text"}
 			},
@@ -51,24 +51,29 @@ const data = {
 		{
 			"id":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a",
 			"text":"INC63",
-			"d951f959-640b-4b47-b7ed-2f0daf7867":"INC63",
+			"code1":"INC63",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
+			"start_date":"2021-11-11T12:55:26",
+			"end_date": "2021-11-13T12:55:26",
 			"level":0,
-			"type":"RESOURCE",
 			"editor": {"map_to": "text", "type": "text"},
+			"progress":0.8,
+			"type":"RESOURCE"
 		},
 		{
 			"id":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
 			"text":"SD111",
-			"d951f959-640b-4b47-b7ed-2f0daf7867":"SD111",
+			"code1":"SD111",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u041e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u0435",
+			"start_date":"2021-11-11T11:55:26",
+			"end_date": "2021-11-13T11:55:26",
 			"level":0,
 			"type":"project"
 		},
 		{
 			"id":"employee$752501_d63f121f-0c59-43a9-8b6a-145a0927041c",
 			"text":"\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d",
-			"d951f959-640b-4b47-b7ed-2f0daf7867":"\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d",
+			"code1":"\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0421\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a",
 			"parent":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
 			"start_date":"2021-11-11T11:55:26",
@@ -79,7 +84,7 @@ const data = {
 		{
 			"id":"serviceCall$2419102_0c0310d7-f454-4baf-8eea-7f38066a317c",
 			"text":"112",
-			"d951f959-640b-4b47-b7ed-2f0daf7867":"112",
+			"code1":"112",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0417\u0430\u043f\u0440\u043e\u0441 \u043d\u0430 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435",
 			"level":0,
 			"type":"RESOURCE"
@@ -87,12 +92,15 @@ const data = {
 		{
 			"id":"serviceCall$2418501_572397e3-0c6a-4ef9-bd45-c3d2cd64b99d",
 			"text":"INC109",
-			"d951f959-640b-4b47-b7ed-2f0daf7867":"INC109",
+			"code1":"INC109",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
 			"level":0,
 			"type":"RESOURCE"
 		},
-	]
+	],
+	"links":[
+        { "id":1, "source":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887", "target":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a", "type":"1"}
+    ]
 };
 
 export const getDiagramData = () => {
@@ -102,7 +110,7 @@ export const getDiagramData = () => {
 		data.tasks.push(
 			{
 				'id': '4567fghgfd891' + Math.random(),
-				'd951f959-640b-4b47-b7ed-2f0daf7867': 'Второе2' + Math.random(),
+				'code1': 'Второе2' + Math.random(),
 				'parent': '4567890',
 				'd951f7': '4556',
 				'text': 'Название на календарной сетке1',
@@ -111,7 +119,7 @@ export const getDiagramData = () => {
 			},
 			{
 				'id': '456789jk2' + Math.random(),
-				'd951f959-640b-4b47-b7ed-2f0daf7867': 'Другое23456789' + Math.random(),
+				'code1': 'Другое23456789' + Math.random(),
 				'd951f7': '4577777776',
 				'd951f9': '16-04-2019',
 				'duration': 480,

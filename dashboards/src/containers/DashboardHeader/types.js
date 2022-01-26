@@ -13,12 +13,14 @@ export type ConnectedProps = {
 	personalDashboard: boolean,
 	personalDashboardCreating: boolean,
 	personalDashboardDeleting: boolean,
+	showHeader: boolean,
 	switching: boolean,
 	user: UserData
 };
 
 export type ConnectedFunctions = {
 	changeLayoutMode: (mode: LayoutMode) => ThunkAction,
+	changeShowHeader: (show: boolean) => ThunkAction,
 	createPersonalDashboard: () => ThunkAction,
 	editDashboard: () => ThunkAction,
 	getSettings: (refresh: boolean) => ThunkAction,

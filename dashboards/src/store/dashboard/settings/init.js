@@ -29,6 +29,7 @@ export const initialDashboardState: SettingsState = {
 	personal: false,
 	personalCreating: false,
 	personalDeleting: false,
+	showHeader: true,
 	widthEditPanel: 320
 };
 

@@ -586,9 +586,15 @@ const setWidthEditPanel = (payload: number) => ({
 	type: DASHBOARD_EVENTS.SET_WIDTH_EDIT_PANEL
 });
 
+const changeShowHeader = (payload: boolean) => ({
+	payload,
+	type: DASHBOARD_EVENTS.CHANGE_SHOW_HEADER
+});
+
 export {
 	changeIntervalRemainder,
 	changeLayoutMode,
+	changeShowHeader,
 	createNewState,
 	createPersonalDashboard,
 	editDashboard,

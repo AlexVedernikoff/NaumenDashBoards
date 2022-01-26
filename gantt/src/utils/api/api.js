@@ -110,6 +110,29 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
+	/**
+	* Отправляет данные обновленной задачи
+	* @param  {string} startDate - дата и время начала задачи
+	* @param  {string} endDate - дата и время окончания задачи
+	* @param  {string | number} subjectUuid - идентификатор задачи
+	* @returns {Settings}
+	*/
+	async postDataTasks (startDate: string, endDate: string, subjectUuid: string | number) {
+		const url = `exec-post?func=modules.ganttSettings.saveGanttSettings&params=requestContent`;
+		const body = {
+			endDate: endDate,
+			startDate: startDate,
+			subjectUuid: subjectUuid
+		};
+
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		return this.jsApi.restCallAsJson(url, options);
+	}
+
 	getContentCode () {
 		return this.jsApi.findContentCode();
 	}

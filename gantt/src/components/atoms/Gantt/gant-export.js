@@ -1,3 +1,4 @@
+// плагин библиотеки `gantt` для функциональности экспорта файлов, в `node_modules` его нет
 (function() {
 	var apiUrl = "https://export.dhtmlx.com/gantt";
 

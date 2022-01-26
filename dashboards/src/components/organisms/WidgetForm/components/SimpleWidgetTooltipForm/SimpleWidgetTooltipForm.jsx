@@ -36,7 +36,7 @@ class SimpleWidgetTooltipForm extends PureComponent<Props> {
 		return (
 			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleShow} showContent={show} title={t('WidgetForm::SimpleWidgetTooltipForm::Tooltip')}>
 				<FormField label={t('WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle')}>
-					<TextArea focusOnMount={true} name={DIAGRAM_FIELDS.title} onChange={this.handleChange} value={title} />
+					<TextArea focusOnMount={true} maxLength={1000} name={DIAGRAM_FIELDS.title} onChange={this.handleChange} value={title} />
 				</FormField>
 			</ToggableFormBox>
 		);

@@ -422,7 +422,9 @@ export class SourceFieldset extends Component<Props, State> {
 		const {children, className, onClick} = props;
 		const isChanged = this.isCurrentFilterChanged();
 
-		const saveButton = isChanged && !isPersonal ? (<IconButton icon={ICON_NAMES.SAVE} onClick={this.showSaveForm} />) : null;
+		const saveButton = isChanged && !isPersonal
+			? (<IconButton icon={ICON_NAMES.SAVE} onClick={this.showSaveForm} tip={t('SourceFieldset::SaveButton')} />)
+			: null;
 
 		return (
 			<div className={className} onClick={onClick}>

@@ -5,16 +5,20 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
 import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
-import './gant-export';
+import Modal from 'src/components/atoms/Modal';
 import React, {useEffect, useRef, useState} from 'react';
-import {setColumnSettings, setColumnTask} from 'store/App/actions';
 import {useDispatch, useSelector} from 'react-redux';
+import {getCommonTask, setColumnSettings, setColumnTask, setTask} from 'store/App/actions';
+import './gant-export';
 
 const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
-	const {columns, rollUp, scale, tasks} = props;
+	const {columns, links, rollUp, scale, tasks} = props;
 	const [showMenu, setShowMenu] = useState(false);
+	const [showModalConfirm, setShowModalConfirm] = useState(true);
+	let ID;
+	const [openModal, setOpenModal] = useState(false);
 	const [initPage, setinitPage] = useState(false);
 	const [position, setPosition] = useState({left: 0, top: 0});
 	const store = useSelector((state) => state);
@@ -121,7 +125,32 @@ const Gantt = (props: Props) => {
 		};
 
 		gantt.ext.zoom.init(zoomConfig);
-		gantt.showLightbox = function (id) {};
+		gantt.config.lightbox.sections = [
+			{focus: true, height: 70, map_to: 'text', name: 'description', type: 'textarea'},
+			{height: 72, map_to: 'auto', name: 'time', type: 'time'}
+		];
+
+		gantt.attachEvent('onTaskSelected', function (id) {
+			gantt.showLightbox(id);
+		});
+
+		gantt.attachEvent('onAfterTaskDrag', function (id, mode, e) {
+			const t = gantt.getTask(id);
+			const task = {
+				endDate: t.end_date,
+				startDate: t.start_date,
+				subjectUuid: id
+			};
+
+			console.log(task);
+
+			setTask(task);
+
+			setOpenModal(true);
+			setShowModalConfirm(true);
+			dispatch(getCommonTask());
+		});
+
 		gantt.i18n.setLocale('ru');
 		gantt.plugins({marker: true});
 		gantt.plugins({
@@ -143,6 +172,7 @@ const Gantt = (props: Props) => {
 		generateGridWidth();
 
 		gantt.init(ganttContainer.current);
+		gantt.clearAll();
 	}, []);
 
 	useEffect(() => {
@@ -160,7 +190,7 @@ const Gantt = (props: Props) => {
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
 		gantt.clearAll();
-		gantt.parse(JSON.stringify({data: tasks}));
+		gantt.parse((JSON.stringify({data: tasks, links: links})));
 		gantt.showDate(new Date());
 		gantt.render();
 
@@ -182,6 +212,16 @@ const Gantt = (props: Props) => {
 	}, [tasks]);
 
 	useEffect(() => {
+		gantt.config.show_progress = props.progress;
+		gantt.render();
+	}, [props.progress]);
+
+	useEffect(() => {
+		gantt.config.show_links = props.allLinks;
+		gantt.render();
+	}, [props.allLinks]);
+
+	useEffect(() => {
 		if (initPage) {
 			gantt.exportToPDF({
 				name: "mygantt.pdf"
@@ -193,8 +233,38 @@ const Gantt = (props: Props) => {
 
 	useEffect(() => {
 		gantt.render();
-		gantt.showLightbox('serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887');
 	}, [props.refresh]);
+
+	const generateId = function () {
+		ID = '_' + Math.random().toString(36).substr(2, 9);
+	};
+
+	useEffect(() => {
+		generateId();
+		const newTasks = deepClone(tasks);
+
+		if (initPage) {
+			gantt.createTask({
+				// 5af9985a-79b4-42b9-9d0f-635f6d80561e: "Сотрудник"
+				code1: 'Иванов Иван',
+				end_date: '2021-11-13T11:55:26',
+				id: ID,
+				// level: 1,
+				// parent: 'serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887',
+				start_date: '2021-11-11T11:55:26',
+				text: 'Иванов Иван',
+				type: 'WORK'
+			});
+			// gantt.refreshData();
+			const tasksTwoo = gantt.getTaskByTime();
+
+			newTasks.push(tasksTwoo[tasksTwoo.length - 1]);
+			setinitPage(true);
+
+			dispatch(setColumnTask(newTasks));
+		}
+	}, [props.newTask]);
+
 	const handleHeaderClick = () => {
 		gantt.attachEvent('onGridHeaderClick', function (name, e) {
 			let ids;
@@ -324,10 +394,28 @@ const Gantt = (props: Props) => {
 		return <CheckedMenu items={items} onCheck={checkItemMenuHide} onToggle={() => setShowMenu(!showMenu)} position={position} />;
 	};
 
+	const renderConfirmModal = () => {
+		if (showModalConfirm) {
+			return (
+				<Modal
+					notice={true}
+					onClose={() => setShowModalConfirm(false)}
+					onSubmit={() => setShowModalConfirm(false)}
+					submitText="Подтвердить"
+				>
+					Изменение диапазона времени задачи выходит за рамки проекта!
+				</Modal>
+			);
+		}
+
+		return null;
+	};
+
 	return (
 		<>
 			<div ref={ganttContainer} style={{height: '100%', width: '100%'}} />
 			{showMenu && renderCheckedMenu()}
+			{openModal && renderConfirmModal()}
 		</>
 	);
 };

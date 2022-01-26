@@ -9,6 +9,7 @@ export const initialAppState: AppState = {
 	errorData: false,
 	errorSettings: false,
 	hideEditPanel: false,
+	links: [],
 	loadingCommon: true,
 	loadingData: true,
 	loadingSettings: true,

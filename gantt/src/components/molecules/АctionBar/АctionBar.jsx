@@ -16,8 +16,7 @@ const АctionBar = props => {
 	const [showModal, setShowModal] = useState(false);
 	const [showDatepicker, setShowDatepicker] = useState(true);
 	const panelButtons = [
-		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'},
-		{icon: ICON_NAMES.BIG_PLUS, key: 'BIG_PLUS', method: 'method'}
+		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'}
 	];
 	const iconButtonGroup = panelButtons.map(item =>
 		<IconButton
@@ -102,13 +101,14 @@ const АctionBar = props => {
 	const renderPanel = () => {
 		return (
 			<div className={styles.container}>
-				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_OUT} onClick={zoomOut} />
-				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_IN} onClick={zoomIn} />
-				<IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} onClick={props.handleToggle} />
+				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_OUT} onClick={zoomIn} />
+				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_IN} onClick={zoomOut} />
+				<IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} />
 				<IconButton className={styles.icon} icon={ICON_NAMES.CLOCK} onClick={openClockModal} />
 				{iconButtonGroup}
+				<IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={props.addNewTask} />
 				<IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={props.refresh} />
-				<Button className={styles.btn}>Просмотреть</Button>
+				<Button className={styles.btn} onClick={props.handleToggle}>{props.name}</Button>
 			</div>
 		);
 	};

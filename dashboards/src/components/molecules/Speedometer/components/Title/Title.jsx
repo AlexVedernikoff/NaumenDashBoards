@@ -46,10 +46,7 @@ export class Title extends PureComponent<Props, State> {
 		const {title} = this.props;
 
 		return (
-			<tspan
-				onMouseLeave={this.handleClearTooltip}
-				onMouseMove={this.handleTooltipShow}
-			>
+			<tspan>
 				{this.renderDefaultTooltip()}
 				{title}
 			</tspan>
@@ -93,6 +90,8 @@ export class Title extends PureComponent<Props, State> {
 			<Text
 				dominantBaseline="middle"
 				fontSizeScale={fontSizeScale}
+				onMouseLeave={this.handleClearTooltip}
+				onMouseMove={this.handleTooltipShow}
 				style={style}
 				textAnchor="middle"
 				x={centerX}
