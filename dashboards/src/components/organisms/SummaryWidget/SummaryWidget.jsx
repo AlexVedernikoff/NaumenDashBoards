@@ -9,7 +9,7 @@ import {summaryMixin} from 'utils/chart/mixins';
 
 export class SummaryWidget extends PureComponent<Props, State> {
 	state = {
-		options: null
+		options: {data: {tooltip: null}}
 	};
 
 	containerRef: DivRef = createRef();
