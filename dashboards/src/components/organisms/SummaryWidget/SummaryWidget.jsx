@@ -1,5 +1,6 @@
 // @flow
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
+import {DEFAULT_SUMMARY_OPTIONS} from './constants';
 import type {DivRef} from 'components/types';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import type {Props, State} from './types';
@@ -9,7 +10,7 @@ import {summaryMixin} from 'utils/chart/mixins';
 
 export class SummaryWidget extends PureComponent<Props, State> {
 	state = {
-		options: {data: {tooltip: null}}
+		options: DEFAULT_SUMMARY_OPTIONS
 	};
 
 	containerRef: DivRef = createRef();
