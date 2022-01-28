@@ -1,6 +1,7 @@
 // @flow
 import {Button} from 'naumen-common-components';
 import {connect} from 'react-redux';
+import {Datepicker} from 'components/molecules/Datepicker/Datepicker.jsx';
 import {deepClone} from 'helpers';
 import {functions, props} from 'components/organisms/FormPanel/selectors';
 import IconButton from 'components/atoms/IconButton';
@@ -9,12 +10,14 @@ import React, {useState} from 'react';
 import {ScaleNames} from 'components/organisms/FormPanel/consts';
 import styles from './styles.less';
 import Modal from 'components/atoms/Modal/Modal';
-import {Datepicker} from 'components/molecules/Datepicker/Datepicker.jsx';
 import {TextInput} from 'components/atoms/TextInput/TextInput';
 
 const АctionBar = props => {
+	const [inputStartDate, setinputStartDate] = useState('');
+	const [inputEndDate, setinputEndDate] = useState('');
 	const [showModal, setShowModal] = useState(false);
-	const [showDatepicker, setShowDatepicker] = useState(true);
+	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
+	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
 	const panelButtons = [
 		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'}
 	];
@@ -29,6 +32,16 @@ const АctionBar = props => {
 	const {settings} = props;
 	const newSettings = deepClone(settings);
 	let indexScaleName;
+
+	const onSelectStartDate = (value) => {
+		setinputStartDate(value);
+		setShowDatePickerStartDate(!showDatePickerStartDate);
+	};
+
+	const onSelectEndDate = (value) => {
+		setinputEndDate(value);
+		setShowDatePickerEndDate(!showDatePickerEndDate);
+	};
 
 	const defineCurrenScale = active => {
 		ScaleNames.find((item, index) => {
@@ -64,29 +77,49 @@ const АctionBar = props => {
 		}
 	};
 
-	const renderModal = () => {
-		const showCalendar = () => {
-			setShowDatepicker(!showDatepicker);
+	const renderDatePickerStartDate = () => {
+		if (showDatePickerStartDate) {
+			return <Datepicker onSelect={(value) => onSelectStartDate(value)} value="" />;
+		}
+	};
+
+	const renderDatePickerEndDate = () => {
+		if (showDatePickerEndDate) {
+			return <Datepicker onSelect={(value) => onSelectEndDate(value)} value="" />;
+		}
+	};
+
+	const sibmitRange = () => {
+		const date = {
+			endDate: inputEndDate,
+			startDate: inputStartDate
 		};
 
+		props.setRangeTime(date);
+		console.log(1);
+		setShowModal(!showModal);
+	};
+
+	const renderModal = () => {
 		if (showModal) {
 			return (
 				<Modal
 					className={styles.modal}
 					notice={true}
 					onClose={() => setShowModal(!showModal)}
-					onSubmit={() => setShowModal(!showModal)}
+					onSubmit={() => sibmitRange()}
 					submitText="Сохранить"
 				>
 					<div className={styles.inputwrapper}>
-						<TextInput />
-						<IconButton className={styles.calendar} icon={ICON_NAMES.CALENDAR} onClick={showCalendar} />
+						<TextInput maxLength={30} placeholder="" value={inputStartDate} />
+						<IconButton className={styles.calendar} icon={ICON_NAMES.CALENDAR} onClick={() => setShowDatePickerStartDate(!showDatePickerStartDate)} />
 					</div>
+					{renderDatePickerStartDate()}
 					<div className={styles.inputwrapper}>
-						<TextInput />
-						<IconButton className={styles.calendar} icon={ICON_NAMES.CALENDAR} onClick={showCalendar} />
+						<TextInput maxLength={30} placeholder="" value={inputEndDate} />
+						<IconButton className={styles.calendar} icon={ICON_NAMES.CALENDAR} onClick={() => setShowDatePickerEndDate(!showDatePickerEndDate)} />
 					</div>
-					{renderDatepicker()}
+					{renderDatePickerEndDate()}
 				</Modal>
 			);
 		}
@@ -111,20 +144,6 @@ const АctionBar = props => {
 				<Button className={styles.btn} onClick={props.handleToggle}>{props.name}</Button>
 			</div>
 		);
-	};
-
-	const handleSelect = () => {
-		setShowDatepicker(!showDatepicker);
-	};
-
-	const renderDatepicker = () => {
-		if (!showDatepicker) {
-			return (
-				<div>
-					<Datepicker onSelect={handleSelect} value="10.10.2021" />
-				</div>
-			);
-		}
 	};
 
 	return (

@@ -7,7 +7,7 @@ import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
 import {getCommonTask, setColumnSettings, setColumnTask, setTask} from 'store/App/actions';
 import Modal from 'src/components/atoms/Modal';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import './gant-export';
 
@@ -21,9 +21,9 @@ const Gantt = (props: Props) => {
 	const [openModal, setOpenModal] = useState(false);
 	const [initPage, setinitPage] = useState(false);
 	const [position, setPosition] = useState({left: 0, top: 0});
-	const store = useSelector((state) => state);
 	const dispatch = useDispatch();
 	const ganttContainer = useRef(null);
+	const store = useSelector(state => state);
 	const zoomConfig = {
 		levels: [
 			{
@@ -192,10 +192,22 @@ const Gantt = (props: Props) => {
 		}
 
 		generateGridWidth();
-
+		gantt.config.fit_tasks = true;
 		gantt.init(ganttContainer.current);
 		gantt.clearAll();
 	}, []);
+
+	const [firstUpdate, setFirstUpdate] = useState(true);
+
+	useLayoutEffect(() => {
+		if (!firstUpdate) {
+			gantt.config.start_date = store.APP.startDate;
+			gantt.config.end_date = store.APP.endDate;
+			gantt.render();
+		}
+
+		setFirstUpdate(false);
+	}, [store.APP.startDate, store.APP.endDate]);
 
 	useEffect(() => {
 		gantt.ext.zoom.setLevel(String(scale).toLowerCase());

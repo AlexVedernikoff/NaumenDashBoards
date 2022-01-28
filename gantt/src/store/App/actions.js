@@ -236,6 +236,15 @@ const setDiagramData = (payload: DiagramData) => ({
 });
 
 /**
+ * Сохраняет диапазон времени
+ * @param {DiagramData} payload - данные диаграммы
+ */
+ const setRangeTime = payload => ({
+	payload,
+	type: APP_EVENTS.SET_RANGE_TIME
+});
+
+/**
  * Сохраняет источники
  * @param {Array<Source>} payload - массив из источников
  */
@@ -298,6 +307,7 @@ export {
 	getCommonTask,
 	setDiagramLinksData,
 	setDiagramData,
+	setRangeTime,
 	setResourceSettings,
 	showLoaderData,
 	showLoaderSettings,

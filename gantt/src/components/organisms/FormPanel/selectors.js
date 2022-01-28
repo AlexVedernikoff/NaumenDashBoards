@@ -1,17 +1,19 @@
 // @flow
 import type {AppState} from 'store/types';
-import {cancelSettings, changeScale, saveSettings, setCommonSettings, setResourceSettings} from 'store/App/actions';
+import {cancelSettings, changeScale, saveSettings, setCommonSettings, setRangeTime, setResourceSettings} from 'store/App/actions';
 
 const props = (state: AppState) => {
-	const {diagramKey, errorSettings, loadingSettings, resources, settings, sources} = state.APP;
+	const {diagramKey, endDate, errorSettings, loadingSettings, resources, settings, sources, startDate} = state.APP;
 
 	return {
 		diagramKey,
+		endDate,
 		errorSettings,
 		loading: loadingSettings,
 		resources,
 		settings,
-		sources
+		sources,
+		startDate
 	};
 };
 
@@ -20,6 +22,7 @@ const functions = {
 	changeScale,
 	saveSettings,
 	setCommonSettings,
+	setRangeTime,
 	setResourceSettings
 };
 

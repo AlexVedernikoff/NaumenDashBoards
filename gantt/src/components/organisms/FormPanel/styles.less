@@ -68,6 +68,31 @@
 		padding: 0;
 	}
 
+	.interval {
+		margin-top: 30px;
+		
+		&__inner_wrapper_input {
+			display: flex;
+		}
+
+		.input {
+			max-width: 31%;
+		}
+
+		&__label {
+			color: #737373;
+			display: block;
+			font-size: 13px;
+			margin-bottom: 4px;
+		}
+
+		&__wrapper_input {
+			&:first-child {
+				margin-bottom: 8px;
+			}
+		}
+	}
+
 	.item {
 		align-items: center;
 		display: flex;
@@ -105,7 +130,6 @@
 		}
 	}
 
-	.basket,
 	.kebab {
 		visibility: hidden;
 	}

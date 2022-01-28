@@ -2,6 +2,7 @@
 import {
 	Button,
 	Checkbox,
+	Datepicker,
 	FormControl,
 	Icon,
 	IconButton,
@@ -20,11 +21,11 @@ import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
 import {getChild, getIndexBottomNeighbor, getNeighbor, getUpdatedLevel, skipChildren} from './utils';
 import GridLayout from 'react-grid-layout';
+import {IntervalSelectionCriterion, ScaleNames} from './consts';
 import Modal from 'src/components/atoms/Modal';
 import type {Props} from './types';
 import React, {useState} from 'react';
 import Resource from './components/Resource';
-import {ScaleNames} from './consts';
 import ShowBox from 'src/components/atoms/ShowBox';
 import styles from './styles.less';
 import {v4 as uuidv4} from 'uuid';
@@ -145,6 +146,11 @@ const FormPanel = (props: Props) => {
 		handleUpdateCommonSettings('scale', value.value);
 	};
 
+	const [valueInterval, setValueInterval] = useState({label: 'c ... по', value: 'INTERVAL'});
+	const handleIntervalChange = ({value}) => {
+		setValueInterval(value);
+	};
+
 	const handleCheckboxChange = () => {
 		const {settings} = props;
 
@@ -229,6 +235,76 @@ const FormPanel = (props: Props) => {
 		</div>
 	);
 
+	const [inputStartDate, setinputStartDate] = useState('');
+	const [inputEndDate, setinputEndDate] = useState('');
+	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
+	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
+
+	const onSelectStartDate = (value) => {
+		setinputStartDate(value);
+		setShowDatePickerStartDate(!showDatePickerStartDate);
+	};
+
+	const onSelectEndDate = (value) => {
+		setinputEndDate(value);
+		setShowDatePickerEndDate(!showDatePickerEndDate);
+	};
+
+	const renderDatePickerStartDate = () => {
+		if (showDatePickerStartDate) {
+			return <Datepicker onSelect={(value) => onSelectStartDate(value)} value="" />;
+		}
+	};
+
+	const renderDatePickerEndDate = () => {
+		if (showDatePickerEndDate) {
+			return <Datepicker onSelect={(value) => onSelectEndDate(value)} value="" />;
+		}
+	};
+
+	const sibmitRange = () => {
+		const date = {
+			endDate: inputEndDate,
+			startDate: inputStartDate
+		};
+
+		props.setRangeTime(date);
+	};
+
+	const renderIntervalFromTo = () => {
+		if (valueInterval.value === 'INTERVAL') {
+			return (
+				<div className={styles.interval}>
+					<div className={styles.interval__wrapper_input}>
+						<span className={styles.interval__label}>С</span>
+						<div className={styles.interval__inner_wrapper_input}>
+							<TextInput className={styles.input} maxLength={30} placeholder="" value={inputStartDate} />
+							<IconButton className={styles.basket} icon='CALENDAR' onClick={() => setShowDatePickerStartDate(!showDatePickerStartDate)} />
+						</div>
+						{renderDatePickerStartDate()}
+					</div>
+					<div className={styles.interval__wrapper_input}>
+						<span className={styles.interval__label}>По</span>
+						<div className={styles.interval__inner_wrapper_input}>
+							<TextInput className={styles.input} maxLength={30} placeholder="" value={inputEndDate} />
+							<IconButton className={styles.basket} icon='CALENDAR' onClick={() => setShowDatePickerEndDate(!showDatePickerEndDate)} />
+						</div>
+						{renderDatePickerEndDate()}
+					</div>
+					<button onClick={sibmitRange}>Применить</button>
+				</div>
+			);
+		}
+	};
+
+	const renderSelectInterval = () => (
+		<div className={styles.select}>
+			<span className={styles.label}>Критерий</span>
+			<Select className={cn(styles.selectIcon, styles.top)} icon={'CHEVRON'} onSelect={handleIntervalChange} options={IntervalSelectionCriterion} placeholder='Критерий' value={valueInterval.label} />
+			{renderIntervalFromTo()}
+		</div>
+	);
+
 	const renderCheckboxCommonBlock = () => {
 		const {settings} = props;
 
@@ -262,6 +338,7 @@ const FormPanel = (props: Props) => {
 			<div className={styles.field}>
 				{renderHeaderCommonBlock()}
 				{renderSelectCommonBlock()}
+				{renderSelectInterval()}
 				{renderCheckboxProgress()}
 				{renderCheckboxСonnections()}
 				{renderCheckboxCommonBlock()}
