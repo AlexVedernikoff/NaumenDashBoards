@@ -276,6 +276,14 @@ const setColumnSettings = payload => ({
 	type: APP_EVENTS.SET_COLUMN_SETTINGS
 });
 
+/**
+ * Изменение колонки задачи
+ */
+const setColumnTask = payload => ({
+	payload,
+	type: APP_EVENTS.SET_COLUMN_TASK
+});
+
 export {
 	cancelSettings,
 	changeScale,
@@ -285,6 +293,7 @@ export {
 	saveSettings,
 	setColumnSettings,
 	setCommonSettings,
+	setColumnTask,
 	getGanttData,
 	getCommonTask,
 	setDiagramLinksData,

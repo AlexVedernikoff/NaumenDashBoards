@@ -5,23 +5,25 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
 import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
+import {getCommonTask, setColumnSettings, setColumnTask, setTask} from 'store/App/actions';
 import Modal from 'src/components/atoms/Modal';
 import React, {useEffect, useRef, useState} from 'react';
-import {getCommonTask, setColumnSettings, setTask} from 'store/App/actions';
+import {useDispatch, useSelector} from 'react-redux';
 import './gant-export';
-import {useDispatch} from 'react-redux';
 
 const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
+	let ID;
 	const {columns, links, rollUp, scale, tasks} = props;
 	const [showMenu, setShowMenu] = useState(false);
 	const [showModalConfirm, setShowModalConfirm] = useState(true);
 	const [openModal, setOpenModal] = useState(false);
 	const [initPage, setinitPage] = useState(false);
 	const [position, setPosition] = useState({left: 0, top: 0});
-	const ganttContainer = useRef(null);
+	const store = useSelector((state) => state);
 	const dispatch = useDispatch();
+	const ganttContainer = useRef(null);
 	const zoomConfig = {
 		levels: [
 			{
@@ -132,6 +134,28 @@ const Gantt = (props: Props) => {
 			gantt.showLightbox(id);
 		});
 
+		gantt.attachEvent('onLightboxSave', function (id, obj) {
+			const newTasks = deepClone(tasks);
+			const resultTasks = [];
+
+			obj.code1 = obj.text;
+			newTasks.map(i => {
+				if (i.id !== id) {
+					resultTasks.push(i);
+				} else {
+					i.code1 = obj.text;
+					i.text = obj.text;
+					i.start_date = obj.start_date;
+					i.end_date = obj.end_date;
+					resultTasks.push(i);
+				}
+			});
+			gantt.render();
+			dispatch(setColumnTask(newTasks));
+
+			return true;
+		});
+
 		gantt.attachEvent('onAfterTaskDrag', function (id, mode, e) {
 			const t = gantt.getTask(id);
 			const task = {
@@ -170,6 +194,7 @@ const Gantt = (props: Props) => {
 		generateGridWidth();
 
 		gantt.init(ganttContainer.current);
+		gantt.clearAll();
 	}, []);
 
 	useEffect(() => {
@@ -232,22 +257,92 @@ const Gantt = (props: Props) => {
 		gantt.render();
 	}, [props.refresh]);
 
+	const generateId = function () {
+		ID = '_' + Math.random().toString(36).substr(2, 9);
+	};
+
+	useEffect(() => {
+		generateId();
+		const newTasks = deepClone(tasks);
+
+		if (initPage) {
+			gantt.createTask({
+				// 5af9985a-79b4-42b9-9d0f-635f6d80561e: "Сотрудник"
+				code1: 'Иванов Иван',
+				end_date: '2021-11-13T11:55:26',
+				id: ID,
+				// level: 1,
+				// parent: 'serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887',
+				start_date: '2021-11-11T11:55:26',
+				text: 'Иванов Иван',
+				type: 'WORK'
+			});
+			// gantt.refreshData();
+			const tasksTwo = gantt.getTaskByTime();
+
+			newTasks.push(tasksTwo[tasksTwo.length - 1]);
+			setinitPage(true);
+			dispatch(setColumnTask(newTasks));
+		}
+	}, [props.newTask]);
+
 	const handleHeaderClick = () => {
 		gantt.attachEvent('onGridHeaderClick', function (name, e) {
-			const column = gantt.getGridColumn(name);
+			let ids;
 
-			if (column && !column.tree && column.name !== 'button') {
+			if (!e.target.childNodes[1]) {
+				ids = e.target.id;
+			}
+
+			const column = gantt.getGridColumn(ids);
+
+			if (column && !column.tree && name !== 'button') {
 				gantt.getGridColumn('button').hide = false;
 				column.hide = true;
 				column.show = false;
 				generateGridWidth();
 				gantt.render();
-			} else if (column.name === 'button') {
+			} else if (name === 'button') {
 				setPosition({left: e.x, top: e.y - 52});
 				setShowMenu(!showMenu);
 			}
 		});
 	};
+
+	const debounce = (f, t) => {
+		return function (args) {
+			const previousCall = this.lastCall;
+
+			this.lastCall = Date.now();
+
+			if (previousCall && ((this.lastCall - previousCall) <= t)) {
+				clearTimeout(this.lastCallTimer);
+			}
+
+			this.lastCallTimer = setTimeout(() => f(args), t);
+		};
+	};
+
+	const inlineEditors = gantt.ext.inlineEditors;
+
+	inlineEditors.attachEvent('onBeforeSave', debounce(function (state) {
+		const newTasks = deepClone(tasks);
+
+		newTasks.map(function (i) {
+			if (i.id === state.id) {
+				for (const key in i) {
+					if (key === state.columnName) {
+						i[key] = state.newValue;
+						i.text = i.code1;
+					}
+				}
+			}
+		});
+
+		dispatch(setColumnTask(newTasks));
+
+		return true;
+	}, 100));
 
 	const configureAdaptedColumns = () => {
 		const adaptedColumns = [];
@@ -255,8 +350,9 @@ const Gantt = (props: Props) => {
 		if (columns && columns.length) {
 			columns.forEach(item => adaptedColumns.push({
 				...item,
+				editor: item.editor,
 				hide: !item.show,
-				label: item.title,
+				label: item.title + `<div id="${item.code}"></div>`,
 				minWidth: 100,
 				name: item.code,
 				resize: true,

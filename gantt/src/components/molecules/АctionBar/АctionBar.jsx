@@ -16,8 +16,7 @@ const АctionBar = props => {
 	const [showModal, setShowModal] = useState(false);
 	const [showDatepicker, setShowDatepicker] = useState(true);
 	const panelButtons = [
-		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'},
-		{icon: ICON_NAMES.BIG_PLUS, key: 'BIG_PLUS', method: 'method'}
+		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'}
 	];
 	const iconButtonGroup = panelButtons.map(item =>
 		<IconButton
@@ -107,6 +106,7 @@ const АctionBar = props => {
 				<IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} />
 				<IconButton className={styles.icon} icon={ICON_NAMES.CLOCK} onClick={openClockModal} />
 				{iconButtonGroup}
+				<IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={props.addNewTask} />
 				<IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={props.refresh} />
 				<Button className={styles.btn} onClick={props.handleToggle}>{props.name}</Button>
 			</div>

@@ -37,10 +37,20 @@
 
 .gantt_tree_content,
 .gantt_grid_head_cell {
-	overflow:hidden;
+	overflow: hidden;
+	padding: 2px;
 	text-overflow: ellipsis;
 	text-align: center;
-	padding: 2px;
+}
+
+.gantt_task_progress_drag,
+.gantt_link_control {
+	display: none !important;
+}
+
+.gantt_grid_editor_placeholder input {
+	background-color: #ffffff;
+	border: 2px solid #000000;
 }
 
 .gantt_grid_head_cell:not(:first-child) {
@@ -59,15 +69,23 @@
 	}
 }
 
-.gantt_grid_head_cell::before {
-	content: "\02DF";
-	cursor: pointer;
+.gantt_grid_head_cell > div {
 	display: none;
-	font-size: 20px;
 	position: absolute;
-	right: 5px;
-	top: 11px;
-	transform: translateY(-50%);
+	right: 10px;
+	top: -20px;
+}
+
+.gantt_grid_head_cell > div::before {
+	content: "\2DF";
+	cursor: pointer;
+	font-size: 20px;
+	right: 0;
+	top: 0;
+}
+
+.gantt_grid_head_cell:not(:first-child):hover div {
+	display: block;
 }
 
 // кнопка-плюсик для добавления скрытого столбца
@@ -93,8 +111,8 @@
 	}
 
 	.gantt_layout_cell.scrollHor_cell {
-		position: absolute !important;
 		bottom: -6px;
+		position: absolute !important;
 	}
 
 	.gantt_container {

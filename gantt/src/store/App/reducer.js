@@ -122,11 +122,16 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 				...state,
 				settings: {...state.settings, columnSettings: action.payload}
 			};
+		case APP_EVENTS.SET_COLUMN_TASK:
+			return {
+				...state,
+				tasks: action.payload
+			};
 		case APP_EVENTS.CHANGE_SCALE:
 			return {
 				...state,
 				settings: action.payload
-			}
+			};
 		default:
 			return state;
 	}

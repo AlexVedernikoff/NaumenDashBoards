@@ -14,14 +14,20 @@ export class GanttContent extends PureComponent<Props> {
 		this.handleToggle = this.handleToggle.bind(this);
 		this.handleToggleProgress = this.handleToggleProgress.bind(this);
 		this.handleToggleLinks = this.handleToggleLinks.bind(this);
+		this.addNewTask = this.addNewTask.bind(this);
 		this.state = {
 			allLinks: false,
 			flag: false,
 			name: 'Просмотреть',
+			newTask: false,
 			progress: false,
 			refresh: false,
 			swiped: false
 		};
+	}
+
+	addNewTask () {
+		this.setState({ newTask: !this.state.newTask });
 	}
 
 	handleToggle = () => {
@@ -49,13 +55,14 @@ export class GanttContent extends PureComponent<Props> {
 
 	renderGanttGrid = () => {
 		const {errorData} = this.props;
-		const {allLinks, flag, progress, refresh} = this.state;
+		const {allLinks, flag, newTask, progress, refresh} = this.state;
 
 		return errorData
 			? <p>Ошибка загрузки данных</p>
 			: <GanttGrid
 				allLinks={allLinks}
 				flag={flag}
+				newTask={newTask}
 				progress={progress}
 				refresh={refresh}
 				style={{height: '100%', width: '100%'}}
@@ -80,6 +87,7 @@ export class GanttContent extends PureComponent<Props> {
 
 		return editMode
 			? <АctionBar
+				addNewTask={() => this.addNewTask()}
 				handleToggle={this.handleToggle}
 				name={this.state.name}
 				onClick={() => this.onMove()}

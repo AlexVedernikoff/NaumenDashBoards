@@ -17,7 +17,7 @@ const CheckedMenu = (props: Props) => {
 
 	const renderCheckbox = item => {
 		return (
-			<FormControl label={item.label}>
+			<FormControl label={item.title}>
 				<Checkbox checked={item.show} name='Checkbox' onChange={handleCheckboxChange(item)} value={item.show} />
 			</FormControl>
 		);
