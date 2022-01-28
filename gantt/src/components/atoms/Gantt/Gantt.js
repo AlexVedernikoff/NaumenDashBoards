@@ -5,10 +5,10 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
 import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
+import {getCommonTask, setColumnSettings, setColumnTask, setTask} from 'store/App/actions';
 import Modal from 'src/components/atoms/Modal';
 import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {getCommonTask, setColumnSettings, setColumnTask, setTask} from 'store/App/actions';
 import './gant-export';
 
 const HEIGHT_HEADER = 70;
@@ -139,17 +139,20 @@ const Gantt = (props: Props) => {
 			const resultTasks = [];
 
 			obj.code1 = obj.text;
-			newTasks.map((i) => {
+			newTasks.map(i => {
 				if (i.id !== id) {
 					resultTasks.push(i);
 				} else {
 					i.code1 = obj.text;
 					i.text = obj.text;
+					i.start_date = obj.start_date;
+					i.end_date = obj.end_date;
 					resultTasks.push(i);
 				}
 			});
 			gantt.render();
 			dispatch(setColumnTask(newTasks));
+
 			return true;
 		});
 
@@ -275,9 +278,9 @@ const Gantt = (props: Props) => {
 				type: 'WORK'
 			});
 			// gantt.refreshData();
-			const tasksTwoo = gantt.getTaskByTime();
+			const tasksTwo = gantt.getTaskByTime();
 
-			newTasks.push(tasksTwoo[tasksTwoo.length - 1]);
+			newTasks.push(tasksTwo[tasksTwo.length - 1]);
 			setinitPage(true);
 			dispatch(setColumnTask(newTasks));
 		}
@@ -323,7 +326,6 @@ const Gantt = (props: Props) => {
 	const inlineEditors = gantt.ext.inlineEditors;
 
 	inlineEditors.attachEvent('onBeforeSave', debounce(function (state) {
-		console.log(1);
 		const newTasks = deepClone(tasks);
 
 		newTasks.map(function (i) {
@@ -338,6 +340,7 @@ const Gantt = (props: Props) => {
 		});
 
 		dispatch(setColumnTask(newTasks));
+
 		return true;
 	}, 100));
 
@@ -349,7 +352,7 @@ const Gantt = (props: Props) => {
 				...item,
 				editor: item.editor,
 				hide: !item.show,
-				label: item.title + `<div id=${item.code}></div>`,
+				label: item.title + `<div id="${item.code}"></div>`,
 				minWidth: 100,
 				name: item.code,
 				resize: true,

@@ -38,9 +38,9 @@
 .gantt_tree_content,
 .gantt_grid_head_cell {
 	overflow: hidden;
+	padding: 2px;
 	text-overflow: ellipsis;
 	text-align: center;
-	padding: 2px;
 }
 
 .gantt_task_progress_drag,
@@ -49,8 +49,8 @@
 }
 
 .gantt_grid_editor_placeholder input {
-	border: 2px solid #000000;
 	background-color: #ffffff;
+	border: 2px solid #000000;
 }
 
 .gantt_grid_head_cell:not(:first-child) {
@@ -70,18 +70,18 @@
 }
 
 .gantt_grid_head_cell > div {
-	top: -20px;
-    right: 10px;
-	position: absolute;
 	display: none;
+	position: absolute;
+	right: 10px;
+	top: -20px;
 }
 
 .gantt_grid_head_cell > div::before {
 	content: "\2DF";
-    cursor: pointer;
-    font-size: 20px;
-    right: 0;
-    top: 0;
+	cursor: pointer;
+	font-size: 20px;
+	right: 0;
+	top: 0;
 }
 
 .gantt_grid_head_cell:not(:first-child):hover div {
@@ -111,8 +111,8 @@
 	}
 
 	.gantt_layout_cell.scrollHor_cell {
-		position: absolute !important;
 		bottom: -6px;
+		position: absolute !important;
 	}
 
 	.gantt_container {
