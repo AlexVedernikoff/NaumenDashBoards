@@ -5,6 +5,7 @@ import {APP_EVENTS, USER_ROLES} from './constants';
 export const initialAppState: AppState = {
 	contentCode: '',
 	diagramKey: '',
+	endDate: new Date(),
 	errorCommon: false,
 	errorData: false,
 	errorSettings: false,
@@ -19,6 +20,7 @@ export const initialAppState: AppState = {
 	resources: [],
 	settings: {columnSettings: []},
 	sources: {},
+	startDate: new Date(),
 	subjectUuid: '',
 	tasks: [],
 	user: {

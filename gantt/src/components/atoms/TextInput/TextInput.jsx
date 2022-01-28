@@ -32,11 +32,11 @@ export class TextInput extends PureComponent<Props> {
 		onChange({name, value: ''});
 	};
 
-	renderClearIcon = () => {
-		const {value} = this.props;
+	// renderClearIcon = () => {
+	// 	const {value} = this.props;
 
-		return value ? <IconButton className={styles.icon} icon={ICON_NAMES.REMOVE} onClick={this.handleClear} /> : null;
-	};
+	// 	return value ? <IconButton className={styles.icon} icon={ICON_NAMES.REMOVE} onClick={this.handleClear} /> : null;
+	// };
 
 	renderInput = () => {
 		const {forwardedRef, maxLength, onBlur, onFocus, placeholder, value, id} = this.props;
@@ -72,7 +72,7 @@ export class TextInput extends PureComponent<Props> {
 		return (
 			<div className={containerCN}>
 				{this.renderInput()}
-				{this.renderClearIcon()}
+				{/* {this.renderClearIcon()} */}
 			</div>
 		);
 	}
