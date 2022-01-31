@@ -7,6 +7,7 @@ import type {
 	ReceiveDynamicAttributesPayload
 } from './types';
 import {DYNAMIC_GROUPS_EVENTS} from './constants';
+import {omit} from 'helpers';
 
 const setDynamicGroups = (
 	state: DynamicGroupsState,
@@ -131,10 +132,7 @@ const reducer = (
 				}
 			};
 		case DYNAMIC_GROUPS_EVENTS.CLEAR_DYNAMIC_ATTRIBUTE_GROUPS:
-			return {
-				...state,
-				[action.payload]: null
-			};
+			return omit(state, action.payload);
 		default:
 			return state;
 	}
