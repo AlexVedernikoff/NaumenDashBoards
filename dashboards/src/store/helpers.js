@@ -92,7 +92,7 @@ const getLocalStorageValue = (storageKey: string, key: string, defaultValue: any
 
 	storage = storage ? JSON.parse(storage) : {};
 
-	return storage[key] || defaultValue;
+	return storage[key] ?? defaultValue;
 };
 
 /**

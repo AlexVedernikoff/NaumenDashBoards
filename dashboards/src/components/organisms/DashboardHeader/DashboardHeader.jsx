@@ -3,30 +3,41 @@ import AutoUpdateButton from 'containers/AutoUpdateButton';
 import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import ButtonGroup from 'components/atoms/ButtonGroup';
 import {DASHBOARD_HEADER_HEIGHT, EXPORT_LIST} from './constants';
+import {DEFAULT_BUTTONS, FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import DropDownButton from './components/DropDownButton';
 import ExportByEmailButton from './components/ExportByEmailButton';
 import exporter from 'utils/export';
 import {FILE_VARIANTS} from 'utils/export/constants';
-import {FOOTER_POSITIONS, SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import {gridRef} from 'components/organisms/WidgetsGrid/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from './components/IconButton';
 import isMobile from 'ismobilejs';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
-import Modal from 'components/molecules/Modal';
 import NavItem from './components/NavItem';
 import type {Props} from 'containers/DashboardHeader/types';
 import React, {Component} from 'react';
-import type {State} from './types';
 import styles from './styles.less';
 import t from 'localization';
 import T from 'components/atoms/Translation';
 import {USER_ROLES} from 'store/context/constants';
 import {VARIANTS as ICON_BUTTON_VARIANTS} from './components/IconButton/constants';
 
-export class DashboardHeader extends Component<Props, State> {
-	state = {
-		showModal: false
+export class DashboardHeader extends Component<Props> {
+	confirmRemovePersonalDashboard = async (): Promise<boolean> => {
+		const {confirm} = this.props;
+		const result = await confirm(
+			t('DashboardHeader::DeleteConfirmation'),
+			t('DashboardHeader::DeleteYourPersonalDashboard'),
+			{
+				cancelText: t('DashboardHeader::No'),
+				defaultButton: DEFAULT_BUTTONS.CANCEL_BUTTON,
+				footerPosition: FOOTER_POSITIONS.RIGHT,
+				size: MODAL_SIZES.SMALL,
+				submitText: t('DashboardHeader::Yes')
+			}
+		);
+
+		return result;
 	};
 
 	handleChangeDisplayMode = () => {
@@ -64,16 +75,13 @@ export class DashboardHeader extends Component<Props, State> {
 		}
 	};
 
-	hideModal = () => this.setState({showModal: false});
-
-	removePersonalDashboard = () => {
+	removePersonalDashboard = async () => {
 		const {removePersonalDashboard} = this.props;
 
-		this.hideModal();
-		removePersonalDashboard();
+		if (await this.confirmRemovePersonalDashboard()) {
+			removePersonalDashboard();
+		}
 	};
-
-	showModal = () => this.setState({showModal: true});
 
 	togglePanel = () => {
 		const {changeShowHeader, showHeader} = this.props;
@@ -136,10 +144,11 @@ export class DashboardHeader extends Component<Props, State> {
 		const top = (showHeader ? DASHBOARD_HEADER_HEIGHT : 0) - 12;
 		const style = {top};
 		const icon = showHeader ? ICON_NAMES.SIDEBAR_ROUND_UP : ICON_NAMES.SIDEBAR_ROUND_DOWN;
+		const title = showHeader ? t('DashboardHeader::CollapseTopPanel') : t('DashboardHeader::ExpandTopPanel');
 
 		return (
 			<div className={styles.drawControl} onClick={this.togglePanel} style={style}>
-				<Icon name={icon} />
+				<Icon name={icon} title={title} />
 			</div>
 		);
 	};
@@ -149,27 +158,6 @@ export class DashboardHeader extends Component<Props, State> {
 			<ExportByEmailButton />
 		</NavItem>
 	);
-
-	renderModal = () => {
-		const {showModal} = this.state;
-
-		if (showModal) {
-			return (
-				<Modal
-					cancelText={t('DashboardHeader::No')}
-					footerPosition={FOOTER_POSITIONS.RIGHT}
-					header={t('DashboardHeader::DeleteConfirmation')}
-					notice={true}
-					onClose={this.hideModal}
-					onSubmit={this.removePersonalDashboard}
-					size={MODAL_SIZES.SMALL}
-					submitText={t('DashboardHeader::Yes')}
-				>
-					<T text="DashboardHeader::DeleteYourPersonalDashboard" />
-				</Modal>
-			);
-		}
-	};
 
 	renderModeButton = () => {
 		const {editDashboard, editMode, isEditableContext, seeDashboard, user} = this.props;
@@ -201,11 +189,10 @@ export class DashboardHeader extends Component<Props, State> {
 		if (personalDashboard) {
 			return (
 				<NavItem>
-					<Button disabled={personalDashboardDeleting} onClick={this.showModal} outline>
+					<Button disabled={personalDashboardDeleting} onClick={this.removePersonalDashboard} outline>
 						<Icon className={styles.removeIcon} name={ICON_NAMES.CLOSE} />
 						<span><T text="DashboardHeader::Delete" /></span>
 					</Button>
-					{this.renderModal()}
 				</NavItem>
 			);
 		}
