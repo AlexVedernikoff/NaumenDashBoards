@@ -22,6 +22,8 @@
 	"DashboardHeader::SaveYourself": "Сохранить себе",
 	"DashboardHeader::Personal": "Личный",
 	"DashboardHeader::Common": "Общий",
+	"DashboardHeader::CollapseTopPanel": "Свернуть верхнюю панель",
+	"DashboardHeader::ExpandTopPanel": "Развернуть верхнюю панель",
 	"ExportByEmailButton::SendToEmail": "Отправить на почту",
 	"Chart::CountTotals": "Итого: {countTotals}",
 	"Kebab::Menu": "Меню",

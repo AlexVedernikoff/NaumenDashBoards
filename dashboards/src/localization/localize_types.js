@@ -145,7 +145,9 @@ type DashboardHeader =
   | 'DashboardHeader::SaveYourself'
   | 'DashboardHeader::View'
   | 'DashboardHeader::WebSwitch'
-  | 'DashboardHeader::Yes';
+  | 'DashboardHeader::Yes'
+  | 'DashboardHeader::CollapseTopPanel'
+  | 'DashboardHeader::ExpandTopPanel';
 
 // components/organisms/DashboardHeader/components/ExportByEmailButton
 type ExportByEmailButton = 'ExportByEmailButton::SendToEmail';

@@ -1,5 +1,6 @@
 // @flow
 import type {AutoUpdateSettings, LayoutMode} from 'store/dashboard/settings/types';
+import type {CommonDialogContextProps} from 'containers/CommonDialogs/types';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
 
@@ -30,4 +31,4 @@ export type ConnectedFunctions = {
 	switchDashboard: () => ThunkAction
 };
 
-export type Props = ConnectedProps & ConnectedFunctions;
+export type Props = ConnectedProps & ConnectedFunctions & CommonDialogContextProps;

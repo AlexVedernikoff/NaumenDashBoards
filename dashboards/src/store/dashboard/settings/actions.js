@@ -9,7 +9,7 @@ import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
 import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
-import {DASHBOARD_EVENTS, MAX_AUTO_UPDATE_INTERVAL} from './constants';
+import {DASHBOARD_EVENTS, EDIT_PANEL_POSITION, MAX_AUTO_UPDATE_INTERVAL} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
@@ -79,6 +79,8 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		await dispatch(getEditableParam());
 		dispatch(initPersonalValue());
 		dispatch(initLayoutMode());
+		dispatch(initHeaderPanel());
+		dispatch(initEditPanelPosition());
 
 		await dispatch(getSettings());
 		await Promise.all([
@@ -556,6 +558,16 @@ const initPersonalValue = () => ({
 	type: DASHBOARD_EVENTS.SET_PERSONAL
 });
 
+const initHeaderPanel = () => ({
+	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.SHOW_HEADER_PANEL, true),
+	type: DASHBOARD_EVENTS.CHANGE_SHOW_HEADER
+});
+
+const initEditPanelPosition = () => ({
+	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.EDIT_PANEL_POSITION, EDIT_PANEL_POSITION.RIGHT),
+	type: DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION
+});
+
 const changeAutoUpdateSettings = payload => ({
 	payload,
 	type: DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
@@ -571,10 +583,13 @@ const setDashboardUUID = payload => ({
 	type: DASHBOARD_EVENTS.SET_DASHBOARD_UUID
 });
 
-const setEditPanelPosition = (payload: EditPanelPosition) => ({
-	payload,
-	type: DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION
-});
+const setEditPanelPosition = (payload: EditPanelPosition) => (dispatch: Dispatch) => {
+	setLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.EDIT_PANEL_POSITION, payload);
+	dispatch({
+		payload,
+		type: DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION
+	});
+};
 
 const setHideEditPanel = (payload: boolean) => ({
 	payload,
@@ -586,10 +601,14 @@ const setWidthEditPanel = (payload: number) => ({
 	type: DASHBOARD_EVENTS.SET_WIDTH_EDIT_PANEL
 });
 
-const changeShowHeader = (payload: boolean) => ({
-	payload,
-	type: DASHBOARD_EVENTS.CHANGE_SHOW_HEADER
-});
+const changeShowHeader = (payload: boolean) => (dispatch: Dispatch) => {
+	setLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.SHOW_HEADER_PANEL, payload);
+
+	dispatch({
+		payload,
+		type: DASHBOARD_EVENTS.CHANGE_SHOW_HEADER
+	});
+};
 
 export {
 	changeIntervalRemainder,
