@@ -11,6 +11,7 @@ export type VerifyData = {
 	entities: VerifyEntities[],
 	html: string,
 	message: string,
+	uuidDocument: string,
 };
 
 export type VerifyAction = {

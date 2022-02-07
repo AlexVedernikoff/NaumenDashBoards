@@ -1,6 +1,6 @@
 // @flow
-import type {Dispatch, ThunkAction} from 'store/types';
-import {getSubjectUuid, getVerifyDocument, getVerifyResult, getWsDocument} from 'utils/api';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {generateDocument, getSubjectUuid, getVerifyDocument, getVerifyResult, updateEntityStatus} from 'utils/api';
 import {VERIFY_EVENTS} from './constants';
 
 /**
@@ -11,15 +11,45 @@ const getDataVerify = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
 	try {
 		dispatch(showLoaderData());
 
-		const decisionUUID = await getSubjectUuid();
-		const setting = await getVerifyResult(decisionUUID);
+		const uuidDocument = await getSubjectUuid();
+		const setting = await getVerifyResult(uuidDocument);
 		const html = await getVerifyDocument(setting.document);
 
-		await getWsDocument(setting.document);
-
+		dispatch(setUuidDocument(setting.document));
 		dispatch(setVerifyData({...setting, html}));
 	} catch (error) {
-		console.error(error);
+		dispatch(setErrorData(error));
+	} finally {
+		dispatch(hideLoaderData());
+	}
+};
+
+/**
+ * Отправляет измененный статус ошибки
+ * @returns {ThunkAction}
+ * @param UUID - Uuid ошибки
+ * @param status - статус
+ */
+const sendEntityStatus = (UUID, status): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await updateEntityStatus(UUID, status);
+	} catch (error) {
+		dispatch(setErrorData(error));
+	} finally {
+		dispatch(hideLoaderData());
+	}
+};
+
+/**
+ * Отправляет команду на формирование документа
+ * @returns {ThunkAction}
+ */
+const sendGenerateDocument = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	try {
+		const {verify: {uuidDocument}} = getState();
+
+		await generateDocument(uuidDocument);
+	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
 		dispatch(hideLoaderData());
@@ -58,6 +88,18 @@ const setVerifyData = (payload: string) => ({
 	type: VERIFY_EVENTS.SET_VERIFY_DATA
 });
 
+/**
+ * Сохраняет UUID документа
+ * @param {string} payload - contentCode
+ */
+const setUuidDocument = (payload: string) => ({
+	payload,
+	type: VERIFY_EVENTS.SET_UUID_DOCUMENT
+});
+
 export {
-	getDataVerify
+	getDataVerify,
+	setVerifyData,
+	sendGenerateDocument,
+	sendEntityStatus
 };

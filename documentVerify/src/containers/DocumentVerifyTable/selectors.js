@@ -1,6 +1,6 @@
 // @flow
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {getVerify} from 'store/verify/actions';
+import {sendEntityStatus, sendGenerateDocument, setVerifyData} from 'store/verify/actions';
 import type {State} from 'store/types';
 
 /**
@@ -16,5 +16,7 @@ export const props = (state: State): ConnectedProps => {
 };
 
 export const functions: ConnectedFunctions = {
-	getVerify
+	sendEntityStatus,
+	sendGenerateDocument,
+	setVerifyData
 };
