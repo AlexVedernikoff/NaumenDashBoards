@@ -1,93 +1,99 @@
 // @flow
 import AlertIcon from 'icons/alert.svg';
+import Button from 'components/atoms/Button';
 import cn from 'classnames';
 import ErrorIcon from 'icons/error.svg';
 import type {Props} from 'containers/DocumentVerifyTable/types';
-import React, {useEffect, useState} from 'react';
+import React, {Component} from 'react';
 import styles from './styles.less';
 import SuccessIcon from 'icons/success.svg';
 
+export default class DocumentVerifyTable extends Component<Props> {
+	constructor (props) {
+		super(props);
+		this.state = {
+			activeUUID: null
+		};
 
-const DocumentVerifyTable = ({switchView, verify: {data: {entities, html}}}: Props) => {
-	const [activeUUID, setActiveUUID] = useState(null);
+		const {verify: {data: {entities, html}}} = this.props;
 
-	const scrollToTable = UUID => {
+		this.timer = setTimeout(() => {
+			if (html) {
+				entities.forEach(this.searchValueError);
+
+				clearTimeout(this.timer);
+			}
+		}, 100);
+	}
+
+	setActiveUUID (activeUUID) {
+		this.setState({activeUUID});
+	}
+
+	scrollToTable (UUID) {
 		const {height: trHeight, top: trTop} = document.getElementById(UUID).getBoundingClientRect();
 		const tableScroll = document.getElementById('tableScroll');
 		const {height, top} = tableScroll.getBoundingClientRect();
 		tableScroll.scrollTop += Math.floor(trTop - top - height / 2 + trHeight / 2);
-	};
+	}
 
-	const animate = (element, opacity = 0) => {
+	scrollToError (UUID) {
+		this.setActiveUUID(UUID);
+
+		const del = document.getElementById(`${UUID}_del`);
+		const ins = document.getElementById(`${UUID}_ins`);
+
+		if (del) {
+			this.animate(del);
+		}
+
+		if (ins) {
+			this.animate(ins);
+		}
+	}
+
+	animate (element) {
 		element.scrollIntoView({block: 'center'});
-		window.setTimeout(function () {
-			const style = (element.getAttribute('style') || '').replace(/opacity[^;]+;\s+/gi, '');
-			element.setAttribute('style', `opacity: ${opacity}; ${style}`);
+		element.style.opacity = 0;
 
-			if (opacity < 1) {
-				animate(element, opacity + 0.1);
+		const interval = window.setInterval(function () {
+			if (element.style.opacity < 1) {
+				return (element.style.opacity = +element.style.opacity + 0.1);
 			}
+
+			clearInterval(interval);
 		}, 30);
-	};
+	}
 
-	const searchValueError = ({UUID, state}) => {
-		const del = document.querySelector(`del[style*="${UUID}"]`);
-		const ins = document.querySelector(`ins[style*="${UUID}"]`);
+	handleChangeEntity = (state, {UUID}) => {
+		const {sendEntityStatus, setVerifyData, verify: {data: {entities, html}}} = this.props;
 
-
-		if (ins) {
-			const insStyle = ins.getAttribute('style');
-
-			if (state === 'error' || state === 'skipped') {
-				ins.style.display = 'none';
-			} else {
-				ins.onclick = () => {
-					scrollToTable(UUID);
-					setActiveUUID(UUID);
-				};
+		const skipEntity = entities.map(entity => {
+			if (entity.UUID === UUID) {
+				entity.state = state;
 			}
 
-			ins.style.backgroundColor = '#94D1AD';
-			ins.style.cursor = 'pointer';
-			ins.style.padding = '0 5px';
-			ins.setAttribute('style', `${ins.style.cssText} ${insStyle}`);
-		}
+			return entity;
+		});
 
-		if (del) {
-			const delStyle = del.getAttribute('style');
-
-			if (state === 'fixed') {
-				del.style.display = 'none';
-			} else {
-				del.onclick = () => {
-					scrollToTable(UUID);
-					setActiveUUID(UUID);
-				};
-			}
-
-			del.style.backgroundColor = '#E08A85';
-			del.style.cursor = 'pointer';
-			ins.style.padding = '0 5px';
-			del.setAttribute('style', `${del.style.cssText} ${delStyle}`);
-		}
+		sendEntityStatus(UUID, state);
+		setVerifyData({entities: skipEntity, html});
 	};
 
-	const scrollToError = ({UUID}) => {
-		setActiveUUID(UUID);
+	isDocumentGenerationDisabled () {
+		const {verify: {data: {entities}}} = this.props;
 
-		const del = document.querySelector(`del[style*="${UUID}"]`);
-		const ins = document.querySelector(`ins[style*="${UUID}"]`);
+		return entities.find(entity => entity.state === 'error');
+	}
 
-		if (del) {
-			animate(del);
-		}
+	getListControlShow ({state}) {
+		return {
+			abort: state === 'fixed' || state === 'skipped',
+			error: state === 'error'
+		};
+	}
 
-		if (ins) {
-			animate(ins);
-		}
-	};
-
-	const getTypeIcon = ({state}) => {
+	getEntityIcon (state) {
 		switch (state) {
 			case 'skipped':
 				return <AlertIcon className={styles.icon} />;
@@ -96,59 +102,193 @@ const DocumentVerifyTable = ({switchView, verify: {data: {entities, html}}}: Pro
 			default:
 				return <SuccessIcon className={styles.icon} />;
 		}
+	}
+
+	getEntityErrorCount () {
+		const {verify: {data: {entities}}} = this.props;
+		return entities.filter(({state}) => state === 'error').length;
+	}
+
+	getControlButtonProps (type, entity) {
+		const show = this.getListControlShow(entity);
+
+		const props = {
+			onClick: this.handleChangeEntity.bind(this, type, entity),
+			show: false,
+			title: ''
+		};
+
+		switch (type) {
+			case 'fixed':
+				return {
+					...props,
+					show: show.error,
+					title: 'Исправить'
+				};
+			case 'skipped':
+				return {
+					...props,
+					show: show.error,
+					title: 'Пропустить'
+				};
+			case 'error':
+				return {
+					...props,
+					show: show.abort,
+					title: 'Отменить'
+				};
+		}
+	}
+
+	handleCreateDocument = async () => {
+		const {sendGenerateDocument} = this.props;
+
+		await sendGenerateDocument();
 	};
 
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			if (html) {
-				entities.forEach(searchValueError);
+	handleRowClick = UUID => () => {
+		this.scrollToError(UUID);
+	};
+
+	searchValueError = ({UUID, state}) => {
+		const del = document.querySelector(`del[style*="${UUID}"]`) || document.getElementById(`${UUID}_del`);
+		const ins = document.querySelector(`ins[style*="${UUID}"]`) || document.getElementById(`${UUID}_ins`);
+
+		if (del) {
+			del.setAttribute('id', `${UUID}_del`);
+
+			if (state === 'fixed') {
+				del.style.display = 'none';
+			} else {
+				del.style.display = 'inline';
+				del.onclick = () => {
+					this.scrollToTable(UUID);
+					this.setActiveUUID(UUID);
+				};
 			}
-		}, 100);
 
-		return () => clearTimeout(timer);
-	}, [html]);
+			if (state === 'skipped') {
+				del.style.backgroundColor = '#D9BF8C';
+			} else {
+				del.style.backgroundColor = '#E08A85';
+			}
 
-	return (
-		<div className={cn({
+			del.style.cursor = 'pointer';
+			del.style.padding = '0 5px';
+		}
+
+		if (ins) {
+			ins.setAttribute('id', `${UUID}_ins`);
+
+			if (state === 'error' || state === 'skipped') {
+				ins.style.display = 'none';
+			} else {
+				ins.style.display = 'inline';
+				ins.onclick = () => {
+					this.scrollToTable(UUID);
+					this.setActiveUUID(UUID);
+				};
+			}
+
+			ins.style.backgroundColor = '#94D1AD';
+			ins.style.cursor = 'pointer';
+			ins.style.padding = '0 5px';
+		}
+	};
+
+	renderHeader () {
+		return (
+			<thead>
+				<tr>
+					<td>Проверка документа</td>
+					<td>&nbsp;</td>
+					<td>Ошибок в документе: {this.getEntityErrorCount()}</td>
+				</tr>
+				<tr>
+					<td>Наименование</td>
+					<td>Рекомендуемое значение</td>
+					<td>Значение в документе</td>
+				</tr>
+			</thead>
+		);
+	}
+
+	renderBody () {
+		const {verify: {data: {entities}}} = this.props;
+		return (
+			<tbody id="tableScroll">
+				{entities.map(this.renderTableRow)}
+			</tbody>
+		);
+	}
+
+	renderFooter () {
+		return (
+			<tfoot>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td className={styles.controlFooter}>
+						<Button disabled={this.isDocumentGenerationDisabled()} onClick={this.handleCreateDocument}>Сформировать документ</Button>
+					</td>
+				</tr>
+			</tfoot>
+		);
+	}
+
+	renderTableRow = entity => {
+		const {UUID, state, title, valueAdvice, valueDoc} = entity;
+		const classNames = cn({
+			[styles.active]: this.state.activeUUID === UUID
+		});
+
+		return (
+			<tr className={classNames} id={UUID} key={UUID} onClick={this.handleRowClick(UUID)}>
+				<td>
+					{this.getEntityIcon(state)}<span className={styles.title}>{title}</span>
+				</td>
+				<td>
+					{valueAdvice}
+				</td>
+				<td className={styles.column}>
+					<div>{valueDoc}</div>{this.renderEntityControls(entity)}
+				</td>
+			</tr>
+		);
+	};
+
+	renderButton (type, entity) {
+		const {onClick, show, title} = this.getControlButtonProps(type, entity);
+
+		return show ? <button onClick={onClick}>{title}</button> : null;
+	}
+
+	renderEntityControls (entity) {
+		return (
+			<div className={styles.controlEntity}>
+				{this.renderButton('fixed', entity)}
+				{this.renderButton('skipped', entity)}
+				{this.renderButton('error', entity)}
+			</div>
+		);
+	}
+
+	render () {
+		const {switchView} = this.props;
+
+		const classNames = cn({
 			[styles.container]: true,
 			[styles.containerSwitch]: switchView
-		})}>
-			<table className={styles.table}>
-				<thead>
-					<tr>
-						<td>Проверка документа</td>
-						<td>&nbsp;</td>
-						<td>Ошибок в документе: {entities.filter(({state}) => state === 'error').length}</td>
-					</tr>
-					<tr>
-						<td>Наименование</td>
-						<td>Рекомендуемое значение</td>
-						<td>Значение в документе</td>
-					</tr>
-				</thead>
-				<tbody id='tableScroll'>
-					{entities.map(entity => {
-						return (
-							<tr className={cn({
-								[styles.active]: activeUUID === entity.UUID
-							})} id={entity.UUID} key={entity.UUID} onClick={() => { scrollToError(entity); }}>
-								<td>{getTypeIcon(entity)}<span className={styles.title}>{entity.title}</span></td>
-								<td>{entity.valueAdvice}</td>
-								<td>{entity.valueDoc}</td>
-							</tr>
-						);
-					})}
-				</tbody>
-				<tfoot>
-					<tr>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
-	);
-};
+		});
 
-export default DocumentVerifyTable;
+		return (
+			<div className={classNames}>
+				<table className={styles.table}>
+					{this.renderHeader()}
+					{this.renderBody()}
+					{this.renderFooter()}
+				</table>
+			</div>
+		);
+	}
+}

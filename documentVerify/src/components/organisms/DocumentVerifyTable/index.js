@@ -1,3 +1,3 @@
 // @flow
-import DocumentVerifyTable from './DocumentVerifyTable';
-export default DocumentVerifyTable;
+import DocumentVerifyTableOld from './DocumentVerifyTable';
+export default DocumentVerifyTableOld;

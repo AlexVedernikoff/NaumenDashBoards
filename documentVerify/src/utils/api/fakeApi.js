@@ -1,5 +1,4 @@
 import document from 'utils/mocks/document';
-import verifyResult from 'utils/mocks/verifyResult';
 
 export default class FakeApi {
 	async getFileUuid () {
@@ -12,14 +11,23 @@ export default class FakeApi {
 
 	async getVerifyResult (decisionUUID) {
 		await new Promise(resolve => setTimeout(() => resolve(), 500));
-
-		return verifyResult;
+		return document;
 	}
 
 	async getVerifyDocument (documentUUID) {
 		await new Promise(resolve => setTimeout(() => resolve(), 500));
 
 		return document.document;
+	}
+
+	async updateEntityStatus (UUID, status) {
+		await new Promise(resolve => setTimeout(() => resolve(), 500));
+		return true;
+	}
+
+	async generateDocument (documentUUID) {
+		await new Promise(resolve => setTimeout(() => resolve(), 500));
+		return true;
 	}
 
 	async getWsDocument (documentUUID) {

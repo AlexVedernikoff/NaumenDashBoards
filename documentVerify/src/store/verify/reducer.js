@@ -16,6 +16,11 @@ const reducer = (state: VerifyState = initialVerifyState, action: VerifyAction =
 				...state,
 				loading: false
 			};
+		case VERIFY_EVENTS.SET_UUID_DOCUMENT:
+			return {
+				...state,
+				uuidDocument: action.payload
+			};
 		case VERIFY_EVENTS.SET_VERIFY_DATA:
 			return {
 				...state,
