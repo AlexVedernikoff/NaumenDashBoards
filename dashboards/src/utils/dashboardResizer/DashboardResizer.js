@@ -82,10 +82,10 @@ export class DashboardResizer {
 			if (this.isMobile) {
 				document.body.style.overflow = 'auto';
 			} else if (document.body.style.height !== height) {
+				this.sizeWillBeChanged = window.height < parseInt(height);
+
 				document.body.style.height = height;
 				document.body.style.minHeight = minHeight;
-
-				this.sizeWillBeChanged = true;
 			}
 		}
 	};
