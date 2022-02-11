@@ -1749,17 +1749,20 @@ class DashboardSettingsService
     private Collection<IHasGroup> updateAttributeForGroup(Collection<IHasGroup> valuesWithGroup, DashboardSettingsClass dashboardSettings)
     {
         valuesWithGroup?.each { value ->
-            if(value?.group?.way == Way.CUSTOM)
+            if (value.hasProperty('group'))
             {
-                def groupKey = value?.group?.data
-                if(groupKey)
+                if(value?.group?.way == Way.CUSTOM)
                 {
-                    def group = dashboardSettings?.customGroups?.find { it?.id == groupKey }
-                    Boolean oldGroupType = AttributeType.LINK_TYPES.any { group?.type?.contains(it) } &&
-                                           !(value?.attribute?.attrChains()?.last()?.type in AttributeType.LINK_TYPES)
-                    if(oldGroupType)
+                    def groupKey = value?.group?.data
+                    if(groupKey)
                     {
-                        value?.attribute?.ref = null
+                        def group = dashboardSettings?.customGroups?.find { it?.id == groupKey }
+                        Boolean oldGroupType = AttributeType.LINK_TYPES.any { group?.type?.contains(it) } &&
+                                               !(value?.attribute?.attrChains()?.last()?.type in AttributeType.LINK_TYPES)
+                        if(oldGroupType)
+                        {
+                            value?.attribute?.ref = null
+                        }
                     }
                 }
             }
