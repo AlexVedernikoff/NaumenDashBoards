@@ -2562,7 +2562,7 @@ trait IHasFontSettings
     /**
      * Размер шрифта
      */
-    Integer fontSize = 16
+    String fontSize = 16
 }
 
 trait IHasTotalSettings
@@ -2998,7 +2998,7 @@ class IndicatorOrParameter
     /**
      * Размер шрифта на оси
      */
-    Integer fontSize = 12
+    String fontSize = 12
 }
 
 /**
