@@ -19,6 +19,7 @@ import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.ISearchParams
 import ru.naumen.core.server.script.api.IWebApi
 import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
+import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 import ru.naumen.core.server.script.spi.IScriptConditionsApi
 import ru.naumen.core.server.script.spi.IScriptUtils
 import ru.naumen.core.shared.IUUIDIdentifiable
@@ -1480,12 +1481,17 @@ class DashboardsService
     private Collection<DataSource> mappingDataSource(def fqns, Boolean fromAttribute = false)
     {
         return fqns.collect {
+            if (it instanceof Attribute)
+            {
+                it = metainfo.getMetaClass(it.metaClassFqn)
+            }
+            Collection<String> attributeGroupCodes = it.getAttributeGroupCodes()
             new DataSource(
                 classFqn: it.code,
                 title: it.title?.replace('Event for ', ''),
                 children: fromAttribute ? [] : mappingDataSource(it.children),
                 hasDynamic: fromAttribute ? false : checkForDynamicAttributes(it.code),
-                sourceFilterAttributeGroup: SOURCE_FILTER_ATTRIBUTE_GROUP in it.getAttributeGroupCodes() ? SOURCE_FILTER_ATTRIBUTE_GROUP : null
+                sourceFilterAttributeGroup: SOURCE_FILTER_ATTRIBUTE_GROUP in attributeGroupCodes ? SOURCE_FILTER_ATTRIBUTE_GROUP : null
             )
         }.sort { it.title }
     }
