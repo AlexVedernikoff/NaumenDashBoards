@@ -27,7 +27,9 @@ export default class FakeApi {
 
 	async generateDocument (documentUUID) {
 		await new Promise(resolve => setTimeout(() => resolve(), 500));
-		return true;
+		return {
+			result: false
+		};
 	}
 
 	async getWsDocument (documentUUID) {
