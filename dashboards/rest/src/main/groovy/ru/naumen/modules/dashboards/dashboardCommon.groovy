@@ -2403,6 +2403,10 @@ class PercentageRelativeAttr extends BaseAttribute
      * Код источника
      */
     String sourceCode = ''
+    /**
+     * Флаг на возможность включения агрегации AVG
+     */
+    Boolean ableForAvg = false
 
     /**
      * Полное копирование атрибута включая вложенные
