@@ -1,5 +1,5 @@
 // @flow
-import type {DTOValue, FilterFormDescriptorDTO} from 'api/types';
+import type {DTOValue, FilterFormContextDTO, FilterFormOptionsDTO} from 'api/types';
 import type {FrameAPI} from 'api/interfaces';
 
 export default class Frame implements FrameAPI {
@@ -44,7 +44,21 @@ export default class Frame implements FrameAPI {
 		return window.jsApi.restCallModule(module, method, ...params);
 	}
 
-	openFilterForm (descriptor: FilterFormDescriptorDTO, useAttrFilter?: boolean) {
-		return window.jsApi.commands.filterForm(descriptor, useAttrFilter);
+	openFilterForm (context: FilterFormContextDTO, options: FilterFormOptionsDTO) {
+		if (window.jsApi.forms.getFilterFormBuilder) {
+			let formBuilder = window.jsApi.forms.getFilterFormBuilder(context);
+
+			if (options.useRestriction) {
+				if (options.restriction) {
+					formBuilder = formBuilder.setAttributeTree({ 'restriction': options.restriction });
+				} else {
+					formBuilder = formBuilder.setAttributeTree({ 'useRestriction': true });
+				}
+			}
+
+			return formBuilder.openForm();
+		} else {
+			return window.jsApi.commands.filterForm(context, options.useRestriction);
+		}
 	}
 }
