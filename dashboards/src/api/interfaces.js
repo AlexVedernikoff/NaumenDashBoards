@@ -9,13 +9,14 @@ import type {
 	DashboardParams,
 	EmailUserDTO,
 	FilterFormAnswerDTO,
-	FilterFormDescriptorDTO,
+	FilterFormContextDTO,
+	FilterFormOptionsDTO,
 	SourceFilterDTO,
 	UserDTO
 } from './types';
 
 export interface FilterFormAPI {
-	openForm (descriptor: FilterFormDescriptorDTO, useAttrFilter?: boolean): Promise<FilterFormAnswerDTO>;
+	openForm (descriptor: FilterFormContextDTO, options: FilterFormOptionsDTO): Promise<FilterFormAnswerDTO>;
 }
 
 export interface FrameAPI {
@@ -27,7 +28,7 @@ export interface FrameAPI {
 	getCurrentUser (): UserDTO;
 	getSubjectUuid (): string;
 	getViewMode(): string;
-	openFilterForm (descriptor: FilterFormDescriptorDTO, useAttrFilter?: boolean): Promise<DTOValue>;
+	openFilterForm (descriptor: FilterFormContextDTO, options: FilterFormOptionsDTO): Promise<DTOValue>;
 	restCallAsJson(url: string, options: DTOValue): Promise<DTOValue>;
 	restCallModule(module: string, method: string, ...params: Array<DTOValue>): Promise<DTOValue>;
 }
@@ -98,6 +99,7 @@ export interface DashboardsAPI {
 	getDynamicAttributes(groupCode: DTOValue): Promise<DTOValue>;
 	getLinkedDataSources(payload: DTOValue): Promise<DTOValue>;
 	getMetaClasses(metaClassFqn: string): Promise<DTOValue>;
+	getNonMetadataAttributeCodes(classFqn: string, attrGroupCode: string | null): Promise<DTOValue>;
 	getStates(metaClassFqn: string): Promise<DTOValue>;
 	searchValue(request: DTOValue): Promise<DTOValue>;
 }

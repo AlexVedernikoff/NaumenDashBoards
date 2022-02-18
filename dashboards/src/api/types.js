@@ -21,8 +21,9 @@ export type FilterFormAnswerDTO = {
 	serializedContext: string
 };
 
-export type FilterFormDescriptorDTO = {
+export type FilterFormContextDTO = {
 	attrCodes?: Array<string>,
+	attrGroupCode?: string,
 	cases?: Array<string>,
 	clazz?: string
 };
@@ -77,4 +78,9 @@ export type ExecErrorResponse = {
 	responseText: string,
 	status: number,
 	statusText: string
+};
+
+export type FilterFormOptionsDTO = {
+	restriction: {[fqn: string]: string} | null,
+	useRestriction: boolean
 };

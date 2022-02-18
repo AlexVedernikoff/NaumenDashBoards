@@ -1,6 +1,6 @@
 // @flow
 import type {FilterFormAPI, FrameAPI} from 'api/interfaces';
-import type {FilterFormDescriptorDTO, Transport} from 'api/types';
+import type {FilterFormContextDTO, FilterFormOptionsDTO, Transport} from 'api/types';
 
 export default class FilterForm implements FilterFormAPI {
 	transport: Transport;
@@ -11,7 +11,7 @@ export default class FilterForm implements FilterFormAPI {
 		this.frame = frame;
 	}
 
-	openForm (descriptor: FilterFormDescriptorDTO, useAttrFilter?: boolean) {
-		return this.frame.openFilterForm(descriptor, useAttrFilter);
+	openForm (context: FilterFormContextDTO, options: FilterFormOptionsDTO) {
+		return this.frame.openFilterForm(context, options);
 	}
 }
