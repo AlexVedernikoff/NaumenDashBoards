@@ -1,6 +1,7 @@
 // @flow
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
+import PanelIcon from 'icons/PanelIcon';
 import PanelContent from 'components/molecules/PanelContent';
 import PanelHeader from 'components/molecules/PanelHeader';
 import type {Props} from './types';
@@ -9,7 +10,7 @@ import Scrollable from 'components/atoms/Scrollable';
 import styles from './Panel.less';
 
 export class Panel extends Component<Props> {
-	panelContainerRef: {current: null | HTMLDivElement};
+	panelContainerRef: { current: null | HTMLDivElement };
 
 	constructor (props: Props) {
 		super(props);
@@ -30,24 +31,43 @@ export class Panel extends Component<Props> {
 		this.panelContainerRef.current = element;
 	};
 
-	render () {
-		const {open} = this.props;
+	renderPanelToggle = () => {
+		const {panelOpen} = this.props;
 
-		if (open) {
+		return panelOpen ? (
+			<div className={styles.panelContainer}>
+				<PanelIcon/>
+			</div>
+		) : null;
+	};
+
+	renderPanelHeader = () => {
+		const {panelOpen} = this.props;
+
+		return panelOpen ? <PanelHeader/> : null;
+	};
+
+	renderPanelContent = () => {
+		const {panelOpen} = this.props;
+
+		return panelOpen ? (
+			<div className={styles.panelContainer}>
+				<Scrollable scrollbarColors="grey" attachRef={this.attachRef}>
+					<PanelContent/>
+				</Scrollable>
+			</div>
+		) : null;
+	};
+
+	render () {
+		const {panelOpen, togglePanel} = this.props;
+
+		if (panelOpen) {
 			return (
 				<div className={styles.panelWrap}>
-					<div >
-						<div className={styles.panelContainer}>
-							<PanelHeader />
-						</div>
-					</div>
-					<div className={styles.panelContentWrap}>
-						<div className={styles.panelContentContainer} >
-							<Scrollable scrollbarColors='grey' attachRef={this.attachRef}>
-								<PanelContent />
-							</Scrollable>
-						</div>
-					</div>
+					{this.renderPanelHeader()}
+					{this.renderPanelContent()}
+					{this.renderPanelToggle()}
 				</div>
 			);
 		}

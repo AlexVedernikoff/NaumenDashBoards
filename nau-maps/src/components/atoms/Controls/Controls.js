@@ -51,7 +51,7 @@ export class Controls extends Component<Props, State> {
 				onClick={this.openPanel}
 				onMouseEnter={this.togglePanelHover}
 				onMouseLeave={this.togglePanelHover}
-				title="Панель"
+				title="Выбор карты"
 			>
 				<PanelIcon color={panelIconColor} />
 			</div>
