@@ -6,7 +6,7 @@ import isMobile from 'ismobilejs';
 import type {Store} from 'store/types';
 
 export class DashboardResizer {
-	initHeight: number = window.innerHeight;
+	initHeight: number = 800;
 	sizeWillBeChanged = false;
 	store = null;
 	isMobile = false;
@@ -14,6 +14,7 @@ export class DashboardResizer {
 	constructor (store: Store) {
 		this.store = store;
 		this.isMobile = isMobile().any;
+		this.initHeight = window.innerHeight;
 	}
 
 	getContentHeight (): number | null {
@@ -78,14 +79,16 @@ export class DashboardResizer {
 	};
 
 	setHeight = (height: string, minHeight: string) => {
-		if (document.body) {
+		const body = document.body;
+
+		if (body) {
 			if (this.isMobile) {
-				document.body.style.overflow = 'auto';
-			} else if (document.body.style.height !== height) {
+				body.style.overflow = 'auto';
+			} else if (body.style.height !== height) {
 				this.sizeWillBeChanged = window.height < parseInt(height);
 
-				document.body.style.height = height;
-				document.body.style.minHeight = minHeight;
+				body.style.height = height;
+				body.style.minHeight = minHeight;
 			}
 		}
 	};
