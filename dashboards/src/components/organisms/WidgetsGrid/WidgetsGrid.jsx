@@ -115,7 +115,7 @@ export class WidgetsGrid extends Component<Props, State> {
 
 	handleDragStop = () => this.toggleGrid(false);
 
-	handleFocus = (element: HTMLDivElement) => element.scrollIntoView();
+	handleFocus = (element: HTMLDivElement) => setTimeout(() => element.scrollIntoView(), 300); // пауза на отрисовку - убираем тормоза браузера
 
 	handleItemClick = e => e.stopPropagation();
 

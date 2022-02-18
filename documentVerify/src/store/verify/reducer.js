@@ -31,6 +31,11 @@ const reducer = (state: VerifyState = initialVerifyState, action: VerifyAction =
 				...state,
 				error: true
 			};
+		case VERIFY_EVENTS.SET_NOTIFICATION_SHOW:
+			return {
+				...state,
+				notification: action.payload
+			};
 		default:
 			return state;
 	}

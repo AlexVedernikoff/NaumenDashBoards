@@ -6,10 +6,15 @@ export const initialVerifyState: VerifyState = {
 	data: {
 		document: '',
 		entities: [],
-		message: ''
+		message: '',
+		object: ''
 	},
 	error: false,
-	loading: false
+	loading: false,
+	notification: {
+		isSuccess: true,
+		show: false
+	}
 };
 
 export const defaultVerifyAction: VerifyAction = {

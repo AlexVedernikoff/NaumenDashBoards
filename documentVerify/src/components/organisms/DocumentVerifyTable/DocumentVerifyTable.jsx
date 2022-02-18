@@ -12,7 +12,8 @@ export default class DocumentVerifyTable extends Component<Props> {
 	constructor (props) {
 		super(props);
 		this.state = {
-			activeUUID: null
+			activeUUID: null,
+			isDocGenerationDisabled: true
 		};
 
 		const {verify: {data: {entities, html}}} = this.props;
@@ -66,6 +67,7 @@ export default class DocumentVerifyTable extends Component<Props> {
 	}
 
 	handleChangeEntity = (state, {UUID}) => {
+		this.setState({isDocGenerationDisabled: false});
 		const {sendEntityStatus, setVerifyData, verify: {data: {entities, html}}} = this.props;
 
 		const skipEntity = entities.map(entity => {
@@ -79,12 +81,6 @@ export default class DocumentVerifyTable extends Component<Props> {
 		sendEntityStatus(UUID, state);
 		setVerifyData({entities: skipEntity, html});
 	};
-
-	isDocumentGenerationDisabled () {
-		const {verify: {data: {entities}}} = this.props;
-
-		return entities.find(entity => entity.state === 'error');
-	}
 
 	getListControlShow ({state}) {
 		return {
@@ -143,6 +139,19 @@ export default class DocumentVerifyTable extends Component<Props> {
 	handleCreateDocument = async () => {
 		const {sendGenerateDocument} = this.props;
 
+		this.setState({isDocGenerationDisabled: true});
+		await sendGenerateDocument();
+
+		const {verify: {notification: {isSuccess, show}}} = this.props;
+
+		if (!isSuccess && show) {
+			this.setState({isDocGenerationDisabled: false});
+		}
+	};
+
+	handleCreateDocument = async () => {
+		const {sendGenerateDocument} = this.props;
+
 		await sendGenerateDocument();
 	};
 
@@ -165,6 +174,11 @@ export default class DocumentVerifyTable extends Component<Props> {
 					this.scrollToTable(UUID);
 					this.setActiveUUID(UUID);
 				};
+				const [span] = del.children;
+
+				if (span) {
+					span.style.backgroundColor = 'initial';
+				}
 			}
 
 			if (state === 'skipped') {
@@ -188,6 +202,12 @@ export default class DocumentVerifyTable extends Component<Props> {
 					this.scrollToTable(UUID);
 					this.setActiveUUID(UUID);
 				};
+
+				const [span] = ins.children;
+
+				if (span) {
+					span.style.backgroundColor = 'initial';
+				}
 			}
 
 			ins.style.backgroundColor = '#94D1AD';
@@ -213,15 +233,6 @@ export default class DocumentVerifyTable extends Component<Props> {
 		);
 	}
 
-	renderBody () {
-		const {verify: {data: {entities}}} = this.props;
-		return (
-			<tbody id="tableScroll">
-				{entities.map(this.renderTableRow)}
-			</tbody>
-		);
-	}
-
 	renderFooter () {
 		return (
 			<tfoot>
@@ -229,10 +240,19 @@ export default class DocumentVerifyTable extends Component<Props> {
 					<td>&nbsp;</td>
 					<td>&nbsp;</td>
 					<td className={styles.controlFooter}>
-						<Button disabled={this.isDocumentGenerationDisabled()} onClick={this.handleCreateDocument}>Сформировать документ</Button>
+						<Button disabled={this.state.isDocGenerationDisabled} onClick={this.handleCreateDocument}>Сформировать документ</Button>
 					</td>
 				</tr>
 			</tfoot>
+		);
+	}
+
+	renderBody () {
+		const {verify: {data: {entities}}} = this.props;
+		return (
+			<tbody id="tableScroll">
+				{entities.map(this.renderTableRow)}
+			</tbody>
 		);
 	}
 

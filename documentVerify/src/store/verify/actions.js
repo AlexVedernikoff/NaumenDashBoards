@@ -47,8 +47,9 @@ const sendEntityStatus = (UUID, status): ThunkAction => async (dispatch: Dispatc
 const sendGenerateDocument = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		const {verify: {uuidDocument}} = getState();
+		const {result} = await generateDocument(uuidDocument);
 
-		await generateDocument(uuidDocument);
+		dispatch(setNotificationData(true, result));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -97,9 +98,20 @@ const setUuidDocument = (payload: string) => ({
 	type: VERIFY_EVENTS.SET_UUID_DOCUMENT
 });
 
+/**
+ * Установка данных для сообщения о генерации документа
+ * @param {boolean} show - Показать сообщение
+ * @param {boolean} isSuccess - Если ошибка
+ */
+const setNotificationData = (show: boolean, isSuccess: boolean = false) => ({
+	payload: {isSuccess, show},
+	type: VERIFY_EVENTS.SET_NOTIFICATION_SHOW
+});
+
 export {
 	getDataVerify,
 	setVerifyData,
 	sendGenerateDocument,
-	sendEntityStatus
+	sendEntityStatus,
+	setNotificationData
 };

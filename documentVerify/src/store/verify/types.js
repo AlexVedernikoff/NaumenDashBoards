@@ -8,8 +8,10 @@ export type VerifyEntities = {
 };
 
 export type VerifyData = {
+	document: string,
 	entities: VerifyEntities[],
 	html: string,
+	object: string,
 	message: string,
 	uuidDocument: string,
 };
@@ -23,4 +25,6 @@ export type VerifyState = {
 	data: VerifyData,
 	error: boolean,
 	loading: boolean,
+	notification: boolean,
+	uuidDocument: string,
 };
