@@ -1,11 +1,10 @@
 // @flow
 import {defaultMetaClassesAction, initialMetaClassesState} from './init';
 import type {MetaClassesAction, MetaClassesState} from './types';
-import {META_CLASSES_EVENTS} from './constants';
 
 const reducer = (state: MetaClassesState = initialMetaClassesState, action: MetaClassesAction = defaultMetaClassesAction): MetaClassesState => {
 	switch (action.type) {
-		case META_CLASSES_EVENTS.RECEIVE_META_CLASS_DATA:
+		case 'RECEIVE_META_CLASS_DATA':
 			return {
 				...state,
 				[action.payload.metaClassFqn]: {
@@ -14,7 +13,7 @@ const reducer = (state: MetaClassesState = initialMetaClassesState, action: Meta
 					loading: false
 				}
 			};
-		case META_CLASSES_EVENTS.RECORD_META_CLASS_DATA_ERROR:
+		case 'RECORD_META_CLASS_DATA_ERROR':
 			return {
 				...state,
 				[action.payload]: {
@@ -23,7 +22,7 @@ const reducer = (state: MetaClassesState = initialMetaClassesState, action: Meta
 					loading: false
 				}
 			};
-		case META_CLASSES_EVENTS.REQUEST_META_CLASS_DATA:
+		case 'REQUEST_META_CLASS_DATA':
 			return {
 				...state,
 				[action.payload]: {

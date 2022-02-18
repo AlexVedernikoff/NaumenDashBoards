@@ -10,6 +10,7 @@ import React, {createRef, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
 import t from 'localization';
+import withFilterForm from 'containers/FilterForm';
 
 export class FilterItem extends PureComponent<Props, State> {
 	state = {
@@ -27,16 +28,13 @@ export class FilterItem extends PureComponent<Props, State> {
 	}
 
 	fetchOptions = () => {
-		const {dataSets, fetchAttributes, value} = this.props;
+		const {dataSets, fetchFilterAttributes, value} = this.props;
 		const {dataSetIndex} = value;
 
 		if (typeof dataSetIndex === 'number') {
 			const selectedDataSet = dataSets[dataSetIndex];
-			const {attributes = [], attributesLoading} = selectedDataSet;
 
-			if (!attributesLoading && attributes.length === 0) {
-				fetchAttributes(dataSetIndex);
-			}
+			fetchFilterAttributes(selectedDataSet.source);
 		}
 	};
 
@@ -73,42 +71,36 @@ export class FilterItem extends PureComponent<Props, State> {
 	});
 
 	renderAttributeSelector = (): React$Node => {
-		const {dataSets, idx, value} = this.props;
+		const {fetchingFilterAttributes, filterAttributes, idx, value} = this.props;
 
 		if (value) {
-			const {dataSetIndex} = value;
-
-			if (typeof dataSetIndex === 'number') {
-				const selectedDataSet = dataSets[dataSetIndex];
-				const {attributes = [], attributesLoading} = selectedDataSet;
-				const attribute = value.attributes && value.attributes.length > 0 ? value.attributes[0] : null;
-				const filterAttributes = attributes.filter(({code, metaClassFqn}) =>
-					code !== 'UUID'
+			const attributes = (filterAttributes ?? []).filter(({code, metaClassFqn}) =>
+				code !== 'UUID'
 					&& !(metaClassFqn === 'employee' && code === 'password')
 					&& !(metaClassFqn === 'employee' && code === 'immediateSupervisor')
-				);
+			);
+			const attribute = value.attributes && value.attributes.length > 0 ? value.attributes[0] : null;
 
-				return (
-					<FormField
-						className={styles.attributeFormField}
-						label={t('FiltersOnWidget::FilterItem::Attribute')}
-						path={`filtersOnWidget[${idx}].attributes`}
-						small
-					>
-						<Select
-							fetchOptions={this.fetchOptions}
-							getOptionLabel={(attribute: Attribute) => attribute.title}
-							getOptionValue={(attribute: Attribute) => attribute}
-							isSearching={true}
-							loading={attributesLoading}
-							onSelect={this.handleChangeAttribute}
-							options={filterAttributes}
-							placeholder={t('FiltersOnWidget::FilterItem::AttributePlaceholder')}
-							value={attribute}
-						/>
-					</FormField>
-				);
-			}
+			return (
+				<FormField
+					className={styles.attributeFormField}
+					label={t('FiltersOnWidget::FilterItem::Attribute')}
+					path={`filtersOnWidget[${idx}].attributes`}
+					small
+				>
+					<Select
+						fetchOptions={this.fetchOptions}
+						getOptionLabel={(attribute: Attribute) => attribute.title}
+						getOptionValue={(attribute: Attribute) => attribute}
+						isSearching={true}
+						loading={fetchingFilterAttributes}
+						onSelect={this.handleChangeAttribute}
+						options={attributes}
+						placeholder={t('FiltersOnWidget::FilterItem::AttributePlaceholder')}
+						value={attribute}
+					/>
+				</FormField>
+			);
 		}
 
 		return null;
@@ -185,4 +177,4 @@ export class FilterItem extends PureComponent<Props, State> {
 	}
 }
 
-export default FilterItem;
+export default withFilterForm(FilterItem);

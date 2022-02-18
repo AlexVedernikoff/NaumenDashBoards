@@ -2,12 +2,11 @@
 import {createObjectData, receiveObjectData, recordObjectError, requestObjectData} from './helpers';
 import {defaultObjectsAction, initialObjectsState} from './init';
 import type {ObjectsAction, ObjectsState} from './types';
-import {OBJECTS_EVENTS} from './constants';
 import {omit} from 'helpers';
 
 const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsAction = defaultObjectsAction): ObjectsState => {
 	switch (action.type) {
-		case OBJECTS_EVENTS.CHANGE_SEARCH_VALUE:
+		case 'CHANGE_SEARCH_VALUE':
 			return {
 				...state,
 				found: {
@@ -18,7 +17,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 					}
 				}
 			};
-		case OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED:
+		case 'FOUND_OBJECTS_FULFILLED':
 			return {
 				...state,
 				found: {
@@ -31,7 +30,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 					}
 				}
 			};
-		case OBJECTS_EVENTS.FOUND_OBJECTS_PENDING:
+		case 'FOUND_OBJECTS_PENDING':
 			return {
 				...state,
 				found: {
@@ -42,7 +41,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 					}
 				}
 			};
-		case OBJECTS_EVENTS.FOUND_OBJECT_REJECTED:
+		case 'FOUND_OBJECT_REJECTED':
 			return {
 				...state,
 				found: {
@@ -54,7 +53,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 					}
 				}
 			};
-		case OBJECTS_EVENTS.OBJECT_DATA_FULFILLED:
+		case 'OBJECT_DATA_FULFILLED':
 			return {
 				...state,
 				[action.payload.type]: {
@@ -62,7 +61,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 					[action.payload.id]: receiveObjectData(state[action.payload.type], action.payload)
 				}
 			};
-		case OBJECTS_EVENTS.OBJECT_DATA_PENDING:
+		case 'OBJECT_DATA_PENDING':
 			return {
 				...state,
 				[action.payload.type]: {
@@ -70,7 +69,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 					[action.payload.id]: requestObjectData(state[action.payload.type], action.payload)
 				}
 			};
-		case OBJECTS_EVENTS.OBJECT_DATA_REJECTED:
+		case 'OBJECT_DATA_REJECTED':
 			return {
 				...state,
 				[action.payload.type]: {
@@ -78,7 +77,7 @@ const reducer = (state: ObjectsState = initialObjectsState, action: ObjectsActio
 					[action.payload.id]: recordObjectError(state[action.payload.type], action.payload)
 				}
 			};
-		case OBJECTS_EVENTS.FOUND_OBJECTS_CLEAR_SEARCH:
+		case 'FOUND_OBJECTS_CLEAR_SEARCH':
 			return {
 				...state,
 				found: omit(state.found, action.payload)

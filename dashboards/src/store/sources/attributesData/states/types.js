@@ -1,6 +1,4 @@
 // @flow
-import {STATES_EVENTS} from './constants';
-
 export type Data = {
 	title: string,
 	uuid: string
@@ -21,24 +19,13 @@ export type ReceivePayload = {
 	metaClassFqn: string
 };
 
-type ReceiveStateData = {
-	payload: ReceivePayload,
-	type: typeof STATES_EVENTS.RECEIVE_META_CLASS_STATES
-};
+type ReceiveStateData = {payload: ReceivePayload, type: 'RECEIVE_META_CLASS_STATES'};
 
-type RecordStateDataError = {
-	payload: string,
-	type: typeof STATES_EVENTS.RECORD_META_CLASS_STATES_ERROR
-};
+type RecordStateDataError = {payload: string, type: 'RECORD_META_CLASS_STATES_ERROR'};
 
-type RequestStateData = {
-	payload: string,
-	type: typeof STATES_EVENTS.REQUEST_META_CLASS_STATES
-};
+type RequestStateData = {payload: string, type: 'REQUEST_META_CLASS_STATES'};
 
-type UnknownStatesAction = {
-	type: typeof STATES_EVENTS.UNKNOWN_STATES_ACTION
-};
+type UnknownStatesAction = { type: 'UNKNOWN_STATES_ACTION'};
 
 export type StatesAction =
 	| ReceiveStateData

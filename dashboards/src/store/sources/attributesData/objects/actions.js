@@ -5,7 +5,7 @@ import type {Attribute} from 'store/sources/attributes/types';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import type {FetchParams, RawObjectData} from './types';
 import {getObjectKey} from './helpers';
-import {LIMIT, OBJECTS_DATA_TYPES, OBJECTS_EVENTS} from './constants';
+import {LIMIT, OBJECTS_DATA_TYPES} from './constants';
 import type {Source} from 'store/widgets/data/types';
 
 /**
@@ -44,7 +44,7 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 				id,
 				searchValue
 			},
-			type: OBJECTS_EVENTS.FOUND_OBJECTS_PENDING
+			type: 'FOUND_OBJECTS_PENDING'
 		});
 
 		try {
@@ -72,7 +72,7 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 						id,
 						items
 					},
-					type: OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED
+					type: 'FOUND_OBJECTS_FULFILLED'
 				});
 			} else if (foundData && foundData.searchValue) {
 				dispatch({
@@ -80,13 +80,13 @@ const searchObjects = (source: Source, attribute: Attribute, searchValue: string
 						id,
 						searchValue
 					},
-					type: OBJECTS_EVENTS.CHANGE_SEARCH_VALUE
+					type: 'CHANGE_SEARCH_VALUE'
 				});
 			}
 		} catch (error) {
 			dispatch({
 				payload: id,
-				type: OBJECTS_EVENTS.FOUND_OBJECT_REJECTED
+				type: 'FOUND_OBJECT_REJECTED'
 			});
 		}
 	};
@@ -96,7 +96,7 @@ const clearSearchObjects = (source: Source, attribute: Attribute): ThunkAction =
 
 	dispatch({
 		payload: id,
-		type: OBJECTS_EVENTS.FOUND_OBJECTS_CLEAR_SEARCH
+		type: 'FOUND_OBJECTS_CLEAR_SEARCH'
 	});
 };
 
@@ -123,7 +123,7 @@ const fetchObjectData = (params: FetchParams): ThunkAction => async (dispatch: D
 
 	dispatch({
 		payload,
-		type: OBJECTS_EVENTS.OBJECT_DATA_PENDING
+		type: 'OBJECT_DATA_PENDING'
 	});
 
 	try {
@@ -140,12 +140,12 @@ const fetchObjectData = (params: FetchParams): ThunkAction => async (dispatch: D
 
 		dispatch({
 			payload: {...payload, data, uploaded},
-			type: OBJECTS_EVENTS.OBJECT_DATA_FULFILLED
+			type: 'OBJECT_DATA_FULFILLED'
 		});
 	} catch (error) {
 		dispatch({
 			payload,
-			type: OBJECTS_EVENTS.OBJECT_DATA_REJECTED
+			type: 'OBJECT_DATA_REJECTED'
 		});
 	}
 };

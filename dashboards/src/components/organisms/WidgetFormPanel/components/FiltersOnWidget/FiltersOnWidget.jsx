@@ -79,22 +79,18 @@ export class FiltersOnWidget extends PureComponent<Props> {
 		return null;
 	};
 
-	renderFilterItem = (filterItemIdx: number, value: CustomFilterValue, availableDataSets: CustomFilterDataSet[]): React$Node => {
-		const {fetchAttributes} = this.props;
-		return (
-			<FilterItem
-				dataSets={availableDataSets}
-				fetchAttributes={fetchAttributes}
-				idx={filterItemIdx}
-				key={filterItemIdx}
-				onChangeAttribute={this.handleChangeAttribute(filterItemIdx)}
-				onChangeDataSet={this.handleChangeDataSet(filterItemIdx)}
-				onChangeLabel={this.handleChangeLabel(filterItemIdx)}
-				onDelete={this.handleDelete(filterItemIdx)}
-				value={value}
-			/>
-		);
-	};
+	renderFilterItem = (filterItemIdx: number, value: CustomFilterValue, availableDataSets: CustomFilterDataSet[]): React$Node => (
+		<FilterItem
+			dataSets={availableDataSets}
+			idx={filterItemIdx}
+			key={filterItemIdx}
+			onChangeAttribute={this.handleChangeAttribute(filterItemIdx)}
+			onChangeDataSet={this.handleChangeDataSet(filterItemIdx)}
+			onChangeLabel={this.handleChangeLabel(filterItemIdx)}
+			onDelete={this.handleDelete(filterItemIdx)}
+			value={value}
+		/>
+	);
 
 	renderFilterItems = (): React$Node => {
 		const {dataSets, filters = []} = this.props;

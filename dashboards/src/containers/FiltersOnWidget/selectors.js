@@ -9,9 +9,10 @@ import type {
 	CustomFilterValue,
 	DataSetTypes
 } from './types';
-import type {CustomFilter} from 'store/widgets/data/types';
-import {fetchAttributes} from 'store/sources/attributes/actions';
+import type {CustomFilter, SourceData} from 'store/widgets/data/types';
+import {fetchAttributesForFilters} from 'store/sources/actions';
 import {getSelectedWidget} from 'store/widgets/data/selectors';
+import {getSourceAttributeGroup} from 'store/sources/selectors';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
@@ -57,27 +58,39 @@ const generateCustomFiltersValues = (data: DataSetTypes): Array<CustomFilterValu
  * Сформировать справочные данные для отображения источника
  * @param {DataSetTypes} data - источник
  * @param {AttributesState} attributes - справочник атрибутов для источников из стора
+ * @param {Function} attrGroupCodeGenerator - генератор для attrGroupCode
  * @returns {Array<CustomFilterDataSet>}
  */
-const generateCustomFilterItems = (data: DataSetTypes, attributes: AttributesState): Array<CustomFilterDataSet> =>
-	data.map(({dataKey, source}, dataSetIndex) => {
+const generateCustomFilterItems = (
+	data: DataSetTypes,
+	attributes: AttributesState,
+	attrGroupCodeGenerator: (SourceData) => string | null
+): Array<CustomFilterDataSet> => {
+	const mainDataSet = data.find(ds => !ds.sourceForCompute);
+	const parentClassFqn = mainDataSet?.source.value?.value ?? null;
+
+	return data.map(({dataKey, source}, dataSetIndex) => {
 		const classFqn = source.value?.value;
 		const {loading: attributesLoading = false, options = []} = attributes?.[classFqn] || {};
 
 		return {
+			attrGroupCode: attrGroupCodeGenerator(source),
 			attributes: options,
 			attributesLoading,
 			dataSetIndex,
+			parentClassFqn,
 			source
 		};
 	});
+};
 
 export const props = (state: AppState, props: ContainerProps): ConnectedProps => {
 	const {values: {data}} = props;
 	const {attributes} = state.sources;
 	const widget = getSelectedWidget(state);
+	const attrGroupCodeGenerator = source => getSourceAttributeGroup(state, source);
 	const initialCustomFiltersValues = generateCustomFiltersValues(data);
-	let dataSets = generateCustomFilterItems(data, attributes);
+	let dataSets = generateCustomFilterItems(data, attributes, attrGroupCodeGenerator);
 
 	if (widget.type === WIDGET_TYPES.TABLE && dataSets.length > 0) {
 		const [firstDataSet] = dataSets;
@@ -92,5 +105,5 @@ export const props = (state: AppState, props: ContainerProps): ConnectedProps =>
 };
 
 export const functions: ConnectedFunctions = {
-	fetchAttributes
+	fetchAttributesForFilters
 };

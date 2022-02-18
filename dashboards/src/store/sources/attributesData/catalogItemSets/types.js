@@ -1,5 +1,4 @@
 // @flow
-import {CATALOG_ITEM_SETS_EVENTS} from './constants';
 import type {SelectData} from 'store/customGroups/types';
 import type {TreeNode} from 'components/types';
 
@@ -34,24 +33,13 @@ export type ReceivePayload = {
 	property: string
 };
 
-type ReceiveCatalogItemSetData = {
-	payload: ReceivePayload,
-	type: typeof CATALOG_ITEM_SETS_EVENTS.RECEIVE_CATALOG_ITEM_SET_DATA
-};
+type ReceiveCatalogItemSetData = {payload: ReceivePayload, type: 'RECEIVE_CATALOG_ITEM_SET_DATA'};
 
-type RecordCatalogItemSetDataError = {
-	payload: string,
-	type: typeof CATALOG_ITEM_SETS_EVENTS.RECORD_CATALOG_ITEM_SET_DATA_ERROR
-};
+type RecordCatalogItemSetDataError = {payload: string, type: 'RECORD_CATALOG_ITEM_SET_DATA_ERROR'};
 
-type RequestCatalogItemSetData = {
-	payload: string,
-	type: typeof CATALOG_ITEM_SETS_EVENTS.REQUEST_CATALOG_ITEM_SET_DATA
-};
+type RequestCatalogItemSetData = {payload: string, type: 'REQUEST_CATALOG_ITEM_SET_DATA'};
 
-type UnknownCatalogItemSetsAction = {
-	type: typeof CATALOG_ITEM_SETS_EVENTS.UNKNOWN_CATALOG_ITEM_SETS_ACTION
-};
+type UnknownCatalogItemSetsAction = { type: 'UNKNOWN_CATALOG_ITEM_SETS_ACTION'};
 
 export type CatalogItemSetsAction =
 	| ReceiveCatalogItemSetData

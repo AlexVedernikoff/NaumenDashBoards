@@ -73,11 +73,11 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async 
 	const {context, dashboard} = getState();
 	const {subjectUuid} = context;
 	const {id, type} = widget;
-	const {groupCode = ''} = parseAttrSetConditions(payload) ?? {};
+	const {attrGroupCode = ''} = parseAttrSetConditions(payload) ?? {};
 
 	dispatch(requestLink(id));
 	try {
-		const {link} = await api.instance.drillDown.getLink(payload, subjectUuid, type, dashboard.settings.code, groupCode);
+		const {link} = await api.instance.drillDown.getLink(payload, subjectUuid, type, dashboard.settings.code, attrGroupCode);
 
 		window.open(getRelativeLink(link));
 		dispatch(receiveLink(id));
