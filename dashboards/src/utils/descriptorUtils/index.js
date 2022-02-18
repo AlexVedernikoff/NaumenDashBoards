@@ -96,15 +96,13 @@ const parseCasesAndGroupCode = (descriptor: string): ?AttrSetConditions => {
 		const descriptorObject = JSON.parse(descriptor);
 		const {attrGroupCode, cases} = descriptorObject;
 
-		result = {cases, groupCode: attrGroupCode};
+		result = {attrGroupCode, cases};
 	} catch (e) {
 		console.log('error parsing descriptor');
 	}
 
 	return result;
 };
-
-
 
 export {
 	descriptorContainsFilter,

@@ -1,6 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import Checkbox from 'components/atoms/Checkbox';
+import cn from 'classnames';
 import type {ContainerProps} from 'components/molecules/TreeSelect/types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER} from 'store/widgetForms/constants';
 import {descriptorContainsFilter} from 'utils/descriptorUtils';
@@ -324,15 +325,19 @@ export class SourceFieldset extends Component<Props, State> {
 	};
 
 	renderFilterButton = (): React$Node => {
-		const {usesFilter, value} = this.props;
+		const {openingFilterForm, usesFilter, value} = this.props;
 		const {FILLED_FILTER, FILTER} = ICON_NAMES;
 		const {descriptor, filterId} = value.source;
 		const active = !!filterId || descriptorContainsFilter(descriptor);
 		const iconName = active ? FILLED_FILTER : FILTER;
+		const className = cn({
+			[styles.filterButtonIconOpening]: openingFilterForm,
+			[styles.filterButton]: true
+		});
 
 		if (usesFilter) {
 			return (
-				<div className={styles.filterButton} onClick={this.callFilterModal}>
+				<div className={className} onClick={this.callFilterModal}>
 					<Icon name={iconName} />
 				</div>
 			);

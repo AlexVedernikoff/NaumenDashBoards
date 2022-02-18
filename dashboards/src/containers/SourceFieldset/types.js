@@ -15,6 +15,7 @@ import type {
 } from 'store/sources/sourcesFilters/types';
 import type {ClearDynamicAttributeGroups} from 'store/sources/dynamicGroups/types';
 import type {DataSourceMap} from 'store/sources/data/types';
+import type {InjectedProps as OpenFormProps} from 'containers/FilterForm/types';
 import type {OnLoadCallback} from 'store/sources/types';
 import type {Props as ComponentProps} from 'WidgetFormPanel/components/SourceFieldset/types';
 
@@ -61,4 +62,4 @@ export type DispatchConnectedFunctions = {
 	onUpdateSourcesFilter: DispatchUpdateSourcesFilter
 };
 
-export type Props = ConnectedProps & DispatchConnectedFunctions & ComponentProps;
+export type Props = ConnectedProps & DispatchConnectedFunctions & OpenFormProps & ComponentProps;

@@ -92,7 +92,8 @@ export class Select extends Component<Props, State> {
 		this.setState({foundOptions: this.getFoundOptions(searchValue), searchValue});
 	};
 
-	handleClick = () => {
+	handleClick = e => {
+		e && e.stopPropagation();
 		!this.state.showMenu && this.fetchOptions();
 		this.setState({showMenu: !this.state.showMenu});
 	};

@@ -7,17 +7,18 @@ export type RawDataSource = {
 	classFqn: string,
 	descriptor?: string,
 	hasDynamic: boolean,
-	sourceFilterAttributeGroup: string | null,
+	sourceFilterAttributeGroup: string,
 	title: string
 };
 
 type Source = {
 	hasDynamic: boolean,
 	label: string,
+	sourceFilterAttributeGroup: string | null,
 	value: string,
 };
 
-export type DataSource = TreeNode<Source>;
+export type DataSource = TreeNode<Source, RawDataSource>;
 
 export type DataSourceMap = {
 	[key: string]: DataSource

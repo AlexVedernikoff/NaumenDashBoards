@@ -2,7 +2,6 @@
 import api from 'api';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {ReceivePayload} from './types';
-import {STATES_EVENTS} from './constants';
 
 /**
  * Получает статусы, найденные по мета-классу атрибута
@@ -21,20 +20,11 @@ const fetchMetaClassStates = (metaClassFqn: string): ThunkAction => async (dispa
 	}
 };
 
-const requestMetaClassStates = (payload: string) => ({
-	payload,
-	type: STATES_EVENTS.REQUEST_META_CLASS_STATES
-});
+const requestMetaClassStates = (payload: string) => ({payload, type: 'REQUEST_META_CLASS_STATES'});
 
-const recordMetaClassStatesError = (payload: string) => ({
-	payload,
-	type: STATES_EVENTS.RECORD_META_CLASS_STATES_ERROR
-});
+const recordMetaClassStatesError = (payload: string) => ({payload, type: 'RECORD_META_CLASS_STATES_ERROR'});
 
-const receiveMetaClassStates = (payload: ReceivePayload) => ({
-	payload,
-	type: STATES_EVENTS.RECEIVE_META_CLASS_STATES
-});
+const receiveMetaClassStates = (payload: ReceivePayload) => ({payload, type: 'RECEIVE_META_CLASS_STATES'});
 
 export {
 	fetchMetaClassStates

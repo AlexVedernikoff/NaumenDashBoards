@@ -115,23 +115,6 @@ const removeLocalStorageValue = (storageKey: string, key: string) => {
  */
 const getDescriptorCases = (classFqn: string) => [classFqn, ...getSourceTypes(classFqn)];
 
-/**
- * Возвращает массив для окна фильтрации, содержащий код источника и все его подтипы
- * @param {string} classFqn - код источника
- * @returns {Array<string>}
- */
-const getSourceFilterAttributeGroup = (classFqn: string): string | null => {
-	const {map: sources} = store.getState().sources.data;
-	const source = sources[classFqn];
-	let result = null;
-
-	if (source) {
-		result = source.value.sourceFilterAttributeGroup;
-	}
-
-	return result;
-};
-
 const isLayoutsChanged = () => {
 	const state: AppState = store.getState();
 	return state.dashboard.layouts.changed;
@@ -143,7 +126,6 @@ export {
 	getParams,
 	getSourceTypes,
 	isLayoutsChanged,
-	getSourceFilterAttributeGroup,
 	getUserLocalStorageId,
 	removeLocalStorageValue,
 	setLocalStorageValue

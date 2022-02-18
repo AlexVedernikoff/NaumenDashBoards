@@ -1,15 +1,13 @@
 // @flow
-import api from 'api';
 import type {BreakdownItem, Parameter} from 'store/widgetForms/types';
+import {compose} from 'redux';
 import {connect} from 'react-redux';
-import {createFilterContext, getFilterContext} from 'utils/descriptorUtils';
 import type {DataSet, Props} from './types';
 import {functions, props} from './selectors';
-import {getDescriptorCases, getSourceFilterAttributeGroup} from 'store/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
-import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import React, {Component} from 'react';
 import SourceFieldset from 'WidgetFormPanel/components/SourceFieldset';
+import withFilterForm from 'containers/FilterForm';
 
 export class SourceFieldsetContainer extends Component<Props> {
 	fetchAttributesByCode = async (classFqn: string | null, parameters: Array<Parameter | BreakdownItem>, defaultItem: Parameter | BreakdownItem) => {
@@ -64,48 +62,14 @@ export class SourceFieldsetContainer extends Component<Props> {
 	};
 
 	setContext = async (): Promise<string | null> => {
-		const {clearDynamicAttributeGroups, isUserMode, value} = this.props;
-		const {value: sourceValue} = value.source;
+		const {clearDynamicAttributeGroups, openFilterForm, value} = this.props;
+		const serializedContext = await openFilterForm(value.source);
 
-		if (sourceValue) {
-			const {value: classFqn} = sourceValue;
-			const descriptor = this.getSourceDescriptor();
-			const context = descriptor
-				? getFilterContext(descriptor, classFqn, getDescriptorCases)
-				: createFilterContext(classFqn, getDescriptorCases);
-
-			try {
-				let useAttrFilter;
-
-				if (isUserMode) {
-					const attrSetConditions = parseAttrSetConditions(value.source);
-
-					if (attrSetConditions) {
-						const {groupCode} = attrSetConditions;
-
-						context['attrGroupCode'] = groupCode;
-						useAttrFilter = true;
-					}
-				}
-
-				const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(classFqn);
-
-				if (sourceFilterAttributeGroup) {
-					context['attrGroupCode'] = sourceFilterAttributeGroup;
-					useAttrFilter = true;
-				}
-
-				const {serializedContext} = await api.instance.filterForm.openForm(context, useAttrFilter);
-
-				clearDynamicAttributeGroups(value.dataKey);
-
-				return serializedContext;
-			} catch (e) {
-				console.error('Filtration error: ', e);
-			}
+		if (serializedContext) {
+			clearDynamicAttributeGroups(value.dataKey);
 		}
 
-		return null;
+		return serializedContext;
 	};
 
 	render () {
@@ -122,4 +86,4 @@ export class SourceFieldsetContainer extends Component<Props> {
 	}
 }
 
-export default connect(props, functions)(SourceFieldsetContainer);
+export default compose(connect(props, functions), withFilterForm)(SourceFieldsetContainer);

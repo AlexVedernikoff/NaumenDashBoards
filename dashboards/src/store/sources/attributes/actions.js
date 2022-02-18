@@ -35,7 +35,7 @@ const fetchAttributeByCode = (classFqn: string, attribute: Attribute): ThunkActi
  * @returns {ThunkAction}
  */
 const fetchAttributes = (classFqn: string, parentClassFqn: ?string = null, attrSetConditions: ?AttrSetConditions = null, callback?: OnLoadCallback): ThunkAction =>
-	async (dispatch: Dispatch): Promise<void> => {
+	async (dispatch: Dispatch): Promise<Array<Attribute>> => {
 		dispatch(requestAttributes(classFqn));
 
 		try {
@@ -48,9 +48,12 @@ const fetchAttributes = (classFqn: string, parentClassFqn: ?string = null, attrS
 
 			callback && callback(attributes);
 			dispatch(receiveAttributes(attributes, classFqn));
+
+			return attributes;
 		} catch (error) {
 			dispatch(recordAttributesError(classFqn));
 		}
+		return [];
 	};
 
 const requestAttributes = (payload: string) => ({

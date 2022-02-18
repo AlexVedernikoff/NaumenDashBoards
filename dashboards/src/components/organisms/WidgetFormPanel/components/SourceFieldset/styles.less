@@ -70,4 +70,18 @@
 		padding: 16px 3px 0;
 	}
 
+	@animation-blinker-name: 'blinker';
+
+	.filterButtonIconOpening {
+		animation: @animation-blinker-name 1s infinite linear;
+	}
+
+
+	@keyframes @animation-blinker-name {
+		from { opacity: 1.0; }
+		50% { opacity: .5; }
+		to { opacity: 1.0; }
+	}
+
+
 }

@@ -1,5 +1,5 @@
 // @flow
-import type {DTOValue, FilterFormDescriptorDTO} from 'api/types';
+import type {DTOValue, FilterFormContextDTO, FilterFormOptionsDTO} from 'api/types';
 import {DASHBOARD_EDIT_MODE} from './constants';
 import type {FrameAPI} from 'api/interfaces';
 
@@ -61,7 +61,7 @@ export default class Frame implements FrameAPI {
 		return process.env.SUBJECT_UUID ?? '';
 	}
 
-	async openFilterForm (descriptor: FilterFormDescriptorDTO, useAttrFilter?: boolean) {
+	async openFilterForm (descriptor: FilterFormContextDTO, options: FilterFormOptionsDTO) {
 		const {clazz} = descriptor;
 		let result = {
 			command: 'filterForm',
