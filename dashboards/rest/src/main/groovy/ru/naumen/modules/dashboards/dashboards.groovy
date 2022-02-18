@@ -24,6 +24,7 @@ import ru.naumen.core.server.script.spi.IScriptConditionsApi
 import ru.naumen.core.server.script.spi.IScriptUtils
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
+import ru.naumen.core.shared.dto.ISDtObject
 
 import static groovy.json.JsonOutput.toJson
 import static MessageProvider.*
@@ -1014,6 +1015,7 @@ class DashboardsService
     List<Attribute> getDynamicAttributes(String groupUUID)
     {
         List<String> templateUUIDS = getUUIDSForTemplates(groupUUID)
+        templateUUIDS = getActiveTemplateUUIDS(templateUUIDS)
         Collection<Attribute> attributes = templateUUIDS?.collect { templateUUID ->
             def type = getDynamicAttributeType(templateUUID)
             return type ? new Attribute(
@@ -1044,6 +1046,7 @@ class DashboardsService
         return getDescriptorGroups(descriptor)?.collect {
             def dynamicSource = getDynamicGroupSource(it)
             def templateUUIDS = getUUIDSForTemplates(it.UUID)
+            templateUUIDS = getActiveTemplateUUIDS(templateUUIDS)
             boolean anyAttributes = templateUUIDS.any { getDynamicAttributeType(it) }
             if (dynamicSource && anyAttributes) {
                 return new DynamicGroup(
@@ -1539,6 +1542,19 @@ class DashboardsService
     private List<String> getUUIDSForTemplates(String groupUUID)
     {
         return groupUUID ? utils.get(groupUUID).listTempAttr*.UUID : null
+    }
+
+    /**
+     * Метод фильтрации шаблонов динамических атрибутов по статусу
+     * @param templateUUIDS - UUID-ы шаблонов
+     * @return UUID-ы активных шаблонов
+     */
+    private List<String> getActiveTemplateUUIDS(List<String> templateUUIDS)
+    {
+        return templateUUIDS?.findAll {
+            ISDtObject dynamicAttribute = utils.get(it)
+            return dynamicAttribute?.state != 'closed'
+        }
     }
 
     /**
