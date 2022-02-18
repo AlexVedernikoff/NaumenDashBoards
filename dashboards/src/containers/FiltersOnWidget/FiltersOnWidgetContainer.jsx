@@ -17,19 +17,6 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 		return this.setState({filters: initialCustomFiltersValues});
 	}
 
-	fetchAttributes = (dataSetIndex: number) => {
-		const {dataSets, fetchAttributes} = this.props;
-		const dataSet = dataSets[dataSetIndex];
-
-		if (dataSet) {
-			const source = dataSet.source.value;
-
-			if (source) {
-				fetchAttributes(source.value);
-			}
-		}
-	};
-
 	handleAddNewFilterItem = () => {
 		const newValue: CustomFilterValue = {
 			attributes: [],
@@ -124,7 +111,6 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 		return (
 			<FiltersOnWidget
 				dataSets={dataSets}
-				fetchAttributes={this.fetchAttributes}
 				filters={filters}
 				onAddNewFilterItem={this.handleAddNewFilterItem}
 				onChangeFilter={this.handleChangeFilter}

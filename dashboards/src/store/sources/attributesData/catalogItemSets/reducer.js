@@ -1,7 +1,6 @@
 // @flow
 import {arrayToTree} from 'utils/arrayToTree';
 import type {CatalogItemSetsAction, CatalogItemSetsState} from './types';
-import {CATALOG_ITEM_SETS_EVENTS} from './constants';
 import {defaultCatalogItemSetsAction, initialCatalogItemSetsState} from './init';
 
 const reducer = (
@@ -9,7 +8,7 @@ const reducer = (
 	action: CatalogItemSetsAction = defaultCatalogItemSetsAction
 ): CatalogItemSetsState => {
 	switch (action.type) {
-		case CATALOG_ITEM_SETS_EVENTS.RECEIVE_CATALOG_ITEM_SET_DATA:
+		case 'RECEIVE_CATALOG_ITEM_SET_DATA':
 			return {
 				...state,
 				[action.payload.property]: {
@@ -20,7 +19,7 @@ const reducer = (
 					loading: false
 				}
 			};
-		case CATALOG_ITEM_SETS_EVENTS.RECORD_CATALOG_ITEM_SET_DATA_ERROR:
+		case 'RECORD_CATALOG_ITEM_SET_DATA_ERROR':
 			return {
 				...state,
 				[action.payload]: {
@@ -29,7 +28,7 @@ const reducer = (
 					loading: false
 				}
 			};
-		case CATALOG_ITEM_SETS_EVENTS.REQUEST_CATALOG_ITEM_SET_DATA:
+		case 'REQUEST_CATALOG_ITEM_SET_DATA':
 			return {
 				...state,
 				[action.payload]: {

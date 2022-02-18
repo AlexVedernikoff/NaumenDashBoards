@@ -1,6 +1,5 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {OBJECTS_EVENTS} from './constants';
 import type {Source} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 import type {TreeNode} from 'components/types';
@@ -70,7 +69,7 @@ type ChangeSearchValue = {
 		id: string,
 		searchValue: string
 	},
-	type: typeof OBJECTS_EVENTS.CHANGE_SEARCH_VALUE
+	type: 'CHANGE_SEARCH_VALUE'
 };
 
 type FoundObjectsFulfilled = {
@@ -78,45 +77,28 @@ type FoundObjectsFulfilled = {
 		id: string,
 		items: ItemsMap
 	},
-	type: typeof OBJECTS_EVENTS.FOUND_OBJECTS_FULFILLED
+	type: 'FOUND_OBJECTS_FULFILLED'
 };
 
-type ClearFoundObjects = {
-	payload: string,
-	type: typeof OBJECTS_EVENTS.FOUND_OBJECTS_CLEAR_SEARCH
-};
+type ClearFoundObjects = {payload: string, type: 'FOUND_OBJECTS_CLEAR_SEARCH'};
 
 type FoundObjectsPending = {
 	payload: {
 		id: string,
 		searchValue: string
 	},
-	type: typeof OBJECTS_EVENTS.FOUND_OBJECTS_PENDING
+	type: 'FOUND_OBJECTS_PENDING'
 };
 
-type FoundObjectsRejected = {
-	payload: string,
-	type: typeof OBJECTS_EVENTS.FOUND_OBJECT_REJECTED
-};
+type FoundObjectsRejected = {payload: string, type: 'FOUND_OBJECT_REJECTED'};
 
-type ObjectDataFulfilled = {
-	payload: ReceivePayload,
-	type: typeof OBJECTS_EVENTS.OBJECT_DATA_FULFILLED
-};
+type ObjectDataFulfilled = {payload: ReceivePayload, type: 'OBJECT_DATA_FULFILLED'};
 
-type ObjectDataPending = {
-	payload: Payload,
-	type: typeof OBJECTS_EVENTS.OBJECT_DATA_PENDING
-};
+type ObjectDataPending = {payload: Payload, type: 'OBJECT_DATA_PENDING'};
 
-type ObjectDataRejected = {
-	payload: Payload,
-	type: typeof OBJECTS_EVENTS.OBJECT_DATA_REJECTED
-};
+type ObjectDataRejected = {payload: Payload, type: 'OBJECT_DATA_REJECTED'};
 
-type UnknownObjectsAction = {
-	type: typeof OBJECTS_EVENTS.UNKNOWN_OBJECTS_ACTION
-};
+type UnknownObjectsAction = {type: 'UNKNOWN_OBJECTS_ACTION'};
 
 export type ObjectsAction =
 	| ChangeSearchValue

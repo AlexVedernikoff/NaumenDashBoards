@@ -1,6 +1,5 @@
 // @flow
 import api from 'api';
-import {CATALOG_ITEMS_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
 import type {ReceivePayload} from './types';
 
@@ -21,20 +20,11 @@ const fetchCatalogItemData = (property: string): ThunkAction => async (dispatch:
 	}
 };
 
-const requestCatalogItemData = (payload: string) => ({
-	payload,
-	type: CATALOG_ITEMS_EVENTS.REQUEST_CATALOG_ITEM_DATA
-});
+const requestCatalogItemData = (payload: string) => ({payload, type: 'REQUEST_CATALOG_ITEM_DATA'});
 
-const recordCatalogItemDataError = (payload: string) => ({
-	payload,
-	type: CATALOG_ITEMS_EVENTS.RECORD_CATALOG_ITEM_DATA_ERROR
-});
+const recordCatalogItemDataError = (payload: string) => ({payload, type: 'RECORD_CATALOG_ITEM_DATA_ERROR'});
 
-const receiveCatalogItemData = (payload: ReceivePayload) => ({
-	payload,
-	type: CATALOG_ITEMS_EVENTS.RECEIVE_CATALOG_ITEM_DATA
-});
+const receiveCatalogItemData = (payload: ReceivePayload) => ({payload, type: 'RECEIVE_CATALOG_ITEM_DATA'});
 
 export {
 	fetchCatalogItemData

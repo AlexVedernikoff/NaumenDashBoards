@@ -1,5 +1,4 @@
 // @flow
-import {CATALOG_ITEMS_EVENTS} from './constants';
 import type {TreeNode} from 'components/types';
 
 export type Data = {
@@ -26,24 +25,13 @@ export type ReceivePayload = {
 	property: string
 };
 
-type ReceiveCatalogItemData = {
-	payload: ReceivePayload,
-	type: typeof CATALOG_ITEMS_EVENTS.RECEIVE_CATALOG_ITEM_DATA
-};
+type ReceiveCatalogItemData = {payload: ReceivePayload, type: 'RECEIVE_CATALOG_ITEM_DATA'};
 
-type RecordCatalogItemDataError = {
-	payload: string,
-	type: typeof CATALOG_ITEMS_EVENTS.RECORD_CATALOG_ITEM_DATA_ERROR
-};
+type RecordCatalogItemDataError = {payload: string, type: 'RECORD_CATALOG_ITEM_DATA_ERROR'};
 
-type RequestCatalogItemData = {
-	payload: string,
-	type: typeof CATALOG_ITEMS_EVENTS.REQUEST_CATALOG_ITEM_DATA
-};
+type RequestCatalogItemData = {payload: string, type: 'REQUEST_CATALOG_ITEM_DATA'};
 
-type UnknownCatalogItemsAction = {
-	type: typeof CATALOG_ITEMS_EVENTS.UNKNOWN_CATALOG_ITEMS_ACTION
-};
+type UnknownCatalogItemsAction = { type: 'UNKNOWN_CATALOG_ITEMS_ACTION'};
 
 export type CatalogItemsAction =
 	| ReceiveCatalogItemData
