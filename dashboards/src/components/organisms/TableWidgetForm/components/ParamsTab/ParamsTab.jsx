@@ -214,7 +214,7 @@ export class ParamsTab extends PureComponent<Props> {
 		const {data, top} = values;
 		const disabled = isDisableDataTopField(data);
 
-		if (isDontUseParamsForDataSet(data?.[0])) {
+		if (!isDontUseParamsForDataSet(data?.[0])) {
 			return (
 				<FormField name={DIAGRAM_FIELDS.top}>
 					<DataTopField disabled={disabled} onChange={this.handleChangeTopSettings} value={top} />
@@ -234,7 +234,7 @@ export class ParamsTab extends PureComponent<Props> {
 	renderShowEmptyDataCheckbox = () => {
 		const {data, showBlankData} = this.props.values;
 
-		if (isDontUseParamsForDataSet(data?.[0])) {
+		if (!isDontUseParamsForDataSet(data?.[0])) {
 			return (
 				<FormField>
 					<FormControl label={t('TableWidgetForm::ParamsTab::ShowBlankValues')} reverse>
