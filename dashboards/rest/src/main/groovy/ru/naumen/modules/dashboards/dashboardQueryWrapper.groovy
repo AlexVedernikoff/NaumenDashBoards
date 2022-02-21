@@ -83,64 +83,34 @@ class QueryWrapper implements CriteriaWrapper
         return new QueryWrapper(source, templateUUID)
     }
 
-    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, boolean fromSevenDays = false, Integer top = null, Source source = null)
+    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, boolean fromSevenDays = false, Integer top = null)
     {
         Aggregation aggregationType = parameter.type
         def sc = api.selectClause
         def attribute = parameter.attribute
 
-        if (attribute.type == 'PERCENTAGE_RELATIVE_ATTR')
+        Closure aggregation = getAggregation(aggregationType)
+        String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode.rcurry(true))
+
+        IApiCriteriaColumn column = sc.property(attributeCodes)
+        if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
+            aggregationType == Aggregation.AVG)
         {
-            String sourceDescriptor = source.descriptor
-            String indicatorDescriptor = getDescriptorWithMergedFilters(sourceDescriptor, attribute.descriptor)
-
-            IApiCriteria sourceCriteria
-            if (sourceDescriptor)
-            {
-                sourceCriteria = sourceDescriptor
-                    .with(api.listdata.&createListDescriptor).with(api.listdata.&createCriteria)
-            }
-            else
-            {
-                sourceCriteria = api.db.createCriteria().addSource(source.classFqn)
-            }
-            sourceCriteria.addColumn(sc.countDistinct(sc.property('id')))
-
-            List<Object> sourceRes = api.db.query(sourceCriteria).list()
-
-            IApiCriteria indicatorCriteria = indicatorDescriptor
-                .with(api.listdata.&createListDescriptor).with(api.listdata.&createCriteria)
-                .addColumn(sc.countDistinct(sc.property('id')))
-            List<Object> indicatorRes = api.db.query(indicatorCriteria).list()
-
-            IApiCriteriaColumn column = sc.columnDivide(sc.constant(indicatorRes.head() * 100), sc.constant(sourceRes.head()))
-            column.with(criteria.&addColumn)
+            column = sc.property(attributeCodes).with(sc.&cast.rcurry('float'))
         }
-        else
+
+        if (fromSevenDays && (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
         {
-            Closure aggregation = getAggregation(aggregationType)
-            String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode.rcurry(true))
-
-            IApiCriteriaColumn column = sc.property(attributeCodes)
-            if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
-                aggregationType == Aggregation.AVG)
-            {
-                column = sc.property(attributeCodes).with(sc.&cast.rcurry('float'))
-            }
-
-            if (fromSevenDays && (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
-            {
-                String linkTemplateUuid = attribute.attrChains().last().title ?: ''
-                column = castDynamicToType(attribute, column)
-                criteria.add(api.filters.attrValueEq('totalValue.linkTemplate', linkTemplateUuid))
-            }
-            column.with(aggregation).with(criteria.&addColumn)
-            String sortingType = parameter.sortingType
-            if (sortingType)
-            {
-                Closure sorting = getSorting(sortingType)
-                column.with(aggregation).with(sorting).with(criteria.&addOrder)
-            }
+            String linkTemplateUuid = attribute.attrChains().last().title ?: ''
+            column = castDynamicToType(attribute, column)
+            criteria.add(api.filters.attrValueEq('totalValue.linkTemplate', linkTemplateUuid))
+        }
+        column.with(aggregation).with(criteria.&addColumn)
+        String sortingType = parameter.sortingType
+        if (sortingType)
+        {
+            Closure sorting = getSorting(sortingType)
+            column.with(aggregation).with(sorting).with(criteria.&addOrder)
         }
 
         if(totalValueCriteria)
@@ -314,29 +284,6 @@ class QueryWrapper implements CriteriaWrapper
     }
 
     /**
-     * Метод получения дескриптора с фильтрами из дескриптора источника и дескриптора показателя
-     * @param sourceDescriptor - дескриптор источника
-     * @param indicatorDescriptor - дескриптор показателя
-     * @return дескриптор с обоими фильтрами
-     */
-    private String getDescriptorWithMergedFilters(String sourceDescriptor, String indicatorDescriptor)
-    {
-        JsonSlurper slurper = new JsonSlurper()
-        Map<String, Object> parsedSourceDescriptor = sourceDescriptor ? slurper.parseText(sourceDescriptor) : [:]
-        Map<String, Object> parsedIndicatorDescriptor = indicatorDescriptor ? slurper.parseText(indicatorDescriptor) : [:]
-
-        if (parsedSourceDescriptor.filters)
-        {
-            parsedSourceDescriptor.filters.each {
-                parsedIndicatorDescriptor.filters << it
-            }
-        }
-
-        indicatorDescriptor = toJson(parsedIndicatorDescriptor)
-        return indicatorDescriptor
-    }
-
-    /**
      * Метод для получения правильного кода атрибута для получения названия статуса по metaCaseId
      * @param attrChains - цепочка атрибутов
      * @return правильный код атрибута для получения названия статуса по metaCaseId
@@ -505,7 +452,7 @@ class QueryWrapper implements CriteriaWrapper
         }
         else
         {
-            wrapper.aggregate(criteria, totalValueCriteria, parameter, false, top, requestData.source)
+            wrapper.aggregate(criteria, totalValueCriteria, parameter, false, top)
         }
     }
 

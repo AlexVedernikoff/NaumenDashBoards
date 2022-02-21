@@ -1428,6 +1428,16 @@ class Source
     String classFqn
     String descriptor
     Collection<FilterList> filterList
+
+    @Override
+    Source clone() throws CloneNotSupportedException
+    {
+        return new Source(
+            classFqn: this.classFqn,
+            descriptor: this.descriptor,
+            filterList: this.filterList
+        )
+    }
 }
 
 abstract class Parameter<T>
