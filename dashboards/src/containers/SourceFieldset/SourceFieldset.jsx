@@ -4,8 +4,6 @@ import {compose} from 'redux';
 import {connect} from 'react-redux';
 import type {DataSet, Props} from './types';
 import {functions, props} from './selectors';
-import {getDescriptorCases, getSourceFilterAttributeGroup} from 'store/helpers';
-import {getSourceDescriptor} from 'store/widgets/data/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import React, {Component} from 'react';
 import SourceFieldset from 'WidgetFormPanel/components/SourceFieldset';

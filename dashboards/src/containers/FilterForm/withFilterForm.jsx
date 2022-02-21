@@ -35,19 +35,19 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 			}
 		};
 
-		generateRestriction = (classFqn: string) => {
-			const {attributes} = this.props;
+		generateRestriction = async (classFqn: string, attrGroupCode: string | null) => {
 			const result = {};
+			const attributes = await this.getFilterAttributes(classFqn, attrGroupCode);
 
-			if (attributes[classFqn] && attributes[classFqn].options) {
-				attributes[classFqn].options.forEach(attribute => {
-					const {property, type} = attribute;
+			result[classFqn] = attrGroupCode ?? 'system';
 
-					if (type in ATTRIBUTE_SETS.REFERENCE && property && !(property in result)) {
-						result[property] = 'system';
-					}
-				});
-			}
+			attributes.forEach(attribute => {
+				const {property, type} = attribute;
+
+				if (type in ATTRIBUTE_SETS.REFERENCE && property && !(property in result)) {
+					result[property] = 'system';
+				}
+			});
 
 			return result;
 		};
@@ -105,19 +105,26 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		};
 
 		openFilterForm = async (source: SourceData) => {
-			this.setState({openingFilterForm: true});
+			try {
+				this.setState({openingFilterForm: true});
 
-			const {value: classFqn} = source.value;
-			const descriptor = this.getSourceDescriptor(source);
-			const context: Context = descriptor
-				? getFilterContext(descriptor, classFqn, getDescriptorCases)
-				: createFilterContext(classFqn, getDescriptorCases);
-			const options = await this.updateContext(context, classFqn, descriptor);
+				const {value: classFqn} = source.value;
+				const descriptor = this.getSourceDescriptor(source);
+				const context: Context = descriptor
+					? getFilterContext(descriptor, classFqn, getDescriptorCases)
+					: createFilterContext(classFqn, getDescriptorCases);
+				const options = await this.updateContext(context, classFqn, descriptor);
 
-			this.setState({openingFilterForm: false});
-			const {serializedContext} = await api.instance.filterForm.openForm(context, options);
+				this.setState({openingFilterForm: false});
 
-			return serializedContext;
+				const {serializedContext} = await api.instance.filterForm.openForm(context, options);
+
+				return serializedContext;
+			} catch (e) {
+				console.error('Filtration error: ', e);
+			}
+
+			return null;
 		};
 
 		updateContext = async (context: Context, classFqn: string, descriptor: string): Promise<FilterFormOptionsDTO> => {
@@ -132,11 +139,11 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 			const attrCodes = await fetchGroupsAttributes(classFqn, attrGroupCode ?? null);
 
 			if (attrCodes && attrCodes.length > 0) {
-				context.attrCodes = attrCodes;
+				context.attrCodes = attrCodes.map(attrCode => `${classFqn}@${attrCode}`);
 				options.useRestriction = true;
 
 				if (!isUserMode) {
-					options.restriction = this.generateRestriction(classFqn);
+					options.restriction = await this.generateRestriction(classFqn, attrGroupCode);
 				}
 			} else if (attrGroupCode) {
 				context.attrGroupCode = attrGroupCode;

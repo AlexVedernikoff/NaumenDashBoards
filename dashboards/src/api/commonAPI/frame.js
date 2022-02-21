@@ -52,7 +52,7 @@ export default class Frame implements FrameAPI {
 				if (options.restriction) {
 					formBuilder = formBuilder.setAttributeTree({ 'restriction': options.restriction });
 				} else {
-					formBuilder = formBuilder.setAttributeTree({ 'useRestriction': true });
+					formBuilder = formBuilder.setAttributeList({ 'useRestriction': true });
 				}
 			}
 
