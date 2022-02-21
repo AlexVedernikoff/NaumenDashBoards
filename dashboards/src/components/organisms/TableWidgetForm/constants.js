@@ -27,7 +27,7 @@ const schema = object({
 		object({
 			breakdown: mixed().requiredByCompute(array().conditionalBreakdown()),
 			indicators: mixed().requiredByCompute(array().indicators()),
-			parameters: array().parameters(),
+			parameters: array().requiredByNotIndependentSource(array().parameters()),
 			source: object().source().test(
 				'check-source-for-parent',
 				t('TableWidgetForm::Scheme::WrongSource'),

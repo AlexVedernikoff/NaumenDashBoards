@@ -15,6 +15,7 @@ import {getDefaultBreakdown, parseAttrSetConditions} from 'store/widgetForms/hel
 import {getErrorPath} from 'WidgetFormPanel/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from 'components/atoms/IconButton';
+import {isDontUseParamsForDataSet} from 'store/widgetForms/tableForm/helpers';
 import LabelEditingForm from 'components/molecules/InputForm';
 import memoize from 'memoize-one';
 import {MODE} from './constraints';
@@ -34,6 +35,7 @@ export class SourceFieldset extends Component<Props, State> {
 	static defaultProps = {
 		parentClassFqn: null,
 		removable: true,
+		showSourceRowName: false,
 		usesFilter: true
 	};
 
@@ -234,6 +236,13 @@ export class SourceFieldset extends Component<Props, State> {
 		}
 	};
 
+	handleSetSourceRowName = ({name, value}: OnChangeEvent<boolean>) => {
+		const {index, onChange, value: dataSet} = this.props;
+		const sourceRowName = value ? null : '';
+
+		onChange(index, {...dataSet, sourceRowName});
+	};
+
 	hideEditForm = () => this.setState({error: null, mode: null, showEditForm: false});
 
 	isCurrentFilterChanged = (): boolean => {
@@ -399,6 +408,27 @@ export class SourceFieldset extends Component<Props, State> {
 		return null;
 	};
 
+	renderSourceRowNameCheckbox = () => {
+		const {index, showSourceRowName, value} = this.props;
+		const disabled = index !== 0;
+		const checked = isDontUseParamsForDataSet(value);
+
+		if (showSourceRowName) {
+			return (
+				<FormControl label={t('SourceFieldset::SourceRowNameCheckbox')}>
+					<Checkbox
+						checked={checked}
+						className={styles.sourceRowName}
+						disabled={disabled}
+						onChange={this.handleSetSourceRowName}
+						value={checked}
+					/>
+				</FormControl>);
+		}
+
+		return null;
+	};
+
 	renderSourceSelect = (): React$Node => {
 		const {index} = this.props;
 		const {error, showEditForm} = this.state;
@@ -417,6 +447,7 @@ export class SourceFieldset extends Component<Props, State> {
 				</div>
 				{this.renderRemoveButton()}
 				{this.renderComputeCheckbox()}
+				{this.renderSourceRowNameCheckbox()}
 				<FieldError text={error} />
 			</FormField>
 		);

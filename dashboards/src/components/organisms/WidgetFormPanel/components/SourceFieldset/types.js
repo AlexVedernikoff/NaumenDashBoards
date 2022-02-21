@@ -15,6 +15,10 @@ export type Props = CommonDialogContextProps & ContainerProps & {
 	index: number,
 	onChange: (index: number, dataSet: DataSet, callback?: Function) => void,
 	onOpenFilterForm: () => Promise<string>,
+	parentClassFqn: string,
+	removable: boolean,
+	showSourceRowName: boolean,
+	usesFilter: boolean,
 	value: DataSet
 };
 

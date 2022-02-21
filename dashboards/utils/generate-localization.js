@@ -5,9 +5,8 @@ const fs = require('fs');
 const BASE_PATH = 'src/localization/json';
 const EMPTY = '__EMPTY';
 
-const wb = XLSX.readFile(path.join(BASE_PATH, 'localization.xlsx'));
-const sheet = wb.Sheets['localization'];
-
+const wb = XLSX.readFile(path.join(BASE_PATH, 'localization.csv'));
+const sheet = wb.Sheets['Sheet1'];
 const data = XLSX.utils.sheet_to_json(sheet);
 
 if (data.length > 0) {

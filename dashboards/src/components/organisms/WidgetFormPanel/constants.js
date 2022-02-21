@@ -77,6 +77,7 @@ const sorting = 'sorting';
 const source = 'source';
 const sources = 'sources';
 const sourceForCompute = 'sourceForCompute';
+const sourceRowName = 'sourceRowName';
 const style = 'style';
 const template = 'template';
 const templateName = 'templateName';
@@ -135,6 +136,7 @@ const DIAGRAM_FIELDS = {
 	sorting,
 	source,
 	sourceForCompute,
+	sourceRowName,
 	sources,
 	style,
 	template,

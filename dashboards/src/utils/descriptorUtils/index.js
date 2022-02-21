@@ -98,7 +98,7 @@ const parseCasesAndGroupCode = (descriptor: string): ?AttrSetConditions => {
 
 		result = {attrGroupCode, cases};
 	} catch (e) {
-		console.log('error parsing descriptor');
+		console.error('error parsing descriptor');
 	}
 
 	return result;

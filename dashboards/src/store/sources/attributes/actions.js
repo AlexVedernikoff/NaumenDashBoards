@@ -56,6 +56,11 @@ const fetchAttributes = (classFqn: string, parentClassFqn: ?string = null, attrS
 		return [];
 	};
 
+const setLoadingStateAttributes = (classFqn: string, state: boolean) => ({
+	payload: {classFqn, state},
+	type: ATTRIBUTES_EVENTS.SET_LOADING_STATE_ATTRIBUTES
+});
+
 const requestAttributes = (payload: string) => ({
 	payload,
 	type: ATTRIBUTES_EVENTS.REQUEST_ATTRIBUTES
@@ -73,5 +78,6 @@ const recordAttributesError = (payload: string) => ({
 
 export {
 	fetchAttributes,
-	fetchAttributeByCode
+	fetchAttributeByCode,
+	setLoadingStateAttributes
 };

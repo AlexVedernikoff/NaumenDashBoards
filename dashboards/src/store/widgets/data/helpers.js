@@ -12,6 +12,8 @@ import type {
 	SetMessageWarning,
 	SetWidgets,
 	Source,
+	SourceData,
+	TableData,
 	UpdateWidget,
 	Widget,
 	WidgetType,
@@ -326,6 +328,34 @@ const getDefaultFormatForAttribute = (attribute: Attribute | null, group: Group 
 	return format;
 };
 
+/**
+ * Возвращает реальный дескриптор из источника
+ * @param {SourceData} source - источник
+ * @param {Array}  filters - список фильтров
+ * @returns {string} - дескриптор
+ */
+const getSourceDescriptor = (source: SourceData, filters: Array<{descriptor: string, id: string}>) => {
+	const {descriptor, filterId} = source;
+	let result = descriptor;
+
+	if (filterId) {
+		const filter = filters.find(item => item.id === filterId);
+
+		if (filter) {
+			result = filter.descriptor;
+		}
+	}
+
+	return result;
+};
+
+/**
+ * Проверяет, что источник вычисляется как одна строка, без применения параметров
+ * @param {?TableData} dataSet - источник
+ * @returns {boolean} - возвращает true, если источник установлен и вычисляется как одна строка, иначе false
+ */
+const isDontUseParamsForDataSet = (dataSet: ?TableData) => dataSet && typeof dataSet.sourceRowName === 'string';
+
 export {
 	addWidget,
 	clearWidgetWarning,
@@ -338,6 +368,8 @@ export {
 	getDefaultFormatForAttribute,
 	getMainDataSet,
 	getMainDataSetIndex,
+	getSourceDescriptor,
+	isDontUseParamsForDataSet,
 	resetWidget,
 	setSelectedWidget,
 	setWidgets,

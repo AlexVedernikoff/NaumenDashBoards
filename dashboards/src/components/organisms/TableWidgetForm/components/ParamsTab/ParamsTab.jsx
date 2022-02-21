@@ -1,7 +1,7 @@
 // @flow
 import type {Breakdown} from 'store/widgetForms/types';
 import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
-import {createTableDataSet} from 'store/widgetForms/tableForm/helpers';
+import {createTableDataSet, isDontUseParamsForDataSet} from 'store/widgetForms/tableForm/helpers';
 import type {DataSet} from 'store/widgetForms/tableForm/types';
 import DataSetSettings from 'containers/TableDataSetSettings';
 import DataTopField from 'WidgetFormPanel/components/DataTopField';
@@ -27,6 +27,7 @@ import Toggle from 'components/atoms/Toggle';
 import uuid from 'tiny-uuid';
 import WidgetNameBox from 'WidgetFormPanel/components/WidgetNameBox';
 import WidgetSelectBox from 'WidgetFormPanel/components/WidgetSelectBox';
+import {withCommonDialog} from 'containers/CommonDialogs/withCommonDialog';
 
 const CALC_TOTAL_CONTEXT = createContext(false);
 
@@ -47,23 +48,73 @@ export class ParamsTab extends PureComponent<Props> {
 		this.resetTopByIndicators();
 	}
 
+	confirmClearSources = async () => {
+		const {confirm} = this.props;
+		const result = await confirm(t('TableWidgetForm::ParamsTab::ConfirmClearSourcesHeader'), t('TableWidgetForm::ParamsTab::ConfirmClearSourcesText'));
+
+		return result;
+	};
+
 	getUsedDataKeys = () => [this.props.values.data[this.mainIndex].dataKey];
 
 	handleAddDataSet = () => {
 		const {onChange, values} = this.props;
+		const addSourceRowName = isDontUseParamsForDataSet(values.data?.[0]);
 
-		onChange(DIAGRAM_FIELDS.data, [...values.data, createTableDataSet(uuid())]);
+		onChange(DIAGRAM_FIELDS.data, [...values.data, createTableDataSet(uuid(), addSourceRowName)]);
 	};
 
-	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
+	handleChangeDataSet = async (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
-		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
+		let newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
+		let needClearingSources = false;
 
-		if (hasDifferentAggregations(newData)) {
-			this.setBreakdown();
+		if (index === 0) {
+			const mainDataSet = newData[0];
+			const oldMainIsSingleRow = isDontUseParamsForDataSet(values.data[0]);
+			const mainIsSingleRow = isDontUseParamsForDataSet(mainDataSet);
+
+			// В случае когда выставляют/сбрасывают признак однострочного источника
+			if (oldMainIsSingleRow !== mainIsSingleRow) {
+				newData = newData.map(dataSet => {
+					const dataSetIsSingleRow = isDontUseParamsForDataSet(dataSet);
+
+					if (mainIsSingleRow !== dataSetIsSingleRow) {
+						let result = {...dataSet};
+
+						if (mainIsSingleRow && !dataSetIsSingleRow) {
+							// Основный источник - однострочный, выставляем дополнительный в однострочный
+							result.sourceRowName = '';
+						} else if (!mainIsSingleRow && dataSetIsSingleRow) {
+							// Основный источник - не однострочный, сбрасываем признак однострочного источника
+							result.sourceRowName = null;
+
+							// При расхождении источника у основного и дополнительного - сбрасываем источник
+							if (dataSet?.source?.value?.value !== mainDataSet?.source?.value?.value) {
+								result = createTableDataSet(dataSet.dataKey, false);
+								needClearingSources = true;
+							}
+
+							if (result.indicators.length > 1) {
+								result.indicators = result.indicators.slice(0, 1);
+							}
+						}
+
+						return result;
+					}
+
+					return dataSet;
+				});
+			}
 		}
 
-		onChange(DIAGRAM_FIELDS.data, newData, callback);
+		if (!needClearingSources || await this.confirmClearSources()) {
+			if (hasDifferentAggregations(newData)) {
+				this.setBreakdown();
+			}
+
+			onChange(DIAGRAM_FIELDS.data, newData, callback);
+		}
 	};
 
 	handleChangeTopSettings = (top: DataTopSettings) => {
@@ -138,7 +189,8 @@ export class ParamsTab extends PureComponent<Props> {
 		const {calcTotalColumn, data} = this.props.values;
 		const isLast = data.length === 1;
 		const isMain = index === this.mainIndex;
-		const parentClassFqn = !isMain ? data[this.mainIndex].source.value?.value : '';
+		const isSingleRow = isDontUseParamsForDataSet(data[this.mainIndex]);
+		const parentClassFqn = !isMain && !isSingleRow ? data[this.mainIndex].source.value?.value : '';
 
 		return (
 			<CALC_TOTAL_CONTEXT.Provider key={`DataSetSettings_${dataSet.dataKey}`} value={calcTotalColumn}>
@@ -162,11 +214,15 @@ export class ParamsTab extends PureComponent<Props> {
 		const {data, top} = values;
 		const disabled = isDisableDataTopField(data);
 
-		return (
-			<FormField name={DIAGRAM_FIELDS.top}>
-				<DataTopField disabled={disabled} onChange={this.handleChangeTopSettings} value={top} />
-			</FormField>
-		);
+		if (isDontUseParamsForDataSet(data?.[0])) {
+			return (
+				<FormField name={DIAGRAM_FIELDS.top}>
+					<DataTopField disabled={disabled} onChange={this.handleChangeTopSettings} value={top} />
+				</FormField>
+			);
+		}
+
+		return null;
 	};
 
 	renderIndicatorsFormBox = ({children, rightControl, ...props}: IndicatorsFormBoxProps) => (
@@ -176,20 +232,24 @@ export class ParamsTab extends PureComponent<Props> {
 	);
 
 	renderShowEmptyDataCheckbox = () => {
-		const {showBlankData} = this.props.values;
+		const {data, showBlankData} = this.props.values;
 
-		return (
-			<FormField>
-				<FormControl label={t('TableWidgetForm::ParamsTab::ShowBlankValues')} reverse>
-					<Toggle
-						checked={showBlankData}
-						name={DIAGRAM_FIELDS.showBlankData}
-						onChange={this.handleToggleChange}
-						value={showBlankData}
-					/>
-				</FormControl>
-			</FormField>
-		);
+		if (isDontUseParamsForDataSet(data?.[0])) {
+			return (
+				<FormField>
+					<FormControl label={t('TableWidgetForm::ParamsTab::ShowBlankValues')} reverse>
+						<Toggle
+							checked={showBlankData}
+							name={DIAGRAM_FIELDS.showBlankData}
+							onChange={this.handleToggleChange}
+							value={showBlankData}
+						/>
+					</FormControl>
+				</FormField>
+			);
+		}
+
+		return null;
 	};
 
 	renderSumButton = (rightControl: React$Node) => (
@@ -230,4 +290,4 @@ export class ParamsTab extends PureComponent<Props> {
 	}
 }
 
-export default ParamsTab;
+export default withCommonDialog(ParamsTab);

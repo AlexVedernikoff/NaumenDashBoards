@@ -12,6 +12,7 @@ import t from 'localization';
 
 export class IndicatorsBox extends PureComponent<Props> {
 	static defaultProps = {
+		canAddIndicators: true,
 		components: {
 			FormBox
 		}
@@ -52,6 +53,7 @@ export class IndicatorsBox extends PureComponent<Props> {
 			<IndicatorFieldset
 				dataKey={dataKey}
 				dataSetIndex={dataSetIndex}
+				hasInterestRelative={true}
 				index={index}
 				key={index}
 				onChange={this.handleChange}
@@ -64,7 +66,22 @@ export class IndicatorsBox extends PureComponent<Props> {
 		);
 	};
 
-	renderRightControl = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddButton} round={false} />;
+	renderRightControl = () => {
+		const {canAddIndicator} = this.props;
+
+		if (canAddIndicator) {
+			return (
+				<IconButton
+					canAddIndicator={canAddIndicator}
+					icon={ICON_NAMES.PLUS}
+					onClick={this.handleClickAddButton}
+					round={false}
+				/>
+			);
+		}
+
+		return null;
+	};
 
 	render () {
 		const {components, value} = this.props;

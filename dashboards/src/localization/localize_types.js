@@ -66,7 +66,13 @@ type Select =
   | 'Select::NotFoundMessage';
 
 // components/molecules/Select/components/List
-type SelectList = 'Select::List::ShowMore';
+type SelectList =
+  |'Select::List::ShowMore';
+
+// components/molecules/Select/components/List
+type SelectModal =
+  | 'SelectModal::CreateField'
+  | 'SelectModal::Cancel';
 
 // components/molecules/SelectWithCustomEdit
 type SelectWithCustomEdit = 'SelectWithCustomEdit::UserOption';
@@ -80,7 +86,7 @@ type TreeSelectNode = 'TreeSelectNode::ShowMore';
 // components/molecules/TreeSelect/components/Tree
 type Tree = 'Tree::ListEmpty' | 'Tree::ShowMore';
 
-// components/organisms/AttributeCreatingModal/components/SoucreControlTree
+// components/organisms/AttributeCreatingModal/components/SourceControlTree
 type SourceControlTree =
   | 'SourceControlTree::AddConstants'
   | 'SourceControlTree::Find'
@@ -332,15 +338,23 @@ type TableWidgetFormIndicatorsBox =
 
 // components/organisms/TableWidgetForm/components/ParametersBox
 type TableWidgetFormParametersBox =
-  'TableWidgetForm::ParametersBox::Parameters';
+  | 'TableWidgetForm::ParametersBox::Parameters'
+  | 'TableWidgetForm::ParametersBox::SourceRowName';
 
 // components/organisms/TableWidgetForm/components/ParamsTab
 type TableWidgetFormParamsTab =
   | 'TableWidgetForm::ParamsTab::ShowBlankValues'
-  | 'TableWidgetForm::ParamsTab::CalculateTotal';
+  | 'TableWidgetForm::ParamsTab::CalculateTotal'
+  | 'TableWidgetForm::ParamsTab::ConfirmClearSourcesHeader'
+  | 'TableWidgetForm::ParamsTab::ConfirmClearSourcesText';
 
 // components/organisms/TableWidgetForm/components/TableBox
-type TableWidgetFormTableBox = 'TableWidgetForm::TableBox::Table';
+type TableWidgetFormTableBox =
+  | 'TableWidgetForm::TableBox::Table';
+
+// components/organisms/TableWidgetForm/components/DataSetSettings
+type TableWidgetFormDataSetSettings =
+  | 'TableWidgetForm::DataSetSettings::SourceRowNamePlaceholder';
 
 // components/organisms/TextWidgetForm
 type TextWidgetForm =
@@ -471,7 +485,10 @@ type HeaderBox =
 // components/organisms/WidgetFormPanel/components/IndicatorFieldset
 type IndicatorFieldset =
   | 'IndicatorFieldset::Aggregation'
-  | 'IndicatorFieldset::CreateField';
+  | 'IndicatorFieldset::CreateField'
+  | 'IndicatorFieldset::MathFormula'
+  | 'IndicatorFieldset::SourcePercentageRelative'
+  | 'IndicatorFieldset::SourcePercentageRelativeField' ;
 
 // components/organisms/WidgetFormPanel/components/IndicatorsBox
 type IndicatorsBox = 'IndicatorsBox::Indicator';
@@ -522,6 +539,7 @@ type SourceBox = 'SourceBox::Title';
 // components/organisms/WidgetFormPanel/components/SourceFieldset
 type SourceFieldset =
   | 'SourceFieldset::ChangeFilterDuplicate'
+  | 'SourceFieldset::SourceRowNameCheckbox'
   | 'SourceFieldset::DeleteSavedFilterError'
   | 'SourceFieldset::ConfirmFilterTitle'
   | 'SourceFieldset::ConfirmFilterMessage'
@@ -867,6 +885,7 @@ export type LangType =
   | SearchInput
   | Select
   | SelectList
+  | SelectModal
   | SelectWithCustomEdit
   | ShowTotalAmountBox
   | SortingBox
@@ -894,6 +913,7 @@ export type LangType =
   | TableTotal
   | TableWidget
   | TableWidgetFormBodySettingsBox
+  | TableWidgetFormDataSetSettings
   | TableWidgetFormHeaderSettingsBox
   | TableWidgetFormIndicatorsBox
   | TableWidgetFormParametersBox

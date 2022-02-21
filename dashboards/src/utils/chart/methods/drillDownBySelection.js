@@ -8,7 +8,7 @@ import {deepClone} from 'helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {drillDown} from 'store/widgets/links/actions';
 import type {DrillDownMixin} from 'store/widgets/links/types';
-import {getAttributeValue} from 'store/sources/attributes/helpers';
+import {getAttributeValue, getSourceAttribute} from 'store/sources/attributes/helpers';
 import {getLabelWithoutUUID} from 'utils/chart/mixins/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
@@ -211,10 +211,12 @@ const addFilters = (widget: Chart, props: AddFiltersProps): ReturnsAddFiltersDat
  * false - если по этому атрибуту нельзя построить валидную выборку.
  */
 const hasAttributeDrillDown = (attribute: MixedAttribute | null) => {
-	if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-		const isDateType = getAttributeValue(attribute, 'type') === ATTRIBUTE_TYPES.dtInterval;
-		const isServiceCallEvt = attribute.metaClassFqn === 'serviceCall__Evt';
-		const isTimerValue = !!attribute.timerValue;
+	const sourceAttribute = getSourceAttribute(attribute);
+
+	if (sourceAttribute) {
+		const isDateType = getAttributeValue(sourceAttribute, 'type') === ATTRIBUTE_TYPES.dtInterval;
+		const isServiceCallEvt = sourceAttribute.metaClassFqn === 'serviceCall__Evt';
+		const isTimerValue = !!sourceAttribute.timerValue;
 
 		return !isDateType && !isServiceCallEvt && !isTimerValue;
 	}

@@ -1,4 +1,5 @@
 // @flow
+import type {AttributesMap, FetchAttributes} from 'store/sources/attributes/types';
 import {REGULAR_TABS, TABS} from 'src/containers/DiagramWidgetForm/constants';
 import type {Schema} from 'components/types';
 import type {SetFieldValue, Values} from 'components/organisms/WidgetForm/types';
@@ -9,13 +10,16 @@ export type InnerFormErrors = {[key: string]: string};
 export type RaiseErrors = (errors: InnerFormErrors) => void;
 
 export type ConnectedProps = {
+	attributes: AttributesMap,
 	saving: boolean,
 	tabs: typeof REGULAR_TABS | typeof TABS,
 	widgets: Array<Widget>
 };
 
 export type ConnectedFunctions = {
-	cancelForm: () => void
+	cancelForm: () => void,
+	fetchAttributes: FetchAttributes,
+	setLoadingStateAttributes: (classFqn: string, state: boolean) => void
 };
 
 export type TabProps = {

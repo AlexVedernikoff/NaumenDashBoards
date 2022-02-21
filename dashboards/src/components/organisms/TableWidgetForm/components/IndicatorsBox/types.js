@@ -12,6 +12,7 @@ export type Components = {
 };
 
 export type Props = {
+	canAddIndicator: boolean,
 	components: Components,
 	dataKey: string,
 	index: number,

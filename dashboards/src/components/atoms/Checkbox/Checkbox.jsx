@@ -7,21 +7,25 @@ import styles from './styles.less';
 
 export class Checkbox extends PureComponent<Props> {
 	static defaultProps = {
+		disabled: false,
 		name: ''
 	};
 
 	handleClick = () => {
-		const {name, onChange, value} = this.props;
+		const {disabled, name, onChange, value} = this.props;
 
-		onChange({name, value});
+		if (!disabled) {
+			onChange({name, value});
+		}
 	};
 
 	render () {
-		const {checked} = this.props;
+		const {checked, disabled} = this.props;
 		const {CHECKBOX, CHECKBOX_CHECKED} = ICON_NAMES;
 		const name = checked ? CHECKBOX_CHECKED : CHECKBOX;
 		const iconCN = cn({
 			[styles.icon]: true,
+			[styles.disabled]: disabled,
 			[styles.checked]: checked
 		});
 

@@ -438,7 +438,7 @@ const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidget
 					}, false));
 				}
 			} catch (e) {
-				console.log(e);
+				console.error(e);
 			}
 		}
 	};

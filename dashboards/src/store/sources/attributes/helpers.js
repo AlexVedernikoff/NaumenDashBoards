@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from './types';
-import {ATTRIBUTE_SETS} from './constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from './constants';
 import type {MixedAttribute} from 'store/widgets/data/types';
 
 /**
@@ -63,8 +63,26 @@ const setAttributeValue = (attribute: Attribute, key: string, value: any) => {
 	return newAttribute;
 };
 
+/**
+ * Получает Attribute из MixedAttribute
+ * @param {MixedAttribute}  attribute  - атрибут
+ * @returns {Attribute} - приведенный тип, или null если тип атрибута не совпадает
+ */
+const getSourceAttribute = (attribute: MixedAttribute | null): Attribute | null => {
+	if (
+		attribute
+		&& attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR
+		&& attribute.type !== ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR
+	) {
+		return attribute;
+	}
+
+	return null;
+};
+
 export {
-	getProcessedAttribute,
 	getAttributeValue,
+	getProcessedAttribute,
+	getSourceAttribute,
 	setAttributeValue
 };

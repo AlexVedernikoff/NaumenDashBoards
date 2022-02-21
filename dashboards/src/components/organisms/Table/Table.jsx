@@ -75,9 +75,9 @@ export class Table extends PureComponent<Props, State> {
 	 * @param {Props} props - пропсы компонента
 	 * @returns {Array<Column>}
 	 */
-	getDataColumns (props: Props) {
-		return props.columns.map(column => column.columns || column)
-			.reduce((columns, value) => Array.isArray(value) ? [...columns, ...value] : [...columns, value], []);
+	getDataColumns (props: Props): Array<Column> {
+		const result = props.columns.flatMap(column => column.columns ? column.columns : column);
+		return result;
 	}
 
 	/**

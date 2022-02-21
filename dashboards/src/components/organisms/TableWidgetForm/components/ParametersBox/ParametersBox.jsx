@@ -11,6 +11,10 @@ import SortableList from 'TableWidgetForm/components/SortableList';
 import t from 'localization';
 
 export class ParametersBox extends PureComponent<Props> {
+	static defaultProps = {
+		isSourceRowName: false
+	};
+
 	handleChange = (dataSetIndex: number, parameterIndex: number, newParameter: Parameter, callback?: Function) => {
 		const {onChange, value} = this.props;
 		const newParameters = value.map((parameter, index) => index === parameterIndex ? newParameter : parameter);

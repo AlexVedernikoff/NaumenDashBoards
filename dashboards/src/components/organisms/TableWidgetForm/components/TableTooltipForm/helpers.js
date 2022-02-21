@@ -1,5 +1,5 @@
 // @flow
-import {ATTRIBUTE_TYPES} from 'src/store/sources/attributes/constants';
+import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import type {Indicator} from 'store/widgetForms/types';
 
 /**
@@ -10,9 +10,10 @@ import type {Indicator} from 'store/widgetForms/types';
 const indicatorToKey = (indicator: ?Indicator): ?string => {
 	if (indicator) {
 		const {aggregation, attribute} = indicator;
+		const sourceAttribute = getSourceAttribute(attribute);
 
-		if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-			const {code, property, sourceCode} = attribute.ref || attribute;
+		if (sourceAttribute) {
+			const {code, property, sourceCode} = sourceAttribute.ref || sourceAttribute;
 			return `${sourceCode}_${property}_${code}_${aggregation}`;
 		}
 	}

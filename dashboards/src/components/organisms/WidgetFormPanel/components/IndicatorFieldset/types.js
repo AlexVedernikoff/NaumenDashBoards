@@ -15,6 +15,7 @@ export type Props = TypeProps & ValuesProps<ValuesPropsParams> & HelpersProps & 
 	className: ?string,
 	dataKey: string,
 	dataSetIndex: number,
+	hasInterestRelative: boolean,
 	index: number,
 	onChange: (index: number, indicator: Indicator, callback?: Function) => void,
 	onChangeLabel: (event: OnSelectEvent, index: number) => void,
@@ -26,5 +27,6 @@ export type Props = TypeProps & ValuesProps<ValuesPropsParams> & HelpersProps & 
 };
 
 export type State = {
-	showCreatingModal: boolean
+	showCreatingModal: boolean,
+	showSelectionModal: boolean
 };

@@ -30,12 +30,12 @@ const hasDifferentAggregations = (data: Array<DataSet>) => !data
 async function checkSourceForParent () {
 	const {options, parent} = this;
 	const {data} = options.values;
-	const {dataKey, source} = parent;
+	const {dataKey, source, sourceRowName = null} = parent;
 	const mainSource = data[0].source;
 	const index = data.findIndex(dataSet => dataSet.dataKey === dataKey);
 	let result = true;
 
-	if (index > 0 && source?.value && mainSource) {
+	if (index > 0 && source?.value && mainSource && sourceRowName === null) {
 		const {value: mainValue} = mainSource.value;
 		const {value} = source.value;
 

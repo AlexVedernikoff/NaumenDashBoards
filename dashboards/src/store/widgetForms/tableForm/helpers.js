@@ -10,14 +10,16 @@ import type {Values as SummaryValues} from 'src/store/widgetForms/summaryForm/ty
 /**
  * Создает базовый объект данных таблицы
  * @param {string} dataKey - ключ объекта данных
+ * @param {boolean} addSourceRowName - установить sourceRowName
  * @returns {DataSet}
  */
-const createTableDataSet = (dataKey: string): DataSet => ({
+const createTableDataSet = (dataKey: string, addSourceRowName: boolean = false): DataSet => ({
 	dataKey,
 	indicators: [DEFAULT_INDICATOR],
 	parameters: [DEFAULT_PARAMETER],
 	source: DEFAULT_SOURCE,
-	sourceForCompute: false
+	sourceForCompute: false,
+	sourceRowName: addSourceRowName ? '' : null
 });
 
 /**
@@ -178,9 +180,17 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 	};
 };
 
+/**
+ * Проверяет, что источник вычисляется как одна строка, без применения параметров
+ * @param {?DataSet} dataSet - источник
+ * @returns {boolean} - возвращает true, если источник установлен и вычисляется как одна строка, иначе false
+ */
+const isDontUseParamsForDataSet = (dataSet: ?DataSet) => dataSet && typeof dataSet.sourceRowName === 'string';
+
 export {
 	changeValuesByCircleChart,
 	changeValuesByAxisOrComboCharts,
 	changeValuesBySpeedometerOrSummary,
+	isDontUseParamsForDataSet,
 	createTableDataSet
 };

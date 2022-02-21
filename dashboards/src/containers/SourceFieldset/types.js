@@ -25,7 +25,8 @@ export type DataSet = {
 	indicators: Array<Indicator>,
 	parameters?: Array<Parameter>,
 	source: SourceData,
-	sourceForCompute: boolean
+	sourceForCompute: boolean,
+	sourceRowName?: string | null
 };
 
 export type ConnectedProps = {

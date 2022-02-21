@@ -1,9 +1,9 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {Breakdown, Indicator, Parameter} from 'store/widgetForms/types';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
+import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import {HELPERS_CONTEXT} from 'containers/DiagramWidgetForm/HOCs/withHelpers/constants';
 import type {InnerFormErrors, Props, State} from './types';
 import memoize from 'memoize-one';
@@ -31,11 +31,52 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 	};
 
 	getHelpers = memoize(() => ({
+		filterAttributeByMainDataSet: this.filterAttributeByMainDataSet,
 		filterAttributesByUsed: this.filterAttributesByUsed
 	}));
 
 	/**
-	 * Отфильтровывает атрибуты в зависимости от уже использованных
+	 * Фильтрует атрибуты в зависимости от главного источника
+	 * Используется в таблицах, в которых установленно "не использовать параметры"
+	 * @param {Array<Attribute>} options - список атрибутов
+	 * @param {number} dataSetIndex - индекс набора данных
+	 * @returns {Array<Attribute>} - список отфильтрованных атрибутов
+	 */
+	filterAttributeByMainDataSet = (options: Array<Attribute>, dataSetIndex: number): Array<Attribute> => {
+		const {attributes, fetchAttributes, setLoadingStateAttributes, values: {data}} = this.props;
+		let result = [];
+
+		if (options && options.length > 0) {
+			const dataSet = data[dataSetIndex];
+			const dataSetSource = dataSet.source.value.value;
+			const mainDataSet = data.find(ds => !ds.sourceForCompute);
+			const mainSource = mainDataSet.source?.value?.value;
+			const mainAttributes = attributes[mainSource];
+
+			if (!mainAttributes || (!mainAttributes.uploaded && !mainAttributes.loading)) {
+				// атрибуты главного источника не загружены, переводим источник в загрузку,
+				// и загружаем атрибуты главного источника
+				setLoadingStateAttributes(dataSetSource, true);
+				fetchAttributes(mainSource, null, null, () => setLoadingStateAttributes(dataSetSource, false));
+			} else {
+				if (!mainAttributes.loading) {
+					// атрибуты главного источника загружены,
+					// оставляем только те атрибуты, которые встречаются
+					// в главном источнике
+					const mainOptions = mainAttributes.options;
+
+					result = options.filter(({code, property}) =>
+						mainOptions.find(item => item.code === code && item.property === property)
+					);
+				}
+			}
+		}
+
+		return result;
+	};
+
+	/**
+	 * Фильтрует атрибуты в зависимости от уже использованных
 	 * @param {Array<Attribute>} options - список атрибутов
 	 * @param {number} dataSetIndex - индекс набора данных
 	 * @param {Array<Attribute>} includeAttributes - атрибут который не надо отфильтровывать
@@ -80,8 +121,10 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 
 		if (items) {
 			items.forEach(({attribute}) => {
-				if (attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-					result.push(attribute.ref || attribute);
+				const sourceAttribute = getSourceAttribute(attribute);
+
+				if (sourceAttribute) {
+					result.push(sourceAttribute);
 				}
 			});
 		}

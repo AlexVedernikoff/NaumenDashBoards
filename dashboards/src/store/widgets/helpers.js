@@ -11,6 +11,7 @@ import {
 	INTERVALS
 } from './constants';
 import {DISPLAY_MODE, WIDGET_TYPES} from './data/constants';
+import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -63,7 +64,8 @@ const getLayoutWidgets = (widgets: Array<Widget>, mode: LayoutMode): Array<Widge
  * @returns {boolean}
  */
 const hasPercent = (attribute: MixedAttribute | null, aggregation: string): boolean =>
-	Boolean(attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && aggregation === DEFAULT_AGGREGATION.PERCENT);
+	Boolean(getSourceAttribute(attribute) && aggregation === DEFAULT_AGGREGATION.PERCENT)
+	|| attribute?.type === ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR;
 
 /**
  * Сообщает используется ли в наборе данных виджета агрегация в процентах
@@ -72,7 +74,7 @@ const hasPercent = (attribute: MixedAttribute | null, aggregation: string): bool
  * @returns {boolean}
  */
 const hasCountPercent = (attribute: MixedAttribute | null, aggregation: string): boolean =>
-	Boolean(attribute && attribute.type !== ATTRIBUTE_TYPES.COMPUTED_ATTR && aggregation === DEFAULT_AGGREGATION.PERCENT_CNT);
+	Boolean(getSourceAttribute(attribute) && aggregation === DEFAULT_AGGREGATION.PERCENT_CNT);
 
 /**
  * Сообщает об использовании uuid в лейблах

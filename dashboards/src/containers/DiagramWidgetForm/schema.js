@@ -78,8 +78,8 @@ addMethod(mixed, 'singleAttributeUse', function (skipDiffAggregation = false) {
 					return checkerResult;
 				};
 
-				result = !values.data.some(({breakdown, indicators, parameters, sourceForCompute}) =>
-					!sourceForCompute && (
+				result = !values.data.some(({breakdown, indicators, parameters, sourceForCompute, sourceRowName}) =>
+					!sourceForCompute && (sourceRowName ?? null) === null && (
 						(parameters?.some(checkMatchToTargetAttribute()) ?? false)
 						|| (indicators?.some(checkMatchToTargetAttribute(skipDiffAggregation)) ?? false)
 						|| (breakdown?.some(checkMatchToTargetAttribute()) ?? false)
@@ -111,6 +111,13 @@ addMethod(mixed, 'minSourceNumbers', function () {
 addMethod(mixed, 'requiredByCompute', function (schema) {
 	return this.when(DIAGRAM_FIELDS.sourceForCompute, {
 		is: false,
+		then: schema
+	});
+});
+
+addMethod(mixed, 'requiredByNotIndependentSource', function (schema) {
+	return this.when(DIAGRAM_FIELDS.sourceRowName, {
+		is: value => (value ?? null) === null,
 		then: schema
 	});
 });

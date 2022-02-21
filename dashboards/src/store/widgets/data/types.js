@@ -93,7 +93,14 @@ export type ComputedAttr = {|
 	type: typeof ATTRIBUTE_TYPES.COMPUTED_ATTR
 |};
 
-export type MixedAttribute = ComputedAttr | Attribute;
+export type PercentageRelativeAttr = {|
+	code: string,
+	descriptor: string,
+	title: string,
+	type: typeof ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR
+|};
+
+export type MixedAttribute = ComputedAttr | PercentageRelativeAttr | Attribute;
 
 export type LabelFormat = $Keys<typeof LABEL_FORMATS>;
 
@@ -451,7 +458,8 @@ export type TableData = {
 	indicators: Array<Indicator>,
 	parameters: Array<Parameter>,
 	source: SourceData,
-	sourceForCompute: boolean
+	sourceForCompute: boolean,
+	sourceRowName?: string | null,
 };
 
 export type TableCellSettings = {

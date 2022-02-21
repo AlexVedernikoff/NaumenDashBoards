@@ -2,6 +2,7 @@
 import type {AppState} from 'store/types';
 import {cancelForm} from 'store/widgets/data/actions';
 import type {ConnectedProps} from './types';
+import {fetchAttributes, setLoadingStateAttributes} from 'store/sources/attributes/actions';
 import {getAllWidgetsWithoutSelected} from 'store/widgets/data/selectors';
 import {isPersonalDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {REGULAR_TABS, TABS} from 'src/containers/DiagramWidgetForm/constants';
@@ -17,6 +18,7 @@ export const props = (state: AppState): ConnectedProps => {
 		: translateObjectsArray('title', TABS);
 
 	return {
+		attributes: state.sources.attributes,
 		saving: state.widgets.data.saving.loading,
 		tabs,
 		widgets: getAllWidgetsWithoutSelected(state)
@@ -24,5 +26,7 @@ export const props = (state: AppState): ConnectedProps => {
 };
 
 export const functions = {
-	cancelForm
+	cancelForm,
+	fetchAttributes,
+	setLoadingStateAttributes
 };

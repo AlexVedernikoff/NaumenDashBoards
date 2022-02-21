@@ -1,7 +1,7 @@
 // @flow
 import Cell from 'Table/components/Cell';
 import type {CellConfigProps, ColumnsWidth, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
-import type {Column, ColumnType, ParameterColumn, Row} from 'store/widgets/buildData/types';
+import type {Column, ColumnType, ParameterColumn} from 'store/widgets/buildData/types';
 import {COLUMN_TYPES, IGNORE_TABLE_DATA_LIMITS_SETTINGS} from 'store/widgets/buildData/constants';
 import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
@@ -31,30 +31,27 @@ import ValueWithLimitWarning from './components/ValueWithLimitWarning';
 
 export class TableWidget extends PureComponent<Props, State> {
 	tableRef: Ref<typeof Table> = createRef();
-	state = this.initState(this.props);
+	state = {
+		columns: [],
+		fixedColumnsCount: 0
+	};
 
-	initState (props: Props): State {
+	static getDerivedStateFromProps (props: Props) {
 		const {data} = props;
-		const {columns} = data;
+		const {columns: propColumns} = data;
+		const fixedColumnsCount = propColumns.findIndex(column => column.type === COLUMN_TYPES.INDICATOR);
+		const columns = propColumns.map(column => {
+			if (column.accessor === ID_ACCESSOR) {
+				return {...column, width: 32};
+			}
 
-		const fixedColumnsCount = columns.findIndex(column => column.type === COLUMN_TYPES.INDICATOR);
-		const idColumn = columns.find(column => column.accessor === ID_ACCESSOR);
-
-		if (idColumn) {
-			idColumn.width = this.getMaxValueCellLength(data.data, ID_ACCESSOR);
-		}
+			return column;
+		});
 
 		return {
+			columns,
 			fixedColumnsCount
 		};
-	}
-
-	getMaxValueCellLength (data: Array<Row>, accessor: string): number {
-		return data.reduce((maxLength, row) => {
-			const currentLength = String(row[accessor]).length * 16;
-
-			return currentLength > maxLength ? currentLength : maxLength;
-		}, 0);
 	}
 
 	/**
@@ -397,8 +394,8 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	render (): React$Node {
 		const {data: tableData, loading, widget} = this.props;
-		const {fixedColumnsCount} = this.state;
-		const {columns, data, total} = tableData;
+		const {columns, fixedColumnsCount} = this.state;
+		const {data, total} = tableData;
 		const {columnsRatioWidth, showTotalAmount, sorting, table} = widget;
 		const {pageSize} = table.body;
 		const components = {

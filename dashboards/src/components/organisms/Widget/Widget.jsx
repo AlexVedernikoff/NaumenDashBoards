@@ -20,7 +20,7 @@ export class Widget extends PureComponent<Props, State> {
 	};
 
 	static getDerivedStateFromError (error: Object) {
-		window.top.console.log(error);
+		window.top.console.error(error);
 
 		return {
 			hasError: true

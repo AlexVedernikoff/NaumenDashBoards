@@ -47,6 +47,14 @@ type RecordAttributesError = {
 	type: typeof ATTRIBUTES_EVENTS.RECORD_ATTRIBUTES_ERROR
 };
 
+type SetLoadingStateAttributes = {
+	payload: {
+		classFqn: string,
+		state: boolean
+	},
+	type: typeof ATTRIBUTES_EVENTS.SET_LOADING_STATE_ATTRIBUTES
+};
+
 type UnknownAttributesAction = {
 	payload: null,
 	type: typeof ATTRIBUTES_EVENTS.UNKNOWN_ATTRIBUTES_ACTION
@@ -56,6 +64,7 @@ export type AttributesAction =
 	| ReceiveAttributes
 	| RecordAttributesError
 	| RequestAttributes
+	| SetLoadingStateAttributes
 	| UnknownAttributesAction
 ;
 

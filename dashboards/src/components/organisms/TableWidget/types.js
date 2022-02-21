@@ -1,6 +1,6 @@
 // @flow
+import type {Column, FetchTableBuildData, TableBuildData} from 'store/widgets/buildData/types';
 import type {DrillDown, OpenCardObject} from 'store/widgets/links/types';
-import type {FetchTableBuildData, TableBuildData} from 'store/widgets/buildData/types';
 import type {TableWidget} from 'store/widgets/data/types';
 
 export type Props = {
@@ -14,5 +14,6 @@ export type Props = {
 };
 
 export type State = {
-	fixedColumnsCount: number
+	columns: Array<Column>,
+	fixedColumnsCount: number,
 };

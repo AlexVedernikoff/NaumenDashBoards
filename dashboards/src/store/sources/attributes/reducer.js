@@ -33,6 +33,14 @@ const reducer = (state: AttributesState = initialAttributesState, action: Attrib
 					uploaded: false
 				}
 			};
+		case ATTRIBUTES_EVENTS.SET_LOADING_STATE_ATTRIBUTES:
+			return {
+				...state,
+				[action.payload.classFqn]: {
+					...state[action.payload.classFqn],
+					loading: action.payload.state
+				}
+			};
 		default:
 			return state;
 	}
