@@ -14,6 +14,7 @@ package ru.naumen.modules.dashboards
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovy.transform.Field
 import groovy.transform.TupleConstructor
 import ru.naumen.core.server.script.api.IAuthenticationApi
@@ -39,7 +40,7 @@ import org.apache.commons.lang3.time.DateUtils
 import static DiagramType.*
 import static MessageProvider.*
 import static DashboardMarshallerClass.*
-
+import static groovy.json.JsonOutput.toJson
 
 @Field @Lazy @Delegate DashboardDataSet dashboardDataSet = new DashboardDataSetImpl(binding, new DashboardDataSetService(api.utils,
                                                                                                                          api.metainfo,
@@ -504,51 +505,68 @@ class DashboardDataSetService
         Integer total = 0
         if(widgetSettings.type in [*DiagramType.CountableTypes, DiagramType.TABLE] && widgetSettings.showTotalAmount)
         {
-            //флаг на проверку, что пришедший датасет уже правильно построен
-            def dataAndResultAlreadyOk = request.data.every{ key, value ->
-                value.aggregations.type.every { it == Aggregation.COUNT_CNT }
-            } && diagramType in DiagramType.CountableTypes  &&
-                                         request.requisite.every {it.nodes.every {it.type == 'DEFAULT'}}
-
-            //иначе датасет получается по-новому
-            if(!dataAndResultAlreadyOk)
+            if (widgetSettings?.data.sourceRowName?.findAll())
             {
-                request = updateAggregationsInRequest(request, diagramType)
-                Integer aggregationCnt = request?.data?.findResult { key, value ->
-                    value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
-                }
-                res = diagramType in DiagramType.CountableTypes
-                    ? getDiagramData(request, diagramType, templateUUID)
-                    : getDiagramData(request, diagramType, templateUUID,
-                                     aggregationCnt, widgetSettings,
-                                     ignoreLimits)
-            }
-
-            //проверка на наличии агрегации N/A в таблице
-            Boolean tableWithNA = diagramType == DiagramType.TABLE &&
-                                                request?.data?.any { key, value ->
-                                                    value.aggregations.type.any { it == Aggregation.NOT_APPLICABLE }
-                                                }
-            if(tableWithNA)
-            {
-                def NAIndex = request?.data?.findResult { key, value ->
-                    value?.aggregations?.withIndex()?.findResult { val, i ->
-                        if (val.type == Aggregation.NOT_APPLICABLE)
-                            return i
+                res.each {
+                    it.each {
+                        try
+                        {
+                            total += it[0] as Integer
+                        }
+                        catch (NumberFormatException e)
+                        {
+                        }
                     }
                 }
-                total = res?.find()?.transpose()?.get(NAIndex)?.count {it != '' }
             }
             else
             {
-                //подсчет для комбо будет суммой для всех показателей диаграммы
-                if(diagramType == DiagramType.COMBO)
+                //флаг на проверку, что пришедший датасет уже правильно построен
+                Boolean dataAndResultAlreadyOk = request?.data?.every{ key, value ->
+                    value.aggregations.type.every { it == Aggregation.COUNT_CNT }
+                } && diagramType in DiagramType.CountableTypes  &&
+                                             request.requisite.every {it.nodes.every {it.type == 'DEFAULT'}}
+
+                //иначе датасет получается по-новому
+                if(!dataAndResultAlreadyOk)
                 {
-                    total = res.grep()*.transpose()*.get(0).flatten().sum { it as Integer }
+                    request = updateAggregationsInRequest(request, diagramType)
+                    Integer aggregationCnt = request?.data?.findResult { key, value ->
+                        value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
+                    }
+                    res = diagramType in DiagramType.CountableTypes
+                        ? getDiagramData(request, diagramType, templateUUID)
+                        : getDiagramData(request, diagramType, templateUUID,
+                                         aggregationCnt, widgetSettings,
+                                         ignoreLimits)
+                }
+
+                //проверка на наличии агрегации N/A в таблице
+                Boolean tableWithNA = diagramType == DiagramType.TABLE &&
+                                      request?.data?.any { key, value ->
+                                          value.aggregations.type.any { it == Aggregation.NOT_APPLICABLE }
+                                      }
+                if(tableWithNA)
+                {
+                    Integer NAIndex = request?.data?.findResult { key, value ->
+                        value?.aggregations?.withIndex()?.findResult { val, i ->
+                            if (val.type == Aggregation.NOT_APPLICABLE)
+                                return i
+                        }
+                    }
+                    total = res?.find()?.transpose()?.get(NAIndex)?.count {it != '' }
                 }
                 else
                 {
-                    total = res?.find()?.transpose()?.find()?.sum { it as Integer }
+                    //подсчет для комбо будет суммой для всех показателей диаграммы
+                    if(diagramType == DiagramType.COMBO)
+                    {
+                        total = res.grep()*.transpose()*.get(0).flatten().sum { it as Integer }
+                    }
+                    else
+                    {
+                        total = res?.find()?.transpose()?.find()?.sum { it as Integer }
+                    }
                 }
             }
         }
@@ -1734,7 +1752,105 @@ class DashboardDataSetService
         Collection<Requisite> requisite = intermediateData.findResults { key, value ->
             value.requisite as Requisite
         }
+
+        resultRequestData = updateDiagramRequestDataForPercentCalculation(requisite, resultRequestData)
+
         return new DiagramRequest(requisite: requisite, data: resultRequestData)
+    }
+
+    /**
+     * Метод обработки данных запроса для расчета процента для показателя относительно источника
+     * @param requisites - реквизиты
+     * @param resultRequestData - данные запроса
+     * @return обновленные данные запроса
+     */
+    private Map<String, RequestData> updateDiagramRequestDataForPercentCalculation(Collection<Requisite> requisites,
+                                                               Map<String, RequestData> resultRequestData)
+    {
+        Map<String, RequestData> updatedRequestData = [:]
+
+        resultRequestData.each {
+            RequestData requestData = it.value
+            String dataKey = it.key
+            Collection<AggregationParameter> aggregations = requestData.aggregations
+            updatedRequestData[dataKey] = requestData
+
+            if (aggregations.head().attribute.type != 'PERCENTAGE_RELATIVE_ATTR')
+            {
+                return
+            }
+
+            String sourceCode = requestData.source.classFqn
+            String mergedDescriptor = getDescriptorWithMergedFilters(
+                requestData.source.descriptor,
+                aggregations.head().attribute.descriptor
+            )
+            Attribute attributeForPercentCalculation = getAttributeForPercentCalculation(sourceCode)
+
+            aggregations.head().attribute = attributeForPercentCalculation
+
+            RequestData requestDataWithMergedDescriptor = requestData.clone()
+            requestDataWithMergedDescriptor.source = requestDataWithMergedDescriptor.source.clone()
+            String newDataKey = UUID.randomUUID()
+            requestDataWithMergedDescriptor.source.descriptor = mergedDescriptor
+            updatedRequestData[newDataKey] = requestDataWithMergedDescriptor
+
+            RequisiteNode requisiteNode = new ComputationRequisiteNode(
+                title: null,
+                type: 'COMPUTATION',
+                formula: "[{${ newDataKey }}/{${ dataKey }}*100]"
+            )
+            Requisite requisite = new Requisite(
+                title: 'DEFAULT',
+                nodes: [requisiteNode],
+                showNulls: false
+            )
+            requisites[
+                requisites.findIndexOf {
+                    it.nodes.head() in DefaultRequisiteNode && it.nodes.head().dataKey == dataKey
+                }
+            ] = requisite
+        }
+
+        return updatedRequestData
+    }
+
+    /**
+     * Метод получения дескриптора с фильтрами из дескриптора источника и дескриптора показателя
+     * @param sourceDescriptor - дескриптор источника
+     * @param indicatorDescriptor - дескриптор показателя
+     * @return дескриптор с обоими фильтрами
+     */
+    private String getDescriptorWithMergedFilters(String sourceDescriptor, String indicatorDescriptor)
+    {
+        JsonSlurper slurper = new JsonSlurper()
+        Map<String, Object> parsedSourceDescriptor = sourceDescriptor ? slurper.parseText(sourceDescriptor) : [:]
+        Map<String, Object> parsedIndicatorDescriptor = indicatorDescriptor ? slurper.parseText(indicatorDescriptor) : [:]
+
+        if (parsedSourceDescriptor.filters)
+        {
+            parsedSourceDescriptor.filters.each {
+                parsedIndicatorDescriptor.filters << it
+            }
+        }
+
+        indicatorDescriptor = toJson(parsedIndicatorDescriptor)
+        return indicatorDescriptor
+    }
+
+    /**
+     * Метод получения атрибута, относительно которого будет производится расчет процента для показателя относительно источника
+     * @param sourceCode - код источнка
+     * @return атрибут
+     */
+    private Attribute getAttributeForPercentCalculation(String sourceCode)
+    {
+        return new Attribute(
+            type: 'string',
+            metaClassFqn: sourceCode,
+            sourceCode: sourceCode,
+            code: 'UUID'
+        )
     }
 
     /**
@@ -4190,7 +4306,8 @@ class DashboardDataSetService
         if (sourceRowNames.findAll())
         {
             attributes = attributes[(aggregationCnt - 1)..-1]
-            attributes.head().name = 'Показатель'
+            // берем название самого первого показателя
+            attributes.head().name = requestContent.data.head().indicators.head().attribute.title ?: ''
         }
 
         List<String> allAggregationAttributes = getSpecificAggregationsList(requestContent).name
@@ -4811,7 +4928,7 @@ class DashboardDataSetService
 
         if (sourceRowNames.findAll())
         {
-            columns.add(1, new NumberColumn(header: "Источник", accessor: "Источник", footer: ""))
+            columns.add(1, new NumberColumn(header: "", accessor: "Источник", footer: ""))
         }
 
         def source = request.data.findResult { k, v -> v.source }
