@@ -1,5 +1,4 @@
 // @flow
-import api from 'api';
 import type {Attribute} from 'store/sources/attributes/types';
 import AttributeAggregationField from 'WidgetFormPanel/components/AttributeAggregationField';
 import AttributeCreatingModal from 'containers/AttributeCreatingModal';
@@ -9,7 +8,6 @@ import {compose} from 'redux';
 import type {ComputedAttr, PercentageRelativeAttr} from 'store/widgets/data/types';
 import ComputedAttributeEditor from 'WidgetFormPanel/components/ComputedAttributeEditor';
 import Container from 'components/atoms/Container';
-import {createFilterContext, getFilterContext} from 'utils/descriptorUtils';
 import CreationPanel from 'components/atoms/CreationPanel';
 import {deepClone} from 'helpers';
 import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
@@ -17,7 +15,6 @@ import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FieldButton from 'components/atoms/FieldButton';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
-import {getDescriptorCases} from 'store/helpers';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
 import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import type {Indicator} from 'store/widgetForms/types';
@@ -31,6 +28,7 @@ import SelectModal, {SelectItem} from 'components/molecules/SelectModal';
 import t from 'localization';
 import uuid from 'tiny-uuid';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
+import withFilterForm from 'containers/FilterForm';
 import withHelpers from 'containers/DiagramWidgetForm/HOCs/withHelpers';
 import withType from 'WidgetFormPanel/HOCs/withType';
 import withValues from 'components/organisms/WidgetForm/HOCs/withValues';
@@ -67,30 +65,26 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		const handler = async () => {
 			this.setState({showSelectionModal: false});
 
-			const {source: {value}} = this.props;
+			const {openFilterForm, source} = this.props;
+			const {descriptor, value} = source;
 
 			if (value) {
-				const {label, value: classFqn} = value;
+				const {label} = value;
+				const sourceData = {descriptor: descriptor ?? null, value};
+				const serializedContext = await openFilterForm(sourceData);
 
-				if (classFqn) {
-					const context = createFilterContext(classFqn, getDescriptorCases);
-					const {serializedContext} = await api.instance.filterForm.openForm(context);
+				if (serializedContext) {
+					const attribute: PercentageRelativeAttr = {
+						code: uuid(),
+						descriptor: serializedContext,
+						title: `${label} - ${t('IndicatorFieldset::SourcePercentageRelativeField')}`,
+						type: ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR
+					};
 
-					if (serializedContext) {
-						// this.saveComputedAttribute(attribute); -- ???
-
-						const attribute: PercentageRelativeAttr = {
-							code: uuid(),
-							descriptor: serializedContext,
-							title: `${label} - ${t('IndicatorFieldset::SourcePercentageRelativeField')}`,
-							type: ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR
-						};
-
-						this.change({
-							...this.props.value,
-							attribute
-						});
-					}
+					this.change({
+						...this.props.value,
+						attribute
+					});
 				}
 			}
 		};
@@ -100,15 +94,12 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	getHandleEditPercentageRelativeAttribute = (attribute: PercentageRelativeAttr | null) => {
 		const handler = async () => {
-			const {source: {value}} = this.props;
+			const {openFilterForm, source} = this.props;
+			const {descriptor, value} = source;
 
-			if (attribute && value) {
-				const {descriptor} = attribute;
-				const {value: classFqn} = value;
-
-				const context = getFilterContext(descriptor, classFqn, getDescriptorCases);
-
-				const {serializedContext} = await api.instance.filterForm.openForm(context);
+			if (attribute && source && value) {
+				const sourceData = {descriptor: descriptor ?? null, value};
+				const serializedContext = await openFilterForm(sourceData);
 
 				if (serializedContext) {
 					const newAttribute = {...attribute, descriptor: serializedContext};
@@ -397,4 +388,9 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	}
 }
 
-export default compose(withHelpers, withValues(DIAGRAM_FIELDS.computedAttrs, DIAGRAM_FIELDS.data), withType)(IndicatorFieldset);
+export default compose(
+	withHelpers,
+	withValues(DIAGRAM_FIELDS.computedAttrs, DIAGRAM_FIELDS.data),
+	withType,
+	withFilterForm
+)(IndicatorFieldset);
