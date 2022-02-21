@@ -19,6 +19,7 @@ import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.ISearchParams
 import ru.naumen.core.server.script.api.IWebApi
 import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
+import ru.naumen.core.server.script.api.metainfo.IAttributeGroupWrapper
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 import ru.naumen.core.server.script.spi.IScriptConditionsApi
 import ru.naumen.core.server.script.spi.IScriptUtils
@@ -181,6 +182,14 @@ interface Dashboards
      * @return ссылка на на страницу с дашбордом в json-формате.
      */
     String getDashboardLink(Map<String, Object> requestContent, IUUIDIdentifiable user)
+
+    /**
+     * Метод получения списка кодов атрибутов по группе атрибутов
+     * @param classFqn - код класса источника
+     * @param attrGroupCode - код группы атрибутов
+     * @return список кодов атрибутов группы
+     */
+    String getNonMetadataAttributeCodes(String classFqn, String attrGroupCode)
 }
 
 @InheritConstructors
@@ -328,6 +337,12 @@ class DashboardsImpl extends BaseController implements Dashboards
         String dashboardCode = requestContent.dashboardCode
         String subjectUUID = requestContent.subjectUUID
         return toJson(service.getDashboardLink(dashboardCode, subjectUUID, user))
+    }
+
+    @Override
+    String getNonMetadataAttributeCodes(String classFqn, String attrGroupCode)
+    {
+        return toJson(service.getNonMetadataAttributeCodes(classFqn, attrGroupCode))
     }
 }
 
@@ -1149,6 +1164,38 @@ class DashboardsService
         def currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
         String message = messageProvider.getConstant(EMPTY_DASHBOARD_CODE_ERROR, currentUserLocale)
         utils.throwReadableException("$message#${EMPTY_DASHBOARD_CODE_ERROR}")
+    }
+
+    /**
+     * Метод получения списка кодов атрибутов по группе атрибутов
+     * @param classFqn - код класса источника
+     * @param attrGroupCode - код группы атрибутов
+     * @return список кодов атрибутов группы
+     */
+    List<String> getNonMetadataAttributeCodes(String classFqn, String attrGroupCode = null)
+    {
+        List<String> attrCodes
+        IMetaClassWrapper metaClass = metainfo.getMetaClass(classFqn)
+
+        if (attrGroupCode)
+        {
+            IAttributeGroupWrapper attributeGroup = metaClass.getAttributeGroup(attrGroupCode)
+            attrCodes = attributeGroup.attributes*.code
+        }
+        else
+        {
+            attrCodes = metaClass.attributes.findResults {
+                String attrCode = null
+
+                Boolean hasMetadataTag = it.tags?.any { it.code == 'Metadata' }
+                if (!hasMetadataTag)
+                {
+                    attrCode = it.code
+                }
+                return attrCode
+            }
+        }
+        return attrCodes
     }
 
     /**
