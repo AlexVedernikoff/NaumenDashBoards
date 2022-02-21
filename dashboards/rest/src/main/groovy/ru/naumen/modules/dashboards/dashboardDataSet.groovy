@@ -279,6 +279,12 @@ class DashboardDataSetService
 
         if (diagramType == DiagramType.TABLE)
         {
+            if (widgetSettings?.data[0].sourceRowName != null)
+            {
+                widgetSettings.data.each { dataSet ->
+                    dataSet.parameters = []
+                }
+            }
             Boolean requestHasBreakdown = checkForBreakdown(widgetSettings)
             Boolean showTableNulls = widgetSettings.showEmptyData
             Boolean showTableBlanks = widgetSettings.showBlankData
