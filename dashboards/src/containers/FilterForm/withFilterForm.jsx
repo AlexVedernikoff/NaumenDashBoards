@@ -36,6 +36,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		};
 
 		generateRestriction = async (classFqn: string, attrGroupCode: string | null) => {
+			const {sources} = this.props;
 			const result = {};
 			const attributes = await this.getFilterAttributes(classFqn, attrGroupCode);
 
@@ -45,7 +46,9 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 				const {property, type} = attribute;
 
 				if (type in ATTRIBUTE_SETS.REFERENCE && property && !(property in result)) {
-					result[property] = 'system';
+					const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(sources, property);
+
+					result[property] = sourceFilterAttributeGroup ?? 'system';
 				}
 			});
 
