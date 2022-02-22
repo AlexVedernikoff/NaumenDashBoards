@@ -78,11 +78,12 @@ export default class DocumentVerifyTable extends Component<Props> {
 			return entity;
 		});
 
+		skipEntity.forEach(this.searchValueError);
+
 		sendEntityStatus(UUID, state);
 		setVerifyData({entities: skipEntity, html});
 
 		const isError = skipEntity.some(({state}) => state === 'error');
-
 		this.setState({isDocGenerationDisabled: isError});
 	};
 
