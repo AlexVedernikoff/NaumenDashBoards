@@ -1,12 +1,12 @@
 // @flow
 import api from 'api';
 import {DASHBOARD_HEADER_HEIGHT} from 'components/organisms/DashboardHeader/constants';
+import {DEFAULT_HEIGHT} from './constants';
 import {gridRef} from 'components/organisms/WidgetsGrid/constants';
 import isMobile from 'ismobilejs';
 import type {Store} from 'store/types';
 
 export class DashboardResizer {
-	initHeight: number = 800;
 	sizeWillBeChanged = false;
 	store = null;
 	isMobile = false;
@@ -14,11 +14,26 @@ export class DashboardResizer {
 	constructor (store: Store) {
 		this.store = store;
 		this.isMobile = isMobile().any;
-		this.initHeight = window.innerHeight;
 	}
 
 	getContentHeight (): number | null {
 		return gridRef.current && gridRef.current.getBoundingClientRect().height + DASHBOARD_HEADER_HEIGHT;
+	}
+
+	getFrameInitHeight (): number {
+		let result = window.innerHeight ?? DEFAULT_HEIGHT;
+
+		if (window.frameElement) {
+			const attributeHeight = window.frameElement.getAttribute('height');
+
+			result = Number.parseInt(attributeHeight);
+
+			if (isNaN(result)) {
+				result = DEFAULT_HEIGHT;
+			}
+		}
+
+		return result;
 	}
 
 	focus = () => window.frameElement.scrollIntoView();
@@ -42,13 +57,13 @@ export class DashboardResizer {
 		this.sizeWillBeChanged = false;
 	}, {once: true});
 
-	resetHeight = () => this.isFullSize() ? this.setFullHeight() : this.setCustomHeight(this.initHeight);
+	resetHeight = () => this.isFullSize() ? this.setFullHeight() : this.setCustomHeight(this.getFrameInitHeight());
 
 	resize = (callback?: Function) => {
 		if (this.isFullSize()) {
 			this.setFullHeight();
 		} else if (this.isEditableDashboard()) {
-			this.setCustomHeight(this.initHeight);
+			this.setCustomHeight(this.getFrameInitHeight());
 		} else {
 			const height = this.getContentHeight();
 
@@ -64,6 +79,7 @@ export class DashboardResizer {
 
 	setFullHeight = () => {
 		const {frameElement} = window;
+		const frameHeight = this.getFrameInitHeight();
 
 		if (frameElement) {
 			const clientHeight = frameElement.ownerDocument.documentElement.clientHeight;
@@ -72,9 +88,9 @@ export class DashboardResizer {
 			// 8px - margin-top растяние элемента оболочки iframe
 			const height = clientHeight - top - left - 8;
 
-			this.setHeight(`${height}px`, `${this.initHeight}px`);
+			this.setHeight(`${height}px`, `${frameHeight}px`);
 		} else {
-			this.setHeight(`100%`, `${this.initHeight}px`);
+			this.setHeight(`100%`, `${frameHeight}px`);
 		}
 	};
 
