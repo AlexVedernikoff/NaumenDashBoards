@@ -80,6 +80,10 @@ export default class DocumentVerifyTable extends Component<Props> {
 
 		sendEntityStatus(UUID, state);
 		setVerifyData({entities: skipEntity, html});
+
+		const isError = skipEntity.some(({state}) => state === 'error');
+
+		this.setState({isDocGenerationDisabled: isError});
 	};
 
 	getListControlShow ({state}) {
@@ -147,12 +151,6 @@ export default class DocumentVerifyTable extends Component<Props> {
 		if (!isSuccess && show) {
 			this.setState({isDocGenerationDisabled: false});
 		}
-	};
-
-	handleCreateDocument = async () => {
-		const {sendGenerateDocument} = this.props;
-
-		await sendGenerateDocument();
 	};
 
 	handleRowClick = UUID => () => {
