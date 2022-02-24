@@ -145,7 +145,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 				context.attrCodes = attrCodes.map(attrCode => `${classFqn}@${attrCode}`);
 				options.useRestriction = true;
 
-				if (!isUserMode) {
+				if (!isUserMode && attrGroupCode) {
 					options.restriction = await this.generateRestriction(classFqn, attrGroupCode);
 				}
 			} else if (attrGroupCode) {
