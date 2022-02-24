@@ -43,11 +43,6 @@
 	text-align: center;
 }
 
-.gantt_task_progress_drag,
-.gantt_link_control {
-	display: none !important;
-}
-
 .gantt_grid_editor_placeholder input {
 	background-color: #ffffff;
 	border: 2px solid #000000;
@@ -84,7 +79,7 @@
 	top: 0;
 }
 
-.gantt_grid_head_cell:not(:first-child):hover div {
+.gantt_grid_head_cell:not(:first-child):not(:nth-last-child(2)):hover div {
 	display: block;
 }
 

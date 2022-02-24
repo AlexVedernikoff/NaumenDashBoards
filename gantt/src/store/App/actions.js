@@ -2,7 +2,7 @@
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, saveData, saveDataTask} from 'utils/api';
+import {getContext, getCurrentUser, getDataSources, getAttributeGroups, getDiagramData, getInitialSettings, getUserData, saveData, postChangeProgress} from 'utils/api';
 import {v4 as uuidv4} from 'uuid';
 
 /**
@@ -16,8 +16,9 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		const {contentCode, subjectUuid} = getContext();
 		const {email, groupUser: role, name} = await getUserData();
 		const sources = await getDataSources();
-		const {commonSettings, diagramKey, resourceAndWorkSettings} = await getInitialSettings(contentCode, subjectUuid);
+		const {commonSettings, diagramKey, resourceAndWorkSettings, workProgresses} = await getInitialSettings(contentCode, subjectUuid);
 
+		dispatch(changeWorkProgress(workProgresses));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setContentCode(contentCode));
 		dispatch(setSubjectUuid(subjectUuid));
@@ -34,25 +35,42 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 };
 
 /**
- * Получает данные, необходимые для измененной задачи
+ * Получает список групповых аттрибутов
  * @returns {ThunkAction}
  */
-const getCommonTask = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getListOfGroupAttributes = (metaClass): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const {endDate, startDate, subjectUuid} = await saveDataTask();
-		const task = {
-			endDate: endDate,
-			startDate: startDate,
-			subjectUuid: subjectUuid
-		};
+		const groupAttribute = await getAttributeGroups(metaClass);
 
-		dispatch(setTask(task));
+		dispatch(saveListOfAttributes(groupAttribute));
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+ * Сохраняет и отправляет данные работы у которой изменили прогресс и параметры текущей диаграммы
+ * @param {string} workUUID - идентификатор работы
+ * @param {number} progress - прогресс работы
+ * @returns {ThunkAction}
+ */
+const saveChangeProgress = (workUUID: string, progress: number): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const {contentCode, subjectUuid} = getContext();
+
+		await postChangeProgress(workUUID, progress, contentCode, subjectUuid);
+
+		dispatch(setContentCode(contentCode));
+		dispatch(setSubjectUuid(subjectUuid));
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
 		dispatch(hideLoaderData());
 	}
 };
+
 /**
  * Получает данные, необходимые для отображения данных ВП
  * @returns {ThunkAction}
@@ -106,6 +124,14 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
  */
 const saveMasterSettings = () => ({
 	type: APP_EVENTS.SAVE_MASTER_SETTINGS
+});
+
+/**
+ * Сохраняет список аттрибутов
+ */
+const saveListOfAttributes = (payload: ListOfAttributes) => ({
+	payload,
+	type: APP_EVENTS.SET_ATTRIBUTE
 });
 
 /**
@@ -254,15 +280,6 @@ const setSources = (payload: Array<Source>) => ({
 });
 
 /**
- * Сохраняет источники
- * @param {Array<Source>} payload - массив из источников
- */
- const setTask = (payload: Task) => ({
-	payload,
-	type: APP_EVENTS.SET_TASK
-});
-
-/**
  * Отмена заполненных настроек
  */
 const cancelSettings = () => ({
@@ -293,23 +310,33 @@ const setColumnTask = payload => ({
 	type: APP_EVENTS.SET_COLUMN_TASK
 });
 
+/**
+ * Изменение прогресса работы
+ */
+const changeWorkProgress = (payload: WorkProgress) => ({
+	payload,
+	type: APP_EVENTS.SET_WORK_PROGRESS
+});
+
 export {
 	cancelSettings,
 	changeScale,
 	getAppConfig,
+	getGanttData,
+	getListOfGroupAttributes,
 	hideLoaderData,
 	hideLoaderSettings,
+	saveListOfAttributes,
+	saveChangeProgress,
 	saveSettings,
 	setColumnSettings,
 	setCommonSettings,
 	setColumnTask,
-	getGanttData,
-	getCommonTask,
+	changeWorkProgress,
 	setDiagramLinksData,
 	setDiagramData,
 	setRangeTime,
 	setResourceSettings,
 	showLoaderData,
-	showLoaderSettings,
-	setTask
+	showLoaderSettings
 };

@@ -5,7 +5,7 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
 import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
-import {getCommonTask, setColumnSettings, setColumnTask, setTask} from 'store/App/actions';
+import {setColumnSettings, setColumnTask, changeWorkProgress} from 'store/App/actions';
 import Modal from 'src/components/atoms/Modal';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
@@ -15,13 +15,15 @@ const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
 	let ID;
-	const {columns, links, rollUp, scale, tasks} = props;
+	const {columns, getListOfGroupAttributes, links, resources, rollUp, scale, tasks, workProgresses} = props;
 	const [showMenu, setShowMenu] = useState(false);
 	const [showModalConfirm, setShowModalConfirm] = useState(true);
 	const [openModal, setOpenModal] = useState(false);
 	const [initPage, setinitPage] = useState(false);
+	const [res, setRes] = useState([]);
 	const [position, setPosition] = useState({left: 0, top: 0});
 	const dispatch = useDispatch();
+	const [options, setOptions] = useState([]);
 	const ganttContainer = useRef(null);
 	const store = useSelector(state => state);
 	const zoomConfig = {
@@ -98,7 +100,31 @@ const Gantt = (props: Props) => {
 		]
 	};
 
+	// Изменяет содержание опций групповых аттрибутов в карточке задачи при изменении res
 	useEffect(() => {
+		gantt.attachEvent('onTaskSelected', function (id) {
+			const newId = '%27employee%27';
+
+			getListOfGroupAttributes(newId);
+
+			gantt.showLightbox(id);
+		});
+
+		if (store.APP.groupAttribute !== undefined) {
+			store.APP.groupAttribute.map(i => {
+				const { code: key, title: label } = i;
+				const newObj = { key, label };
+
+				options.push(newObj);
+				setOptions(options);
+			});
+		}
+	}, [res]);
+
+	useEffect(() => {
+		const newId = '%27employee%27';
+
+		getListOfGroupAttributes(newId);
 		handleHeaderClick();
 
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
@@ -127,12 +153,15 @@ const Gantt = (props: Props) => {
 		gantt.ext.zoom.init(zoomConfig);
 		gantt.config.lightbox.sections = [
 			{focus: true, height: 70, map_to: 'text', name: 'description', type: 'textarea'},
+			{
+				height: 22,
+				label: 'Campaign',
+				map_to: 'priority',
+				name: 'priority',
+				options: options,
+				type: 'select'},
 			{height: 72, map_to: 'auto', name: 'time', type: 'time'}
 		];
-
-		gantt.attachEvent('onTaskSelected', function (id) {
-			gantt.showLightbox(id);
-		});
 
 		gantt.attachEvent('onLightboxSave', function (id, obj) {
 			const newTasks = deepClone(tasks);
@@ -157,20 +186,25 @@ const Gantt = (props: Props) => {
 		});
 
 		gantt.attachEvent('onAfterTaskDrag', function (id, mode, e) {
-			const t = gantt.getTask(id);
-			const task = {
-				endDate: t.end_date,
-				startDate: t.start_date,
-				subjectUuid: id
-			};
+			const taskId = gantt.getTask(id);
 
-			console.log(task);
+			const newTasks = store.APP.tasks;
 
-			setTask(task);
+			newTasks.forEach(i => {
+				if (i.id === taskId.id) {
+					i.progress = taskId.progress;
+				}
+			});
+			const {saveChangeProgress} = props;
+			const wholeId = taskId.id.split('_');
+			const finishProgress = taskId.progress;
+			const finishId = wholeId[0];
+
+			saveChangeProgress(finishId, finishProgress);
+			dispatch(setColumnTask(newTasks));
 
 			setOpenModal(true);
 			setShowModalConfirm(true);
-			dispatch(getCommonTask());
 		});
 
 		gantt.i18n.setLocale('ru');
@@ -197,8 +231,30 @@ const Gantt = (props: Props) => {
 		gantt.clearAll();
 	}, []);
 
+	// Изменяет прогресс в задачах при изменении store.APP.workProgresses
+	useEffect(() => {
+		let arrProgressValues = [];
+
+		if (Object.keys(store.APP.workProgresses).length && !firstUpdate) {
+			if (store.APP.workProgresses) {
+				arrProgressValues = Object.values(store.APP.workProgresses);
+
+				for (let i = 0; i < tasks.length; i++) {
+					tasks[i].progress = arrProgressValues[i];
+				}
+			}
+
+			dispatch(setColumnTask(tasks));
+
+			gantt.render();
+		}
+
+		gantt.parse((JSON.stringify({data: tasks, links: links})));
+	}, [store.APP.workProgresses]);
+
 	const [firstUpdate, setFirstUpdate] = useState(true);
 
+	// Изменяет время и дату настроек диаграммы гантта при изменении [store.APP.startDate, store.APP.endDate]
 	useLayoutEffect(() => {
 		if (!firstUpdate) {
 			gantt.config.start_date = store.APP.startDate;
@@ -209,10 +265,12 @@ const Gantt = (props: Props) => {
 		setFirstUpdate(false);
 	}, [store.APP.startDate, store.APP.endDate]);
 
+	// Изменяет временной формат на диграемме при изменении scale
 	useEffect(() => {
 		gantt.ext.zoom.setLevel(String(scale).toLowerCase());
 	}, [scale]);
 
+	// Отображает или скрывает детей задач при изменении rollUp
 	useEffect(() => {
 		tasks
 			.filter(task => !task.parent)
@@ -220,6 +278,12 @@ const Gantt = (props: Props) => {
 			.forEach(taskId => rollUp ? gantt.close(taskId) : gantt.open(taskId));
 	}, [rollUp]);
 
+	// Изменяет состояние ресурсов при изменении props.resources
+	useEffect(() => {
+		setRes(resources);
+	}, [props.resources]);
+
+	// Изменяет дефолтные настройки при изменения tasks
 	useEffect(() => {
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
@@ -245,16 +309,19 @@ const Gantt = (props: Props) => {
 		});
 	}, [tasks]);
 
+	// Отображает или скрывает прогресс при изменении props.progress
 	useEffect(() => {
 		gantt.config.show_progress = props.progress;
 		gantt.render();
 	}, [props.progress]);
 
+	// Отображает связи между задачами при изменении props.allLinks
 	useEffect(() => {
 		gantt.config.show_links = props.allLinks;
 		gantt.render();
 	}, [props.allLinks]);
 
+	// Экспортирует диаграмму при изменении props.flag
 	useEffect(() => {
 		if (initPage) {
 			gantt.exportToPDF({
@@ -265,6 +332,7 @@ const Gantt = (props: Props) => {
 		setinitPage(true);
 	}, [props.flag]);
 
+	// Обновляет диаграмму при изменении props.refresh
 	useEffect(() => {
 		gantt.render();
 	}, [props.refresh]);
@@ -279,17 +347,13 @@ const Gantt = (props: Props) => {
 
 		if (initPage) {
 			gantt.createTask({
-				// 5af9985a-79b4-42b9-9d0f-635f6d80561e: "Сотрудник"
 				code1: 'Иванов Иван',
 				end_date: '2021-11-13T11:55:26',
 				id: ID,
-				// level: 1,
-				// parent: 'serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887',
 				start_date: '2021-11-11T11:55:26',
 				text: 'Иванов Иван',
 				type: 'WORK'
 			});
-			// gantt.refreshData();
 			const tasksTwo = gantt.getTaskByTime();
 
 			newTasks.push(tasksTwo[tasksTwo.length - 1]);

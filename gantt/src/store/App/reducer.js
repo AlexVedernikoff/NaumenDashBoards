@@ -17,6 +17,11 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 				errorData: '',
 				loadingData: true
 			};
+		case APP_EVENTS.SET_ATTRIBUTE:
+			return {
+				...state,
+				groupAttribute: action.payload
+			};
 		case APP_EVENTS.HIDE_LOADER_SETTINGS:
 			return {
 				...state,
@@ -107,14 +112,9 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 			};
 		case APP_EVENTS.CANCEL_SETTINGS:
 			return {
-				...state, 
+				...state,
 				resources: deepClone(state.masterResources),
 				settings: deepClone(state.masterSettings)
-			};
-		case APP_EVENTS.SET_TASK:
-			return {
-				...state,
-				task: action.payload
 			};
 		case APP_EVENTS.SAVE_MASTER_SETTINGS:
 			return {
@@ -137,6 +137,11 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 			return {
 				...state,
 				settings: action.payload
+			};
+		case APP_EVENTS.SET_WORK_PROGRESS:
+			return {
+				...state,
+				workProgresses: action.payload
 			};
 		default:
 			return state;

@@ -102,16 +102,17 @@ const saveData = async (subjectUuid: string, contentCode: string, data: Settings
 };
 
 /**
- * Отправляет обновленную задачу
- * @param {string} endDate - конец дедлайна
- * @param {string | number} subjectUuid - идентификатор объекта
- * @param {string} startDate - начало дедлайна
- * @returns {Promise<Task>} - новые настройки [Уточнить у Данила]
+ * Отправляет измененный прогресс
+ * @param workUUID - идентификатор работы
+ * @param progress - прогресс работы
+ * @param contentCode - code объекта
+ * @param subjectUUID - Uuid объекта
+ * @returns {Promise<Origress>} - новый прогресс
  */
- const saveDataTask = async (subjectUuid: string, startDate: string, endDate: string): Promise<Task> => {
-	console.log(subjectUuid);
-	const task = await api.postDataTasks(endDate, startDate, subjectUuid);
-	return task;
+
+const postChangeProgress = async (workUUID: string, progress: number, contentCode: string, subjectUUID): Promise<Task> => {
+	const res = await api.postChangeProgress(workUUID, progress, contentCode, subjectUUID);
+	return res;
 };
 
 /**
@@ -141,7 +142,18 @@ const getDataSources = async (): Promise<Params> => {
 	});
 };
 
+/**
+ * Возвращает список групп аттрибутов
+ * @param {string} metaClass - метакласс работы
+ * @returns {Promise<Params>} -  группы аттрибутов
+ */
+const getAttributeGroups = async (metaClass): Promise<Params> => {
+	const res = await api.getAttributeGroups(metaClass);
+	return res;
+};
+
 export {
+	getAttributeGroups,
 	getContext,
 	getCurrentUser,
 	getDataSourceAttributes,
@@ -152,6 +164,6 @@ export {
 	getInitialSettings,
 	openFilterForm,
 	getUserData,
-	saveData,
-	saveDataTask
+	postChangeProgress,
+	saveData
 };

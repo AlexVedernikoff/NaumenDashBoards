@@ -203,13 +203,13 @@ const FormPanel = (props: Props) => {
 	};
 
 	const handleSave = () => {
-		const {diagramKey, saveSettings, settings} = props;
+		const {diagramKey, saveSettings, settings, workProgresses} = props;
 		const newError = checkingSettings();
 
 		setError(newError);
 
 		if (!newError) {
-			saveSettings({commonSettings: settings, diagramKey: diagramKey, resourceAndWorkSettings: resources});
+			saveSettings({commonSettings: settings, diagramKey: diagramKey, resourceAndWorkSettings: resources, workProgresses});
 		}
 	};
 

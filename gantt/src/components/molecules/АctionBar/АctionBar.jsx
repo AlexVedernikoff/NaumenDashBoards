@@ -96,7 +96,6 @@ const АctionBar = props => {
 		};
 
 		props.setRangeTime(date);
-		console.log(1);
 		setShowModal(!showModal);
 	};
 

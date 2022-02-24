@@ -115,5 +115,9 @@ export default {
 				"level": 1,
 				"type": "RESOURCE"
 			},
-	]
+	],
+	"workProgresses": {
+		"employee$752501": 0.4891304347826087,
+		"serviceCall$2347805": 0.4437299035369775
+	}
 };
