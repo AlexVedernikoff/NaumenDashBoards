@@ -8,6 +8,7 @@ import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
 import {
+	getIndicatorAttribute,
 	getSeparatedLabel,
 	hasIndicatorsWithAggregation,
 	isCardObjectColumn,
@@ -326,20 +327,24 @@ export class TableWidget extends PureComponent<Props, State> {
 	renderIndicatorCell = (props: CellConfigProps) => {
 		const {fontColor, fontStyle} = this.props.widget.table.body.indicatorSettings;
 		const {column, value = ''} = props;
-		const {aggregation, attribute} = column;
+		const indicator = getIndicatorAttribute(column);
 		const components = {
 			Value: this.renderLinkValue
 		};
 		let cellValue = value;
 
-		if (hasMSInterval(attribute, aggregation)) {
-			cellValue = parseMSInterval(Number(value));
-		} else if (isPercentCountColumn(column)) {
-			cellValue = parsePercentCountColumnValueForTable(value);
-		} else if (value && hasPercent(attribute, aggregation)) {
-			cellValue = `${value}%`;
-		} else if (isCardObjectColumn(column)) {
-			cellValue = getSeparatedLabel(value);
+		if (indicator) {
+			const {aggregation, attribute} = indicator;
+
+			if (hasMSInterval(attribute, aggregation)) {
+				cellValue = parseMSInterval(Number(value));
+			} else if (isPercentCountColumn(column)) {
+				cellValue = parsePercentCountColumnValueForTable(value);
+			} else if (value && hasPercent(attribute, aggregation)) {
+				cellValue = `${value}%`;
+			} else if (isCardObjectColumn(column)) {
+				cellValue = getSeparatedLabel(value);
+			}
 		}
 
 		return <Cell {...props} components={components} fontColor={fontColor} fontStyle={fontStyle} value={cellValue.toString()} />;

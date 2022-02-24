@@ -95,10 +95,11 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	getHandleEditPercentageRelativeAttribute = (attribute: PercentageRelativeAttr | null) => {
 		const handler = async () => {
 			const {openFilterForm, source} = this.props;
-			const {descriptor, value} = source;
+			const {value} = source;
 
 			if (attribute && source && value) {
-				const sourceData = {descriptor: descriptor ?? null, value};
+				const descriptor = attribute.descriptor ?? source.descriptor ?? null;
+				const sourceData = {descriptor, value};
 				const serializedContext = await openFilterForm(sourceData);
 
 				if (serializedContext) {
