@@ -5981,14 +5981,13 @@ class DashboardDataSetService
                     } : [[calculator.execute { key ->
                     variables[key as String].head().head() as Double
                 }]]
-                List total = [(node.title): formatAggregationSet(
+                Map total = [(node.title): formatAggregationSet(
                     res,
                     listIdsOfNormalAggregations,
                     diagramType in DiagramType.CountTypes ? false : onlyFilled,
                     getPercentCntAggregationIndexForTable(request, diagramType)
                 )]
-                total = formatResult(total, aggregationCnt)
-                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
+                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, formatResult(total, aggregationCnt), parameter,
                                                       parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
             default:
                 String message = messageProvider.getMessage(REQUISITE_IS_NOT_SUPPORTED_ERROR, currentUserLocale, nodeType: nodeType)

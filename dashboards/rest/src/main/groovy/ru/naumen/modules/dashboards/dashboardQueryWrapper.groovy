@@ -1040,7 +1040,7 @@ class QueryWrapper implements CriteriaWrapper
                          PaginationSettings paginationSettings = null)
     {
         return execute(criteria, diagramType, hasBreakdown, ignoreParameterLimit, paginationSettings).collect {
-            requestHasOneNoneAggregation ? [it] : it.collect() as List
+            requestHasOneNoneAggregation || it in String ? [it] : it.collect() as List
         }
     }
 
