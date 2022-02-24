@@ -94,3 +94,7 @@ export type AppState = {
 	task: Task,
 	user: UserData,
 };
+
+export type WorkProgress = {[UUID: string]: number};
+
+export type ListOfAttributes = Array<{code: string, title: string}>;

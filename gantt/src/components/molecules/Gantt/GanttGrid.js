@@ -1,13 +1,13 @@
 // @flow
 import {connect} from 'react-redux';
+import {functions, props} from './selectors';
 import Gantt from 'components/atoms/Gantt';
 import {Loader} from 'naumen-common-components';
-import {props} from './selectors';
 import React from 'react';
 import styles from './styles.less';
 
 const GanttGrid = (props: Props) => {
-	const {allLinks, columns, links, loading, newTask, progress, rollUp, scale, tasks} = props;
+	const {allLinks, columns, getListOfGroupAttributes, groupAttribute, links, loading, newTask, progress, resources, rollUp, saveChangeProgress, scale, tasks} = props;
 
 	if (loading) {
 		return (
@@ -24,11 +24,15 @@ const GanttGrid = (props: Props) => {
 					allLinks={allLinks}
 					columns={columns}
 					flag={props.flag}
+					getListOfGroupAttributes={getListOfGroupAttributes}
+					groupAttribute={groupAttribute}
 					links={links}
 					newTask={newTask}
 					progress={progress}
 					refresh={props.refresh}
+					resources={resources}
 					rollUp={rollUp}
+					saveChangeProgress={saveChangeProgress}
 					scale={scale}
 					style={{height: '100%', width: '100%'}}
 					tasks={tasks}
@@ -38,4 +42,4 @@ const GanttGrid = (props: Props) => {
 	);
 };
 
-export default connect(props)(GanttGrid);
+export default connect(props, functions)(GanttGrid);

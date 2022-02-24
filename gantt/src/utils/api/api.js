@@ -15,12 +15,9 @@ export default class Api {
 		return window.jsApi.getCurrentUser();
 	}
 
-	async getInitialSettings (contentCode: string, subjectUuid: string) {
+	async getInitialSettings (contentCode: string, subjectUUID: string) {
 		const url = `exec-post?func=modules.ganttSettings.getGanttSettings&params=requestContent,user`;
-		const body = {
-			contentCode: contentCode,
-			subjectUUID: subjectUuid
-		};
+		const body = {contentCode, subjectUUID};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -29,12 +26,9 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
-	async getUserData (contentCode: string, subjectUuid: string) {
+	async getUserData (contentCode: string, subjectUUID: string) {
 		const url = `exec-post?func=modules.ganttSettings.getUserData&params=requestContent,user`;
-		const body = {
-			contentCode: contentCode,
-			subjectUUID: subjectUuid
-		};
+		const body = {contentCode, subjectUUID};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -67,12 +61,24 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
+	/**
+	* Получает группы аттрибутов
+	* @param  {string} metaClass - метакласс задачи
+	* @returns {ListOfAttributes}
+	*/
+	async getAttributeGroups (metaClass) {
+		const url = `exec?func=modules.ganttWorkHandler.getAttributeGroups&params=${metaClass}`;
+		const options = {
+			method: 'GET'
+		};
+
+		return this.jsApi.restCallAsJson(url, options);
+	}
+
 	async getDataSourceAttributes (classFqn: string, parentClassFqn: string) {
 		const url = `exec-post?func=modules.ganttSettings.getDataSourceAttributes&params=requestContent`;
 		const body = {
-			classFqn: classFqn,
-			parentClassFqn: parentClassFqn
-		};
+			classFqn, parentClassFqn};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -83,10 +89,7 @@ export default class Api {
 
 	async getDataSourceAttributesByTypes (classFqn: string, types: string) {
 		const url = `exec-post?func=modules.ganttSettings.getDataSourceAttributes&params=requestContent`;
-		const body = {
-			classFqn: classFqn,
-			types: types
-		};
+		const body = {classFqn, types};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -97,11 +100,7 @@ export default class Api {
 
 	async postData (subjectUuid: string, contentCode: string, data: Settings) {
 		const url = `exec-post?func=modules.ganttSettings.saveGanttSettings&params=requestContent`;
-		const body = {
-			contentCode: contentCode,
-			ganttSettings: data,
-			subjectUUID: subjectUuid
-		};
+		const body = {contentCode, data, subjectUuid};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -115,15 +114,10 @@ export default class Api {
 	* @param  {string} startDate - дата и время начала задачи
 	* @param  {string} endDate - дата и время окончания задачи
 	* @param  {string | number} subjectUuid - идентификатор задачи
-	* @returns {Settings}
 	*/
-	async postDataTasks (startDate: string, endDate: string, subjectUuid: string | number) {
-		const url = `exec-post?func=modules.ganttSettings.saveGanttSettings&params=requestContent`;
-		const body = {
-			endDate: endDate,
-			startDate: startDate,
-			subjectUuid: subjectUuid
-		};
+	async postChangeProgress (workUUID: string, progress: number, contentCode: string, subjectUUID) {
+		const url = `exec-post?func=modules.ganttWorkHandler.changeWorkProgress&params=requestContent`;
+		const body = {contentCode, progress, subjectUUID, workUUID};
 
 		const options = {
 			body: JSON.stringify(body),

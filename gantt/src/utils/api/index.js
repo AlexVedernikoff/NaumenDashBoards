@@ -2,6 +2,7 @@
 import Api from './api';
 import FakeApi from './fakeApi';
 import {
+	getAttributeGroups,
 	getContext,
 	getCurrentUser,
 	getDataSourceAttributes,
@@ -12,11 +13,12 @@ import {
 	getInitialSettings,
 	getUserData,
 	openFilterForm,
-	saveData,
-	saveDataTask
+	postChangeProgress,
+	saveData
 } from './context';
 
 export {
+	getAttributeGroups,
 	getContext,
 	getCurrentUser,
 	getDataSourceAttributes,
@@ -27,8 +29,8 @@ export {
 	getInitialSettings,
 	getUserData,
 	openFilterForm,
-	saveData,
-	saveDataTask
+	postChangeProgress,
+	saveData
 };
 
 export const api = process.env.NODE_ENV === 'development' ? new FakeApi() : new Api();

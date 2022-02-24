@@ -1,3 +1,4 @@
+import getAttributes from 'utils/mocks/getAttributes';
 import {getDiagramData} from 'utils/mocks/getDiagramData';
 import getSettings from 'utils/mocks/getSettings';
 import getSources from 'utils/mocks/getSources';
@@ -48,6 +49,10 @@ export default class FakeApi {
 		return getSources;
 	}
 
+	async getAttributeGroups () {
+		return getAttributes;
+	}
+
 	async getDataSourceAttributes (classFqn, parentClassFqn) {
 		await new Promise(resolve => setTimeout(() => resolve(), 3000));
 
@@ -87,13 +92,9 @@ export default class FakeApi {
 		return data;
 	}
 
-	async postDataTasks (endDate, startDate, subjectUuid) {
-		const answer = await new Promise(resolve => setTimeout(() => resolve({
-			endDate: '2021-11-13T15:55:26',
-			startDate: '2021-11-11T15:55:26',
-			subjectUuid: 'serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a'
-		}), 300));
-		return answer;
+	async postChangeProgress (workUUID, progress, contentCode, subjectUUID) {
+		await new Promise(resolve => setTimeout(() => resolve(), 300));
+		return progress;
 	}
 
 	getContentCode () {

@@ -9,6 +9,7 @@ export const initialAppState: AppState = {
 	errorCommon: false,
 	errorData: false,
 	errorSettings: false,
+	groupAttribute: [],
 	hideEditPanel: false,
 	links: [],
 	loadingCommon: true,
@@ -17,6 +18,7 @@ export const initialAppState: AppState = {
 	masterResources: [],
 	masterSettings: {},
 	metaClass: '',
+	resourceAndWorkSettings: [],
 	resources: [],
 	settings: {columnSettings: []},
 	sources: {},
@@ -27,7 +29,8 @@ export const initialAppState: AppState = {
 		email: '',
 		name: '',
 		role: USER_ROLES.REGULAR
-	}
+	},
+	workProgresses: {}
 };
 
 export const defaultAppAction: AppAction = {
