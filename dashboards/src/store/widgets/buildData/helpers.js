@@ -2,6 +2,7 @@
 import type {AttributeColumn, BuildDataState, Column, DataSetDescriptorRelation, DiagramBuildData, WidgetDataError} from './types';
 import {COLUMN_TYPES, SEPARATOR, TITLE_SEPARATOR} from './constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
+import type {IndicatorData} from 'store/widgets/buildData/types';
 import type {SourceData, Widget} from 'store/widgets/data/types';
 
 /**
@@ -128,6 +129,27 @@ const isCardObjectColumn = (column: AttributeColumn): boolean => {
 };
 
 /**
+ * Возвращает атрибут и агрегацию показателя для столбца
+ * @param {AttributeColumn} column - колонка
+ * @returns {IndicatorData} - данные показателя для конкретного столбца
+ */
+const getIndicatorAttribute = (column: AttributeColumn): IndicatorData | null => {
+	let result = null;
+
+	if (column.type === COLUMN_TYPES.INDICATOR) {
+		const {aggregation, attribute} = column;
+
+		result = {aggregation, attribute};
+	} else if (column.type === COLUMN_TYPES.BREAKDOWN) {
+		const {aggregation, attribute} = column.indicator;
+
+		result = {aggregation, attribute};
+	}
+
+	return result;
+};
+
+/**
  * Проверяет, есть ли в таблице индикаторы с агрегацией
  * @param {Array<Column>} columns - столбцы таблицы
  * @returns  {boolean}
@@ -215,14 +237,15 @@ const parsePercentCountColumnValueForTable = (value: string): string => {
 };
 
 export {
+	getIndicatorAttribute,
 	getSeparatedLabel,
 	getWidgetFilterOptionsDescriptors,
 	hasIndicatorsWithAggregation,
 	isCardObjectColumn,
 	isIndicatorColumn,
 	isPercentCountColumn,
-	removeCodesFromTableData,
 	parsePercentCountColumnValueForTable,
+	removeCodesFromTableData,
 	setWidgetError,
 	updateWidgetData
 };

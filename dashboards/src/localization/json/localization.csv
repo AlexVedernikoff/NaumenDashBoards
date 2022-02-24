@@ -258,7 +258,7 @@
 "NavigationBox::SelectPlaceholder","Укажите дашборд или виджет","Specify a dashboard or widget",,
 "NavigationBox::ShowTip","Отображать всплывающую подсказку","Display a tooltip",,
 "NavigationBox::Title","Навигация с виджета","Navigation from a widget",,
-"ParametersDataBox::Parameter","Параметр","Parameter",,
+"ParametersDataBox::Parameter","Параметр (группировка)","Parameters (grouping)",,
 "SavedFilters::Title","Сохраненные фильтры","Saved Filters",,
 "SavedFilters::HeaderMessage","Выберите сохраненный фильтр","Select a saved filter",,
 "SavedFilters::NotFoundMessage","Нет совпадений","No match",,
