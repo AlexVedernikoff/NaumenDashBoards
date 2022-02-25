@@ -54,13 +54,14 @@ export class RangesStyleBox extends Component<Props> {
 		const {displayType, legendPosition} = this.props.value;
 		const {left, right} = LEGEND_POSITIONS;
 		const disabled = legendPosition === left || legendPosition === right;
+		const options = translateObjectsArray('title', DISPLAY_TYPE_OPTIONS);
 
 		return (
 			<CheckIconButtonGroup
 				disabled={disabled}
 				name={DIAGRAM_FIELDS.displayType}
 				onChange={this.handleSelect}
-				options={DISPLAY_TYPE_OPTIONS}
+				options={options}
 				value={displayType}
 			/>
 		);
@@ -89,12 +90,13 @@ export class RangesStyleBox extends Component<Props> {
 
 	renderLegendPositionButtons = () => {
 		const {legendPosition} = this.props.value;
+		const options = translateObjectsArray('title', POSITION_OPTIONS);
 
 		return (
 			<CheckIconButtonGroup
 				name={DIAGRAM_FIELDS.legendPosition}
 				onChange={this.handleSelect}
-				options={POSITION_OPTIONS}
+				options={options}
 				value={legendPosition}
 			/>
 		);
