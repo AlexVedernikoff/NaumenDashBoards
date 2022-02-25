@@ -49,7 +49,10 @@ export class TimerGroupModal extends Component<Props, State> {
 		SystemGroup: () => null
 	}));
 
-	renderExpirationSelect = (props: RenderProps) => <MaterialSelect options={EXCEED_OPTIONS} {...props} />;
+	renderExpirationSelect = (props: RenderProps) => {
+		const exceedOptions = translateObjectsArray('label', EXCEED_OPTIONS);
+		return <MaterialSelect options={exceedOptions} {...props} />;
+	};
 
 	renderOrCondition = (props: OrConditionProps) => {
 		const {onChange, value} = props;
