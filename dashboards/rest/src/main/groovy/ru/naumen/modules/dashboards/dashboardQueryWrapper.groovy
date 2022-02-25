@@ -111,6 +111,7 @@ class QueryWrapper implements CriteriaWrapper
         {
             Closure sorting = getSorting(sortingType)
             column.with(aggregation).with(sorting).with(criteria.&addOrder)
+            criteria.add(api.whereClause.isNotNull(column))
         }
 
         if(totalValueCriteria)
