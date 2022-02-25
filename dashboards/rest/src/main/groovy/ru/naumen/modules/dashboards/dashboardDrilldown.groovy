@@ -588,7 +588,7 @@ class DashboardDrilldownService
                             if(attributeType in AttributeType.LINK_TYPES)
                             {
                                 def wrapper = new MainDateFilterProvider().getWrapperForDynamicAttr(attr, classFqn, descriptor)
-                                wrapper.totalValueCriteria.add(filtersApi.attrValueEq('value',
+                                wrapper.totalValueCriteria.add(filters.attrValueEq('value',
                                                                                       utils.get(LinksAttributeMarshaller.unmarshal(value).last())))
                                 objects = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
                             }
@@ -698,7 +698,7 @@ class DashboardDrilldownService
                             def filterParam = groupFilters?.find {it?.attribute?.code?.find() == 'value' }
                             def wrapper = QueryWrapper.build(source, templateUUID)
 
-                            wrapper.totalValueCriteria.add(filtersApi.attrValueEq('linkTemplate', templateUUID))
+                            wrapper.totalValueCriteria.add(filters.attrValueEq('linkTemplate', templateUUID))
                                    .addColumn(selectClause.property('UUID'))
                             wrapper.filtering(wrapper.totalValueCriteria, true, filterParam)
 
@@ -1299,16 +1299,17 @@ class DashboardDrilldownService
      * Метод получения данных из БД по атрибуту второго уровня
      * @param attr - атрибут целиком
      * @param DBvalue - значение, для фильтрации в БД
+     * @param descriptor - дескриптор
      * @return список uuid-ов для атрибута первого уровня и фильтрации containsInSet
      */
-    private Collection getValuesForRefAttr(Attribute attr, def DBvalue)
+    private Collection getValuesForRefAttr(Attribute attr, def DBvalue, String descriptor = null)
     {
         def sc = selectClause
         def criteria = descriptor
             ? descriptor.with(listdata.&createListDescriptor).with(listdata.&createCriteria)
-            : db.createCriteria().addSource(classFqn)
+            : db.createCriteria().addSource(attr.sourceCode)
         criteria.addColumn(sc.property("${attr.code}.UUID"))
-                .add(filtersApi.attrValueEq((Attribute.getAttributeType(attr) in AttributeType.TIMER_TYPES)
+                .add(filters.attrValueEq((Attribute.getAttributeType(attr) in AttributeType.TIMER_TYPES)
                                                 ?  attr.attrChains().code.join('.') + getTimerAttrCode(attr)
                                                 : attr.attrChains().code.join('.'), DBvalue))
         return db.query(criteria).list()
@@ -1376,9 +1377,7 @@ class DashboardDrilldownService
             def values = []
             if (value == 'Не заполнено' || value == 'EMPTY')
             {
-                values = getValuesForRefAttr(attr, null)
-                checkValuesSize(values)
-                return filterBuilder.OR(attr.code, 'containsInSet', values)
+                return filterBuilder.OR(attr.code, 'null', null)
             }
             switch (type)
             {
