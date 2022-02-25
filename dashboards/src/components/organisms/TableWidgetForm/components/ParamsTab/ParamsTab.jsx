@@ -169,6 +169,7 @@ export class ParamsTab extends PureComponent<Props> {
 	renderBreakdownFieldSet = () => {
 		const {values} = this.props;
 		const {breakdown, indicators} = values.data[this.mainIndex];
+		const onlyCommonAttributes = isDontUseParamsForDataSet(values.data[this.mainIndex]);
 
 		return (
 			<BreakdownFieldset
@@ -179,6 +180,7 @@ export class ParamsTab extends PureComponent<Props> {
 				indicator={indicators?.[0]}
 				onChange={this.setBreakdown}
 				onRemove={this.removeBreakdown}
+				onlyCommonAttributes={onlyCommonAttributes}
 				removable={true}
 				value={breakdown}
 			/>

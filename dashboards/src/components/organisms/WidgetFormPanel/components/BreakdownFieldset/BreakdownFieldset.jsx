@@ -40,6 +40,7 @@ export class BreakdownFieldset extends Component<Props> {
 		className: '',
 		dataKey: '',
 		disabled: false,
+		onlyCommonAttributes: false,
 		required: false,
 		value: []
 	};
@@ -95,19 +96,27 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, index: number = 0): Array<Attribute> => {
-		const {helpers, index: dataSetIndex, value} = this.props;
-		let filteredOptions = options;
-		const {attribute} = value[index] ?? {};
+		const {helpers, index: dataSetIndex, onlyCommonAttributes, value} = this.props;
+		let attributes = [];
 
-		if (index > this.mainIndex) {
-			const {attribute: mainParameter} = value[this.mainIndex];
+		if (onlyCommonAttributes) {
+			attributes = helpers.getCommonAttributes();
+		} else {
+			let filteredOptions = options;
+			const {attribute} = value[index] ?? {};
 
-			if (mainParameter) {
-				filteredOptions = filterByAttribute(options, mainParameter, filterByRef);
+			if (index > this.mainIndex) {
+				const {attribute: mainParameter} = value[this.mainIndex];
+
+				if (mainParameter) {
+					filteredOptions = filterByAttribute(options, mainParameter, filterByRef);
+				}
 			}
+
+			attributes = helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
 		}
 
-		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
+		return attributes;
 	};
 
 	handleChangeGroup = (breakdownIndex: number) => (group: Group, attribute: Attribute) => {

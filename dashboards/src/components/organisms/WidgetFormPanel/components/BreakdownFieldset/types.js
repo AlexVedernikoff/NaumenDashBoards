@@ -27,6 +27,7 @@ export type Props = ValuesProps<Values> & HelpersProps & {
 	index: number,
 	indicator: MixedAttribute | null,
 	onChange: (value: Breakdown, callback?: Function) => void,
+	onlyCommonAttributes: boolean,
 	onRemove: () => void,
 	removable: boolean,
 	required: boolean,

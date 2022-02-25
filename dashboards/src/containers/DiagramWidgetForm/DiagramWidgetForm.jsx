@@ -32,7 +32,8 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 
 	getHelpers = memoize(() => ({
 		filterAttributeByMainDataSet: this.filterAttributeByMainDataSet,
-		filterAttributesByUsed: this.filterAttributesByUsed
+		filterAttributesByUsed: this.filterAttributesByUsed,
+		getCommonAttributes: this.getCommonAttributes
 	}));
 
 	/**
@@ -79,7 +80,7 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 	 * Фильтрует атрибуты в зависимости от уже использованных
 	 * @param {Array<Attribute>} options - список атрибутов
 	 * @param {number} dataSetIndex - индекс набора данных
-	 * @param {Array<Attribute>} includeAttributes - атрибут который не надо отфильтровывать
+	 * @param {?Array<?Attribute>} includeAttributes - атрибут который не надо отфильтровывать
 	 * @returns {Array<Attribute>} - список отфильтрованных атрибутов
 	 */
 	filterAttributesByUsed = (options: Array<Attribute>, dataSetIndex: number, includeAttributes: ?Array<?Attribute>): Array<Attribute> => {
@@ -92,23 +93,68 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 		let filteredOptions = options;
 
 		if (usedAttributes.length > 0) {
-			filteredOptions = options.filter(attribute => {
+			filteredOptions = [];
+
+			options.forEach(attribute => {
 				const {code, sourceCode = null} = attribute;
-				let isInclude = false;
-
-				if (includeAttributes) {
-					isInclude = includeAttributes.some(
-						includeAttribute => includeAttribute && includeAttribute.code === code && includeAttribute.sourceCode === sourceCode
-					);
-				}
-
-				return isInclude || usedAttributes.findIndex(
+				const isInclude = includeAttributes?.some(
+					includeAttribute => includeAttribute && includeAttribute.code === code && includeAttribute.sourceCode === sourceCode
+				) ?? false;
+				const isUsedAttribute = usedAttributes.find(
 					usedAttribute => usedAttribute.code === code && usedAttribute.sourceCode === sourceCode
-				) === -1;
+				);
+
+				if (isInclude || !isUsedAttribute) {
+					filteredOptions.push(attribute);
+				}
 			});
 		}
 
 		return filteredOptions;
+	};
+
+	/**
+	 * Возвращает только те атрибуты, которые используются во всех источниках
+	 * @returns {Array<Attribute>} - список отфильтрованных атрибутов
+	 */
+	getCommonAttributes = (): Array<Attribute> => {
+		const {attributes, fetchAttributes, values: {data}} = this.props;
+		const result = [];
+		const optionsList = [];
+		let allLoaded = true;
+
+		// проверка на загруженность атрибутов
+		data.forEach(ds => {
+			const source = ds.source?.value?.value;
+			const sourceAttributes = attributes[source];
+
+			if (!sourceAttributes || (!sourceAttributes.uploaded && !sourceAttributes.loading)) {
+				allLoaded = false;
+				fetchAttributes(source, null, null);
+			} else if (sourceAttributes.loading) {
+				allLoaded = false;
+			} else {
+				optionsList.push(sourceAttributes.options);
+			}
+		});
+
+		// оставляет те атрибуты первого источника,
+		// которые есть во всех остальных источниках
+		if (allLoaded) {
+			const [mainOptions, ...secondOptionsList] = optionsList;
+
+			mainOptions.forEach(mainItem => {
+				const isAdd = secondOptionsList.every(options =>
+					options.find(({code, property}) => code === mainItem.code && property === mainItem.property)
+				);
+
+				if (isAdd) {
+					result.push(mainItem);
+				}
+			});
+		}
+
+		return result;
 	};
 
 	/**
