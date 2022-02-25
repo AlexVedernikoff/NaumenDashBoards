@@ -19,7 +19,9 @@ import TextInput from 'components/atoms/TextInput';
 
 export class BorderFieldSet extends PureComponent<Props> {
 	getEmptyHelpers = memoize(() => ({
-		filterAttributesByUsed: (options, dataSetIndex) => options
+		filterAttributeByMainDataSet: (options, dataSetIndex) => options,
+		filterAttributesByUsed: (options, dataSetIndex) => options,
+		getCommonAttributes: () => []
 	}));
 
 	handleChange = (borderName: string) => (name: string, value, callback?: Function) => {
