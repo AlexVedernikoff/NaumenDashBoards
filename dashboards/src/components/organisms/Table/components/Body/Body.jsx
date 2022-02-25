@@ -1,5 +1,6 @@
 // @flow
 import type {Column, Row as RowType} from 'Table/types';
+import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
@@ -31,7 +32,7 @@ export class Body extends PureComponent<Props, State> {
 		const key = `${accessor}-${rowIndex}`;
 		let value = row[accessor];
 
-		if (Number(value) === 0) {
+		if (column.type !== COLUMN_TYPES.PARAMETER && (Number(value) === 0)) {
 			value = '';
 		}
 
