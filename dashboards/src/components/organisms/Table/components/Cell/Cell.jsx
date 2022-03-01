@@ -15,6 +15,8 @@ export class Cell extends PureComponent<Props, State> {
 		fontColor: '',
 		left: null,
 		row: null,
+		rowAggregations: null,
+		rowIndex: 0,
 		textAlign: TEXT_ALIGNS.left,
 		textHandler: TEXT_HANDLERS.CROP,
 		tip: '',
@@ -45,12 +47,13 @@ export class Cell extends PureComponent<Props, State> {
 	handleClearTooltip = () => this.setState({position: null});
 
 	handleClick = (e: MouseEvent) => {
-		const {column, onClick, row, value} = this.props;
+		const {column, onClick, row, rowIndex, value} = this.props;
 
 		if (onClick) {
 			const props = {
 				column,
 				row,
+				rowIndex,
 				value
 			};
 

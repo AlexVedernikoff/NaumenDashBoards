@@ -71,6 +71,7 @@ export class DataSetSettings extends PureComponent<Props> {
 			return (
 				<IndicatorsBox
 					canAddIndicators={canAddIndicators}
+					canCreateInterestRelative={!canAddIndicators}
 					components={this.getIndicatorsBoxComponents(components)}
 					dataKey={dataKey}
 					index={index}

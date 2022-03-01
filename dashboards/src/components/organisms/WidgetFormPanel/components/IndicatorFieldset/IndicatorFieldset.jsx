@@ -82,7 +82,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 					};
 
 					this.change({
-						...this.props.value,
+						aggregation: DEFAULT_AGGREGATION.COUNT,
 						attribute
 					});
 				}

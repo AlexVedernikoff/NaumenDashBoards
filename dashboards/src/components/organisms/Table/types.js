@@ -2,6 +2,7 @@
 import type {DefaultProps as DefaultCellProps, Props as CellProps} from './components/Cell/types';
 import type {Props as HeaderProps} from './components/HeaderCell/types';
 import type {Props as RowProps} from './components/Row/types';
+import type {RowAggregation} from 'store/widgets/buildData/types';
 import type {Table, TableSorting, WidgetTooltip} from 'store/widgets/data/types';
 
 export type Column = {
@@ -39,6 +40,7 @@ export type Components = $Shape<{
 export type OnClickCellProps = {
 	column: Column,
 	row: Row | null,
+	rowIndex: number,
 	value: number | string
 };
 
@@ -67,6 +69,7 @@ export type Props = {
 	onClickDataCell?: OnClickCell,
 	onFetch: (pageSize: number, page: number, sorting: TableSorting) => void,
 	pageSize: number,
+	rowAggregations?: Array<RowAggregation>,
 	settings: Table,
 	sorting: TableSorting,
 	total: number

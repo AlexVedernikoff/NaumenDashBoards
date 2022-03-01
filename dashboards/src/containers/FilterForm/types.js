@@ -4,9 +4,10 @@ import type {DataSourceMap} from 'store/sources/data/types';
 import type {SourceData} from 'src/store/widgets/data/types';
 import type {SourcesFiltersMap} from 'store/sources/sourcesFilters/types';
 
-export type ConnectedProps = {
+export type ConnectedProps<Config> = {
 	attributes: AttributesMap,
 	isUserMode: boolean,
+	parentProps: Config,
 	sources: DataSourceMap,
 	sourcesFilters: SourcesFiltersMap
 };
@@ -16,7 +17,7 @@ export type ConnectedFunctions = {
 	fetchGroupsAttributes: (classFqn: string, attrGroupCode: string | null) => Promise<Array<string>>
 };
 
-export type Props = ConnectedProps & ConnectedFunctions;
+export type Props<Config> = ConnectedProps<Config> & ConnectedFunctions;
 
 export type InjectedProps = {
 	fetchFilterAttributes: (source: SourceData) => Promise<void>,

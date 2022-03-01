@@ -13,6 +13,7 @@ import t from 'localization';
 export class IndicatorsBox extends PureComponent<Props> {
 	static defaultProps = {
 		canAddIndicators: true,
+		canCreateInterestRelative: false,
 		components: {
 			FormBox
 		}
@@ -46,14 +47,14 @@ export class IndicatorsBox extends PureComponent<Props> {
 	};
 
 	renderFieldset = (indicator: Indicator, index: number, indicators: Array<Indicator>) => {
-		const {dataKey, index: dataSetIndex, source} = this.props;
+		const {canCreateInterestRelative, dataKey, index: dataSetIndex, source} = this.props;
 		const removable = indicators.length > 1;
 
 		return (
 			<IndicatorFieldset
 				dataKey={dataKey}
 				dataSetIndex={dataSetIndex}
-				hasInterestRelative={true}
+				hasInterestRelative={canCreateInterestRelative}
 				index={index}
 				key={index}
 				onChange={this.handleChange}
@@ -67,12 +68,11 @@ export class IndicatorsBox extends PureComponent<Props> {
 	};
 
 	renderRightControl = () => {
-		const {canAddIndicator} = this.props;
+		const {canAddIndicators} = this.props;
 
-		if (canAddIndicator) {
+		if (canAddIndicators) {
 			return (
 				<IconButton
-					canAddIndicator={canAddIndicator}
 					icon={ICON_NAMES.PLUS}
 					onClick={this.handleClickAddButton}
 					round={false}
