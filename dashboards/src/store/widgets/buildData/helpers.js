@@ -2,7 +2,7 @@
 import type {AttributeColumn, BuildDataState, Column, DataSetDescriptorRelation, DiagramBuildData, WidgetDataError} from './types';
 import {COLUMN_TYPES, SEPARATOR, TITLE_SEPARATOR} from './constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import type {IndicatorData} from 'store/widgets/buildData/types';
+import type {IndicatorData, RowAggregation} from 'store/widgets/buildData/types';
 import type {SourceData, Widget} from 'store/widgets/data/types';
 
 /**
@@ -112,38 +112,35 @@ const isIndicatorColumn = (column: AttributeColumn): boolean => {
 /**
  * Сообщает о том, что в колонке содержатся значения, которые открываются как карточки объекта
  * @param {AttributeColumn} column - колонка
+ * @param {AttributeColumn} aggregation - агрегация колонки
  * @returns {boolean} - true - открывать как карточки объекта, false - открывать как drillDown
  */
-const isCardObjectColumn = (column: AttributeColumn): boolean => {
-	let aggregation;
-
-	if (column.type === COLUMN_TYPES.INDICATOR) {
-		({aggregation} = column);
-	}
-
-	if (column.type === COLUMN_TYPES.BREAKDOWN) {
-		({aggregation} = column.indicator);
-	}
-
-	return isIndicatorColumn(column) && aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE;
-};
+const isCardObjectColumn = (column: AttributeColumn, aggregation: string): boolean =>
+	isIndicatorColumn(column) && aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE;
 
 /**
  * Возвращает атрибут и агрегацию показателя для столбца
  * @param {AttributeColumn} column - колонка
+ * @param {RowAggregation | null} rowAggregations - агрегация для источников без параметра
  * @returns {IndicatorData} - данные показателя для конкретного столбца
  */
-const getIndicatorAttribute = (column: AttributeColumn): IndicatorData | null => {
+const getIndicatorAttribute = (column: AttributeColumn, rowAggregations?: RowAggregation): IndicatorData | null => {
 	let result = null;
 
-	if (column.type === COLUMN_TYPES.INDICATOR) {
-		const {aggregation, attribute} = column;
+	if (rowAggregations) {
+		const {attribute, type: aggregation} = rowAggregations;
 
 		result = {aggregation, attribute};
-	} else if (column.type === COLUMN_TYPES.BREAKDOWN) {
-		const {aggregation, attribute} = column.indicator;
+	} else {
+		if (column.type === COLUMN_TYPES.INDICATOR) {
+			const {aggregation, attribute} = column;
 
-		result = {aggregation, attribute};
+			result = {aggregation, attribute};
+		} else if (column.type === COLUMN_TYPES.BREAKDOWN) {
+			const {aggregation, attribute} = column.indicator;
+
+			result = {aggregation, attribute};
+		}
 	}
 
 	return result;
@@ -197,25 +194,6 @@ const removeCodesFromTableData = (tableData: DiagramBuildData): DiagramBuildData
 };
 
 /**
- * Сообщает о том, что в колонке содержатся значения, которые агрегированы как PERCENT_CNT
- * @param {AttributeColumn} column - колонка
- * @returns {boolean} - true - агрегация как PERCENT_CNT, false - другая
- */
-const isPercentCountColumn = (column: AttributeColumn): boolean => {
-	let aggregation;
-
-	if (column.type === COLUMN_TYPES.INDICATOR) {
-		({aggregation} = column);
-	}
-
-	if (column.type === COLUMN_TYPES.BREAKDOWN) {
-		({aggregation} = column.indicator);
-	}
-
-	return aggregation === DEFAULT_AGGREGATION.PERCENT_CNT;
-};
-
-/**
  * Преобразует значение PERCENT_CNT в понятный для пользователя вид
  * @param {string} value - значение PERCENT_CNT в формате `CNT PERCENT`
  * @returns {string}
@@ -243,7 +221,6 @@ export {
 	hasIndicatorsWithAggregation,
 	isCardObjectColumn,
 	isIndicatorColumn,
-	isPercentCountColumn,
 	parsePercentCountColumnValueForTable,
 	removeCodesFromTableData,
 	setWidgetError,

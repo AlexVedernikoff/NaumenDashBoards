@@ -13,7 +13,7 @@ import React, {PureComponent} from 'react';
 import type {SourceData} from 'src/store/widgets/data/types';
 
 export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config & InjectedProps>): React$ComponentType<Config> => {
-	class WithFilterForm extends PureComponent<Config & Props, State> {
+	class WithFilterForm extends PureComponent<Config & Props<Config>, State> {
 		state = {
 			fetchingFilterAttributes: false,
 			filterAttributes: null,
@@ -157,10 +157,11 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		};
 
 		render () {
+			const {parentProps} = this.props;
 			const {fetchingFilterAttributes, filterAttributes, openingFilterForm} = this.state;
 			return (
 				<Component
-					{...(this.props: Config)}
+					{...parentProps}
 					fetchFilterAttributes={this.fetchFilterAttributes}
 					fetchingFilterAttributes={fetchingFilterAttributes}
 					filterAttributes={filterAttributes}

@@ -13,10 +13,9 @@ import {
 	hasIndicatorsWithAggregation,
 	isCardObjectColumn,
 	isIndicatorColumn,
-	isPercentCountColumn,
 	parsePercentCountColumnValueForTable
 } from 'store/widgets/buildData/helpers';
-import {hasMSInterval, hasPercent, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
+import {hasMSInterval, hasPercent, hasPercentCount, hasUUIDsInLabels, parseMSInterval} from 'store/widgets/helpers';
 import HeaderCell from 'Table/components/HeaderCell';
 import {ID_ACCESSOR} from './constants';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
@@ -235,14 +234,20 @@ export class TableWidget extends PureComponent<Props, State> {
 	};
 
 	handleClickDataCell = (e: MouseEvent, props: OnClickCellProps) => {
-		const {columns} = this.props.data;
-		const {column} = props;
+		const {columns, rowAggregations} = this.props.data;
+		const {column, rowIndex} = props;
 
 		if (isIndicatorColumn(column)) {
-			if (!hasIndicatorsWithAggregation(columns) && isCardObjectColumn(column)) {
-				this.openCardObject(props);
-			} else {
-				this.drillDown(props);
+			const indicator = getIndicatorAttribute(column, rowAggregations?.[rowIndex]);
+
+			if (indicator) {
+				const {aggregation} = indicator;
+
+				if (!hasIndicatorsWithAggregation(columns) && isCardObjectColumn(column, aggregation)) {
+					this.openCardObject(props);
+				} else {
+					this.drillDown(props);
+				}
 			}
 		}
 	};
@@ -326,8 +331,8 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	renderIndicatorCell = (props: CellConfigProps) => {
 		const {fontColor, fontStyle} = this.props.widget.table.body.indicatorSettings;
-		const {column, value = ''} = props;
-		const indicator = getIndicatorAttribute(column);
+		const {column, rowAggregations, rowIndex = 0, value = ''} = props;
+		const indicator = getIndicatorAttribute(column, rowAggregations?.[rowIndex]);
 		const components = {
 			Value: this.renderLinkValue
 		};
@@ -338,11 +343,11 @@ export class TableWidget extends PureComponent<Props, State> {
 
 			if (hasMSInterval(attribute, aggregation)) {
 				cellValue = parseMSInterval(Number(value));
-			} else if (isPercentCountColumn(column)) {
+			} else if (hasPercentCount(attribute, aggregation)) {
 				cellValue = parsePercentCountColumnValueForTable(value);
 			} else if (value && hasPercent(attribute, aggregation)) {
 				cellValue = `${value}%`;
-			} else if (isCardObjectColumn(column)) {
+			} else if (isCardObjectColumn(column, aggregation)) {
 				cellValue = getSeparatedLabel(value);
 			}
 		}
@@ -400,7 +405,7 @@ export class TableWidget extends PureComponent<Props, State> {
 	render (): React$Node {
 		const {data: tableData, loading, widget} = this.props;
 		const {columns, fixedColumnsCount} = this.state;
-		const {data, total} = tableData;
+		const {data, rowAggregations, total} = tableData;
 		const {columnsRatioWidth, showTotalAmount, sorting, table} = widget;
 		const {pageSize} = table.body;
 		const components = {
@@ -426,6 +431,7 @@ export class TableWidget extends PureComponent<Props, State> {
 				onFetch={this.handleFetch}
 				pageSize={pageSize}
 				ref={this.tableRef}
+				rowAggregations={rowAggregations}
 				settings={table}
 				sorting={sorting}
 				total={total}

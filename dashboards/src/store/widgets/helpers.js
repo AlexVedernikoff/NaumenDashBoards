@@ -68,6 +68,15 @@ const hasPercent = (attribute: MixedAttribute | null, aggregation: string): bool
 	|| attribute?.type === ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR;
 
 /**
+ * Сообщает используется ли в наборе данных виджета агрегация в значение + процент
+ * @param {MixedAttribute} attribute - атрибут
+ * @param {MixedAttribute} aggregation - агрегация
+ * @returns {boolean} - true - агрегация как PERCENT_CNT, false - другая
+ */
+const hasPercentCount = (attribute: MixedAttribute | null, aggregation: string): boolean =>
+	Boolean(getSourceAttribute(attribute) && aggregation === DEFAULT_AGGREGATION.PERCENT_CNT);
+
+/**
  * Сообщает используется ли в наборе данных виджета агрегация в процентах
  * @param {MixedAttribute | null} attribute - атрибут
  * @param {string} aggregation - агрегация атрибута
@@ -202,6 +211,7 @@ export {
 	hasMSInterval,
 	hasCountPercent,
 	hasPercent,
+	hasPercentCount,
 	isAllowedTopAggregation,
 	isAxisChart,
 	isCircleChart,

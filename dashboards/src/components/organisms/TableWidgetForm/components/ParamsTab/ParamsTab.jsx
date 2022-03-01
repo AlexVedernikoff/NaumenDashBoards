@@ -1,4 +1,5 @@
 // @flow
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {Breakdown} from 'store/widgetForms/types';
 import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
 import {createTableDataSet, isDontUseParamsForDataSet} from 'store/widgetForms/tableForm/helpers';
@@ -6,6 +7,7 @@ import type {DataSet} from 'store/widgetForms/tableForm/types';
 import DataSetSettings from 'containers/TableDataSetSettings';
 import DataTopField from 'WidgetFormPanel/components/DataTopField';
 import type {DataTopSettings} from 'store/widgets/data/types';
+import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import DisplayModeSelectBox from 'containers/DisplayModeSelectBox';
 import FormBox from 'components/molecules/FormBox';
@@ -77,10 +79,27 @@ export class ParamsTab extends PureComponent<Props> {
 			// В случае когда выставляют/сбрасывают признак однострочного источника
 			if (oldMainIsSingleRow !== mainIsSingleRow) {
 				newData = newData.map(dataSet => {
+					let result = dataSet;
 					const dataSetIsSingleRow = isDontUseParamsForDataSet(dataSet);
 
+					if (!dataSetIsSingleRow) {
+						// Сбрасываем PERCENTAGE_RELATIVE_ATTR для обычных источников
+						const indicators = result.indicators;
+						const newIndicators = indicators.filter(indicator =>
+							indicator.attribute?.type !== ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR
+						);
+
+						if (newIndicators.length !== indicators.length) {
+							if (newIndicators.length === 0) {
+								newIndicators.push(DEFAULT_INDICATOR);
+							}
+
+							result = {...result, indicators: newIndicators};
+						}
+					}
+
 					if (mainIsSingleRow !== dataSetIsSingleRow) {
-						let result = {...dataSet};
+						result = {...result};
 
 						if (mainIsSingleRow && !dataSetIsSingleRow) {
 							// Основный источник - однострочный, выставляем дополнительный в однострочный
@@ -99,11 +118,9 @@ export class ParamsTab extends PureComponent<Props> {
 								result.indicators = result.indicators.slice(0, 1);
 							}
 						}
-
-						return result;
 					}
 
-					return dataSet;
+					return result;
 				});
 			}
 		}

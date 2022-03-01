@@ -58,6 +58,11 @@ export type Row = {
 	[accessor: string]: string
 };
 
+export type RowAggregation = {
+	attribute: Attribute,
+	type: string
+};
+
 export type TableBuildData = {
 	columns: Array<Column>,
 	countTotals: number,
@@ -66,6 +71,7 @@ export type TableBuildData = {
 		breakdown: boolean,
 		parameter: boolean
 	},
+	rowAggregations?: Array<RowAggregation>,
 	total: number
 };
 
