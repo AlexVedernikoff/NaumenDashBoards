@@ -13,6 +13,7 @@ package ru.naumen.modules.dashboards
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Field
 import com.fasterxml.jackson.core.type.TypeReference
+import ru.naumen.core.server.script.IListLinkDefinition
 import ru.naumen.core.server.script.api.IAuthenticationApi
 import ru.naumen.core.server.script.api.IDateApi
 import ru.naumen.core.server.script.api.IDbApi
@@ -300,7 +301,7 @@ class DashboardDrilldownService
         link.template?.with(builder.&setTemplate)
         def filterBuilder = builder.filter()
         addDescriptorInFilter(filterBuilder, link.descriptor)
-        formatFilter(filterBuilder, link.filters, link.classFqn, link.cases, link.descriptor, offsetMinutes)
+        formatFilter(filterBuilder, link.filters, link.classFqn, link.cases, link.descriptor, offsetMinutes, link.diagramType)
         return builder
     }
 
@@ -485,9 +486,14 @@ class DashboardDrilldownService
     /**
      * Вспомогательный метод для формирования фильтра
      * @param filterBuilder - билдер для фильтра
+     * @param filters - фильтры
+     * @param classFqn - код класса, которому принадлежат объекты списка
+     * @param cases - список разршенных типов
+     * @param descriptor - дескриптор
      * @param offsetMinutes - смещение часового пояса пользователя относительно серверного времени
+     * @param diagramType - тип диаграммы
      */
-    private void formatFilter(def filterBuilder, def filters, def classFqn, def cases, def descriptor, Integer offsetMinutes)
+    private void formatFilter(IListLinkDefinition.IFilter filterBuilder, Collection<DrilldownFilter> filters, String classFqn, Collection<String> cases, String descriptor, Integer offsetMinutes, DiagramType diagramType = null)
     {
         if (filters)
         {

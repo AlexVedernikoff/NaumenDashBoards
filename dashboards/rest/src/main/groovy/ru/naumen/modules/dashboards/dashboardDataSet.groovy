@@ -279,12 +279,6 @@ class DashboardDataSetService
 
         if (diagramType == DiagramType.TABLE)
         {
-            if (widgetSettings?.data[0].sourceRowName != null)
-            {
-                widgetSettings.data.each { dataSet ->
-                    dataSet.parameters = []
-                }
-            }
             Boolean requestHasBreakdown = checkForBreakdown(widgetSettings)
             Boolean showTableNulls = widgetSettings.showEmptyData
             Boolean showTableBlanks = widgetSettings.showBlankData
@@ -3451,7 +3445,7 @@ class DashboardDataSetService
             {
                 listIdsOfNormalAggregations.each { index ->
                     List<String> countAndPercentValuesForTable
-                    if (index == percentCntAggregationIndex)
+                    if (index == percentCntAggregationIndex && list[index] in String)
                     {
                         countAndPercentValuesForTable = list[index].split(' ')
                         list[index] = countAndPercentValuesForTable[1]
@@ -3461,7 +3455,7 @@ class DashboardDataSetService
                         ? DECIMAL_FORMAT.format(list[index] as Double)
                         : DECIMAL_FORMAT.format(0)
 
-                    if (index == percentCntAggregationIndex)
+                    if (index == percentCntAggregationIndex && countAndPercentValuesForTable)
                     {
                         list[index] = countAndPercentValuesForTable[0] + ' ' + list[index]
                     }
@@ -4817,7 +4811,7 @@ class DashboardDataSetService
                 }
             }
 
-            if (sourceRowNames)
+            if (sourceRowNames.findAll())
             {
                 Map<String, List> dataGroupedBySources = data.groupBy { it['Источник'] }
                 Integer dataId = 1
@@ -4981,7 +4975,39 @@ class DashboardDataSetService
 
         LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
 
-        return new TableDiagram(columns: columns.findAll(), data: data, limitsExceeded: limitsExceeded, total: rowCount, countTotals: countTotals)
+        List<Map<String, Object>> rowsInfo =
+            sourceRowNames.findAll() ? getRowsInfoForTablesWithoutParameter(request) : null
+
+        return new TableDiagram(
+            columns: columns.findAll(),
+            data: data,
+            limitsExceeded: limitsExceeded,
+            total: rowCount,
+            countTotals: countTotals,
+            rowsInfo: rowsInfo
+        )
+    }
+
+    /**
+     * Метод получения данных о строках для таблицы без параметра
+     * @param request - запрос диаграммы
+     * @return данные о строках
+     */
+    private List<Map<String, Object>> getRowsInfoForTablesWithoutParameter(DiagramRequest request)
+    {
+        List<Map<String, Object>> rowsInfo = []
+
+        request.data.each {
+            RequestData requestData = it.value
+            Map<String, Object> rowInfo = [
+                'indicator': requestData.aggregations.head(),
+                'breakdown': requestData.groups ? requestData.groups.head() : null,
+                'source': requestData.source
+            ]
+            rowsInfo << rowInfo
+        }
+
+        return rowsInfo
     }
 
     /**
@@ -5981,13 +6007,14 @@ class DashboardDataSetService
                     } : [[calculator.execute { key ->
                     variables[key as String].head().head() as Double
                 }]]
-                Map total = [(node.title): formatAggregationSet(
+                List total = [(node.title): formatAggregationSet(
                     res,
                     listIdsOfNormalAggregations,
                     diagramType in DiagramType.CountTypes ? false : onlyFilled,
                     getPercentCntAggregationIndexForTable(request, diagramType)
                 )]
-                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, formatResult(total, aggregationCnt), parameter,
+                total = formatResult(total, aggregationCnt)
+                return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
                                                       parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
             default:
                 String message = messageProvider.getMessage(REQUISITE_IS_NOT_SUPPORTED_ERROR, currentUserLocale, nodeType: nodeType)
@@ -6149,6 +6176,10 @@ class TableDiagram implements IHasTotals
      * Количество строк в полном запросе
      */
     Integer total = 0
+    /**
+     * Данные о строках для таблицы без параметра
+     */
+    List<Map<String, Object>> rowsInfo
 }
 
 /**
