@@ -75,10 +75,45 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
+	/**
+	* Отправляет данные изменения временных рамок работ
+	* @param  {string} timezone - таймзона
+	* @param  {workDateInterval} workDateInterval -Объект временных рамок работы
+	* @param  {string} contentCode - code объекта
+	* @param  {string} subjectUuid - Uuid объекта
+	* @param  {string} user - user объект
+	*/
+	async postChangedWorkInterval (timezone: string, workDateInterval: workDateInterval, contentCode, subjectUuid, user: UserData) {
+		const url = `exec?func=modules.ganttWorkHandler.editWorkDateRanges&params=requestContent,user`;
+		const body = {contentCode, subjectUuid, timezone, workDateInterval};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCall(url, options);
+	}
+
+	/**
+	* Отправляет данные изменненых рабочих связей
+	* @param workRelations - объект связи между работами
+	* @param contentCode - code объекта
+	* @param subjectUuid -  Uuid объекта
+	*/
+	async postChangedWorkRelations (workRelations, contentCode: string, subjectUuid: string) {
+		const url = `exec?func=modules.ganttSettings.storeWorkRelations&params=requestContent`;
+		const body = {contentCode, subjectUuid, workRelations};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
 	async getDataSourceAttributes (classFqn: string, parentClassFqn: string) {
 		const url = `exec-post?func=modules.ganttSettings.getDataSourceAttributes&params=requestContent`;
-		const body = {
-			classFqn, parentClassFqn};
+		const body = {classFqn, parentClassFqn};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -110,12 +145,13 @@ export default class Api {
 	}
 
 	/**
-	* Отправляет данные обновленной задачи
-	* @param  {string} startDate - дата и время начала задачи
-	* @param  {string} endDate - дата и время окончания задачи
-	* @param  {string | number} subjectUuid - идентификатор задачи
+	* Отправляет данные изменения прогресса работы
+	* @param {string} workUUID - идентификатор работы
+	* @param {number} progress - прогресс работы
+	* @param {string} contentCode - code объекта
+	* @param {string} subjectUUID - Uuid объекта
 	*/
-	async postChangeProgress (workUUID: string, progress: number, contentCode: string, subjectUUID) {
+	async postChangedWorkProgress (workUUID: string, progress: number, contentCode: string, subjectUUID) {
 		const url = `exec-post?func=modules.ganttWorkHandler.changeWorkProgress&params=requestContent`;
 		const body = {contentCode, progress, subjectUUID, workUUID};
 
@@ -124,7 +160,7 @@ export default class Api {
 			method: 'POST'
 		};
 
-		return this.jsApi.restCallAsJson(url, options);
+		this.jsApi.restCallAsJson(url, options);
 	}
 
 	getContentCode () {

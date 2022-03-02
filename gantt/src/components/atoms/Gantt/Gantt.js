@@ -5,7 +5,7 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
 import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
-import {setColumnSettings, setColumnTask, changeWorkProgress} from 'store/App/actions';
+import {setColumnSettings, setColumnTask} from 'store/App/actions';
 import Modal from 'src/components/atoms/Modal';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
@@ -193,14 +193,21 @@ const Gantt = (props: Props) => {
 			newTasks.forEach(i => {
 				if (i.id === taskId.id) {
 					i.progress = taskId.progress;
+					i.start_date = taskId.start_date;
+					i.end_date = taskId.end_date;
 				}
 			});
-			const {saveChangeProgress} = props;
+			const {saveChangedWorkInterval, saveChangedWorkProgress} = props;
 			const wholeId = taskId.id.split('_');
 			const finishProgress = taskId.progress;
 			const finishId = wholeId[0];
 
-			saveChangeProgress(finishId, finishProgress);
+			saveChangedWorkProgress(finishId, finishProgress);
+			saveChangedWorkInterval ([
+				{dateType: 'startDate', value: taskId.start_date, workUUID: finishId},
+				{dateType: 'endDate', value: taskId.end_date, workUUID: finishId}
+			]);
+
 			dispatch(setColumnTask(newTasks));
 
 			setOpenModal(true);
@@ -230,6 +237,14 @@ const Gantt = (props: Props) => {
 		gantt.init(ganttContainer.current);
 		gantt.clearAll();
 	}, []);
+
+	gantt.templates.drag_link = (from, from_start, to, to_start) => {
+		const links = gantt.getLinks();
+
+		if (links.length && !firstUpdate) {
+			props.saveChangedWorkRelations(links);
+		}
+	};
 
 	// Изменяет прогресс в задачах при изменении store.APP.workProgresses
 	useEffect(() => {

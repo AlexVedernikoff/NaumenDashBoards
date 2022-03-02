@@ -12,6 +12,7 @@ module.exports = {
 		historyApiFallback: true,
 		host: localIp()
 	},
+	devtool: 'source-map',
 	entry: {
 		'index': ['babel-polyfill', './src/index.js']
 	},

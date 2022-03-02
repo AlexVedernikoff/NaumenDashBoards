@@ -92,9 +92,16 @@ export default class FakeApi {
 		return data;
 	}
 
-	async postChangeProgress (workUUID, progress, contentCode, subjectUUID) {
+	async postChangedWorkProgress (workUUID, progress, contentCode, subjectUUID) {
 		await new Promise(resolve => setTimeout(() => resolve(), 300));
-		return progress;
+	}
+
+	async postChangedWorkInterval (timezone, workDateData, contentCode, subjectUuid, user) {
+		await new Promise(resolve => setTimeout(() => resolve(), 300));
+	}
+
+	async postChangedWorkRelations (workRelations, contentCode, subjectUuid) {
+		await new Promise(resolve => setTimeout(() => resolve(), 300));
 	}
 
 	getContentCode () {
