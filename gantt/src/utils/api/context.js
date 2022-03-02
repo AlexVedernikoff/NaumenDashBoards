@@ -71,11 +71,31 @@ const getDiagramData = async (contentCode: string, subjectUuid: string, user: Us
  * Возвращает список атрибутов для источника данных
  * @param classFqn - код класса
  * @param parentClassFqn - код класса родителя
- * @returns {Promise<Source>} - атрибуты
  */
 const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string = null): Promise<Source> => {
-	const attributes = await api.getDataSourceAttributes(classFqn, parentClassFqn);
-	return attributes;
+	await api.getDataSourceAttributes(classFqn, parentClassFqn);
+};
+
+/**
+* Отправляет данные изменения временных рамок работ
+* @param  {string} timezone - таймзона
+* @param  {workDateInterval} workDateInterval - Объект временных рамок работы
+* @param  {string} contentCode - code объекта
+* @param  {string} subjectUuid - Uuid объекта
+* @param  {string} user - user объект
+*/
+const postChangedWorkInterval = async (timezone: string, workDateInterval: workDateInterval, contentCode: string, subjectUuid: string, user: UserData): Promise<Source> => {
+	await api.postChangedWorkInterval(timezone, workDateInterval, contentCode, subjectUuid, user);
+};
+
+/**
+ * Отправляет изменение связей
+ * @param workRelations - объект связи между работами
+ * @param contentCode - code объекта
+ * @param subjectUuid -  Uuid объекта
+ */
+const postChangedWorkRelations = async (workRelations, contentCode: string, subjectUuid: string) => {
+	await api.postChangedWorkRelations(workRelations, contentCode, subjectUuid);
 };
 
 /**
@@ -102,17 +122,14 @@ const saveData = async (subjectUuid: string, contentCode: string, data: Settings
 };
 
 /**
- * Отправляет измененный прогресс
- * @param workUUID - идентификатор работы
- * @param progress - прогресс работы
- * @param contentCode - code объекта
- * @param subjectUUID - Uuid объекта
- * @returns {Promise<Origress>} - новый прогресс
+ * Отправляет данные изменения прогресса работы
+ * @param {string} workUUID - идентификатор работы
+ * @param {number} progress - прогресс работы
+ * @param {string} contentCode - code объекта
+ * @param {string} subjectUUID - Uuid объекта
  */
-
-const postChangeProgress = async (workUUID: string, progress: number, contentCode: string, subjectUUID): Promise<Task> => {
-	const res = await api.postChangeProgress(workUUID, progress, contentCode, subjectUUID);
-	return res;
+const postChangedWorkProgress = async (workUUID: string, progress: number, contentCode: string, subjectUUID: string): Promise<Task> => {
+	await api.postChangedWorkProgress(workUUID, progress, contentCode, subjectUUID);
 };
 
 /**
@@ -164,6 +181,8 @@ export {
 	getInitialSettings,
 	openFilterForm,
 	getUserData,
-	postChangeProgress,
+	postChangedWorkRelations,
+	postChangedWorkProgress,
+	postChangedWorkInterval,
 	saveData
 };

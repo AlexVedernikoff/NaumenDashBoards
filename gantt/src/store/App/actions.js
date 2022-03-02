@@ -2,7 +2,7 @@
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getContext, getCurrentUser, getDataSources, getAttributeGroups, getDiagramData, getInitialSettings, getUserData, saveData, postChangeProgress} from 'utils/api';
+import {getContext, getCurrentUser, getDataSources, getAttributeGroups, getDiagramData, getInitialSettings, getUserData, saveData, postChangedWorkRelations, postChangedWorkProgress, postChangedWorkInterval} from 'utils/api';
 import {v4 as uuidv4} from 'uuid';
 
 /**
@@ -51,20 +51,63 @@ const getListOfGroupAttributes = (metaClass): ThunkAction => async (dispatch: Di
 };
 
 /**
- * Сохраняет и отправляет данные работы у которой изменили прогресс и параметры текущей диаграммы
+ * Сохраняет и отправляет данные изменения прогресса работы
  * @param {string} workUUID - идентификатор работы
  * @param {number} progress - прогресс работы
  * @returns {ThunkAction}
  */
-const saveChangeProgress = (workUUID: string, progress: number): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const saveChangedWorkProgress = (workUUID: string, progress: number): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const {contentCode, subjectUuid} = getContext();
 
-		await postChangeProgress(workUUID, progress, contentCode, subjectUuid);
+		await postChangedWorkProgress(workUUID, progress, contentCode, subjectUuid);
 
 		dispatch(setContentCode(contentCode));
 		dispatch(setSubjectUuid(subjectUuid));
 	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderData());
+	}
+};
+
+/**
+ * Сохраняет и отправляет данные изменненых временных рамок работы
+ * @param {workDateInterval} workDateInterval - Объект временных рамок работы
+ * @returns {ThunkAction}
+ */
+const saveChangedWorkInterval = (workDateInterval): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const {contentCode, subjectUuid} = getContext();
+		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+		const user = await getCurrentUser();
+
+		await postChangedWorkInterval(timezone, workDateInterval, contentCode, subjectUuid, user);
+
+		dispatch(setContentCode(contentCode));
+		dispatch(setSubjectUuid(subjectUuid));
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderData());
+	}
+};
+
+/**
+ * Сохраняет и отправляет данные изменненых рабочих связей
+ * @param workRelations - объект связи между работами
+ * @returns {ThunkAction}
+ */
+const saveChangedWorkRelations = (workRelations): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const {contentCode, subjectUuid} = getContext();
+
+		await postChangedWorkRelations(workRelations, contentCode, subjectUuid);
+
+		dispatch(setContentCode(contentCode));
+		dispatch(setSubjectUuid(subjectUuid));
+	} catch (error) {
+		console.log(error);
 		dispatch(setErrorCommon(error));
 	} finally {
 		dispatch(hideLoaderData());
@@ -327,7 +370,9 @@ export {
 	hideLoaderData,
 	hideLoaderSettings,
 	saveListOfAttributes,
-	saveChangeProgress,
+	saveChangedWorkRelations,
+	saveChangedWorkProgress,
+	saveChangedWorkInterval,
 	saveSettings,
 	setColumnSettings,
 	setCommonSettings,

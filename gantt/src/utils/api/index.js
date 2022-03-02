@@ -13,7 +13,9 @@ import {
 	getInitialSettings,
 	getUserData,
 	openFilterForm,
-	postChangeProgress,
+	postChangedWorkRelations,
+	postChangedWorkInterval,
+	postChangedWorkProgress,
 	saveData
 } from './context';
 
@@ -29,7 +31,9 @@ export {
 	getInitialSettings,
 	getUserData,
 	openFilterForm,
-	postChangeProgress,
+	postChangedWorkRelations,
+	postChangedWorkInterval,
+	postChangedWorkProgress,
 	saveData
 };
 
