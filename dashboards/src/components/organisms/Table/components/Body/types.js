@@ -1,6 +1,6 @@
 // @flow
 import type {Column, ColumnsWidth, Components, FixedPositions, OnClickCell, Row} from 'Table/types';
-import type {RowAggregation} from 'store/widgets/buildData/types';
+import type {SingleRowInfo} from 'store/widgets/buildData/types';
 import type {Table, TableSorting} from 'store/widgets/data/types';
 
 export type Props = {
@@ -14,7 +14,7 @@ export type Props = {
 	onScroll: (event: SyntheticEvent<HTMLDivElement>) => void,
 	page: number,
 	pageSize: number,
-	rowAggregations?: Array<RowAggregation>,
+	rowsInfo?: Array<SingleRowInfo>,
 	settings: Table,
 	sorting: TableSorting,
 	width: number

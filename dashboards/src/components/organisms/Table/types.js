@@ -2,7 +2,7 @@
 import type {DefaultProps as DefaultCellProps, Props as CellProps} from './components/Cell/types';
 import type {Props as HeaderProps} from './components/HeaderCell/types';
 import type {Props as RowProps} from './components/Row/types';
-import type {RowAggregation} from 'store/widgets/buildData/types';
+import type {SingleRowInfo} from 'store/widgets/buildData/types';
 import type {Table, TableSorting, WidgetTooltip} from 'store/widgets/data/types';
 
 export type Column = {
@@ -69,7 +69,7 @@ export type Props = {
 	onClickDataCell?: OnClickCell,
 	onFetch: (pageSize: number, page: number, sorting: TableSorting) => void,
 	pageSize: number,
-	rowAggregations?: Array<RowAggregation>,
+	rowsInfo?: Array<SingleRowInfo>,
 	settings: Table,
 	sorting: TableSorting,
 	total: number

@@ -2,7 +2,7 @@
 import type {AttributeColumn, BuildDataState, Column, DataSetDescriptorRelation, DiagramBuildData, WidgetDataError} from './types';
 import {COLUMN_TYPES, SEPARATOR, TITLE_SEPARATOR} from './constants';
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import type {IndicatorData, RowAggregation} from 'store/widgets/buildData/types';
+import type {IndicatorData, SingleRowInfo} from 'store/widgets/buildData/types';
 import type {SourceData, Widget} from 'store/widgets/data/types';
 
 /**
@@ -121,14 +121,14 @@ const isCardObjectColumn = (column: AttributeColumn, aggregation: string): boole
 /**
  * Возвращает атрибут и агрегацию показателя для столбца
  * @param {AttributeColumn} column - колонка
- * @param {RowAggregation | null} rowAggregations - агрегация для источников без параметра
+ * @param {SingleRowInfoIndicator | null} rowInfo - агрегация для источников без параметра
  * @returns {IndicatorData} - данные показателя для конкретного столбца
  */
-const getIndicatorAttribute = (column: AttributeColumn, rowAggregations?: RowAggregation): IndicatorData | null => {
+const getIndicatorAttribute = (column: AttributeColumn, rowInfo?: SingleRowInfo): IndicatorData | null => {
 	let result = null;
 
-	if (rowAggregations) {
-		const {attribute, type: aggregation} = rowAggregations;
+	if (rowInfo) {
+		const {attribute, type: aggregation} = rowInfo.indicator;
 
 		result = {aggregation, attribute};
 	} else {
