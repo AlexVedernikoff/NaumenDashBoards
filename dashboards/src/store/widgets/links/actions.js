@@ -63,6 +63,7 @@ const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): Thunk
 			dispatch(openObjectsList(widget, postData));
 		}
 	};
+
 /**
  * Открывает список объектов
  * @param {Widget} widget - данные виджета

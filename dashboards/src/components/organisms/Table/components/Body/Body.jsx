@@ -22,7 +22,7 @@ export class Body extends PureComponent<Props, State> {
 	}
 
 	renderCell = (row: RowType, rowIndex: number) => (column: Column, columnIndex: number, columns: Array<Column>) => {
-		const {columnsWidth, components, fixedPositions, onClickCell, rowAggregations, settings} = this.props;
+		const {columnsWidth, components, fixedPositions, onClickCell, rowsInfo, settings} = this.props;
 		const {defaultValue, textAlign, textHandler} = settings.body;
 		const {accessor} = column;
 		const {BodyCell} = components;
@@ -47,8 +47,8 @@ export class Body extends PureComponent<Props, State> {
 				left={left}
 				onClick={onClickCell}
 				row={row}
-				rowAggregations={rowAggregations}
 				rowIndex={rowIndex}
+				rowsInfo={rowsInfo}
 				textAlign={textAlign}
 				textHandler={textHandler}
 				value={value}

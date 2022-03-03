@@ -2,7 +2,7 @@
 import type {Column, Components, OnClickCell, Row} from 'Table/types';
 import type {DefaultTableValue, FontStyle, TextAlign, TextHandler, WidgetTooltip} from 'store/widgets/data/types';
 import type {Position} from 'src/components/molecules/WidgetTooltip/components/Message/types.js';
-import type {RowAggregation} from 'store/widgets/buildData/types';
+import type {SingleRowInfo} from 'store/widgets/buildData/types';
 
 export type DefaultProps = {|
 	children: React$Node,
@@ -11,8 +11,8 @@ export type DefaultProps = {|
 	fontColor: string,
 	left: number | null,
 	row: Row | null,
-	rowAggregations: Array<RowAggregation> | null,
 	rowIndex: number,
+	rowsInfo: Array<SingleRowInfo> | null,
 	textAlign: TextAlign,
 	textHandler: TextHandler,
 	tip: string,

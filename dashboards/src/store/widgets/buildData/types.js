@@ -1,6 +1,7 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
 import {BUILD_DATA_EVENTS, COLUMN_TYPES} from './constants';
+import {DEFAULT_AGGREGATION, INTEGER_AGGREGATION} from 'store/widgets/constants';
 import type {Group, SetCreatedWidget, TableWidget, UpdateWidget, Widget, WidgetTooltip} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 
@@ -58,9 +59,25 @@ export type Row = {
 	[accessor: string]: string
 };
 
-export type RowAggregation = {
-	attribute: Attribute,
-	type: string
+export type SingleRowInfoBreakdown = {
+    attribute: Attribute,
+    type: string
+};
+
+export type SingleRowInfoIndicator = {
+    attribute: Attribute,
+    type: $Keys<typeof DEFAULT_AGGREGATION> | $Keys<typeof INTEGER_AGGREGATION>
+};
+
+export type SingleRowInfoSource = {
+    classFqn: string,
+    descriptor: string
+};
+
+export type SingleRowInfo = {
+    breakdown: SingleRowInfoBreakdown,
+    indicator: SingleRowInfoIndicator,
+    source: SingleRowInfoSource
 };
 
 export type TableBuildData = {
@@ -71,7 +88,7 @@ export type TableBuildData = {
 		breakdown: boolean,
 		parameter: boolean
 	},
-	rowAggregations?: Array<RowAggregation>,
+	rowsInfo?: Array<SingleRowInfo>,
 	total: number
 };
 

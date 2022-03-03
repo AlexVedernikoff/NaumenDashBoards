@@ -61,49 +61,59 @@ export class TableWidget extends PureComponent<Props, State> {
 	 */
 	drillDown = (props: OnClickCellProps) => {
 		const {data, onDrillDown, widget} = this.props;
-		const {columns} = data;
-		const {column, row} = props;
+		const {columns, rowsInfo} = data;
+		const {column, row, rowIndex} = props;
 		const {BREAKDOWN} = COLUMN_TYPES;
 		const mixin = createDrillDownMixin(widget);
-		// $FlowFixMe
-		const dataColumns: Array<ParameterColumn> = columns.filter(this.isGroupColumn);
-		let {aggregation, attribute, type} = column;
+		const indicator = getIndicatorAttribute(column, rowsInfo?.[rowIndex]);
 
-		if (type === BREAKDOWN) {
-			dataColumns.push(column);
-			({aggregation, attribute} = column.indicator);
-		}
+		if (indicator) {
+			const {aggregation, attribute} = indicator;
+			// $FlowFixMe
+			const dataColumns: Array<ParameterColumn> = columns.filter(this.isGroupColumn);
+			const {type} = column;
 
-		mixin.filters.push({aggregation, attribute});
+			if (type === BREAKDOWN) {
+				if (rowsInfo?.[rowIndex]) {
+					const rowBreakdown = rowsInfo[rowIndex].breakdown;
 
-		dataColumns.forEach(column => {
-			const {accessor, attribute, group, header, type} = column;
-			let rowValue = '';
-
-			if (row) {
-				({[accessor]: rowValue = t('TableWidget::EmptyValue')} = row);
-
-				if (rowValue === '') {
-					rowValue = t('TableWidget::EmptyValue');
+					dataColumns.push({...column, attribute: rowBreakdown.attribute});
+				} else {
+					dataColumns.push(column);
 				}
 			}
 
-			const value = type === BREAKDOWN ? header : rowValue;
+			mixin.filters.push({aggregation, attribute});
 
-			if (value) {
-				const subTitle: string = getSeparatedLabel(value);
+			dataColumns.forEach(column => {
+				const {accessor, attribute, group, header, type} = column;
+				let rowValue = '';
 
-				mixin.title = `${mixin.title}. ${subTitle}`;
-			}
+				if (row) {
+					({[accessor]: rowValue = t('TableWidget::EmptyValue')} = row);
 
-			mixin.filters.push({
-				attribute,
-				group,
-				value
+					if (rowValue === '') {
+						rowValue = t('TableWidget::EmptyValue');
+					}
+				}
+
+				const value = type === BREAKDOWN ? header : rowValue;
+
+				if (value) {
+					const subTitle: string = getSeparatedLabel(value);
+
+					mixin.title = `${mixin.title}. ${subTitle}`;
+				}
+
+				mixin.filters.push({
+					attribute,
+					group,
+					value
+				});
 			});
-		});
 
-		onDrillDown(widget, 0, mixin);
+			onDrillDown(widget, rowsInfo ? rowIndex : 0, mixin);
+		}
 	};
 
 	findRow = (id: number, accessor: string) => {
@@ -234,11 +244,11 @@ export class TableWidget extends PureComponent<Props, State> {
 	};
 
 	handleClickDataCell = (e: MouseEvent, props: OnClickCellProps) => {
-		const {columns, rowAggregations} = this.props.data;
+		const {columns, rowsInfo} = this.props.data;
 		const {column, rowIndex} = props;
 
 		if (isIndicatorColumn(column)) {
-			const indicator = getIndicatorAttribute(column, rowAggregations?.[rowIndex]);
+			const indicator = getIndicatorAttribute(column, rowsInfo?.[rowIndex]);
 
 			if (indicator) {
 				const {aggregation} = indicator;
@@ -331,8 +341,8 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	renderIndicatorCell = (props: CellConfigProps) => {
 		const {fontColor, fontStyle} = this.props.widget.table.body.indicatorSettings;
-		const {column, rowAggregations, rowIndex = 0, value = ''} = props;
-		const indicator = getIndicatorAttribute(column, rowAggregations?.[rowIndex]);
+		const {column, rowIndex = 0, rowsInfo, value = ''} = props;
+		const indicator = getIndicatorAttribute(column, rowsInfo?.[rowIndex]);
 		const components = {
 			Value: this.renderLinkValue
 		};
@@ -405,7 +415,7 @@ export class TableWidget extends PureComponent<Props, State> {
 	render (): React$Node {
 		const {data: tableData, loading, widget} = this.props;
 		const {columns, fixedColumnsCount} = this.state;
-		const {data, rowAggregations, total} = tableData;
+		const {data, rowsInfo, total} = tableData;
 		const {columnsRatioWidth, showTotalAmount, sorting, table} = widget;
 		const {pageSize} = table.body;
 		const components = {
@@ -431,7 +441,7 @@ export class TableWidget extends PureComponent<Props, State> {
 				onFetch={this.handleFetch}
 				pageSize={pageSize}
 				ref={this.tableRef}
-				rowAggregations={rowAggregations}
+				rowsInfo={rowsInfo}
 				settings={table}
 				sorting={sorting}
 				total={total}

@@ -299,7 +299,7 @@ export class Table extends PureComponent<Props, State> {
 	};
 
 	renderBody = () => {
-		const {data, onClickDataCell, pageSize, rowAggregations, settings} = this.props;
+		const {data, onClickDataCell, pageSize, rowsInfo, settings} = this.props;
 		const {columnsWidth, components, dataColumns, fixedPositions, page, sorting, width} = this.state;
 
 		return (
@@ -314,7 +314,7 @@ export class Table extends PureComponent<Props, State> {
 				onScroll={this.handleBodyScroll}
 				page={page}
 				pageSize={pageSize}
-				rowAggregations={rowAggregations}
+				rowsInfo={rowsInfo}
 				settings={settings}
 				sorting={sorting}
 				width={width}
