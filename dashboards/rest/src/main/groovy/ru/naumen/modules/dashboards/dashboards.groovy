@@ -32,7 +32,7 @@ import static MessageProvider.*
 
 @Field @Lazy @Delegate Dashboards dashboards = new DashboardsImpl(
     binding,
-    new DashboardsService(api.utils, api.listdata, api.metainfo, api.web, api.apps, api.db, op, sp, new DashboardUtils())
+    new DashboardsService(api.utils, api.listdata, api.metainfo, api.web, api.apps, api.db, op, sp, new DashboardUtils(), logger)
 )
 
 interface Dashboards
@@ -357,6 +357,7 @@ class DashboardsService
     private final IScriptConditionsApi op
     private final ISearchParams sp
     private final DashboardUtils dashboardUtils
+    private final logger
 
     DashboardsService(IScriptUtils utils,
                       IListDataApi listdata,
@@ -366,7 +367,8 @@ class DashboardsService
                       IDbApi db,
                       IScriptConditionsApi op,
                       ISearchParams sp,
-                      DashboardUtils dashboardUtils)
+                      DashboardUtils dashboardUtils,
+                      def logger)
     {
         this.utils = utils
         this.listdata = listdata
@@ -377,6 +379,7 @@ class DashboardsService
         this.op = op
         this.sp = sp
         this.dashboardUtils = dashboardUtils
+        this.logger = logger
     }
 
     private static final String MAIN_FQN = 'abstractBO'

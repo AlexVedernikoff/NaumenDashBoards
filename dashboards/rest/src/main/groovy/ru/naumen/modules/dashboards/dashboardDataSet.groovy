@@ -56,7 +56,9 @@ import static groovy.json.JsonOutput.toJson
                                                                                                                                                       api.utils,
                                                                                                                                                       api.db,
                                                                                                                                                       api.keyValue,
-                                                                                                                                                      new DashboardUtils())))
+                                                                                                                                                      new DashboardUtils(),
+                                                                                                                                                      logger),
+                                                                                                                         logger))
 
 interface DashboardDataSet
 {
@@ -141,6 +143,7 @@ class DashboardDataSetService
     private DashboardSettingsService dashboardSettingsService
     private final DashboardUtils dashboardUtils
     private final DashboardQueryWrapperUtils dashboardQueryWrapperUtils
+    private final def logger
 
     DashboardDataSetService(IScriptUtils utils,
                             IMetainfoApi metainfo,
@@ -151,7 +154,8 @@ class DashboardDataSetService
                             IAuthenticationApi auth,
                             DashboardUtils dashboardUtils,
                             DashboardQueryWrapperUtils dashboardQueryWrapperUtils,
-                            DashboardSettingsService dashboardSettingsService)
+                            DashboardSettingsService dashboardSettingsService,
+                            def logger)
     {
         this.utils = utils
         this.metainfo = metainfo
@@ -163,6 +167,7 @@ class DashboardDataSetService
         this.dashboardSettingsService = dashboardSettingsService
         this.dashboardQueryWrapperUtils = dashboardQueryWrapperUtils
         this.dashboardUtils = dashboardUtils
+        this.logger = logger
     }
 
     MessageProvider messageProvider = MessageProvider.instance

@@ -32,7 +32,8 @@ import static groovy.json.JsonOutput.toJson
                                                                                                                     api.utils,
                                                                                                                     api.db,
                                                                                                                     api.keyValue,
-                                                                                                                    new DashboardUtils()))
+                                                                                                                    new DashboardUtils(),
+                                                                                                                    logger))
 
 /**
  * Интерфейс главного контроллера
@@ -441,7 +442,7 @@ class DashboardSettingsService
                              IDbApi db,
                              IKeyValueStorageApi keyValue,
                              DashboardUtils dashboardUtils,
-                             def logger = null)
+                             def logger)
     {
         this.metainfo = metainfo
         this.apps = apps

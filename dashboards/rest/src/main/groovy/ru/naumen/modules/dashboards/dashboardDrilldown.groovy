@@ -65,13 +65,17 @@ import static DashboardMarshallerClass.*
                                                                                                                                                                                  api.utils,
                                                                                                                                                                                  api.db,
                                                                                                                                                                                  api.keyValue,
-                                                                                                                                                                                 new DashboardUtils())),
+                                                                                                                                                                                 new DashboardUtils(),
+                                                                                                                                                                                 logger),
+                                                                                                                                                    logger),
                                                                                                                         new DashboardSettingsService(api.metainfo,
                                                                                                                                                      api.apps,
                                                                                                                                                      api.utils,
                                                                                                                                                      api.db,
                                                                                                                                                      api.keyValue,
-                                                                                                                                                     new DashboardUtils())))
+                                                                                                                                                     new DashboardUtils(),
+                                                                                                                                                     logger),
+                                                                                                                        logger))
 
 interface DashboardDrilldown
 {
@@ -116,6 +120,7 @@ class DashboardDrilldownService
     private final DashboardUtils dashboardUtils
     private final DashboardDataSetService dashboardDataSetService
     private final DashboardSettingsService dashboardSettingsService
+    private final def logger
 
     private String currentUserLocale
 
@@ -133,7 +138,8 @@ class DashboardDrilldownService
                               IWebApi web,
                               DashboardUtils dashboardUtils,
                               DashboardDataSetService dashboardDataSetService,
-                              DashboardSettingsService dashboardSettingsService)
+                              DashboardSettingsService dashboardSettingsService,
+                              def logger)
     {
         this.utils = utils
         this.metainfo = metainfo
@@ -148,6 +154,7 @@ class DashboardDrilldownService
         this.dashboardUtils = dashboardUtils
         this.dashboardDataSetService = dashboardDataSetService
         this.dashboardSettingsService = dashboardSettingsService
+        this.logger = logger
     }
 
     /**
