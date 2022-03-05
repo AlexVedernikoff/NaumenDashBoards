@@ -1085,7 +1085,7 @@ class DashboardsService
     Collection<DataSource> getLinkedDataSources(String classFqn, String parentClassFqn, List<String> types)
     {
         def linkAttributes = getDataSourceAttributes(classFqn, parentClassFqn, types)
-        return mappingDataSource(linkAttributes, true)
+        return mappingDataSource(linkAttributes, true).unique { it.classFqn }
     }
 
     /**
@@ -1536,7 +1536,7 @@ class DashboardsService
         return fqns.collect {
             if (it instanceof Attribute)
             {
-                it = metainfo.getMetaClass(it.metaClassFqn)
+                it = metainfo.getMetaClass(it.property)
             }
             Collection<String> attributeGroupCodes = it.getAttributeGroupCodes()
             new DataSource(
