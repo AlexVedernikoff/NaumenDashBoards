@@ -1948,7 +1948,13 @@ class DashboardDataSetService
                 // этот ключ указывает на источник вместе с группировками
                 def requestData = getData(dataKey) as RequestData
                 def newRequestData = requestData.clone()
-                def group = comp.group as GroupParameter
+
+                def group = null
+                if (!checkDuplicateGroup(newRequestData.groups, comp.group as GroupParameter))
+                {
+                    group = comp.group as GroupParameter
+                }
+
                 def aggregation = comp.aggregation as AggregationParameter
                 if (diagramType == DiagramType.TABLE)
                 {
