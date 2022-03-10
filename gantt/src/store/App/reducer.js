@@ -107,8 +107,8 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 		case APP_EVENTS.SET_RANGE_TIME:
 			return {
 				...state,
-				endDate: action.payload.endDate,
-				startDate: action.payload.startDate
+				endDate: action.payload.endDate ? action.payload.endDate : state.endDate,
+				startDate: action.payload.startDate ? action.payload.startDate : state.startDate
 			};
 		case APP_EVENTS.CANCEL_SETTINGS:
 			return {

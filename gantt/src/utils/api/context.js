@@ -73,7 +73,8 @@ const getDiagramData = async (contentCode: string, subjectUuid: string, user: Us
  * @param parentClassFqn - код класса родителя
  */
 const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string = null): Promise<Source> => {
-	await api.getDataSourceAttributes(classFqn, parentClassFqn);
+	const attributes = await api.getDataSourceAttributes(classFqn, parentClassFqn);
+	return attributes;
 };
 
 /**

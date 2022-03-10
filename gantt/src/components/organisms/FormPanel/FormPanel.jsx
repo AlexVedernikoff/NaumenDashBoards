@@ -46,9 +46,6 @@ const FormPanel = (props: Props) => {
 
 		let indexForNewBlock = index;
 
-		// новая работа [от ресурса] встает сразу под ресурсом
-		// новая работа [от работыА] встает сразу после детей-работ работыА
-		// новый ресурс встает сразу после всех детей
 		if ((value === 'WORK' && resources[index].type === 'WORK') || (value === 'RESOURCE')) {
 			indexForNewBlock = skipChildren(index) - 1;
 		}
@@ -216,6 +213,7 @@ const FormPanel = (props: Props) => {
 	const handleCancel = () => {
 		const {cancelSettings} = props;
 
+		props.handleToggle();
 		cancelSettings();
 	};
 
@@ -235,37 +233,49 @@ const FormPanel = (props: Props) => {
 		</div>
 	);
 
-	const [inputStartDate, setinputStartDate] = useState('');
-	const [inputEndDate, setinputEndDate] = useState('');
+	const [inputStartDate, setinputStartDate] = useState(new Date(props.startDate).toLocaleString());
+	const [inputEndDate, setinputEndDate] = useState(new Date(props.endDate).toLocaleString());
 	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
 
 	const onSelectStartDate = (value) => {
-		setinputStartDate(value);
+		setinputStartDate(new Date(value).toLocaleString());
 		setShowDatePickerStartDate(!showDatePickerStartDate);
 	};
 
 	const onSelectEndDate = (value) => {
-		setinputEndDate(value);
+		setinputEndDate(new Date(value).toLocaleString());
 		setShowDatePickerEndDate(!showDatePickerEndDate);
 	};
 
 	const renderDatePickerStartDate = () => {
 		if (showDatePickerStartDate) {
-			return <Datepicker onSelect={(value) => onSelectStartDate(value)} value="" />;
+			return <div className={styles.datepicker}><Datepicker onSelect={(value) => onSelectStartDate(value)} value="" /></div>;
 		}
 	};
 
 	const renderDatePickerEndDate = () => {
 		if (showDatePickerEndDate) {
-			return <Datepicker onSelect={(value) => onSelectEndDate(value)} value="" />;
+			return <div className={styles.datepicker}><Datepicker onSelect={(value) => onSelectEndDate(value)} value="" /> </div>;
 		}
 	};
 
+	const convertDateToNormal = date => {
+		const chunkDate = date.split(',');
+		const dotReplacement = chunkDate[0].replace(/\./g, ',').split(',');
+
+		[dotReplacement[0], dotReplacement[1]] = [dotReplacement[1], dotReplacement[0]];
+		const modifiedDate = dotReplacement.join('.') + ',' + chunkDate[1];
+
+		return modifiedDate;
+	};
+
 	const sibmitRange = () => {
+		const newStartDate = new Date(convertDateToNormal(inputStartDate));
+		const newEndDate = new Date(convertDateToNormal(inputEndDate));
 		const date = {
-			endDate: inputEndDate,
-			startDate: inputStartDate
+			endDate: newEndDate,
+			startDate: newStartDate
 		};
 
 		props.setRangeTime(date);
