@@ -140,9 +140,7 @@ const getNiceScale = (value: number) => {
  * @returns {number} - максимальное значение
  */
 const getMaxValue = (series: Series, stacked: boolean) => {
-	const values = series
-		.map(s => s.data)
-		.reduce((all, data) => [...all, ...data], []);
+	const values = series.flatMap(s => s.data).map(v => parseFloat(v));
 	const maxStackedValue = stacked ? getMaxStackedValue(series) : 0;
 
 	return Math.max(...values, maxStackedValue);
@@ -163,8 +161,9 @@ const getMaxStackedValue = (series: Series) => {
 			stackedValues[index] = stackedValues[index] ? stackedValues[index] + value : value;
 		});
 	});
+	const stackedValuesFloat = stackedValues.map(val => parseFloat(val));
 
-	return Math.max(...stackedValues);
+	return Math.max(...stackedValuesFloat);
 };
 
 /**
