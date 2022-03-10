@@ -1,6 +1,6 @@
 // @flow
 import type {AppState} from 'store/types';
-import {getListOfGroupAttributes, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations} from 'store/App/actions';
+import {getGanttData, getListOfGroupAttributes, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations} from 'store/App/actions';
 
 const props = (state: AppState) => {
 	const {diagramKey, groupAttribute, links, loadingData, resources, settings, tasks} = state.APP;
@@ -20,6 +20,7 @@ const props = (state: AppState) => {
 };
 
 const functions = {
+	getGanttData,
 	getListOfGroupAttributes,
 	saveChangedWorkInterval,
 	saveChangedWorkProgress,

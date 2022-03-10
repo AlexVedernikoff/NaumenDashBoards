@@ -76,23 +76,21 @@ export class GanttContent extends PureComponent<Props> {
 			? <GanttPanel
 				allLinks={this.state.allLinks}
 				handleToggle={this.handleToggle}
-				handleToggleLinks={() => this.handleToggleLinks()}
-				handleToggleProgress={() => this.handleToggleProgress()}
+				handleToggleLinks={this.handleToggleLinks}
+				handleToggleProgress={this.handleToggleProgress}
 				progress={this.state.progress} swiped={this.state.swiped}
 			/> : null;
 	};
 
 	renderАctionBar = () => {
-		const {editMode} = this.props;
-
-		return editMode
-			? <АctionBar
-				addNewTask={() => this.addNewTask()}
+		return (
+			<АctionBar
+				addNewTask={this.addNewTask}
 				handleToggle={this.handleToggle}
 				name={this.state.name}
-				onClick={() => this.onMove()}
-				refresh={() => this.onRefresh()}
-			/> : null;
+				onClick={this.onMove}
+				refresh={this.onRefresh}
+			/>);
 	};
 
 	render () {

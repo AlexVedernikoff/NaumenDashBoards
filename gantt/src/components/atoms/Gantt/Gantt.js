@@ -19,7 +19,7 @@ const Gantt = (props: Props) => {
 	const [showMenu, setShowMenu] = useState(false);
 	const [showModalConfirm, setShowModalConfirm] = useState(true);
 	const [openModal, setOpenModal] = useState(false);
-	const [initPage, setinitPage] = useState(false);
+	const [initPage, setInitPage] = useState(false);
 	const [res, setRes] = useState([]);
 	const [position, setPosition] = useState({left: 0, top: 0});
 	const dispatch = useDispatch();
@@ -344,12 +344,17 @@ const Gantt = (props: Props) => {
 			});
 		}
 
-		setinitPage(true);
+		setInitPage(true);
 	}, [props.flag]);
 
 	// Обновляет диаграмму при изменении props.refresh
 	useEffect(() => {
-		gantt.render();
+		if (initPage) {
+			props.getGanttData();
+			gantt.render();
+		}
+
+		setInitPage(true);
 	}, [props.refresh]);
 
 	const generateId = function () {
@@ -372,7 +377,7 @@ const Gantt = (props: Props) => {
 			const tasksTwo = gantt.getTaskByTime();
 
 			newTasks.push(tasksTwo[tasksTwo.length - 1]);
-			setinitPage(true);
+			setInitPage(true);
 			dispatch(setColumnTask(newTasks));
 		}
 	}, [props.newTask]);

@@ -39,12 +39,12 @@ export class TextInput extends PureComponent<Props> {
 	// };
 
 	renderInput = () => {
-		const {forwardedRef, maxLength, onBlur, onFocus, placeholder, value, id} = this.props;
+		const {forwardedRef, id, label, maxLength, onBlur, onFocus, placeholder, value} = this.props;
 
 		return (
 			<div className={styles.wrapperInput}>
 				<label htmlFor={id}>
-					Label
+					{label}
 				</label>
 				<input
 					className={styles.input}
