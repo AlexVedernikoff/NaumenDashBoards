@@ -1,6 +1,7 @@
 // @flow
-import {GEOLOCATION_EVENTS} from './constants';
+
 import type {GeolocationAction, GeolocationState} from './types';
+import {GEOLOCATION_EVENTS} from './constants';
 
 export const initialGeolocationState: GeolocationState = {
 	context: {
@@ -13,13 +14,14 @@ export const initialGeolocationState: GeolocationState = {
 	},
 	error: false,
 	loading: true,
+	mapObjects: [],
 	panelShow: 'static',
 	params: {
 		autoUpdateLocation: true,
 		colorPart: '#000000',
 		groupingMethodName: '',
 		listName: 'Объекты ВОЛС',
-		locationUpdateFrequency: {length: 60, interval: 'SECOND'},
+		locationUpdateFrequency: {interval: 'SECOND', length: 60},
 		requestCurrentLocation: false,
 		trailsMethodName: 'trailsMethodName',
 		updatePointsMode: 'getMapObjects'
@@ -28,11 +30,10 @@ export const initialGeolocationState: GeolocationState = {
 	singleObject: null,
 	staticGroups: [],
 	success: false,
-	timeUpdate: new Date().getTime(),
-	mapObjects: []
+	timeUpdate: new Date().getTime()
 };
 
 export const defaultGeolocationAction: GeolocationAction = {
-	type: GEOLOCATION_EVENTS.UNKNOWN_GEOLOCATION_ACTION,
-	payload: null
+	payload: null,
+	type: GEOLOCATION_EVENTS.UNKNOWN_GEOLOCATION_ACTION
 };

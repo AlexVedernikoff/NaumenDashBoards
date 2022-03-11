@@ -23,8 +23,8 @@ export const getLatLngBounds = (dataMarkers: Array<Trail>) => {
 		curr.equipments && acc.push(...curr.equipments);
 		return acc;
 	}, []).map(equipment => ({
-			geoposition: equipment.geopositions[0]
-		}));
+		geoposition: equipment.geopositions[0]
+	}));
 
 	if (bounds.length < 1) {
 		bounds = dataMarkers.reduce((acc, curr) => {

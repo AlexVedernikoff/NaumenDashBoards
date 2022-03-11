@@ -1,7 +1,7 @@
 // @flow
 import {defaultGeolocationAction, initialGeolocationState} from './init';
-import {GEOLOCATION_EVENTS} from './constants';
 import type {GeolocationAction, GeolocationState} from './types';
+import {GEOLOCATION_EVENTS} from './constants';
 
 const reducer = (state: GeolocationState = initialGeolocationState, action: GeolocationAction = defaultGeolocationAction): GeolocationState => {
 	switch (action.type) {

@@ -1,44 +1,44 @@
 // @flow
-import {Common} from '../../types/common';
+import {Common} from 'types/common';
 import type {Context} from 'types/api';
 import type {Controls} from 'types/controls';
 import {GEOLOCATION_EVENTS} from './constants';
-import type {Params} from 'types/params';
 import type {GroupCode, Point, PointType, StaticGroup} from 'types/point';
+import type {Params} from 'types/params';
 
 type SetContext = {
-	type: typeof GEOLOCATION_EVENTS.SET_CONTEXT,
-	payload: Context
+	payload: Context,
+	type: typeof GEOLOCATION_EVENTS.SET_CONTEXT
 };
 
 type SetParams = {
-	type: typeof GEOLOCATION_EVENTS.SET_PARAMS,
-	payload: Object
+	payload: Object,
+	type: typeof GEOLOCATION_EVENTS.SET_PARAMS
 };
 
 type RecordGeolocationError = {
-	type: typeof GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR,
-	payload: null
+	payload: null,
+	type: typeof GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR
 };
 
 type SetDataGeolocation = {
-	type: typeof GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION,
-	payload: Object
+	payload: Object,
+	type: typeof GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION
 };
 
 type ReloadActivePoint = {
-	type: typeof GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT,
-	payload: Object
+	payload: Object,
+	type: typeof GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT
 };
 
 type SetTab = {
-	type: typeof GEOLOCATION_EVENTS.SET_TAB,
-	payload: PointType
+	payload: PointType,
+	type: typeof GEOLOCATION_EVENTS.SET_TAB
 };
 
 type setSingleObject = {
-	type: typeof GEOLOCATION_EVENTS.SET_SINGLE_POINT,
-	payload: Point
+	payload: Point,
+	type: typeof GEOLOCATION_EVENTS.SET_SINGLE_POINT
 };
 
 type ResetSingleObject = {
@@ -46,8 +46,8 @@ type ResetSingleObject = {
 };
 
 type ToggleGroup = {
-	type: typeof GEOLOCATION_EVENTS.TOGGLE_GROUP,
-	payload: GroupCode
+	payload: GroupCode,
+	type: typeof GEOLOCATION_EVENTS.TOGGLE_GROUP
 };
 
 type ResetAllGroups = {
@@ -67,8 +67,8 @@ type ToggleFilter = {
 };
 
 type UnknownGeolocationAction = {
-	type: typeof GEOLOCATION_EVENTS.UNKNOWN_GEOLOCATION_ACTION,
-	payload: null
+	payload: null,
+	type: typeof GEOLOCATION_EVENTS.UNKNOWN_GEOLOCATION_ACTION
 };
 
 export type GeolocationAction =

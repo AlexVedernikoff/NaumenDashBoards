@@ -63,7 +63,7 @@ export default {
 								'presentation': 'right_of_label'
 							}
 						],
-						'color': 'red'
+						'color': '#fb0202'
 					}
 				},
 				{
@@ -881,7 +881,7 @@ export default {
 						'presentation': 'right_of_label'
 					}
 				],
-				'color': 'pink'
+				'color': '#d4f'
 			}
 		}
 	],
