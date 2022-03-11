@@ -51,39 +51,39 @@ const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dis
 };
 
 const setContext = (payload: Object) => ({
-	type: GEOLOCATION_EVENTS.SET_CONTEXT,
-	payload
+	payload,
+	type: GEOLOCATION_EVENTS.SET_CONTEXT
 });
 
 const setParams = (payload: Object) => dispatch => {
 	dispatch({
-		type: GEOLOCATION_EVENTS.SET_PARAMS,
-		payload
+		payload,
+		type: GEOLOCATION_EVENTS.SET_PARAMS
 	});
 	return Promise.resolve();
 };
 
 const setData = (payload: Object, firstCall) => ({
-	type: GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION,
 	payload: {
 		...payload,
 		firstCall
-	}
+	},
+	type: GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION
 });
 
-const recordGeolocationdError = (error) => ({
-	type: GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR,
-	payload: error
+const recordGeolocationdError = error => ({
+	payload: error,
+	type: GEOLOCATION_EVENTS.RECORD_GEOLOCATION_ERROR
 });
 
 const setTab = (payload: PointType) => ({
-	type: GEOLOCATION_EVENTS.SET_TAB,
-	payload
+	payload,
+	type: GEOLOCATION_EVENTS.SET_TAB
 });
 
 const setSingleObject = (data: Point) => ({
-	type: GEOLOCATION_EVENTS.SET_SINGLE_POINT,
-	payload: data
+	payload: data,
+	type: GEOLOCATION_EVENTS.SET_SINGLE_POINT
 });
 
 const resetSingleObject = () => ({
@@ -99,8 +99,8 @@ const toggleFilter = () => ({
 });
 
 const toggleGroup = (payload: GroupCode) => ({
-	type: GEOLOCATION_EVENTS.TOGGLE_GROUP,
-	payload
+	payload,
+	type: GEOLOCATION_EVENTS.TOGGLE_GROUP
 });
 
 const resetAllGroups = () => ({

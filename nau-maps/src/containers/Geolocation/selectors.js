@@ -10,7 +10,7 @@ import {resetSingleObject} from 'store/geolocation/actions';
  */
 export const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {controls, timeUpdate, mapObjects} = geolocation;
+	const {controls, mapObjects, timeUpdate} = geolocation;
 	const bounds = mapObjects && mapObjects.length ? mapObjects : [];
 	const {filterOpen, panelOpen} = controls;
 	const panelRightPadding = (filterOpen || panelOpen) ? 400 : 0;

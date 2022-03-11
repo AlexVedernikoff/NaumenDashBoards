@@ -10,40 +10,63 @@
 		"standard",
 		"plugin:react/recommended",
 		"plugin:promise/recommended",
-		"plugin:flowtype/recommended"
+		"plugin:flowtype/recommended",
+		"plugin:jsdoc/recommended"
 	],
 	"parser": "babel-eslint",
 	"plugins": [
+		"babel",
+		"eslint-plugin-local-rules",
+		"sort-destructure-keys",
 		"standard",
 		"react",
 		"promise",
-		"flowtype"
+		"flowtype",
+		"sort-keys-fix"
 	],
 	"rules": {
-		"curly": ["error", "all"],
-		"indent": [
-			"error",
-			"tab",
-			{
-				"SwitchCase": 1
-			}
-		],
-		"brace-style": ["error", "1tbs"],
-		"no-extend-native": ["error", {"exceptions":  ["String"]}],
-		"no-param-reassign": "error",
-		"no-tabs": 0,
-		"semi": ["error", "always"],
-		"flowtype/semi": ["error", "always"],
+		"one-var": ["error", "never"],
+		"babel/semi": [2, "always"],
 		"comma-dangle": ["error", "never"],
-		"flowtype/delimiter-dangle": ["error", "never"],
-		"multiline-ternary": ["error", "always-multiline"],
+		"curly": 0,
+		"flowtype/semi": 2,
+		"flowtype/sort-keys": [2, "asc", {"caseSensitive": true, "natural": true}],
+		"import/no-relative-parent-imports": 2,
+		"indent": ["warn", "tab", {"SwitchCase": 1}],
+		"jsdoc/newline-after-description": 0,
+		"jsdoc/require-returns-description": 0,
+		"no-param-reassign": 2,
+		"no-tabs": ["error", { "allowIndentationTabs": true }],
+		"no-var": "error",
 		"operator-linebreak": ["error", "before"],
-		"object-curly-spacing": ["error", "never"]
+		"prefer-const": ["warn", {"destructuring": "all", "ignoreReadBeforeAssign": true}],
+		"padding-line-between-statements": [
+			"warn",
+			{ "blankLine": "any", "prev": ["const", "let", "var"], "next": "*"},
+			{ "blankLine": "any", "prev": ["const", "let", "var"], "next": ["const", "let", "var"]},
+			{ "blankLine": "any", "prev": ["const", "let", "var"], "next": "return"},
+			{ "blankLine": "always", "prev": "*", "next": "if" },
+			{ "blankLine": "always", "prev": "if", "next": "*" }
+		],
+		"react/jsx-sort-props": 2,
+		"react/jsx-tag-spacing": [2, {"beforeSelfClosing": "always"}],
+		"require-atomic-updates": "off",
+		"semi": [2, "always"],
+		"sort-destructure-keys/sort-destructure-keys": [2, {"caseSensitive": true}],
+		"sort-keys": [2, "asc", {"caseSensitive": true}],
+		"sort-keys-fix/sort-keys-fix": "warn",
+		"sort-vars": [2, {"ignoreCase": false}],
+		"local-rules/sort-class-methods": "error",
+		"local-rules/sort-imports": "error",
+		"arrow-parens": ["warn", "as-needed"],
+		"no-return-await": "warn"
 	},
 	"settings": {
 		"react": {
-			"flowVersion": "0.108.0",
-			"version": "16.4.0"
+			"createClass": "createReactClass",
+			"pragma": "React",
+			"version": "detect",
+			"flowVersion": "0.74"
 		}
 	}
 }
