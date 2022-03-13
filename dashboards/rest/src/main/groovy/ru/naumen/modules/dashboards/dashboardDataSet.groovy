@@ -284,7 +284,7 @@ class DashboardDataSetService
 
         if (diagramType == DiagramType.TABLE)
         {
-            if (widgetSettings.data[0].sourceRowName != null)
+            if (widgetSettings.data.head().sourceRowName != null)
             {
                 widgetSettings.data.each { dataSet ->
                     dataSet.parameters = []
@@ -295,7 +295,6 @@ class DashboardDataSetService
             Boolean showTableBlanks = widgetSettings.showBlankData
             Integer pageSize
             Integer firstElementIndex
-            paginationSettings
 
             if(tableRequestSettings)
             {
@@ -341,7 +340,8 @@ class DashboardDataSetService
                 //а здесь уже важно знать, выводить пустые значения или нет
                 showTableNulls = widgetSettings.showEmptyData
 
-                if (!widgetSettings.data.sourceRowName.findAll())
+                Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
+                if (!isSourceForEachRow)
                 {
                     res = prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
                     rowCount = requestHasBreakdown
@@ -434,7 +434,7 @@ class DashboardDataSetService
                                            showRowNum as boolean, rowCount, tableTop,
                                            paginationSettings, tableSorting, reverseRowCount,
                                            widgetSettings, request, tableRequestSettings?.ignoreLimits,
-                                           countTotals, tableTotals, widgetSettings.data.sourceRowName)
+                                           countTotals, tableTotals, widgetSettings.data.sourceRowName.findAll())
             case COMBO:
                 Integer sortingDataIndex = getSortingDataIndex(widgetSettings)
                 //нашли источник, по которому должна быть сортировка
@@ -1081,10 +1081,9 @@ class DashboardDataSetService
                 it.type == Aggregation.NOT_APPLICABLE
             }
 
-            Map dataMaps = [:]
             if (computeAggregations)
             {
-                dataMaps = computeAggregations.withIndex().collect { aggregation, i ->
+                Map dataMaps = computeAggregations.withIndex().collect { aggregation, i ->
                     RequestData tempRequestData = requestData.clone()
                     tempRequestData.aggregations = [aggregation] + aggregationsNoneAggr
                     ComputationRequisiteNode compositeRequisiteNode = new ComputationRequisiteNode(
@@ -1460,9 +1459,14 @@ class DashboardDataSetService
         }
         if(computationInTableRequest)
         {
-            intermediateData = isSourceForEachRow ?
-                updateIntermediateDataForTableWithoutParameters(intermediateData) :
-                updateIntermediateData(intermediateData)
+            if (isSourceForEachRow)
+            {
+                intermediateData = updateIntermediateDataForTableWithoutParameters(intermediateData)
+            }
+            else
+            {
+                intermediateData = updateIntermediateData(intermediateData)
+            }
 
             def request = buildDiagramRequest(intermediateData, subjectUUID, diagramType)
 
@@ -1537,30 +1541,6 @@ class DashboardDataSetService
             }
         }
         return isGroupDuplicate
-    }
-
-    /**
-     * Метод проверки дупликатов аггрегации
-     * @param aggregations - список агрегаций
-     * @param aggregation - проверяемая агрегация
-     * @return показатель дупликат или нет
-     */
-    private Boolean checkDuplicateAggregation(List<AggregationParameter> aggregations,
-                                              AggregationParameter aggregation)
-    {
-        Boolean isAggregationDuplicate = false
-
-        aggregations.each {
-            if (aggregation.type ==
-                it.type &&
-                aggregation.attribute.code ==
-                it.attribute.code && aggregation.attribute.sourceCode == it.attribute.sourceCode)
-            {
-                isAggregationDuplicate = true
-            }
-        }
-
-        return isAggregationDuplicate
     }
 
     /**
@@ -4293,7 +4273,7 @@ class DashboardDataSetService
     {
         Boolean hasBreakdown = checkForBreakdown(requestContent)
         List<List> resultDataSet
-        if (sourceRowNames.findAll())
+        if (sourceRowNames)
         {
             if (hasBreakdown)
             {
@@ -4320,7 +4300,7 @@ class DashboardDataSetService
         Integer aggregationCnt = getSpecificAggregationsList(requestContent).count { it.aggregation !=  Aggregation.NOT_APPLICABLE }
         List<Map> attributes = getAttributeNamesAndValuesFromRequest(requestContent)
 
-        if (sourceRowNames.findAll())
+        if (sourceRowNames)
         {
             attributes = attributes[(aggregationCnt - 1)..-1]
             // берем название самого первого показателя
@@ -4785,7 +4765,7 @@ class DashboardDataSetService
         Collection <Column> columns = collectColumns(attributes, hasBreakdown, customValuesInBreakdown ?: breakdownValues)
 
         List<String> attributeNames = attributes.name
-        if (sourceRowNames.findAll() && hasBreakdown)
+        if (sourceRowNames && hasBreakdown)
         {
             attributeNames << attributeNames[attributeNames.size() - 1]
             attributeNames[attributeNames.size() - 2] = 'Источник'
@@ -4798,7 +4778,7 @@ class DashboardDataSetService
         List data = []
         int id = reverseRowCount ? rowCount - paginationSettings.firstElementIndex : paginationSettings.firstElementIndex
 
-        if (sourceRowNames.findAll())
+        if (sourceRowNames)
         {
             aggregationCnt = 1
         }
@@ -4828,7 +4808,7 @@ class DashboardDataSetService
                 }
             }
 
-            if (sourceRowNames.findAll())
+            if (sourceRowNames)
             {
                 Map<String, List> dataGroupedBySources = data.groupBy { it['Источник'] }
                 Integer dataId = 1
@@ -4851,7 +4831,7 @@ class DashboardDataSetService
                 tempMaps = getDataSetWithPagination(tempMaps, paginationSettings)
             }
 
-            if (sourceRowNames.findAll())
+            if (sourceRowNames)
             {
                 aggregationCnt = 1
             }
@@ -4943,7 +4923,7 @@ class DashboardDataSetService
             columns.add(0, new NumberColumn(header: "", accessor: "ID", footer: "", show: showRowNum))
         }
 
-        if (sourceRowNames.findAll())
+        if (sourceRowNames)
         {
             columns.add(1, new NumberColumn(header: "", accessor: "Источник", footer: ""))
         }
@@ -4992,8 +4972,11 @@ class DashboardDataSetService
 
         LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
 
-        List<Map<String, Object>> rowsInfo =
-            sourceRowNames.findAll() ? getRowsInfoForTablesWithoutParameter(request) : null
+        List<Map<String, Object>> rowsInfo = null
+        if (sourceRowNames)
+        {
+            rowsInfo = getRowsInfoForTablesWithoutParameter(request)
+        }
 
         return new TableDiagram(
             columns: columns.findAll(),
