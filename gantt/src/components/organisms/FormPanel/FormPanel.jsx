@@ -38,6 +38,11 @@ const FormPanel = (props: Props) => {
 	const [columnSettingsModal, setColumnSettingsModal] = useState([]);
 	const [layout, setLayout] = useState([]);
 	const [error, setError] = useState('');
+	const [inputStartDate, setInputStartDate] = useState('');
+	const [inputEndDate, setInputEndDate] = useState('');
+	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
+	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
+	const [valueError, setValueError] = useState('');
 
 	const handleAddNewBlock = (index: number, value: string) => {
 		const {setResourceSettings} = props;
@@ -233,18 +238,13 @@ const FormPanel = (props: Props) => {
 		</div>
 	);
 
-	const [inputStartDate, setinputStartDate] = useState(new Date(props.startDate).toLocaleString());
-	const [inputEndDate, setinputEndDate] = useState(new Date(props.endDate).toLocaleString());
-	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
-	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
-
 	const onSelectStartDate = (value) => {
-		setinputStartDate(new Date(value).toLocaleString());
+		setInputStartDate(new Date(value).toLocaleString());
 		setShowDatePickerStartDate(!showDatePickerStartDate);
 	};
 
 	const onSelectEndDate = (value) => {
-		setinputEndDate(new Date(value).toLocaleString());
+		setInputEndDate(new Date(value).toLocaleString());
 		setShowDatePickerEndDate(!showDatePickerEndDate);
 	};
 
@@ -273,12 +273,30 @@ const FormPanel = (props: Props) => {
 	const sibmitRange = () => {
 		const newStartDate = new Date(convertDateToNormal(inputStartDate));
 		const newEndDate = new Date(convertDateToNormal(inputEndDate));
-		const date = {
-			endDate: newEndDate,
-			startDate: newStartDate
-		};
 
-		props.setRangeTime(date);
+		if (Date.parse(newEndDate) >= Date.parse(newStartDate)) {
+			const date = {
+				endDate: newEndDate,
+				startDate: newStartDate
+			};
+
+			props.setRangeTime(date);
+			setValueError('');
+		} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
+			setValueError('Дата начала не может быть позднее даты завершения');
+		} else if (!inputStartDate.length || !inputEndDate.length) {
+			setValueError('Заполните все поля');
+		} else {
+			setValueError('Некорректная дата');
+		}
+	};
+
+	const changeStartDate = target => {
+		setInputStartDate(target.value);
+	};
+
+	const changeEndDate = target => {
+		setInputEndDate(target.value);
 	};
 
 	const renderIntervalFromTo = () => {
@@ -288,7 +306,7 @@ const FormPanel = (props: Props) => {
 					<div className={styles.interval__wrapper_input}>
 						<span className={styles.interval__label}>С</span>
 						<div className={styles.interval__inner_wrapper_input}>
-							<TextInput className={styles.input} maxLength={30} placeholder="" value={inputStartDate} />
+							<TextInput className={styles.input} maxLength={30} onChange={changeStartDate} placeholder="дд.мм.гггг, чч:мм:сс" value={inputStartDate} />
 							<IconButton className={styles.basket} icon='CALENDAR' onClick={() => setShowDatePickerStartDate(!showDatePickerStartDate)} />
 						</div>
 						{renderDatePickerStartDate()}
@@ -296,11 +314,12 @@ const FormPanel = (props: Props) => {
 					<div className={styles.interval__wrapper_input}>
 						<span className={styles.interval__label}>По</span>
 						<div className={styles.interval__inner_wrapper_input}>
-							<TextInput className={styles.input} maxLength={30} placeholder="" value={inputEndDate} />
+							<TextInput className={styles.input} maxLength={30} onChange={changeEndDate} placeholder="дд.мм.гггг, чч:мм:сс" value={inputEndDate} />
 							<IconButton className={styles.basket} icon='CALENDAR' onClick={() => setShowDatePickerEndDate(!showDatePickerEndDate)} />
 						</div>
 						{renderDatePickerEndDate()}
 					</div>
+					<div className={styles.error}>{valueError}</div>
 					<button onClick={sibmitRange}>Применить</button>
 				</div>
 			);

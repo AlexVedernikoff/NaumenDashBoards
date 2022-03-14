@@ -13,11 +13,12 @@ import Modal from 'components/atoms/Modal/Modal';
 import {TextInput} from 'components/atoms/TextInput/TextInput';
 
 const АctionBar = props => {
-	const [inputStartDate, setinputStartDate] = useState(new Date(props.startDate).toLocaleString());
-	const [inputEndDate, setinputEndDate] = useState(new Date(props.endDate).toLocaleString());
+	const [inputStartDate, setInputStartDate] = useState(new Date(props.startDate).toLocaleString());
+	const [inputEndDate, setInputEndDate] = useState(new Date(props.endDate).toLocaleString());
 	const [showModal, setShowModal] = useState(false);
 	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
+	const [valueError, setValueError] = useState('');
 	const panelButtons = [
 		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'}
 	];
@@ -35,12 +36,12 @@ const АctionBar = props => {
 	let indexScaleName;
 
 	const onSelectStartDate = (value) => {
-		setinputStartDate(new Date(value).toLocaleString());
+		setInputStartDate(new Date(value).toLocaleString());
 		setShowDatePickerStartDate(!showDatePickerStartDate);
 	};
 
 	const onSelectEndDate = (value) => {
-		setinputEndDate(new Date(value).toLocaleString());
+		setInputEndDate(new Date(value).toLocaleString());
 		setShowDatePickerEndDate(!showDatePickerEndDate);
 	};
 
@@ -104,13 +105,31 @@ const АctionBar = props => {
 	const sibmitRange = () => {
 		const newStartDate = new Date(convertDateToNormal(inputStartDate));
 		const newEndDate = new Date(convertDateToNormal(inputEndDate));
-		const date = {
-			endDate: newEndDate,
-			startDate: newStartDate
-		};
 
-		props.setRangeTime(date);
-		setShowModal(!showModal);
+		if (Date.parse(newEndDate) >= Date.parse(newStartDate)) {
+			const date = {
+				endDate: newEndDate,
+				startDate: newStartDate
+			};
+
+			props.setRangeTime(date);
+			setShowModal(!showModal);
+			setValueError('');
+		} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
+			setValueError('Дата начала не может быть позднее даты завершения');
+		} else if (!inputStartDate.length || !inputEndDate.length) {
+			setValueError('Заполните все поля');
+		} else {
+			setValueError('Некорректная дата');
+		}
+	};
+
+	const changeStartDate = target => {
+		setInputStartDate(target.value);
+	};
+
+	const changeEndDate = target => {
+		setInputEndDate(target.value);
 	};
 
 	const renderModal = () => {
@@ -124,15 +143,16 @@ const АctionBar = props => {
 					submitText="Сохранить"
 				>
 					<div className={styles.inputwrapper}>
-						<TextInput label="Начало интервала" maxLength={30} placeholder="" value={inputStartDate} />
+						<TextInput label="Начало интервала" maxLength={30} onChange={changeStartDate} placeholder="дд.мм.гггг, чч:мм:сс" value={inputStartDate} />
 						<IconButton className={styles.calendar} icon={ICON_NAMES.CALENDAR} onClick={() => setShowDatePickerStartDate(!showDatePickerStartDate)} />
 					</div>
 					{renderDatePickerStartDate()}
 					<div className={styles.inputwrapper}>
-						<TextInput label="Конец интервала" maxLength={30} placeholder="" value={inputEndDate} />
+						<TextInput label="Конец интервала" maxLength={30} onChange={changeEndDate} placeholder="дд.мм.гггг, чч:мм:сс" value={inputEndDate} />
 						<IconButton className={styles.calendar} icon={ICON_NAMES.CALENDAR} onClick={() => setShowDatePickerEndDate(!showDatePickerEndDate)} />
 					</div>
 					{renderDatePickerEndDate()}
+					<div className={styles.error}>{valueError}</div>
 				</Modal>
 			);
 		}
