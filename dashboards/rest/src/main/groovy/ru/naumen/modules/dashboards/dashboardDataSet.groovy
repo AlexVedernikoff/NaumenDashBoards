@@ -1535,7 +1535,7 @@ class DashboardDataSetService
     {
         Boolean isGroupDuplicate = false
         groups.each {
-            if (group.type == it.type && group.attribute.code == it.attribute.code)
+            if (group && group.type == it.type && group.attribute.code == it.attribute.code)
             {
                 isGroupDuplicate = true
             }
