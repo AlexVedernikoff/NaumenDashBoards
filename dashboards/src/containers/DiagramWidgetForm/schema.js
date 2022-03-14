@@ -195,25 +195,29 @@ addMethod(object, 'topSettings', function () {
 	}).default(DEFAULT_TOP_SETTINGS);
 });
 
-addMethod(array, 'parameters', function () {
+addMethod(array, 'parameters', function (singleCheck = true) {
 	return this.of(
 		lazy((parameter: Parameter, options: Object) => {
 			const {data} = options.values;
-			const schema = mixed()
-				.requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.parameter))
-				.singleAttributeUse();
+			let schema = mixed().requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.parameter));
+
+			if (singleCheck) {
+				schema = schema.singleAttributeUse();
+			}
 
 			return data[0].parameters[0] === parameter ? schema.group(DIAGRAM_FIELDS.parameter) : schema;
 		})
 	);
 });
 
-addMethod(array, 'indicators', function () {
-	return this.of(
-		mixed()
-			.requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.indicator))
-			.singleAttributeUse(true)
-	);
+addMethod(array, 'indicators', function (singleCheck = true) {
+	let schema = mixed().requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.indicator));
+
+	if (singleCheck) {
+		schema = schema.singleAttributeUse(true);
+	}
+
+	return this.of(schema);
 });
 
 addMethod(array, 'breakdown', function () {

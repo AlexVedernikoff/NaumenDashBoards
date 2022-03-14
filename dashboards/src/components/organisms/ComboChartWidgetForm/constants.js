@@ -11,8 +11,8 @@ const schema = object({
 			is: type => type === COMBO_TYPES.COLUMN_STACKED,
 			then: array().breakdown()
 		}),
-		indicators: mixed().requiredByCompute(array().indicators()),
-		parameters: array().parameters(),
+		indicators: mixed().requiredByCompute(array().indicators(false)),
+		parameters: array().parameters(false),
 		source: object().source(),
 		top: object().topSettings()
 	})),
