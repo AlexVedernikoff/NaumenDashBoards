@@ -47,8 +47,7 @@
 		<dependency>
 			<groupId>ru.naumen</groupId>
 			<artifactId>script-api-context</artifactId>
-			<version>4.12.5</version>
-			<scope>compile</scope>
+			<version>4.13.0.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
