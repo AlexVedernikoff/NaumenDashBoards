@@ -121,8 +121,7 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
     @Override
     String getWorkAttributes(String metaClassFqn, String attributeGroupCode, String workUUID = null)
     {
-        return
-        Jackson.toJsonString(service.getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID))
+        return Jackson.toJsonString(service.getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID))
     }
 
     @Override
