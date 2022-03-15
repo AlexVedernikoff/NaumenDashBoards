@@ -124,6 +124,18 @@ class GanttSettingsService
     private static final String MAIN_FQN = 'abstractBO'
     private static final String OLD_GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
+    static final List<String> ATTRIBUTE_TYPES_ALLOWED_FOR_EDITION = [
+        AttributeType.CATALOG_ITEM_TYPE,
+        AttributeType.CATALOG_ITEM_SET_TYPE,
+        AttributeType.BO_LINKS_TYPE,
+        AttributeType.OBJECT_TYPE,
+        AttributeType.STATE_TYPE,
+        AttributeType.BOOL_TYPE,
+        AttributeType.DATE_TIME_TYPE,
+        AttributeType.DATE_TYPE,
+        AttributeType.INTEGER_TYPE,
+        AttributeType.STRING_TYPE
+    ]
 
     /**
      * Отдает список источников данных с детьми
@@ -148,7 +160,7 @@ class GanttSettingsService
         def metaInfo = api.metainfo.getMetaClass(request.classFqn)
         def metaClassTypes =  api.metainfo.getTypes(request.classFqn)
 
-        return ([metaInfo] + metaClassTypes).collectMany { mc ->
+        Collection<Attribute> attributes =  ([metaInfo] + metaClassTypes).collectMany { mc ->
             def attributes = request.types
                 ? mc?.attributes?.findAll { it.type.code in request.types ? it : null }
                 : mc?.attributes?.toList()
@@ -163,6 +175,15 @@ class GanttSettingsService
                 ? mappingAttribute(attributes, mc.title, mc.code)
                 : []
         }.unique { it.code }.sort { it.title }
+
+        if (request.isForColumns)
+        {
+            attributes = attributes.findAll {
+                it.type in ATTRIBUTE_TYPES_ALLOWED_FOR_EDITION
+            }
+        }
+
+        return attributes
     }
 
     /**
@@ -202,6 +223,7 @@ class GanttSettingsService
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
         ganttSettings.diagramKey = diagramKey
+        transformGanttSettings(ganttSettings)
         return ganttSettings
     }
 
@@ -244,6 +266,21 @@ class GanttSettingsService
         return [groupUser : groupUser,
                 name: user?.title,
                 email: user?.email]
+    }
+
+    /**
+     * Метод преобразования некоторых данных диаграммы
+     * @param ganttSettings - данные диаграммы
+     */
+    private void transformGanttSettings(GanttSettingsClass ganttSettings)
+    {
+        Boolean columnForWorkAdditionExists = ganttSettings.commonSettings.columnSettings.any {
+            it.code == 'add'
+        }
+        if (!columnForWorkAdditionExists)
+        {
+            ganttSettings.commonSettings.columnSettings << new ColumnSettings(show: true, code: 'add', title: '')
+        }
     }
 
     /**
@@ -363,7 +400,7 @@ class GanttSettingsService
      * @param contentCode - код контента, который нахолится на карточке
      * @return сгенерированный ключ сохраненной диаграммы
      */
-    private String generateDiagramKey(String subjectUUID, String contentCode)
+    String generateDiagramKey(String subjectUUID, String contentCode)
     {
         String type = api.utils.get(subjectUUID)?.metaClass?.toString()
         return "${type}_${contentCode}"
@@ -374,7 +411,7 @@ class GanttSettingsService
      * @param key - уникальный идентификатор объекта
      * @return сериализованные настройки объекта
      */
-    private String getJsonSettings(String key, String namespace = GANTT_NAMESPACE)
+    String getJsonSettings(String key, String namespace = GANTT_NAMESPACE)
     {
         return api.keyValue.get(namespace, key)
     }
@@ -385,7 +422,7 @@ class GanttSettingsService
      * @param jsonValue - ыериализованные настройки объекта
      * @return true/false успешное/провалльное сохранение
      */
-    private Boolean saveJsonSettings(String key, String jsonValue, String namespace = GANTT_NAMESPACE)
+    Boolean saveJsonSettings(String key, String jsonValue, String namespace = GANTT_NAMESPACE)
     {
         return api.keyValue.put(namespace, key, jsonValue)
     }
@@ -456,6 +493,26 @@ enum SourceType
 }
 
 /**
+ * Тип отношений между работами
+ */
+enum WorkRelationType
+{
+    finish_to_start,
+    start_to_start,
+    finish_to_finish,
+    start_to_finish
+}
+
+/**
+ * Тип даты у работы для редактирования
+ */
+enum WorkEditDateType
+{
+    startDate,
+    endDate
+}
+
+/**
  * Тело базового запроса (на получение необходимых данных для настроек)
  */
 @Canonical
@@ -481,6 +538,10 @@ class SourceAttributesRequest extends BaseRequest
      * Код метакласса "родителя" (нужно на получение атрибутов связи для вложенных работ/ресурсов)
      */
     String parentClassFqn
+    /**
+     * Флаг на получение атрибутов для связи с колонками
+     */
+    Boolean isForColumns = false
 }
 
 /**
@@ -534,6 +595,16 @@ class BaseGanttDiagramData
      * Ключ диаграммы
      */
     String diagramKey
+
+    /**
+     * Настройки связей между работами
+     */
+    Collection<WorkRelation> workRelations = []
+
+    /**
+     * Данные о прогрессе работ
+     */
+    Map<String, Double> workProgresses = [:]
 }
 
 /**
@@ -545,6 +616,27 @@ class GanttSettingsClass extends BaseGanttDiagramData
      * Настройки для источников - ресурсов/работ
      */
     Collection<ResourceAndWorkSettings> resourceAndWorkSettings
+}
+
+/**
+ * Связь между работами
+ */
+class WorkRelation
+{
+    /**
+     * UUID работы A
+     */
+    String workAUuid
+
+    /**
+     * UUID работы B
+     */
+    String workBUuid
+
+    /**
+     * Тип отношений между работами
+     */
+    WorkRelationType type
 }
 
 /**
@@ -588,6 +680,27 @@ class ColumnSettings extends TitleAndCode
      * Флаг на отображение
      */
     Boolean show
+
+    /**
+     * Настройки для редактирования атрибута
+     */
+    Editor editor
+}
+
+/**
+ * Настройки колонки для редактирования атрибута
+ */
+class Editor
+{
+    /**
+     * Тип атрибута в колонке
+     */
+    String type
+
+    /**
+     * Название атрибута для колонки
+     */
+    String map_to
 }
 
 /**
@@ -661,6 +774,10 @@ class Attribute extends TitleAndCode
      * Код источника
      */
     String sourceCode
+    /**
+     * Значение атрибута
+     */
+    String value
 
     /**
      * Вложенный атрибут

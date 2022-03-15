@@ -71,6 +71,7 @@ class GanttDataSetService
         def data = new GanttDiagramData()
         data.commonSettings = settings.commonSettings
         data.diagramKey = settings.diagramKey
+        data.workRelations = settings.workRelations
         if (!(settings?.resourceAndWorkSettings))
         {
             data.tasks = []
@@ -81,38 +82,70 @@ class GanttDataSetService
             def timezone = TimeZone.getTimeZone(api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone)
             def workAttributeSettings = settings.resourceAndWorkSettings.find { it.startWorkAttribute && it.endWorkAttribute }
             data.tasks.each {
-                if (it['start_date'])
-                {
-                    if (workAttributeSettings?.startWorkAttribute?.type == 'date')
-                    {
-                        it['start_date'] = it['start_date'].format("yyyy-MM-dd'T'HH:mm:ss")
-                    }
-                    else
-                    {
-                        it['start_date'] = it['start_date'].format("yyyy-MM-dd'T'HH:mm:ss", timezone)
-                    }
-                }
-                if (it['end_date'])
-                {
-                    if (workAttributeSettings?.endWorkAttribute?.type == 'date')
-                    {
-                        it['end_date'] = it['end_date'].format("yyyy-MM-dd'T'HH:mm:ss")
-                    }
-                    else
-                    {
-                        it['end_date'] = it['end_date'].format("yyyy-MM-dd'T'HH:mm:ss", timezone)
-                    }
-                }
-
-                def task = it
-                data.tasks.each {
-                    if (it.parent == task.id) {
-                        task['type'] = 'project'
-                    }
-                }
+                formatWorkDates(it, workAttributeSettings, timezone)
+                setWorkTypeToProjectIfItHasChildren(it, data.tasks)
+                setWorkProgress(it, settings)
             }
         }
         return data
+    }
+
+    /**
+     * Установить данные прогресса для работы
+     * @param work - работа
+     * @param ganttSettings - настройки диаграммы, где хранится прогресс
+     */
+    private void setWorkProgress(Map work, GanttSettingsClass ganttSettings)
+    {
+        Double progress = ganttSettings.workProgresses[work.id]
+        work.progress = progress ?: 0
+    }
+
+    /**
+     * Метод изменения типа работы на 'project', если у нее есть дочерние работы
+     * @param work - текущая работа
+     * @param allWorks - все работы
+     */
+    private void setWorkTypeToProjectIfItHasChildren(Map work, Collection<Map> allWorks)
+    {
+        allWorks.each {
+            if (it.parent == work.id) {
+                work.type = 'project'
+            }
+        }
+    }
+
+    /**
+     * Метод перевода дат работ в строку
+     * @param work - работа
+     * @param workAttributeSettings - настройки работы
+     * @param timezone - таймзона
+     */
+    private void formatWorkDates(Map work, ResourceAndWorkSettings workAttributeSettings, TimeZone timezone)
+    {
+        String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        if (work.start_date)
+        {
+            if (workAttributeSettings?.startWorkAttribute?.type == 'date')
+            {
+                work.start_date = work.start_date.format(dateFormat)
+            }
+            else
+            {
+                work.start_date = work.start_date.format(dateFormat, timezone)
+            }
+        }
+        if (work.end_date)
+        {
+            if (workAttributeSettings?.endWorkAttribute?.type == 'date')
+            {
+                work.end_date = work.end_date.format(dateFormat)
+            }
+            else
+            {
+                work.end_date = work.end_date.format(dateFormat, timezone)
+            }
+        }
     }
 
     /**
