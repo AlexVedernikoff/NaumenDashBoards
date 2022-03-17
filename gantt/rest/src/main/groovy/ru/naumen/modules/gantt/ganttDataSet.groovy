@@ -14,8 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Field
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
-import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.shared.IUUIDIdentifiable
+import static groovy.json.JsonOutput.toJson
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 interface GanttDataSetController
@@ -85,9 +85,35 @@ class GanttDataSetService
                 formatWorkDates(it, workAttributeSettings, timezone)
                 setWorkTypeToProjectIfItHasChildren(it, data.tasks)
                 setWorkProgress(it, settings)
+                setColumnDateFormats(it, timezone)
             }
         }
         return data
+    }
+
+    /**
+     * Замена формата даты для колонок
+     * @param work - работа
+     * @param timezone - таймзона
+     */
+    private void setColumnDateFormats(Map work, TimeZone timezone)
+    {
+        Map workToMerge = [:]
+        work.each {
+            def value = it.value
+            String key = it.key
+            if (value in Date && !(key in ['start_date', 'end_date']))
+            {
+                workToMerge[key] = value.format("dd.MM.yyyy, HH:mm:ss", timezone)
+            }
+        }
+
+        if (workToMerge)
+        {
+            workToMerge.each {
+                work[it.key] = it.value
+            }
+        }
     }
 
     /**
