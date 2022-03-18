@@ -1177,27 +1177,30 @@ class DashboardsService
      */
     List<String> getNonMetadataAttributeCodes(String classFqn, String attrGroupCode = null)
     {
-        List<String> attrCodes
         IMetaClassWrapper metaClass = metainfo.getMetaClass(classFqn)
+        Collection<IAttributeWrapper> attributes
 
         if (attrGroupCode)
         {
             IAttributeGroupWrapper attributeGroup = metaClass.getAttributeGroup(attrGroupCode)
-            attrCodes = attributeGroup.attributes*.code
+            attributes = attributeGroup.attributes
         }
         else
         {
-            attrCodes = metaClass.attributes.findResults {
-                String attrCode = null
-
-                Boolean hasMetadataTag = it.tags?.any { it.code == 'Metadata' }
-                if (!hasMetadataTag)
-                {
-                    attrCode = it.code
-                }
-                return attrCode
-            }
+            attributes = metaClass.attributes
         }
+
+        List<String> attrCodes = attributes.findResults {
+            String attrCode = null
+
+            Boolean hasMetadataTag = it.tags?.any { it.code == 'Metadata' }
+            if (!hasMetadataTag)
+            {
+                attrCode = it.code
+            }
+            return attrCode
+        }
+
         return attrCodes
     }
 
