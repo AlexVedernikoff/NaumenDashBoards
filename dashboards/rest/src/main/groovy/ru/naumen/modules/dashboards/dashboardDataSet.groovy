@@ -1871,7 +1871,7 @@ class DashboardDataSetService
 
                 def attribute = comp?.aggregation?.attribute
                 def attributeType = Attribute.getAttributeType(attribute)
-                if (attributeType in AttributeType.LINK_TYPES)
+                if (attributeType in AttributeType.LINK_TYPES && attributeType != AttributeType.CATALOG_ITEM_TYPE)
                 {
                     attribute.attrChains().last().ref = new Attribute(title: 'Название', code: 'title', type: 'string')
                 }
@@ -1920,7 +1920,7 @@ class DashboardDataSetService
 
                 def attribute = comp?.aggregation?.attribute
                 def attributeType = Attribute.getAttributeType(attribute)
-                if (attributeType in AttributeType.LINK_TYPES)
+                if (attributeType in AttributeType.LINK_TYPES && attributeType != AttributeType.CATALOG_ITEM_TYPE)
                 {
                     attribute.attrChains().last().ref = new Attribute(title: 'Название', code: 'title', type: 'string')
                 }
