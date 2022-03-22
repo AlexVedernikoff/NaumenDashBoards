@@ -121,7 +121,7 @@ const isCardObjectColumn = (column: AttributeColumn, aggregation: string): boole
 /**
  * Возвращает атрибут и агрегацию показателя для столбца
  * @param {AttributeColumn} column - колонка
- * @param {SingleRowInfoIndicator | null} rowInfo - агрегация для источников без параметра
+ * @param {SingleRowInfo | null} rowInfo - агрегация для источников без параметра
  * @returns {IndicatorData} - данные показателя для конкретного столбца
  */
 const getIndicatorAttribute = (column: AttributeColumn, rowInfo?: SingleRowInfo): IndicatorData | null => {

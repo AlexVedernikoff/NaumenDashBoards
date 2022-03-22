@@ -56,7 +56,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		};
 
 		getAttrGroupCodeForSource = (classFqn: string, descriptor: string): string | null => {
-			const {isUserMode, sources} = this.props;
+			const {isUserMode} = this.props; // * временно отключаем SMRMEXT-12874 (sources)
 			let result = null;
 
 			if (isUserMode) {
@@ -68,7 +68,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 					result = attrSetConditions.attrGroupCode ?? null;
 				}
 			} else {
-				const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(sources, classFqn);
+				const sourceFilterAttributeGroup = null; // * временно отключаем SMRMEXT-12874 (getSourceFilterAttributeGroup(sources, classFqn))
 
 				if (sourceFilterAttributeGroup) {
 					result = sourceFilterAttributeGroup;
@@ -131,7 +131,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		};
 
 		updateContext = async (context: Context, classFqn: string, descriptor: string): Promise<FilterFormOptionsDTO> => {
-			const {fetchGroupsAttributes, isUserMode} = this.props;
+			const {fetchGroupsAttributes} = this.props; // * временно отключаем SMRMEXT-12874 (isUserMode)
 			const attrGroupCode = this.getAttrGroupCodeForSource(classFqn, descriptor);
 
 			const options: FilterFormOptionsDTO = {
@@ -145,9 +145,10 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 				context.attrCodes = attrCodes.map(attrCode => `${classFqn}@${attrCode}`);
 				options.useRestriction = true;
 
-				if (!isUserMode && attrGroupCode) {
-					options.restriction = await this.generateRestriction(classFqn, attrGroupCode);
-				}
+				// * временно отключаем SMRMEXT-12874
+				// if (!isUserMode && attrGroupCode) {
+				// options.restriction = await this.generateRestriction(classFqn, attrGroupCode);
+				// }
 			} else if (attrGroupCode) {
 				context.attrGroupCode = attrGroupCode;
 				options.useRestriction = true;

@@ -186,7 +186,7 @@
     "zip": "cd ./dist && zip -r \"../$npm_package_name-v$npm_package_version.zip\" ./* && cd ..",
     "storybook": "cross-env STORYBOOK=true start-storybook -p 6006",
     "build-storybook": "cross-env STORYBOOK=true NODE_ENV=production build-storybook",
-    "generate-localalize": "node ./utils/generate-localization.js"
+    "generate-localize": "node ./utils/generate-localization.js"
   },
-  "version": "2.3.1-0"
+  "version": "2.4.0-0"
 }

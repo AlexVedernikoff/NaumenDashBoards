@@ -45,7 +45,9 @@ export default class Frame implements FrameAPI {
 	}
 
 	openFilterForm (context: FilterFormContextDTO, options: FilterFormOptionsDTO) {
-		if (window.jsApi.forms.getFilterFormBuilder) {
+		const useNewForm = false; // * временно отключаем SMRMEXT-12874
+
+		if (useNewForm && window.jsApi.forms.getFilterFormBuilder) {
 			let formBuilder = window.jsApi.forms.getFilterFormBuilder(context);
 
 			if (options.useRestriction) {
