@@ -1512,16 +1512,32 @@ class DashboardDataSetService
             }
         }
 
-        intermediateData.each { key, request ->
-            String sourceClassFqn = request.requestData.source.classFqn
-            List<GroupParameter> groups = allGroups.collect {
-                GroupParameter group = it.deepClone()
+        if (allGroups.size() == 1) // Если группировка общая
+        {
+            intermediateData.each { key, request ->
+                String sourceClassFqn = request.requestData.source.classFqn
+                List<GroupParameter> groups = allGroups.collect {
+                    GroupParameter group = it.deepClone()
+                    group.attribute.sourceCode = sourceClassFqn
+                    group.attribute.metaClassFqn = sourceClassFqn
+                    return group
+                }
+
+                request.requestData.groups = groups
+            }
+        }
+        else
+        {
+            intermediateData.eachWithIndex { it, index ->
+                Object request = it.value
+                String sourceClassFqn = request.requestData.source.classFqn
+
+                GroupParameter group = allGroups[index].deepClone()
                 group.attribute.sourceCode = sourceClassFqn
                 group.attribute.metaClassFqn = sourceClassFqn
-                return group
-            }
 
-            request.requestData.groups = groups
+                request.requestData.groups = [group]
+            }
         }
     }
 
@@ -5347,6 +5363,12 @@ class DashboardDataSetService
             {
                 return []
             }
+        }
+
+        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
+        if (isSourceForEachRow)
+        {
+            breakdownAttributes = [breakdownAttributes.head()]
         }
 
         return (aggregations + parameterAttributes + breakdownAttributes).grep()
