@@ -26,15 +26,15 @@ export class PointStatic extends Component<Props, State> {
 		return nextProps.active !== this.props.active || nextState.type !== this.state.type || nextProps.color !== this.props.color;
 	}
 
-	handleMouseOver = () => {
-		clearTimeout(this.state.timeoutId);
-	};
-
 	handleMouseOut = () => {
 		if (!this.state.open) {
 			const timeoutId = setTimeout(() => this.setState({type: 'static'}), 100);
 			this.setState({timeoutId});
 		}
+	};
+
+	handleMouseOver = () => {
+		clearTimeout(this.state.timeoutId);
 	};
 
 	showSingle = () => () => {
@@ -45,18 +45,18 @@ export class PointStatic extends Component<Props, State> {
 	};
 
 	render () {
-		const {point, active} = this.props;
-		const {data, icon, geopositions} = point;
+		const {active, point} = this.props;
+		const {data, geopositions, icon} = point;
 		const {equipType, type} = data;
-		let iconMarker = getCustomOrDefaultIconMarker(equipType || type, active, icon);
+		const iconMarker = getCustomOrDefaultIconMarker(equipType || type, active, icon);
 
 		return (
 			<Marker
-				onMouseOver={this.handleMouseOver}
-				onMouseOut={this.handleMouseOut}
 				icon={iconMarker}
-				position={[geopositions[0].latitude, geopositions[0].longitude]}
 				onClick={this.showSingle()}
+				onMouseOut={this.handleMouseOut}
+				onMouseOver={this.handleMouseOver}
+				position={[geopositions[0].latitude, geopositions[0].longitude]}
 			>
 				<TooltipPoint title={data.header} />
 			</Marker>

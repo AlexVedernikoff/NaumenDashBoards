@@ -1,0 +1,38 @@
+:local {
+	.control {
+		background-color: #FFFFFF;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		height: 36px;
+		padding: 0;
+		width: 36px;
+
+		&:hover {
+			background-color: #D9D9D9;
+		}
+
+		&.controlActive {
+			background-color: #CCCCCC;
+		}
+	}
+
+	.controlTop {
+		margin-bottom: 10px;
+	}
+
+	.controlBottom {
+		margin-top: auto;
+	}
+
+	.controlsContainer {
+		bottom: 10px;
+		display: flex;
+		flex-direction: column;
+		position: absolute;
+		right: 10px;
+		top: 10px;
+		z-index: 1;
+	}
+}
+

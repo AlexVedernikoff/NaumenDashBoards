@@ -71,7 +71,18 @@ type UnknownGeolocationAction = {
 	type: typeof GEOLOCATION_EVENTS.UNKNOWN_GEOLOCATION_ACTION
 };
 
+type ChangeZoom = {
+	payload: null,
+	type: typeof GEOLOCATION_EVENTS.CHANGE_ZOOM
+};
+
+type SetMapPanel = {
+	payload: null,
+	type: typeof GEOLOCATION_EVENTS.SET_MAP_PANEL
+};
+
 export type GeolocationAction =
+	ChangeZoom
 	| ReloadActivePoint
 	| RecordGeolocationError
 	| ResetAllGroups
@@ -82,6 +93,7 @@ export type GeolocationAction =
 	| SetParams
 	| setSingleObject
 	| SetTab
+	| SetMapPanel
 	| ToggleFilter
 	| ToggleGroup
 	| TogglePanel
@@ -94,6 +106,7 @@ export type GeolocationState = {
 	error: boolean,
 	loading: boolean,
 	mapObjects: Array<Common>,
+	mapSelect: string,
 	panelShow: PointType,
 	params: Params,
 	showSingleObject: boolean,

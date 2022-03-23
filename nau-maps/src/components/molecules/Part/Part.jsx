@@ -23,8 +23,8 @@ export class Part extends Component<Props, State> {
 	showSingle = () => () => {
 		const {part, setSingleObject} = this.props;
 		const data = {
-			geoposition: part.geopositions[0],
 			data: part.data,
+			geoposition: part.geopositions[0],
 			type: part.type
 		};
 
@@ -33,7 +33,7 @@ export class Part extends Component<Props, State> {
 	};
 
 	render () {
-		const {part, color} = this.props;
+		const {color, part} = this.props;
 		const {data, geopositions} = part;
 		const {header} = data;
 

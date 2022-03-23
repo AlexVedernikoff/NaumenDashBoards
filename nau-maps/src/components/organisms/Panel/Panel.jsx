@@ -1,4 +1,5 @@
 // @flow
+import cn from 'classnames';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import PanelContent from 'components/molecules/PanelContent';
@@ -32,47 +33,52 @@ export class Panel extends Component<Props> {
 	};
 
 	renderPanelContent = () => {
-		const {panelOpen} = this.props;
-
-		return panelOpen ? (
-			<div className={styles.panelContainer}>
-				<Scrollable attachRef={this.attachRef} scrollbarColors="grey">
-					<PanelContent />
-				</Scrollable>
-			</div>
-		) : null;
+		return (
+			<Scrollable attachRef={this.attachRef} scrollbarColors="grey">
+				<PanelContent />
+			</Scrollable>
+		);
 	};
 
 	renderPanelHeader = () => {
-		const {panelOpen} = this.props;
-
-		return panelOpen ? <PanelHeader /> : null;
+		return <PanelHeader />;
 	};
 
-	renderPanelToggle = togglePanel => {
-		const {panelOpen} = this.props;
+	renderPanelToggle = panelOpen => {
+		const {togglePanel} = this.props;
 
-		return panelOpen ? (
-			<div className={styles.panelContainer}>
+		const classNames = cn({
+			[styles.panelButton]: true,
+			[styles.panelButtonShow]: !panelOpen
+		});
+
+		return (
+			<div className={classNames} onClick={togglePanel}>
 				<PanelIcon />
 			</div>
-		) : null;
+		);
 	};
 
 	render () {
-		const {panelOpen, togglePanel} = this.props;
+		const {panelOpen} = this.props;
 
 		if (panelOpen) {
 			return (
 				<div className={styles.panelWrap}>
-					{this.renderPanelHeader()}
-					{this.renderPanelContent()}
-					{this.renderPanelToggle(togglePanel)}
+					<div className={styles.panelContainer}>
+						{this.renderPanelHeader()}
+						{this.renderPanelContent()}
+					</div>
+					{this.renderPanelToggle(panelOpen)}
+				</div>
+			);
+		} else {
+			return (
+				<div className={styles.panelWrap}>
+					{this.renderPanelToggle(panelOpen)}
 				</div>
 			);
 		}
-
-		return null;
 	}
 }
 

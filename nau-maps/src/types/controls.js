@@ -1,5 +1,7 @@
 // @flow
 export type Controls = {
 	filterOpen: boolean,
-	panelOpen: boolean
+	panelMapOpen: boolean,
+	panelOpen: boolean,
+	zoom: number
 };

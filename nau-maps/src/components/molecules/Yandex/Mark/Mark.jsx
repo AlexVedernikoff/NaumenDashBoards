@@ -28,7 +28,7 @@ export class Mark extends Component<Props, State> {
 					iconImageHref: iconUrl,
 					iconImageSize: [30, 30],
 					iconLayout: 'default#image',
-					iconOffset: [-15, -15]
+					iconOffset: [15, 15]
 				}}
 				properties={{
 					hintContent: header
