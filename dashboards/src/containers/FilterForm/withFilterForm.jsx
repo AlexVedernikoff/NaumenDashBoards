@@ -20,6 +20,22 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 			openingFilterForm: false
 		};
 
+		clearSerializedContext = (serializedContext: string): string => {
+			// TODO: Хак - убрать после исправлений на платформе
+			try {
+				const context = JSON.parse(serializedContext);
+
+				if (context.attrCodes) {
+					delete context.attrCodes;
+				}
+
+				return JSON.stringify(context);
+			} catch (e) {
+				console.error('Error descriptor in clearSerializedContext', e);
+				return serializedContext;
+			}
+		};
+
 		fetchFilterAttributes = async (source: SourceData) => {
 			const {fetchingFilterAttributes} = this.state;
 
@@ -122,7 +138,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 
 				const {serializedContext} = await api.instance.filterForm.openForm(context, options);
 
-				return serializedContext;
+				return this.clearSerializedContext(serializedContext);
 			} catch (e) {
 				console.error('Filtration error: ', e);
 			}
