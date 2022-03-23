@@ -10,11 +10,14 @@ export const initialGeolocationState: GeolocationState = {
 	},
 	controls: {
 		filterOpen: false,
-		panelOpen: true
+		panelMapOpen: false,
+		panelOpen: true,
+		zoom: 5
 	},
 	error: false,
 	loading: true,
 	mapObjects: [],
+	mapSelect: 'OpenMap',
 	panelShow: 'static',
 	params: {
 		autoUpdateLocation: true,
@@ -22,6 +25,7 @@ export const initialGeolocationState: GeolocationState = {
 		groupingMethodName: '',
 		listName: 'Объекты ВОЛС',
 		locationUpdateFrequency: {interval: 'SECOND', length: 60},
+		mapsList: ['Yandex', 'OpenMap'],
 		requestCurrentLocation: false,
 		trailsMethodName: 'trailsMethodName',
 		updatePointsMode: 'getMapObjects'

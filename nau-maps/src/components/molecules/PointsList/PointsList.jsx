@@ -23,10 +23,10 @@ export class PointsList extends Component<Props> {
 		const {parts = [], equipments = []} = trail;
 
 		return (
-			<>
+			<div key={trail.data.uuid} >
 				{parts.map(this.renderYandexLine)}
 				{equipments.map(this.renderYandexMark)}
-			</>
+			</div>
 		);
 	};
 

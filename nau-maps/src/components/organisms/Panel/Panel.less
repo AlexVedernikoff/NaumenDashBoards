@@ -1,27 +1,44 @@
 :local {
 	.panelWrap {
-		height: 100%;
+		bottom: 0;
+		display: flex;
 		overflow: hidden;
-		width: 320px;
+		position: absolute;
+		top: 0;
+		left: 0;
+		flex-direction: row;
+		z-index: 1;
 	}
 
 	.panelContainer {
-		background: #FFFFFF;
+		background-color: #FFFFFF;
+		display: flex;
+		flex-direction: column;
 		height: 100%;
-		margin-bottom: 10px;
 		overflow: hidden;
-		padding-top: 38px;
-		position: relative;
-		overflow-y: auto;
-	}
-
-	.panelContentContainer {
-		background: #FFFFFF;
-		height: 100%;
-		margin-left: auto;
 		overflow-y: auto;
 		position: relative;
 		width: 320px;
+	}
+
+	.panelButton {
+		align-items: center;
+		background-color: #FFFFFF;
+		border-radius: 4px;
+		cursor: pointer;
+		display: flex;
+		height: 20px;
+		justify-content: center;
+		margin: 10px 0 0 6px;
+		width: 20px;
+	}
+
+	.panelButtonShow {
+		align-items: start;
+		background: rgba(133, 151, 173, 0.3);
+		height: 100%;
+		margin: 0;
+		padding-top: 10px;
 	}
 
 }

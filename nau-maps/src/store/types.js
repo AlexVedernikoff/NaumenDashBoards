@@ -2,8 +2,8 @@
 import type {GeolocationState} from './geolocation/types';
 
 export type Error = {
-	status: number,
-	message: string
+	message: string,
+	status: number
 };
 
 type Action = {

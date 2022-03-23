@@ -1,11 +1,12 @@
 // @flow
 import 'leaflet/dist/leaflet.css';
 import 'styles/styles.less';
-import Controls from 'components/atoms/Controls';
+import Controls from 'components/organisms/Controls';
 import Copyright from 'components/atoms/Copyright';
-import {GoogleMap, Marker, withGoogleMap, withScriptjs} from 'react-google-maps';
+import {GoogleMap, Marker} from 'react-google-maps';
 import {Map as LeafletMap} from 'react-leaflet';
-import {Map, YMaps} from 'react-yandex-maps';
+import {Map as YandexMap, YMaps} from 'react-yandex-maps';
+import MapPanel from 'components/organisms/MapPanel';
 import Panel from 'components/organisms/Panel';
 import PointsList from 'components/molecules/PointsList';
 import type {Props} from './types';
@@ -13,94 +14,143 @@ import React, {Component} from 'react';
 import styles from './Geolocation.less';
 
 export class Geolocation extends Component<Props> {
-	static defaultProps = {
-		googleMapUrl: 'https://maps.googleapis.com/maps/api/js?key=AIzaSySEDDFRGFQSw2OjzDEE1-tDsN7vw&v=3.exp&libraries=geometry,drawing,places'
-	};
-
 	constructor (props: Props) {
 		super(props);
 
-		this.yMaps = null;
 		this.mapRef = React.createRef();
 	}
 
-	resetSingleObject = () => {
-		const {resetSingleObject} = this.props;
-		resetSingleObject();
-	};
+	yandexMapLoad () {
+		/*
+		* Задержка для корректной центровки после загрузки и инициализации обьектов на карте
+		* */
+		window.setTimeout(() => {
+			this.mapRef.current.setBounds(this.mapRef.current.geoObjects.getBounds());
+		}, 150);
+	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {bounds, panelRightPadding, timeUpdate} = this.props;
+		const {bounds, mapSelect, timeUpdate, zoom} = this.props;
 
-		if (prevProps.timeUpdate !== timeUpdate && this.mapRef.current) {
-			this.mapRef.current.leafletElement.fitBounds(bounds, {paddingBottomRight: [panelRightPadding, 0]});
+		if (this.mapRef.current) {
+			if (prevProps.zoom !== zoom) {
+				switch (mapSelect) {
+					case 'Yandex':
+						this.mapRef.current.setZoom(zoom, { duration: 600 });
+						break;
+					case 'Google':
+						this.mapRef.current.setZoom(zoom);
+						break;
+					default:
+						this.mapRef.current.leafletElement.setZoom(zoom);
+				}
+			}
+
+			if (prevProps.timeUpdate !== timeUpdate) {
+				switch (mapSelect) {
+					case 'Yandex':
+						break;
+					case 'Google':
+						this.mapRef.current.fitBounds(bounds);
+						break;
+					default:
+						this.mapRef.current.leafletElement.fitBounds([
+							[bounds._northEast.lat, bounds._northEast.lng],
+							[bounds._southWest.lat, bounds._southWest.lng]
+						]);
+				}
+			}
 		}
 	}
 
 	renderGoogleMap () {
+		const {mapSelect, zoom} = this.props;
+
 		return (
 			<GoogleMap
-				defaultCenter={{lat: -34.397, lng: 150.644}}
-				defaultZoom={8}
+				defaultCenter={{lat: 0, lng: 0}}
+				defaultZoom={zoom}
 			>
-				<Marker position={{lat: -34.397, lng: 150.644}} />
-				<PointsList typeMap={'Google'} />
+				<Marker position={{lat: 0, lng: 0}} />
+				<PointsList typeMap={mapSelect} />
 			</GoogleMap>
 		);
 	}
 
 	renderYandexMap () {
+		const {mapSelect, resetSingleObject, zoom} = this.props;
+
 		return (
 			<YMaps
 				query={{apikey: '9e8e2fc4-5970-4ca6-95c5-3e620095e8e3'}}
 			>
-				<Map
+				<YandexMap
 					className={styles.mapContainer}
 					instanceRef={this.mapRef}
 					modules={['geoObject.addon.balloon', 'geoObject.addon.hint']}
-					onClick={this.resetSingleObject}
+					onClick={resetSingleObject}
+					onLoad={this.yandexMapLoad.bind(this)}
 					options={{
-						size: 'small'
+						mapAutoFocus: false,
+						maxZoom: 15,
+						minZoom: 5
 					}}
 					state={{
-						center: [57.8, 60.61],
-						zoom: 8
+						center: [0, 0],
+						zoom: zoom
 					}}
 				>
-					<PointsList typeMap={'Yandex'} />
-				</Map>
+					<PointsList typeMap={mapSelect} />
+				</YandexMap>
 			</YMaps>
 		);
 	}
 
 	renderOpenMap () {
+		const {mapSelect, resetSingleObject, zoom} = this.props;
+
 		return (
 			<LeafletMap
 				animate={true}
+				center={[0, 0]}
 				className={styles.mapContainer}
 				closePopupOnClick={false}
 				doubleClickZoom={true}
 				dragging={true}
-				easeLinearity={0.35}
-				maxZoom={19}
-				minZoom={2}
-				onClick={this.resetSingleObject}
+				maxZoom={15}
+				minZoom={5}
+				onClick={resetSingleObject}
 				ref={this.mapRef}
 				scrollWheelZoom={true}
+				zoom={zoom}
 				zoomControl={false}
 			>
-				<PointsList />
-				<Controls />
+				<PointsList typeMap={mapSelect} />
 				<Copyright />
 			</LeafletMap>
 		);
 	}
 
+	renderTypeMap () {
+		const {mapSelect} = this.props;
+
+		switch (mapSelect) {
+			case 'Yandex':
+				return this.renderYandexMap();
+			case 'Google':
+				return this.renderGoogleMap();
+			default:
+				return this.renderOpenMap();
+		}
+	}
+
 	render () {
 		return (
 			<div className={styles.mainContainer}>
-				{this.renderYandexMap()}
+				{this.renderTypeMap()}
+				<Controls />
 				<Panel />
+				<MapPanel />
 			</div>
 		);
 	}

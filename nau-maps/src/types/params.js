@@ -6,7 +6,8 @@ export type Params = {
 	colorPart: string,
 	groupingMethodName: string,
 	listName: string,
-	locationUpdateFrequency: {length: number, interval: TimeInterval},
+	locationUpdateFrequency: {interval: TimeInterval, length: number},
+	mapsList: [string],
 	requestCurrentLocation: boolean,
 	trailsMethodName: string,
 	updatePointsMode: string

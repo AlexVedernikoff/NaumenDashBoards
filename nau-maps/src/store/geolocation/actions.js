@@ -1,6 +1,6 @@
 // @flow
-import type {Dispatch, ThunkAction} from 'store/types';
-import {GEOLOCATION_EVENTS} from './constants';
+import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {GEOLOCATION_EVENTS} from 'store/geolocation/constants';
 import {getContext, getMapObjects, getParams} from 'utils/api';
 import type {GroupCode, Point, PointType} from 'types/point';
 import {notify} from 'helpers/notify';
@@ -50,6 +50,26 @@ const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dis
 	}
 };
 
+const zoomIn = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	try {
+		const {controls: {zoom}} = getState().geolocation;
+		dispatch(cnangeZoom(zoom + 1));
+	} catch (error) {
+		notify('error', 'error');
+		dispatch(recordGeolocationdError(error));
+	}
+};
+
+const zoomOut = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	try {
+		const {controls: {zoom}} = getState().geolocation;
+		dispatch(cnangeZoom(zoom - 1));
+	} catch (error) {
+		notify('error', 'error');
+		dispatch(recordGeolocationdError(error));
+	}
+};
+
 const setContext = (payload: Object) => ({
 	payload,
 	type: GEOLOCATION_EVENTS.SET_CONTEXT
@@ -86,12 +106,21 @@ const setSingleObject = (data: Point) => ({
 	type: GEOLOCATION_EVENTS.SET_SINGLE_POINT
 });
 
+const setMapPanel = (map: string) => ({
+	payload: map,
+	type: GEOLOCATION_EVENTS.SET_MAP_PANEL
+});
+
 const resetSingleObject = () => ({
 	type: GEOLOCATION_EVENTS.RESET_SINGLE_POINT
 });
 
 const togglePanel = () => ({
 	type: GEOLOCATION_EVENTS.TOGGLE_PANEL
+});
+
+const toggleMapPanel = () => ({
+	type: GEOLOCATION_EVENTS.TOGGLE_MAP_PANEL
 });
 
 const toggleFilter = () => ({
@@ -107,6 +136,11 @@ const resetAllGroups = () => ({
 	type: GEOLOCATION_EVENTS.RESET_ALL_GROUPS
 });
 
+const cnangeZoom = zoom => ({
+	payload: zoom,
+	type: GEOLOCATION_EVENTS.CHANGE_ZOOM
+});
+
 const selectAllGroups = () => ({
 	type: GEOLOCATION_EVENTS.SELECT_ALL_GROUPS
 });
@@ -118,8 +152,12 @@ export {
 	resetSingleObject,
 	selectAllGroups,
 	setSingleObject,
+	setMapPanel,
 	setTab,
 	toggleFilter,
 	toggleGroup,
-	togglePanel
+	toggleMapPanel,
+	togglePanel,
+	zoomIn,
+	zoomOut
 };

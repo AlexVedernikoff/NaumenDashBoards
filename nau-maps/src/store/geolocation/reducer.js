@@ -23,6 +23,11 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				success: true,
 				timeUpdate: new Date().getTime()
 			};
+		case GEOLOCATION_EVENTS.SET_MAP_PANEL:
+			return {
+				...state,
+				mapSelect: action.payload
+			};
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
 			return {
 				...state,
@@ -49,6 +54,14 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 					panelOpen: !state.controls.panelOpen
 				},
 				showSingleObject: false
+			};
+		case GEOLOCATION_EVENTS.TOGGLE_MAP_PANEL:
+			return {
+				...state,
+				controls: {
+					...state.controls,
+					panelMapOpen: !state.controls.panelMapOpen
+				}
 			};
 		case GEOLOCATION_EVENTS.SET_TAB:
 			return {
@@ -96,6 +109,14 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				...state,
 				error: true,
 				loading: false
+			};
+		case GEOLOCATION_EVENTS.CHANGE_ZOOM:
+			return {
+				...state,
+				controls: {
+					...state.controls,
+					zoom: action.payload
+				}
 			};
 		default:
 			return state;
