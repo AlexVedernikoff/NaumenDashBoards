@@ -648,6 +648,10 @@ class GanttDiagramData extends BaseGanttDiagramData
      * Данные для построения диаграммы
      */
     def tasks
+    /**
+     * Карта групп атрибутов по метаклассу работы
+     */
+    Map<String, Collection> attributesMap = [:]
 }
 
 /**

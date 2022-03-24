@@ -72,6 +72,16 @@ class GanttDataSetService
         data.commonSettings = settings.commonSettings
         data.diagramKey = settings.diagramKey
         data.workRelations = settings.workRelations
+
+        GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
+        settings.resourceAndWorkSettings.each {
+            String metaClassCode = it.source.value.value
+            data.attributesMap.put(
+                metaClassCode,
+                ganttWorkHandlerService.getAttributeGroups(metaClassCode)
+            )
+        }
+
         if (!(settings?.resourceAndWorkSettings))
         {
             data.tasks = []
@@ -79,8 +89,13 @@ class GanttDataSetService
         else
         {
             data.tasks = buildDataListFromSettings(settings.resourceAndWorkSettings, null)
-            def timezone = TimeZone.getTimeZone(api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone)
-            def workAttributeSettings = settings.resourceAndWorkSettings.find { it.startWorkAttribute && it.endWorkAttribute }
+            def timezone =
+                TimeZone.getTimeZone(
+                    api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
+                )
+            def workAttributeSettings = settings.resourceAndWorkSettings.find {
+                it.startWorkAttribute && it.endWorkAttribute
+            }
             data.tasks.each {
                 formatWorkDates(it, workAttributeSettings, timezone)
                 setWorkTypeToProjectIfItHasChildren(it, data.tasks)
