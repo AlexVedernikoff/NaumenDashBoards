@@ -58,7 +58,7 @@ export class Form extends Component<Props> {
 		const {size, top} = this.props;
 		const width = Number.isInteger(size) && size;
 		// вычисляет расположение формы
-		const newTop = top > window.innerHeight - 248 ? 'auto' : (top - 52);
+		const newTop = top > window.innerHeight - 100 ? 'auto' : (top - 200);
 		const newBottom = newTop === 'auto' ? 0 : 'auto';
 
 		return (

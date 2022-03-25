@@ -6,6 +6,16 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SET_WORK_ATTRIBUTES:
+			return {
+				...state,
+				workAttributes: action.payload
+			};
+		case APP_EVENTS.SET_ATTRIBUTE_MAP:
+			return {
+				...state,
+				attributesMap: action.payload
+			};
 		case APP_EVENTS.HIDE_LOADER_DATA:
 			return {
 				...state,
@@ -20,7 +30,8 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 		case APP_EVENTS.SET_ATTRIBUTE:
 			return {
 				...state,
-				groupAttribute: action.payload
+				groupAttribute: deepClone(action.payload),
+				loading: true
 			};
 		case APP_EVENTS.HIDE_LOADER_SETTINGS:
 			return {

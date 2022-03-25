@@ -7,7 +7,7 @@ import React from 'react';
 import styles from './styles.less';
 
 const GanttGrid = (props: Props) => {
-	const {allLinks, columns, getGanttData, getListOfGroupAttributes, groupAttribute, links, loading, newTask, progress, resources, rollUp, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations, scale, tasks} = props;
+	const {allLinks, attributesMap, columns, getGanttData, getListOfWorkAttributes, links, loading, newTask, progress, resources, rollUp, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations, scale, tasks, workAttributes} = props;
 
 	if (loading) {
 		return (
@@ -22,11 +22,11 @@ const GanttGrid = (props: Props) => {
 			<div className="gantt-container" style={{height: '100%', position: 'absolute', width: '100%'}}>
 				<Gantt
 					allLinks={allLinks}
+					attributesMap={attributesMap}
 					columns={columns}
 					flag={props.flag}
 					getGanttData={getGanttData}
-					getListOfGroupAttributes={getListOfGroupAttributes}
-					groupAttribute={groupAttribute}
+					getListOfWorkAttributes={getListOfWorkAttributes}
 					links={links}
 					newTask={newTask}
 					progress={progress}
@@ -39,6 +39,7 @@ const GanttGrid = (props: Props) => {
 					scale={scale}
 					style={{height: '100%', width: '100%'}}
 					tasks={tasks}
+					workAttributes={workAttributes}
 				/>
 			</div>
 		</div>

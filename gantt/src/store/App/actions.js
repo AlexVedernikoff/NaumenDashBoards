@@ -2,7 +2,7 @@
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getContext, getCurrentUser, getDataSources, getAttributeGroups, getDiagramData, getInitialSettings, getUserData, saveData, postChangedWorkRelations, postChangedWorkProgress, postChangedWorkInterval} from 'utils/api';
+import {getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, getWorkAttributes, postChangedWorkInterval, postChangedWorkProgress, postChangedWorkRelations, saveData} from 'utils/api';
 import {v4 as uuidv4} from 'uuid';
 
 /**
@@ -35,14 +35,17 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 };
 
 /**
- * Получает список групповых аттрибутов
+ * Получает список аттрибутов работы
+ * @param {string} attributeGroupCode - код группы аттрибутов
+ * @param {string} metaClassFqn - метакласс работы
+ * @param {string} workUUID - идентификатор работы
  * @returns {ThunkAction}
  */
-const getListOfGroupAttributes = (metaClass): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getListOfWorkAttributes = (metaClassFqn, attributeGroupCode, workUUID): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const groupAttribute = await getAttributeGroups(metaClass);
+		const workAttributes = await getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID);
 
-		dispatch(saveListOfAttributes(groupAttribute));
+		dispatch(setworkAttributes(workAttributes));
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -107,7 +110,6 @@ const saveChangedWorkRelations = (workRelations): ThunkAction => async (dispatch
 		dispatch(setContentCode(contentCode));
 		dispatch(setSubjectUuid(subjectUuid));
 	} catch (error) {
-		console.log(error);
 		dispatch(setErrorCommon(error));
 	} finally {
 		dispatch(hideLoaderData());
@@ -125,8 +127,9 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		const {contentCode, subjectUuid} = getContext();
 		const user = await getCurrentUser();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const {commonSettings, diagramKey, links, tasks} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
+		const {attributesMap, commonSettings, diagramKey, links, tasks} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
 
+		dispatch(setAttributesMap(attributesMap));
 		dispatch(setContentCode(contentCode));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setSubjectUuid(subjectUuid));
@@ -163,6 +166,22 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
 };
 
 /**
+ * Сохраняет аттрибуты работы
+ */
+ const setworkAttributes = payload => ({
+	payload,
+	type: APP_EVENTS.SET_WORK_ATTRIBUTES
+});
+
+/**
+ * Сохраняет коллекцию аттрибутов
+ */
+ const setAttributesMap = payload => ({
+	payload,
+	type: APP_EVENTS.SET_ATTRIBUTE_MAP
+});
+
+/**
  * Сохраняет копию исходных данных
  */
 const saveMasterSettings = () => ({
@@ -172,7 +191,7 @@ const saveMasterSettings = () => ({
 /**
  * Сохраняет список аттрибутов
  */
-const saveListOfAttributes = (payload: ListOfAttributes) => ({
+ const saveListOfAttributes = payload => ({
 	payload,
 	type: APP_EVENTS.SET_ATTRIBUTE
 });
@@ -366,9 +385,10 @@ export {
 	changeScale,
 	getAppConfig,
 	getGanttData,
-	getListOfGroupAttributes,
+	getListOfWorkAttributes,
 	hideLoaderData,
 	hideLoaderSettings,
+	setAttributesMap,
 	saveListOfAttributes,
 	saveChangedWorkRelations,
 	saveChangedWorkProgress,
@@ -382,6 +402,5 @@ export {
 	setDiagramData,
 	setRangeTime,
 	setResourceSettings,
-	showLoaderData,
 	showLoaderSettings
 };

@@ -12,15 +12,17 @@ import {
 	getInitialParams,
 	getInitialSettings,
 	getUserData,
+	getWorkAttributes,
 	openFilterForm,
-	postChangedWorkRelations,
 	postChangedWorkInterval,
 	postChangedWorkProgress,
+	postChangedWorkRelations,
 	saveData
 } from './context';
 
 export {
 	getAttributeGroups,
+	getWorkAttributes,
 	getContext,
 	getCurrentUser,
 	getDataSourceAttributes,

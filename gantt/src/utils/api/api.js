@@ -62,12 +62,14 @@ export default class Api {
 	}
 
 	/**
-	* Получает группы аттрибутов
-	* @param  {string} metaClass - метакласс задачи
-	* @returns {ListOfAttributes}
-	*/
-	async getAttributeGroups (metaClass) {
-		const url = `exec?func=modules.ganttWorkHandler.getAttributeGroups&params=${metaClass}`;
+	 * Получает аттрибуты работы
+	 * @param {string} attributeGroupCode - код группы аттрибутов
+	 * @param {string} metaClassFqn - метакласс работы
+	 * @param {string} workUUID - идентификатор работы
+	 * @returns {ThunkAction}
+	 */
+	async getWorkAttributes (metaClassFqn, attributeGroupCode, workUUID) {
+		const url = `exec?func=modules.ganttWorkHandler.getWorkAttributes&params=%27${metaClassFqn}%27,%27${attributeGroupCode}%27,${null}`;
 		const options = {
 			method: 'GET'
 		};
@@ -135,7 +137,11 @@ export default class Api {
 
 	async postData (subjectUuid: string, contentCode: string, data: Settings) {
 		const url = `exec-post?func=modules.ganttSettings.saveGanttSettings&params=requestContent`;
-		const body = {contentCode, data, subjectUuid};
+		const body = {
+			contentCode: contentCode,
+			ganttSettings: data,
+			subjectUUID: subjectUuid
+		};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
