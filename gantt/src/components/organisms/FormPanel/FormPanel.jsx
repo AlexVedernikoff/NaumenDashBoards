@@ -24,7 +24,7 @@ import GridLayout from 'react-grid-layout';
 import {IntervalSelectionCriterion, ScaleNames} from './consts';
 import Modal from 'src/components/atoms/Modal';
 import type {Props} from './types';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import Resource from './components/Resource';
 import ShowBox from 'src/components/atoms/ShowBox';
 import styles from './styles.less';
@@ -43,6 +43,8 @@ const FormPanel = (props: Props) => {
 	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
 	const [valueError, setValueError] = useState('');
+	const [inputMonthDays, setInputMonthDays] = useState('');
+	const [inputLastDays, setinputLastDays] = useState('');
 
 	const handleAddNewBlock = (index: number, value: string) => {
 		const {setResourceSettings} = props;
@@ -151,6 +153,7 @@ const FormPanel = (props: Props) => {
 	const [valueInterval, setValueInterval] = useState({label: 'c ... по', value: 'INTERVAL'});
 	const handleIntervalChange = ({value}) => {
 		setValueInterval(value);
+		setValueError('');
 	};
 
 	const handleCheckboxChange = () => {
@@ -205,13 +208,13 @@ const FormPanel = (props: Props) => {
 	};
 
 	const handleSave = () => {
-		const {diagramKey, saveSettings, settings, workProgresses} = props;
+		const {diagramKey, endDate, saveSettings, settings, startDate, workProgresses} = props;
 		const newError = checkingSettings();
 
 		setError(newError);
 
 		if (!newError) {
-			saveSettings({commonSettings: settings, diagramKey: diagramKey, resourceAndWorkSettings: resources, workProgresses});
+			saveSettings({commonSettings: settings, diagramKey: diagramKey, endDate: endDate, resourceAndWorkSettings: resources, startDate: startDate, workProgresses});
 		}
 	};
 
@@ -240,7 +243,7 @@ const FormPanel = (props: Props) => {
 
 	const onSelectStartDate = (value) => {
 		setInputStartDate(new Date(value).toLocaleString());
-		setShowDatePickerStartDate(!showDatePickerStartDate);
+		setShowDatePickerStartDate(false);
 	};
 
 	const onSelectEndDate = (value) => {
@@ -254,6 +257,24 @@ const FormPanel = (props: Props) => {
 		}
 	};
 
+	const onCloseDateModal = event => {
+		const notInteractiveElements = [
+			'src-components-Datepicker-styles__container',
+			'src-components-Icon-styles__icon',
+			'src-components-Datepicker-styles__daysContainer'
+		];
+
+		if (notInteractiveElements.includes(event.target.className && event.target.className.animVal) === false) {
+			setShowDatePickerStartDate(false);
+			setShowDatePickerEndDate(false);
+		}
+	};
+
+	React.useEffect(() => {
+		document.addEventListener('click', onCloseDateModal);
+		return () => document.removeEventListener('click', onCloseDateModal);
+	});
+
 	const renderDatePickerEndDate = () => {
 		if (showDatePickerEndDate) {
 			return <div className={styles.datepicker}><Datepicker onSelect={(value) => onSelectEndDate(value)} value="" /> </div>;
@@ -265,29 +286,72 @@ const FormPanel = (props: Props) => {
 		const dotReplacement = chunkDate[0].replace(/\./g, ',').split(',');
 
 		[dotReplacement[0], dotReplacement[1]] = [dotReplacement[1], dotReplacement[0]];
+
 		const modifiedDate = dotReplacement.join('.') + ',' + chunkDate[1];
 
 		return modifiedDate;
 	};
 
 	const sibmitRange = () => {
-		const newStartDate = new Date(convertDateToNormal(inputStartDate));
-		const newEndDate = new Date(convertDateToNormal(inputEndDate));
+		if (valueInterval.value === 'INTERVAL') {
+			const newStartDate = new Date(convertDateToNormal(inputStartDate));
+			const newEndDate = new Date(convertDateToNormal(inputEndDate));
 
-		if (Date.parse(newEndDate) >= Date.parse(newStartDate)) {
+			if (Date.parse(newEndDate) >= Date.parse(newStartDate)) {
+				const date = {
+					endDate: newEndDate,
+					startDate: newStartDate
+				};
+
+				props.setRangeTime(date);
+				setValueError('');
+			} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
+				setValueError('Дата начала не может быть позднее даты завершения');
+			} else if (!inputStartDate.length || !inputEndDate.length) {
+				setValueError('Заполните все поля');
+			} else {
+				setValueError('Некорректная дата');
+			}
+		} else if (valueInterval.value === 'MONTH') {
+			if (isNaN(inputMonthDays)) {
+				setValueError('Некорректное значение');
+			} else {
+				const today = new Date();
+				const inWeek = new Date();
+
+				const monthDays = inWeek.setDate(today.getDate() + +inputMonthDays);
+
+				const date = {
+					endDate: new Date(monthDays),
+					startDate: today
+				};
+
+				props.setRangeTime(date);
+				setValueError('');
+			}
+		} else if (valueInterval.value === 'LASTDAYS') {
+			if (isNaN(inputMonthDays)) {
+				setValueError('Некорректное значение');
+			} else {
+				const today = new Date();
+				const inWeek = new Date();
+
+				const monthDays = inWeek.setDate(today.getDate() - +inputLastDays);
+
+				const date = {
+					endDate: today,
+					startDate: new Date(monthDays)
+				};
+
+				props.setRangeTime(date);
+			}
+		} else if (valueInterval.value === 'NEXTDAYS') {
 			const date = {
-				endDate: newEndDate,
-				startDate: newStartDate
+				endDate: new Date(),
+				startDate: new Date()
 			};
 
 			props.setRangeTime(date);
-			setValueError('');
-		} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
-			setValueError('Дата начала не может быть позднее даты завершения');
-		} else if (!inputStartDate.length || !inputEndDate.length) {
-			setValueError('Заполните все поля');
-		} else {
-			setValueError('Некорректная дата');
 		}
 	};
 
@@ -295,34 +359,102 @@ const FormPanel = (props: Props) => {
 		setInputStartDate(target.value);
 	};
 
+	const changeMonthDays = target => {
+		setInputMonthDays(target.value);
+	};
+
+	const changeinputLastDays = target => {
+		setinputLastDays(target.value);
+	};
+
 	const changeEndDate = target => {
 		setInputEndDate(target.value);
 	};
 
-	const renderIntervalFromTo = () => {
-		if (valueInterval.value === 'INTERVAL') {
-			return (
-				<div className={styles.interval}>
-					<div className={styles.interval__wrapper_input}>
-						<span className={styles.interval__label}>С</span>
-						<div className={styles.interval__inner_wrapper_input}>
-							<TextInput className={styles.input} maxLength={30} onChange={changeStartDate} placeholder="дд.мм.гггг, чч:мм:сс" value={inputStartDate} />
-							<IconButton className={styles.basket} icon='CALENDAR' onClick={() => setShowDatePickerStartDate(!showDatePickerStartDate)} />
-						</div>
-						{renderDatePickerStartDate()}
-					</div>
-					<div className={styles.interval__wrapper_input}>
-						<span className={styles.interval__label}>По</span>
-						<div className={styles.interval__inner_wrapper_input}>
-							<TextInput className={styles.input} maxLength={30} onChange={changeEndDate} placeholder="дд.мм.гггг, чч:мм:сс" value={inputEndDate} />
-							<IconButton className={styles.basket} icon='CALENDAR' onClick={() => setShowDatePickerEndDate(!showDatePickerEndDate)} />
-						</div>
-						{renderDatePickerEndDate()}
-					</div>
-					<div className={styles.error}>{valueError}</div>
-					<button onClick={sibmitRange}>Применить</button>
+	const dataInterval = [
+		{
+			changeDate: changeStartDate,
+			inputDate: inputStartDate,
+			renderDatePickerDate: renderDatePickerStartDate,
+			setShowDatePickerDate: setShowDatePickerStartDate,
+			showDatePickerDate: showDatePickerStartDate,
+			text: 'С'
+		},
+		{
+			changeDate: changeEndDate,
+			inputDate: inputEndDate,
+			renderDatePickerDate: renderDatePickerEndDate,
+			setShowDatePickerDate: setShowDatePickerEndDate,
+			showDatePickerDate: showDatePickerEndDate,
+			text: 'По'
+		}
+	];
+
+	const dataMonthAndLastDays = [
+		{
+			changeinputLastDays: changeinputLastDays,
+			inputLastDays: inputLastDays,
+			text: 'За последние n дней'
+		},
+		{
+			changeinputLastDays: changeMonthDays,
+			inputLastDays: inputMonthDays,
+			text: 'В ближайшие n дней'
+		}
+	];
+
+	const listDataInterval = dataInterval.map((item, index) => {
+		return (
+			<div className={styles.interval__wrapper_input} key={index}>
+				<span className={styles.interval__label}>{item.text}</span>
+				<div className={styles.interval__inner_wrapper_input}>
+					<TextInput className={styles.input} maxLength={30} onChange={item.changeDate} placeholder="дд.мм.гггг, чч:мм:сс" value={item.inputDate} />
+					<IconButton className={styles.basket} icon="CALENDAR" onClick={() => item.setShowDatePickerDate(!item.showDatePickerDate)} />
 				</div>
-			);
+				{item.renderDatePickerDate()}
+			</div>
+		);
+	});
+
+	const listDataMonthAndLastDays = dataMonthAndLastDays.map((item, index) => {
+		return (
+			<div className={styles.interval} key={index}>
+				<div className={styles.interval__wrapper_input}>
+					<span className={styles.interval__label}>{item.text}</span>
+					<div className={styles.interval__inner_wrapper_input}>
+						<TextInput className={styles.input} maxLength={4} onChange={item.changeinputLastDays} placeholder="Количество дней" value={item.inputLastDays} />
+					</div>
+				</div>
+				<div className={styles.error}>{valueError}</div>
+				<button onClick={sibmitRange}>Применить</button>
+			</div>
+		);
+	});
+
+	const renderFormNextdays = () => {
+		return (
+			<div className={styles.interval}>
+				<div className={styles.error}>{valueError}</div>
+				<button onClick={sibmitRange}>Применить</button>
+			</div>
+		);
+	};
+
+	const renderIntervalFromTo = () => {
+		switch (valueInterval.value) {
+			case 'INTERVAL':
+				return (
+					<div>
+						{listDataInterval}
+						<button onClick={sibmitRange}>Применить</button>
+					</div>
+				);
+			case 'LASTDAYS':
+				return listDataMonthAndLastDays[0];
+			case 'MONTH':
+				return listDataMonthAndLastDays[1];
+			case 'NEXTDAYS':
+				return renderFormNextdays();
 		}
 	};
 

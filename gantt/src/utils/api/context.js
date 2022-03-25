@@ -161,17 +161,19 @@ const getDataSources = async (): Promise<Params> => {
 };
 
 /**
- * Возвращает список групп аттрибутов
- * @param {string} metaClass - метакласс работы
- * @returns {Promise<Params>} -  группы аттрибутов
+ * Получает аттрибуты работы
+ * @param {string} attributeGroupCode - код группы аттрибутов
+ * @param {string} metaClassFqn - метакласс работы
+ * @param {string} workUUID - идентификатор работы
+ * @returns {ThunkAction}
  */
-const getAttributeGroups = async (metaClass): Promise<Params> => {
-	const res = await api.getAttributeGroups(metaClass);
-	return res;
+const getWorkAttributes = async (attributeGroupCode, metaClassFqn, workUUID): Promise<Params> => {
+	const workAttributes = await api.getWorkAttributes(attributeGroupCode, metaClassFqn, workUUID);
+	return workAttributes;
 };
 
 export {
-	getAttributeGroups,
+	getWorkAttributes,
 	getContext,
 	getCurrentUser,
 	getDataSourceAttributes,

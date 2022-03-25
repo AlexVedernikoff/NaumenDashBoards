@@ -3,6 +3,10 @@ import type {AppAction, AppState} from './types';
 import {APP_EVENTS, USER_ROLES} from './constants';
 
 export const initialAppState: AppState = {
+	attributesMap: {
+		employee: [],
+		serviceCall$PMTask: []
+	},
 	contentCode: '',
 	diagramKey: '',
 	endDate: new Date(),
@@ -30,6 +34,7 @@ export const initialAppState: AppState = {
 		name: '',
 		role: USER_ROLES.REGULAR
 	},
+	workAttributes: [],
 	workProgresses: {}
 };
 

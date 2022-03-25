@@ -31,7 +31,7 @@ const АctionBar = props => {
 			onClick={props.onClick}
 		>{item.icon}
 		</IconButton>);
-	const {settings} = props;
+	const {addNewTask, handleToggle, name, refresh, settings} = props;
 	const newSettings = deepClone(settings);
 	let indexScaleName;
 
@@ -164,17 +164,35 @@ const АctionBar = props => {
 		setShowModal(!showModal);
 	};
 
+	const onCloseDateModal = event => {
+		const notInteractiveElements = [
+			'src-components-Datepicker-styles__container',
+			'src-components-Icon-styles__icon',
+			'src-components-Datepicker-styles__daysContainer'
+		];
+
+		if (notInteractiveElements.includes(event.target.className && event.target.className.animVal) === false) {
+			setShowDatePickerStartDate(false);
+			setShowDatePickerEndDate(false);
+		}
+	};
+
+	React.useEffect(() => {
+		document.addEventListener('click', onCloseDateModal);
+		return () => document.removeEventListener('click', onCloseDateModal);
+	});
+
 	const renderPanel = () => {
 		return (
 			<div className={styles.container}>
 				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_OUT} onClick={zoomIn} tip="Уменьшить масштаб" />
 				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_IN} onClick={zoomOut} tip="Увеличить масштаб" />
-				<IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} tip="Настройка" onClick={props.handleToggle}/>
+				<IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} onClick={handleToggle} tip="Настройка"/>
 				<IconButton className={styles.icon} icon={ICON_NAMES.CLOCK} onClick={openClockModal} tip="Интервал" />
 				{iconButtonGroup}
-				<IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={props.addNewTask}  tip="Добавить работу" />
-				<IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={props.refresh} tip="Обновить" />
-				<Button className={styles.btn}>{props.name}</Button>
+				<IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={addNewTask} tip="Добавить работу" />
+				<IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={refresh} tip="Обновить" />
+				<Button className={styles.btn}>{name}</Button>
 			</div>
 		);
 	};

@@ -85,6 +85,7 @@ export type AppAction =
 ;
 
 export type AppState = {
+	attributesMap: {},
 	contentCode: string,
 	error: boolean,
 	loading: boolean,

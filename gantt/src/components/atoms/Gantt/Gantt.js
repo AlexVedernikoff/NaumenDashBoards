@@ -7,6 +7,7 @@ import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
 import {setColumnSettings, setColumnTask} from 'store/App/actions';
 import Modal from 'src/components/atoms/Modal';
+import ModalTask from 'components/atoms/ModalTask';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import './gant-export';
@@ -14,8 +15,7 @@ import './gant-export';
 const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
-	let ID;
-	const {columns, getListOfGroupAttributes, links, resources, rollUp, scale, tasks, workProgresses} = props;
+	const {attributesMap, columns, getListOfWorkAttributes, links, resources, rollUp, scale, tasks, workProgresses} = props;
 	const [showMenu, setShowMenu] = useState(false);
 	const [showModalConfirm, setShowModalConfirm] = useState(true);
 	const [openModal, setOpenModal] = useState(false);
@@ -23,7 +23,6 @@ const Gantt = (props: Props) => {
 	const [res, setRes] = useState([]);
 	const [position, setPosition] = useState({left: 0, top: 0});
 	const dispatch = useDispatch();
-	const [options, setOptions] = useState([]);
 	const ganttContainer = useRef(null);
 	const store = useSelector(state => state);
 	const zoomConfig = {
@@ -100,31 +99,7 @@ const Gantt = (props: Props) => {
 		]
 	};
 
-	// Изменяет содержание опций групповых аттрибутов в карточке задачи при изменении res
 	useEffect(() => {
-		gantt.attachEvent('onTaskSelected', function (id) {
-			const newId = '%27employee%27';
-
-			getListOfGroupAttributes(newId);
-
-			gantt.showLightbox(id);
-		});
-
-		if (store.APP.groupAttribute !== undefined) {
-			store.APP.groupAttribute.map(i => {
-				const { code: key, title: label } = i;
-				const newObj = { key, label };
-
-				options.push(newObj);
-				setOptions(options);
-			});
-		}
-	}, [res]);
-
-	useEffect(() => {
-		const newId = '%27employee%27';
-
-		getListOfGroupAttributes(newId);
 		handleHeaderClick();
 
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
@@ -151,39 +126,6 @@ const Gantt = (props: Props) => {
 		};
 
 		gantt.ext.zoom.init(zoomConfig);
-		gantt.config.lightbox.sections = [
-			{focus: true, height: 70, map_to: 'text', name: 'description', type: 'textarea'},
-			{
-				height: 22,
-				label: 'Campaign',
-				map_to: 'priority',
-				name: 'priority',
-				options: options,
-				type: 'select'},
-			{height: 72, map_to: 'auto', name: 'time', type: 'time'}
-		];
-
-		gantt.attachEvent('onLightboxSave', function (id, obj) {
-			const newTasks = deepClone(tasks);
-			const resultTasks = [];
-
-			obj.code1 = obj.text;
-			newTasks.map(i => {
-				if (i.id !== id) {
-					resultTasks.push(i);
-				} else {
-					i.code1 = obj.text;
-					i.text = obj.text;
-					i.start_date = obj.start_date;
-					i.end_date = obj.end_date;
-					resultTasks.push(i);
-				}
-			});
-			gantt.render();
-			dispatch(setColumnTask(newTasks));
-
-			return true;
-		});
 
 		gantt.attachEvent('onAfterTaskDrag', function (id, mode, e) {
 			const taskId = gantt.getTask(id);
@@ -357,31 +299,6 @@ const Gantt = (props: Props) => {
 		setInitPage(true);
 	}, [props.refresh]);
 
-	const generateId = function () {
-		ID = '_' + Math.random().toString(36).substr(2, 9);
-	};
-
-	useEffect(() => {
-		generateId();
-		const newTasks = deepClone(tasks);
-
-		if (initPage) {
-			gantt.createTask({
-				code1: 'Иванов Иван',
-				end_date: '2021-11-13T11:55:26',
-				id: ID,
-				start_date: '2021-11-11T11:55:26',
-				text: 'Иванов Иван',
-				type: 'WORK'
-			});
-			const tasksTwo = gantt.getTaskByTime();
-
-			newTasks.push(tasksTwo[tasksTwo.length - 1]);
-			setInitPage(true);
-			dispatch(setColumnTask(newTasks));
-		}
-	}, [props.newTask]);
-
 	const handleHeaderClick = () => {
 		gantt.attachEvent('onGridHeaderClick', function (name, e) {
 			let ids;
@@ -529,11 +446,23 @@ const Gantt = (props: Props) => {
 		return null;
 	};
 
+	const renderModalTask = () => {
+		return (
+			<ModalTask
+				attributesMap={attributesMap}
+				getListOfWorkAttributes={getListOfWorkAttributes}
+				newTask={props.newTask}
+				workAttributes={props.workAttributes}
+			/>
+		);
+	};
+
 	return (
 		<>
 			<div ref={ganttContainer} style={{height: '100%', width: '100%'}} />
 			{showMenu && renderCheckedMenu()}
 			{openModal && renderConfirmModal()}
+			{renderModalTask()}
 		</>
 	);
 };

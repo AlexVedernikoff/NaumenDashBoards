@@ -3,6 +3,16 @@
 import {deepClone} from "../../helpers";
 
 const data = {
+	"attributesMap": {
+		"employee": [
+			{"code": "search_unlic", "title": "Атрибуты результатов поиска для нелицензированных пользователей"},
+			{"code": "0f31f516-1b18-4863-829c-d36c462ab0d7", "title": "Для формы добавления заявки"}
+		],
+		"serviceCall$PMTask": [
+			{"code": "DlyaSlozhnoiFormyDobavleniyaVDublyah", "title": "Для сложной формы добавления в дублях"},
+			{"code": "11eaebc5-dd95-4ea0-88fc-7304c034d1a0", "title": "Для карточки команды-ответственной"}
+		]
+	},
 	"commonSettings":{
 		"columnSettings":[
 			{
@@ -38,7 +48,7 @@ const data = {
 				"show":false
 			},
 			{
-				"title":"",
+				"title":"Добавить работу",
 				"code":"add",
 				"show":true
 			},

@@ -39,7 +39,6 @@ export default class FakeApi {
 		return {email: 'test@d.ru', groupUser: USER_ROLES.MASTER, name: 'test'};
 	}
 
-
 	async getDiagramData (contentCode, subjectUuid, user, timezone) {
 		await new Promise(resolve => setTimeout(() => resolve(), 300));
 		return getDiagramData();
@@ -51,6 +50,19 @@ export default class FakeApi {
 
 	async getAttributeGroups () {
 		return getAttributes;
+	}
+
+	async getWorkAttributes (metaClassFqn, attributeGroupCode, workUUID) {
+		return [
+			{
+				'code': 'solvedByEmployee',
+				'title': 'Кем решен (сотрудник)'
+			},
+			{
+				'code': 'solveedByEmployee',
+				'title': 'Кем решен (сотрудник)'
+			}
+		];
 	}
 
 	async getDataSourceAttributes (classFqn, parentClassFqn) {
