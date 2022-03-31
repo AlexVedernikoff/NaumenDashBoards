@@ -4293,11 +4293,33 @@ class DashboardDataSetService
         {
             if (hasBreakdown)
             {
+                List breakdownValues = []
+                list.each {
+                    if (it && !breakdownValues)
+                    {
+                        breakdownValues = it.collect {
+                            it.tail().first()
+                        }
+                    }
+                }
+
                 Integer i = 0
                 resultDataSet = list.collectMany {
-                    it.each { results ->
-                        results << results[results.size() - 1]
-                        results[results.size() - 2] = sourceRowNames[i]
+                    if (it)
+                    {
+                        it.each { results ->
+                            results << results[results.size() - 1]
+                            results[results.size() - 2] = sourceRowNames[i]
+                        }
+                    }
+                    else
+                    {
+                        breakdownValues.eachWithIndex { breakDownValue, index ->
+                            it[index] = []
+                            it[index][0] = 0
+                            it[index][1] = sourceRowNames[i]
+                            it[index][2] = breakDownValue
+                        }
                     }
                     i++
                     return it
@@ -4305,7 +4327,9 @@ class DashboardDataSetService
             }
             else
             {
-                resultDataSet = list.collect { it.size() ? it.head() : [0] } as List<List>
+                resultDataSet = list.collect {
+                    it ? it.head() : [0]
+                } as List<List>
             }
         }
         else
