@@ -338,8 +338,12 @@ type TableWidgetFormIndicatorsBox =
 
 // components/organisms/TableWidgetForm/components/ParametersBox
 type TableWidgetFormParametersBox =
-  | 'TableWidgetForm::ParametersBox::Parameters'
-  | 'TableWidgetForm::ParametersBox::SourceRowName';
+  | 'TableWidgetForm::ParametersBox::Parameters';
+
+// components/organisms/TableWidgetForm/components/SingleRowDataSetSettings
+type TableWidgetFormSingleRowDataSetSettings =
+  | 'TableWidgetForm::SingleRowDataSetSettings::SourceRowName'
+  | 'TableWidgetForm::SingleRowDataSetSettings::SourceRowNamePlaceholder';
 
 // components/organisms/TableWidgetForm/components/ParamsTab
 type TableWidgetFormParamsTab =
@@ -351,10 +355,6 @@ type TableWidgetFormParamsTab =
 // components/organisms/TableWidgetForm/components/TableBox
 type TableWidgetFormTableBox =
   | 'TableWidgetForm::TableBox::Table';
-
-// components/organisms/TableWidgetForm/components/DataSetSettings
-type TableWidgetFormDataSetSettings =
-  | 'TableWidgetForm::DataSetSettings::SourceRowNamePlaceholder';
 
 // components/organisms/TextWidgetForm
 type TextWidgetForm =
@@ -913,12 +913,12 @@ export type LangType =
   | TableTotal
   | TableWidget
   | TableWidgetFormBodySettingsBox
-  | TableWidgetFormDataSetSettings
   | TableWidgetFormHeaderSettingsBox
   | TableWidgetFormIndicatorsBox
   | TableWidgetFormParametersBox
   | TableWidgetFormParamsTab
   | TableWidgetFormScheme
+  | TableWidgetFormSingleRowDataSetSettings
   | TableWidgetFormTableBox
   | TableWidgetFormTableTooltipForm
   | TextAlignControl

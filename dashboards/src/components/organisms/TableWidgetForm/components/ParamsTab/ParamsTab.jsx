@@ -23,6 +23,7 @@ import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {createContext, Fragment, PureComponent} from 'react';
 import ShowTotalAmountBox from 'WidgetFormPanel/components/ShowTotalAmountBox';
+import SingleRowDataSetSettings from 'containers/TableSingleRowDataSetSettings';
 import styles from './styles.less';
 import t from 'localization';
 import Toggle from 'components/atoms/Toggle';
@@ -184,32 +185,37 @@ export class ParamsTab extends PureComponent<Props> {
 	};
 
 	renderBreakdownFieldSet = () => {
-		const {values} = this.props;
-		const {breakdown, indicators} = values.data[this.mainIndex];
-		const onlyCommonAttributes = isDontUseParamsForDataSet(values.data[this.mainIndex]);
+		const {values: {data}} = this.props;
+		const isSingleRow = isDontUseParamsForDataSet(data[this.mainIndex]);
 
-		return (
-			<BreakdownFieldset
-				className={styles.breakdownField}
-				disabled={hasDifferentAggregations(values.data)}
-				getUsedDataKeys={this.getUsedDataKeys}
-				index={this.mainIndex}
-				indicator={indicators?.[0]}
-				onChange={this.setBreakdown}
-				onRemove={this.removeBreakdown}
-				onlyCommonAttributes={onlyCommonAttributes}
-				removable={true}
-				value={breakdown}
-			/>
-		);
+		if (!isSingleRow) {
+			const {breakdown, indicators} = data[this.mainIndex];
+			const onlyCommonAttributes = isDontUseParamsForDataSet(data[this.mainIndex]);
+
+			return (
+				<BreakdownFieldset
+					className={styles.breakdownField}
+					disabled={hasDifferentAggregations(data)}
+					getUsedDataKeys={this.getUsedDataKeys}
+					index={this.mainIndex}
+					indicator={indicators?.[0]}
+					onChange={this.setBreakdown}
+					onRemove={this.removeBreakdown}
+					onlyCommonAttributes={onlyCommonAttributes}
+					removable={true}
+					value={breakdown}
+				/>
+			);
+		}
+
+		return null;
 	};
 
-	renderDataSetSettings = (dataSet: DataSet, index: number) => {
+	renderCommonDataSetSettings = (dataSet: DataSet, index: number) => {
 		const {calcTotalColumn, data} = this.props.values;
 		const isLast = data.length === 1;
 		const isMain = index === this.mainIndex;
-		const isSingleRow = isDontUseParamsForDataSet(data[this.mainIndex]);
-		const parentClassFqn = !isMain && !isSingleRow ? data[this.mainIndex].source.value?.value : '';
+		const parentClassFqn = !isMain ? data[this.mainIndex].source.value?.value : '';
 
 		return (
 			<CALC_TOTAL_CONTEXT.Provider key={`DataSetSettings_${dataSet.dataKey}`} value={calcTotalColumn}>
@@ -226,6 +232,17 @@ export class ParamsTab extends PureComponent<Props> {
 				/>
 			</CALC_TOTAL_CONTEXT.Provider>
 		);
+	};
+
+	renderDataSetSettings = (dataSet: DataSet, index: number) => {
+		const {data} = this.props.values;
+		const isSingleRow = isDontUseParamsForDataSet(data[this.mainIndex]);
+
+		if (isSingleRow) {
+			return this.renderSingleRowDataSetSettings(dataSet, index);
+		} else {
+			return this.renderCommonDataSetSettings(dataSet, index);
+		}
 	};
 
 	renderDataTopField = () => {
@@ -269,6 +286,29 @@ export class ParamsTab extends PureComponent<Props> {
 		}
 
 		return null;
+	};
+
+	renderSingleRowDataSetSettings = (dataSet: DataSet, index: number) => {
+		const {calcTotalColumn, data} = this.props.values;
+		const isLast = data.length === 1;
+		const isMain = index === this.mainIndex;
+		const isDifferentAggregations = hasDifferentAggregations(data);
+
+		return (
+			<CALC_TOTAL_CONTEXT.Provider key={`DataSetSettings_${dataSet.dataKey}`} value={calcTotalColumn}>
+				<SingleRowDataSetSettings
+					components={this.getDataSetSettingsComponents()}
+					index={index}
+					isDifferentAggregations={isDifferentAggregations}
+					isLast={isLast}
+					isMain={isMain}
+					onAdd={this.handleAddDataSet}
+					onChange={this.handleChangeDataSet}
+					onRemove={this.handleRemoveDataSet}
+					value={dataSet}
+				/>
+			</CALC_TOTAL_CONTEXT.Provider>
+		);
 	};
 
 	renderSumButton = (rightControl: React$Node) => (

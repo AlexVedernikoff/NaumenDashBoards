@@ -9,9 +9,9 @@ import {compose} from 'redux';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import ExtendButton from 'components/atoms/ExtendButton';
 import type {FieldContext, Props} from './types';
-import {filterByAttribute, getErrorPath} from 'WidgetFormPanel/helpers';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
+import {getErrorPath} from 'WidgetFormPanel/helpers';
 import {getMapValues} from 'helpers';
 import type {Group} from 'store/widgets/data/types';
 import type {OnSelectEvent} from 'components/types';
@@ -28,6 +28,7 @@ const Context: React$Context<FieldContext> = createContext({
 		group: getDefaultSystemGroup()
 	},
 	breakdownIndex: 0,
+	isMainSource: true,
 	source: null
 });
 
@@ -40,6 +41,7 @@ export class BreakdownFieldset extends Component<Props> {
 		className: '',
 		dataKey: '',
 		disabled: false,
+		isMain: true,
 		onlyCommonAttributes: false,
 		required: false,
 		value: []
@@ -80,8 +82,12 @@ export class BreakdownFieldset extends Component<Props> {
 		let usedKeys = [];
 
 		if (indicator && indicator.type === ATTRIBUTE_TYPES.COMPUTED_ATTR) {
-			usedKeys = getMapValues(indicator.computeData)
-				.reduce((usedKeys, {dataKey}) => !usedKeys.includes(dataKey) ? [...usedKeys, dataKey] : dataKey, usedKeys);
+			getMapValues(indicator.computeData)
+				.forEach(({dataKey}) => {
+					if (!usedKeys.includes(dataKey)) {
+						usedKeys.push(dataKey);
+					}
+				});
 		} else {
 			usedKeys = getUsedDataKeys ? getUsedDataKeys(values.data) : [dataKey];
 		}
@@ -97,23 +103,16 @@ export class BreakdownFieldset extends Component<Props> {
 
 	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, index: number = 0): Array<Attribute> => {
 		const {helpers, index: dataSetIndex, onlyCommonAttributes, value} = this.props;
-		let attributes = [];
+		let attributes = onlyCommonAttributes ? helpers.getCommonAttributes() : options;
 
-		if (onlyCommonAttributes) {
-			attributes = helpers.getCommonAttributes();
-		} else {
-			let filteredOptions = options;
+		if (index > this.mainIndex) {
+			attributes = helpers.filterBreakdownAttributeByMainDataSet(attributes, dataSetIndex);
+		}
+
+		if (!onlyCommonAttributes) {
 			const {attribute} = value[index] ?? {};
 
-			if (index > this.mainIndex) {
-				const {attribute: mainParameter} = value[this.mainIndex];
-
-				if (mainParameter) {
-					filteredOptions = filterByAttribute(options, mainParameter, filterByRef);
-				}
-			}
-
-			attributes = helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
+			attributes = helpers.filterAttributesByUsed(attributes, dataSetIndex, [attribute]);
 		}
 
 		return attributes;
@@ -174,7 +173,7 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	renderField = (item: BreakdownItem, breakdownIndex: number) => {
-		const {index: dataSetIndex, onRemove, removable, required, values} = this.props;
+		const {index: dataSetIndex, isMain, onRemove, removable, required, values} = this.props;
 		const {attribute} = item;
 		const dataSet = values.data[dataSetIndex];
 		const hasRemove = removable && !required;
@@ -184,6 +183,7 @@ export class BreakdownFieldset extends Component<Props> {
 			const context: FieldContext = {
 				breakdown: item,
 				breakdownIndex,
+				isMainSource: isMain,
 				source: source.value
 			};
 			const components = {
@@ -196,6 +196,7 @@ export class BreakdownFieldset extends Component<Props> {
 						<AttributeFieldset
 							components={components}
 							dataKey={dataKey}
+							dataSetIndex={dataSetIndex}
 							getMainOptions={this.filterOptions(false)}
 							getRefOptions={this.filterOptions(true)}
 							index={breakdownIndex}
@@ -215,11 +216,11 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	renderGroup = (context: FieldContext) => {
-		const {breakdown, breakdownIndex, source} = context;
+		const {breakdown, breakdownIndex, isMainSource, source} = context;
 		const {attribute, group} = breakdown;
 		const isNotMain = breakdownIndex !== this.mainIndex;
 		const isNotRefAttr = attribute && !(attribute.type in ATTRIBUTE_SETS.REFERENCE);
-		const disabled = Boolean(isNotMain && isNotRefAttr);
+		const disabled = Boolean(isNotMain && isNotRefAttr) || !isMainSource;
 
 		return (
 			<AttributeGroupField
