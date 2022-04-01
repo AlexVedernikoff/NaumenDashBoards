@@ -12,6 +12,7 @@ type DataSet = {
 export type FieldContext = {
 	breakdown: BreakdownItem,
 	breakdownIndex: number,
+	isMainSource: boolean,
 	source: Source | null
 };
 
@@ -26,6 +27,7 @@ export type Props = ValuesProps<Values> & HelpersProps & {
 	getUsedDataKeys?: (data: Array<DataSet>) => Array<string>,
 	index: number,
 	indicator: MixedAttribute | null,
+	isMain: boolean,
 	onChange: (value: Breakdown, callback?: Function) => void,
 	onlyCommonAttributes: boolean,
 	onRemove: () => void,

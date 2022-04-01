@@ -5,6 +5,7 @@ import {createContext} from 'react';
 const HELPERS_CONTEXT = createContext<Context>({
 	filterAttributeByMainDataSet: () => [],
 	filterAttributesByUsed: () => [],
+	filterBreakdownAttributeByMainDataSet: () => [],
 	getCommonAttributes: () => []
 });
 

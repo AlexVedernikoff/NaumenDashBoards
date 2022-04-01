@@ -2,6 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import type {Breakdown, Indicator, Parameter} from 'store/widgetForms/types';
 import {connect} from 'react-redux';
+import {filterByAttribute} from 'containers/WidgetFormPanel/helpers';
 import {functions, props} from './selectors';
 import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import {HELPERS_CONTEXT} from 'containers/DiagramWidgetForm/HOCs/withHelpers/constants';
@@ -33,6 +34,7 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 	getHelpers = memoize(() => ({
 		filterAttributeByMainDataSet: this.filterAttributeByMainDataSet,
 		filterAttributesByUsed: this.filterAttributesByUsed,
+		filterBreakdownAttributeByMainDataSet: this.filterBreakdownAttributeByMainDataSet,
 		getCommonAttributes: this.getCommonAttributes
 	}));
 
@@ -111,6 +113,28 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 		}
 
 		return filteredOptions;
+	};
+
+	/**
+	 * Фильтрует атрибуты разбивки в соответствии с типом разбивки первого источника
+	 * @param {Array<Attribute>} options - список атрибутов
+	 * @returns {Array<Attribute>} - список отфильтрованных атрибутов
+	 */
+	filterBreakdownAttributeByMainDataSet = (options: Array<Attribute>): Array<Attribute> => {
+		const {values: {data}} = this.props;
+		let result = [];
+
+		if (options && options.length > 0) {
+			const mainDataSet = data.find(ds => !ds.sourceForCompute);
+
+			if (mainDataSet.breakdown.length > 0) {
+				const {attribute} = mainDataSet.breakdown[0];
+
+				result = filterByAttribute(options, attribute, false);
+			}
+		}
+
+		return result;
 	};
 
 	/**

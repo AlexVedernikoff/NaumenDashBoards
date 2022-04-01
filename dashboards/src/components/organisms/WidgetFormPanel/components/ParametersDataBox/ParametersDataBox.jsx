@@ -2,7 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import type {DataSet, Props} from './types';
-import {filterByAttribute} from 'WidgetFormPanel/helpers';
+import {filterByAttribute} from 'containers/WidgetFormPanel/helpers';
 import FormBox from 'components/molecules/FormBox';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
