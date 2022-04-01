@@ -184,12 +184,12 @@ interface Dashboards
     String getDashboardLink(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
-     * Метод получения списка кодов атрибутов по группе атрибутов
+     * Метод получения данных атрибутов по группе атрибутов
      * @param classFqn - код класса источника
      * @param attrGroupCode - код группы атрибутов
      * @return список кодов атрибутов группы
      */
-    String getNonMetadataAttributeCodes(String classFqn, String attrGroupCode)
+    String getNonMetadataAttributesData(String classFqn, String attrGroupCode)
 }
 
 @InheritConstructors
@@ -340,9 +340,9 @@ class DashboardsImpl extends BaseController implements Dashboards
     }
 
     @Override
-    String getNonMetadataAttributeCodes(String classFqn, String attrGroupCode)
+    String getNonMetadataAttributesData(String classFqn, String attrGroupCode)
     {
-        return toJson(service.getNonMetadataAttributeCodes(classFqn, attrGroupCode))
+        return toJson(service.getNonMetadataAttributesData(classFqn, attrGroupCode))
     }
 }
 
@@ -1170,12 +1170,12 @@ class DashboardsService
     }
 
     /**
-     * Метод получения списка кодов атрибутов по группе атрибутов
+     * Метод получения данных атрибутов по группе атрибутов
      * @param classFqn - код класса источника
      * @param attrGroupCode - код группы атрибутов
      * @return список кодов атрибутов группы
      */
-    List<String> getNonMetadataAttributeCodes(String classFqn, String attrGroupCode = null)
+    List<Map> getNonMetadataAttributesData(String classFqn, String attrGroupCode = null)
     {
         IMetaClassWrapper metaClass = metainfo.getMetaClass(classFqn)
         Collection<IAttributeWrapper> attributes
@@ -1190,18 +1190,27 @@ class DashboardsService
             attributes = metaClass.attributes
         }
 
-        List<String> attrCodes = attributes.findResults {
-            String attrCode = null
+        attributes = attributes.findResults {
+            IAttributeWrapper attribute = null
 
             Boolean hasMetadataTag = it.tags?.any { it.code == 'Metadata' }
             if (!hasMetadataTag)
             {
-                attrCode = it.code
+                attribute = it
             }
-            return attrCode
+            return attribute
         }
 
-        return attrCodes
+        List<Map> attributesData = attributes.collect {
+            String[] attributeFqnSplitData = it.attributeFqn.toString().split('@')
+            Map attributeData = [
+                'metaClassCode': attributeFqnSplitData[0],
+                'attributeCode': attributeFqnSplitData[1]
+            ]
+            return attributeData
+        }
+
+        return attributesData
     }
 
     /**
