@@ -108,9 +108,15 @@ const data = {
 			"type":"RESOURCE"
 		},
 	],
-	"links":[
-        { "id":1, "source":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887", "target":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a", "type":"1"}
+	"workRelations":[
+        { 
+			"source":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887", 
+			"target":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a", 
+			"type":"1"
+		}
     ],
+	"progressCheckbox": false,
+	"workRelationCheckbox": false
 };
 
 export const getDiagramData = () => {

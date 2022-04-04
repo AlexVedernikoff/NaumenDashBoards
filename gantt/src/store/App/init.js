@@ -15,13 +15,13 @@ export const initialAppState: AppState = {
 	errorSettings: false,
 	groupAttribute: [],
 	hideEditPanel: false,
-	links: [],
 	loadingCommon: true,
 	loadingData: true,
 	loadingSettings: true,
 	masterResources: [],
 	masterSettings: {},
 	metaClass: '',
+	progressCheckbox: false,
 	resourceAndWorkSettings: [],
 	resources: [],
 	settings: {columnSettings: []},
@@ -35,7 +35,9 @@ export const initialAppState: AppState = {
 		role: USER_ROLES.REGULAR
 	},
 	workAttributes: [],
-	workProgresses: {}
+	workProgresses: {},
+	workRelationCheckbox: false,
+	workRelations: []
 };
 
 export const defaultAppAction: AppAction = {

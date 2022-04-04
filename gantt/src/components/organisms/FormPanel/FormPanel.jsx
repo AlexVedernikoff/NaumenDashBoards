@@ -208,13 +208,13 @@ const FormPanel = (props: Props) => {
 	};
 
 	const handleSave = () => {
-		const {diagramKey, endDate, saveSettings, settings, startDate, workProgresses} = props;
+		const {diagramKey, endDate, progressCheckbox, saveSettings, settings, startDate, workProgresses, workRelationCheckbox} = props;
 		const newError = checkingSettings();
 
 		setError(newError);
 
 		if (!newError) {
-			saveSettings({commonSettings: settings, diagramKey: diagramKey, endDate: endDate, resourceAndWorkSettings: resources, startDate: startDate, workProgresses});
+			saveSettings({commonSettings: settings, diagramKey, endDate, progressCheckbox, resourceAndWorkSettings: resources, startDate, workProgresses, workRelationCheckbox});
 		}
 	};
 
@@ -620,7 +620,7 @@ const FormPanel = (props: Props) => {
 		return (
 			<div onClick={props.handleToggleProgress}>
 				<FormControl className={cn(styles.checkbox)} label='Отображать прогресс выполнения работ на диаграмме' small={true}>
-					<Checkbox checked={props.progress} name='Checkbox' onChange={props.handleToggleProgress} value={props.progress} />
+					<Checkbox checked={props.progressCheckbox} name='Checkbox' onChange={props.handleToggleProgress} value={props.progressCheckbox} />
 				</FormControl>
 			</div>
 		);
@@ -630,7 +630,7 @@ const FormPanel = (props: Props) => {
 		return (
 			<div onClick={props.handleToggleLinks}>
 				<FormControl className={cn(styles.checkbox)} label='Отображать связи работ на диаграмме' small={true}>
-					<Checkbox checked={props.allLinks} name='Checkbox' onChange={props.handleToggleLinks} value={props.allLinks} />
+					<Checkbox checked={props.workRelationCheckbox} name='Checkbox' onChange={props.handleToggleLinks} value={props.workRelationCheckbox} />
 				</FormControl>
 			</div>
 		);

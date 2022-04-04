@@ -6,6 +6,16 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SWITCH_WORK_RELATION_CHECKBOX:
+			return {
+				...state,
+				workRelationCheckbox: action.isShowWorkRelation
+			};
+		case APP_EVENTS.SWITCH_PROGRESS_CHECKBOX:
+			return {
+				...state,
+				progressCheckbox: action.isShowProgress
+			};
 		case APP_EVENTS.SET_WORK_ATTRIBUTES:
 			return {
 				...state,
@@ -101,7 +111,7 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 		case APP_EVENTS.SET_LINKS_DIAGRAM_DATA:
 			return {
 				...state,
-				links: action.payload,
+				workRelations: action.payload,
 				loading: true
 			};
 		case APP_EVENTS.SET_DIAGRAM_DATA:

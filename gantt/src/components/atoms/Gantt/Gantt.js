@@ -15,10 +15,8 @@ import './gant-export';
 const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
-	const {attributesMap, columns, getListOfWorkAttributes, links, resources, rollUp, scale, tasks, workProgresses} = props;
+	const {attributesMap, columns, getListOfWorkAttributes, resources, rollUp, scale, tasks, workProgresses, workRelations} = props;
 	const [showMenu, setShowMenu] = useState(false);
-	const [showModalConfirm, setShowModalConfirm] = useState(true);
-	const [openModal, setOpenModal] = useState(false);
 	const [initPage, setInitPage] = useState(false);
 	const [res, setRes] = useState([]);
 	const [position, setPosition] = useState({left: 0, top: 0});
@@ -99,9 +97,31 @@ const Gantt = (props: Props) => {
 		]
 	};
 
-	useEffect(() => {
-		handleHeaderClick();
+	const debounce = (f, t) => {
+		return function (args) {
+			const previousCall = this.lastCall;
 
+			this.lastCall = Date.now();
+
+			if (previousCall && ((this.lastCall - previousCall) <= t)) {
+				clearTimeout(this.lastCallTimer);
+			}
+
+			this.lastCallTimer = setTimeout(() => f(args), t);
+		};
+	};
+
+	useEffect(() => {
+		gantt.attachEvent('onAfterLinkDelete', () => {
+			const links = gantt.getLinks();
+
+			props.saveChangedWorkRelations(links);
+		});
+
+		gantt.config.drag_project = true;
+		handleHeaderClick();
+		gantt.plugins({ multiselect: true });
+		gantt.config.drag_multiple = true;
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
 		gantt.config.open_tree_initially = true;
@@ -127,34 +147,58 @@ const Gantt = (props: Props) => {
 
 		gantt.ext.zoom.init(zoomConfig);
 
-		gantt.attachEvent('onAfterTaskDrag', function (id, mode, e) {
-			const taskId = gantt.getTask(id);
-
+		gantt.attachEvent('onAfterTaskDrag', debounce(function (id) {
+			const task = gantt.getTask(id);
 			const newTasks = store.APP.tasks;
+			let startDate = '';
+			let endDate = '';
+
+			const shiftingTimeZone = (date) => {
+				const timezone = /(GMT.*\))/.exec(new Date(date));
+				const deviation = timezone[0].slice(5, 6);
+				const sign = timezone[0].slice(3, 4);
+				let deleteDeviation = `${deviation}`;
+
+				if (sign === '-') {
+					deleteDeviation = `'-'${deviation}`;
+					return deleteDeviation;
+				}
+
+				if (date === task.start_date) {
+					startDate = gantt.date.add(new Date(date), deleteDeviation, 'hour');
+					return startDate;
+				} else {
+					endDate = gantt.date.add(new Date(date), deleteDeviation, 'hour');
+					return endDate;
+				}
+			};
+
+			shiftingTimeZone(task.start_date);
+			shiftingTimeZone(task.end_date);
+
+			const {saveChangedWorkInterval, saveChangedWorkProgress} = props;
 
 			newTasks.forEach(i => {
-				if (i.id === taskId.id) {
-					i.progress = taskId.progress;
-					i.start_date = taskId.start_date;
-					i.end_date = taskId.end_date;
+				if (i.id === task.id) {
+					i.start_date = startDate;
+					i.end_date = endDate;
+					i.progress = task.progress;
 				}
 			});
-			const {saveChangedWorkInterval, saveChangedWorkProgress} = props;
-			const wholeId = taskId.id.split('_');
-			const finishProgress = taskId.progress;
-			const finishId = wholeId[0];
 
-			saveChangedWorkProgress(finishId, finishProgress);
-			saveChangedWorkInterval ([
-				{dateType: 'startDate', value: taskId.start_date, workUUID: finishId},
-				{dateType: 'endDate', value: taskId.end_date, workUUID: finishId}
-			]);
+			saveChangedWorkInterval(
+				[
+					{dateType: 'startDate', value: startDate, workUUID: task.id},
+					{dateType: 'endDate', value: endDate, workUUID: task.id}
+				]
+			);
+			task.start_date = startDate;
+			task.end_date = endDate;
+
+			saveChangedWorkProgress(task.id, task.progress);
 
 			dispatch(setColumnTask(newTasks));
-
-			setOpenModal(true);
-			setShowModalConfirm(true);
-		});
+		}, 100));
 
 		gantt.i18n.setLocale('ru');
 		gantt.plugins({marker: true});
@@ -178,15 +222,13 @@ const Gantt = (props: Props) => {
 		gantt.config.fit_tasks = true;
 		gantt.init(ganttContainer.current);
 		gantt.clearAll();
-	}, []);
 
-	gantt.templates.drag_link = (from, from_start, to, to_start) => {
-		const links = gantt.getLinks();
+		gantt.attachEvent('onAfterLinkAdd', () => {
+			const links = gantt.getLinks();
 
-		if (links.length && !firstUpdate) {
 			props.saveChangedWorkRelations(links);
-		}
-	};
+		});
+	}, []);
 
 	// Изменяет прогресс в задачах при изменении store.APP.workProgresses
 	useEffect(() => {
@@ -202,11 +244,10 @@ const Gantt = (props: Props) => {
 			}
 
 			dispatch(setColumnTask(tasks));
-
 			gantt.render();
 		}
 
-		gantt.parse((JSON.stringify({data: tasks, links: links})));
+		gantt.parse((JSON.stringify({data: tasks, links: workRelations})));
 	}, [store.APP.workProgresses]);
 
 	const [firstUpdate, setFirstUpdate] = useState(true);
@@ -245,7 +286,7 @@ const Gantt = (props: Props) => {
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
 		gantt.clearAll();
-		gantt.parse((JSON.stringify({data: tasks, links: links})));
+		gantt.parse((JSON.stringify({data: tasks, links: workRelations})));
 		gantt.showDate(new Date());
 		gantt.render();
 
@@ -266,17 +307,17 @@ const Gantt = (props: Props) => {
 		});
 	}, [tasks]);
 
-	// Отображает или скрывает прогресс при изменении props.progress
+	// Отображает или скрывает прогресс при изменении props.progressCheckbox
 	useEffect(() => {
-		gantt.config.show_progress = props.progress;
+		gantt.config.show_progress = props.progressCheckbox;
 		gantt.render();
-	}, [props.progress]);
+	}, [props.progressCheckbox]);
 
-	// Отображает связи между задачами при изменении props.allLinks
+	// Отображает связи между задачами при изменении props.workRelationCheckbox
 	useEffect(() => {
-		gantt.config.show_links = props.allLinks;
+		gantt.config.show_links = props.workRelationCheckbox;
 		gantt.render();
-	}, [props.allLinks]);
+	}, [props.workRelationCheckbox]);
 
 	// Экспортирует диаграмму при изменении props.flag
 	useEffect(() => {
@@ -322,19 +363,6 @@ const Gantt = (props: Props) => {
 		});
 	};
 
-	const debounce = (f, t) => {
-		return function (args) {
-			const previousCall = this.lastCall;
-
-			this.lastCall = Date.now();
-
-			if (previousCall && ((this.lastCall - previousCall) <= t)) {
-				clearTimeout(this.lastCallTimer);
-			}
-
-			this.lastCallTimer = setTimeout(() => f(args), t);
-		};
-	};
 
 	const inlineEditors = gantt.ext.inlineEditors;
 
@@ -429,23 +457,6 @@ const Gantt = (props: Props) => {
 		return <CheckedMenu items={items} onCheck={checkItemMenuHide} onToggle={() => setShowMenu(!showMenu)} position={position} />;
 	};
 
-	const renderConfirmModal = () => {
-		if (showModalConfirm) {
-			return (
-				<Modal
-					notice={true}
-					onClose={() => setShowModalConfirm(false)}
-					onSubmit={() => setShowModalConfirm(false)}
-					submitText="Подтвердить"
-				>
-					Изменение диапазона времени задачи выходит за рамки проекта!
-				</Modal>
-			);
-		}
-
-		return null;
-	};
-
 	const renderModalTask = () => {
 		return (
 			<ModalTask
@@ -461,7 +472,6 @@ const Gantt = (props: Props) => {
 		<>
 			<div ref={ganttContainer} style={{height: '100%', width: '100%'}} />
 			{showMenu && renderCheckedMenu()}
-			{openModal && renderConfirmModal()}
 			{renderModalTask()}
 		</>
 	);

@@ -82,12 +82,11 @@ export default class Api {
 	* @param  {string} timezone - таймзона
 	* @param  {workDateInterval} workDateInterval -Объект временных рамок работы
 	* @param  {string} contentCode - code объекта
-	* @param  {string} subjectUuid - Uuid объекта
-	* @param  {string} user - user объект
+	* @param  {string} subjectUUID - Uuid объекта
 	*/
-	async postChangedWorkInterval (timezone: string, workDateInterval: workDateInterval, contentCode, subjectUuid, user: UserData) {
-		const url = `exec?func=modules.ganttWorkHandler.editWorkDateRanges&params=requestContent,user`;
-		const body = {contentCode, subjectUuid, timezone, workDateInterval};
+	async postChangedWorkInterval (timezone: string, workDateInterval, contentCode: string, subjectUUID: string) {
+		const url = `exec-post?func=modules.ganttWorkHandler.editWorkDateRanges&params=requestContent,user`;
+		const body = {contentCode, subjectUUID, timezone, workDateInterval};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -100,11 +99,11 @@ export default class Api {
 	* Отправляет данные изменненых рабочих связей
 	* @param workRelations - объект связи между работами
 	* @param contentCode - code объекта
-	* @param subjectUuid -  Uuid объекта
+	* @param subjectUUID -  Uuid объекта
 	*/
-	async postChangedWorkRelations (workRelations, contentCode: string, subjectUuid: string) {
-		const url = `exec?func=modules.ganttSettings.storeWorkRelations&params=requestContent`;
-		const body = {contentCode, subjectUuid, workRelations};
+	async postChangedWorkRelations (workRelations, contentCode: string, subjectUUID: string) {
+		const url = `exec-post?func=modules.ganttWorkHandler.storeWorkRelations&params=requestContent`;
+		const body = {contentCode, subjectUUID, workRelations};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -135,12 +134,12 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
-	async postData (subjectUuid: string, contentCode: string, data: Settings) {
+	async postData (subjectUUID: string, contentCode: string, data: Settings) {
 		const url = `exec-post?func=modules.ganttSettings.saveGanttSettings&params=requestContent`;
 		const body = {
 			contentCode: contentCode,
 			ganttSettings: data,
-			subjectUUID: subjectUuid
+			subjectUUID: subjectUUID
 		};
 		const options = {
 			body: JSON.stringify(body),
