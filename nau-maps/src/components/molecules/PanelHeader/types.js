@@ -7,8 +7,8 @@ type OwnProps = {
 };
 
 export type ConnectedProps = {
-	panelShow: PointType,
-	listName: string
+	listName: string,
+	panelShow: PointType
 };
 
 export type ConnectedFunctions = {

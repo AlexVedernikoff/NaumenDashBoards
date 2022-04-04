@@ -13,7 +13,10 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 		case GEOLOCATION_EVENTS.SET_PARAMS:
 			return {
 				...state,
-				params: action.payload
+				params: {
+					...state.params,
+					...action.payload
+				}
 			};
 		case GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION:
 			return {

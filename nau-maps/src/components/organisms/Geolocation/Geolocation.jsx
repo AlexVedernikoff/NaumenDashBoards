@@ -30,9 +30,23 @@ export class Geolocation extends Component<Props> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {bounds, mapSelect, timeUpdate, zoom} = this.props;
+		const {bounds, mapSelect, showSingleObject, singleObject, timeUpdate, zoom} = this.props;
 
 		if (this.mapRef.current) {
+			if (showSingleObject) {
+				const {geoposition: {latitude, longitude}} = singleObject;
+
+				switch (mapSelect) {
+					case 'Yandex':
+						this.mapRef.current.setCenter([latitude, longitude]);
+						break;
+					case 'Google':
+						break;
+					default:
+						this.mapRef.current.leafletElement.panTo([latitude, longitude]);
+				}
+			}
+
 			if (prevProps.zoom !== zoom) {
 				switch (mapSelect) {
 					case 'Yandex':
@@ -49,6 +63,7 @@ export class Geolocation extends Component<Props> {
 			if (prevProps.timeUpdate !== timeUpdate) {
 				switch (mapSelect) {
 					case 'Yandex':
+						this.mapRef.current.setBounds(this.mapRef.current.geoObjects.getBounds());
 						break;
 					case 'Google':
 						this.mapRef.current.fitBounds(bounds);
@@ -91,7 +106,6 @@ export class Geolocation extends Component<Props> {
 					onClick={resetSingleObject}
 					onLoad={this.yandexMapLoad.bind(this)}
 					options={{
-						mapAutoFocus: false,
 						maxZoom: 15,
 						minZoom: 5
 					}}

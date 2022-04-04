@@ -1,40 +1,58 @@
 // @flow
-import cn from 'classnames';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './PanelPointContent.less';
-import {truncatedText} from 'components/atoms/TruncatedText';
 
 export class PanelPointContent extends Component<Props> {
+	constructor (props: Props) {
+		super(props);
+
+		this.state = {
+			viewTextFull: false
+		};
+	}
+
+	changeViewText = () => {
+		this.setState({viewTextFull: !this.state.viewTextFull});
+	};
+
+	truncate = (str, n) => {
+		return str.length > n && this.state.viewTextFull ? str.substr(0, n - 1) : str;
+	};
+
+	renderTextFull () {
+		return <div onClick={this.changeViewText}>{this.state.viewTextFull ? 'Показать подробнее' : 'Скрыть' }</div>;
+	}
+
+	renderText () {
+		const {option: {label}} = this.props;
+
+		return (
+			<div className={styles.text}>
+				{this.truncate(label, 255)}
+				{label.length > 255 && this.renderTextFull()}
+			</div>
+		);
+	}
+
+	renderLink () {
+		const {option: {value}} = this.props;
+
+		if (value.url) {
+			return <a className={styles.link} href={value.url} rel="noreferrer" target="_blank">{value.label}</a>;
+		} else {
+			return <div className={styles.link}>{value.label}</div>;
+		}
+	}
+
 	render () {
-		const {option} = this.props;
-		const {label, presentation, value} = option;
-
-		const optionCN = cn({
-			[styles.option]: true,
-			[styles.optionFull]: presentation === 'right_of_label',
-			[styles.optionUnderLabel]: presentation === 'under_label'
-		});
-
-		const optionValueCN = cn({
-			[styles.optionUnder]: presentation === 'under_label',
-			[styles.optionRight]: presentation === 'right_of_label',
-			[styles.optionLine]: presentation === 'full_length'
-		});
-
-		const optionLabelCN = cn({
-			[styles.optionLeft]: presentation === 'right_of_label',
-			[styles.optionWide]: presentation === 'under_label',
-			[styles.optionHide]: presentation === 'full_length'
-		});
+		const {option: {value}} = this.props;
 
 		if (value) {
 			return (
-				<div className={optionCN}>
-					{label && <div className={optionLabelCN}>{truncatedText(label)}</div>}
-					{value.url
-						? <a className={optionValueCN} rel="noopener noreferrer" target="_blank" href={value.url}>{truncatedText(value.label)}</a>
-						: <div className={optionValueCN}>{truncatedText(value.label)}</div>}
+				<div className={styles.container}>
+					{this.renderText()}
+					{this.renderLink()}
 				</div>
 			);
 		}

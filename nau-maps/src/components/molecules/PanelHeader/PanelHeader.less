@@ -1,40 +1,25 @@
 :local {
-	.PanelHeaderWrap {
-		background-color: #F4F4F4;
-		height: 48px;
-		width: 100%;
+	.container {
+		align-items: center;
+		display: flex;
+		flex-direction: row;
+		padding: 12px 20px;
 	}
 
-	.PanelHeaderContainer {
+	.text {
+		color: #4D92C8;
+		font-size: 14px;
+		font-style: normal;
+		font-weight: 500;
+		line-height: 16px;
+	}
+
+	.icon {
 		cursor: pointer;
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		height: 40px;
-		padding: 4px 12px 4px 12px;
-		text-align: center;
-	}
+		margin-right: 10px;
 
-	.label {
-		color: #323232;
-		font-size: 13px;
-		font-weight: 500;
-		line-height: 15px;
-		margin: 12px 12px 8px 12px;
+		svg {
+			fill: #4D92C8;
+		}
 	}
-
-	.active {
-	}
-
-	.inActiveLabel {
-		color: #999999;
-		font-size: 13px;
-		font-weight: 500;
-		line-height: 15px;
-		margin: 12px 12px 13px 12px;
-	}
-
-	.inActiveLabel:hover {
-		color: #323232;
-	}
-
 }

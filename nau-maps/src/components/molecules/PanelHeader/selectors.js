@@ -4,13 +4,9 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 import {setTab} from 'store/geolocation/actions';
 
 const props = (state: AppState): ConnectedProps => {
-	const {geolocation} = state;
-	const {panelShow, params} = geolocation;
-	const {listName} = params;
-
 	return {
-		listName,
-		panelShow
+		name: state.geolocation.params.listName,
+		showSingleObject: state.geolocation.showSingleObject
 	};
 };
 
