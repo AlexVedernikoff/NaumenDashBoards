@@ -36,7 +36,7 @@ const getParams = async () => {
 
 	const {jsApi} = window;
 	const paramsApp = await jsApi.commands.getCurrentContentParameters().then(data => data);
-	const {locationUpdateFrequency, requestCurrentLocation, listName, updatePointsMode} = paramsApp;
+	const {listName, locationUpdateFrequency, requestCurrentLocation, updatePointsMode} = paramsApp;
 
 	if (!listName) {
 		paramsApp.listName = params.listName;
@@ -62,9 +62,7 @@ const getParams = async () => {
 
 const getMapObjects = async (contentCode: string, subjectUuid: string) => {
 	const {jsApi} = window;
-	const data = await jsApi.restCallModule('mapRestSettings', 'getMapObjects', subjectUuid, contentCode);
-
-	return data;
+	return await jsApi.restCallModule('mapRestSettings', 'getMapObjects', subjectUuid, contentCode);
 };
 
 const changeState = async (uuid: string, states: Array<string>): Promise<string | null> => {

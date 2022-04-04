@@ -1,13 +1,13 @@
 // @flow
 import buildUrl from './core';
-import client from './client';
 import {
 	changeResponsible,
 	changeState,
 	getContext,
-	getParams,
-	getMapObjects
+	getMapObjects,
+	getParams
 } from './context';
+import client from './client';
 
 export {
 	buildUrl,

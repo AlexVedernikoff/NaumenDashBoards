@@ -10,12 +10,14 @@ import {resetSingleObject} from 'store/geolocation/actions';
  */
 export const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {controls: {zoom}, mapObjects, mapSelect, timeUpdate} = geolocation;
+	const {controls: {zoom}, mapObjects, mapSelect, showSingleObject, singleObject, timeUpdate} = geolocation;
 	const bounds = mapObjects && mapObjects.length ? mapObjects : [];
 
 	return {
 		bounds: getLatLngBounds(bounds),
 		mapSelect,
+		showSingleObject,
+		singleObject,
 		timeUpdate,
 		zoom
 	};

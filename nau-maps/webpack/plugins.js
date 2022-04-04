@@ -13,7 +13,7 @@ const plugins = [
 	}),
 	new ParametersXMLWebpackPlugin({
 		output: './dist/parameters.xml',
-		path: './src/rest/resources/eaWithParamsMeta.xml',
+		path: './src/rest/resources/eaWithParamsMeta.xml'
 	}),
 	new HtmlWebpackPlugin({
 		filename: 'index.html',

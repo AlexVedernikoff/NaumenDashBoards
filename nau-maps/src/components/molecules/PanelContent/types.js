@@ -1,8 +1,11 @@
 // @flow
+import type {Point} from 'types/point';
+
 type OwnProps = {};
 
 export type ConnectedProps = {
-	showSingleObject: boolean
+	points: Array<Point>,
+	timeUpdate: number
 };
 
 export type ConnectedFunctions = {};

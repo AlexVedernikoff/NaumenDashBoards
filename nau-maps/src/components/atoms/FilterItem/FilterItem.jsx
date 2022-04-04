@@ -1,18 +1,17 @@
 // @flow
 import cn from 'classnames';
 import {connect} from 'react-redux';
-import type {GroupCode} from 'types/point';
 import {functions, props} from './selectors';
+import type {GroupCode} from 'types/point';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './FilterItem.less';
-import {truncatedText} from 'components/atoms/TruncatedText';
 
 export class Filter extends Component<Props, State> {
 	toggleGroup = (code: GroupCode) => () => {
 		const {toggleGroup} = this.props;
 		toggleGroup(code);
-	}
+	};
 
 	render () {
 		const {filterItem} = this.props;
@@ -24,7 +23,7 @@ export class Filter extends Component<Props, State> {
 
 		return (
 			<label className={checboxContinerCN}>
-				<div className={styles.label}>{truncatedText(name, 1)}</div>
+				<div className={styles.label}>{name}</div>
 				<input
 					checked={checked}
 					onChange={this.toggleGroup(code)}

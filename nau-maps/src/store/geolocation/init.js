@@ -17,7 +17,7 @@ export const initialGeolocationState: GeolocationState = {
 	error: false,
 	loading: true,
 	mapObjects: [],
-	mapSelect: 'OpenMap',
+	mapSelect: 'Yandex',
 	panelShow: 'static',
 	params: {
 		autoUpdateLocation: true,

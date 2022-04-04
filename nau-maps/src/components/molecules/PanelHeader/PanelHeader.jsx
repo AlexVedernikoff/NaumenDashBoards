@@ -1,40 +1,36 @@
 // @flow
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
-import type {PointType} from 'types/point';
+import ListBtnIcon from 'icons/ListBtnIcon';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './PanelHeader.less';
-import {truncatedText} from 'components/atoms/TruncatedText';
 
 export class PanelHeader extends Component<Props> {
-	renderTab = (type: PointType, label: string) => {
-		const {panelShow, setTab} = this.props;
+	truncate = (str, n) => {
+		return str.length > n ? str.substr(0, n - 1) + '...' : str;
+	};
 
-		if (type === panelShow) {
-			return (
-				<div>
-					<div className={styles.label} >{truncatedText(label, 1)}</div>
-					<div className={styles.active} />
-				</div>
-			);
-		}
+	renderIcon = () => {
+		const {setTab} = this.props;
 
 		return (
-			<div onClick={() => setTab(type)}>
-				<div className={styles.inActiveLabel} >{truncatedText(label, 1)}</div>
+			<div className={styles.icon} onClick={setTab} title="Перейти">
+				<ListBtnIcon />
 			</div>
 		);
 	};
 
-	render () {
-		const {listName} = this.props;
+	renderText = () => {
+		const {name} = this.props;
+		return <div className={styles.text}>{this.truncate(name, 30)}</div>;
+	};
 
+	render () {
 		return (
-			<div className={styles.PanelHeaderWrap}>
-				<div className={styles.PanelHeaderContainer}>
-					{this.renderTab('static', listName)}
-				</div>
+			<div className={styles.container}>
+				{this.renderIcon()}
+				{this.renderText()}
 			</div>
 		);
 	}
