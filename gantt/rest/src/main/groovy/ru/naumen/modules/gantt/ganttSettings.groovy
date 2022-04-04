@@ -240,6 +240,14 @@ class GanttSettingsService
 
         String ganttSettingsKey = ganttSettings?.diagramKey ?: generateDiagramKey(subjectUUID, contentCode)
 
+        String currentGanttSettingsJSON = getJsonSettings(ganttSettingsKey)
+
+        GanttSettingsClass currentGanttSettings = currentGanttSettingsJSON
+            ? Jackson.fromJsonString(currentGanttSettingsJSON, GanttSettingsClass)
+            : new GanttSettingsClass()
+
+        ganttSettings.workRelations = currentGanttSettings.workRelations
+
         ganttSettings.commonSettings = updateColumnsInCommonSettings(ganttSettings.commonSettings)
 
         if(saveJsonSettings(ganttSettingsKey, Jackson.toJsonString(ganttSettings)))
@@ -493,17 +501,6 @@ enum SourceType
 }
 
 /**
- * Тип отношений между работами
- */
-enum WorkRelationType
-{
-    finish_to_start,
-    start_to_start,
-    finish_to_finish,
-    start_to_finish
-}
-
-/**
  * Тип даты у работы для редактирования
  */
 enum WorkEditDateType
@@ -605,6 +602,16 @@ class BaseGanttDiagramData
      * Данные о прогрессе работ
      */
     Map<String, Double> workProgresses = [:]
+
+    /**
+     * Отображение прогресса выполнения работ на диаграмме
+     */
+    Boolean progressCheckbox
+
+    /**
+     * Отображение связи работ на диаграмме
+     */
+    Boolean workRelationCheckbox
 }
 
 /**
@@ -624,19 +631,24 @@ class GanttSettingsClass extends BaseGanttDiagramData
 class WorkRelation
 {
     /**
+     * ID работ
+     */
+    String id
+
+    /**
      * UUID работы A
      */
-    String workAUuid
+    String source
 
     /**
      * UUID работы B
      */
-    String workBUuid
+    String target
 
     /**
      * Тип отношений между работами
      */
-    WorkRelationType type
+    String type
 }
 
 /**

@@ -72,6 +72,8 @@ class GanttDataSetService
         data.commonSettings = settings.commonSettings
         data.diagramKey = settings.diagramKey
         data.workRelations = settings.workRelations
+        data.workRelationCheckbox = settings.workRelationCheckbox
+        data.progressCheckbox = settings.progressCheckbox
 
         GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
         settings.resourceAndWorkSettings.each {
