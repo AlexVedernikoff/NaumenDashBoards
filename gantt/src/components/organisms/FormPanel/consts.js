@@ -37,13 +37,5 @@ export const IntervalSelectionCriterion = [
 	{
 		label: 'сегодня',
 		value: 'NEXTDAYS'
-	},
-	{
-		label: 'пусто',
-		value: 'EMPTY'
-	},
-	{
-		label: 'не пусто',
-		value: 'NOTEMPTY'
 	}
 ];

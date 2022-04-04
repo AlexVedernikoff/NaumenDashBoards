@@ -27,6 +27,7 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(setResourceSettings(resourceAndWorkSettings && Object.keys(resourceAndWorkSettings).length ? resourceAndWorkSettings : [{ ...defaultResourceSetting, id: uuidv4() }]));
 		dispatch(setSources(sources));
 		dispatch(saveMasterSettings());
+		await dispatch(getGanttData());
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -127,15 +128,17 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		const {contentCode, subjectUuid} = getContext();
 		const user = await getCurrentUser();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const {attributesMap, commonSettings, diagramKey, links, tasks} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
+		const {attributesMap, commonSettings, diagramKey, progressCheckbox, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
 
+		dispatch(switchProgressCheckbox(progressCheckbox));
+		dispatch(switchWorkRelationCheckbox(workRelationCheckbox));
 		dispatch(setAttributesMap(attributesMap));
 		dispatch(setContentCode(contentCode));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setSubjectUuid(subjectUuid));
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
 		dispatch(setDiagramData(tasks || []));
-		dispatch(setDiagramLinksData(links || []));
+		dispatch(setDiagramLinksData(workRelations || []));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -164,6 +167,22 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
 		dispatch(hideLoaderSettings());
 	}
 };
+
+/**
+ * Переключает чекбокс прогресса
+ */
+ const switchProgressCheckbox = (isShowProgress: Boolean) => ({
+	isShowProgress,
+	type: APP_EVENTS.SWITCH_PROGRESS_CHECKBOX
+});
+
+/**
+ * Переключает чекбокс связи работы
+ */
+ const switchWorkRelationCheckbox = (isShowWorkRelation: Boolean) => ({
+	isShowWorkRelation,
+	type: APP_EVENTS.SWITCH_WORK_RELATION_CHECKBOX
+});
 
 /**
  * Сохраняет аттрибуты работы
@@ -402,5 +421,7 @@ export {
 	setDiagramData,
 	setRangeTime,
 	setResourceSettings,
-	showLoaderSettings
+	showLoaderSettings,
+	switchProgressCheckbox,
+	switchWorkRelationCheckbox
 };

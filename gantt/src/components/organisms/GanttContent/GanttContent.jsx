@@ -3,7 +3,9 @@ import АctionBar from 'components/molecules/АctionBar';
 import GanttGrid from 'components/molecules/Gantt';
 import GanttPanel from 'containers/GanttPanel';
 import type {Props} from 'containers/GanttContent/types';
+import {connect} from 'react-redux';
 import React, {PureComponent} from 'react';
+import {functions, props} from './selectors';
 import styles from './styles.less';
 
 export class GanttContent extends PureComponent<Props> {
@@ -16,11 +18,9 @@ export class GanttContent extends PureComponent<Props> {
 		this.handleToggleLinks = this.handleToggleLinks.bind(this);
 		this.addNewTask = this.addNewTask.bind(this);
 		this.state = {
-			allLinks: false,
 			flag: false,
 			name: 'Просмотреть',
 			newTask: false,
-			progress: false,
 			refresh: false,
 			swiped: false
 		};
@@ -36,11 +36,11 @@ export class GanttContent extends PureComponent<Props> {
 	};
 
 	handleToggleLinks = () => {
-		this.setState({allLinks: !this.state.allLinks});
+		this.props.switchWorkRelationCheckbox(!this.props.workRelationCheckbox);
 	};
 
 	handleToggleProgress = () => {
-		this.setState({progress: !this.state.progress});
+		this.props.switchProgressCheckbox(!this.props.progressCheckbox);
 	};
 
 	onRefresh () {
@@ -104,4 +104,4 @@ export class GanttContent extends PureComponent<Props> {
 	}
 }
 
-export default GanttContent;
+export default connect(props, functions)(GanttContent);
