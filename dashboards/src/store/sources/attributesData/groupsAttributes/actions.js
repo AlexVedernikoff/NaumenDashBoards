@@ -3,6 +3,7 @@ import api from 'api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {getGroupAttrKey} from './helpers';
 import {getGroupsAttributes} from './selectors';
+import type {GroupsAttributeItem} from './types';
 
 /**
  * Получает список атрибутов в данной группе
@@ -11,7 +12,7 @@ import {getGroupsAttributes} from './selectors';
  * @returns {ThunkAction}
  */
 const fetchGroupsAttributes = (classFqn: string, attrGroupCode: string | null): ThunkAction =>
-	async (dispatch: Dispatch, getState: GetState): Promise<Array<string>> => {
+	async (dispatch: Dispatch, getState: GetState): Promise<Array<GroupsAttributeItem>> => {
 		const state = getState();
 
 		let groupsAttributes = getGroupsAttributes(state, classFqn, attrGroupCode)?.items;
@@ -25,9 +26,9 @@ const fetchGroupsAttributes = (classFqn: string, attrGroupCode: string | null): 
 			});
 
 			try {
-				groupsAttributes = await api.instance.dashboards.getNonMetadataAttributeCodes(classFqn, attrGroupCode);
+				groupsAttributes = await api.instance.dashboards.getNonMetadataAttributesData(classFqn, attrGroupCode);
 
-				dispatch({
+				await dispatch({
 					payload: {
 						data: groupsAttributes,
 						key

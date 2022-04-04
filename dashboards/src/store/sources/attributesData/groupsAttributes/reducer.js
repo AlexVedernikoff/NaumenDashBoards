@@ -9,7 +9,7 @@ const reducer = (state: GroupsAttributesState = initialGroupsAttributesState, ac
 				...state,
 				[action.payload.key]: {
 					error: false,
-					item: action.payload.data,
+					items: action.payload.data,
 					loading: false
 				}
 			};
@@ -27,7 +27,7 @@ const reducer = (state: GroupsAttributesState = initialGroupsAttributesState, ac
 				...state,
 				[action.payload]: {
 					error: false,
-					item: [],
+					items: [],
 					loading: true
 				}
 			};

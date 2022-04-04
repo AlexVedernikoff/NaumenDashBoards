@@ -1,6 +1,7 @@
 // @flow
 import type {Attribute, AttributesMap} from 'store/sources/attributes/types';
 import type {DataSourceMap} from 'store/sources/data/types';
+import type {GroupsAttributeItem} from 'store/sources/attributesData/groupsAttributes/types';
 import type {SourceData} from 'src/store/widgets/data/types';
 import type {SourcesFiltersMap} from 'store/sources/sourcesFilters/types';
 
@@ -14,7 +15,7 @@ export type ConnectedProps<Config> = {
 
 export type ConnectedFunctions = {
 	fetchAttributes: (classFqn: string) => Promise<Array<Attribute>>,
-	fetchGroupsAttributes: (classFqn: string, attrGroupCode: string | null) => Promise<Array<string>>
+	fetchGroupsAttributes: (classFqn: string, attrGroupCode: string | null) => Promise<Array<GroupsAttributeItem>>
 };
 
 export type Props<Config> = ConnectedProps<Config> & ConnectedFunctions;
