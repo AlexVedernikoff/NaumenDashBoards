@@ -29,12 +29,10 @@ interface GanttWorkHandlerController
      * Метод редактирования диапазонов дат работ
      * @param requestContent - тело запроса
      * @param user - пользователь
-     * @param ignoreWarnings - флаг игнорирования предупреждений о превышении дедлайнов
      * @return результат обновления
      */
-    String editWorkDateRanges(Map<String, String> requestContent,
-                              IUUIDIdentifiable user,
-                              Boolean ignoreWarnings)
+    String editWorkDateRanges(Map<String, Object> requestContent,
+                              IUUIDIdentifiable user)
 
     /**
      * Метод получения групп атрибутов по метаклассу работы
@@ -103,13 +101,12 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
     GanttWorkHandlerService service = GanttWorkHandlerService.instance
 
     @Override
-    String editWorkDateRanges(Map<String, String> requestContent,
-                              IUUIDIdentifiable user,
-                              Boolean ignoreWarnings = false)
+    String editWorkDateRanges(Map<String, Object> requestContent,
+                              IUUIDIdentifiable user)
     {
         EditWorkDateRangesRequest request = new ObjectMapper().
             convertValue(requestContent, EditWorkDateRangesRequest)
-        return Jackson.toJsonString(service.editWorkDateRanges(request, user, ignoreWarnings))
+        return Jackson.toJsonString(service.editWorkDateRanges(request, user))
     }
 
     @Override
@@ -210,12 +207,10 @@ class GanttWorkHandlerService
      * Метод редактирования диапазонов дат работ
      * @param request - тело запроса
      * @param user - пользователь
-     * @param ignoreWarnings - флаг игнорирования предупреждений о превышении дедлайнов
      * @return результат обновления
      */
     EditWorkDateRangesResponse editWorkDateRanges(EditWorkDateRangesRequest request,
-                                                  IUUIDIdentifiable user,
-                                                  Boolean ignoreWarnings = false)
+                                                  IUUIDIdentifiable user)
     {
         try
         {
@@ -232,7 +227,7 @@ class GanttWorkHandlerService
                 : new GanttSettingsClass()
 
             api.tx.call {
-                request.workDatesData.each { workDateData ->
+                request.workDateInterval.each { workDateData ->
                     ISDtObject work = api.utils.get(workDateData.workUUID)
                     String timezoneString =
                         api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
@@ -242,38 +237,24 @@ class GanttWorkHandlerService
 
                     List<ISDtObject> relatedEntities =
                         getWorkRelatedEntitiesWithExceededDeadline(work, work, newDateToUpdate)
-                    if (ignoreWarnings || !relatedEntities && !warnings)
-                    {
-                        String attributeCode = null
-                        String metaClassId = work.getMetaClass().getId()
-                        ganttSettings.resourceAndWorkSettings.each {
-                            if (it.source.value.value == metaClassId)
-                            {
-                                attributeCode =
-                                    workDateData.dateType == WorkEditDateType.startDate ?
-                                        it.startWorkAttribute : it.endWorkAttribute
-                            }
-                        }
 
-                        api.utils.edit(work, [(attributeCode): newDateToUpdate])
-                        updateRelatedEntitiesDeadlines(relatedEntities, newDateToUpdate)
+                    String attributeCode = null
+                    String metaClassId = work.getMetaClass().getId()
+                    ganttSettings.resourceAndWorkSettings.find {
+                        if (it.source.value.value == metaClassId)
+                        {
+                            attributeCode =
+                                workDateData.dateType == WorkEditDateType.startDate ?
+                                    it.startWorkAttribute.code : it.endWorkAttribute.code
+                        }
                     }
-                    else if (relatedEntities)
-                    {
-                        warnings <<
-                        utils.processTemplate(DEADLINE_WARNING_MESSAGE, [workTitle: work.title])
-                    }
+
+                    api.utils.edit(work, [(attributeCode): newDateToUpdate])
+                    updateRelatedEntitiesDeadlines(relatedEntities, newDateToUpdate)
                 }
             }
 
-            if (warnings)
-            {
-                return new EditWorkDateRangesResponse(warnings: warnings)
-            }
-            else
-            {
-                return new EditWorkDateRangesResponse(updated: true)
-            }
+            return new EditWorkDateRangesResponse(updated: true)
         }
         catch (Exception e)
         {
@@ -738,7 +719,7 @@ class EditWorkDateRangesRequest extends BaseGanttSettingsRequest
     /**
      * Даты работ для редактирования
      */
-    Collection<WorkDateData> workDatesData
+    Collection<WorkDateData> workDateInterval
 }
 
 /**
