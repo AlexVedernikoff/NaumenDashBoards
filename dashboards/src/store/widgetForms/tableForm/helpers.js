@@ -144,7 +144,7 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 			const {indicators: oldIndicators} = dataSet;
 			const indicators = [];
 
-			oldIndicators.forEach(indicator => {
+			oldIndicators && oldIndicators.forEach(indicator => {
 				const {tooltip} = indicator;
 
 				if (tooltip && !tooltip.show) {
