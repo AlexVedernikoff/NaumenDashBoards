@@ -1,6 +1,6 @@
 // @flow
 import {connect} from 'react-redux';
-import Part from 'components/molecules/Part';
+import Part from 'components/molecules/OpenMap/Line';
 import type {Part as PartType} from 'types/part';
 import type {Props, State} from './types';
 import React, {Component} from 'react';

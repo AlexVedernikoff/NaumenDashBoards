@@ -1,9 +1,9 @@
 // @flow
 import type {ConnectedFunctions} from './types';
-import {fetchGeolocation} from 'store/geolocation/actions';
+import {setSingleObject} from 'store/geolocation/actions';
 
 const functions: ConnectedFunctions = {
-	fetchGeolocation
+	setSingleObject
 };
 
 export {

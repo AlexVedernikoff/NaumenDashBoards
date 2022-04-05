@@ -1,9 +1,9 @@
 // @flow
 import {connect} from 'react-redux';
 import type {Equipment} from 'types/equipment';
-import Part from 'components/molecules/Part';
+import OpenMapLine from 'components/molecules/OpenMap/Line';
+import OpenMapMark from 'components/molecules/OpenMap/Mark';
 import type {Part as PartType} from 'types/part';
-import PointStatic from 'components/molecules/PointStatic';
 import {props} from './selectors';
 import type {Props} from './types';
 import React, {Component} from 'react';
@@ -13,8 +13,8 @@ import YandexLine from 'components/molecules/Yandex/Line';
 import YandexMark from 'components/molecules/Yandex/Mark';
 
 export class PointsList extends Component<Props> {
-	renderEquipments = (equipment: Equipment) => <PointStatic key={equipment.data.uuid} point={equipment} />;
-	renderSections = (part: PartType) => <Part key={part.data.uuid} part={part} />;
+	renderEquipments = (equipment: Equipment) => <OpenMapMark key={equipment.data.uuid} point={equipment} />;
+	renderSections = (part: PartType) => <OpenMapLine key={part.data.uuid} part={part} />;
 	renderTrail = (trail: TrailType) => <Trail key={trail.data.uuid} trail={trail} />;
 
 	renderYandexLine = (part: PartType) => <YandexLine key={part.data.uuid} part={part} />;

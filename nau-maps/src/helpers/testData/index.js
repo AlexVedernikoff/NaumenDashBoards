@@ -1,7 +1,442 @@
 export default {
+	'errors': [],
 	'objects': [
 		{
-			'type': 'wols',
+			'data': {
+				'actions': [
+					{
+						'inPlace': false,
+						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701',
+						'name': '1 Перейти на карточку',
+						'type': 'open_link'
+					},
+					{
+						'inPlace': false,
+						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701',
+						'name': '2 Перейти на карточку',
+						'type': 'open_link'
+					}
+				],
+				'color': '#4F4FD9',
+				'header': 'Подвал Южная >> ЦОД №1',
+				'options': [
+					{
+						'label': 'Площадка А',
+						'presentation': 'right_of_label',
+						'value': {
+							'label': 'Подвал Южная',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+						}
+					},
+					{
+						'label': 'Площадка Б',
+						'presentation': 'right_of_label',
+						'value': {
+							'label': 'ЦОД №1',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
+						}
+					}
+				],
+				'type': 'wols',
+				'uuid': 'link$4701'
+			},
+			'equipments': [
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4103',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'equipType': 'clutch',
+						'header': 'Муфта SNR-FOSC-D 1505',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'SNR-FOSC-D',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Подвал Южная',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+								}
+							}
+						],
+						'type': 'passive',
+						'uuid': 'cmdb$4103'
+					},
+					'geopositions': [{
+						'latitude': 56.808611111111105,
+						'longitude': 60.617777777777775
+					}],
+					'icon': '/sd/operator/download?uuid=file$5801',
+					'type': 'point'
+				},
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'equipType': 'cross',
+						'header': 'Оптический кросс. TT 120',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'TT 120',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4402'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Подвал Южная',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+								}
+							}
+						],
+						'type': 'passive',
+						'uuid': 'cmdb$4105'
+					},
+					'geopositions': [{
+						'latitude': 56.79972222222222,
+						'longitude': 61.61527777777778
+					}],
+					'icon': '/sd/operator/download?uuid=file$5802',
+					'type': 'point'
+				},
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4110',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'header': 'Маршрутизатор ACX2100',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'ACX2100',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4407'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Подвал Южная',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+								}
+							}
+						],
+						'type': 'active',
+						'uuid': 'cmdb$4110'
+					},
+					'geopositions': [{
+						'latitude': 56.99972222222222,
+						'longitude': 61.61527777777778
+					}],
+					'icon': '',
+					'type': 'point'
+				},
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4101',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'equipType': 'clutch',
+						'header': 'Муфта SNR-FOSC-D 1500',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'SNR-FOSC-D',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Щорса-37',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+								}
+							}
+						],
+						'type': 'passive',
+						'uuid': 'cmdb$410у1'
+					},
+					'geopositions': [{
+						'latitude': 56.808611111111105,
+						'longitude': 60.617777777777775
+					}],
+					'icon': '/sd/operator/download?uuid=file$5801',
+					'type': 'point'
+				},
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4109',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'header': 'Маршрутизатор ASR 903',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'ASR 903',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4408'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Щорса-37',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+								}
+							}
+						],
+						'type': 'active',
+						'uuid': 'cmdb$4109'
+					},
+					'geopositions': [{
+						'latitude': 56.808611111111105,
+						'longitude': 60.617777777777775
+					}],
+					'icon': '',
+					'type': 'point'
+				},
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4114',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'header': 'Коммутатор Catalyst 9500-24Q-A7',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Catalyst 9500-24Q-A7',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4409'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Щорса-37',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+								}
+							}
+						],
+						'type': 'active',
+						'uuid': 'cmdb$411а4'
+					},
+					'geopositions': [{
+						'latitude': 56.808611111111105,
+						'longitude': 60.617777777777775
+					}],
+					'icon': '',
+					'type': 'point'
+				},
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4101',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'equipType': 'clutch',
+						'header': 'Муфта SNR-FOSC-D 1500',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'SNR-FOSC-D',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Щорса-37',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+								}
+							}
+						],
+						'type': 'passive',
+						'uuid': 'cmdb$4101'
+					},
+					'geopositions': [{
+						'latitude': 56.808611111111105,
+						'longitude': 60.617777777777775
+					}],
+					'icon': '/sd/operator/download?uuid=file$5801',
+					'type': 'point'
+				},
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4109',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'header': 'Маршрутизатор ASR 903',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'ASR 903',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4408'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Щорса-37',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+								}
+							}
+						],
+						'type': 'active',
+						'uuid': 'cmdb$4в109'
+					},
+					'geopositions': [{
+						'latitude': 56.808611111111105,
+						'longitude': 60.617777777777775
+					}],
+					'icon': '',
+					'type': 'point'
+				},
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4114',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'header': 'Коммутатор Catalyst 9500-24Q-A7',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Catalyst 9500-24Q-A7',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4409'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Щорса-37',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+								}
+							}
+						],
+						'type': 'active',
+						'uuid': 'cmdb$4114'
+					},
+					'geopositions': [{
+						'latitude': 56.808611111111105,
+						'longitude': 60.617777777777775
+					}],
+					'icon': '',
+					'type': 'point'
+				},
+				{
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4108',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'equipType': 'cross',
+						'header': 'Оптический кросс. КРС -16d',
+						'options': [
+							{
+								'label': 'Модель',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'КРС -16',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4403'
+								}
+							},
+							{
+								'label': 'Расположение',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'ЦОД №1',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
+								}
+							}
+						],
+						'type': 'passive',
+						'uuid': 'cmdb$4108'
+					},
+					'geopositions': [{
+						'latitude': 56.791969277777774,
+						'longitude': 60.621894805555556
+					}],
+					'icon': 'https://svgsilh.com/svg/1801287.svg',
+					'type': 'point'
+				}
+			],
 			'geopositions': [
 				{
 					'latitude': 56.79972222222222,
@@ -14,7 +449,46 @@ export default {
 			],
 			'parts': [
 				{
-					'type': 'section',
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4702',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'color': '#fb0202',
+						'header': 'Участок 2: Подвал Южная >> Щорса-37',
+						'options': [
+							{
+								'label': 'Площадка А',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Подвал Южная',
+									'url': ''
+								}
+							},
+							{
+								'label': 'Площадка Б',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Щорса-37',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+								}
+							},
+							{
+								'label': 'Входит в ВОЛС',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Подвал Южная >> ЦОД №1',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701'
+								}
+							}
+						],
+						'type': 'section',
+						'uuid': 'link$4702'
+					},
 					'geopositions': [
 						{
 							'latitude': 56.99972222222222,
@@ -25,49 +499,49 @@ export default {
 							'longitude': 60.617779777777775
 						}
 					],
+					'type': 'section'
+				},
+				{
 					'data': {
-						'type': 'section',
-						'uuid': 'link$4702',
-						'header': 'Участок 2: Подвал Южная >> Щорса-37',
 						'actions': [
 							{
-								'type': 'open_link',
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4703',
 								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4702',
-								'inPlace': false
+								'type': 'open_link'
 							}
 						],
+						'color': '',
+						'header': 'Участок 2: Щорса-37 >> ЦОД №1',
 						'options': [
 							{
 								'label': 'Площадка А',
-								'value': {
-									'label': 'Подвал Южная',
-									'url': ''
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Площадка Б',
+								'presentation': 'right_of_label',
 								'value': {
 									'label': 'Щорса-37',
 									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
+								}
+							},
+							{
+								'label': 'Площадка Б',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'ЦОД №1',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
+								}
 							},
 							{
 								'label': 'Входит в ВОЛС',
+								'presentation': 'right_of_label',
 								'value': {
 									'label': 'Подвал Южная >> ЦОД №1',
 									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701'
-								},
-								'presentation': 'right_of_label'
+								}
 							}
 						],
-						'color': '#fb0202'
-					}
-				},
-				{
-					'type': 'section',
+						'type': 'section',
+						'uuid': 'link$4703'
+					},
 					'geopositions': [
 						{
 							'latitude': 56.808611111111105,
@@ -78,486 +552,126 @@ export default {
 							'longitude': 60.621894805555556
 						}
 					],
-					'data': {
-						'type': 'section',
-						'uuid': 'link$4703',
-						'header': 'Участок 2: Щорса-37 >> ЦОД №1',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4703',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Площадка А',
-								'value': {
-									'label': 'Щорса-37',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Площадка Б',
-								'value': {
-									'label': 'ЦОД №1',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Входит в ВОЛС',
-								'value': {
-									'label': 'Подвал Южная >> ЦОД №1',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701'
-								},
-								'presentation': 'right_of_label'
-							}
-						],
-						'color': ''
-					}
+					'type': 'section'
 				}
 			],
+			'type': 'wols'
+		},
+		{
+			'data': {
+				'actions': [
+					{
+						'inPlace': false,
+						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701',
+						'name': 'Перейти на карточку',
+						'type': 'open_link'
+					}
+				],
+				'color': '#4F4FD9',
+				'header': '23 Южная >> ЦОД №1',
+				'options': [
+					{
+						'label': 'Площадка А',
+						'presentation': 'right_of_label',
+						'value': {
+							'label': 'Подвал Южная',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+						}
+					},
+					{
+						'label': 'Площадка Б',
+						'presentation': 'right_of_label',
+						'value': {
+							'label': 'ЦОД №1',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
+						}
+					}
+				],
+				'type': 'wols',
+				'uuid': 'link$47061'
+			},
 			'equipments': [
 				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 56.808611111111105,
-						'longitude': 60.617777777777775
-					}],
-					'icon': '/sd/operator/download?uuid=file$5801',
 					'data': {
-						'type': 'passive',
-						'uuid': 'cmdb$4103',
-						'header': 'Муфта SNR-FOSC-D 1505',
 						'actions': [
 							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
+								'inPlace': false,
 								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4103',
-								'inPlace': false
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
 							}
 						],
+						'equipType': 'clutch',
+						'header': 'Муфта SNR-FOSC-D 1505',
 						'options': [
 							{
 								'label': 'Модель',
+								'presentation': 'right_of_label',
 								'value': {
 									'label': 'SNR-FOSC-D',
 									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
-								},
-								'presentation': 'right_of_label'
+								}
 							},
 							{
 								'label': 'Расположение',
+								'presentation': 'right_of_label',
 								'value': {
 									'label': 'Подвал Южная',
 									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-								},
-								'presentation': 'right_of_label'
+								}
 							}
 						],
-						'equipType': 'clutch'
-					}
-				},
-				{
-					'type': 'point',
+						'type': 'passive',
+						'uuid': 'cmdb$4103'
+					},
 					'geopositions': [{
 						'latitude': 56.79972222222222,
 						'longitude': 61.61527777777778
 					}],
-					'icon': '/sd/operator/download?uuid=file$5802',
+					'icon': '/sd/operator/download?uuid=file$5801',
+					'type': 'point'
+				},
+				{
 					'data': {
-						'type': 'passive',
-						'uuid': 'cmdb$4105',
-						'header': 'Оптический кросс. TT 120',
 						'actions': [
 							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
+								'inPlace': false,
 								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
-								'inPlace': false
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
 							}
 						],
+						'equipType': 'cross',
+						'header': 'Оптический кросс. TT 120',
 						'options': [
 							{
 								'label': 'Модель',
+								'presentation': 'right_of_label',
 								'value': {
 									'label': 'TT 120',
 									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4402'
-								},
-								'presentation': 'right_of_label'
+								}
 							},
 							{
 								'label': 'Расположение',
+								'presentation': 'right_of_label',
 								'value': {
 									'label': 'Подвал Южная',
 									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-								},
-								'presentation': 'right_of_label'
+								}
 							}
 						],
-						'equipType': 'cross'
-					}
-				},
-				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 56.99972222222222,
-						'longitude': 61.61527777777778
-					}],
-					'icon': '',
-					'data': {
-						'type': 'active',
-						'uuid': 'cmdb$4110',
-						'header': 'Маршрутизатор ACX2100',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4110',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'ACX2100',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4407'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'Подвал Южная',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-								},
-								'presentation': 'right_of_label'
-							}
-						]
-					}
-				},
-				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 56.808611111111105,
-						'longitude': 60.617777777777775
-					}],
-					'icon': '/sd/operator/download?uuid=file$5801',
-					'data': {
 						'type': 'passive',
-						'uuid': 'cmdb$410у1',
-						'header': 'Муфта SNR-FOSC-D 1500',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4101',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'SNR-FOSC-D',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'Щорса-37',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
-							}
-						],
-						'equipType': 'clutch'
-					}
-				},
-				{
-					'type': 'point',
+						'uuid': 'cmdb$4105'
+					},
 					'geopositions': [{
-						'latitude': 56.808611111111105,
-						'longitude': 60.617777777777775
+						'latitude': 57.79972222222222,
+						'longitude': 60.61527777777778
 					}],
-					'icon': '',
-					'data': {
-						'type': 'active',
-						'uuid': 'cmdb$4109',
-						'header': 'Маршрутизатор ASR 903',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4109',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'ASR 903',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4408'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'Щорса-37',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
-							}
-						]
-					}
-				},
-				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 56.808611111111105,
-						'longitude': 60.617777777777775
-					}],
-					'icon': '',
-					'data': {
-						'type': 'active',
-						'uuid': 'cmdb$411а4',
-						'header': 'Коммутатор Catalyst 9500-24Q-A7',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4114',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'Catalyst 9500-24Q-A7',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4409'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'Щорса-37',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
-							}
-						]
-					}
-				},
-				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 56.808611111111105,
-						'longitude': 60.617777777777775
-					}],
-					'icon': '/sd/operator/download?uuid=file$5801',
-					'data': {
-						'type': 'passive',
-						'uuid': 'cmdb$4101',
-						'header': 'Муфта SNR-FOSC-D 1500',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4101',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'SNR-FOSC-D',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'Щорса-37',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
-							}
-						],
-						'equipType': 'clutch'
-					}
-				},
-				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 56.808611111111105,
-						'longitude': 60.617777777777775
-					}],
-					'icon': '',
-					'data': {
-						'type': 'active',
-						'uuid': 'cmdb$4в109',
-						'header': 'Маршрутизатор ASR 903',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4109',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'ASR 903',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4408'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'Щорса-37',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
-							}
-						]
-					}
-				},
-				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 56.808611111111105,
-						'longitude': 60.617777777777775
-					}],
-					'icon': '',
-					'data': {
-						'type': 'active',
-						'uuid': 'cmdb$4114',
-						'header': 'Коммутатор Catalyst 9500-24Q-A7',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4114',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'Catalyst 9500-24Q-A7',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4409'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'Щорса-37',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
-							}
-						]
-					}
-				},
-				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 56.791969277777774,
-						'longitude': 60.621894805555556
-					}],
-					'icon': 'https://svgsilh.com/svg/1801287.svg',
-					'data': {
-						'type': 'passive',
-						'uuid': 'cmdb$4108',
-						'header': 'Оптический кросс. КРС -16d',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4108',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'КРС -16',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4403'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'ЦОД №1',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
-								},
-								'presentation': 'right_of_label'
-							}
-						],
-						'equipType': 'cross'
-					}
+					'icon': '/sd/operator/download?uuid=file$5802',
+					'type': 'point'
 				}
 			],
-			'data': {
-				'type': 'wols',
-				'uuid': 'link$4701',
-				'header': 'Подвал Южная >> ЦОД №1',
-				'actions': [
-					{
-						'type': 'open_link',
-						'name': '1 Перейти на карточку',
-						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701',
-						'inPlace': false
-					},
-					{
-						'type': 'open_link',
-						'name': '2 Перейти на карточку',
-						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701',
-						'inPlace': false
-					}
-				],
-				'options': [
-					{
-						'label': 'Площадка А',
-						'value': {
-							'label': 'Подвал Южная',
-							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-						},
-						'presentation': 'right_of_label'
-					},
-					{
-						'label': 'Площадка Б',
-						'value': {
-							'label': 'ЦОД №1',
-							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
-						},
-						'presentation': 'right_of_label'
-					}
-				],
-				'color': '#4F4FD9'
-			}
-		},
-		{
-			'type': 'wols',
 			'geopositions': [
 				{
 					'latitude': 56.79972222222222,
@@ -570,7 +684,46 @@ export default {
 			],
 			'parts': [
 				{
-					'type': 'section',
+					'data': {
+						'actions': [
+							{
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4702',
+								'name': 'Перейти на карточку',
+								'type': 'open_link'
+							}
+						],
+						'color': '#4F4FD9',
+						'header': 'Участок 1: Подвал Южная >> Щорса-37',
+						'options': [
+							{
+								'label': 'Площадка А',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Подвал Южная',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+								}
+							},
+							{
+								'label': 'Площадка Б',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Щорса-37',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+								}
+							},
+							{
+								'label': 'Входит в ВОЛС',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'Подвал Южная >> ЦОД №1',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701'
+								}
+							}
+						],
+						'type': 'section',
+						'uuid': 'link$4702'
+					},
 					'geopositions': [
 						{
 							'latitude': 56.79972222222222,
@@ -581,49 +734,49 @@ export default {
 							'longitude': 60.617777777777775
 						}
 					],
+					'type': 'section'
+				},
+				{
 					'data': {
-						'type': 'section',
-						'uuid': 'link$4702',
-						'header': 'Участок 1: Подвал Южная >> Щорса-37',
 						'actions': [
 							{
-								'type': 'open_link',
+								'inPlace': false,
+								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4703',
 								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4702',
-								'inPlace': false
+								'type': 'open_link'
 							}
 						],
+						'color': '',
+						'header': 'Участок 2: Щорса-37 >> ЦОД №1',
 						'options': [
 							{
 								'label': 'Площадка А',
-								'value': {
-									'label': 'Подвал Южная',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Площадка Б',
+								'presentation': 'right_of_label',
 								'value': {
 									'label': 'Щорса-37',
 									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
+								}
+							},
+							{
+								'label': 'Площадка Б',
+								'presentation': 'right_of_label',
+								'value': {
+									'label': 'ЦОД №1',
+									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
+								}
 							},
 							{
 								'label': 'Входит в ВОЛС',
+								'presentation': 'right_of_label',
 								'value': {
 									'label': 'Подвал Южная >> ЦОД №1',
 									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701'
-								},
-								'presentation': 'right_of_label'
+								}
 							}
 						],
-						'color': '#4F4FD9'
-					}
-				},
-				{
-					'type': 'section',
+						'type': 'section',
+						'uuid': 'link$4703'
+					},
 					'geopositions': [
 						{
 							'latitude': 57.808611111111105,
@@ -634,205 +787,92 @@ export default {
 							'longitude': 60.621894805555556
 						}
 					],
-					'data': {
-						'type': 'section',
-						'uuid': 'link$4703',
-						'header': 'Участок 2: Щорса-37 >> ЦОД №1',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4703',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Площадка А',
-								'value': {
-									'label': 'Щорса-37',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Площадка Б',
-								'value': {
-									'label': 'ЦОД №1',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Входит в ВОЛС',
-								'value': {
-									'label': 'Подвал Южная >> ЦОД №1',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701'
-								},
-								'presentation': 'right_of_label'
-							}
-						],
-						'color': ''
-					}
+					'type': 'section'
 				}
 			],
-			'equipments': [
-				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 56.79972222222222,
-						'longitude': 61.61527777777778
-					}],
-					'icon': '/sd/operator/download?uuid=file$5801',
-					'data': {
-						'type': 'passive',
-						'uuid': 'cmdb$4103',
-						'header': 'Муфта SNR-FOSC-D 1505',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4103',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'SNR-FOSC-D',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'Подвал Южная',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-								},
-								'presentation': 'right_of_label'
-							}
-						],
-						'equipType': 'clutch'
-					}
-				},
-				{
-					'type': 'point',
-					'geopositions': [{
-						'latitude': 57.79972222222222,
-						'longitude': 60.61527777777778
-					}],
-					'icon': '/sd/operator/download?uuid=file$5802',
-					'data': {
-						'type': 'passive',
-						'uuid': 'cmdb$4105',
-						'header': 'Оптический кросс. TT 120',
-						'actions': [
-							{
-								'type': 'open_link',
-								'name': 'Перейти на карточку',
-								'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
-								'inPlace': false
-							}
-						],
-						'options': [
-							{
-								'label': 'Модель',
-								'value': {
-									'label': 'TT 120',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4402'
-								},
-								'presentation': 'right_of_label'
-							},
-							{
-								'label': 'Расположение',
-								'value': {
-									'label': 'Подвал Южная',
-									'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-								},
-								'presentation': 'right_of_label'
-							}
-						],
-						'equipType': 'cross'
-					}
-				}
-			],
+			'type': 'wols'
+		},
+		{
 			'data': {
-				'type': 'wols',
-				'uuid': 'link$47061',
-				'header': '23 Южная >> ЦОД №1',
 				'actions': [
 					{
-						'type': 'open_link',
+						'inPlace': false,
+						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4103',
 						'name': 'Перейти на карточку',
-						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701',
-						'inPlace': false
+						'type': 'open_link'
 					}
 				],
+				'equipType': 'cross',
+				'header': '!!!!Муфта SNR-FOSC-D 1505',
 				'options': [
 					{
-						'label': 'Площадка А',
+						'label': 'Модель',
+						'presentation': 'right_of_label',
+						'value': {
+							'label': 'SNR-FOSC-D',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
+						}
+					},
+					{
+						'label': 'Расположение',
+						'presentation': 'right_of_label',
 						'value': {
 							'label': 'Подвал Южная',
 							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-						},
-						'presentation': 'right_of_label'
-					},
-					{
-						'label': 'Площадка Б',
-						'value': {
-							'label': 'ЦОД №1',
-							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3802'
-						},
-						'presentation': 'right_of_label'
+						}
 					}
 				],
-				'color': '#4F4FD9'
-			}
-		},
-		{
-			'type': 'point',
+				'type': 'passive',
+				'uuid': 'cmdb$41083'
+			},
 			'geopositions': [{
 				'latitude': 56.99972222222222,
 				'longitude': 61.91527777777778
 			}],
 			'icon': '',
+			'type': 'point'
+		},
+		{
 			'data': {
-				'type': 'passive',
-				'equipType': 'cross',
-				'uuid': 'cmdb$41083',
-				'header': '!!!!Муфта SNR-FOSC-D 1505',
 				'actions': [
 					{
-						'type': 'open_link',
+						'inPlace': false,
+						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4702',
 						'name': 'Перейти на карточку',
-						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4103',
-						'inPlace': false
+						'type': 'open_link'
 					}
 				],
+				'color': '#d4f',
+				'header': '!!!Участок 25555: Подвал Южная >> Щорса-37',
 				'options': [
 					{
-						'label': 'Модель',
-						'value': {
-							'label': 'SNR-FOSC-D',
-							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4401'
-						},
-						'presentation': 'right_of_label'
-					},
-					{
-						'label': 'Расположение',
+						'label': 'Площадка А',
+						'presentation': 'right_of_label',
 						'value': {
 							'label': 'Подвал Южная',
 							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-						},
-						'presentation': 'right_of_label'
+						}
+					},
+					{
+						'label': 'Площадка Б',
+						'presentation': 'right_of_label',
+						'value': {
+							'label': 'Щорса-37',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
+						}
+					},
+					{
+						'label': 'Входит в ВОЛС',
+						'presentation': 'right_of_label',
+						'value': {
+							'label': 'Подвал Южная >> ЦОД №1',
+							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701'
+						}
 					}
-				]
-			}
-		},
-		{
-			'type': 'section',
+				],
+				'type': 'section',
+				'uuid': 'link$47052'
+			},
 			'geopositions': [
 				{
 					'latitude': 59.99972222222222,
@@ -843,47 +883,7 @@ export default {
 					'longitude': 61.617779777777775
 				}
 			],
-			'data': {
-				'type': 'section',
-				'uuid': 'link$47052',
-				'header': '!!!Участок 25555: Подвал Южная >> Щорса-37',
-				'actions': [
-					{
-						'type': 'open_link',
-						'name': 'Перейти на карточку',
-						'link': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4702',
-						'inPlace': false
-					}
-				],
-				'options': [
-					{
-						'label': 'Площадка А',
-						'value': {
-							'label': 'Подвал Южная',
-							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-						},
-						'presentation': 'right_of_label'
-					},
-					{
-						'label': 'Площадка Б',
-						'value': {
-							'label': 'Щорса-37',
-							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3803'
-						},
-						'presentation': 'right_of_label'
-					},
-					{
-						'label': 'Входит в ВОЛС',
-						'value': {
-							'label': 'Подвал Южная >> ЦОД №1',
-							'url': 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:link$4701'
-						},
-						'presentation': 'right_of_label'
-					}
-				],
-				'color': '#d4f'
-			}
+			'type': 'section'
 		}
-	],
-	'errors': []
+	]
 };

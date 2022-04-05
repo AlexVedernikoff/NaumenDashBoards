@@ -1,8 +1,8 @@
 // @flow
-import {Tooltip} from 'react-leaflet';
+import type {Props, State} from './types';
 import React, {Component} from 'react';
 import styles from './TooltipMarker.less';
-import type {Props, State} from './types';
+import {Tooltip} from 'react-leaflet';
 
 export class TooltipPoint extends Component<Props, State> {
 	render () {
@@ -10,7 +10,7 @@ export class TooltipPoint extends Component<Props, State> {
 		const offset = [0, 30];
 
 		return (
-			<Tooltip className={styles.tolltipLabel} offset={offset} opacity={1} interactive={true}>
+			<Tooltip className={styles.tolltipLabel} interactive={true} offset={offset} opacity={1}>
 				{title}
 			</Tooltip>
 		);

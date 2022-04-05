@@ -26,9 +26,9 @@ export class Mark extends Component<Props, State> {
 				onClick={this.showSingle}
 				options={{
 					iconImageHref: iconUrl,
-					iconImageSize: [30, 30],
-					iconLayout: 'default#image',
-					iconOffset: [15, 15]
+					iconImageOffset: [-12, -12],
+					iconImageSize: [active ? 36 : 24, active ? 36 : 24],
+					iconLayout: 'default#image'
 				}}
 				properties={{
 					hintContent: header

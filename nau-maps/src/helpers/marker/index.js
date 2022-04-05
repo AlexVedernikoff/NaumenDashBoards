@@ -19,7 +19,7 @@ const filterPointData = (pointData: Array<PointData>, staticGroups: Array<Static
  * @param {Array<StaticGroup>} staticGroups - массив статических групп.
  * @param {string} groupingMethodName - метод группировки для статических точек.
  * @returns {Array<Point>} - массив статических точек.
-*/
+ */
 export const filterByGroup = (staticPoints: Array<Point>, staticGroups: Array<StaticGroup>, groupingMethodName: string) => {
 	const points = [];
 
@@ -45,7 +45,7 @@ export const filterByGroup = (staticPoints: Array<Point>, staticGroups: Array<St
  * @param {Array<StaticGroup>} staticGroups - массив статических групп.
  * @param {string} groupingMethodName - метод группировки для статических точек.
  * @returns {Array<Point>} - массив статических точек.
-*/
+ */
 export const filterByGroupInPanel = (staticPoints: Array<Point>, staticGroups: Array<StaticGroup>, groupingMethodName: string) => {
 	const points = [];
 
@@ -74,24 +74,24 @@ export const filterByGroupInPanel = (staticPoints: Array<Point>, staticGroups: A
  * Возвращает кластерные точки с отсортированными и отфильтрованными данными, если задан метод группировки.
  * @param {Point} singleObject - статическая точка для показа в панели.
  * @param {Array<StaticGroup>} staticGroups - массив статических групп.
- * @param {String} groupingMethodName - метод группировки для статических точек.
+ * @param {string} groupingMethodName - метод группировки для статических точек.
  * @returns {Array<Point>} - массив из кластерной точки с отсортироваными и отфильтрованными данными.
-*/
+ */
 export const filterInSingleObject = (singleObject: Point, staticGroups: Array<StaticGroup>, groupingMethodName: string) => {
 	const {data} = singleObject;
 
 	if (data.length > 1) {
-		const point = filterByGroupInPanel([singleObject], staticGroups, groupingMethodName);
-
-		return point;
+		return filterByGroupInPanel([singleObject], staticGroups, groupingMethodName);
 	}
 
 	return [singleObject];
 };
 
 export const checkActivePoint = (point: Point, singleObject: Point) => {
-	const {data} = point;
-	const found = data.uuid === singleObject.data.uuid;
+	if (point && singleObject) {
+		const {data} = point;
+		return point && data.uuid === singleObject.data.uuid;
+	}
 
-	return found;
+	return false;
 };

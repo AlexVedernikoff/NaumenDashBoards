@@ -1,7 +1,7 @@
 // @flow
+import type {AppState} from 'store/types';
 import {checkActivePoint} from 'helpers/marker';
 import type {ConnectedFunctions, ConnectedProps, OwnProps} from './types';
-import type {AppState} from 'store/types';
 import {setSingleObject} from 'store/geolocation/actions';
 
 const props = (state: AppState, props: OwnProps): ConnectedProps => {
