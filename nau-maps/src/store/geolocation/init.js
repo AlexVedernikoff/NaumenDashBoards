@@ -12,7 +12,7 @@ export const initialGeolocationState: GeolocationState = {
 		filterOpen: false,
 		panelMapOpen: false,
 		panelOpen: true,
-		zoom: 5
+		zoom: 10
 	},
 	error: false,
 	loading: true,

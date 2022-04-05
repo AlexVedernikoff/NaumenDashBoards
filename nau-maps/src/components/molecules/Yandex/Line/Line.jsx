@@ -7,9 +7,9 @@ import React, {Component} from 'react';
 
 class Line extends Component<Props, State> {
 	showSingle = () => {
-		const {part: {data, type, geopositions: [positions]}, setSingleObject} = this.props;
+		const {part, setSingleObject} = this.props;
 
-		setSingleObject({data, geoposition: positions, type});
+		setSingleObject(part);
 	};
 
 	render () {
@@ -26,7 +26,8 @@ class Line extends Component<Props, State> {
 				options={{
 					balloonCloseButton: false,
 					strokeColor: color,
-					strokeWidth: 5
+					strokeStyle: 'shortdot',
+					strokeWidth: 8
 				}}
 				properties={{
 					hintContent: header

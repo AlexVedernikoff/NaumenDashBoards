@@ -1,7 +1,7 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {setTab} from 'store/geolocation/actions';
+import {setSingleObject, setTab} from 'store/geolocation/actions';
 
 const props = (state: AppState): ConnectedProps => {
 	return {
@@ -11,6 +11,7 @@ const props = (state: AppState): ConnectedProps => {
 };
 
 const functions: ConnectedFunctions = {
+	setSingleObject,
 	setTab
 };
 

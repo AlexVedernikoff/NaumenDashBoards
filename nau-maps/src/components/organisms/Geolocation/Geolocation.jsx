@@ -20,21 +20,21 @@ export class Geolocation extends Component<Props> {
 		this.mapRef = React.createRef();
 	}
 
-	yandexMapLoad () {
-		/*
-		* Задержка для корректной центровки после загрузки и инициализации обьектов на карте
-		* */
-		window.setTimeout(() => {
-			this.mapRef.current.setBounds(this.mapRef.current.geoObjects.getBounds());
-		}, 150);
-	}
+	yandexMapLoad = () => {
+		const {bounds} = this.props;
+
+		if (bounds && this.mapRef.current) {
+			this.mapRef.current.setBounds(bounds);
+		}
+	};
 
 	componentDidUpdate (prevProps: Props) {
 		const {bounds, mapSelect, showSingleObject, singleObject, timeUpdate, zoom} = this.props;
 
 		if (this.mapRef.current) {
 			if (showSingleObject) {
-				const {geoposition: {latitude, longitude}} = singleObject;
+				const {geopositions: [position]} = singleObject;
+				const {latitude, longitude} = position;
 
 				switch (mapSelect) {
 					case 'Yandex':
@@ -63,16 +63,13 @@ export class Geolocation extends Component<Props> {
 			if (prevProps.timeUpdate !== timeUpdate) {
 				switch (mapSelect) {
 					case 'Yandex':
-						this.mapRef.current.setBounds(this.mapRef.current.geoObjects.getBounds());
+						this.mapRef.current.setBounds(bounds);
 						break;
 					case 'Google':
 						this.mapRef.current.fitBounds(bounds);
 						break;
 					default:
-						this.mapRef.current.leafletElement.fitBounds([
-							[bounds._northEast.lat, bounds._northEast.lng],
-							[bounds._southWest.lat, bounds._southWest.lng]
-						]);
+						this.mapRef.current.leafletElement.fitBounds(bounds);
 				}
 			}
 		}
@@ -101,17 +98,19 @@ export class Geolocation extends Component<Props> {
 			>
 				<YandexMap
 					className={styles.mapContainer}
+					defaultState={{
+						center: [0, 0],
+						zoom: zoom
+					}}
 					instanceRef={this.mapRef}
 					modules={['geoObject.addon.balloon', 'geoObject.addon.hint']}
 					onClick={resetSingleObject}
-					onLoad={this.yandexMapLoad.bind(this)}
+					onLoad={e => {
+						this.yandexMapLoad(e);
+					}}
 					options={{
 						maxZoom: 15,
 						minZoom: 5
-					}}
-					state={{
-						center: [0, 0],
-						zoom: zoom
 					}}
 				>
 					<PointsList typeMap={mapSelect} />
@@ -125,19 +124,13 @@ export class Geolocation extends Component<Props> {
 
 		return (
 			<LeafletMap
-				animate={true}
 				center={[0, 0]}
 				className={styles.mapContainer}
-				closePopupOnClick={false}
-				doubleClickZoom={true}
-				dragging={true}
 				maxZoom={15}
 				minZoom={5}
 				onClick={resetSingleObject}
 				ref={this.mapRef}
-				scrollWheelZoom={true}
 				zoom={zoom}
-				zoomControl={false}
 			>
 				<PointsList typeMap={mapSelect} />
 				<Copyright />

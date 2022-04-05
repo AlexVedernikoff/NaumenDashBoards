@@ -2,49 +2,39 @@
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import {LatLng} from 'leaflet/dist/leaflet-src.esm';
-import Line from 'components/atoms/Line';
+import {Polyline} from 'react-leaflet';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
 import TooltipPoint from 'components/atoms/TooltipPoint';
 
-export class Part extends Component<Props, State> {
-	constructor (props: Props) {
-		super(props);
-
-		this.state = {
-			open: false
-		};
-	}
-
-	shouldComponentUpdate (nextProps: Props) {
-		return nextProps.color !== this.props.color;
-	}
-
+export class Line extends Component<Props, State> {
 	showSingle = () => () => {
 		const {part, setSingleObject} = this.props;
-		const data = {
-			data: part.data,
-			geoposition: part.geopositions[0],
-			type: part.type
-		};
 
-		this.setState({open: true});
-		setSingleObject(data);
+		setSingleObject(part);
 	};
 
 	render () {
-		const {color, part} = this.props;
+		const {color, opacity = 1, part, weight = 8} = this.props;
 		const {data, geopositions} = part;
 		const {header} = data;
 
 		const positions = geopositions.map(geoposition => new LatLng(geoposition.latitude, geoposition.longitude));
 
 		return (
-			<Line color={color} geopositions={positions} onClick={this.showSingle()}>
+			<Polyline
+				bubblingMouseEvents={false}
+				color={color}
+				dashArray={'0, 16'}
+				onClick={this.showSingle()}
+				opacity={opacity}
+				positions={positions}
+				weight={weight}
+			>
 				<TooltipPoint sticky={true} title={header} />
-			</Line>
+			</Polyline>
 		);
 	}
 }
 
-export default connect(props, functions)(Part);
+export default connect(props, functions)(Line);

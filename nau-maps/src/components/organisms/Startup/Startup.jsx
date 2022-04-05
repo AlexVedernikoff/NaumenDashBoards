@@ -1,7 +1,6 @@
 // @flow
 import type {Props} from 'containers/Startup/types';
 import React, {Component} from 'react';
-import Toast from 'components/atoms/Toast';
 
 export class Startup extends Component<Props> {
 	componentDidMount () {
@@ -20,7 +19,6 @@ export class Startup extends Component<Props> {
 
 		return (
 			<div>
-				<Toast />
 				{children}
 			</div>
 		);

@@ -56,19 +56,6 @@ body {
 	width: 36px;
 }
 
-.customMarker {
-	outline: none;
-}
-
-.customMarker.active {
-	/**
-	* Для выдвижения активного маркера на первый план используем z-index
-	* По-умолчанию z-index для маркеров задается библиотекой leaflet, причем значения z-index динамические
-	* Путем просмотра значений, было установлено, что z-index для отрисованных маркеров < 1000
-	*/
-	z-index: 1000 !important;
-}
-
 .dynamic-type {
 	margin-top: -12px;
 	margin-left: -12px;
@@ -80,10 +67,22 @@ body {
 .passive-type,
 .custom-type,
 .point-type {
-	height: auto;
+	outline: none;
+	height: 24px;
 	margin-left: -12px;
 	margin-top: -12px;
 	width: 24px;
+
+	.active {
+		height: 36px;
+		width: 36px;
+		/**
+		* Для выдвижения активного маркера на первый план используем z-index
+		* По-умолчанию z-index для маркеров задается библиотекой leaflet, причем значения z-index динамические
+		* Путем просмотра значений, было установлено, что z-index для отрисованных маркеров < 1000
+		*/
+		z-index: 1000 !important;
+	}
 }
 
 .static-type {

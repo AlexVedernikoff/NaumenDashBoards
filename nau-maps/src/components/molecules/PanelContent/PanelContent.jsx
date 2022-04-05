@@ -1,27 +1,23 @@
 // @flow
 import {connect} from 'react-redux';
 import type {Equipment} from 'types/equipment';
-import type {Geoposition} from 'types/geoposition';
 import PanelPoint from 'components/molecules/PanelPoint';
 import type {Part} from 'types/part';
-import type {Point, PointData, PointType} from 'types/point';
+import type {Point} from 'types/point';
 import {props} from './selectors';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import type {Trail} from 'types/trail';
 
 export class PanelContent extends Component<Props> {
-	renderEquipments = (object: Point | Equipment, key: number) => {
-		const {data, geopositions, type} = object;
-		return this.renderPointData(data, key, type, geopositions && geopositions[0]);
+	renderEquipments = (object: Equipment, key: number) => {
+		return this.renderPointData(object, key);
 	};
 
 	renderObject = (object: Trail, key: number) => {
-		const {data, geopositions, type} = object;
-
 		return (
 			<div key={key}>
-				{this.renderPointData(data, key, type, geopositions && geopositions[0])}
+				{this.renderPointData(object, key)}
 				{object.parts && object.parts.map(this.renderParts)}
 				{object.equipments && object.equipments.map(this.renderEquipments)}
 			</div>
@@ -29,19 +25,18 @@ export class PanelContent extends Component<Props> {
 	};
 
 	renderParts = (object: Part, key: number) => {
-		const {data, geopositions, type} = object;
-		return this.renderPointData(data, key, type, geopositions && geopositions[0]);
+		return this.renderPointData(object, key);
 	};
 
-	renderPointData = (pointData: PointData, key: number, type: PointType, geoposition: Geoposition) => {
-		return <PanelPoint geoposition={geoposition} key={key} pointData={pointData} type={type} />;
+	renderPointData = (object: Part | Point | Equipment, key: number) => {
+		return <PanelPoint key={key} point={object} />;
 	};
 
 	render () {
 		const {points, showSingleObject, singleObject} = this.props;
 
 		if (showSingleObject) {
-			return this.renderPointData(singleObject.data, singleObject.data.uuid, singleObject.type, singleObject.geoposition);
+			return this.renderPointData(singleObject, singleObject.data.uuid);
 		}
 
 		return points.map(this.renderObject);
