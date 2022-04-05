@@ -1,7 +1,13 @@
 // @flow
+
+export type GroupsAttributeItem = {
+	attributeCode: string,
+	metaClassCode: string
+};
+
 export type GroupsAttributesData = {
 	error: boolean,
-	items: Array<string>,
+	items: Array<GroupsAttributeItem>,
 	loading: boolean
 };
 
@@ -10,7 +16,7 @@ export type GroupsAttributesState = {
 };
 
 export type ReceivePayload = {
-	data: Array<string>,
+	data: Array<GroupsAttributeItem>,
 	key: string
 };
 

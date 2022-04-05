@@ -20,22 +20,6 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 			openingFilterForm: false
 		};
 
-		clearSerializedContext = (serializedContext: string): string => {
-			// TODO: Хак - убрать после исправлений на платформе
-			try {
-				const context = JSON.parse(serializedContext);
-
-				if (context.attrCodes) {
-					delete context.attrCodes;
-				}
-
-				return JSON.stringify(context);
-			} catch (e) {
-				console.error('Error descriptor in clearSerializedContext', e);
-				return serializedContext;
-			}
-		};
-
 		fetchFilterAttributes = async (source: SourceData) => {
 			const {fetchingFilterAttributes} = this.state;
 
@@ -96,7 +80,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 
 		getFilterAttributes = async (classFqn: string, attrGroupCode: string | null) => {
 			const {fetchGroupsAttributes} = this.props;
-			const attrCodes = await fetchGroupsAttributes(classFqn, attrGroupCode ?? null);
+			const groupsAttributes = await fetchGroupsAttributes(classFqn, attrGroupCode ?? null);
 			const {attributes: loadedAttributes, fetchAttributes} = this.props;
 			let attributes = loadedAttributes[classFqn]?.options;
 
@@ -104,7 +88,11 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 				attributes = await fetchAttributes(classFqn);
 			}
 
-			return attributes.filter(attribute => attrCodes.includes(attribute.code));
+			return attributes.filter(
+				attribute => groupsAttributes.find(
+					({attributeCode, metaClassCode}) => attrGroupCode === attribute.code && attribute.metaClassFqn === metaClassCode
+				)
+			);
 		};
 
 		getSourceDescriptor = (source: SourceData) => {
@@ -138,7 +126,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 
 				const {serializedContext} = await api.instance.filterForm.openForm(context, options);
 
-				return this.clearSerializedContext(serializedContext);
+				return serializedContext;
 			} catch (e) {
 				console.error('Filtration error: ', e);
 			}
@@ -155,10 +143,10 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 				useRestriction: attrGroupCode !== null
 			};
 
-			const attrCodes = await fetchGroupsAttributes(classFqn, attrGroupCode ?? null);
+			const groupsAttributes = await fetchGroupsAttributes(classFqn, attrGroupCode ?? null);
 
-			if (attrCodes && attrCodes.length > 0) {
-				context.attrCodes = attrCodes.map(attrCode => `${classFqn}@${attrCode}`);
+			if (groupsAttributes && groupsAttributes.length > 0) {
+				context.attrCodes = groupsAttributes.map(attribute => `${attribute.metaClassCode}@${attribute.attributeCode}`);
 				options.useRestriction = true;
 
 				// * временно отключаем SMRMEXT-12874

@@ -65,8 +65,8 @@ export default class Dashboards implements DashboardsAPI {
 		return this.transport('dashboards', 'getMetaClasses', ['classFqn'], metaClassFqn);
 	}
 
-	getNonMetadataAttributeCodes (classFqn: string, attrGroupCode: string | null) {
-		return this.transport('dashboards', 'getNonMetadataAttributeCodes', ['classFqn', 'attrGroupCode'], classFqn, attrGroupCode);
+	getNonMetadataAttributesData (classFqn: string, attrGroupCode: string | null) {
+		return this.transport('dashboards', 'getNonMetadataAttributesData', ['classFqn', 'attrGroupCode'], classFqn, attrGroupCode);
 	}
 
 	getStates (metaClassFqn: string) {
