@@ -56,7 +56,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		};
 
 		getAttrGroupCodeForSource = (classFqn: string, descriptor: string): string | null => {
-			const {isUserMode} = this.props; // * временно отключаем SMRMEXT-12874 (sources)
+			const {isUserMode, sources} = this.props;
 			let result = null;
 
 			if (isUserMode) {
@@ -68,7 +68,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 					result = attrSetConditions.attrGroupCode ?? null;
 				}
 			} else {
-				const sourceFilterAttributeGroup = null; // * временно отключаем SMRMEXT-12874 (getSourceFilterAttributeGroup(sources, classFqn))
+				const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(sources, classFqn);
 
 				if (sourceFilterAttributeGroup) {
 					result = sourceFilterAttributeGroup;
@@ -135,7 +135,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		};
 
 		updateContext = async (context: Context, classFqn: string, descriptor: string): Promise<FilterFormOptionsDTO> => {
-			const {fetchGroupsAttributes} = this.props; // * временно отключаем SMRMEXT-12874 (isUserMode)
+			const {fetchGroupsAttributes, isUserMode} = this.props;
 			const attrGroupCode = this.getAttrGroupCodeForSource(classFqn, descriptor);
 
 			const options: FilterFormOptionsDTO = {
@@ -149,10 +149,9 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 				context.attrCodes = groupsAttributes.map(attribute => `${attribute.metaClassCode}@${attribute.attributeCode}`);
 				options.useRestriction = true;
 
-				// * временно отключаем SMRMEXT-12874
-				// if (!isUserMode && attrGroupCode) {
-				// options.restriction = await this.generateRestriction(classFqn, attrGroupCode);
-				// }
+				if (!isUserMode && attrGroupCode) {
+					options.restriction = await this.generateRestriction(classFqn, attrGroupCode);
+				}
 			} else if (attrGroupCode) {
 				context.attrGroupCode = attrGroupCode;
 				options.useRestriction = true;
