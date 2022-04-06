@@ -1061,15 +1061,16 @@ class DashboardsService
     {
         def slurper = new groovy.json.JsonSlurper()
         descriptor = slurper.parseText(descriptor)
-        return getDescriptorGroups(descriptor)?.collect {
-            def dynamicSource = getDynamicGroupSource(it)
-            def templateUUIDS = getUUIDSForTemplates(it.UUID)
+        List descriptorGroupsData = getDescriptorGroupsData(descriptor)
+        return descriptorGroupsData?.collect {
+            def dynamicSource = getDynamicGroupSource(it.group)
+            def templateUUIDS = getUUIDSForTemplates(it.group.UUID)
             templateUUIDS = getActiveTemplateUUIDS(templateUUIDS)
             boolean anyAttributes = templateUUIDS.any { getDynamicAttributeType(it) }
             if (dynamicSource && anyAttributes) {
                 return new DynamicGroup(
-                    code: it.UUID,
-                    title: "${it.title} (${dynamicSource?.name})"
+                    code: it.group.UUID,
+                    title: "${it.group.title} (${it.title})"
                 )
             }
         }?.grep()?.toList()
@@ -1643,7 +1644,7 @@ class DashboardsService
      * @param descriptor - условия фильтрации (дескриптор)
      * @return - список групп динамических атрибутов
      */
-    private List getDescriptorGroups(descriptor)
+    private List getDescriptorGroupsData(descriptor)
     {
         return descriptor?.filters?.collectMany { filter ->
             if (filter['properties'].attrTypeCode.find() in AttributeType.LINK_TYPES) {
@@ -1654,8 +1655,12 @@ class DashboardsService
                     }
                     if (hasAttribute)
                     {
-                        return utils.get(metaClass.uuid).additAttrsG?.findResults {
+                        ISDtObject filterSubject = utils.get(metaClass.uuid)
+                        List descriptorGroups = filterSubject.additAttrsG?.findResults {
                             it.state == 'active' ? it : null
+                        }
+                        return descriptorGroups.collect {
+                            ['title': filterSubject.title, 'group': it]
                         }
                     }
                     else
