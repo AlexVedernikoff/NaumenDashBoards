@@ -986,6 +986,7 @@ class DashboardUtils
             : "${template.metaClass}"
         attrFormatToFind = attrFormatToFind.replace('_unitsLinks', '')
         attrFormatToFind = attrFormatToFind.replace('_unitsButtons', '')
+        attrFormatToFind = attrFormatToFind.replace('_stFrCat', '')
         def dynamicFields = getModules().dynamicFields.hasProperty('controller') ? getModules().dynamicFields.controller : getModules().dynamicFields
         return dynamicFields.getAttrToTotalValueMap()[attrFormatToFind]
     }
