@@ -13,11 +13,14 @@ import Modal from 'components/atoms/Modal/Modal';
 import {TextInput} from 'components/atoms/TextInput/TextInput';
 
 const АctionBar = props => {
+	const [active, setActive] = useState(true);
 	const [inputStartDate, setInputStartDate] = useState(new Date(props.startDate).toLocaleString());
 	const [inputEndDate, setInputEndDate] = useState(new Date(props.endDate).toLocaleString());
 	const [showModal, setShowModal] = useState(false);
 	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
+	const [showModalConfirmation, setShowModalConfirmation] = useState(false);
+	const [showModalSave, setShowModalSave] = useState(false);
 	const [valueError, setValueError] = useState('');
 	const panelButtons = [
 		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'}
@@ -168,6 +171,81 @@ const АctionBar = props => {
 		return null;
 	};
 
+	const submitConfirmation = () => {
+		setShowModalConfirmation(!showModalConfirmation);
+	};
+
+	const renderModalConfirmation = () => {
+		if (showModalConfirmation) {
+			return (
+				<Modal
+					className={styles.modal}
+					notice={true}
+					onClose={() => setShowModalConfirmation(!showModalConfirmation)}
+					onSubmit={() => submitConfirmation()}
+					submitText="Принять"
+				>
+					<div>Изменения будут применены к атрибутам</div>
+				</Modal>
+			);
+		}
+
+		return null;
+	};
+
+	const sibmitSave = () => {
+		setShowModalSave(!showModalSave);
+	};
+
+	const renderModalSave = () => {
+		if (showModalSave) {
+			return (
+				<Modal
+					className={styles.modal}
+					notice={true}
+					onClose={() => setShowModalSave(!showModalSave)}
+					onSubmit={() => sibmitSave()}
+					submitText="Сохранить"
+				>
+					<div>Изменения к атрибутам не будут применены</div>
+				</Modal>
+			);
+		}
+
+		return null;
+	};
+
+	const openSaveModal = () => {
+		setShowModalSave(!showModalSave);
+	};
+
+	const openConfirmationModal = () => {
+		setShowModalConfirmation(!showModalConfirmation);
+	};
+
+	const renderModalSecondLevel = () => {
+		if (showModalSave) {
+			return (
+				<Modal
+					className={styles.modal}
+					notice={true}
+					onClose={() => setShowModalSave(!showModalSave)}
+					onSubmit={() => sibmitSave()}
+					submitText="Сохранить"
+				>
+					<div className={styles.inputInnerwrapper}>
+						<label htmlFor="name">Название:</label> <input id="name" />
+					</div>
+					<div className={styles.inputInnerwrapper}>
+						<label htmlFor="date">Дата и время:</label> <input id="date" />
+					</div>
+				</Modal>
+			);
+		}
+
+		return null;
+	};
+
 	const openClockModal = () => {
 		setShowModal(!showModal);
 	};
@@ -199,14 +277,21 @@ const АctionBar = props => {
 	const renderPanel = () => {
 		return (
 			<div className={styles.container}>
-				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_OUT} onClick={zoomIn} tip="Уменьшить масштаб" />
-				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_IN} onClick={zoomOut} tip="Увеличить масштаб" />
-				{renderButtonSettings()}
-				<IconButton className={styles.icon} icon={ICON_NAMES.CLOCK} onClick={openClockModal} tip="Интервал" />
-				{iconButtonGroup}
-				<IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={addNewTask} tip="Добавить работу" />
-				<IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={refresh} tip="Обновить" />
-				<Button className={styles.btn}>{name}</Button>
+				<div className={styles.leftContainer}>
+					<Button className={`${styles.btn} ${styles.btnVersions} ${active ? styles.unActive : ''}`} onClick={() => setActive(false)}>Версии</Button>
+					<Button className={` ${styles.btn} ${styles.btnCurrent} ${!active ? styles.unActive : ''}`} onClick={() => setActive(true)}>Текущий</Button>
+				</div>
+				<div className={styles.container}>
+					<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_OUT} onClick={zoomIn} tip="Уменьшить масштаб" />
+					<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_IN} onClick={zoomOut} tip="Увеличить масштаб" />
+					{renderButtonSettings()}
+					<IconButton className={styles.icon} icon={ICON_NAMES.CLOCK} onClick={openClockModal} tip="Интервал" />
+					{iconButtonGroup}
+					<IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={addNewTask} tip="Добавить работу" />
+					<IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={refresh} tip="Обновить" />
+					<Button className={styles.btn} onClick={openConfirmationModal}>Применить</Button>
+					<Button className={styles.btn} onClick={openSaveModal}>Сохранить</Button>
+				</div>
 			</div>
 		);
 	};
@@ -215,6 +300,9 @@ const АctionBar = props => {
 		<div className={styles.wrapper}>
 			{renderPanel()}
 			{renderModal()}
+			{renderModalConfirmation()}
+			{renderModalSave()}
+			{renderModalSecondLevel()}
 		</div>
 	);
 };

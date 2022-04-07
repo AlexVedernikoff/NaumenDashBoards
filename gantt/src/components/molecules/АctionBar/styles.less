@@ -10,6 +10,19 @@
 		margin-left: 12px;
 		padding: 0 12px;
 		width: 125px;
+
+		&:hover {
+			color: @white;
+		}
+	}
+
+	.btnCurrent {
+		border-radius: 0 2px 2px 0;	
+		margin-left: 0;
+	}
+
+	.btnVersions {
+		border-radius: 2px 0 0 2px;
 	}
 
 	.calendar {
@@ -34,6 +47,27 @@
 		color: red;
 		margin-top: 10px;
 		opacity: .7;
+	}
+
+	.inputInnerwrapper {
+		align-items: center;
+		background-color: #FFFFFF;
+		border: 1px solid #bbbbbb;
+		border-radius: 2px;
+		box-sizing: border-box;
+		display: flex;
+		height: 32px;
+		justify-content: space-between;
+		max-width: 80%;
+		overflow: hidden;
+		padding: 0 12px;
+		width: 100%;
+
+		input {
+			border: none;
+			font-size: 13px;
+			width: calc(100% - 24px);
+		}
 	}
 
 	.icon {
@@ -76,6 +110,26 @@
 
 		&:first-child {
 			margin-bottom: 40px;
+		}
+	}
+
+	.leftContainer {
+		align-items: center;
+		box-sizing: border-box;
+		display: flex;
+		height: 100%;
+		justify-content: left;
+		padding: 8px 10px;
+		width: 100%;
+	}
+
+	.unActive {
+		background-color: transparent;
+		border: 1px solid #4D92C8;
+		color: #4D92C8;
+		
+		&:hover {
+			border: 1px solid #3578ad;;
 		}
 	}
 
