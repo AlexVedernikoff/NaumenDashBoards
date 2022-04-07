@@ -2,6 +2,7 @@
 import {DASHBOARD_EVENTS} from './constants';
 import {defaultDashboardAction, initialDashboardState} from './init';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
+import {resizer as dashboardResizer} from 'app.constants';
 import type {SettingsAction, SettingsState} from './types';
 
 const reducer = (state: SettingsState = initialDashboardState, action: SettingsAction = defaultDashboardAction): SettingsState => {
@@ -12,14 +13,17 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 				autoUpdate: {...state.autoUpdate, ...action.payload}
 			};
 		case DASHBOARD_EVENTS.CHANGE_INTERVAL_REMINDER:
-			state.autoUpdate.remainder = action.payload;
-			return state;
+			return {
+				...state,
+				autoUpdate: {...state.autoUpdate, remainder: action.payload}
+			};
 		case DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE:
 			return {
 				...state,
 				layoutMode: state.isMobileDevice ? LAYOUT_MODE.MOBILE : action.payload ?? LAYOUT_MODE.WEB
 			};
 		case DASHBOARD_EVENTS.CHANGE_SHOW_HEADER:
+			dashboardResizer.setShowHeader(action.payload);
 			return {
 				...state,
 				showHeader: action.payload
