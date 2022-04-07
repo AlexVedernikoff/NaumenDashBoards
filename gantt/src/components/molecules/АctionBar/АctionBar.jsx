@@ -6,7 +6,7 @@ import {deepClone} from 'helpers';
 import {functions, props} from 'components/organisms/FormPanel/selectors';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {ScaleNames} from 'components/organisms/FormPanel/consts';
 import styles from './styles.less';
 import Modal from 'components/atoms/Modal/Modal';
@@ -31,16 +31,21 @@ const АctionBar = props => {
 			onClick={props.onClick}
 		>{item.icon}
 		</IconButton>);
-	const {addNewTask, handleToggle, name, refresh, settings} = props;
+	const {addNewTask, editMode, handleToggle, name, refresh, settings} = props;
 	const newSettings = deepClone(settings);
 	let indexScaleName;
 
-	const onSelectStartDate = (value) => {
+	useEffect(() => {
+		setInputEndDate(props.endDate);
+		setInputStartDate(props.startDate);
+	}, [props.endDate, props.startDate]);
+
+	const onSelectStartDate = value => {
 		setInputStartDate(new Date(value).toLocaleString());
 		setShowDatePickerStartDate(!showDatePickerStartDate);
 	};
 
-	const onSelectEndDate = (value) => {
+	const onSelectEndDate = value => {
 		setInputEndDate(new Date(value).toLocaleString());
 		setShowDatePickerEndDate(!showDatePickerEndDate);
 	};
@@ -99,7 +104,10 @@ const АctionBar = props => {
 
 		const modifiedDate = dotReplacement.join('.') + ',' + chunkDate[1];
 
-		return modifiedDate;
+		const withoutDotsandDash = modifiedDate.replace(/\./g, '/').replace(/\,/g, '');
+		const modifiedDateStr = new Date(withoutDotsandDash);
+
+		return modifiedDateStr;
 	};
 
 	const sibmitRange = () => {
@@ -166,9 +174,11 @@ const АctionBar = props => {
 
 	const onCloseDateModal = event => {
 		const notInteractiveElements = [
-			'src-components-Datepicker-styles__container',
-			'src-components-Icon-styles__icon',
-			'src-components-Datepicker-styles__daysContainer'
+			'src-components-atoms-Icon-styles__icon',
+			'src-components-molecules-Datepicker-styles__daysContainer',
+			'src-components-molecules-Datepicker-styles__container',
+			'src-components-atoms-DatepickerControl-styles__iconContainer',
+			'_3wX93PsyvAvzd8jTwAHjLy'
 		];
 
 		if (notInteractiveElements.includes(event.target.className && event.target.className.animVal) === false) {
@@ -182,12 +192,16 @@ const АctionBar = props => {
 		return () => document.removeEventListener('click', onCloseDateModal);
 	});
 
+	const renderButtonSettings = () => {
+		return editMode ? <IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} onClick={handleToggle} tip="Настройка" /> : null;
+	};
+
 	const renderPanel = () => {
 		return (
 			<div className={styles.container}>
 				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_OUT} onClick={zoomIn} tip="Уменьшить масштаб" />
 				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_IN} onClick={zoomOut} tip="Увеличить масштаб" />
-				<IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} onClick={handleToggle} tip="Настройка"/>
+				{renderButtonSettings()}
 				<IconButton className={styles.icon} icon={ICON_NAMES.CLOCK} onClick={openClockModal} tip="Интервал" />
 				{iconButtonGroup}
 				<IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={addNewTask} tip="Добавить работу" />

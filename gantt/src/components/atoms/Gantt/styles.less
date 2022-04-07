@@ -101,6 +101,10 @@
 	content: "";
 }
 
+.gantt_layout_cell.scrollHor_cell {
+	top: -40px;
+}
+
 @supports (-moz-appearance:none) {
 	.gantt_hor_scroll {
 		height: 17px !important
@@ -111,8 +115,9 @@
 	}
 
 	.gantt_layout_cell.scrollHor_cell {
-		bottom: -6px;
+		bottom: 30px;
 		position: absolute !important;
+		top: auto;
 	}
 
 	.gantt_container {

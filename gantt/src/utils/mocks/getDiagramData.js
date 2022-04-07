@@ -116,7 +116,9 @@ const data = {
 		}
     ],
 	"progressCheckbox": false,
-	"workRelationCheckbox": false
+	"workRelationCheckbox": false,
+	"startDate": "01.01.2024, 15:17:45",
+	"endDate": "01.01.2025, 15:17:45"
 };
 
 export const getDiagramData = () => {

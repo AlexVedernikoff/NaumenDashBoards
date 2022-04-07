@@ -83,9 +83,12 @@ export class GanttContent extends PureComponent<Props> {
 	};
 
 	renderАctionBar = () => {
+		const {editMode} = this.props;
+
 		return (
 			<АctionBar
 				addNewTask={this.addNewTask}
+				editMode={editMode}
 				handleToggle={this.handleToggle}
 				name={this.state.name}
 				onClick={this.onMove}

@@ -128,8 +128,9 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		const {contentCode, subjectUuid} = getContext();
 		const user = await getCurrentUser();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const {attributesMap, commonSettings, diagramKey, progressCheckbox, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
+		const {attributesMap, commonSettings, diagramKey, endDate, progressCheckbox, startDate, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
 
+		dispatch(setRangeTime({endDate, startDate}));
 		dispatch(switchProgressCheckbox(progressCheckbox));
 		dispatch(switchWorkRelationCheckbox(workRelationCheckbox));
 		dispatch(setAttributesMap(attributesMap));
@@ -402,6 +403,7 @@ const changeWorkProgress = (payload: WorkProgress) => ({
 export {
 	cancelSettings,
 	changeScale,
+	changeWorkProgress,
 	getAppConfig,
 	getGanttData,
 	getListOfWorkAttributes,
@@ -416,7 +418,6 @@ export {
 	setColumnSettings,
 	setCommonSettings,
 	setColumnTask,
-	changeWorkProgress,
 	setDiagramLinksData,
 	setDiagramData,
 	setRangeTime,
