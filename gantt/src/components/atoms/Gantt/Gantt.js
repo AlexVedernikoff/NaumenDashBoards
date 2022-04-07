@@ -130,6 +130,7 @@ const Gantt = (props: Props) => {
 		gantt.config.duration_unit = 'minute';
 		gantt.config.duration_step = 1;
 		gantt.config.scroll_size = 6;
+		gantt.config.autoscroll = true;
 		gantt.templates.parse_date = (dateStr) => {
 			const timezone = /(GMT.*\))/.exec(new Date(dateStr));
 			const deviation = timezone[0].slice(5, 6);
@@ -254,7 +255,7 @@ const Gantt = (props: Props) => {
 
 	// Изменяет время и дату настроек диаграммы гантта при изменении [store.APP.startDate, store.APP.endDate]
 	useLayoutEffect(() => {
-		if (!firstUpdate) {
+		if (firstUpdate) {
 			gantt.config.start_date = store.APP.startDate;
 			gantt.config.end_date = store.APP.endDate;
 			gantt.render();

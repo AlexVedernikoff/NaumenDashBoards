@@ -289,7 +289,10 @@ const FormPanel = (props: Props) => {
 
 		const modifiedDate = dotReplacement.join('.') + ',' + chunkDate[1];
 
-		return modifiedDate;
+		const withoutDotsandDash = modifiedDate.replace(/\./g, '/').replace(/\,/g, '');
+		const modifiedDateStr = new Date(withoutDotsandDash);
+
+		return modifiedDateStr;
 	};
 
 	const sibmitRange = () => {

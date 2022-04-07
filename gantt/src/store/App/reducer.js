@@ -6,6 +6,12 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SET_RANGE_TIME:
+			return {
+				...state,
+				endDate: action.payload.endDate,
+				startDate: action.payload.startDate
+			};
 		case APP_EVENTS.SWITCH_WORK_RELATION_CHECKBOX:
 			return {
 				...state,
@@ -124,12 +130,6 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 			return {
 				...state,
 				sources: action.payload
-			};
-		case APP_EVENTS.SET_RANGE_TIME:
-			return {
-				...state,
-				endDate: action.payload.endDate ? action.payload.endDate : state.endDate,
-				startDate: action.payload.startDate ? action.payload.startDate : state.startDate
 			};
 		case APP_EVENTS.CANCEL_SETTINGS:
 			return {

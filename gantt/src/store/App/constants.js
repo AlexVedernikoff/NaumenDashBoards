@@ -118,7 +118,6 @@ const defaultResourceSetting = {
 	'level': 0,
 	'nested': false,
 	'parent': '',
-	'progress': 0.8,
 	'source': {
 		'descriptor': '',
 		'value': null
