@@ -74,6 +74,8 @@ class GanttDataSetService
         data.workRelations = settings.workRelations
         data.workRelationCheckbox = settings.workRelationCheckbox
         data.progressCheckbox = settings.progressCheckbox
+        data.startDate = settings.startDate
+        data.endDate = settings.endDate
 
         GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
         settings.resourceAndWorkSettings.each {
@@ -218,7 +220,7 @@ class GanttDataSetService
      * @param parentUUID - уникальный идентификатор записи в БД о родителе
      * @return список Map<String, String> параметров для построения диаграммы
      */
-    private List<Map<String, String>> buildDataListFromSettings(List<ResourceAndWorkSettings> settingsList, String parentUUID)
+    public List<Map<String, String>> buildDataListFromSettings(List<ResourceAndWorkSettings> settingsList, String parentUUID)
     {
         /* За текущую настройку из списка настроек, берется 1-ый элемент settingsList[0]. В цикле совершается поиск таких
            настроек, для которых уровень вложенности level равен level-у текущей. Таким образом находятся по сути соседние
