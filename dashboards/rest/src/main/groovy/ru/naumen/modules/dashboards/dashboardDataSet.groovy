@@ -1512,6 +1512,11 @@ class DashboardDataSetService
             }
         }
 
+        if (!allGroups)
+        {
+            return
+        }
+
         if (allGroups.size() == 1) // Если группировка общая
         {
             intermediateData.each { key, request ->
@@ -5390,7 +5395,7 @@ class DashboardDataSetService
         }
 
         Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
-        if (isSourceForEachRow)
+        if (isSourceForEachRow && breakdownAttributes)
         {
             breakdownAttributes = [breakdownAttributes.head()]
         }

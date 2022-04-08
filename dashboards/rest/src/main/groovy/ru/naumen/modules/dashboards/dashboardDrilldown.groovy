@@ -75,7 +75,8 @@ import static DashboardMarshallerClass.*
                                                                                                                                                      api.keyValue,
                                                                                                                                                      new DashboardUtils(),
                                                                                                                                                      logger),
-                                                                                                                        logger))
+                                                                                                                        logger,
+                                                                                                                        beanFactory))
 
 interface DashboardDrilldown
 {
@@ -121,6 +122,7 @@ class DashboardDrilldownService
     private final DashboardDataSetService dashboardDataSetService
     private final DashboardSettingsService dashboardSettingsService
     private final def logger
+    private final def beanFactory
 
     private String currentUserLocale
 
@@ -139,7 +141,8 @@ class DashboardDrilldownService
                               DashboardUtils dashboardUtils,
                               DashboardDataSetService dashboardDataSetService,
                               DashboardSettingsService dashboardSettingsService,
-                              def logger)
+                              def logger,
+                              def beanFactory)
     {
         this.utils = utils
         this.metainfo = metainfo
@@ -155,6 +158,7 @@ class DashboardDrilldownService
         this.dashboardDataSetService = dashboardDataSetService
         this.dashboardSettingsService = dashboardSettingsService
         this.logger = logger
+        this.beanFactory = beanFactory
     }
 
     /**
