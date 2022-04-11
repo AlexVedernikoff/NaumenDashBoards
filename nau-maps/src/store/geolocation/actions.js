@@ -123,6 +123,11 @@ const toggleMapPanel = () => ({
 	type: GEOLOCATION_EVENTS.TOGGLE_MAP_PANEL
 });
 
+const toggleMapContextMenu = (data: Point) => ({
+	payload: data,
+	type: GEOLOCATION_EVENTS.TOGGLE_MAP_CONTENT_MENU
+});
+
 const toggleFilter = () => ({
 	type: GEOLOCATION_EVENTS.TOGGLE_FILTER
 });
@@ -157,6 +162,7 @@ export {
 	toggleFilter,
 	toggleGroup,
 	toggleMapPanel,
+	toggleMapContextMenu,
 	togglePanel,
 	zoomIn,
 	zoomOut

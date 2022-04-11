@@ -3,8 +3,8 @@ import defaultBounds from './defaultBounds';
 
 export const getLatLngBounds = (trail: Array<Trail>) => {
 	const bounds = trail.reduce((acc, curr) => {
-		const equipments = (curr.equipments || []).reduce((acc, equipments) => [...acc, ...equipments.geopositions], []);
-		const parts = (curr.parts || []).reduce((acc, parts) => [...acc, ...parts.geopositions], []);
+		const equipments = (curr.equipments || []).map(item => item.geopositions).flat();
+		const parts = (curr.parts || []).map(item => item.geopositions).flat();
 
 		return [
 			...acc,

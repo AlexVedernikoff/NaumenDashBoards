@@ -7,7 +7,6 @@ import type {Part as PartType} from 'types/part';
 import {props} from './selectors';
 import type {Props} from './types';
 import React, {Component} from 'react';
-import Trail from 'components/molecules/Trail';
 import type {Trail as TrailType} from 'types/trail';
 import YandexLine from 'components/molecules/Yandex/Line';
 import YandexMark from 'components/molecules/Yandex/Mark';
@@ -15,7 +14,17 @@ import YandexMark from 'components/molecules/Yandex/Mark';
 export class PointsList extends Component<Props> {
 	renderEquipments = (equipment: Equipment) => <OpenMapMark key={equipment.data.uuid} point={equipment} />;
 	renderSections = (part: PartType) => <OpenMapLine key={part.data.uuid} part={part} />;
-	renderTrail = (trail: TrailType) => <Trail key={trail.data.uuid} trail={trail} />;
+
+	renderTrails = (trail: TrailType) => {
+		const {parts = [], equipments = []} = trail;
+
+		return (
+			<div key={trail.data.uuid} >
+				{parts.map(this.renderSections)}
+				{equipments.map(this.renderEquipments)}
+			</div>
+		);
+	};
 
 	renderYandexLine = (part: PartType) => <YandexLine key={part.data.uuid} part={part} />;
 	renderYandexMark = (equipment: Equipment) => <YandexMark key={equipment.data.uuid} point={equipment} />;
@@ -45,10 +54,9 @@ export class PointsList extends Component<Props> {
 			default:
 				return (
 					<div>
-						{trails.length && trails.map(this.renderTrail)}
-						{trails.length && trails.map(trail => trail.equipments && trail.equipments.map(this.renderEquipments))}
-						{points.length && points.map(this.renderEquipments)}
-						{sections.length && sections.map(this.renderSections)}
+						{trails.map(this.renderTrails)}
+						{points.map(this.renderEquipments)}
+						{sections.map(this.renderSections)}
 					</div>
 				);
 		}

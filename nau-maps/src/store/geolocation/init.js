@@ -10,6 +10,7 @@ export const initialGeolocationState: GeolocationState = {
 	},
 	controls: {
 		filterOpen: false,
+		mapContentMenuOpen: false,
 		panelMapOpen: false,
 		panelOpen: true,
 		zoom: 10

@@ -6,6 +6,7 @@ import Copyright from 'components/atoms/Copyright';
 import {GoogleMap, Marker} from 'react-google-maps';
 import {Map as LeafletMap} from 'react-leaflet';
 import {Map as YandexMap, YMaps} from 'react-yandex-maps';
+import MapContentMenu from 'components/organisms/MapContentMenu';
 import MapPanel from 'components/organisms/MapPanel';
 import Panel from 'components/organisms/Panel';
 import PointsList from 'components/molecules/PointsList';
@@ -158,6 +159,7 @@ export class Geolocation extends Component<Props> {
 				<Controls />
 				<Panel />
 				<MapPanel />
+				<MapContentMenu />
 			</div>
 		);
 	}
