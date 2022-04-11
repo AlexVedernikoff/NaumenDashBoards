@@ -10,6 +10,7 @@ export class DashboardResizer {
 	sizeWillBeChanged = false;
 	store = null;
 	isMobile = false;
+	showHeader = true;
 
 	constructor (store: Store) {
 		this.store = store;
@@ -17,7 +18,13 @@ export class DashboardResizer {
 	}
 
 	getContentHeight (): number | null {
-		return gridRef.current && gridRef.current.getBoundingClientRect().height + DASHBOARD_HEADER_HEIGHT;
+		let addHeight = DASHBOARD_HEADER_HEIGHT;
+
+		if (this.isMobile || !this.showHeader) {
+			addHeight = 0;
+		}
+
+		return gridRef.current && gridRef.current.getBoundingClientRect().height + addHeight;
 	}
 
 	getFrameInitHeight (): number {
@@ -107,6 +114,10 @@ export class DashboardResizer {
 				body.style.minHeight = minHeight;
 			}
 		}
+	};
+
+	setShowHeader = (value: boolean) => {
+		this.showHeader = value;
 	};
 }
 
