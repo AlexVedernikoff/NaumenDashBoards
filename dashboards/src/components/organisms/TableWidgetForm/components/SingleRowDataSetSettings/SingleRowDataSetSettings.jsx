@@ -1,10 +1,13 @@
 // @flow
 import type {Breakdown, Indicator} from 'store/widgetForms/types';
 import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
+import {CALC_TOTAL_CONTEXT} from 'TableWidgetForm/components/ParamsTab/constants';
 import FormBox from 'components/molecules/FormBox';
-import type {FormBoxProps} from 'WidgetFormPanel/components/IndicatorsBox/types';
 import FormField from 'WidgetFormPanel/components/FormField';
+import IconButton from 'components/atoms/IconButton';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import IndicatorsBox from 'TableWidgetForm/components/IndicatorsBox';
+import type {IndicatorsFormBoxProps} from 'TableWidgetForm/components/DataSetSettings/types';
 import memoize from 'memoize-one';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
@@ -20,7 +23,8 @@ BREAKDOWN_CONTEXT.displayName = 'BREAKDOWN_CONTEXT';
 
 export class SingleRowDataSetSettings extends PureComponent<Props> {
 	getIndicatorsBoxComponents = memoize(() => ({
-		FormBox: this.renderIndicatorsFormBox
+		FormBox: this.renderIndicatorsFormBox,
+		FormBoxControls: this.renderIndicatorsControl
 	}));
 
 	getHandleChangeSourceRowNameValue = (index: number) => ({value: sourceRowName}: OnChangeEvent<string>) => {
@@ -42,6 +46,8 @@ export class SingleRowDataSetSettings extends PureComponent<Props> {
 		const {index, onChange, value} = this.props;
 		return onChange(index, {...value, breakdown: undefined});
 	};
+
+	handleClickSumButton = () => this.props.onChangeCalcTotalColumn();
 
 	renderBreakdownFieldSet = breakdown => {
 		const {index, isDifferentAggregations, value} = this.props;
@@ -91,7 +97,31 @@ export class SingleRowDataSetSettings extends PureComponent<Props> {
 		return null;
 	};
 
-	renderIndicatorsFormBox = ({children, ...props}: FormBoxProps) => (
+	renderIndicatorsControl = () => {
+		const {index} = this.props;
+
+		if (index === 0) {
+			return (
+				<CALC_TOTAL_CONTEXT.Consumer>
+					{active => (
+						<Fragment>
+							<IconButton
+								active={active}
+								icon={ICON_NAMES.SUM}
+								onClick={this.handleClickSumButton}
+								round={false}
+								tip={t('TableWidgetForm::ParamsTab::CalculateTotal')}
+							/>
+						</Fragment>
+					)}
+				</CALC_TOTAL_CONTEXT.Consumer>
+			);
+		}
+
+		return null;
+	};
+
+	renderIndicatorsFormBox = ({children, ...props}: IndicatorsFormBoxProps) => (
 		<BREAKDOWN_CONTEXT.Consumer>
 			{breakdown => (
 				<FormBox {...props}>

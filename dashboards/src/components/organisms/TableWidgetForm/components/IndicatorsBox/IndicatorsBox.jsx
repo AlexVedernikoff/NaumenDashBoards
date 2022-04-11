@@ -15,7 +15,8 @@ export class IndicatorsBox extends PureComponent<Props> {
 		canAddIndicators: true,
 		canCreateInterestRelative: false,
 		components: {
-			FormBox
+			FormBox,
+			FormBoxControls: null
 		}
 	};
 
@@ -84,16 +85,17 @@ export class IndicatorsBox extends PureComponent<Props> {
 	};
 
 	render () {
-		const {components, value} = this.props;
+		const {components: {FormBox, FormBoxControls}, value} = this.props;
+		const rightControl = FormBoxControls ? <FormBoxControls /> : null;
 
 		return (
-			<components.FormBox rightControl={this.renderRightControl()} title={t('TableWidgetForm::IndicatorsBox::Indicators')}>
+			<FormBox rightControl={rightControl} title={t('TableWidgetForm::IndicatorsBox::Indicators')}>
 				<SortableList
 					list={value}
 					onChangeOrder={this.handleChangeOrder}
 					renderItem={this.renderFieldset}
 				/>
-			</components.FormBox>
+			</FormBox>
 		);
 	}
 }

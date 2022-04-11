@@ -8,7 +8,8 @@ export type FormBoxProps = {
 };
 
 export type Components = {
-	FormBox: React$ComponentType<FormBoxProps>
+	FormBox: React$ComponentType<FormBoxProps>,
+	FormBoxControls: React$ComponentType<{}>
 };
 
 export type Props = {

@@ -4,12 +4,13 @@ import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
-import t from 'localization';
+import T from 'components/atoms/Translation';
 
 export class Total extends PureComponent<Props> {
 	renderColumn = (lastParameterIdx: number) => (column: Column, index: number, columns: Array<Column>) => {
 		const {columnsWidth, components, countTotals, fixedPositions, scrollBarWidth} = this.props;
 		const {TotalCell} = components;
+		const totalComponents = {...components, Value: this.renderTotalValue};
 		const {accessor} = column;
 		const left = fixedPositions[accessor];
 		const last = index === columns.length - 1;
@@ -17,15 +18,13 @@ export class Total extends PureComponent<Props> {
 		let value = '';
 
 		if (index === lastParameterIdx) {
-			value = t('Table::Total::Total');
-		} else if (index === lastParameterIdx + 1) {
 			value = countTotals.toString();
 		}
 
 		return (
 			<TotalCell
 				column={column}
-				components={components}
+				components={totalComponents}
 				key={accessor}
 				last={last}
 				left={left}
@@ -35,10 +34,35 @@ export class Total extends PureComponent<Props> {
 		);
 	};
 
+	renderTotalValue = ({value}) => {
+		if (value && value.toString().trim() !== '') {
+			return (
+				<div className={styles.totalValue}>
+					<div><T text='Table::Total::Total' /></div>
+					<div>{value}</div>
+				</div>
+			);
+		}
+
+		return null;
+	};
+
 	render () {
 		const {columns, components, forwardedRef, width} = this.props;
 		const {Row} = components;
-		const lastParameterId = columns.map(({type}) => type).lastIndexOf(COLUMN_TYPES.PARAMETER);
+		const columnTypes = columns.map(({type}) => type);
+		let lastParameterId = columnTypes.lastIndexOf(COLUMN_TYPES.PARAMETER);
+
+		if (lastParameterId === -1) {
+			const indicatorTypes = [COLUMN_TYPES.BREAKDOWN, COLUMN_TYPES.INDICATOR];
+
+			lastParameterId = columnTypes.findIndex(type => indicatorTypes.includes(type)) - 1;
+
+			if (lastParameterId === -1) {
+				lastParameterId = 0;
+			}
+		}
+
 		const renderColumn = this.renderColumn(lastParameterId);
 
 		return (

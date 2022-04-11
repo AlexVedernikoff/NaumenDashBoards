@@ -1,17 +1,24 @@
 // @flow
+import {CALC_TOTAL_CONTEXT} from 'TableWidgetForm/components/ParamsTab/constants';
 import type {Components, Props} from './types';
+import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
+import IconButton from 'components/atoms/IconButton';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Indicator, Parameter} from 'store/widgetForms/types';
 import IndicatorsBox from 'TableWidgetForm/components/IndicatorsBox';
 import memoize from 'memoize-one';
 import ParametersBox from 'TableWidgetForm/components/ParametersBox';
 import {PARENT_CLASS_FQN_CONTEXT} from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withParentClassFqn';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import SourceBox from 'WidgetFormPanel/components/SourceBox';
 import SourceFieldset from 'containers/SourceFieldset';
+import styles from './styles.less';
+import t from 'localization';
 
 export class DataSetSettings extends PureComponent<Props> {
 	getIndicatorsBoxComponents = memoize(({IndicatorsFormBox}: Components) => ({
-		FormBox: IndicatorsFormBox
+		FormBox: IndicatorsFormBox,
+		FormBoxControls: this.renderIndicatorsControl
 	}));
 
 	getDataSetSources = () => {
@@ -43,6 +50,15 @@ export class DataSetSettings extends PureComponent<Props> {
 		return onChange(index, {...value, parameters}, callback);
 	};
 
+	handleClickAddIndicatorButton = () => {
+		const {index, onChange, value} = this.props;
+		const {indicators} = value;
+
+		return onChange(index, {...value, indicators: [...indicators, DEFAULT_INDICATOR]});
+	};
+
+	handleClickSumButton = () => this.props.onChangeCalcTotalColumn();
+
 	renderIndicatorsBox = () => {
 		const {components, index, value} = this.props;
 
@@ -65,6 +81,28 @@ export class DataSetSettings extends PureComponent<Props> {
 
 		return null;
 	};
+
+	renderIndicatorsControl = () => (
+		<CALC_TOTAL_CONTEXT.Consumer>
+			{active => (
+				<Fragment>
+					<IconButton
+						active={active}
+						className={styles.sumInput}
+						icon={ICON_NAMES.SUM}
+						onClick={this.handleClickSumButton}
+						round={false}
+						tip={t('TableWidgetForm::ParamsTab::CalculateTotal')}
+					/>
+					<IconButton
+						icon={ICON_NAMES.PLUS}
+						onClick={this.handleClickAddIndicatorButton}
+						round={false}
+					/>
+				</Fragment>
+			)}
+		</CALC_TOTAL_CONTEXT.Consumer>
+	);
 
 	renderParametersBox = () => {
 		const {index, value} = this.props;

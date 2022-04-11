@@ -20,6 +20,7 @@ export type Props = {
 	linkedSources: LinkedDataSourceMap,
 	onAdd: () => void,
 	onChange: (index: number, value: DataSet, callback?: Function) => void,
+	onChangeCalcTotalColumn: () => void,
 	onRemove: (index: number) => void,
 	parentClassFqn: string,
 	sources: DataSourceMap,
