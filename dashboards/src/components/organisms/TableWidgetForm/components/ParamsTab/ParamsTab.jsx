@@ -2,6 +2,7 @@
 import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {Breakdown} from 'store/widgetForms/types';
 import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
+import {CALC_TOTAL_CONTEXT} from './constants';
 import {createTableDataSet, isDontUseParamsForDataSet} from 'store/widgetForms/tableForm/helpers';
 import type {DataSet} from 'store/widgetForms/tableForm/types';
 import DataSetSettings from 'containers/TableDataSetSettings';
@@ -14,14 +15,12 @@ import FormBox from 'components/molecules/FormBox';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {hasDifferentAggregations, isDisableDataTopField} from 'TableWidgetForm/helpers';
-import IconButton from 'components/atoms/IconButton';
-import {ICON_NAMES} from 'components/atoms/Icon';
 import type {IndicatorsFormBoxProps} from 'TableWidgetForm/components/DataSetSettings/types';
 import memoize from 'memoize-one';
 import NavigationBox from 'containers/NavigationBox';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
-import React, {createContext, Fragment, PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import ShowTotalAmountBox from 'WidgetFormPanel/components/ShowTotalAmountBox';
 import SingleRowDataSetSettings from 'containers/TableSingleRowDataSetSettings';
 import styles from './styles.less';
@@ -31,10 +30,6 @@ import uuid from 'tiny-uuid';
 import WidgetNameBox from 'WidgetFormPanel/components/WidgetNameBox';
 import WidgetSelectBox from 'WidgetFormPanel/components/WidgetSelectBox';
 import {withCommonDialog} from 'containers/CommonDialogs/withCommonDialog';
-
-const CALC_TOTAL_CONTEXT = createContext(false);
-
-CALC_TOTAL_CONTEXT.displayName = 'CALC_TOTAL_CONTEXT';
 
 export class ParamsTab extends PureComponent<Props> {
 	mainIndex: number = 0;
@@ -65,6 +60,11 @@ export class ParamsTab extends PureComponent<Props> {
 		const addSourceRowName = isDontUseParamsForDataSet(values.data?.[0]);
 
 		onChange(DIAGRAM_FIELDS.data, [...values.data, createTableDataSet(uuid(), addSourceRowName)]);
+	};
+
+	handleChangeCalcTotalColumn = () => {
+		const {onChange, values} = this.props;
+		return onChange(DIAGRAM_FIELDS.calcTotalColumn, !values.calcTotalColumn);
 	};
 
 	handleChangeDataSet = async (index: number, newDataSet: DataSet, callback?: Function) => {
@@ -139,12 +139,6 @@ export class ParamsTab extends PureComponent<Props> {
 		const {onChange} = this.props;
 
 		onChange(DIAGRAM_FIELDS.top, top);
-	};
-
-	handleClickSumButton = () => {
-		const {onChange, values} = this.props;
-
-		onChange(DIAGRAM_FIELDS.calcTotalColumn, !values.calcTotalColumn);
 	};
 
 	handleRemoveDataSet = (index: number) => {
@@ -226,6 +220,7 @@ export class ParamsTab extends PureComponent<Props> {
 					isMain={isMain}
 					onAdd={this.handleAddDataSet}
 					onChange={this.handleChangeDataSet}
+					onChangeCalcTotalColumn={this.handleChangeCalcTotalColumn}
 					onRemove={this.handleRemoveDataSet}
 					parentClassFqn={parentClassFqn}
 					value={dataSet}
@@ -261,8 +256,8 @@ export class ParamsTab extends PureComponent<Props> {
 		return null;
 	};
 
-	renderIndicatorsFormBox = ({children, rightControl, ...props}: IndicatorsFormBoxProps) => (
-		<FormBox {...props} rightControl={this.renderSumButton(rightControl)}>
+	renderIndicatorsFormBox = ({children, ...props}: IndicatorsFormBoxProps) => (
+		<FormBox {...props}>
 			{children}
 		</FormBox>
 	);
@@ -304,30 +299,13 @@ export class ParamsTab extends PureComponent<Props> {
 					isMain={isMain}
 					onAdd={this.handleAddDataSet}
 					onChange={this.handleChangeDataSet}
+					onChangeCalcTotalColumn={this.handleChangeCalcTotalColumn}
 					onRemove={this.handleRemoveDataSet}
 					value={dataSet}
 				/>
 			</CALC_TOTAL_CONTEXT.Provider>
 		);
 	};
-
-	renderSumButton = (rightControl: React$Node) => (
-		<CALC_TOTAL_CONTEXT.Consumer>
-			{active => (
-				<Fragment>
-					<IconButton
-						active={active}
-						className={styles.sumInput}
-						icon={ICON_NAMES.SUM}
-						onClick={this.handleClickSumButton}
-						round={false}
-						tip={t('TableWidgetForm::ParamsTab::CalculateTotal')}
-					/>
-					{rightControl}
-				</Fragment>
-			)}
-		</CALC_TOTAL_CONTEXT.Consumer>
-	);
 
 	render () {
 		const {onChange, values} = this.props;
