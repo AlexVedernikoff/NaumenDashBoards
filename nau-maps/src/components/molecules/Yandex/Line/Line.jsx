@@ -6,9 +6,13 @@ import type {Props, State} from './types';
 import React, {Component} from 'react';
 
 class Line extends Component<Props, State> {
+	showContentMenu = () => {
+		const {part, toggleMapContextMenu} = this.props;
+		toggleMapContextMenu(part);
+	};
+
 	showSingle = () => {
 		const {part, setSingleObject} = this.props;
-
 		setSingleObject(part);
 	};
 
@@ -23,6 +27,7 @@ class Line extends Component<Props, State> {
 				geometry={positions}
 				key={part.data.uuid}
 				onClick={this.showSingle}
+				onContextMenu={this.showContentMenu}
 				options={{
 					balloonCloseButton: false,
 					strokeColor: color,

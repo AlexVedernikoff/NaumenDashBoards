@@ -7,9 +7,13 @@ import type {Props, State} from './types';
 import React, {Component} from 'react';
 
 export class Mark extends Component<Props, State> {
+	showContentMenu = () => {
+		const {point, toggleMapContextMenu} = this.props;
+		toggleMapContextMenu(point);
+	};
+
 	showSingle = () => {
 		const {point, setSingleObject} = this.props;
-
 		setSingleObject(point);
 	};
 
@@ -24,9 +28,10 @@ export class Mark extends Component<Props, State> {
 			<Placemark
 				geometry={[positions.latitude, positions.longitude]}
 				onClick={this.showSingle}
+				onContextMenu={this.showContentMenu}
 				options={{
 					iconImageHref: iconUrl,
-					iconImageOffset: [-12, -12],
+					iconImageOffset: [active ? -18 : -12, active ? -18 : -12],
 					iconImageSize: [active ? 36 : 24, active ? 36 : 24],
 					iconLayout: 'default#image'
 				}}

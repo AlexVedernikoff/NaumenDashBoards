@@ -8,9 +8,13 @@ import React, {Component} from 'react';
 import TooltipPoint from 'components/atoms/TooltipPoint';
 
 export class Line extends Component<Props, State> {
+	showContentMenu = () => {
+		const {part, toggleMapContextMenu} = this.props;
+		toggleMapContextMenu(part);
+	};
+
 	showSingle = () => () => {
 		const {part, setSingleObject} = this.props;
-
 		setSingleObject(part);
 	};
 
@@ -27,6 +31,7 @@ export class Line extends Component<Props, State> {
 				color={color}
 				dashArray={'0, 16'}
 				onClick={this.showSingle()}
+				onContextMenu={this.showContentMenu}
 				opacity={opacity}
 				positions={positions}
 				weight={weight}

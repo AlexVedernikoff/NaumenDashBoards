@@ -66,6 +66,15 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 					panelMapOpen: !state.controls.panelMapOpen
 				}
 			};
+		case GEOLOCATION_EVENTS.TOGGLE_MAP_CONTENT_MENU:
+			return {
+				...state,
+				controls: {
+					...state.controls,
+					mapContentMenuOpen: !state.controls.mapContentMenuOpen
+				},
+				singleObject: action.payload
+			};
 		case GEOLOCATION_EVENTS.SET_TAB:
 			return {
 				...state,
@@ -87,6 +96,10 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 		case GEOLOCATION_EVENTS.RESET_SINGLE_POINT:
 			return {
 				...state,
+				controls: {
+					...state.controls,
+					mapContentMenuOpen: false
+				},
 				showSingleObject: false,
 				singleObject: initialGeolocationState.singleObject
 			};

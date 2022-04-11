@@ -8,6 +8,11 @@ import React, {Component} from 'react';
 import TooltipPoint from 'components/atoms/TooltipPoint';
 
 export class Mark extends Component<Props, State> {
+	showContentMenu = () => {
+		const {point, toggleMapContextMenu} = this.props;
+		toggleMapContextMenu(point);
+	};
+
 	showSingle = () => () => {
 		const {point, setSingleObject} = this.props;
 		setSingleObject(point);
@@ -22,7 +27,8 @@ export class Mark extends Component<Props, State> {
 		return (
 			<Marker
 				icon={iconMarker}
-				onClick={this.showSingle}
+				onClick={this.showSingle()}
+				onContextMenu={this.showContentMenu}
 				position={[positions.latitude, positions.longitude]}
 			>
 				<TooltipPoint title={data.header} />
