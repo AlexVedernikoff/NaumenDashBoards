@@ -90,7 +90,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 
 			return attributes.filter(
 				attribute => groupsAttributes.find(
-					({attributeCode, metaClassCode}) => attrGroupCode === attribute.code && attribute.metaClassFqn === metaClassCode
+					({attributeCode, metaClassCode}) => attribute.code === attributeCode && attribute.metaClassFqn === metaClassCode
 				)
 			);
 		};
@@ -137,7 +137,6 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		updateContext = async (context: Context, classFqn: string, descriptor: string): Promise<FilterFormOptionsDTO> => {
 			const {fetchGroupsAttributes, isUserMode} = this.props;
 			const attrGroupCode = this.getAttrGroupCodeForSource(classFqn, descriptor);
-
 			const options: FilterFormOptionsDTO = {
 				restriction: null,
 				useRestriction: attrGroupCode !== null
