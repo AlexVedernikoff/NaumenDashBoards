@@ -1,0 +1,37 @@
+:local {
+	.legend {
+		height: 100%;
+		overflow: hidden;
+		width: 100%;
+	}
+
+	.legendItem {
+		align-content: center;
+		display: flex;
+		margin-bottom: 5px;
+	};
+
+	.legendItemBox {
+		display: inline-block;
+		flex: 0 0 auto;
+		margin: 0 5px;
+	};
+
+	.displayInlineHorizontalItem {
+		display: inline-block;
+	};
+
+	.cropLegendItem {
+		white-space: nowrap;
+		width: 100%;
+
+		span {
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	};
+
+	.wrapLegendItem {
+		white-space: normal;
+	};
+}

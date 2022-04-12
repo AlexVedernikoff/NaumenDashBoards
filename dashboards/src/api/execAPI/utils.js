@@ -2,13 +2,11 @@
 import type {DTOValue} from 'api/types';
 import {DISABLE_GET_METHOD, IS_USER_NEEDED_LIST} from './constants';
 
-const isUserNeeded = (module: string, method: string) => {
-	return IS_USER_NEEDED_LIST.some(({method: mth, module: md}) => module === md && method === mth);
-};
+const isUserNeeded = (module: string, method: string) =>
+	IS_USER_NEEDED_LIST.some(({method: mth, module: md}) => module === md && method === mth);
 
-const methodDisabledForGet = (module: string, method: string) => {
-	return DISABLE_GET_METHOD.some(({method: mth, module: md}) => module === md && method === mth);
-};
+const methodDisabledForGet = (module: string, method: string) =>
+	DISABLE_GET_METHOD.some(({method: mth, module: md}) => module === md && method === mth);
 
 const parseParams = (module: string, method: string, names: Array<string>, values: Array<DTOValue>) => {
 	let body;

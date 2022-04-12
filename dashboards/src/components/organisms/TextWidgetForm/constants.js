@@ -1,6 +1,6 @@
 // @flow
+import {DEFAULT_FONT} from 'store/widgets/data/constants';
 import {FIELDS} from 'components/organisms/WidgetFormPanel/constants';
-import {FONT_FAMILIES} from 'store/widgets/data/constants';
 
 const content: 'content' = 'content';
 const editorState: 'editorState' = 'editorState';
@@ -39,7 +39,7 @@ const HOT_KEYS_COMMANDS = {
 
 const DEFAULT_TEXT_WIDGET_SETTINGS: Object = {
 	color: '#323232',
-	fontFamily: FONT_FAMILIES[0],
+	fontFamily: DEFAULT_FONT,
 	fontSize: 16
 };
 

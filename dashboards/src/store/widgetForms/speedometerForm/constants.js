@@ -1,7 +1,7 @@
 // @flow
 import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
-import {DISPLAY_MODE, FONT_FAMILIES, FONT_STYLES, RANGES_POSITION, RANGES_TYPES, TEXT_HANDLERS} from 'store/widgets/data/constants';
-import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/chart';
+import {DEFAULT_FONT, DISPLAY_MODE, FONT_STYLES, RANGES_POSITION, RANGES_TYPES, TEXT_HANDLERS} from 'store/widgets/data/constants';
+import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/recharts/constants';
 import type {State} from './types';
 
 const DEFAULT_SPEEDOMETER_SETTINGS: Object = {
@@ -28,14 +28,14 @@ const DEFAULT_SPEEDOMETER_SETTINGS: Object = {
 		},
 		style: {
 			fontColor: '#323232',
-			fontFamily: FONT_FAMILIES[0],
+			fontFamily: DEFAULT_FONT,
 			fontSize: 18,
 			show: false
 		}
 	},
 	indicator: {
 		fontColor: '#323232',
-		fontFamily: FONT_FAMILIES[0],
+		fontFamily: DEFAULT_FONT,
 		fontSize: 'auto',
 		fontStyle: FONT_STYLES.BOLD,
 		show: true
@@ -50,7 +50,7 @@ const DEFAULT_SPEEDOMETER_SETTINGS: Object = {
 		style: {
 			displayType: LEGEND_DISPLAY_TYPES.BLOCK,
 			fontColor: '#323232',
-			fontFamily: FONT_FAMILIES[0],
+			fontFamily: DEFAULT_FONT,
 			fontSize: 16,
 			legendPosition: LEGEND_POSITIONS.right,
 			position: RANGES_POSITION.CURVE,

@@ -1,6 +1,7 @@
 // @flow
 import type {DrillDown, OpenCardObject} from 'store/widgets/links/types';
 import type {FetchTableBuildData} from 'store/widgets/buildData/types';
+import type {InjectOptionsProps} from 'containers/withBaseWidget/types';
 import type {TableWidget} from 'store/widgets/data/types';
 
 export type ConnectedProps = {
@@ -14,6 +15,6 @@ export type ConnectedFunctions = {
 	updateWidget: TableWidget => Object
 };
 
-export type Props = ConnectedProps & ConnectedFunctions & {
+export type Props = ConnectedProps & ConnectedFunctions & InjectOptionsProps & {
 	widget: TableWidget
 };

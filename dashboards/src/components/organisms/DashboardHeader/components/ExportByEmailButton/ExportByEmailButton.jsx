@@ -13,9 +13,9 @@ export class ExportByEmailButton extends PureComponent<Props, State> {
 		show: false
 	};
 
-	handleClickOutside = () => this.setState({ show: false });
+	handleClickOutside = () => this.setState({show: false});
 
-	handleToggleForm = () => this.setState({ show: !this.state.show });
+	handleToggleForm = () => this.setState({show: !this.state.show});
 
 	renderButton = () => (
 		<IconButton

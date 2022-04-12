@@ -11,7 +11,8 @@ export default {
 
 const Template = args => {
 	const [{multiple, options, value, values}, updateArgs] = useArgs();
-	const onSelect = (event) => {
+
+	const onSelect = event => {
 		const {value} = event;
 
 		action('onSelect')(event);
@@ -60,7 +61,7 @@ export const Multiple = Template.bind({});
 
 Multiple.args = {
 	multiple: true,
-	options: [...new Array(10)].map((_, idx) => ({ label: `element${idx}`, value: `value${idx}` })),
+	options: [...new Array(10)].map((_, idx) => ({label: `element${idx}`, value: `value${idx}`})),
 	values: []
 };
 
@@ -68,7 +69,7 @@ export const ShowMore = Template.bind({});
 
 ShowMore.args = {
 	multiple: true,
-	options: [...new Array(5)].map((_, idx) => ({ label: `element${idx}`, value: `value${idx}` })),
+	options: [...new Array(5)].map((_, idx) => ({label: `element${idx}`, value: `value${idx}`})),
 	showMore: true,
 	values: []
 };

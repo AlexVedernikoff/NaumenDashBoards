@@ -5,7 +5,7 @@ import {DISPLAY_TYPE_OPTIONS, POSITION_OPTIONS} from 'WidgetFormPanel/components
 import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
 import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
 import FormField from 'components/molecules/FormField';
-import {LEGEND_POSITIONS} from 'utils/chart/constants';
+import {LEGEND_POSITIONS} from 'utils/recharts/constants';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';

@@ -9,7 +9,7 @@ import {FONT_SIZE_OPTIONS, RANGES_POSITION_OPTIONS} from './constants';
 import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
 import FontStyleControl from 'WidgetFormPanel/components/FontStyleControl';
 import FormField from 'components/molecules/FormField';
-import {LEGEND_POSITIONS} from 'utils/chart/constants';
+import {LEGEND_POSITIONS} from 'utils/recharts/constants';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props} from './types';

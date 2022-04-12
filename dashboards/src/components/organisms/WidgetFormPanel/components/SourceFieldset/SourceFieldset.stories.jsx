@@ -86,20 +86,22 @@ export default {
 	title: 'Organisms/WidgetFormPanel/Components/SourceFieldset'
 };
 
-const Template = (args) => {
+const Template = args => {
 	const [{value}, updateArgs] = useArgs();
+
 	const onChangeDataSet = (name, source) => {
 		action('onChange')(name, source);
 		updateArgs({
 			dataSet: {...args.dataSet, source}
 		});
 	};
-	const onAction = (actionName) => (...args) => {
+
+	const onAction = actionName => (...args) => {
 		action(actionName)(args);
 	};
 
 	return (
-		<div style={{ width: 300 }}>
+		<div style={{width: 300}}>
 			<SourceFieldset
 				{...args}
 				onChangeDataSet={onChangeDataSet}

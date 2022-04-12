@@ -1,6 +1,6 @@
 // @flow
 import {ICON_NAMES} from 'components/atoms/Icon';
-import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/chart';
+import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/recharts/constants';
 import type {PositionOption} from './types';
 
 const POSITION_OPTIONS: Array<PositionOption> = [

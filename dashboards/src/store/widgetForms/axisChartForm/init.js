@@ -8,7 +8,7 @@ import {
 	DEFAULT_TOOLTIP_SETTINGS,
 	DISPLAY_MODE
 } from 'store/widgets/data/constants';
-import {DEFAULT_CHART_SETTINGS} from 'utils/chart/constants';
+import {DEFAULT_CHART_SETTINGS} from 'utils/recharts/constants';
 import {DEFAULT_DATA_KEY} from 'store/widgetForms/constants';
 import type {State} from './types';
 

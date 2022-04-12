@@ -4,13 +4,11 @@ import {calcLayout, checkFontSize, getAngleByValue, normalizingRanges} from './h
 import type {Components, Props, State} from './types';
 import * as CSS from './css';
 import {DEFAULT_SPEEDOMETER_SETTINGS} from 'store/widgetForms/speedometerForm/constants';
-import {LEGEND_DISPLAY_TYPES} from 'utils/chart/constants';
-import {LEGEND_POSITIONS} from 'utils/chart';
+import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/recharts/constants';
 import Needle from './components/Needle';
 import Range from './components/Range';
 import {RANGES_POSITION, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import React, {Fragment, PureComponent} from 'react';
-import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
 import Text from './components/Text';
 import type {TextProps as RangeTextProps} from './components/Range/types';
@@ -54,54 +52,57 @@ export class Speedometer extends PureComponent<Props, State> {
 		return components ? {...this.components, ...components} : this.components;
 	};
 
-	handleResize = (width: number, height: number) => {
-		const {options: {borders, ranges}} = this.props;
-		const {style: rangesStyles = DEFAULT_SPEEDOMETER_SETTINGS.ranges.style, use: rangesUse} = ranges;
-		const {legendPosition} = rangesStyles;
-		const hasLegend = ranges.use && rangesStyles.show && rangesStyles.position === RANGES_POSITION.LEGEND;
-		const legendInVertical = legendPosition === LEGEND_POSITIONS.left || legendPosition === LEGEND_POSITIONS.right;
-		const {style: borderStyle = DEFAULT_SPEEDOMETER_SETTINGS.borders.style} = borders;
+	static getDerivedStateFromProps (props: Props, state: State) {
+		const {options: {borders, ranges, size: {height, width}}} = props;
 
-		let legendWidth = 0;
-		let graphWidth = width;
-		let legendHeight = 0;
-		let graphHeight = height;
+		if (state.width !== width || state.height !== height) {
+			const {style: rangesStyles = DEFAULT_SPEEDOMETER_SETTINGS.ranges.style, use: rangesUse} = ranges;
+			const {legendPosition} = rangesStyles;
+			const hasLegend = ranges.use && rangesStyles.show && rangesStyles.position === RANGES_POSITION.LEGEND;
+			const legendInVertical = legendPosition === LEGEND_POSITIONS.left || legendPosition === LEGEND_POSITIONS.right;
+			const {style: borderStyle = DEFAULT_SPEEDOMETER_SETTINGS.borders.style} = borders;
 
-		if (hasLegend) {
-			if (legendInVertical) {
-				legendWidth = Math.round(width / 4);
-				graphWidth = width - legendWidth;
-				legendHeight = height;
-			} else {
-				legendHeight = Math.round(height / 4);
-				graphHeight = height - legendHeight;
-				legendWidth = width;
+			let legendWidth = 0;
+			let graphWidth = width;
+			let legendHeight = 0;
+			let graphHeight = height;
+
+			if (hasLegend) {
+				if (legendInVertical) {
+					legendWidth = Math.round(width / 4);
+					graphWidth = width - legendWidth;
+					legendHeight = height;
+				} else {
+					legendHeight = Math.round(height / 4);
+					graphHeight = height - legendHeight;
+					legendWidth = width;
+				}
 			}
+
+			let offsetArcX = 0;
+			let offsetArcY = 0;
+
+			if (hasLegend) {
+				if (legendPosition === LEGEND_POSITIONS.left) {
+					offsetArcX = legendWidth;
+				}
+
+				if (legendPosition === LEGEND_POSITIONS.top) {
+					offsetArcY = legendHeight;
+				}
+			}
+
+			const hasCurveText = rangesUse && rangesStyles.show && rangesStyles.position === RANGES_POSITION.CURVE;
+			const curveFontSize = hasCurveText ? checkFontSize(rangesStyles.fontSize, DEFAULT_SPEEDOMETER_SETTINGS.ranges.style.fontSize) : 0;
+			const borderFontSize = borderStyle.show ? checkFontSize(borderStyle.fontSize, BASE_BORDER_FONT_SIZE) : 0;
+			const layout = calcLayout(graphWidth, graphHeight, curveFontSize, borderFontSize, TITLE_STYLE.fontSize);
+			const {arcX: baseArcX, arcY: baseArcY, fontSizeScale, radius} = layout;
+			const arcX = baseArcX + offsetArcX;
+			const arcY = baseArcY + offsetArcY;
+
+			return {arcX, arcY, fontSizeScale, graphHeight, graphWidth, height, legendHeight, legendPosition, legendWidth, radius, width};
 		}
-
-		let offsetArcX = 0;
-		let offsetArcY = 0;
-
-		if (hasLegend) {
-			if (legendPosition === LEGEND_POSITIONS.left) {
-				offsetArcX = legendWidth;
-			}
-
-			if (legendPosition === LEGEND_POSITIONS.top) {
-				offsetArcY = legendHeight;
-			}
-		}
-
-		const hasCurveText = rangesUse && rangesStyles.show && rangesStyles.position === RANGES_POSITION.CURVE;
-		const curveFontSize = hasCurveText ? rangesStyles.fontSize : 0;
-		const borderFontSize = borderStyle.show ? checkFontSize(borderStyle.fontSize, BASE_BORDER_FONT_SIZE) : 0;
-		const layout = calcLayout(graphWidth, graphHeight, curveFontSize, borderFontSize, TITLE_STYLE.fontSize);
-		const {arcX: baseArcX, arcY: baseArcY, fontSizeScale, radius} = layout;
-		const arcX = baseArcX + offsetArcX;
-		const arcY = baseArcY + offsetArcY;
-
-		this.setState({arcX, arcY, fontSizeScale, graphHeight, graphWidth, height, legendHeight, legendPosition, legendWidth, radius, width});
-	};
+	}
 
 	renderBorderValue = (x: number, value: number) => {
 		const {options: {borders}} = this.props;
@@ -288,20 +289,6 @@ export class Speedometer extends PureComponent<Props, State> {
 		);
 	};
 
-	renderSpeedometer = () => {
-		const {height, width} = this.state;
-		return (
-			<svg className="speedometer" height={height} width={width} xmlns="http://www.w3.org/2000/svg">
-				{this.renderRanges()}
-				{this.renderNeedle()}
-				{this.renderLegend()}
-				{this.renderBorders()}
-				{this.renderTitle()}
-				{this.renderValue()}
-			</svg>
-		);
-	};
-
 	renderTitle = () => {
 		const {options: {borders, data: {title, tooltip}}} = this.props;
 		const {arcX, arcY, fontSizeScale, graphWidth, radius} = this.state;
@@ -349,12 +336,18 @@ export class Speedometer extends PureComponent<Props, State> {
 	};
 
 	render () {
+		const {height, width} = this.state;
 		return (
-			<ResizeDetector onResize={this.handleResize}>
-				<div className={styles.container} ref={this.props.forwardedRef}>
-					{this.renderSpeedometer()}
-				</div>
-			</ResizeDetector>
+			<div className={styles.container}>
+				<svg className="speedometer" height={height} width={width} xmlns="http://www.w3.org/2000/svg">
+					{this.renderRanges()}
+					{this.renderNeedle()}
+					{this.renderLegend()}
+					{this.renderBorders()}
+					{this.renderTitle()}
+					{this.renderValue()}
+				</svg>
+			</div>
 		);
 	}
 }

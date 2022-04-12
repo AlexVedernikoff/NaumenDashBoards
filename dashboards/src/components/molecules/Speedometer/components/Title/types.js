@@ -21,7 +21,7 @@ export type Props = {
 	fontSizeScale: number,
 	style: TextStyle,
 	title: string,
-	tooltip?: string,
+	tooltip: string | null,
 	width: number,
 	y: number
 };

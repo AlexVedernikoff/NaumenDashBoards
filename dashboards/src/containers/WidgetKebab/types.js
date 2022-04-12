@@ -1,5 +1,6 @@
 // @flow
 import type {AnyWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import type {DrillDown} from 'store/widgets/links/types';
 import type {Ref} from 'components/types';
 import type {ThunkAction} from 'store/types';
 
@@ -40,7 +41,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	drillDown: (widget: Widget, index: number) => ThunkAction,
+	drillDown: DrillDown,
 	editWidgetChunkData: (widget: AnyWidget, chunkData: Object) => ThunkAction,
 	exportTableToXLSX: (widget: TableWidget) => ThunkAction,
 	openNavigationLink: (dashboardId: string, widgetId: string) => ThunkAction,

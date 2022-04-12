@@ -1,7 +1,7 @@
 // @flow
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
+import {DEFAULT_FONT} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import {FONT_FAMILIES} from 'store/widgets/data/constants';
 import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
 import {FONT_SIZE_OPTIONS} from './constants';
 import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
@@ -36,7 +36,7 @@ export class AxisSettingsBox extends PureComponent<Props> {
 	};
 
 	renderFontFormat =() => {
-		const {fontFamily = FONT_FAMILIES[0], fontSize = 12, show} = this.props.value;
+		const {fontFamily = DEFAULT_FONT, fontSize = 12, show} = this.props.value;
 
 		if (show) {
 			return (

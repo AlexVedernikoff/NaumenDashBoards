@@ -25,7 +25,7 @@ type RecordStateDataError = {payload: string, type: 'RECORD_META_CLASS_STATES_ER
 
 type RequestStateData = {payload: string, type: 'REQUEST_META_CLASS_STATES'};
 
-type UnknownStatesAction = { type: 'UNKNOWN_STATES_ACTION'};
+type UnknownStatesAction = {type: 'UNKNOWN_STATES_ACTION'};
 
 export type StatesAction =
 	| ReceiveStateData

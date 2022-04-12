@@ -1,6 +1,6 @@
 // @flow
 import ColorField from 'WidgetFormPanel/components/ColorsBox/components/ColorField';
-import {equalLabels, getBreakdownColors} from 'utils/chart/helpers';
+import {equalLabels, getBreakdownColors} from 'utils/recharts/helpers';
 import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';

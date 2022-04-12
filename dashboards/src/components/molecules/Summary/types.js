@@ -1,8 +1,12 @@
 // @flow
 import type {DivRef} from 'components/types';
 import type {FontStyle} from 'store/widgets/data/types';
-import type {Options} from 'utils/chart/types';
 import type {Position} from 'components/molecules/WidgetTooltip/components/Message/types';
+import type {SummaryOptions} from 'utils/recharts/types';
+
+export type Options = SummaryOptions & {
+	value: number
+};
 
 export type Props = {
 	color: string,

@@ -39,7 +39,7 @@ type RecordCatalogItemSetDataError = {payload: string, type: 'RECORD_CATALOG_ITE
 
 type RequestCatalogItemSetData = {payload: string, type: 'REQUEST_CATALOG_ITEM_SET_DATA'};
 
-type UnknownCatalogItemSetsAction = { type: 'UNKNOWN_CATALOG_ITEM_SETS_ACTION'};
+type UnknownCatalogItemSetsAction = {type: 'UNKNOWN_CATALOG_ITEM_SETS_ACTION'};
 
 export type CatalogItemSetsAction =
 	| ReceiveCatalogItemSetData

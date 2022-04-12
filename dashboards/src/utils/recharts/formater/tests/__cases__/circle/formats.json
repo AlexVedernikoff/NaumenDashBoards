@@ -1,0 +1,195 @@
+{
+	"container": {
+		"clientWidth": 1210
+	},
+	"labels": [
+		"Согласовано#accepted",
+		"Завершено#closed",
+		"Отказано#denied",
+		"В процессе (просрочен)#expired",
+		"В процессе#registered"
+	],
+	"widget": {
+		"colorsSettings": {
+			"auto": {
+				"colors": [
+					"#EA3223",
+					"#999999",
+					"#2C6FBA",
+					"#4EAD5B",
+					"#DE5D30",
+					"#67369A",
+					"#F6C142",
+					"#4CAEEA",
+					"#A1BA66",
+					"#B02318",
+					"#536130",
+					"#DCA5A2",
+					"#928A5B",
+					"#9BB3D4",
+					"#8C4A1C",
+					"#FFFE55"
+				]
+			},
+			"custom": {
+				"data": null,
+				"useGlobal": false
+			},
+			"type": "AUTO"
+		},
+		"name": "21344234",
+		"id": "root_DH6175_125faf10-1f86-4baf-bbe7-22e0e95f1fe0",
+		"type": "PIE",
+		"computedAttrs": [],
+		"dataLabels": {
+			"fontColor": "#323232",
+			"show": true,
+			"showShadow": false,
+			"showSubTotalAmount": false,
+			"showTotalAmount": false,
+			"disabled": false,
+			"format": {
+				"type": "NUMBER_FORMAT",
+				"additional": null,
+				"symbolCount": 2,
+				"notation": null,
+				"splitDigits": false
+			},
+			"fontSize": 14,
+			"fontFamily": "Roboto",
+			"computedFormat": {
+				"additional": null,
+				"notation": null,
+				"splitDigits": false,
+				"symbolCount": 0,
+				"type": "NUMBER_FORMAT"
+			}
+		},
+		"breakdownFormat": {
+			"type": "LABEL_FORMAT",
+			"labelFormat": "CODE"
+		},
+		"displayMode": "ANY",
+		"header": {
+			"fontColor": "#323232",
+			"name": "21344234",
+			"position": "TOP",
+			"show": true,
+			"template": "",
+			"textAlign": "left",
+			"textHandler": "CROP",
+			"useName": true,
+			"fontSize": 16,
+			"fontFamily": "Roboto"
+		},
+		"navigation": {
+			"dashboard": null,
+			"show": false,
+			"showTip": false,
+			"tip": "",
+			"widget": null
+		},
+		"legend": {
+			"displayType": "BLOCK",
+			"position": "right",
+			"show": true,
+			"textHandler": "CROP",
+			"fontSize": 14,
+			"fontFamily": "Roboto"
+		},
+		"sorting": {
+			"type": "ASC",
+			"value": "PARAMETER"
+		},
+		"templateName": "21344234",
+		"data": [
+			{
+				"showEmptyData": false,
+				"showBlankData": false,
+				"sourceForCompute": false,
+				"dataKey": "907870b7-7b69-4a4b-a6c7-a570ae9b433c",
+				"top": {
+					"count": 5,
+					"show": false
+				},
+				"breakdown": [
+					{
+						"group": {
+							"way": "SYSTEM",
+							"data": "OVERLAP"
+						},
+						"attribute": {
+							"code": "state",
+							"title": "Статус",
+							"type": "state",
+							"metaClassFqn": "task",
+							"declaredMetaClass": "task",
+							"sourceName": "Задача",
+							"sourceCode": "task"
+						},
+						"dataKey": "907870b7-7b69-4a4b-a6c7-a570ae9b433c"
+					}
+				],
+				"indicators": [
+					{
+						"aggregation": "COUNT_CNT",
+						"attribute": {
+							"code": "UUID",
+							"title": "Уникальный идентификатор",
+							"type": "string",
+							"metaClassFqn": "task",
+							"declaredMetaClass": "abstractBO",
+							"sourceName": "Задача",
+							"sourceCode": "task"
+						}
+					}
+				],
+				"source": {
+					"descriptor": "",
+					"widgetFilterOptions": [],
+					"value": {
+						"label": "Задача",
+						"value": "task"
+					},
+					"filterId": null
+				}
+			}
+		]
+	},
+	"breakdown": [["Согласовано#accepted", "accepted"]],
+	"dataLabel": [
+		[
+			33.46733668341709,
+			"33.47",
+			{ "seriesIndex": 0, "w": { "config": { "series": { "0": 333 } } } }
+		],
+		[
+			23.517587939698494,
+			"23.52",
+			{ "seriesIndex": 1, "w": { "config": { "series": { "1": 234 } } } }
+		],
+		[
+			22.613065326633166,
+			"22.61",
+			{ "seriesIndex": 2, "w": { "config": { "series": { "2": 225 } } } }
+		],
+		[
+			19.497487437185928,
+			"19.50",
+			{ "seriesIndex": 3, "w": { "config": { "series": { "3": 194 } } } }
+		],
+		[
+			19.497487437185928,
+			"19.50",
+			{ "seriesIndex": 3, "w": { "config": { "series": { "3": 194 } } } }
+		]
+	],
+	"legend": [
+		["Согласовано#accepted", "accepted"],
+		["Завершено#closed", "closed"],
+		["Отказано#denied", "denied"],
+		["В процессе (просрочен)#expired", "expired"],
+		["В процессе#registered", "registered"]
+	],
+	"tooltip": [[333, "333.00"]]
+}

@@ -122,7 +122,7 @@ const exportParamsSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 		}
 
 		return {
-			availableOptions: availableOptions.map(value => ({ label: value.toUpperCase(), value })),
+			availableOptions: availableOptions.map(value => ({label: value.toUpperCase(), value})),
 			icon: ICON_NAMES.EXPORT,
 			text: t('WidgetKebab::Export'),
 			value: null

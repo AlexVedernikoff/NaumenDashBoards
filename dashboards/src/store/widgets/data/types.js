@@ -25,7 +25,7 @@ import {
 } from './constants';
 import type {DashboardItem, WidgetItem} from 'store/dashboards/types';
 import {GROUP_WAYS} from 'store/widgets/constants';
-import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/chart';
+import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/recharts/constants';
 import NewWidget from './NewWidget';
 
 export type ResetFocusedWidget = () => Action;
@@ -376,7 +376,7 @@ export type SpeedometerIndicatorSettings = {
 	fontColor: string,
 	fontFamily: string,
 	fontSize: number | string,
-	fontStyle?: FontStyle,
+	fontStyle: ?FontStyle,
 	format?: NumberAxisFormat,
 	show: boolean
 };
@@ -417,7 +417,7 @@ export type RangesStyle = {
 	fontColor: string,
 	fontFamily: string,
 	fontSize: number | string,
-	fontStyle: FontStyle,
+	fontStyle: ?FontStyle,
 	format: ?NumberAxisFormat,
 	legendPosition: LegendPosition,
 	position: RangesPosition,

@@ -14,17 +14,17 @@ const Template = args => {
 	const [{value}, updateArgs] = useArgs();
 	const updateArgsDebounce = debounce(updateArgs, 1000);
 
-	const onChange = (value) => {
+	const onChange = value => {
 		action('onChange')(value);
-		updateArgsDebounce({ value });
+		updateArgsDebounce({value});
 	};
 
-	const onFocus = (event) => {
+	const onFocus = event => {
 		action('onFocus')(event);
 	};
 
 	return (
-		<div style={{ backgroundColor: '#ffffff', width: '300px' }}>
+		<div style={{backgroundColor: '#ffffff', width: '300px'}}>
 			<SearchInput
 				{...args}
 				onChange={onChange}

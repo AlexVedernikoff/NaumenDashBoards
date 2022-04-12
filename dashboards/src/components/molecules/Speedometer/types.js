@@ -1,9 +1,9 @@
 // @flow
 import type {ComponentProps as TextProps} from './components/Text/types';
 import type {DivRef} from 'components/types';
-import type {Options} from 'utils/chart/types';
 import type {Props as NeedleProps} from './components/Needle/types';
 import type {Props as RangeProps} from './components/Range/types';
+import type {SpeedometerOptions} from 'utils/recharts/types';
 
 export type Components = {
 	Needle: React$ComponentType<NeedleProps>,
@@ -15,7 +15,7 @@ export type Props = {
 	color: string,
 	components?: Components,
 	forwardedRef: DivRef,
-	options: Options
+	options: SpeedometerOptions
 };
 
 export type State = {

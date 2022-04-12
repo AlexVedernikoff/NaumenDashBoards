@@ -187,16 +187,16 @@ const saveWidgetWithNewFilters = (widget: Widget): ThunkAction =>
 
 /**
  * Обновляет настройки цветов из глобальных источников
- * @param {AnyWidget} awidget - виджет
+ * @param {AnyWidget} anyWidget - виджет
  * @returns {ThunkAction}
  */
-const updateWidgetCustomColorsSettings = (awidget: AnyWidget) => async (dispatch: Dispatch, getState: GetState): Promise<boolean> => {
+const updateWidgetCustomColorsSettings = (anyWidget: AnyWidget) => async (dispatch: Dispatch, getState: GetState): Promise<boolean> => {
 	let isChanged = false;
 	const state = getState();
 
-	if (awidget.type !== WIDGET_TYPES.TEXT) {
+	if (anyWidget.type !== WIDGET_TYPES.TEXT) {
 		// $FlowFixMe: это не WIDGET_TYPES.TEXT => Widget
-		const widget = (awidget: Widget);
+		const widget = (anyWidget: Widget);
 		const settings = getWidgetGlobalChartColorsSettings(widget)(state);
 
 		if (settings) {

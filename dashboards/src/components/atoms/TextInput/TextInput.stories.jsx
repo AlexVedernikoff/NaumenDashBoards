@@ -11,16 +11,16 @@ export default {
 const Template = args => {
 	const [{value}, updateArgs] = useArgs();
 
-	const onBlur = (event) => {
+	const onBlur = event => {
 		action('onBlur')(event);
 	};
 
 	const onChange = ({name, value}) => {
 		action('onChange')({name, value});
-		updateArgs({ value });
+		updateArgs({value});
 	};
 
-	const onFocus = (event) => {
+	const onFocus = event => {
 		action('onFocus')(event);
 	};
 

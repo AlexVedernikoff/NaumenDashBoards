@@ -2,7 +2,7 @@
 import {createSummaryDataSet} from './helpers';
 import {DEFAULT_DATA_KEY} from 'store/widgetForms/constants';
 import {DEFAULT_HEADER_SETTINGS, DEFAULT_NAVIGATION_SETTINGS, DEFAULT_TOOLTIP_SETTINGS, DISPLAY_MODE} from 'store/widgets/data/constants';
-import {DEFAULT_SUMMARY_SETTINGS} from 'components/organisms/SummaryWidget/constants';
+import {DEFAULT_SUMMARY_SETTINGS} from './constants';
 import type {State} from './types';
 
 export const initialState: State = {

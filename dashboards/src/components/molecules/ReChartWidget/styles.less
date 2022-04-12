@@ -1,0 +1,59 @@
+@import '/styles/variables';
+
+.rechart_dataLabels_shadow { // для теней у dataLabels
+	filter: drop-shadow(0px 0px 2px rgba(0,0,0,.9));
+}
+
+:local {
+	.chart {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+
+		&.circleChart {
+			position: relative;
+
+			.container {
+				height: 100%;
+			}
+
+			.total {
+				bottom: 0;
+				flex: auto;
+				left: 0;
+				position: absolute;
+			}
+		}
+	}
+
+	.container {
+		flex: 1 1 auto;
+		overflow: hidden;
+
+		&:hover {
+			overflow: visible;
+		}
+	}
+
+	.total {
+		flex: 0 0 auto;
+		font-weight: bold;
+		margin: 6px 0 0 0;
+	}
+
+	.blockLegend :global(.apexcharts-legend) {
+		display: block !important;
+	}
+
+	.inlineLegend :global(.apexcharts-legend) {
+		display: flex !important;
+	}
+}
+
+.apexcharts-canvas ::-webkit-scrollbar {
+	height: 6px;
+}
+
+.apexcharts-toolbar {
+	display: none !important;
+}
