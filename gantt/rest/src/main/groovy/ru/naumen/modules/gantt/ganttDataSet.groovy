@@ -18,6 +18,7 @@ import ru.naumen.core.shared.IUUIDIdentifiable
 import static groovy.json.JsonOutput.toJson
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
+
 interface GanttDataSetController
 {
     /**
@@ -27,6 +28,14 @@ interface GanttDataSetController
      * @return данные для построения диаграммы Ганта.
      */
     String getGanttDiagramData(Map<String, String> requestData, IUUIDIdentifiable user)
+
+    /**
+     * Метод получения данных для построения версий диаграммы Ганта
+     * @param request - тело запроса [subjectUUID:..., contentCode: ...]
+     * @param user - пользователь
+     * @return данные для построения диаграммы Ганта
+     */
+    String getGanttVersionDiagramData(String versionKey, IUUIDIdentifiable user, String timezone)
 }
 
 @InheritConstructors
@@ -37,8 +46,15 @@ class GanttDataSetImpl implements GanttDataSetController
     @Override
     String getGanttDiagramData(Map<String, String> requestContent, IUUIDIdentifiable user)
     {
-        GetGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, GetGanttSettingsRequest)
+        GetGanttSettingsRequest request = new ObjectMapper()
+            .convertValue(requestContent, GetGanttSettingsRequest)
         return toJson(service.getGanttDiagramData(request, user))
+    }
+
+    @Override
+    String getGanttVersionDiagramData(String versionKey, IUUIDIdentifiable user, String timezone)
+    {
+        return service.getGanttVersionDiagramData(versionKey, user, timezone)
     }
 }
 
@@ -111,6 +127,70 @@ class GanttDataSetService
     }
 
     /**
+     * Метод получения данных для построения версий диаграммы Ганта
+     * @param request - тело запроса [subjectUUID:..., contentCode: ...]
+     * @param user - пользователь
+     * @return данные для построения диаграммы Ганта
+     */
+    GanttVersionDiagramData getGanttVersionDiagramData(String versionKey,
+                                                       IUUIDIdentifiable user,
+                                                       String timezone)
+    {
+        GanttSettingsService service = GanttSettingsService.instance
+        GanttVersionsSettingsClass settings =
+            service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
+        GanttVersionDiagramData data = new GanttVersionDiagramData()
+
+        data.commonSettings = settings.ganttSettings.commonSettings
+        data.diagramKey = settings.ganttSettings.diagramKey
+        data.workRelations = settings.ganttSettings.workRelations
+        data.workProgresses = settings.ganttSettings.workProgresses
+        data.workRelationCheckbox = settings.ganttSettings.workRelationCheckbox
+        data.progressCheckbox = settings.ganttSettings.progressCheckbox
+        data.startDate = settings.ganttSettings.startDate
+        data.endDate = settings.ganttSettings.endDate
+        data.diagramVersionsKeys = settings.ganttSettings.diagramVersionsKeys
+        data.createdDate = settings.createdDate
+        data.title = settings.title
+        data.versionKey = settings.versionKey
+        settings.ganttSettings.works
+
+        GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
+        settings.ganttSettings.resourceAndWorkSettings.each {
+            String metaClassCode = it.source.value.value
+            data.attributesMap.put(
+                metaClassCode,
+                ganttWorkHandlerService.getAttributeGroups(metaClassCode)
+            )
+        }
+
+        if (!(settings?.ganttSettings.resourceAndWorkSettings))
+        {
+            data.tasks = []
+        }
+        else
+        {
+            data.tasks =
+                buildDataListFromSettings(settings.ganttSettings.resourceAndWorkSettings, null)
+            TimeZone timeZone =
+                TimeZone.getTimeZone(
+                    api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: timezone
+                )
+            ResourceAndWorkSettings workAttributeSettings =
+                settings.ganttSettings.resourceAndWorkSettings.find {
+                    it.startWorkAttribute && it.endWorkAttribute
+                }
+            data.tasks.each {
+                formatWorkDates(it, workAttributeSettings, timeZone)
+                setWorkTypeToProjectIfItHasChildren(it, data.tasks)
+                setWorkProgressVersion(it, settings)
+                setColumnDateFormats(it, timeZone)
+            }
+        }
+        return data
+    }
+
+    /**
      * Замена формата даты для колонок
      * @param work - работа
      * @param timezone - таймзона
@@ -147,6 +227,17 @@ class GanttDataSetService
     }
 
     /**
+     * Установить данные прогресса для работы версий
+     * @param work - работа
+     * @param ganttSettings - настройки диаграммы, где хранится прогресс
+     */
+    private void setWorkProgressVersion(Map work, GanttVersionsSettingsClass ganttSettings)
+    {
+        Double progress = ganttSettings.ganttSettings.workProgresses[work.id]
+        work.progress = progress ?: 0
+    }
+
+    /**
      * Метод изменения типа работы на 'project', если у нее есть дочерние работы
      * @param work - текущая работа
      * @param allWorks - все работы
@@ -154,7 +245,8 @@ class GanttDataSetService
     private void setWorkTypeToProjectIfItHasChildren(Map work, Collection<Map> allWorks)
     {
         allWorks.each {
-            if (it.parent == work.id) {
+            if (it.parent == work.id)
+            {
                 work.type = 'project'
             }
         }
@@ -166,7 +258,9 @@ class GanttDataSetService
      * @param workAttributeSettings - настройки работы
      * @param timezone - таймзона
      */
-    private void formatWorkDates(Map work, ResourceAndWorkSettings workAttributeSettings, TimeZone timezone)
+    private void formatWorkDates(Map work,
+                                 ResourceAndWorkSettings workAttributeSettings,
+                                 TimeZone timezone)
     {
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         if (work.start_date)
@@ -220,7 +314,8 @@ class GanttDataSetService
      * @param parentUUID - уникальный идентификатор записи в БД о родителе
      * @return список Map<String, String> параметров для построения диаграммы
      */
-    public List<Map<String, String>> buildDataListFromSettings(List<ResourceAndWorkSettings> settingsList, String parentUUID)
+    public List<Map<String, String>> buildDataListFromSettings(List<ResourceAndWorkSettings> settingsList,
+                                                               String parentUUID)
     {
         /* За текущую настройку из списка настроек, берется 1-ый элемент settingsList[0]. В цикле совершается поиск таких
            настроек, для которых уровень вложенности level равен level-у текущей. Таким образом находятся по сути соседние
@@ -273,10 +368,12 @@ class GanttDataSetService
             }
 
             // Собираем словарь из атрибутов, чтобы сделать запрос в БД.
-            Map<String, String> mapAttributes = ['id':'UUID', 'text':'title']
+            Map<String, String> mapAttributes = ['id': 'UUID', 'text': 'title']
 
             Collection<AttributeSettings> attributesList = settings.attributeSettings
-            mapAttributes << attributesList.collectEntries { [(it.code) : prepare(it.attribute)] }
+            mapAttributes << attributesList.collectEntries {
+                [(it.code): prepare(it.attribute)]
+            }
             if (settings.communicationResourceAttribute)
             {
                 mapAttributes.put('parent', settings.communicationResourceAttribute.code + '.UUID')
@@ -305,7 +402,11 @@ class GanttDataSetService
             Source source = settings.source
             // Так как из БД нельзя получить повторяющиеся колонки, то имена атрибутов делаем уникальными.
             List<String> listAttributes = mapAttributes.values().toList().unique()
-            List<List<String>> res = getListResultsForParent(source, mapAttributes['parent'], parentUUID?.takeWhile {it != '_'}, listAttributes)
+            List<List<String>> res = getListResultsForParent(
+                source, mapAttributes['parent'], parentUUID?.takeWhile {
+                it != '_'
+            }, listAttributes
+            )
             if (res)
             {
                 /* Из БД пришел набор данных. Необходимо задать правильное соответствие между названием
@@ -314,22 +415,26 @@ class GanttDataSetService
                    строим словарь-соответствие между наименованиями полей (id, text... и тд.) и номером
                    столбца набора данных, пришедшего из БД (0..n). */
                 Map<String, Integer> mapAttributesIndexes = [:]
-                mapAttributes.each {key, value ->
+                mapAttributes.each { key, value ->
                     Integer ind = listAttributes.indexOf(value)
                     mapAttributesIndexes.put(key, [ind: ind, attr: value])
                 }
 
                 // Преобразование в список из словарей (добавление к значениям, полученным из БД, ключей).
                 List<Map<String, String>> resMap = []
-                res.each { item ->
-                    Map<String, String> itemMap = mapAttributesIndexes.collectEntries { key, valueMap ->
-                        return [(key) : updateIfMetaClass(item[valueMap.ind], valueMap.attr)]
-                    }
-                    itemMap.id += "_${UUID.randomUUID()}" //добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
+                res.each { item
+                    ->
+                    Map<String, String> itemMap =
+                        mapAttributesIndexes.collectEntries { key, valueMap ->
+                            return [(key): updateIfMetaClass(item[valueMap.ind], valueMap.attr)]
+                        }
+                    itemMap.id += "_${ UUID.randomUUID() }"
+                    //добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
 
-                    if(itemMap.parent)
+                    if (itemMap.parent)
                     {
-                        itemMap.parent = parentUUID//добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
+                        itemMap.parent = parentUUID
+//добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
                     }
 
                     resMap.add(itemMap)
@@ -337,17 +442,17 @@ class GanttDataSetService
 
                 // Добавление данных, общих для списка.
                 resMap.each {
-                    it << ['level' : settings.level]
-                    it << ['type' : settings.type]
+                    it << ['level': settings.level]
+                    it << ['type': settings.type]
                     if (settings.type == SourceType.WORK)
                     {
                         if (!isStartDate)
                         {
-                            it << ['start_date' : null]
+                            it << ['start_date': null]
                         }
                         if (!isEndDate)
                         {
-                            it << ['end_date' : null]
+                            it << ['end_date': null]
                         }
                     }
                 }
@@ -364,7 +469,8 @@ class GanttDataSetService
                         // Добавление элемента в результирующий список.
                         result.add(it)
                         // Рекурсивный вызов для "потомков". Список с настройками передается со второго элемента.
-                        result.addAll(buildDataListFromSettings(settingsList[(i + 1)..-1], it['id']))
+                        result
+                            .addAll(buildDataListFromSettings(settingsList[(i + 1)..-1], it['id']))
                         return
                     }
                 }
@@ -385,13 +491,18 @@ class GanttDataSetService
      * @param attributes - список запрашиваемых атрибутов (колонок) для выборки
      * @return выборка из БД
      */
-    private List<List<String>> getListResultsForParent(Source source, String attrEq, String value, List<String> attributes)
+    private List<List<String>> getListResultsForParent(Source source,
+                                                       String attrEq,
+                                                       String value,
+                                                       List<String> attributes)
     {
         def sc = api.selectClause
         def criteria
         if (source.descriptor)
         {
-            criteria = source.descriptor.with(api.listdata.&createListDescriptor).with(api.listdata.&createCriteria)
+            criteria =
+                source.descriptor.with(api.listdata.&createListDescriptor)
+                      .with(api.listdata.&createCriteria)
         }
         else
         {

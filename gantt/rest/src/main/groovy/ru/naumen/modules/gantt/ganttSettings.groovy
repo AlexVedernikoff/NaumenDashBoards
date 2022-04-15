@@ -76,6 +76,20 @@ interface GanttSettingsController
     String saveGanttVersion(Map<String, Object> requestContent)
 
     /**
+     * Метод изменения полей в диаграмме версий
+     * @param ganttVersionsSettingsClass - настройки диаграммы версий
+     * @return измененные настройки диаграммы версий
+     */
+    GanttVersionsSettingsClass updateGanttVersionSettings(GanttVersionsSettingsDTOClass ganttVersionsSettingsDTO,
+                                                          String versionKey)
+
+    /**
+     * Метод удаления диаграмм версий из хранилища
+     * @param ganttVersionId - индексы значений
+     */
+    void deleteGanttVersionSettings(int ganttVersionId)
+
+    /**
      * Получение данных о пользователе
      * @param requestContent - параметры запроса (classFqn, contentCode)
      * @param user - текущий пользователь
@@ -98,28 +112,32 @@ class GanttSettingsImpl implements GanttSettingsController
     @Override
     String getDataSourceAttributes(Map<String, Object> requestContent)
     {
-        SourceAttributesRequest request = new ObjectMapper().convertValue(requestContent, SourceAttributesRequest)
+        SourceAttributesRequest request = new ObjectMapper()
+            .convertValue(requestContent, SourceAttributesRequest)
         return toJson(service.getDataSourceAttributes(request))
     }
 
     @Override
     String getDataSourceAttributeGroups(Map<String, Object> requestContent)
     {
-        BaseGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, BaseGanttSettingsRequest)
+        BaseGanttSettingsRequest request = new ObjectMapper()
+            .convertValue(requestContent, BaseGanttSettingsRequest)
         return toJson(service.getDataSourceAttributeGroups(request))
     }
 
     @Override
     String getGanttSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        GetGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, GetGanttSettingsRequest)
+        GetGanttSettingsRequest request = new ObjectMapper()
+            .convertValue(requestContent, GetGanttSettingsRequest)
         return Jackson.toJsonString(service.getGanttSettings(request))
     }
 
     @Override
     String saveGanttSettings(Map<String, Object> requestContent)
     {
-        SaveGanttSettingsRequest request = new ObjectMapper().convertValue(requestContent, SaveGanttSettingsRequest)
+        SaveGanttSettingsRequest request = new ObjectMapper()
+            .convertValue(requestContent, SaveGanttSettingsRequest)
         return Jackson.toJsonString(service.saveGanttSettings(request))
     }
 
@@ -132,8 +150,24 @@ class GanttSettingsImpl implements GanttSettingsController
     @Override
     String saveGanttVersion(Map<String, Object> requestContent)
     {
-        SaveGanttVersionSettingsRequest request = new ObjectMapper().convertValue(requestContent, SaveGanttVersionSettingsRequest)
+        SaveGanttVersionSettingsRequest request = new ObjectMapper()
+            .convertValue(requestContent, SaveGanttVersionSettingsRequest)
         return Jackson.toJsonString(service.saveGanttVersionSettings(request))
+    }
+
+    @Override
+    GanttVersionsSettingsClass updateGanttVersionSettings(GanttVersionsSettingsDTOClass ganttVersionsSettingsDTO,
+                                                          String versionKey)
+    {
+        GanttVersionsSettingsDTOClass request = new ObjectMapper().
+            convertValue(ganttVersionsSettingsDTO, GanttVersionsSettingsDTOClass)
+        return Jackson.toJsonString(service.updateGanttVersionSettings(request, versionKey))
+    }
+
+    @Override
+    void deleteGanttVersionSettings(int ganttVersionId)
+    {
+        service.deleteGanttVersionSettings(ganttVersionId)
     }
 
     @Override
@@ -174,7 +208,11 @@ class GanttSettingsService
     Collection<GanttDataSource> getDataSources(String classFqn = MAIN_FQN)
     {
         def children = getMetaClassChildren(classFqn)
-        return children.collectMany { mappingDataSource(it) }.sort { it.title }
+        return children.collectMany {
+            mappingDataSource(it)
+        }.sort {
+            it.title
+        }
     }
 
     /**
@@ -187,23 +225,31 @@ class GanttSettingsService
     Collection<Attribute> getDataSourceAttributes(SourceAttributesRequest request)
     {
         def metaInfo = api.metainfo.getMetaClass(request.classFqn)
-        def metaClassTypes =  api.metainfo.getTypes(request.classFqn)
+        def metaClassTypes = api.metainfo.getTypes(request.classFqn)
 
-        Collection<Attribute> attributes =  ([metaInfo] + metaClassTypes).collectMany { mc ->
+        Collection<Attribute> attributes = ([metaInfo] + metaClassTypes).collectMany { mc ->
             def attributes = request.types
-                ? mc?.attributes?.findAll { it.type.code in request.types ? it : null }
+                ? mc?.attributes?.findAll {
+                it.type.code in request.types ? it : null
+            }
                 : mc?.attributes?.toList()
 
-            if(request.parentClassFqn)
+            if (request.parentClassFqn)
             {
-                attributes = attributes.findAll { it.type.code in AttributeType.LINK_TYPES &&
-                                                  it.type.relatedMetaClass.code == request.parentClassFqn  ? it : null }
+                attributes = attributes.findAll {
+                    it.type.code in AttributeType.LINK_TYPES &&
+                    it.type.relatedMetaClass.code == request.parentClassFqn ? it : null
+                }
             }
 
             return attributes
                 ? mappingAttribute(attributes, mc.title, mc.code)
                 : []
-        }.unique { it.code }.sort { it.title }
+        }.unique {
+            it.code
+        }.sort {
+            it.title
+        }
 
         if (request.isForColumns)
         {
@@ -232,7 +278,11 @@ class GanttSettingsService
             return attributeGroups
                 ? mappingAttributeGroups(attributeGroups, mc.code)
                 : []
-        }.unique { it.code }.sort { it.title }
+        }.unique {
+            it.code
+        }.sort {
+            it.title
+        }
     }
 
     /**
@@ -268,7 +318,8 @@ class GanttSettingsService
         String contentCode = request.contentCode
         GanttSettingsClass ganttSettings = request.ganttSettings
 
-        String ganttSettingsKey = ganttSettings?.diagramKey ?: generateDiagramKey(subjectUUID, contentCode)
+        String ganttSettingsKey =
+            ganttSettings?.diagramKey ?: generateDiagramKey(subjectUUID, contentCode)
 
         String currentGanttSettingsJSON = getJsonSettings(ganttSettingsKey)
 
@@ -280,7 +331,7 @@ class GanttSettingsService
 
         ganttSettings.commonSettings = updateColumnsInCommonSettings(ganttSettings.commonSettings)
 
-        if(saveJsonSettings(ganttSettingsKey, Jackson.toJsonString(ganttSettings)))
+        if (saveJsonSettings(ganttSettingsKey, Jackson.toJsonString(ganttSettings)))
         {
             return ganttSettings
         }
@@ -310,6 +361,22 @@ class GanttSettingsService
                 : new GanttVersionsSettingsClass()
             return ganttVersionsSettings
         }
+    }
+
+    /**
+     * Метод получения настроек из хранилища
+     * @param versionKey - ключ диаграммы версий
+     * @return настройки из хранилища
+     */
+    GanttVersionsSettingsClass getGanttVersionsSettingsFromDiagramVersionKey(String versionKey)
+    {
+        String diagramVersionValueFromKey = getJsonSettings(versionKey, GANTT_VERSION_NAMESPACE)
+
+        GanttVersionsSettingsClass ganttVersionsSettings = diagramVersionValueFromKey
+            ? Jackson.fromJsonString(diagramVersionValueFromKey, GanttVersionsSettingsClass)
+            : new GanttVersionsSettingsClass()
+
+        return ganttVersionsSettings
     }
 
     /**
@@ -352,7 +419,7 @@ class GanttSettingsService
                 String startAttributeCode = it.startWorkAttribute.code
                 String endAttributeCode = it.endWorkAttribute.code
                 mapAttributes[it.source.value.value] = ['start_date': startAttributeCode,
-                                                        'end_date': endAttributeCode]
+                                                        'end_date'  : endAttributeCode]
             }
         }
 
@@ -435,7 +502,7 @@ class GanttSettingsService
     }
 
     /**
-     * Метод по удалению диаграмм версий из хранилища
+     * Метод удаления диаграмм версий из хранилища
      * @param ganttVersionId - индексы значений
      */
     void deleteGanttVersionSettings(int ganttVersionId)
@@ -454,9 +521,9 @@ class GanttSettingsService
         String classFqn = requestContent.classFqn
         String contentCode = requestContent.contentCode
         String groupUser = getUserGroup(user)
-        return [groupUser : groupUser,
-                name: user?.title,
-                email: user?.email]
+        return [groupUser: groupUser,
+                name     : user?.title,
+                email    : user?.email]
     }
 
     /**
@@ -470,20 +537,10 @@ class GanttSettingsService
         }
         if (!columnForWorkAdditionExists)
         {
-            ganttSettings.commonSettings.columnSettings << new ColumnSettings(show: true, code: 'add', title: '')
-        }
-    }
-
-    /**
-     * Метод добавление редактора
-     * @param ganttSettings - данные диаграммы
-     */
-    private void addingEditor(GanttSettingsClass ganttSettings)
-    {
-        Boolean column = ganttSettings.commonSettings.columnSettings.each {
-            it.editor = new Editor(
-                type: 'text',
-                map_to: 'text'
+            ganttSettings.commonSettings.columnSettings << new ColumnSettings(
+                show: true,
+                code: 'add',
+                title: ''
             )
         }
     }
@@ -530,7 +587,7 @@ class GanttSettingsService
     private CommonSettings updateColumnsInCommonSettings(CommonSettings commonSettings)
     {
         commonSettings?.columnSettings?.each { columnSettings ->
-            if(columnSettings && !columnSettings.code)
+            if (columnSettings && !columnSettings.code)
             {
                 columnSettings.code = UUID.randomUUID()
             }
@@ -545,7 +602,8 @@ class GanttSettingsService
      * @param sourceCode - код типа объекта
      * @return коллекция группы атрибутов
      */
-    private Collection<AttributeGroup> mappingAttributeGroups(List attributeGroups, String sourceCode)
+    private Collection<AttributeGroup> mappingAttributeGroups(List attributeGroups,
+                                                              String sourceCode)
     {
         return attributeGroups.findResults { value ->
             return new AttributeGroup(
@@ -563,11 +621,16 @@ class GanttSettingsService
      * @param sourceName - название типа объекта
      * @param sourceCode - код типа объекта
      */
-    private Collection<Attribute> mappingAttribute(List attributes, String sourceName, String sourceCode)
+    private Collection<Attribute> mappingAttribute(List attributes,
+                                                   String sourceName,
+                                                   String sourceCode)
     {
         return attributes.findResults {
-            !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ? buildAttribute(it, sourceName, sourceCode) : null
-        }.sort { it.title }
+            !it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES ?
+                buildAttribute(it, sourceName, sourceCode) : null
+        }.sort {
+            it.title
+        }
     }
 
     private Attribute buildAttribute(def value, String sourceName, String sourceCode)
@@ -592,7 +655,7 @@ class GanttSettingsService
     private String getAttributeCode(def systemAttribute)
     {
         Boolean attrSignedInClass = systemAttribute.declaredMetaClass.fqn.isClass()
-        if(!attrSignedInClass)
+        if (!attrSignedInClass)
         {
             return systemAttribute.attributeFqn.toString()
         }
@@ -608,7 +671,7 @@ class GanttSettingsService
     String generateDiagramKey(String subjectUUID, String contentCode)
     {
         String type = api.utils.get(subjectUUID)?.metaClass?.toString()
-        return "${type}_${contentCode}"
+        return "${ type }_${ contentCode }"
     }
 
     /**
@@ -623,7 +686,7 @@ class GanttSettingsService
 
     /**
      * Метод сохранения настроек объекта
-     * @param key       - уникальный идентификатор объекта
+     * @param key - уникальный идентификатор объекта
      * @param jsonValue - ыериализованные настройки объекта
      * @return true/false успешное/провальное сохранение
      */
@@ -669,9 +732,15 @@ class GanttSettingsService
             new GanttDataSource(
                 it.code,
                 it.title,
-                mappingDataSource(it.children.findAll { classValidator.call(it) })
+                mappingDataSource(
+                    it.children.findAll {
+                        classValidator.call(it)
+                    }
+                )
             )
-        }.sort { it.title }
+        }.sort {
+            it.title
+        }
     }
 }
 
@@ -774,7 +843,6 @@ class SaveGanttSettingsRequest extends BaseGanttSettingsRequest
      */
     GanttSettingsClass ganttSettings
 }
-
 
 /**
  * Тело запроса на получение настроек версий диаграммы Ганта
@@ -963,6 +1031,33 @@ class GanttDiagramData extends BaseGanttDiagramData
 }
 
 /**
+ * Данные версий диаграммы Ганта для построения
+ */
+class GanttVersionDiagramData extends GanttDiagramData
+{
+    /**
+     * Ключ диаграммы версий
+     */
+    String versionKey
+    /**
+     * Название диаграммы
+     */
+    String title
+    /**
+     * Дата создания диаграммы
+     */
+    Date createdDate
+    /**
+     * Настройки для источников - ресурсов/работ
+     */
+    Collection<ResourceAndWorkSettings> resourceAndWorkSettings
+    /**
+     * Настройки для источников - версий диаграмм Ганта
+     */
+    Collection<String> diagramVersionsKeys = []
+}
+
+/**
  * Настройки общего блока
  */
 class CommonSettings
@@ -1018,40 +1113,50 @@ class Editor
 /**
  * Типы атрибутов даннных для диаграмм
  */
-class AttributeType {
+class AttributeType
+{
 
-    static final Collection<String> ALL_ATTRIBUTE_TYPES = [OBJECT_TYPE, TIMER_TYPE, BACK_TIMER_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE,
-                                                           CATALOG_ITEM_TYPE, CATALOG_ITEM_SET_TYPE, META_CLASS_TYPE, DT_INTERVAL_TYPE, DATE_TYPE,
-                                                           DATE_TIME_TYPE, STRING_TYPE, INTEGER_TYPE, DOUBLE_TYPE, STATE_TYPE,
-                                                           LOCALIZED_TEXT_TYPE, BOOL_TYPE].asImmutable()
+    static final Collection<String> ALL_ATTRIBUTE_TYPES = [OBJECT_TYPE, TIMER_TYPE, BACK_TIMER_TYPE,
+                                                           BO_LINKS_TYPE, BACK_BO_LINKS_TYPE,
+                                                           CATALOG_ITEM_TYPE, CATALOG_ITEM_SET_TYPE,
+                                                           META_CLASS_TYPE, DT_INTERVAL_TYPE,
+                                                           DATE_TYPE,
+                                                           DATE_TIME_TYPE, STRING_TYPE,
+                                                           INTEGER_TYPE, DOUBLE_TYPE, STATE_TYPE,
+                                                           LOCALIZED_TEXT_TYPE, BOOL_TYPE]
+        .asImmutable()
     static final Collection<String> TIMER_TYPES = [TIMER_TYPE, BACK_TIMER_TYPE].asImmutable()
-    static final Collection<String> LINK_TYPES_WITHOUT_CATALOG = [OBJECT_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
-    static final Collection<String> LINK_TYPES = [OBJECT_TYPE,  CATALOG_ITEM_TYPE, CATALOG_ITEM_SET_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
-    static final Collection<String> LINK_SET_TYPES = [CATALOG_ITEM_SET_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE].asImmutable()
+    static final Collection<String> LINK_TYPES_WITHOUT_CATALOG = [OBJECT_TYPE, BO_LINKS_TYPE,
+                                                                  BACK_BO_LINKS_TYPE].asImmutable()
+    static final Collection<String> LINK_TYPES = [OBJECT_TYPE, CATALOG_ITEM_TYPE,
+                                                  CATALOG_ITEM_SET_TYPE, BO_LINKS_TYPE,
+                                                  BACK_BO_LINKS_TYPE].asImmutable()
+    static final Collection<String> LINK_SET_TYPES = [CATALOG_ITEM_SET_TYPE, BO_LINKS_TYPE,
+                                                      BACK_BO_LINKS_TYPE].asImmutable()
     static final Collection<String> NUMBER_TYPES = [INTEGER_TYPE, DOUBLE_TYPE].asImmutable()
     static final Collection<String> DATE_TYPES = [DATE_TYPE, DATE_TIME_TYPE].asImmutable()
     static final Collection<String> HAS_UUID_TYPES = [*LINK_TYPES, STATE_TYPE, META_CLASS_TYPE]
 
     static final String OBJECT_TYPE = 'object'
 
-    static final String TIMER_TYPE ='timer'
-    static final String BACK_TIMER_TYPE ='backTimer'
+    static final String TIMER_TYPE = 'timer'
+    static final String BACK_TIMER_TYPE = 'backTimer'
     static final String BO_LINKS_TYPE = 'boLinks'
-    static final String CATALOG_ITEM_SET_TYPE ='catalogItemSet'
+    static final String CATALOG_ITEM_SET_TYPE = 'catalogItemSet'
 
-    static final String BACK_BO_LINKS_TYPE ='backBOLinks'
-    static final String CATALOG_ITEM_TYPE ='catalogItem'
+    static final String BACK_BO_LINKS_TYPE = 'backBOLinks'
+    static final String CATALOG_ITEM_TYPE = 'catalogItem'
     static final String META_CLASS_TYPE = 'metaClass'
     static final String DT_INTERVAL_TYPE = 'dtInterval'
 
     static final String DATE_TYPE = 'date'
-    static final String DATE_TIME_TYPE ='dateTime'
-    static final String STRING_TYPE ='string'
-    static final String INTEGER_TYPE ='integer'
+    static final String DATE_TIME_TYPE = 'dateTime'
+    static final String STRING_TYPE = 'string'
+    static final String INTEGER_TYPE = 'integer'
 
-    static final String DOUBLE_TYPE ='double'
-    static final String STATE_TYPE ='state'
-    static final String LOCALIZED_TEXT_TYPE ='localizedText'
+    static final String DOUBLE_TYPE = 'double'
+    static final String STATE_TYPE = 'state'
+    static final String LOCALIZED_TEXT_TYPE = 'localizedText'
     static final String BOOL_TYPE = 'bool'
     static final String TOTAL_VALUE_TYPE = 'totalValue'
     static final String VALUE_TYPE = 'value'

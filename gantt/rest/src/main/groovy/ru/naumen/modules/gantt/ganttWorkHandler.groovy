@@ -18,6 +18,7 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.core.server.script.api.metainfo.*
+import ru.naumen.core.server.script.spi.ScriptDtObject
 
 import javax.mail.Store
 
@@ -74,6 +75,12 @@ interface GanttWorkHandlerController
     String editWorkData(Map<String, String> requestContent, IUUIDIdentifiable user)
 
     /**
+     * Метод удаления задач из диаграммы
+     * @param workUUID - UUID редактируемой работы
+     */
+    String deleteWorkDateRanges(String workUUID)
+
+    /**
      * Метод редактирования прогресса работы
      * @param requestContent - тело запроса
      * @return результат обновления
@@ -118,7 +125,8 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
     @Override
     String getWorkAttributes(String metaClassFqn, String attributeGroupCode, String workUUID = null)
     {
-        return Jackson.toJsonString(service.getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID))
+        return
+        Jackson.toJsonString(service.getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID))
     }
 
     @Override
@@ -143,6 +151,12 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
         EditWorkDataRequest request = new ObjectMapper().
             convertValue(requestContent, EditWorkDataRequest)
         return Jackson.toJsonString(service.editWorkData(request, user))
+    }
+
+    @Override
+    String deleteWorkDateRanges(String workUUID)
+    {
+        return service.deleteWorkDateRanges(workUUID)
     }
 
     @Override
@@ -263,6 +277,23 @@ class GanttWorkHandlerService
     }
 
     /**
+     * Метод удаления задач из диаграммы
+     * @param workUUID - UUID редактируемой работы
+     */
+    String deleteWorkDateRanges(String workUUID)
+    {
+        try
+        {
+            utils.delete(utils.get(workUUID))
+            return ("Deleting successful!")
+        }
+        catch (Exception e)
+        {
+            return ("errorMessage: " + e.message)
+        }
+    }
+
+    /**
      * Метод получения групп атрибутов по метаклассу работы
      * @param metaClassFqn - код метакласса
      * @return список групп атрибутов
@@ -358,7 +389,8 @@ class GanttWorkHandlerService
     void editWorkData(EditWorkDataRequest request, IUUIDIdentifiable user)
     {
         Map<String, Object> preparedWorkData = prepareWorkData(request, user)
-        utils.edit(request.workUUID, preparedWorkData)
+        ScriptDtObject res = utils.get(request.workUUID)
+        utils.edit(res, preparedWorkData)
     }
 
     /**
