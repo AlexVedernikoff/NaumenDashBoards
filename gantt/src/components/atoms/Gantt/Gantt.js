@@ -112,6 +112,11 @@ const Gantt = (props: Props) => {
 	};
 
 	useEffect(() => {
+		gantt.plugins({
+			auto_scheduling: true
+		});
+
+		gantt.config.auto_scheduling = true;
 		gantt.attachEvent('onAfterLinkDelete', () => {
 			const links = gantt.getLinks();
 
