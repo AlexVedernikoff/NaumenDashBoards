@@ -11,17 +11,21 @@ export class TableWidgetContainer extends PureComponent<Props> {
 	render () {
 		const {data, drillDown, openCardObject, updateData, updateWidget, updating, widget} = this.props;
 
-		return (
-			<TableWidget
-				data={data}
-				loading={updating}
-				onDrillDown={drillDown}
-				onOpenCardObject={openCardObject}
-				onUpdateData={updateData}
-				onUpdateWidget={updateWidget}
-				widget={widget}
-			/>
-		);
+		if (data) {
+			return (
+				<TableWidget
+					data={data}
+					loading={updating}
+					onDrillDown={drillDown}
+					onOpenCardObject={openCardObject}
+					onUpdateData={updateData}
+					onUpdateWidget={updateWidget}
+					widget={widget}
+				/>
+			);
+		}
+
+		return null;
 	}
 }
 
