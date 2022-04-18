@@ -92,6 +92,7 @@ class GanttDataSetService
         data.progressCheckbox = settings.progressCheckbox
         data.startDate = settings.startDate
         data.endDate = settings.endDate
+        data.currentInterval = settings.currentInterval
 
         GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
         settings.resourceAndWorkSettings.each {
@@ -121,6 +122,9 @@ class GanttDataSetService
                 setWorkTypeToProjectIfItHasChildren(it, data.tasks)
                 setWorkProgress(it, settings)
                 setColumnDateFormats(it, timezone)
+            }
+            data.tasks = data.tasks.findResults {
+                it.type != SourceType.RESOURCE ? it : null
             }
         }
         return data
@@ -153,7 +157,7 @@ class GanttDataSetService
         data.createdDate = settings.createdDate
         data.title = settings.title
         data.versionKey = settings.versionKey
-        settings.ganttSettings.works
+        settings.works
 
         GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
         settings.ganttSettings.resourceAndWorkSettings.each {

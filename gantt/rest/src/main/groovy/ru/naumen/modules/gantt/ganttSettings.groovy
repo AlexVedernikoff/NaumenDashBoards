@@ -78,6 +78,7 @@ interface GanttSettingsController
     /**
      * Метод изменения полей в диаграмме версий
      * @param ganttVersionsSettingsClass - настройки диаграммы версий
+     * @param versionKey - ключ диаграммы версий
      * @return измененные настройки диаграммы версий
      */
     GanttVersionsSettingsClass updateGanttVersionSettings(GanttVersionsSettingsDTOClass ganttVersionsSettingsDTO,
@@ -478,6 +479,7 @@ class GanttSettingsService
     /**
      * Метод изменения полей в диаграмме версий
      * @param ganttVersionsSettingsClass - настройки диаграммы версий
+     * @param versionKey - ключ диаграммы версий
      * @return измененные настройки диаграммы версий
      */
     GanttVersionsSettingsClass updateGanttVersionSettings(GanttVersionsSettingsDTOClass ganttVersionsSettingsDTO,
@@ -920,10 +922,6 @@ class BaseGanttDiagramData
 class GanttSettingsClass extends BaseGanttDiagramData
 {
     /**
-     * Настройки для источников - работ
-     */
-    Collection<Work> works = []
-    /**
      * Настройки для источников - ресурсов/работ
      */
     Collection<ResourceAndWorkSettings> resourceAndWorkSettings
@@ -939,6 +937,10 @@ class GanttSettingsClass extends BaseGanttDiagramData
      * Настройки для источников - окончание работ
      */
     String endDate
+    /**
+     * Настройки интервала
+     */
+    CurrentInterval currentInterval
 }
 
 /**
@@ -946,6 +948,10 @@ class GanttSettingsClass extends BaseGanttDiagramData
  */
 class GanttVersionsSettingsClass
 {
+    /**
+     * Настройки для источников - работ
+     */
+    Collection<Work> works = []
     /**
      * Ключ диаграммы версий
      */
@@ -1028,6 +1034,10 @@ class GanttDiagramData extends BaseGanttDiagramData
      * Настройки для источников - окончание работ
      */
     String endDate
+    /**
+     * Настройки интервала
+     */
+    CurrentInterval currentInterval
 }
 
 /**
@@ -1076,6 +1086,21 @@ class CommonSettings
      * Настройки столбцов таблицы
      */
     Collection<ColumnSettings> columnSettings
+}
+
+/**
+ * Настройка текущего интревала на диаграмме
+ */
+class CurrentInterval
+{
+    /**
+     * Метка опций
+     */
+    String label
+    /**
+     * Значения опций
+     */
+    String value
 }
 
 /**
