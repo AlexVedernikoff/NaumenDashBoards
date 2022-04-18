@@ -216,21 +216,21 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
 
     @Override
     String editWorkDateRangesFromVersion(Map<String, Object> requestContent,
-                                         IUUIDIdentifiable user)
+                                         IUUIDIdentifiable user, String versionKey)
     {
         EditWorkDateRangesRequest request = new ObjectMapper().
             convertValue(requestContent, EditWorkDateRangesRequest)
         return
-        Jackson.toJsonString(service.editWorkDateRangesFromVersion(request, user))
+        Jackson.toJsonString(service.editWorkDateRangesFromVersion(request, user, versionKey))
     }
 
     @Override
     String addNewWorkForVersion(Map<String, String> requestContent,
-                                IUUIDIdentifiable user)
+                                IUUIDIdentifiable user, String versionKey)
     {
         AddNewWorkRequest request = new ObjectMapper().
             convertValue(requestContent, AddNewWorkRequest)
-        return Jackson.toJsonString(service.addNewWorkForVersion(request, user))
+        return Jackson.toJsonString(service.addNewWorkForVersion(request, user, versionKey))
     }
 
     @Override
@@ -240,21 +240,21 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
     {
         EditWorkDataRequest request = new ObjectMapper().
             convertValue(requestContent, EditWorkDataRequest)
-        return Jackson.toJsonString(service.editWorkDataFromVersion(request, user))
+        return Jackson.toJsonString(service.editWorkDataFromVersion(request, user, versionKey))
     }
 
     @Override
-    String deleteWorkFromVersion(String workUUID)
+    String deleteWorkFromVersion(String workUUID, String versionKey)
     {
-        return service.deleteWorkFromVersion(workUUID)
+        return service.deleteWorkFromVersion(workUUID, versionKey)
     }
 
     @Override
-    String changeWorkProgressFromVersion(Map<String, String> requestContent)
+    String changeWorkProgressFromVersion(Map<String, String> requestContent, String versionKey)
     {
         ChangeWorkProgressRequest request = new ObjectMapper().
             convertValue(requestContent, ChangeWorkProgressRequest)
-        return Jackson.toJsonString(service.changeWorkProgressFromVersion(request))
+        return Jackson.toJsonString(service.changeWorkProgressFromVersion(request, versionKey))
     }
 
     @Override
@@ -515,10 +515,12 @@ class GanttWorkHandlerService
      * Метод редактирования диапазона дат работ диаграмм версий
      * @param requestContent - тело запроса
      * @param user - пользователь
+     * @param versionKey - ключ диаграммы версий
      * @return результат обновления
      */
     EditWorkDateRangesResponse editWorkDateRangesFromVersion(EditWorkDateRangesRequest request,
-                                                             IUUIDIdentifiable user)
+                                                             IUUIDIdentifiable user,
+                                                             String versionKey)
     {
         try
         {
@@ -574,12 +576,13 @@ class GanttWorkHandlerService
      * Метод добавления новой работы в диаграмму версий
      * @param request - тело запроса
      * @param user - пользователь
+     * @param versionKey - ключ диаграммы версий
      */
     void addNewWorkForVersion(AddNewWorkRequest request,
-                              IUUIDIdentifiable user)
+                              IUUIDIdentifiable user, String versionKey)
     {
         Map<String, Object> preparedWorkData =
-            prepareWorkDataFromVersion(request, user)
+            prepareWorkDataFromVersion(request, user, versionKey)
         utils.create(request.classFqn, preparedWorkData)
     }
 
@@ -587,20 +590,22 @@ class GanttWorkHandlerService
      * Метод редактирования работы в диаграмме версий
      * @param request - тело запроса
      * @param user - пользователь
+     * @param versionKey - ключ диаграммы версий
      */
     void editWorkDataFromVersion(EditWorkDataRequest request,
-                                 IUUIDIdentifiable user)
+                                 IUUIDIdentifiable user, String versionKey)
     {
         Map<String, Object> preparedWorkData =
-            prepareWorkDataFromVersion(request, user)
+            prepareWorkDataFromVersion(request, user, versionKey)
         utils.edit(request.workUUID, preparedWorkData)
     }
 
     /**
      * Метод редактирования прогресса работы в диаграмме версий
      * @param request - тело запроса
+     * @param versionKey - ключ диаграммы версий
      */
-    void changeWorkProgressFromVersion(ChangeWorkProgressRequest request)
+    void changeWorkProgressFromVersion(ChangeWorkProgressRequest request, String versionKey)
     {
         String subjectUUID = request.subjectUUID
         String contentCode = request.contentCode
@@ -628,8 +633,9 @@ class GanttWorkHandlerService
     /**
      * Метод удаления задач из диаграммы версий
      * @param workUUID - UUID редактируемой работы
+     * @param versionKey - ключ диаграммы версий
      */
-    String deleteWorkFromVersion(String workUUID)
+    String deleteWorkFromVersion(String workUUID, String versionKey)
     {
         try
         {
@@ -712,10 +718,11 @@ class GanttWorkHandlerService
      * Подготовка данных работ в диаграмме версий для обновления
      * @param request - тело запроса
      * @param user - пользователь
+     * @param versionKey - ключ диаграммы версий
      * @return подготовленные данные работы для добавления/редактирования
      */
     private Map<String, Object> prepareWorkDataFromVersion(AddNewWorkRequest request,
-                                                           IUUIDIdentifiable user)
+                                                           IUUIDIdentifiable user, String versionKey)
     {
         Map<String, Object> preparedWorkData = request.workData
         Collection<IAttributeWrapper> attributes =
