@@ -6,6 +6,8 @@ import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {LABEL_DRAW_MODE, LEGEND_ALIGN, LEGEND_LAYOUT, LEGEND_VERTICAL_ALIGN} from './constants';
 
+export type Labels = Array<Array<string>>;
+
 export type DrillDownErrorOptions = {
 	mode: 'disable' | 'error'
 };
@@ -76,6 +78,7 @@ export type AxisOptions = {
 	fontSize: number,
 	height?: number,
 	mode: $Keys<typeof LABEL_DRAW_MODE>,
+	multilineLabels?: Labels,
 	show: boolean,
 	showName: boolean,
 	width?: number
@@ -194,7 +197,8 @@ export type CalculateCategoryWidthResult = {
 
 export type CalculateCategoryHeightResult = {
 	height: number,
-	mode: $Keys<typeof LABEL_DRAW_MODE>,
+	labels?: Labels,
+	mode: $Keys<typeof LABEL_DRAW_MODE>
 };
 
 export type CalculateStringsSizeItem = {
@@ -220,4 +224,9 @@ export type DefaultChartSettings = {
 	axis: AxisSettings,
 	dataLabels: DataLabels,
 	legend: Legend
+};
+
+export type MultilineHeightResult = {
+	height: number,
+	labels: Labels
 };

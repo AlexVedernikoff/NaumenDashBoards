@@ -5,6 +5,7 @@ import type {
 	CalculateCategoryHeightResult,
 	CalculateCategoryWidthResult,
 	DataLabelsOptions,
+	MultilineHeightResult,
 	ReChartLegend,
 	RechartData,
 	RechartDataItem,
@@ -522,29 +523,84 @@ const checkOneLineHeight = (
 };
 
 /**
+ * Создает функцию для разделения строки на подстроки,
+ * с максимальным количеством слов в подстроке, при условии
+ * что все созданные подстроки будут менее указанной ширины
+ * при рендеренге с заданными параметрами
+ * @param {number} width - ширина строки
+ * @param {AxisOptions} params - параметры оси
+ * @returns {Function} - форматер
+ */
+const getSplitterLinesByWidth = (width: number, params: AxisOptions) => {
+	// calculateStringsSize не рассчитывает ширину пробела, если передавать строку из одного пробела,
+	// (рендринг оптимизирует и не отрисовывает пробельные символы)
+	// поэтому используем хак - рассчитываем ширину пробела как разницу 2х строк
+	const sizes = calculateStringsSize([['oo'], ['o o']], params.fontFamily, params.fontSize);
+	const spaceSize = sizes[1].width - sizes[0].width;
+
+	return (label: string) => {
+		const labels = label.split(' ');
+		const sizes = calculateStringsSize(labels.map(label => [label]), params.fontFamily, params.fontSize);
+		const result = [];
+		let curLine = [];
+		let curSize = 0;
+
+		labels.forEach((label, idx) => {
+			const labelWidth = sizes[idx].width;
+			const isEmptyCurrent = curLine.length === 0;
+			const nextWidth = isEmptyCurrent ? labelWidth : curSize + spaceSize + labelWidth;
+
+			if (nextWidth <= width) {
+				curSize += nextWidth;
+				curLine.push(label);
+			} else if (curLine.length === 0) {
+				result.push(label);
+			} else {
+				result.push(curLine.join(' '));
+				curLine = [label];
+				curSize = labelWidth;
+			}
+		});
+
+		if (curLine.length > 0) {
+			result.push(curLine.join(' '));
+		}
+
+		if (result.length === 0) {
+			result.push('');
+		}
+
+		return result;
+	};
+};
+
+/**
  * Проверяет, могут ли метки разместиться в несколько строках по оси X по ширине
  * @param {Array<string>} labels - метки данных
  * @param {AxisOptions} params - параметры оси
  * @param {number} axisWidth - ширина оси
  * @param {number} axisMaxHeight - максимальная высота для подписей
- * @returns {number | null} - минимальная ширина для меток, в случае успеха, null в противном случае
+ * @returns {MultilineHeightResult | null} - минимальная ширина для меток, в случае успеха, null в противном случае
  */
 const checkMultilineHeight = (
 	labels: Array<string>,
 	params: AxisOptions,
 	axisWidth: number,
 	axisMaxHeight: number
-): number | null => {
+): MultilineHeightResult | null => {
 	let result = null;
-	const columnWidth = axisWidth / labels.length;
-	const multiLines = labels.map(label => label.split(' '));
+	const columnWidth = axisWidth / labels.length * 0.8;
+	const multiLines = labels.map(getSplitterLinesByWidth(columnWidth, params));
 	const multilineSizes = calculateStringsSize(multiLines, params.fontFamily, params.fontSize);
 	const isLessWidth = multilineSizes.every(({width}) => width < columnWidth);
 	const heights = multilineSizes.map(({height}) => height);
 	const maxHeightLabels = Math.max(...heights);
 
 	if (isLessWidth && maxHeightLabels < axisMaxHeight) {
-		result = maxHeightLabels;
+		result = {
+			height: maxHeightLabels,
+			labels: multiLines
+		};
 	}
 
 	return result;
@@ -589,7 +645,7 @@ const calculateCategoryHeight = (
 		const multiline = checkMultilineHeight(labels, params, width, maxHeight);
 
 		if (multiline) {
-			result = {height: multiline, mode: LABEL_DRAW_MODE.MULTILINE};
+			result = {...multiline, mode: LABEL_DRAW_MODE.MULTILINE};
 		} else {
 			const AXIS_HEIGHT = 8;
 			const rotateHeight = checkRotateHeight(labels, params) + AXIS_HEIGHT;

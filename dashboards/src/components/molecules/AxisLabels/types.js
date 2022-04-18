@@ -1,5 +1,6 @@
 // @flow
 import {LABEL_DRAW_MODE} from 'utils/recharts/constants';
+import type {Labels} from 'utils/recharts/types';
 
 export type LabelPayload = {
 	coordinate: number,
@@ -18,6 +19,7 @@ export type CategoryLabelProps = {
 	height: number,
 	index: number,
 	mode: $Keys<typeof LABEL_DRAW_MODE>,
+	multilineLabels?: Labels,
 	orientation: string,
 	payload: LabelPayload,
 	stroke: string,
