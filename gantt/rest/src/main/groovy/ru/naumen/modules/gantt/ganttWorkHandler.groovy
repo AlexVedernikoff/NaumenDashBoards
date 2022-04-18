@@ -88,6 +88,53 @@ interface GanttWorkHandlerController
     String changeWorkProgress(Map<String, String> requestContent)
 
     /**
+     * Метод редактирования диапазона дат работ диаграмм версий
+     * @param requestContent - тело запроса
+     * @param user - пользователь
+     * @param versionKey - ключ диаграммы версий
+     * @return результат обновления
+     */
+    String editWorkDateRangesFromVersion(Map<String, Object> requestContent,
+                                         IUUIDIdentifiable user, String versionKey)
+
+    /**
+     * Метод добавления новой работы в диаграмму версий
+     * @param requestContent - тело запроса
+     * @param user - пользователь
+     * @param versionKey - ключ диаграммы версий
+     * @return результат добавления
+     */
+    String addNewWorkForVersion(Map<String, String> requestContent,
+                                IUUIDIdentifiable user,
+                                String versionKey)
+
+    /**
+     * Метод редактирования работы в диаграмме версий
+     * @param requestContent - тело запроса
+     * @param user - пользователь
+     * @param versionKey - ключ диаграммы версий
+     * @return результат добавления
+     */
+    String editWorkDataFromVersion(Map<String, String> requestContent,
+                                   IUUIDIdentifiable user,
+                                   String versionKey)
+
+    /**
+     * Метод редактирования прогресса работы в диаграмме версий
+     * @param requestContent - тело запроса
+     * @param versionKey - ключ диаграммы версий
+     * @return результат обновления
+     */
+    String changeWorkProgressFromVersion(Map<String, String> requestContent, String versionKey)
+
+    /**
+     * Метод удаления задач из диаграммы версий
+     * @param workUUID - UUID редактируемой работы
+     * @param versionKey - ключ диаграммы версий
+     */
+    String deleteWorkFromVersion(String workUUID, String versionKey)
+
+    /**
      * Метод сохранения связей между работами
      * @param requestContent - тело запроса
      * @return результат сохранения
@@ -165,6 +212,49 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
         ChangeWorkProgressRequest request = new ObjectMapper().
             convertValue(requestContent, ChangeWorkProgressRequest)
         return Jackson.toJsonString(service.changeWorkProgress(request))
+    }
+
+    @Override
+    String editWorkDateRangesFromVersion(Map<String, Object> requestContent,
+                                         IUUIDIdentifiable user)
+    {
+        EditWorkDateRangesRequest request = new ObjectMapper().
+            convertValue(requestContent, EditWorkDateRangesRequest)
+        return
+        Jackson.toJsonString(service.editWorkDateRangesFromVersion(request, user))
+    }
+
+    @Override
+    String addNewWorkForVersion(Map<String, String> requestContent,
+                                IUUIDIdentifiable user)
+    {
+        AddNewWorkRequest request = new ObjectMapper().
+            convertValue(requestContent, AddNewWorkRequest)
+        return Jackson.toJsonString(service.addNewWorkForVersion(request, user))
+    }
+
+    @Override
+    String editWorkDataFromVersion(Map<String, String> requestContent,
+                                   IUUIDIdentifiable user,
+                                   String versionKey)
+    {
+        EditWorkDataRequest request = new ObjectMapper().
+            convertValue(requestContent, EditWorkDataRequest)
+        return Jackson.toJsonString(service.editWorkDataFromVersion(request, user))
+    }
+
+    @Override
+    String deleteWorkFromVersion(String workUUID)
+    {
+        return service.deleteWorkFromVersion(workUUID)
+    }
+
+    @Override
+    String changeWorkProgressFromVersion(Map<String, String> requestContent)
+    {
+        ChangeWorkProgressRequest request = new ObjectMapper().
+            convertValue(requestContent, ChangeWorkProgressRequest)
+        return Jackson.toJsonString(service.changeWorkProgressFromVersion(request))
     }
 
     @Override
@@ -422,6 +512,137 @@ class GanttWorkHandlerService
     }
 
     /**
+     * Метод редактирования диапазона дат работ диаграмм версий
+     * @param requestContent - тело запроса
+     * @param user - пользователь
+     * @return результат обновления
+     */
+    EditWorkDateRangesResponse editWorkDateRangesFromVersion(EditWorkDateRangesRequest request,
+                                                             IUUIDIdentifiable user)
+    {
+        try
+        {
+            List<String> warnings = []
+
+            GanttSettingsService ganttSettingsService = GanttSettingsService.instance
+
+            String diagramKey =
+                ganttSettingsService.generateDiagramKey(request.subjectUUID, request.contentCode)
+            String ganttSettingsFromKeyValue = ganttSettingsService.getJsonSettings(diagramKey)
+
+            GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
+                ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
+                : new GanttSettingsClass()
+
+            api.tx.call {
+                request.workDateInterval.each { workDateData ->
+                    ISDtObject work = api.utils.get(workDateData.workUUID)
+                    String timezoneString =
+                        api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
+                    TimeZone timezone = TimeZone.getTimeZone(timezoneString)
+                    Date newDateToUpdate =
+                        Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone)
+
+                    List<ISDtObject> relatedEntities =
+                        getWorkRelatedEntitiesWithExceededDeadline(work, work, newDateToUpdate)
+
+                    String attributeCode = null
+                    String metaClassId = work.getMetaClass().getId()
+                    ganttSettings.resourceAndWorkSettings.find {
+                        if (it.source.value.value == metaClassId)
+                        {
+                            attributeCode =
+                                workDateData.dateType == WorkEditDateType.startDate ?
+                                    it.startWorkAttribute.code : it.endWorkAttribute.code
+                        }
+                    }
+
+                    api.utils.edit(work, [(attributeCode): newDateToUpdate])
+                    updateRelatedEntitiesDeadlines(relatedEntities, newDateToUpdate)
+                }
+            }
+
+            return new EditWorkDateRangesResponse(updated: true)
+        }
+        catch (Exception e)
+        {
+            return EditWorkDateRangesResponse(errorMessage: e.message)
+        }
+    }
+
+    /**
+     * Метод добавления новой работы в диаграмму версий
+     * @param request - тело запроса
+     * @param user - пользователь
+     */
+    void addNewWorkForVersion(AddNewWorkRequest request,
+                              IUUIDIdentifiable user)
+    {
+        Map<String, Object> preparedWorkData =
+            prepareWorkDataFromVersion(request, user)
+        utils.create(request.classFqn, preparedWorkData)
+    }
+
+    /**
+     * Метод редактирования работы в диаграмме версий
+     * @param request - тело запроса
+     * @param user - пользователь
+     */
+    void editWorkDataFromVersion(EditWorkDataRequest request,
+                                 IUUIDIdentifiable user)
+    {
+        Map<String, Object> preparedWorkData =
+            prepareWorkDataFromVersion(request, user)
+        utils.edit(request.workUUID, preparedWorkData)
+    }
+
+    /**
+     * Метод редактирования прогресса работы в диаграмме версий
+     * @param request - тело запроса
+     */
+    void changeWorkProgressFromVersion(ChangeWorkProgressRequest request)
+    {
+        String subjectUUID = request.subjectUUID
+        String contentCode = request.contentCode
+        Double progress = request.progress
+        String workUUID = request.workUUID
+
+        GanttSettingsService ganttSettingsService = GanttSettingsService.instance
+
+        String diagramKey = ganttSettingsService.generateDiagramKey(subjectUUID, contentCode)
+        String ganttVersionSettingsFromKeyValue = ganttSettingsService.getJsonSettings(diagramKey)
+
+        GanttVersionsSettingsClass ganttVersionSettings = ganttVersionSettingsFromKeyValue
+            ? Jackson.fromJsonString(ganttVersionSettingsFromKeyValue, GanttSettingsClass)
+            : new GanttVersionsSettingsClass()
+
+        ganttVersionSettings.ganttSettings.workProgresses[workUUID] = progress
+
+        if (!ganttSettingsService
+                .saveJsonSettings(diagramKey, Jackson.toJsonString(ganttVersionSettings)))
+        {
+            throw new Exception('Настройки не были сохранены!')
+        }
+    }
+
+    /**
+     * Метод удаления задач из диаграммы версий
+     * @param workUUID - UUID редактируемой работы
+     */
+    String deleteWorkFromVersion(String workUUID)
+    {
+        try
+        {
+            utils.delete(utils.get(workUUID))
+            return ("Deleting successful!")
+        }
+        catch (Exception e)
+        {
+            return ("errorMessage: " + e.message)
+        }
+    }
+
+    /**
      * Метод сохранения связей между работами - все связи для конкреной работы А пересохраняются
      * @param request - тело запроса
      */
@@ -479,6 +700,37 @@ class GanttWorkHandlerService
             {
                 String timezoneString =
                     api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
+                TimeZone timezone = TimeZone.getTimeZone(timezoneString)
+                attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
+                preparedWorkData[attributeCode] = attributeValue
+            }
+        }
+        return preparedWorkData
+    }
+
+    /**
+     * Подготовка данных работ в диаграмме версий для обновления
+     * @param request - тело запроса
+     * @param user - пользователь
+     * @return подготовленные данные работы для добавления/редактирования
+     */
+    private Map<String, Object> prepareWorkDataFromVersion(AddNewWorkRequest request,
+                                                           IUUIDIdentifiable user)
+    {
+        Map<String, Object> preparedWorkData = request.workData
+        Collection<IAttributeWrapper> attributes =
+            api.metainfo.getMetaClass(request.classFqn).getAttributes()
+        preparedWorkData.each {
+            String attributeCode = it.key
+            Object attributeValue = it.value
+
+            IAttributeWrapper attribute = attributes.find {
+                it.code == attributeCode
+            }
+            if (attribute.type.code in AttributeType.DATE_TYPES)
+            {
+                String timezoneString =
+                    api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
                 TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                 attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
                 preparedWorkData[attributeCode] = attributeValue
