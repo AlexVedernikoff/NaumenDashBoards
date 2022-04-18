@@ -70,9 +70,9 @@ const getXAxisCategory = (
 		}
 	}
 
-	const {height, mode} = calculateCategoryHeight(labels, settings, maxHeight, width);
+	const {height, labels: multilineLabels, mode} = calculateCategoryHeight(labels, settings, maxHeight, width);
 
-	return {...settings, axisName, height, mode, width};
+	return {...settings, axisName, height, mode, multilineLabels, width};
 };
 
 export {

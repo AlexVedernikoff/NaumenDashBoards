@@ -79,14 +79,15 @@ class XCategoryLabel extends PureComponent<CategoryLabelProps, CategoryLabelStat
 	};
 
 	renderMultiLine = () => {
-		const {fontSize, payload, tickFormatter, verticalAnchor, visibleTicksCount, x, y, ...props} = this.props;
+		const {index, multilineLabels, payload, tickFormatter, verticalAnchor, visibleTicksCount, y, ...props} = this.props;
+		const {fontSize, x} = props;
 		const value = tickFormatter(payload.value);
-		const lines = value.split(' ');
+		const lines = multilineLabels?.[index] ?? value.split(' ');
 		const normalizeY = y + fontSize / 2;
 
 		return (
 			<g>
-				<text {...props} alignmentBaseline="middle" fontSize={fontSize} textAnchor='middle' x={x} y={normalizeY}>
+				<text {...props} alignmentBaseline="middle" textAnchor='middle' y={normalizeY}>
 					{lines.map(this.getRenderMultiLineLine(x))}
 					<title>{value}</title>
 				</text>
@@ -95,7 +96,7 @@ class XCategoryLabel extends PureComponent<CategoryLabelProps, CategoryLabelStat
 	};
 
 	renderOneLine = () => {
-		const {payload, tickFormatter, verticalAnchor, visibleTicksCount, ...props} = this.props;
+		const {multilineLabels, payload, tickFormatter, verticalAnchor, visibleTicksCount, ...props} = this.props;
 		const value = tickFormatter(payload.value);
 
 		return (
@@ -109,7 +110,7 @@ class XCategoryLabel extends PureComponent<CategoryLabelProps, CategoryLabelStat
 	};
 
 	renderRotate = () => {
-		const {payload, tickFormatter, verticalAnchor, visibleTicksCount, ...props} = this.props;
+		const {multilineLabels, payload, tickFormatter, verticalAnchor, visibleTicksCount, ...props} = this.props;
 		const {trimString} = this.state;
 		const value = tickFormatter(payload.value);
 		const {x, y} = props;

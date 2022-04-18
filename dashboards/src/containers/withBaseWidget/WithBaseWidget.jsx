@@ -6,7 +6,7 @@ import Content from './components/Content';
 import type {DivRef} from 'components/types';
 import {functions, props} from './selectors';
 import {getOptions} from 'utils/recharts';
-import React, {createRef, Fragment, PureComponent} from 'react';
+import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
 import T from 'components/atoms/Translation';
 
@@ -55,18 +55,16 @@ export const withBaseWidget = <Config: WidgetProps>(
 
 			if (!error && !loading && options) {
 				return (
-					<BaseWidget className={styles.widget} forwardedRef={this.widgetRef} widget={widget}>
-						<Content widget={widget}>
-							<Component
-								{...props}
-								data={data}
-								drillDown={drillDown}
-								options={options}
-								setWidgetWarning={setWidgetWarning}
-								updateOptions={this.updateOptions}
-							/>
-						</Content>
-					</BaseWidget>
+					<Content widget={widget}>
+						<Component
+							{...props}
+							data={data}
+							drillDown={drillDown}
+							options={options}
+							setWidgetWarning={setWidgetWarning}
+							updateOptions={this.updateOptions}
+						/>
+					</Content>
 				);
 			}
 
@@ -90,12 +88,14 @@ export const withBaseWidget = <Config: WidgetProps>(
 		};
 
 		render () {
+			const {widget} = this.props;
+
 			return (
-				<Fragment>
+				<BaseWidget className={styles.widget} forwardedRef={this.widgetRef} widget={widget}>
 					{this.renderError()}
 					{this.renderLoading()}
 					{this.renderContent()}
-				</Fragment>
+				</BaseWidget>
 			);
 		}
 	}

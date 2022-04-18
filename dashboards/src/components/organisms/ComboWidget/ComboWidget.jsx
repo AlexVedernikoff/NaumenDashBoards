@@ -270,7 +270,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 
 	renderXAxisTick = () => {
 		const {options: {xaxis}} = this.state;
-		const {fontFamily, fontSize, height, mode, showName} = xaxis;
+		const {fontFamily, fontSize, height, mode, multilineLabels, showName} = xaxis;
 		const tickHeight = height ? (height - (showName ? fontSize * 1.5 : 0)) : 0;
 
 		return (
@@ -279,6 +279,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 				fontSize={fontSize}
 				height={tickHeight}
 				mode={mode}
+				multilineLabels={multilineLabels}
 			/>
 		);
 	};
