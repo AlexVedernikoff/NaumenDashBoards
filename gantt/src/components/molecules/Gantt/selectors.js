@@ -3,7 +3,7 @@ import type {AppState} from 'store/types';
 import {getGanttData, getListOfWorkAttributes, postEditedWorkData, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations, switchProgressCheckbox} from 'store/App/actions';
 
 const props = (state: AppState) => {
-	const {attributesMap, diagramKey, loadingData, progressCheckbox, resources, settings, tasks, workAttributes, workRelationCheckbox, workRelations} = state.APP;
+	const {attributesMap, diagramKey, loadingData, progressCheckbox, resources, settings, tasks, workAttributes, workLink, workRelationCheckbox, workRelations} = state.APP;
 	const {columnSettings, rollUp, scale} = settings;
 
 	return {
@@ -17,6 +17,7 @@ const props = (state: AppState) => {
 		scale,
 		tasks,
 		workAttributes,
+		workLink,
 		workRelationCheckbox,
 		workRelations
 	};

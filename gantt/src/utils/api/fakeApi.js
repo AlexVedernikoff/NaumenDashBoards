@@ -132,6 +132,10 @@ export default class FakeApi {
 		return 'GantTest';
 	}
 
+	getWorkPageLink () {
+		return 'link';
+	}
+
 	getSubjectUuid () {
 		return 'root$101';
 	}

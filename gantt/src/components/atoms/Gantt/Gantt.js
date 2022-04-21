@@ -490,6 +490,7 @@ const Gantt = (props: Props) => {
 				postEditedWorkData={props.postEditedWorkData}
 				postNewWorkData={props.postNewWorkData}
 				workAttributes={props.workAttributes}
+				workLink={props.workLink}
 			/>
 		);
 	};

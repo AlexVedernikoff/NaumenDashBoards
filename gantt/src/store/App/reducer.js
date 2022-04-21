@@ -6,6 +6,16 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SET_WORK_LINK:
+			return {
+				...state,
+				workLink: action.workLink
+			};
+		case APP_EVENTS.SET_CURRENT_VALUE_FOR_INTERVAL:
+			return {
+				...state,
+				currentInterval: action.currentInterval
+			};
 		case APP_EVENTS.SET_RANGE_TIME:
 			return {
 				...state,

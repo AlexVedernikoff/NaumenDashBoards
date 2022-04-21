@@ -5,7 +5,7 @@ import {
 	Datepicker, IconButton, TextInput, Select
 } from 'naumen-common-components';
 import {deepClone} from 'helpers';
-import {deleteWork, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
+import {deleteWork, getWorlLink, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
 import {gantt} from 'naumen-gantt';
 import Modal from 'components/atoms/Modal/Modal';
 import React, {useEffect, useState} from 'react';
@@ -36,7 +36,7 @@ const ModalTask = (props: Props) => {
 	gantt.showLightbox = id => {
 		setTaskId(id);
 		const task = gantt.getTask(id);
-
+		dispatch(getWorlLink(task.id));
 		const metaClass = toString(task.id).includes('employee');
 
 		if (metaClass) {
@@ -286,6 +286,7 @@ const ModalTask = (props: Props) => {
 					<input name="delete" onClick={remove} type="button" value="Удалить" />
 				</div>
 				<div className={styles.buttons_grops}>
+					<a className="workLink" href={props.workLink} target="_blank">Переход на карточку работы</a>
 					<input name="close" onClick={cancel} type="button" value="Отмена" />
 					<input name="save" onClick={save} type="button" value="Сохранить" />
 				</div>

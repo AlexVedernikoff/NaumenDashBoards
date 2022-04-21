@@ -1,5 +1,5 @@
 // @flow
-import {addNewWork, deleteWorkDateRanges, editWorkData, getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, getWorkAttributes, postChangedWorkInterval, postChangedWorkProgress, postChangedWorkRelations, saveData} from 'utils/api';
+import {addNewWork, deleteWorkDateRanges, editWorkData, getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, getWorkAttributes, getWorkPageLink, postChangedWorkInterval, postChangedWorkProgress, postChangedWorkRelations, saveData} from 'utils/api';
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
@@ -107,6 +107,23 @@ const getListOfWorkAttributes = (metaClassFqn, attributeGroupCode, workUUID): Th
 };
 
 /**
+ * Получает ссылку работы
+ * @param {string} workUUID - идентификатор работы
+ * @returns {ThunkAction}
+ */
+const getWorlLink = (workUUID): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const workLink = await getWorkPageLink(workUUID);
+
+		dispatch(setWorkLink(workLink));
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
  * Сохраняет и отправляет данные изменения прогресса работы
  * @param {string} workUUID - идентификатор работы
  * @param {number} progress - прогресс работы
@@ -180,8 +197,9 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		const {contentCode, subjectUuid} = getContext();
 		const user = await getCurrentUser();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const {attributesMap, commonSettings, diagramKey, endDate, progressCheckbox, startDate, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
+		const {attributesMap, commonSettings, currentInterval, diagramKey, endDate, progressCheckbox, startDate, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
 
+		dispatch(setCurrentValueForInterval(currentInterval));
 		dispatch(setRangeTime({endDate, startDate}));
 		dispatch(switchProgressCheckbox(progressCheckbox));
 		dispatch(switchWorkRelationCheckbox(workRelationCheckbox));
@@ -220,6 +238,24 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
 		dispatch(hideLoaderSettings());
 	}
 };
+
+/**
+ * Установить ссылку работы
+ * @param {CurrentInterval} currentInterval - Текущий интервал
+ */
+ const setWorkLink = (workLink: string) => ({
+	workLink,
+	type: APP_EVENTS.SET_WORK_LINK
+});
+
+/**
+ * Установить текущенее значение для интервала
+ * @param {CurrentInterval} currentInterval - Текущий интервал
+ */
+ const setCurrentValueForInterval = (currentInterval: CurrentInterval) => ({
+	currentInterval,
+	type: APP_EVENTS.SET_CURRENT_VALUE_FOR_INTERVAL
+});
 
 /**
  * Переключает чекбокс прогресса
@@ -460,6 +496,7 @@ export {
 	getAppConfig,
 	getGanttData,
 	getListOfWorkAttributes,
+	getWorlLink,
 	hideLoaderData,
 	hideLoaderSettings,
 	postEditedWorkData,
@@ -473,6 +510,7 @@ export {
 	setColumnSettings,
 	setCommonSettings,
 	setColumnTask,
+	setCurrentValueForInterval,
 	setDiagramLinksData,
 	setDiagramData,
 	setRangeTime,
