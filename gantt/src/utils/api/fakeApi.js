@@ -48,8 +48,20 @@ export default class FakeApi {
 		return getSources;
 	}
 
+	async deleteWorkDateRanges () {
+		return 'Удалено';
+	}
+
 	async getAttributeGroups () {
 		return getAttributes;
+	}
+
+	async addNewWork () {
+		return 'Добавлено';
+	}
+
+	async editWorkData () {
+		return 'Изменено';
 	}
 
 	async getWorkAttributes (metaClassFqn, attributeGroupCode, workUUID) {

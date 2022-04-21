@@ -5,9 +5,10 @@ import {
 	Datepicker, IconButton, TextInput, Select
 } from 'naumen-common-components';
 import {deepClone} from 'helpers';
+import {deleteWork, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
 import {gantt} from 'naumen-gantt';
+import Modal from 'components/atoms/Modal/Modal';
 import React, {useEffect, useState} from 'react';
-import {setColumnTask} from 'store/App/actions';
 import styles from './styles.less';
 import {useDispatch, useSelector} from 'react-redux';
 
@@ -16,13 +17,14 @@ const ModalTask = (props: Props) => {
 	const [taskId, setTaskId] = useState(null);
 	const [showModal, setShowModal] = useState(false);
 	const [inputStartDate, setInputStartDate] = useState('');
+	const [showModalError, setShowModalError] = useState(false);
 	const [inputEndDate, setInputEndDate] = useState('');
 	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
 	const [valueError, setValueError] = useState('');
 	const [initPage, setInitPage] = useState(false);
 	const [options, setOptions] = useState([]);
-	const [currentmetaClassFqn, setСurrentmetaClassFqn] = useState('');
+	const [currentMetaClassFqn, setСurrentMetaClassFqn] = useState('');
 	const {attributesMap, getListOfWorkAttributes} = props;
 	const dispatch = useDispatch();
 	const store = useSelector(state => state);
@@ -35,15 +37,15 @@ const ModalTask = (props: Props) => {
 		setTaskId(id);
 		const task = gantt.getTask(id);
 
-		const mft = toString(task.id).includes('employee');
+		const metaClass = toString(task.id).includes('employee');
 
-		if (mft) {
+		if (metaClass) {
 			const listEmployeeAtrributes = attributesMap.employee?.map(i => {
 				return i.title;
 			});
 
 			setOptions(listEmployeeAtrributes);
-			setСurrentmetaClassFqn('employee');
+			setСurrentMetaClassFqn('employee');
 		} else {
 			const listserviceAtrributes = attributesMap.serviceCall$PMTask ? attributesMap.serviceCall$PMTask : attributesMap.serviceCall;
 			const listEmployeeAtrributes = listserviceAtrributes.map(i => {
@@ -51,7 +53,7 @@ const ModalTask = (props: Props) => {
 			});
 
 			setOptions(listEmployeeAtrributes);
-			attributesMap.serviceCall$PMTask ? setСurrentmetaClassFqn('serviceCall$PMTask') : setСurrentmetaClassFqn('serviceCall');
+			attributesMap.serviceCall$PMTask ? setСurrentMetaClassFqn('serviceCall$PMTask') : setСurrentMetaClassFqn('serviceCall');
 		}
 
 		setShowModal(true);
@@ -106,10 +108,16 @@ const ModalTask = (props: Props) => {
 					type: 'WORK'
 				});
 
+				const workDate = {
+					PMFinDateEarly: newEndDate,
+					PMPlanDate: newStartDate,
+					title: currentValue
+				};
+
 				const tasksTwo = gantt.getTaskByTime();
 
 				tasks.push(tasksTwo[tasksTwo.length - 1]);
-
+				dispatch(postNewWorkData(workDate, currentMetaClassFqn, taskId));
 				dispatch(setColumnTask(tasks));
 				gantt.render();
 			} else {
@@ -118,6 +126,14 @@ const ModalTask = (props: Props) => {
 						i.start_date = newStartDate;
 						i.end_date = newEndDate;
 						i.code1 = currentValue;
+
+						const workDate = {
+							PMFinDateEarly: newEndDate,
+							PMPlanDate: newStartDate,
+							title: currentValue
+						};
+
+						dispatch(postEditedWorkData(workDate, currentMetaClassFqn, taskId));
 					}
 
 					dispatch(setColumnTask(tasks));
@@ -155,25 +171,32 @@ const ModalTask = (props: Props) => {
 		const tasks = deepClone(store.APP.tasks);
 		const task = gantt.getTask(taskId);
 
-		const newTasks = tasks.filter(i => i.id !== task.id);
+		if (task.$target.length || task.$source.length) {
+			gantt.hideLightbox();
+			setShowModal(false);
+			setShowModalError(true);
+		} else {
+			const newTasks = tasks.filter(i => i.id !== task.id);
 
-		dispatch(setColumnTask(newTasks));
-		gantt.render();
+			dispatch(deleteWork(task.id));
+			dispatch(setColumnTask(newTasks));
+			gantt.render();
 
-		gantt.deleteTask(taskId);
-		gantt.hideLightbox();
-		setOptions([]);
-		setShowModal(false);
+			gantt.deleteTask(taskId);
+			gantt.hideLightbox();
+			setOptions([]);
+			setShowModal(false);
+		}
 	};
 
 	const [valueInterval, setValueInterval] = useState('Группы аттрибутов');
 	const handleIntervalChange = ({value}) => {
-		const mft = toString(currentmetaClassFqn).includes('employee');
+		const metaClass = toString(currentMetaClassFqn).includes('employee');
 		let attribute = '';
 		const newAttributesMapEmployee = deepClone(attributesMap.employee);
 		const newAttributesMapService = attributesMap.serviceCall$PMTask ? attributesMap.serviceCall$PMTask : attributesMap.serviceCall;
 
-		if (mft) {
+		if (metaClass) {
 			attribute = newAttributesMapEmployee.find(i => {
 				if (i.title === value) {
 					return i.code;
@@ -187,7 +210,7 @@ const ModalTask = (props: Props) => {
 			});
 		}
 
-		getListOfWorkAttributes(currentmetaClassFqn, attribute.code, taskId);
+		getListOfWorkAttributes(currentMetaClassFqn, attribute.code, taskId);
 		setValueInterval(value);
 	};
 
@@ -327,7 +350,32 @@ const ModalTask = (props: Props) => {
 		}
 	};
 
-	return renderModalTask();
+	const renderModal = () => {
+		if (showModalError) {
+			return (
+				<Modal
+					className={styles.modal}
+					notice={true}
+					onClose={() => setShowModalError(false)}
+					onSubmit={() => setShowModalError(false)}
+					submitText="Ок"
+				>
+					<div className={styles.inputwrapper}>
+						Невозможно удалить задачу, если она имеет связь с другими задачами
+					</div>
+				</Modal>
+			);
+		}
+
+		return null;
+	};
+
+	return (
+		<div className={styles.wrapper}>
+			{renderModalTask()}
+			{renderModal()}
+		</div>
+	);
 };
 
 export default ModalTask;

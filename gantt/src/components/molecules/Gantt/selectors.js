@@ -1,6 +1,6 @@
 // @flow
 import type {AppState} from 'store/types';
-import {getGanttData, getListOfWorkAttributes, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations, switchProgressCheckbox} from 'store/App/actions';
+import {getGanttData, getListOfWorkAttributes, postEditedWorkData, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations, switchProgressCheckbox} from 'store/App/actions';
 
 const props = (state: AppState) => {
 	const {attributesMap, diagramKey, loadingData, progressCheckbox, resources, settings, tasks, workAttributes, workRelationCheckbox, workRelations} = state.APP;
@@ -25,6 +25,7 @@ const props = (state: AppState) => {
 const functions = {
 	getGanttData,
 	getListOfWorkAttributes,
+	postEditedWorkData,
 	saveChangedWorkInterval,
 	saveChangedWorkProgress,
 	saveChangedWorkRelations,

@@ -5,9 +5,9 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
 import {deepClone} from 'helpers';
 import {gantt} from 'naumen-gantt';
-import {setColumnSettings, setColumnTask} from 'store/App/actions';
 import Modal from 'src/components/atoms/Modal';
 import ModalTask from 'components/atoms/ModalTask';
+import {postEditedWorkData, setColumnSettings, setColumnTask} from 'store/App/actions';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import './gant-export';
@@ -16,6 +16,7 @@ const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
 	const {attributesMap, columns, getListOfWorkAttributes, resources, rollUp, scale, tasks, workProgresses, workRelations} = props;
+	const [currentMetaClassFqn, setСurrentMetaClassFqn] = useState('');
 	const [showMenu, setShowMenu] = useState(false);
 	const [initPage, setInitPage] = useState(false);
 	const [res, setRes] = useState([]);
@@ -260,7 +261,7 @@ const Gantt = (props: Props) => {
 
 	// Изменяет время и дату настроек диаграммы гантта при изменении [store.APP.startDate, store.APP.endDate]
 	useLayoutEffect(() => {
-		if (firstUpdate) {
+		if (!firstUpdate) {
 			gantt.config.start_date = store.APP.startDate;
 			gantt.config.end_date = store.APP.endDate;
 			gantt.render();
@@ -369,7 +370,6 @@ const Gantt = (props: Props) => {
 		});
 	};
 
-
 	const inlineEditors = gantt.ext.inlineEditors;
 
 	inlineEditors.attachEvent('onBeforeSave', debounce(function (state) {
@@ -382,6 +382,24 @@ const Gantt = (props: Props) => {
 						i[key] = state.newValue;
 						i.text = i.code1;
 					}
+				}
+			}
+		});
+
+		newTasks.find(i => {
+			if (i.id === state.id) {
+				const workDate = {
+					title: state.newValue
+				};
+
+				if (i.id.includes('s')) {
+					const metaClassStr = 'serviceCall$PMTask';
+
+					dispatch(postEditedWorkData(workDate, metaClassStr, i.id));
+				} else {
+					const metaClassStr = 'employee';
+
+					dispatch(postEditedWorkData(workDate, metaClassStr, i.id));
 				}
 			}
 		});
@@ -469,6 +487,8 @@ const Gantt = (props: Props) => {
 				attributesMap={attributesMap}
 				getListOfWorkAttributes={getListOfWorkAttributes}
 				newTask={props.newTask}
+				postEditedWorkData={props.postEditedWorkData}
+				postNewWorkData={props.postNewWorkData}
 				workAttributes={props.workAttributes}
 			/>
 		);

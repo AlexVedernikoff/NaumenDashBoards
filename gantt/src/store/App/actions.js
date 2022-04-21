@@ -1,8 +1,8 @@
 // @flow
+import {addNewWork, deleteWorkDateRanges, editWorkData, getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, getWorkAttributes, postChangedWorkInterval, postChangedWorkProgress, postChangedWorkRelations, saveData} from 'utils/api';
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, getWorkAttributes, postChangedWorkInterval, postChangedWorkProgress, postChangedWorkRelations, saveData} from 'utils/api';
 import {v4 as uuidv4} from 'uuid';
 
 /**
@@ -28,6 +28,58 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(setSources(sources));
 		dispatch(saveMasterSettings());
 		await dispatch(getGanttData());
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Удаляет работу
+* @param {string} workUUID - индификатор работы
+*/
+const deleteWork = (workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await deleteWorkDateRanges(workUUID);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Отправляет новый объект работы
+* @param {WorkData} workData - данные работы
+* @param {string} classFqn - метакласс работы
+* @param {string} workUUID - индификатор работы
+*/
+const postNewWorkData = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+		const user = await getCurrentUser();
+
+		await addNewWork(workData, classFqn, workUUID, timezone, user);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Отправляет измененный объект работы
+* @param {WorkData} workData - данные работы
+* @param {string} classFqn - метакласс работы
+* @param {string} workUUID - индификатор работы
+*/
+const postEditedWorkData  = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+		const user = await getCurrentUser();
+
+		await editWorkData(workData, classFqn, workUUID, timezone, user);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -404,11 +456,14 @@ export {
 	cancelSettings,
 	changeScale,
 	changeWorkProgress,
+	deleteWork,
 	getAppConfig,
 	getGanttData,
 	getListOfWorkAttributes,
 	hideLoaderData,
 	hideLoaderSettings,
+	postEditedWorkData,
+	postNewWorkData,
 	setAttributesMap,
 	saveListOfAttributes,
 	saveChangedWorkRelations,

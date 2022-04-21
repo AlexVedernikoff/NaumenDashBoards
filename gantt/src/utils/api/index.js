@@ -2,6 +2,9 @@
 import Api from './api';
 import FakeApi from './fakeApi';
 import {
+	addNewWork,
+	deleteWorkDateRanges,
+	editWorkData,
 	getAttributeGroups,
 	getContext,
 	getCurrentUser,
@@ -21,6 +24,9 @@ import {
 } from './context';
 
 export {
+	addNewWork,
+	deleteWorkDateRanges,
+	editWorkData,
 	getAttributeGroups,
 	getWorkAttributes,
 	getContext,

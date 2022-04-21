@@ -78,12 +78,44 @@ const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string 
 };
 
 /**
+* Добавляет новую работу
+* @param {WorkData} workData - данные работы
+* @param {string} classFqn - метакласс работы
+* @param {string} workUUID - индификатор работы
+* @param {string} timezone - таймзона
+* @param {UserData} user - объект пользователя
+*/
+const addNewWork = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData): Promise<Source> => {
+	await api.addNewWork(workData, classFqn, workUUID, timezone, user);
+};
+
+/**
+* Изменяет данные работы
+* @param {WorkData} workData - данные работы
+* @param {string} classFqn - метакласс работы
+* @param {string} workUUID - индификатор работы
+* @param {string} timezone - таймзона
+* @param {UserData} user - объект пользователя
+*/
+const editWorkData = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData): Promise<Source> => {
+	await api.editWorkData(workData, classFqn, timezone, user);
+};
+
+/**
+* Удаляет работу
+* @param {string} workUUID - индификатор работы
+*/
+const deleteWorkDateRanges = async (workUUID: string): Promise<Source> => {
+	await api.deleteWorkDateRanges(workUUID);
+};
+
+/**
 * Отправляет данные изменения временных рамок работ
 * @param  {string} timezone - таймзона
 * @param  {workDateInterval} workDateInterval - Объект временных рамок работы
 * @param  {string} contentCode - code объекта
 * @param  {string} subjectUuid - Uuid объекта
-* @param  {string} user - user объект
+* @param {UserData} user - объект пользователя
 */
 const postChangedWorkInterval = async (timezone: string, workDateInterval: workDateInterval, contentCode: string, subjectUuid: string, user: UserData): Promise<Source> => {
 	await api.postChangedWorkInterval(timezone, workDateInterval, contentCode, subjectUuid, user);
@@ -167,12 +199,15 @@ const getDataSources = async (): Promise<Params> => {
  * @param {string} workUUID - идентификатор работы
  * @returns {ThunkAction}
  */
-const getWorkAttributes = async (attributeGroupCode, metaClassFqn, workUUID): Promise<Params> => {
+const getWorkAttributes = async (attributeGroupCode: string, metaClassFqn: string, workUUID: string): Promise<Params> => {
 	const workAttributes = await api.getWorkAttributes(attributeGroupCode, metaClassFqn, workUUID);
 	return workAttributes;
 };
 
 export {
+	addNewWork,
+	deleteWorkDateRanges,
+	editWorkData,
 	getWorkAttributes,
 	getContext,
 	getCurrentUser,

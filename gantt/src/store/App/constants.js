@@ -92,6 +92,11 @@ const defaultCommonSettings = {
 	'columnSettings': [
 		{
 			'code': codeMainColumn,
+			'editor':
+				{
+					map_to: 'text',
+					type: 'text'
+				},
 			'show': true,
 			'title': 'Название'
 		}
