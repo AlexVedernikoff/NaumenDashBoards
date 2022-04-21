@@ -4909,20 +4909,29 @@ class DashboardDataSetService
             }
         }
 
-        //подготовка колонок
-        List takenAggregationColumns = []
-        Collection<Column> aggregationColumns = allAggregationAttributes.collect { name ->
-            columns.find {
-                Boolean match = it.header == name && !takenAggregationColumns.contains(it)
-                if (match)
-                {
-                    takenAggregationColumns << it
+        Collection<Column> aggregationColumns
+        if (!sourceRowNames)
+        {
+            //подготовка колонок
+            List takenAggregationColumns = []
+            aggregationColumns = allAggregationAttributes.findResults { name ->
+                columns.find {
+                    Boolean match = it.header == name && !takenAggregationColumns.contains(it)
+                    if (match)
+                    {
+                        takenAggregationColumns << it
+                    }
+                    return match
                 }
-                return match
             }
+            //убираем, чтобы потом подставить правильно
+            columns -= aggregationColumns
         }
-        //убираем, чтобы потом подставить правильно
-        columns -= aggregationColumns
+        else
+        {
+            aggregationColumns = [columns.find()]
+        }
+
         if (totalColumn)
         {
             columns[-1].footer = 'Итого'
@@ -4955,8 +4964,12 @@ class DashboardDataSetService
                 }
             }
         }
-        //агрегация всегда стоит в конце
-        columns += aggregationColumns
+
+        if (!sourceRowNames)
+        {
+            //агрегация всегда стоит в конце
+            columns += aggregationColumns
+        }
 
         if(hasBreakdown)
         {
