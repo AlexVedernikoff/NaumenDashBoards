@@ -52,6 +52,20 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
+	/**
+	* Получает ссылку на страницу работы
+	* @param {string} workUUID - идентификатор работы
+	* @returns {ThunkAction}
+	*/
+	async getWorkPageLink (workUUID: string) {
+		const url = `exec?func=modules.ganttWorkHandler.getWorkPageLink&params=%27${workUUID}%27`;
+		const options = {
+			method: 'GET'
+		};
+
+		return this.jsApi.restCall(url, options);
+	}
+
 	async getDataSources () {
 		const url = 'exec?func=modules.ganttSettings.getDataSources&params=';
 		const options = {

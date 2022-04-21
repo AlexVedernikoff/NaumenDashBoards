@@ -7,7 +7,7 @@ import React from 'react';
 import styles from './styles.less';
 
 const GanttGrid = (props: Props) => {
-	const {allLinks, attributesMap, columns, getGanttData, getListOfWorkAttributes, loading, newTask, postNewWorkData, progress, progressCheckbox, resources, rollUp, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations, scale, switchProgressCheckbox, tasks, workAttributes, workRelationCheckbox, workRelations} = props;
+	const {allLinks, attributesMap, columns, getGanttData, getListOfWorkAttributes, loading, newTask, postNewWorkData, progress, progressCheckbox, resources, rollUp, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations, scale, switchProgressCheckbox, tasks, workAttributes, workLink, workRelationCheckbox, workRelations} = props;
 
 	if (loading) {
 		return (
@@ -43,6 +43,7 @@ const GanttGrid = (props: Props) => {
 					switchProgressCheckbox={switchProgressCheckbox}
 					tasks={tasks}
 					workAttributes={workAttributes}
+					workLink={workLink}
 					workRelationCheckbox={workRelationCheckbox}
 					workRelations={workRelations}
 				/>

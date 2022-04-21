@@ -105,3 +105,4 @@ export type WorkData = {
 export type WorkProgress = {[UUID: string]: number};
 export type ListOfAttributes = Array<{code: string, title: string}>;
 export type workDateInterval = Array<{dateType: string, value: string, workUUID: string}>;
+export type CurrentInterval = {label: string, value: string};

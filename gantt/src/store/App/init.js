@@ -8,6 +8,7 @@ export const initialAppState: AppState = {
 		serviceCall$PMTask: []
 	},
 	contentCode: '',
+	currentInterval: {},
 	diagramKey: '',
 	endDate: new Date(),
 	errorCommon: false,
@@ -35,6 +36,7 @@ export const initialAppState: AppState = {
 		role: USER_ROLES.REGULAR
 	},
 	workAttributes: [],
+	workLink: 'link',
 	workProgresses: {},
 	workRelationCheckbox: false,
 	workRelations: []

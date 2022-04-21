@@ -24,7 +24,7 @@ import GridLayout from 'react-grid-layout';
 import {IntervalSelectionCriterion, ScaleNames} from './consts';
 import Modal from 'src/components/atoms/Modal';
 import type {Props} from './types';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Resource from './components/Resource';
 import ShowBox from 'src/components/atoms/ShowBox';
 import styles from './styles.less';
@@ -45,6 +45,11 @@ const FormPanel = (props: Props) => {
 	const [valueError, setValueError] = useState('');
 	const [inputMonthDays, setInputMonthDays] = useState('');
 	const [inputLastDays, setinputLastDays] = useState('');
+	const [currentInterval, setCurrentInterval] = useState({label: 'с ... по', value: 'INTERVAL'});
+
+	useEffect(() => {
+		setCurrentInterval(props.currentInterval);
+	}, [props.currentInterval]);
 
 	const handleAddNewBlock = (index: number, value: string) => {
 		const {setResourceSettings} = props;
@@ -153,6 +158,7 @@ const FormPanel = (props: Props) => {
 	const [valueInterval, setValueInterval] = useState({label: 'c ... по', value: 'INTERVAL'});
 	const handleIntervalChange = ({value}) => {
 		setValueInterval(value);
+		setCurrentInterval(value);
 		setValueError('');
 	};
 
@@ -179,7 +185,14 @@ const FormPanel = (props: Props) => {
 	const handleAddNewColumn = () => {
 		const newColumnSettings = deepClone(columnSettingsModal);
 
-		setColumnSettingsModal([...newColumnSettings, {...defaultColumn, code: uuidv4(), editor: {map_to: 'text', type: 'text'}}]);
+		newColumnSettings.push({ ...defaultColumn, code: uuidv4(), editor: {map_to: 'text', type: 'text'} });
+
+		const penultIndex = newColumnSettings.length - 2;
+		const lastIndex = newColumnSettings.length - 1;
+
+		newColumnSettings.splice(penultIndex, lastIndex, newColumnSettings[lastIndex], newColumnSettings[penultIndex]);
+
+		setColumnSettingsModal([...newColumnSettings]);
 	};
 
 	const handleDeleteColumn = (index: number) => {
@@ -214,7 +227,7 @@ const FormPanel = (props: Props) => {
 		setError(newError);
 
 		if (!newError) {
-			saveSettings({commonSettings: settings, diagramKey, endDate, progressCheckbox, resourceAndWorkSettings: resources, startDate, workProgresses, workRelationCheckbox});
+			saveSettings({commonSettings: settings, currentInterval, diagramKey, endDate, progressCheckbox, resourceAndWorkSettings: resources, startDate, workProgresses, workRelationCheckbox});
 		}
 	};
 
@@ -300,7 +313,7 @@ const FormPanel = (props: Props) => {
 			const newStartDate = new Date(convertDateToNormal(inputStartDate));
 			const newEndDate = new Date(convertDateToNormal(inputEndDate));
 
-			if (Date.parse(newEndDate) >= Date.parse(newStartDate)) {
+			if (Date.parse(newEndDate) >= Date.parse(newStartDate) && (inputStartDate.length && inputEndDate.length)) {
 				const date = {
 					endDate: newEndDate,
 					startDate: newStartDate
@@ -318,6 +331,8 @@ const FormPanel = (props: Props) => {
 		} else if (valueInterval.value === 'MONTH') {
 			if (isNaN(inputMonthDays)) {
 				setValueError('Некорректное значение');
+			} else if (!inputMonthDays.length) {
+				setValueError('Заполните поле');
 			} else {
 				const today = new Date();
 				const inWeek = new Date();
@@ -335,6 +350,8 @@ const FormPanel = (props: Props) => {
 		} else if (valueInterval.value === 'LASTDAYS') {
 			if (isNaN(inputMonthDays)) {
 				setValueError('Некорректное значение');
+			} else if (!inputMonthDays.length) {
+				setValueError('Заполните поле');
 			} else {
 				const today = new Date();
 				const inWeek = new Date();
@@ -449,6 +466,7 @@ const FormPanel = (props: Props) => {
 				return (
 					<div>
 						{listDataInterval}
+						<div className={styles.error}>{valueError}</div>
 						<button onClick={sibmitRange}>Применить</button>
 					</div>
 				);
@@ -464,7 +482,7 @@ const FormPanel = (props: Props) => {
 	const renderSelectInterval = () => (
 		<div className={styles.select}>
 			<span className={styles.label}>Критерий</span>
-			<Select className={cn(styles.selectIcon, styles.top)} icon={'CHEVRON'} onSelect={handleIntervalChange} options={IntervalSelectionCriterion} placeholder='Критерий' value={valueInterval.label} />
+			<Select className={cn(styles.selectIcon, styles.top)} icon={'CHEVRON'} onSelect={handleIntervalChange} options={IntervalSelectionCriterion} placeholder="Критерий" value={valueInterval.label} />
 			{renderIntervalFromTo()}
 		</div>
 	);
@@ -474,15 +492,15 @@ const FormPanel = (props: Props) => {
 
 		return (
 			<div onClick={handleCheckboxChange}>
-				<FormControl className={cn(styles.checkbox)} label='Свернуть работы по умолчанию' small={true}>
-					<Checkbox checked={settings.rollUp} name='Checkbox' onChange={handleCheckboxChange} value={settings.rollUp} />
+				<FormControl className={cn(styles.checkbox)} label="Свернуть работы по умолчанию" small={true}>
+					<Checkbox checked={settings.rollUp} name="Checkbox" onChange={handleCheckboxChange} value={settings.rollUp} />
 				</FormControl>
 			</div>
 		);
 	};
 
 	const renderButtonCommonBlock = () => (
-		<Button className={styles.button} variant='ADDITIONAL'>
+		<Button className={styles.button} variant="ADDITIONAL">
 			<div className={styles.bigButton} onClick={handleOpenColumnSettingsModal}> </div>
 			Настройки столбцов таблицы
 		</Button>
@@ -517,10 +535,10 @@ const FormPanel = (props: Props) => {
 	const renderBottom = () => {
 		return (
 			<div className={styles.bottom}>
-				<Button onClick={handleSave} variant='INFO'>
+				<Button onClick={handleSave} variant="INFO">
 					Сохранить
 				</Button>
-				<Button onClick={handleCancel} variant='GREY'>
+				<Button onClick={handleCancel} variant="GREY">
 					Отменить
 				</Button>
 			</div>
@@ -534,7 +552,7 @@ const FormPanel = (props: Props) => {
 					notice={false}
 					onClose={() => setError('')}
 					onSubmit={() => setError('')}
-					submitText='Ок'
+					submitText="Ок"
 					text={''}
 				>
 					{error}
@@ -583,15 +601,21 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
+	const lastIndex = columnSettingsModal.length - 1;
+
+	const editColumn = (index, method) => () => {
+		return (index !== lastIndex && index !== 0) ? method(index) : false;
+	};
+
 	const getContentModal = () => {
 		return (
 			<GridLayout className="layout" cols={1} layouts={layout} onLayoutChange={layout => setLayout(layout)} rowHeight={35} width={300}>
 				{columnSettingsModal.map((item, index) => (
 					<div className={styles.item} data-grid={{h: 1, static: !index, w: 1, x: 0, y: index}} key={item.code}>
-						<Icon className={styles.kebab} name='KEBAB' />
-						<ShowBox checked={item.show} className={!index && styles.disabled} name={item.code} onChange={() => index && handleColumnShowChange(index)} value={item.show} />
-						<TextInput className={styles.input} maxLength={30} name={item.code} onChange={target => handleColumnNameChange(target, index)} onlyNumber={false} placeholder='Введите название столбца' value={item.title} />
-						<IconButton className={!index ? styles.disabled : styles.basket} icon='BASKET' onClick={() => index && handleDeleteColumn(index)} />
+						<Icon className={styles.kebab} name="KEBAB" />
+						<ShowBox checked={item.show} className={(index === lastIndex || index === 0) && styles.disabled} name={item.code} onChange={() => editColumn(index, handleColumnShowChange)} value={item.show} />
+						<TextInput className={styles.input} maxLength={30} name={item.code} onChange={target => handleColumnNameChange(target, index)} onlyNumber={false} placeholder="Введите название столбца" value={item.title} />
+						<IconButton className={(index === lastIndex || index === 0) ? styles.disabled : styles.basket} icon="BASKET"onClick={editColumn(index, handleDeleteColumn)} />
 					</div>
 				))}
 			</GridLayout>
@@ -622,8 +646,8 @@ const FormPanel = (props: Props) => {
 	const renderCheckboxProgress = () => {
 		return (
 			<div onClick={props.handleToggleProgress}>
-				<FormControl className={cn(styles.checkbox)} label='Отображать прогресс выполнения работ на диаграмме' small={true}>
-					<Checkbox checked={props.progressCheckbox} name='Checkbox' onChange={props.handleToggleProgress} value={props.progressCheckbox} />
+				<FormControl className={cn(styles.checkbox)} label="Отображать прогресс выполнения работ на диаграмме" small={true}>
+					<Checkbox checked={props.progressCheckbox} name="Checkbox" onChange={props.handleToggleProgress} value={props.progressCheckbox} />
 				</FormControl>
 			</div>
 		);
@@ -632,8 +656,8 @@ const FormPanel = (props: Props) => {
 	const renderCheckboxСonnections = () => {
 		return (
 			<div onClick={props.handleToggleLinks}>
-				<FormControl className={cn(styles.checkbox)} label='Отображать связи работ на диаграмме' small={true}>
-					<Checkbox checked={props.workRelationCheckbox} name='Checkbox' onChange={props.handleToggleLinks} value={props.workRelationCheckbox} />
+				<FormControl className={cn(styles.checkbox)} label="Отображать связи работ на диаграмме" small={true}>
+					<Checkbox checked={props.workRelationCheckbox} name="Checkbox" onChange={props.handleToggleLinks} value={props.workRelationCheckbox} />
 				</FormControl>
 			</div>
 		);

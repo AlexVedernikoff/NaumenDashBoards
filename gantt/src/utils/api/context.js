@@ -11,6 +11,16 @@ const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
 });
 
 /**
+ * Получает ссылку на страницу работы
+ * @param {string} workUUID - идентификатор работы
+ * @returns {string} link - ссылка на карточку работы
+ */
+const getWorkPageLink = async (workUUID: string): Promise<Params> => {
+	console.log('contex', api.getWorkPageLink(workUUID));
+	return api.getWorkPageLink(workUUID);
+};
+
+/**
  * Возвращает текущего пользователя
  * @returns {Promise<UserData>} - пользователь
  */
@@ -217,6 +227,7 @@ export {
 	getDiagramData,
 	getInitialParams,
 	getInitialSettings,
+	getWorkPageLink,
 	openFilterForm,
 	getUserData,
 	postChangedWorkRelations,
