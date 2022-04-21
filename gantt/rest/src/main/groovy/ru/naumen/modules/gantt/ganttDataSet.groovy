@@ -62,6 +62,7 @@ class GanttDataSetImpl implements GanttDataSetController
 @Singleton
 class GanttDataSetService
 {
+    private static final String GANTT_DATE_PATTERN = "yyyy-MM-dd, HH:mm:ss"
     /**
      * Максимальный размер выборки из БД.
      */
@@ -90,8 +91,14 @@ class GanttDataSetService
         data.workRelations = settings.workRelations
         data.workRelationCheckbox = settings.workRelationCheckbox
         data.progressCheckbox = settings.progressCheckbox
-        data.startDate = settings.startDate
-        data.endDate = settings.endDate
+
+        String startDate = settings.startDate
+        String endDate = settings.endDate
+        Date sd = Date.parse("yyyy-MM-dd'T'HH:mm:ss", startDate)
+        Date ed = Date.parse("yyyy-MM-dd'T'HH:mm:ss", endDate)
+        data.startDate = sd.format(GANTT_DATE_PATTERN)
+        data.endDate = ed.format(GANTT_DATE_PATTERN)
+
         data.currentInterval = settings.currentInterval
 
         GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
