@@ -87,7 +87,7 @@ class XCategoryLabel extends PureComponent<CategoryLabelProps, CategoryLabelStat
 
 		return (
 			<g>
-				<text {...props} alignmentBaseline="middle" textAnchor='middle' y={normalizeY}>
+				<text {...props} alignmentBaseline="middle" textAnchor="middle" y={normalizeY}>
 					{lines.map(this.getRenderMultiLineLine(x))}
 					<title>{value}</title>
 				</text>

@@ -62,14 +62,65 @@ export default class Api {
 	}
 
 	/**
+	* Добавляет новую работу
+	* @param {WorkData} workData - данные работы
+	* @param {string} classFqn - метакласс работы
+	* @param {string} workUUID - индификатор работы
+	* @param {string} timezone - таймзона
+	* @param {UserData} user - объект пользователя
+	*/
+	async addNewWork (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData) {
+		const url = `exec-post?func=modules.ganttWorkHandler.addNewWork&params=requestContent,user`;
+		const body = {classFqn, timezone, workData, workUUID};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Удаляет работу
+	* @param {string} workUUID - индификатор работы
+	*/
+	async deleteWor (workUUID) {
+		const url = `exec-post?func=modules.ganttWorkHandler.deleteWorkDateRanges&params=%27${workUUID}%27`;
+		const options = {
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Изменяет данные работы
+	* @param {WorkData} workData - данные работы
+	* @param {string} classFqn - метакласс работы
+	* @param {string} workUUID - индификатор работы
+	* @param {string} timezone - таймзона
+	* @param {UserData} user - объект пользователя
+	*/
+	async editWorkData (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData) {
+		const url = `exec-post?func=modules.ganttWorkHandler.editWorkData&params=requestContent,user`;
+		const body = {classFqn, timezone, workData, workUUID};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
 	 * Получает аттрибуты работы
 	 * @param {string} attributeGroupCode - код группы аттрибутов
 	 * @param {string} metaClassFqn - метакласс работы
 	 * @param {string} workUUID - идентификатор работы
 	 * @returns {ThunkAction}
 	 */
-	async getWorkAttributes (metaClassFqn, attributeGroupCode, workUUID) {
-		const url = `exec?func=modules.ganttWorkHandler.getWorkAttributes&params=%27${metaClassFqn}%27,%27${attributeGroupCode}%27,${null}`;
+	async getWorkAttributes (metaClassFqn, attributeGroupCode, workUUID: string) {
+		const url = `exec-post?func=modules.ganttWorkHandler.getWorkAttributes&params=%27${metaClassFqn}%27,%27${attributeGroupCode}%27,${null}`;
 		const options = {
 			method: 'GET'
 		};
