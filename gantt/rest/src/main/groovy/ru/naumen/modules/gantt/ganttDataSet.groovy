@@ -92,12 +92,15 @@ class GanttDataSetService
         data.workRelationCheckbox = settings.workRelationCheckbox
         data.progressCheckbox = settings.progressCheckbox
 
-        String startDate = settings.startDate
-        String endDate = settings.endDate
-        Date sd = Date.parse("yyyy-MM-dd'T'HH:mm:ss", startDate)
-        Date ed = Date.parse("yyyy-MM-dd'T'HH:mm:ss", endDate)
-        data.startDate = sd.format(GANTT_DATE_PATTERN)
-        data.endDate = ed.format(GANTT_DATE_PATTERN)
+        if (settings.startDate && settings.endDate)
+        {
+            String startDate = settings.startDate
+            String endDate = settings.endDate
+            Date sd = Date.parse("yyyy-MM-dd'T'HH:mm:ss", startDate)
+            Date ed = Date.parse("yyyy-MM-dd'T'HH:mm:ss", endDate)
+            data.startDate = sd.format(GANTT_DATE_PATTERN)
+            data.endDate = ed.format(GANTT_DATE_PATTERN)
+        }
 
         data.currentInterval = settings.currentInterval
 
