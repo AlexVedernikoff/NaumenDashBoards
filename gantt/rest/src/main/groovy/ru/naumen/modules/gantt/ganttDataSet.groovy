@@ -14,8 +14,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Field
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
-import ru.naumen.core.shared.IUUIDIdentifiable
 import static groovy.json.JsonOutput.toJson
+import ru.naumen.core.shared.IUUIDIdentifiable
+import java.time.ZonedDateTime
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 
@@ -119,7 +120,7 @@ class GanttDataSetService
         }
         else
         {
-            data.tasks = buildDataListFromSettings(settings.resourceAndWorkSettings, null)
+            data.tasks = buildDataListFromSettings(settings.resourceAndWorkSettings, null, null)
             def timezone =
                 TimeZone.getTimeZone(
                     api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
@@ -133,8 +134,16 @@ class GanttDataSetService
                 setWorkProgress(it, settings)
                 setColumnDateFormats(it, timezone)
             }
-            data.tasks = data.tasks.findResults {
-                it.type != SourceType.RESOURCE ? it : null
+            data.tasks = data.tasks.findResults{
+                def startAndEndDateExist = it.start_date && it.end_date
+                if(!startAndEndDateExist && it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
+                {
+                    return null
+                }
+                else
+                {
+                    return it
+                }
             }
         }
         return data
@@ -167,7 +176,6 @@ class GanttDataSetService
         data.createdDate = settings.createdDate
         data.title = settings.title
         data.versionKey = settings.versionKey
-        settings.works
 
         GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
         settings.ganttSettings.resourceAndWorkSettings.each {
@@ -185,7 +193,11 @@ class GanttDataSetService
         else
         {
             data.tasks =
-                buildDataListFromSettings(settings.ganttSettings.resourceAndWorkSettings, null)
+                buildDataListFromSettings(
+                    settings.ganttSettings.resourceAndWorkSettings,
+                    null,
+                    versionKey
+                )
             TimeZone timeZone =
                 TimeZone.getTimeZone(
                     api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: timezone
@@ -194,6 +206,7 @@ class GanttDataSetService
                 settings.ganttSettings.resourceAndWorkSettings.find {
                     it.startWorkAttribute && it.endWorkAttribute
                 }
+
             data.tasks.each {
                 formatWorkDates(it, workAttributeSettings, timeZone)
                 setWorkTypeToProjectIfItHasChildren(it, data.tasks)
@@ -214,7 +227,7 @@ class GanttDataSetService
         Map workToMerge = [:]
         work.each {
             def value = it.value
-            String key = it.key
+            def key = it.key
             if (value in Date && !(key in ['start_date', 'end_date']))
             {
                 workToMerge[key] = value.format("dd.MM.yyyy, HH:mm:ss", timezone)
@@ -261,7 +274,7 @@ class GanttDataSetService
         allWorks.each {
             if (it.parent == work.id)
             {
-                work.type = 'project'
+                work['type'] = 'project'
             }
         }
     }
@@ -277,26 +290,26 @@ class GanttDataSetService
                                  TimeZone timezone)
     {
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        if (work.start_date)
+        if (work['start_date'])
         {
             if (workAttributeSettings?.startWorkAttribute?.type == 'date')
             {
-                work.start_date = work.start_date.format(dateFormat)
+                work['start_date'] = work['start_date'].format(dateFormat)
             }
             else
             {
-                work.start_date = work.start_date.format(dateFormat, timezone)
+                work['start_date'] = work['start_date'].format(dateFormat, timezone)
             }
         }
-        if (work.end_date)
+        if (work['end_date'])
         {
             if (workAttributeSettings?.endWorkAttribute?.type == 'date')
             {
-                work.end_date = work.end_date.format(dateFormat)
+                work['end_date'] = work['end_date'].format(dateFormat)
             }
             else
             {
-                work.end_date = work.end_date.format(dateFormat, timezone)
+                work['end_date'] = work['end_date'].format(dateFormat, timezone)
             }
         }
     }
@@ -326,10 +339,12 @@ class GanttDataSetService
      * Метод получения данных для построения диаграммы Ганта, вызывается рекурсивно
      * @param settings - иерархический список настроек
      * @param parentUUID - уникальный идентификатор записи в БД о родителе
+     * @param versionKey - ключ диаграммы версий
      * @return список Map<String, String> параметров для построения диаграммы
      */
-    public List<Map<String, String>> buildDataListFromSettings(List<ResourceAndWorkSettings> settingsList,
-                                                               String parentUUID)
+    private List<Map<String, String>> buildDataListFromSettings(List<ResourceAndWorkSettings> settingsList,
+                                                                String parentUUID,
+                                                                String versionKey)
     {
         /* За текущую настройку из списка настроек, берется 1-ый элемент settingsList[0]. В цикле совершается поиск таких
            настроек, для которых уровень вложенности level равен level-у текущей. Таким образом находятся по сути соседние
@@ -350,14 +365,19 @@ class GanttDataSetService
             'type' : RESOURSE/WORK
            ] */
 
-        // Closure для подготовки значения аттрибута типа метакласс после запроса в БД.
+        // Closure для подготовки кодов аттрибутов для запроса в БД.
+        //Closure prepare = { (it?.type in AttributeType.LINK_TYPES) ? ("${it.code}.title") : it.code }
+
+        GanttSettingsService service = GanttSettingsService.instance
+        GanttVersionsSettingsClass settingsVersion =
+            service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
+
+        def result = []
         Closure updateIfMetaClass = { item, attr ->
             attr == 'metaClassFqn'
                 ? api.metainfo.getMetaClass(item)?.title
                 : item
         }
-
-        def result = []
 
         for (int i = 0; i < settingsList.size(); i++)
         {
@@ -416,11 +436,20 @@ class GanttDataSetService
             Source source = settings.source
             // Так как из БД нельзя получить повторяющиеся колонки, то имена атрибутов делаем уникальными.
             List<String> listAttributes = mapAttributes.values().toList().unique()
-            List<List<String>> res = getListResultsForParent(
-                source, mapAttributes['parent'], parentUUID?.takeWhile {
-                it != '_'
-            }, listAttributes
-            )
+            def res = []
+            if (versionKey != null)
+            {
+                res = settingsVersion.works
+            }
+            else
+            {
+                res = getListResultsForParent(
+                    source, mapAttributes['parent'], parentUUID?.takeWhile {
+                    it != '_'
+                }, listAttributes
+                )
+            }
+
             if (res)
             {
                 /* Из БД пришел набор данных. Необходимо задать правильное соответствие между названием
@@ -436,19 +465,16 @@ class GanttDataSetService
 
                 // Преобразование в список из словарей (добавление к значениям, полученным из БД, ключей).
                 List<Map<String, String>> resMap = []
-                res.each { item
-                    ->
+
+                res.each { item ->
                     Map<String, String> itemMap =
                         mapAttributesIndexes.collectEntries { key, valueMap ->
                             return [(key): updateIfMetaClass(item[valueMap.ind], valueMap.attr)]
                         }
-                    itemMap.id += "_${ UUID.randomUUID() }"
-                    //добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
 
                     if (itemMap.parent)
                     {
                         itemMap.parent = parentUUID
-//добавление уникальности уникальному идентификатору в системе - объект может прийти дважды
                     }
 
                     resMap.add(itemMap)
@@ -483,8 +509,9 @@ class GanttDataSetService
                         // Добавление элемента в результирующий список.
                         result.add(it)
                         // Рекурсивный вызов для "потомков". Список с настройками передается со второго элемента.
-                        result
-                            .addAll(buildDataListFromSettings(settingsList[(i + 1)..-1], it['id']))
+                        result.addAll(
+                            buildDataListFromSettings(settingsList[(i + 1)..-1], it['id'], null)
+                        )
                         return
                     }
                 }

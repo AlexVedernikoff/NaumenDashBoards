@@ -85,7 +85,7 @@ interface GanttSettingsController
                                                           String versionKey)
 
     /**
-     * Метод удаления диаграмм версий из хранилища
+     * Метод по удалению диаграмм версий из хранилища
      * @param ganttVersionId - индексы значений
      */
     void deleteGanttVersionSettings(int ganttVersionId)
@@ -143,6 +143,12 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
+    String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
+    {
+        return toJson(service.getUserData(requestContent, user))
+    }
+
+    @Override
     String getGanttVersionsSettings(String diagramKey)
     {
         return Jackson.toJsonString(service.getGanttVersionsSettings(diagramKey))
@@ -160,8 +166,8 @@ class GanttSettingsImpl implements GanttSettingsController
     GanttVersionsSettingsClass updateGanttVersionSettings(GanttVersionsSettingsDTOClass ganttVersionsSettingsDTO,
                                                           String versionKey)
     {
-        GanttVersionsSettingsDTOClass request = new ObjectMapper().
-            convertValue(ganttVersionsSettingsDTO, GanttVersionsSettingsDTOClass)
+        GanttVersionsSettingsDTOClass request = new ObjectMapper()
+            .convertValue(ganttVersionsSettingsDTO, GanttVersionsSettingsDTOClass)
         return Jackson.toJsonString(service.updateGanttVersionSettings(request, versionKey))
     }
 
@@ -169,12 +175,6 @@ class GanttSettingsImpl implements GanttSettingsController
     void deleteGanttVersionSettings(int ganttVersionId)
     {
         service.deleteGanttVersionSettings(ganttVersionId)
-    }
-
-    @Override
-    String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
-    {
-        return toJson(service.getUserData(requestContent, user))
     }
 }
 
@@ -254,7 +254,7 @@ class GanttSettingsService
 
         if (request.isForColumns)
         {
-            attributes = attributes.findAll {
+            attributes = attributes.findAll() {
                 it.type in ATTRIBUTE_TYPES_ALLOWED_FOR_EDITION
             }
         }
@@ -304,7 +304,7 @@ class GanttSettingsService
             : new GanttSettingsClass()
         ganttSettings.diagramKey = diagramKey
         transformGanttSettings(ganttSettings)
-        addingEditor(ganttSettings)
+
         return ganttSettings
     }
 
@@ -504,7 +504,7 @@ class GanttSettingsService
     }
 
     /**
-     * Метод удаления диаграмм версий из хранилища
+     * Метод по удалению диаграмм версий из хранилища
      * @param ganttVersionId - индексы значений
      */
     void deleteGanttVersionSettings(int ganttVersionId)
@@ -693,7 +693,7 @@ class GanttSettingsService
      * Метод сохранения настроек объекта
      * @param key - уникальный идентификатор объекта
      * @param jsonValue - ыериализованные настройки объекта
-     * @return true/false успешное/провальное сохранение
+     * @return true/false успешное/провалльное сохранение
      */
     Boolean saveJsonSettings(String key, String jsonValue, String namespace = GANTT_NAMESPACE)
     {
@@ -850,17 +850,6 @@ class SaveGanttSettingsRequest extends BaseGanttSettingsRequest
 }
 
 /**
- * Тело запроса на получение настроек версий диаграммы Ганта
- */
-class GetGanttVersionsSettingsRequest extends BaseGanttSettingsRequest
-{
-    /**
-     * Таймзона устройства пользователя
-     */
-    String timezone
-}
-
-/**
  * Тело запроса на сохранение настроек диаграммы версий Ганта
  */
 class SaveGanttVersionSettingsRequest
@@ -917,6 +906,15 @@ class BaseGanttDiagramData
      * Отображение связи работ на диаграмме
      */
     Boolean workRelationCheckbox
+
+    TestField testField
+}
+
+class TestField
+{
+    String test1
+
+    String test2
 }
 
 /**
@@ -924,6 +922,10 @@ class BaseGanttDiagramData
  */
 class GanttSettingsClass extends BaseGanttDiagramData
 {
+    /**
+     * Настройки для источников - работ
+     */
+    Collection<Work> works = []
     /**
      * Настройки для источников - ресурсов/работ
      */
@@ -944,6 +946,12 @@ class GanttSettingsClass extends BaseGanttDiagramData
      * Настройки интервала
      */
     CurrentInterval currentInterval
+}
+
+class GanttVersion
+{
+    String name
+    def createDate
 }
 
 /**
@@ -987,7 +995,7 @@ class GanttVersionsSettingsDTOClass
 
 class Work
 {
-    Map<String, Map<String, Object>> attributesData = [:]
+    Map<String, Object> attributesData = [:]
 }
 
 /**
@@ -999,7 +1007,6 @@ class WorkRelation
      * ID работ
      */
     String id
-
     /**
      * UUID работы A
      */

@@ -203,7 +203,7 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
     @Override
     String deleteWorkDateRanges(String workUUID)
     {
-        return service.deleteWorkDateRanges(workUUID)
+        service.deleteWorkDateRanges(workUUID)
     }
 
     @Override
@@ -320,43 +320,43 @@ class GanttWorkHandlerService
         {
             List<String> warnings = []
 
-            GanttSettingsService ganttSettingsService = GanttSettingsService.instance
+        GanttSettingsService ganttSettingsService = GanttSettingsService.instance
 
-            String diagramKey =
-                ganttSettingsService.generateDiagramKey(request.subjectUUID, request.contentCode)
-            String ganttSettingsFromKeyValue = ganttSettingsService.getJsonSettings(diagramKey)
+        String diagramKey =
+            ganttSettingsService.generateDiagramKey(request.subjectUUID, request.contentCode)
+        String ganttSettingsFromKeyValue = ganttSettingsService.getJsonSettings(diagramKey)
 
-            GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
-                ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
-                : new GanttSettingsClass()
+        GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
+            ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
+            : new GanttSettingsClass()
 
-            api.tx.call {
-                request.workDateInterval.each { workDateData ->
-                    ISDtObject work = api.utils.get(workDateData.workUUID)
-                    String timezoneString =
-                        api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
-                    TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-                    Date newDateToUpdate =
-                        Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone)
+        api.tx.call {
+            request.workDateInterval.each { workDateData ->
+                ISDtObject work = api.utils.get(workDateData.workUUID)
+                String timezoneString =
+                    api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
+                TimeZone timezone = TimeZone.getTimeZone(timezoneString)
+                Date newDateToUpdate =
+                    Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone)
 
-                    List<ISDtObject> relatedEntities =
-                        getWorkRelatedEntitiesWithExceededDeadline(work, work, newDateToUpdate)
+                List<ISDtObject> relatedEntities =
+                    getWorkRelatedEntitiesWithExceededDeadline(work, work, newDateToUpdate)
 
-                    String attributeCode = null
-                    String metaClassId = work.getMetaClass().getId()
-                    ganttSettings.resourceAndWorkSettings.find {
-                        if (it.source.value.value == metaClassId)
-                        {
-                            attributeCode =
-                                workDateData.dateType == WorkEditDateType.startDate ?
-                                    it.startWorkAttribute.code : it.endWorkAttribute.code
-                        }
+                String attributeCode = null
+                String metaClassId = work.getMetaClass().getId()
+                ganttSettings.resourceAndWorkSettings.find {
+                    if (it.source.value.value == metaClassId)
+                    {
+                        attributeCode =
+                            workDateData.dateType == WorkEditDateType.startDate ?
+                                it.startWorkAttribute.code : it.endWorkAttribute.code
                     }
-
-                    api.utils.edit(work, [(attributeCode): newDateToUpdate])
-                    updateRelatedEntitiesDeadlines(relatedEntities, newDateToUpdate)
                 }
+
+                api.utils.edit(work, [(attributeCode): newDateToUpdate])
+                updateRelatedEntitiesDeadlines(relatedEntities, newDateToUpdate)
             }
+        }
 
             return new EditWorkDateRangesResponse(updated: true)
         }
@@ -540,7 +540,8 @@ class GanttWorkHandlerService
                 request.workDateInterval.each { workDateData ->
                     ISDtObject work = api.utils.get(workDateData.workUUID)
                     String timezoneString =
-                        api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
+                        api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?:
+                            request.timezone
                     TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                     Date newDateToUpdate =
                         Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone)
@@ -624,7 +625,7 @@ class GanttWorkHandlerService
         ganttVersionSettings.ganttSettings.workProgresses[workUUID] = progress
 
         if (!ganttSettingsService
-                .saveJsonSettings(diagramKey, Jackson.toJsonString(ganttVersionSettings)))
+            .saveJsonSettings(diagramKey, Jackson.toJsonString(ganttVersionSettings)))
         {
             throw new Exception('Настройки не были сохранены!')
         }
@@ -722,7 +723,8 @@ class GanttWorkHandlerService
      * @return подготовленные данные работы для добавления/редактирования
      */
     private Map<String, Object> prepareWorkDataFromVersion(AddNewWorkRequest request,
-                                                           IUUIDIdentifiable user, String versionKey)
+                                                           IUUIDIdentifiable user,
+                                                           String versionKey)
     {
         Map<String, Object> preparedWorkData = request.workData
         Collection<IAttributeWrapper> attributes =
