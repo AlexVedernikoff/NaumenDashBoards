@@ -421,6 +421,10 @@ class DashboardsService
 
         def descriptor = listdata.createListDescriptor(source.typeCode, source.code, userUUID)
 
+        Boolean anyOfDescriptorMetaClassesHasDynamicAttributes = descriptor.getFqns().any {
+            checkForDynamicAttributes(it.toString())
+        }
+
         // Из дескриптора по "clazz" и "cases" получается код метакласса.
         def listContent = descriptor.unwrap().content
         def clazz = listContent.clazz
@@ -429,7 +433,7 @@ class DashboardsService
             classFqn: clazz ?: cases?.find().toString().takeWhile { it != '$' },
             title: source.title,
             children: [],
-            hasDynamic: false,
+            hasDynamic: anyOfDescriptorMetaClassesHasDynamicAttributes,
             descriptor: listdata.listDescriptorAsJson(descriptor))
         return [totalSource]
     }
