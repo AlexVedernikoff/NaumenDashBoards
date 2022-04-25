@@ -1,7 +1,7 @@
 // @flow
+import type {ComboValueFormatter, ValueFormatter} from 'utils/recharts/formater/types';
 import {LEGEND_LAYOUT} from 'utils/recharts/constants';
 import type {TextHandler} from 'store/widgets/data/types';
-import type {ValueFormatter} from 'utils/recharts/formater/types';
 
 type Align = 'left' | 'center' | 'right';
 type Layout = $Values<typeof LEGEND_LAYOUT>;
@@ -21,6 +21,7 @@ export type Props = {
 	align: Align,
 	chartHeight: number,
 	chartWidth: number,
+	comboFormatter: ComboValueFormatter,
 	formatter: ValueFormatter,
 	height: number,
 	iconSize: number,

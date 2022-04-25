@@ -588,7 +588,8 @@ type WidgetsGrid =
   | 'WidgetsGrid::EmptyGridAction'
   | 'WidgetsGrid::EmptyGridPart1'
   | 'WidgetsGrid::EmptyGridPart2'
-  | 'WidgetsGrid::EmptyMobileMessage';
+  | 'WidgetsGrid::EmptyMobileMessage'
+  | 'WidgetsGrid::Loading';
 
 // components/templates/WidgetForm
 type WidgetForm = 'WidgetForm::Save' | 'WidgetForm::Cancel';

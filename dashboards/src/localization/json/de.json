@@ -310,6 +310,7 @@
 	"WidgetsGrid::EmptyGridPart2": "",
 	"WidgetsGrid::EmptyMobileMessage": "",
 	"WidgetsGrid::ConfirmCloseWindow": "",
+	"WidgetsGrid::Loading": "Wird geladen...",
 	"WidgetForm::Save": "",
 	"WidgetForm::Cancel": "",
 	"WidgetForm::ChoiceWidgetTooltipForm::Tooltip": "",

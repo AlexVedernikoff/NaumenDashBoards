@@ -28,7 +28,7 @@ export class RechartLegend extends PureComponent<Props> {
 	};
 
 	getRenderLegendItem = (isHorizontal: boolean, isCrop: boolean) => {
-		const {formatter, iconSize} = this.props;
+		const {comboFormatter, formatter, iconSize} = this.props;
 		const itemClass = cn({
 			[styles.legendItem]: true,
 			[styles.displayInlineHorizontalItem]: isHorizontal,
@@ -40,7 +40,15 @@ export class RechartLegend extends PureComponent<Props> {
 		return (item, index) => {
 			const {dataKey, value} = item;
 			const key = `${dataKey}_${value}`;
-			const valueData = formatter ? formatter(value) : value;
+			let valueData = value;
+
+			if (formatter) {
+				valueData = formatter(value);
+			} else if (comboFormatter) {
+				const dataKeyClear = dataKey.split(' ', 2)[0];
+
+				valueData = comboFormatter(dataKeyClear)(value);
+			}
 
 			return (
 				<div className={itemClass} key={key}>

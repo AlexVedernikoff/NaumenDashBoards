@@ -308,6 +308,7 @@
 "WidgetsGrid::EmptyGridPart2","или кликнете правой кнопкой мыши на свободное пространство","or click right mouse button on empty space",,
 "WidgetsGrid::EmptyMobileMessage","Отсутствуют данные для отображения. Для редактирования дашборда необходимо открыть полную версию приложения на компьютере","There is no data to display. To edit the dashboard you need to open the desktop version",,
 "WidgetsGrid::ConfirmCloseWindow","В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?","If you close the window, all changes on this dashboard will be reset. Switch to another tab?",,
+"WidgetsGrid::Loading","Загрузка...","Loading...","Wird geladen...","Ładowanie..."
 "WidgetForm::Save","Сохранить","Save",,
 "WidgetForm::Cancel","Отмена","Cancel",,
 "WidgetForm::ChoiceWidgetTooltipForm::Tooltip","Подсказка","Tooltip",,
