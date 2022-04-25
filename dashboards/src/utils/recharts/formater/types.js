@@ -29,10 +29,8 @@ export type AxisFormatter = {
 };
 
 export type CircleFormatter = {
-	breakdown: ValueFormatter,
-	dataLabel: NumberFormatter,
-	legend: ValueFormatter,
-	tooltip: NumberFormatter
+	category: ValueFormatter,
+	label: NumberFormatter,
 };
 
 export type ComboFormatter = {

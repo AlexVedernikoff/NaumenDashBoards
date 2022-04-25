@@ -700,7 +700,7 @@ const getDataLabels = (widget: AxisWidget | CircleWidget | ComboWidget): DataLab
 };
 
 /**
- * Возвращает отложенный расчет общего количества данных на диаграмме
+ * Возвращает функцию для расчета общего количества данных на диаграмме
  * @param {DiagramBuildData} data - данные конкретного графика
  * @returns {() => number}
  */
