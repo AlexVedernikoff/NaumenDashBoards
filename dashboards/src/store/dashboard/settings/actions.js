@@ -280,6 +280,7 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		dispatch({
 			type: DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD
 		});
+
 		const errorMessage = e instanceof ApiError ? e.message : t('store::dashboard::settings::DeleteError');
 
 		dispatch(createToast({
@@ -367,6 +368,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 		dispatch({
 			type: DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR
 		});
+
 		const errorMessage = e instanceof ApiError ? e.message : t('store::dashboard::settings::FileSendingError');
 
 		dispatch(createToast({

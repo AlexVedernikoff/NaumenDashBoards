@@ -310,6 +310,7 @@
 	"WidgetsGrid::EmptyGridPart2": "или кликнете правой кнопкой мыши на свободное пространство",
 	"WidgetsGrid::EmptyMobileMessage": "Отсутствуют данные для отображения. Для редактирования дашборда необходимо открыть полную версию приложения на компьютере",
 	"WidgetsGrid::ConfirmCloseWindow": "В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?",
+	"WidgetsGrid::Loading": "Загрузка...",
 	"WidgetForm::Save": "Сохранить",
 	"WidgetForm::Cancel": "Отмена",
 	"WidgetForm::ChoiceWidgetTooltipForm::Tooltip": "Подсказка",

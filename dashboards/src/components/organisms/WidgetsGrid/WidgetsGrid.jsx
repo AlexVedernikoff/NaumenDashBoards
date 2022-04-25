@@ -1,10 +1,7 @@
 // @flow
 import type {AnyWidget, WidgetType} from 'store/widgets/data/types';
-import BarWidget from 'components/organisms/BarWidget';
 import {calculatePosition, generateWebSMLayout, getSortedWidgetsByLayout, isEqualsLayouts} from './helpers';
 import cn from 'classnames';
-import ColumnsWidget from 'components/organisms/ColumnsWidget';
-import ComboWidget from 'components/organisms/ComboWidget';
 import ContextMenu from 'components/molecules/ContextMenu';
 import {debounce} from 'helpers';
 import {DESKTOP_MK_WIDTH, GRID_PROPS, gridRef} from './constants';
@@ -16,22 +13,26 @@ import {isLayoutsChanged} from 'store/helpers';
 import {Item as MenuItem} from 'rc-menu';
 import type {Layout, Layouts} from 'store/dashboard/layouts/types';
 import {LAYOUT_BREAKPOINTS, LAYOUT_MODE} from 'store/dashboard/settings/constants';
-import LinesWidget from 'components/organisms/LinesWidget';
 import NewWidget from 'store/widgets/data/NewWidget';
-import PieWidget from 'components/organisms/PieWidget';
 import type {Props, State} from './types';
-import React, {Component, createRef} from 'react';
+import React, {Component, createRef, Suspense} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import {resizer as dashboardResizer} from 'app.constants';
 import {Responsive as Grid} from 'react-grid-layout';
-import SpeedometerWidget from 'containers/SpeedometerWidget';
 import styles from './styles.less';
-import SummaryWidget from 'containers/SummaryWidget';
 import t from 'localization';
 import T from 'components/atoms/Translation';
-import TableWidget from 'containers/TableWidget';
-import TextWidget from 'components/organisms/TextWidget';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
+
+const BarWidget = React.lazy(() => import('components/organisms/BarWidget'));
+const ColumnsWidget = React.lazy(() => import('components/organisms/ColumnsWidget'));
+const ComboWidget = React.lazy(() => import('components/organisms/ComboWidget'));
+const LinesWidget = React.lazy(() => import('components/organisms/LinesWidget'));
+const PieWidget = React.lazy(() => import('components/organisms/PieWidget'));
+const SpeedometerWidget = React.lazy(() => import('containers/SpeedometerWidget'));
+const SummaryWidget = React.lazy(() => import('containers/SummaryWidget'));
+const TableWidget = React.lazy(() => import('containers/TableWidget'));
+const TextWidget = React.lazy(() => import('components/organisms/TextWidget'));
 
 export class WidgetsGrid extends Component<Props, State> {
 	state = {
@@ -289,7 +290,9 @@ export class WidgetsGrid extends Component<Props, State> {
 
 		return (
 			<GridItem focused={focused} key={widget.id} onClick={this.handleItemClick} onFocus={this.handleFocus} selected={selected}>
-				{widget instanceof NewWidget ? null : this.renderWidget(widget)}
+				<Suspense fallback={this.renderWidgetSuspend()}>
+					{widget instanceof NewWidget ? null : this.renderWidget(widget)}
+				</Suspense>
 			</GridItem>
 		);
 	};
@@ -344,6 +347,8 @@ export class WidgetsGrid extends Component<Props, State> {
 				return null;
 		}
 	};
+
+	renderWidgetSuspend = () => (<p className={styles.loading}><T text="WidgetsGrid::Loading" /></p>);
 
 	render () {
 		const {isMobileDevice} = this.props;

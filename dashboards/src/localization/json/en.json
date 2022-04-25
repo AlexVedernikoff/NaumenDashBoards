@@ -310,6 +310,7 @@
 	"WidgetsGrid::EmptyGridPart2": "or click right mouse button on empty space",
 	"WidgetsGrid::EmptyMobileMessage": "There is no data to display. To edit the dashboard you need to open the desktop version",
 	"WidgetsGrid::ConfirmCloseWindow": "If you close the window, all changes on this dashboard will be reset. Switch to another tab?",
+	"WidgetsGrid::Loading": "Loading...",
 	"WidgetForm::Save": "Save",
 	"WidgetForm::Cancel": "Cancel",
 	"WidgetForm::ChoiceWidgetTooltipForm::Tooltip": "Tooltip",

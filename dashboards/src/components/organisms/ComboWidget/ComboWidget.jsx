@@ -208,7 +208,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 
 		return (
 			<RechartLegend
-				formatter={formatters.legend}
+				comboFormatter={formatters.legend}
 				textHandler={textHandler}
 			/>
 		);
