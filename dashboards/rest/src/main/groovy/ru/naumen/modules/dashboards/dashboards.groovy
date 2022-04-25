@@ -620,15 +620,17 @@ class DashboardsService
             metaInfo = metainfo.getMetaClass(metaClass)
         }
 
+        List<String> codesOfAddedAttributes = []
         Collection<Attribute> result = [metaInfo, *metaInfos].collectMany { meta ->
             return meta ? meta.attributes.findResults {
-                if(!it.computable && it.type.code in types && !isHiddenAttribute(it))
+                if(!codesOfAddedAttributes.contains(it.code) && !it.computable && it.type.code in types && !isHiddenAttribute(it))
                 {
                     Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(meta.code, it.code, it.type.code)
+                    codesOfAddedAttributes << it.code
                     return buildAttribute(it, metaInfo.title, metaInfo.code, ableForAvg)
                 }
             } : []
-        }.unique{ it.code }.sort { it.title }
+        }.sort { it.title }
 
         if (deep)
         {
