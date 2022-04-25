@@ -8,5 +8,6 @@ export type Props = InjectOptionsProps & {
 };
 
 export type State = {
-	options: $Shape<CircleChartOptions>
+	options: $Shape<CircleChartOptions>,
+	tooltipColor: string
 };

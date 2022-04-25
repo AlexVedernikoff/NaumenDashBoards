@@ -5,6 +5,7 @@ import {DIAGRAM_WIDGET_TYPES} from 'store/widgets/data/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {getCircleFormatter} from './formater';
 import {getCircleSeriesData, getCircleWidget, getDataLabels, getLegendOptions} from './helpers';
+import {getPieTotalCalculator} from './pie.helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import {makeGeneratorCircleDrillDownOptions} from './drillDown.helpers';
 import type {Widget} from 'store/widgets/data/types';
@@ -21,7 +22,8 @@ const getOptions = (
 		const buildDataSet = getBuildSet(circleWidget);
 
 		if (buildDataSet) {
-			const formatters = getCircleFormatter(circleWidget, data.labels, container);
+			const totalCalculator = getPieTotalCalculator(data);
+			const formatters = getCircleFormatter(circleWidget, data.labels, container, totalCalculator);
 			const getDrillDownOptions = makeGeneratorCircleDrillDownOptions(circleWidget);
 
 			return {

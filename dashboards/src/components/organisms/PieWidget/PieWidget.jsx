@@ -1,5 +1,6 @@
 // @flow
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from 'recharts';
+import {darkenColor} from './helpers.js';
 import PieLabel from './components/PieLabel';
 import type {Props, State} from './types';
 import ReChartWidget from 'components/molecules/ReChartWidget';
@@ -9,7 +10,8 @@ import t from 'localization';
 
 export class PieWidget extends PureComponent<Props, State> {
 	state = {
-		options: {}
+		options: {},
+		tooltipColor: '#FFFFFF'
 	};
 
 	static getDerivedStateFromProps (props: Props, state: State) {
@@ -34,12 +36,14 @@ export class PieWidget extends PureComponent<Props, State> {
 		}
 	};
 
+	handlePieMouseEnter = ({fill}) => this.setState({tooltipColor: darkenColor(fill)});
+
 	renderLabel = props => {
 		const {options: {dataLabels, formatters}} = this.state;
 		return (
 			<PieLabel
 				{...props}
-				formatter={formatters.dataLabel}
+				formatter={formatters.label}
 				style={dataLabels}
 			/>
 		);
@@ -78,6 +82,7 @@ export class PieWidget extends PureComponent<Props, State> {
 				label={this.renderLabel}
 				labelLine={false}
 				onClick={this.handleClick}
+				onMouseEnter={this.handlePieMouseEnter}
 			>
 				{data.map(this.renderPieCell)}
 			</Pie>
@@ -87,16 +92,16 @@ export class PieWidget extends PureComponent<Props, State> {
 	renderPieCell = (item, idx) => <Cell fill={item.color} key={`cell-${idx}`} />;
 
 	renderPieChart = () => {
-		const {options: {data, formatters}} = this.state;
-		const formatter = (value, name) => ([
-			formatters.tooltip(value), formatters.breakdown(name)
-		]);
+		const {options: {data, formatters}, tooltipColor} = this.state;
+		const formatter = (value, name, props) => [formatters.label(value), formatters.category(name)];
+		const contentStyle = {backgroundColor: tooltipColor, padding: '5px'};
+		const itemStyle = {color: '#FFFFFF'};
 
 		if (data) {
 			return (
 				<ResponsiveContainer height="100%" width="100%">
 					<PieChart>
-						<Tooltip formatter={formatter} />
+						<Tooltip contentStyle={contentStyle} formatter={formatter} itemStyle={itemStyle} />
 						{this.renderPie(data)}
 						{this.renderLegend()}
 					</PieChart>
@@ -113,7 +118,7 @@ export class PieWidget extends PureComponent<Props, State> {
 
 		return (
 			<RechartLegend
-				formatter={formatters.legend}
+				formatter={formatters.category}
 				textHandler={textHandler}
 			/>
 		);

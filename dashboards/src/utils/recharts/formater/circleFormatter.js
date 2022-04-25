@@ -2,25 +2,30 @@
 import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT} from 'store/widgets/data/constants';
 import {
 	checkInfinity,
-	checkNumber,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
-	storedFormatter
+	storedFormatter,
+	totalPercentFormatter
 } from './helpers';
 import type {CircleFormatter, NumberFormatter, ValueFormatter} from './types';
 import type {CircleWidget, NumberAxisFormat} from 'store/widgets/data/types';
-import {DATETIME_SYSTEM_GROUP, DEFAULT_AGGREGATION, GROUP_WAYS} from 'store/widgets/constants';
+import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
+import {hasCountPercent, hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
 
-const getDataFormatter = (widget: CircleWidget, format: NumberAxisFormat): NumberFormatter => {
+const getDataFormatter = (
+	widget: CircleWidget,
+	format: NumberAxisFormat,
+	totalCalculator: (() => number) | null
+): NumberFormatter => {
 	const dataSet = getMainDataSet(widget.data);
 	const {indicators} = dataSet;
 	const {aggregation, attribute: indicatorAttribute} = indicators[0];
 
 	const usesMSInterval = hasMSInterval(indicatorAttribute, aggregation);
 	const usesPercent = hasPercent(indicatorAttribute, aggregation);
+	const usesCntPercent = hasCountPercent(indicatorAttribute, aggregation);
 
 	let formatter = null;
 
@@ -30,30 +35,19 @@ const getDataFormatter = (widget: CircleWidget, format: NumberAxisFormat): Numbe
 		const numberFormat = !format.additional && usesPercent ? {...format, additional: '%'} : format;
 
 		formatter = makeFormatterByNumberFormat(numberFormat);
+
+		if (usesCntPercent && totalCalculator != null) {
+			const total = totalCalculator();
+
+			if (total !== 0) {
+				formatter = totalPercentFormatter(formatter, total);
+			}
+		}
+
 		formatter = checkInfinity(formatter);
 	}
 
 	return formatter;
-};
-
-const getCircleDataLabelFormatter = (formatter: NumberFormatter, showPercent: boolean) => {
-	let innerFormatter: (value: number, percent?: number) => string = formatter;
-
-	if (showPercent) {
-		const percentFormatter = checkNumber(makeFormatterByNumberFormat({
-			additional: '%',
-			symbolCount: null,
-			type: AXIS_FORMAT_TYPE.NUMBER_FORMAT
-		}));
-
-		innerFormatter = (value: number, percent?: number) => {
-			const resultValue = formatter(value);
-			const percentValue = percentFormatter(percent);
-			return `${resultValue} (${percentValue})`;
-		};
-	}
-
-	return (value, percent?) => innerFormatter(value, percent);
 };
 
 /**
@@ -75,28 +69,30 @@ const getCategoryFormatter = (widget: CircleWidget): ValueFormatter => {
 
 /**
  * Фабрика форматеров для круговой диаграммы
+ *
  * @param {CircleWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @param {() => number} totalCalculator - расчет общего количества элементов на диаграмме
  * @returns {CircleFormatter} - объект с функциями форматерами и параметрами построения
  */
-const getCircleFormatterBase = (widget: CircleWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): CircleFormatter => {
+const getCircleFormatterBase = (
+	widget: CircleWidget,
+	labels: Array<string> | Array<number>,
+	container: HTMLDivElement,
+	totalCalculator: () => number
+): CircleFormatter => {
 	const {dataLabels} = widget;
-	const dataSet = getMainDataSet(widget.data);
 	const dataLabelsFormat = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
 	const normalizedDataLabelsFormat = dataLabelsFormat && dataLabelsFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
 		? dataLabelsFormat
 		: DEFAULT_NUMBER_AXIS_FORMAT;
 	const categoryFormatter = getCategoryFormatter(widget);
-	const doubleAggregation = dataSet.indicators?.[0]?.aggregation === DEFAULT_AGGREGATION.PERCENT_CNT;
-	const dataLabelsFormatter = getDataFormatter(widget, normalizedDataLabelsFormat);
-	const normalizeDataLabelsFormatter = getCircleDataLabelFormatter(dataLabelsFormatter, doubleAggregation);
+	const dataLabelsFormatter = getDataFormatter(widget, normalizedDataLabelsFormat, totalCalculator);
 
 	return {
-		breakdown: categoryFormatter,
-		dataLabel: normalizeDataLabelsFormatter,
-		legend: categoryFormatter,
-		tooltip: dataLabelsFormatter
+		category: categoryFormatter,
+		label: dataLabelsFormatter
 	};
 };
 
@@ -106,30 +102,27 @@ const getCircleFormatterBase = (widget: CircleWidget, labels: Array<string> | Ar
  * @param {CircleWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
+ * @param {() => number} totalCalculator - расчет общего количества элементов на диаграмме
  * @returns {CircleFormatter} - объект с функциями форматерами и параметрами построения
  */
 // eslint-disable-next-line no-unused-vars
-const getCircleFormatterDebug = (widget: CircleWidget, labels: Array<string> | Array<number>, container: HTMLDivElement): CircleFormatter => {
+const getCircleFormatterDebug = (
+	widget: CircleWidget,
+	labels: Array<string> | Array<number>,
+	container: HTMLDivElement,
+	totalCalculator: () => number
+): CircleFormatter => {
 	const {clientWidth} = container;
 	const store = {container: {clientWidth}, labels, widget};
-	const baseFormatter = getCircleFormatterBase(widget, labels, container);
-	const breakdown = [];
-	const dataLabel = [];
-	const legend = [];
-	const tooltipData = [];
-	const tooltipTitle = [];
+	const baseFormatter = getCircleFormatterBase(widget, labels, container, totalCalculator);
+	const category = [];
+	const label = [];
 
-	console.info('getCircleFormatterBase: ', {...store, breakdown, dataLabel, legend, tooltipData, tooltipTitle});
-	const dataLabelCtxExtractor = ctx => {
-		const {seriesIndex, w} = ctx;
-		const value = w.config.series[seriesIndex];
-		return {seriesIndex, w: {config: {series: {[seriesIndex]: value}}}};
-	};
+	console.info('getCircleFormatterBase: ', {...store, category, label});
+
 	return {
-		breakdown: storedFormatter(breakdown, baseFormatter.breakdown),
-		dataLabel: storedFormatter(dataLabel, baseFormatter.dataLabel, dataLabelCtxExtractor),
-		legend: storedFormatter(legend, baseFormatter.legend),
-		tooltip: storedFormatter(tooltipData, baseFormatter.tooltip)
+		category: storedFormatter(category, baseFormatter.category),
+		label: storedFormatter(label, baseFormatter.label)
 	};
 };
 
