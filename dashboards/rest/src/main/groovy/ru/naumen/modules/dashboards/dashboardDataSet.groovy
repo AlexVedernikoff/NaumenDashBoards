@@ -1531,7 +1531,7 @@ class DashboardDataSetService
                 request.requestData.groups = groups
             }
         }
-        else
+        else if (allGroups)
         {
             intermediateData.eachWithIndex { it, index ->
                 Object request = it.value
