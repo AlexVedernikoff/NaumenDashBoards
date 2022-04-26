@@ -605,7 +605,7 @@ class DashboardDrilldownService
                             if(attributeType in AttributeType.LINK_TYPES)
                             {
                                 def wrapper = new MainDateFilterProvider().getWrapperForDynamicAttr(attr, classFqn, descriptor)
-                                wrapper.totalValueCriteria.add(filters.attrValueEq('value',
+                                wrapper.totalValueCriteria.add(this.filters.attrValueEq('value',
                                                                                       utils.get(LinksAttributeMarshaller.unmarshal(value).last())))
                                 objects = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
                             }
@@ -715,7 +715,7 @@ class DashboardDrilldownService
                             def filterParam = groupFilters?.find {it?.attribute?.code?.find() == 'value' }
                             def wrapper = QueryWrapper.build(source, templateUUID)
 
-                            wrapper.totalValueCriteria.add(filters.attrValueEq('linkTemplate', templateUUID))
+                            wrapper.totalValueCriteria.add(this.filters.attrValueEq('linkTemplate', templateUUID))
                                    .addColumn(selectClause.property('UUID'))
                             wrapper.filtering(wrapper.totalValueCriteria, true, filterParam)
 
