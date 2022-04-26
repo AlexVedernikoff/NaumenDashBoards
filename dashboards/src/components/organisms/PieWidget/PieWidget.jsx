@@ -24,6 +24,9 @@ export class PieWidget extends PureComponent<Props, State> {
 		return null;
 	}
 
+	getHandlePieMouseEnter = (fill: string) =>
+		() => this.setState({tooltipColor: darkenColor(fill)});
+
 	handleClick = (payload, idx) => {
 		const {drillDown, setWidgetWarning, widget} = this.props;
 		const {options: {getDrillDownOptions}} = this.state;
@@ -35,8 +38,6 @@ export class PieWidget extends PureComponent<Props, State> {
 			drillDown(widget, params.index, params.mixin);
 		}
 	};
-
-	handlePieMouseEnter = ({fill}) => this.setState({tooltipColor: darkenColor(fill)});
 
 	renderLabel = props => {
 		const {options: {dataLabels, formatters}} = this.state;
@@ -82,14 +83,15 @@ export class PieWidget extends PureComponent<Props, State> {
 				label={this.renderLabel}
 				labelLine={false}
 				onClick={this.handleClick}
-				onMouseEnter={this.handlePieMouseEnter}
 			>
 				{data.map(this.renderPieCell)}
 			</Pie>
 		);
 	};
 
-	renderPieCell = (item, idx) => <Cell fill={item.color} key={`cell-${idx}`} />;
+	renderPieCell = (item, idx) => (
+		<Cell fill={item.color} key={`cell-${idx}`} onMouseOver={this.getHandlePieMouseEnter(item.color.toString())} />
+	);
 
 	renderPieChart = () => {
 		const {options: {data, formatters}, tooltipColor} = this.state;
