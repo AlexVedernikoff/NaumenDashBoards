@@ -32,8 +32,9 @@ interface GanttDataSetController
 
     /**
      * Метод получения данных для построения версий диаграммы Ганта
-     * @param request - тело запроса [subjectUUID:..., contentCode: ...]
+     * @param versionKey - ключ версии диаграммы
      * @param user - пользователь
+     * @param timezone - таймзона
      * @return данные для построения диаграммы Ганта
      */
     String getGanttVersionDiagramData(String versionKey, IUUIDIdentifiable user, String timezone)
@@ -151,8 +152,9 @@ class GanttDataSetService
 
     /**
      * Метод получения данных для построения версий диаграммы Ганта
-     * @param request - тело запроса [subjectUUID:..., contentCode: ...]
+     * @param versionKey - ключ версии диаграммы
      * @param user - пользователь
+     * @param timezone - таймзона
      * @return данные для построения диаграммы Ганта
      */
     GanttVersionDiagramData getGanttVersionDiagramData(String versionKey,
@@ -527,7 +529,7 @@ class GanttDataSetService
     /**
      * Метод получения данных из БД по условию на равенство (attrEq == value)
      * @param source - источник
-     * @param paramEq - код атрибута, по которому ведется поиск
+     * @param attrEq - код атрибута, по которому ведется поиск
      * @param value - значение по которому ведется поиск
      * @param attributes - список запрашиваемых атрибутов (колонок) для выборки
      * @return выборка из БД

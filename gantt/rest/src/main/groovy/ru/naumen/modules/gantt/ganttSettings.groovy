@@ -385,7 +385,7 @@ class GanttSettingsService
      * @param request - тело запроса
      * @return настройки, отправленные в хранилище
      */
-    GanttVersionsSettingsClass saveGanttVersionSettings(SaveGanttVersionSettingsRequest request)
+    GanttVersionsSettingsClass saveGanttVersionSettings(SaveGanttVersionSettingsRequest request, GetGanttSettingsRequest ganttSettingsRequest, IUUIDIdentifiable user)
     {
         String subjectUUID = request.subjectUUID
         String contentCode = request.contentCode
@@ -433,7 +433,9 @@ class GanttSettingsService
 
         List<Map<String, Object>> data =
             ganttDataSetService
-                .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null)
+                .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null,null)
+
+        ganttVersionsSettings.works = ganttDataSetService.getGanttDiagramData(ganttSettingsRequest,user).tasks
 
         Map<String, String> valueForMapAttributes = [:]
         Map<String, Object> mapAttributesWork = [:]
@@ -922,10 +924,6 @@ class TestField
  */
 class GanttSettingsClass extends BaseGanttDiagramData
 {
-    /**
-     * Настройки для источников - работ
-     */
-    Collection<Work> works = []
     /**
      * Настройки для источников - ресурсов/работ
      */
