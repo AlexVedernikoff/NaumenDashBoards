@@ -10,6 +10,7 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules.dashboards
 
+import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.transform.Field
 import groovy.transform.InheritConstructors
@@ -147,10 +148,16 @@ interface Dashboards
     /**
      * Метод получения групп динамических атрибутов
      * @param requestContent - [descriptor: дескриптор из виджета]
-     * @param aggregateToJson - флаг возврата данных в JSON-формате
      * @return список групп динамических атрибутов
      */
     String getDynamicAttributeGroups(Map<String, Object> requestContent)
+
+    /**
+     * Метод получения групп динамических атрибутов для пользовательского дашборда
+     * @param requestContent - [descriptor: дескриптор из виджета]
+     * @return список групп динамических атрибутов
+     */
+    String getDynamicAttributeGroupsForUser(Map<String, Object> requestContent)
 
     /**
      * Метод получения связанных источников
@@ -307,6 +314,13 @@ class DashboardsImpl extends BaseController implements Dashboards
     {
         def descriptor = requestContent.descriptor
         return toJson(service.getDynamicAttributeGroups(descriptor))
+    }
+
+    @Override
+    String getDynamicAttributeGroupsForUser(Map<String, Object> requestContent)
+    {
+        String descriptor = requestContent.descriptor
+        return toJson(service.getDynamicAttributeGroupsForUser(descriptor))
     }
 
     @Override
@@ -553,7 +567,7 @@ class DashboardsService
     Collection<Attribute> getDataSourceAttributesByGroupCode(def requestContent)
     {
         String classFqn = requestContent.classFqn
-        String groupCode = requestContent.groupCode
+        String groupCode = requestContent.attrGroupCode
         List<String> cases = requestContent.cases
         List listOfSystemAttribute = []
         def mainMetaClass = classFqn ? metainfo.getMetaClass(classFqn) : null
@@ -571,7 +585,11 @@ class DashboardsService
         }
 
         cases?.each { metainfo ->
-            listOfSystemAttribute.addAll(getSystemAttributesByGroupCode(metainfo, groupCode))
+            Collection systemAttributes = getSystemAttributesByGroupCode(metainfo, groupCode)
+            if (systemAttributes)
+            {
+                listOfSystemAttribute.addAll(systemAttributes)
+            }
         }
 
         def attrs = listOfSystemAttribute?.unique { it?.code }?.findResults {
@@ -589,7 +607,30 @@ class DashboardsService
             UUIDAttr = buildAttribute(UUIDAttr, mainMetaClass.title, classFqn, ableForAvg)
             attrs += UUIDAttr
         }
-        return getTimerAttributesWithValue(attrs)
+
+        attrs = getTimerAttributesWithValue(attrs)
+        replaceAttributesTitleForMainMetaClass(attrs, classFqn)
+        return attrs
+    }
+
+    /**
+     * Метод замены названия атрибута в случае, если оно изменено в дочерних метаклассах
+     * @param attributes - список атрибутов
+     * @param mainClassFqn - код главного метакласса
+     */
+    void replaceAttributesTitleForMainMetaClass(Collection<Attribute> attributes, String mainClassFqn)
+    {
+        Collection<IAttributeWrapper> mainMetaClassAttributes = metainfo.getMetaClass(mainClassFqn)?.attributes
+        if (mainMetaClassAttributes)
+        {
+            attributes.each { attribute ->
+                IAttributeWrapper mainMetaClassAttribute = mainMetaClassAttributes.find { it.code == attribute.code }
+                if (mainMetaClassAttribute)
+                {
+                    attribute.title = mainMetaClassAttribute.title
+                }
+            }
+        }
     }
 
     /**
@@ -1080,6 +1121,33 @@ class DashboardsService
                 )
             }
         }?.grep()?.toList()
+    }
+
+    /**
+     * Метод получения групп динамических атрибутов для пользовательского дашборда
+     * @param descriptor - дескриптор из виджета
+     * @param aggregateToJson - флаг возврата данных в JSON-формате
+     * @return список групп динамических атрибутов
+     */
+    List<DynamicGroup> getDynamicAttributeGroupsForUser(String descriptor)
+    {
+        JsonSlurper slurper = new JsonSlurper()
+        descriptor = slurper.parseText(descriptor)
+        List descriptorGroupsData = getDynamicAttributeGroupsDataForUser(descriptor)
+        List<DynamicGroup> result = descriptorGroupsData?.collect {
+            Map<String, Object> dynamicSource = getDynamicGroupSource(it.group)
+            List<String> templateUUIDS = getUUIDSForTemplates(it.group.UUID)
+            templateUUIDS = getActiveTemplateUUIDS(templateUUIDS)
+            boolean hasAnyAttributes = templateUUIDS.any { getDynamicAttributeType(it) }
+            if (dynamicSource && hasAnyAttributes)
+            {
+                return new DynamicGroup(
+                    code: it.group.UUID,
+                    title: "${ it.group.title } (${ it.title })"
+                )
+            }
+        }?.grep()?.toList()
+        return result
     }
 
     /**
@@ -1677,6 +1745,37 @@ class DashboardsService
             }
             else return []
         }
+    }
+
+    /**
+     * Получение групп динамических атрибутов по условию фильтрации (дескриптора)
+     * @param descriptor - условия фильтрации (дескриптор)
+     * @return - список групп динамических атрибутов
+     */
+    private List getDynamicAttributeGroupsDataForUser(descriptor)
+    {
+        Collection attributeGroupsData = descriptor?.filters?.collectMany { filter ->
+            if (filter.properties.attrTypeCode.find() in AttributeType.LINK_TYPES)
+            {
+                return getDescriptorGroupsData(descriptor)
+            }
+            else
+            {
+                return []
+            }
+        }
+
+        if (!attributeGroupsData)
+        {
+            List dynamicAttributeGroups = utils.find('attrGroups', [:]).findResults {
+                it.state == 'active' ? it : null
+            }
+            attributeGroupsData = dynamicAttributeGroups.collect {
+                ['title': it.formInService.title, 'group': it]
+            }
+        }
+
+        return attributeGroupsData
     }
 
     /**
