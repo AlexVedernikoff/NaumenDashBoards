@@ -1556,7 +1556,10 @@ class DashboardDataSetService
     {
         Boolean isGroupDuplicate = false
         groups.each {
-            if (group && group.type == it.type && group.attribute.code == it.attribute.code)
+            if (group
+                && group.type == it.type
+                && group.attribute.code == it.attribute.code
+                && group.attribute.metaClass == it.attribute.metaClass)
             {
                 isGroupDuplicate = true
             }
