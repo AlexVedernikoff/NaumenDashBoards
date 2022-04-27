@@ -139,9 +139,10 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 
 	/**
 	 * Возвращает только те атрибуты, которые используются во всех источниках
+	 * @param {Array<Attribute>} options - список атрибутов
 	 * @returns {Array<Attribute>} - список отфильтрованных атрибутов
 	 */
-	getCommonAttributes = (): Array<Attribute> => {
+	getCommonAttributes = (options: Array<Attribute>): Array<Attribute> => {
 		const {attributes, fetchAttributes, values: {data}} = this.props;
 		const result = [];
 		const optionsList = [];
@@ -165,10 +166,8 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 		// оставляет те атрибуты первого источника,
 		// которые есть во всех остальных источниках
 		if (allLoaded) {
-			const [mainOptions, ...secondOptionsList] = optionsList;
-
-			mainOptions.forEach(mainItem => {
-				const isAdd = secondOptionsList.every(options =>
+			options.forEach(mainItem => {
+				const isAdd = optionsList.every(options =>
 					options.find(({code, property}) => code === mainItem.code && property === mainItem.property)
 				);
 
