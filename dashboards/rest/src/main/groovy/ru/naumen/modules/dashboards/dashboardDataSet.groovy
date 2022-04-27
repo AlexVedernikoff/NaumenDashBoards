@@ -281,7 +281,6 @@ class DashboardDataSetService
         def offsetUTCMinutes = dashboardUtils.getOffsetUTCMinutes(user?.UUID, frontOffsetMinutes)
         String minValue
         String maxValue
-        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
 
         if (diagramType == DiagramType.TABLE)
         {
@@ -341,6 +340,7 @@ class DashboardDataSetService
                 //а здесь уже важно знать, выводить пустые значения или нет
                 showTableNulls = widgetSettings.showEmptyData
 
+                Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
                 if (!isSourceForEachRow)
                 {
                     res = prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
@@ -376,21 +376,13 @@ class DashboardDataSetService
                     def finalIndex = aggregationsSize > tempTransponseRes.size() ? tempTransponseRes.size() : aggregationsSize
                     def transposeRes = tempTransponseRes[0..finalIndex - 1]
 
-                    Collection<Integer> percentCntAggregationIndexes
-                    if (isSourceForEachRow)
-                    {
-                        percentCntAggregationIndexes = getPercentCntAggregationIndexesForTableWithNoParameters(request)
-                    }
-                    else
-                    {
-                        percentCntAggregationIndexes = [getPercentCntAggregationIndexForTable(request, diagramType)]
-                    }
+                    Integer percentCntAggregationIndex = getPercentCntAggregationIndexForTable(request, diagramType)
                     tableTotals = transposeRes?.withIndex()?.collect { val, i ->
                         if (i in listIdsOfNormalAggregations)
                         {
                             return val.sum {
                                 List<String> countAndPercentValuesForTable
-                                if (i in percentCntAggregationIndexes)
+                                if (i == percentCntAggregationIndex)
                                 {
                                     countAndPercentValuesForTable = it.split(' ')
                                     return countAndPercentValuesForTable[1] as Double
@@ -3519,25 +3511,6 @@ class DashboardDataSetService
     }
 
     /**
-     * Метод получения индексов агрегаций типа PERCENT_CNT для таблицы без параметра
-     * @param request - запрос
-     * @return - индексы агрегаций типа PERCENT_CNT для таблицы без параметра
-     */
-    Collection<Integer> getPercentCntAggregationIndexesForTableWithNoParameters(DiagramRequest request)
-    {
-        Collection<Integer> percentCntAggregationIndexes = []
-        request?.data?.eachWithIndex{ entry, index ->
-            entry.value?.aggregations?.each {
-                if (it.type == Aggregation.PERCENT_CNT)
-                {
-                    return percentCntAggregationIndexes << index
-                }
-            }
-        }
-        return percentCntAggregationIndexes
-    }
-
-    /**
      * Метод приведения значений группировок к читаемому для человека виду
      * @param data - данные запроса
      * @param tempList - результат выборки
@@ -4971,38 +4944,10 @@ class DashboardDataSetService
                 {
                     List childrenColumns = aggrCol.columns
                     childrenColumns.each { childCol ->
-                        String keyName = "${ aggrCol.header }\$${ childCol.header }"
-                        if (aggrCol.aggregation == 'NOT_APPLICABLE')
-                        {
-                            totalCount = data.count {
-                                it.findAll { k, v -> k == keyName && v != ""
-                                }
-                            }
-                        }
-                        else
-                        {
-                            totalCount = data.sum {
-                                it.entrySet().sum {
-                                    Object value
-                                    if (it.value in String)
-                                    {
-                                        Collection potentialValuesForPercentCntAggregation = it.value.split(' ')
-                                        String countInPercentCntAggregation = potentialValuesForPercentCntAggregation.head()
-                                        if (countInPercentCntAggregation.isNumber()
-                                            && potentialValuesForPercentCntAggregation.size() == 2)
-                                        {
-                                            value = countInPercentCntAggregation
-                                        }
-                                    }
-
-                                    if (!value)
-                                    {
-                                        value = it.value
-                                    }
-                                    it.key == keyName ? value as Double : 0
-                                }
-                            }
-                        }
+                        String keyName = "${aggrCol.header}\$${childCol.header}"
+                        totalCount = aggrCol.aggregation == 'NOT_APPLICABLE'
+                            ? data.count { it.findAll{ k, v -> k == keyName && v != "" } }
+                            : data.sum{it.entrySet().sum{ it.key == keyName ? it.value as Double : 0 }}
                         childCol.footer = DECIMAL_FORMAT.format(totalCount)
                     }
                 }
