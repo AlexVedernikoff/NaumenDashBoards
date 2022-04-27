@@ -621,7 +621,7 @@ class DashboardDrilldownService
                             checkValuesSize(objects)
                             attr.code = AttributeType.TOTAL_VALUE_TYPE
                             result << [filterBuilder.OR(attr.code, 'notNull', null)]
-                            result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
+                            result << [filterBuilder.OR(attr.code, 'containsInSet', objects.collect { it.UUID })]
                         }
                         else
                         {
@@ -635,7 +635,7 @@ class DashboardDrilldownService
 
                                 attr.code = attrCode
                                 def objects = findObjects(attr, metaForAttr, value)
-                                result << [filterBuilder.OR(sourceAttrCode, 'containsInSet', objects)]
+                                result << [filterBuilder.OR(sourceAttrCode, 'containsInSet', objects.collect { it.UUID })]
                             }
                             else
                             {
@@ -673,7 +673,7 @@ class DashboardDrilldownService
                                                 }
                                                 objects = findObjects(attr.ref, attr.property, LinksAttributeMarshaller.unmarshal(value).last(), true)
                                             }
-                                            result << [filterBuilder.OR(attr.code, 'containsInSet', objects)]
+                                            result << [filterBuilder.OR(attr.code, 'containsInSet', objects.collect { it.UUID })]
                                         }
                                         break
                                     case AttributeType.STATE_TYPE:
@@ -957,7 +957,7 @@ class DashboardDrilldownService
                                                     return filterBuilder.OR(
                                                         attr.code,
                                                         'containsInSet',
-                                                        objects
+                                                        objects.collect { it.UUID }
                                                     )
                                                 }
                                                 if (attributeTypeIsSet)
@@ -1029,7 +1029,7 @@ class DashboardDrilldownService
                                                     return filterBuilder.OR(
                                                         attr.code,
                                                         'containsInSet',
-                                                        objects
+                                                        objects.collect { it.UUID }
                                                     )
                                                 }
                                                 if (attributeTypeIsSet)
@@ -1071,7 +1071,7 @@ class DashboardDrilldownService
                                                     return filterBuilder.OR(
                                                         attr.code,
                                                         'containsInSet',
-                                                        objects
+                                                        objects.collect { it.UUID }
                                                     )
                                                 }
                                                 if (attributeTypeIsSet)
@@ -1094,7 +1094,7 @@ class DashboardDrilldownService
                                                 return filterBuilder.OR(
                                                     attr.code,
                                                     'containsInSet',
-                                                    values
+                                                    values.collect { it.UUID }
                                                 )
                                             case [Condition.CONTAINS_CURRENT_OBJECT, Condition.EQUAL_CURRENT_OBJECT]:
                                                 if(twoLinkAttrs)
@@ -1104,7 +1104,7 @@ class DashboardDrilldownService
                                                     return filterBuilder.OR(
                                                         attr.code,
                                                         'containsInSet',
-                                                        objects
+                                                        objects.collect { it.UUID }
                                                     )
                                                 }
                                                 return filterBuilder.OR(
@@ -1130,7 +1130,7 @@ class DashboardDrilldownService
                                                     return filterBuilder.OR(
                                                         attr.code,
                                                         'containsInSet',
-                                                        objects
+                                                        objects.collect { it.UUID }
                                                     )
                                                 }
                                                 return filterBuilder.OR(attr.code, 'contains', value)
@@ -1459,7 +1459,7 @@ class DashboardDrilldownService
                     break
             }
             checkValuesSize(values)
-            return filterBuilder.OR(attr.code, 'containsInSet', values)
+            return filterBuilder.OR(attr.code, 'containsInSet', values.collect { it.UUID })
         }
         if (value == 'Не заполнено' || value == 'EMPTY')
         {
