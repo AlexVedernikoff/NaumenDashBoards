@@ -341,7 +341,7 @@ class GanttDataSetService
      * Метод получения данных для построения диаграммы Ганта, вызывается рекурсивно
      * @param settings - иерархический список настроек
      * @param parentUUID - уникальный идентификатор записи в БД о родителе
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      * @return список Map<String, String> параметров для построения диаграммы
      */
     private List<Map<String, String>> buildDataListFromSettings(List<ResourceAndWorkSettings> settingsList,
@@ -459,17 +459,19 @@ class GanttDataSetService
                    в разных полях формы (в этом случае при простом сопоставлении получим сдвиг). Для этого
                    строим словарь-соответствие между наименованиями полей (id, text... и тд.) и номером
                    столбца набора данных, пришедшего из БД (0..n). */
-                Map<String, Integer> mapAttributesIndexes = [:]
-                mapAttributes.each { key, value ->
-                    Integer ind = listAttributes.indexOf(value)
-                    mapAttributesIndexes.put(key, [ind: ind, attr: value])
-                }
-
-                // Преобразование в список из словарей (добавление к значениям, полученным из БД, ключей).
+                Map<String, Object> mapAttributesIndexes = [:]
                 List<Map<String, String>> resMap = []
+                if (!versionKey)
+                {
+                    mapAttributes.each { key, value ->
+                        Integer ind = listAttributes.indexOf(value)
+                        mapAttributesIndexes.put(key, [ind: ind, attr: value])
+                    }
+                }
+                // Преобразование в список из словарей (добавление к значениям, полученным из БД, ключей).
 
                 res.each { item ->
-                    Map<String, String> itemMap =
+                    Map<String, Object> itemMap =
                         mapAttributesIndexes.collectEntries { key, valueMap ->
                             return [(key): updateIfMetaClass(item[valueMap.ind], valueMap.attr)]
                         }
@@ -500,7 +502,8 @@ class GanttDataSetService
                 }
 
                 // Если есть настройка-потомок (уровень вложенности следующей в списке настройки выше, чем у текущей).
-                if ((settingsList.size() > (i + 1)) && (settingsList[i + 1].level > settings.level))
+                if ((settingsList.size() > (i + 1)) && (
+                    settingsList[i + 1].level > settings.level))
                 {
                     // По каждому элементу списка рекурсивно выполняется этот же метод, дополняя список результатов.
                     resMap.any {
