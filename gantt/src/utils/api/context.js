@@ -11,6 +11,8 @@ const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
 });
 
 /**
+<<<<<<< HEAD
+=======
 * Получает настройки версиий
 * @param {string} diagramKey - ключ диаграммы
 * @return {Promise<Params>}
@@ -120,11 +122,16 @@ const getGanttVersionDiagramData = async (user: UserData): Promise<Params> => {
 };
 
 /**
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
  * Получает ссылку на страницу работы
  * @param {string} workUUID - идентификатор работы
  * @returns {string} link - ссылка на карточку работы
  */
 const getWorkPageLink = async (workUUID: string): Promise<Params> => {
+<<<<<<< HEAD
+	console.log('contex', api.getWorkPageLink(workUUID));
+=======
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 	return api.getWorkPageLink(workUUID);
 };
 
@@ -201,9 +208,16 @@ const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string 
 * @param {string} classFqn - метакласс работы
 * @param {string} workUUID - индификатор работы
 * @param {string} timezone - таймзона
+<<<<<<< HEAD
+* @param {UserData} user - объект пользователя
+*/
+const addNewWork = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData): Promise<Source> => {
+	await api.addNewWork(workData, classFqn, workUUID, timezone, user);
+=======
 */
 const addNewWork = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string): Promise<Source> => {
 	await api.addNewWork(workData, classFqn, workUUID, timezone);
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 };
 
 /**
@@ -212,9 +226,16 @@ const addNewWork = async (workData: WorkData, classFqn: string, workUUID: string
 * @param {string} classFqn - метакласс работы
 * @param {string} workUUID - индификатор работы
 * @param {string} timezone - таймзона
+<<<<<<< HEAD
+* @param {UserData} user - объект пользователя
+*/
+const editWorkData = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData): Promise<Source> => {
+	await api.editWorkData(workData, classFqn, timezone, user);
+=======
 */
 const editWorkData = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string): Promise<Source> => {
 	await api.editWorkData(workData, classFqn, timezone);
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 };
 
 /**
@@ -230,7 +251,12 @@ const deleteWorkDateRanges = async (workUUID: string): Promise<Source> => {
 * @param  {string} timezone - таймзона
 * @param  {workDateInterval} workDateInterval - объект временных рамок работы
 * @param  {string} contentCode - code объекта
+<<<<<<< HEAD
+* @param  {string} subjectUuid - Uuid объекта
+* @param {UserData} user - объект пользователя
+=======
 * @param  {string} subjectUuid - UUID объекта
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 */
 const postChangedWorkInterval = async (timezone: string, workDateInterval: workDateInterval, contentCode: string, subjectUuid: string): Promise<Source> => {
 	await api.postChangedWorkInterval(timezone, workDateInterval, contentCode, subjectUuid);
@@ -321,6 +347,10 @@ const getWorkAttributes = async (attributeGroupCode: string, metaClassFqn: strin
 
 export {
 	addNewWork,
+<<<<<<< HEAD
+	deleteWorkDateRanges,
+	editWorkData,
+=======
 	addNewWorkForVersionRequest,
 	changeWorkProgressFromVersionRequest,
 	deleteGanttVersionSettingsRequest,
@@ -329,6 +359,7 @@ export {
 	editWorkData,
 	editWorkDataFromVersionRequest,
 	editWorkDateRangesFromVersionRequest,
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 	getWorkAttributes,
 	getContext,
 	getCurrentUser,

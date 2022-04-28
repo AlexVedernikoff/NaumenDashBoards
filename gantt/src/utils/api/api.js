@@ -256,8 +256,14 @@ export default class Api {
 	* @param {string} classFqn - метакласс работы
 	* @param {string} workUUID - индификатор работы
 	* @param {string} timezone - таймзона
+<<<<<<< HEAD
+	* @param {UserData} user - объект пользователя
+	*/
+	async addNewWork (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData) {
+=======
 	*/
 	async addNewWork (workData: WorkData, classFqn: string, workUUID: string, timezone: string) {
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 		const url = `exec-post?func=modules.ganttWorkHandler.addNewWork&params=requestContent,user`;
 		const body = {classFqn, timezone, workData, workUUID};
 		const options = {
@@ -287,8 +293,14 @@ export default class Api {
 	* @param {string} classFqn - метакласс работы
 	* @param {string} workUUID - индификатор работы
 	* @param {string} timezone - таймзона
+<<<<<<< HEAD
+	* @param {UserData} user - объект пользователя
+	*/
+	async editWorkData (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData) {
+=======
 	*/
 	async editWorkData (workData: WorkData, classFqn: string, workUUID: string, timezone: string) {
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 		const url = `exec-post?func=modules.ganttWorkHandler.editWorkData&params=requestContent,user`;
 		const body = {classFqn, timezone, workData, workUUID};
 		const options = {

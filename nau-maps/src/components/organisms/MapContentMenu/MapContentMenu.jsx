@@ -3,7 +3,6 @@ import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import type {Props} from './types';
 import React, {Component} from 'react';
-import {resetSingleObject} from '../../../store/geolocation/actions';
 import styles from './MapContentMenu.less';
 
 export class MapContentMenu extends Component<Props> {

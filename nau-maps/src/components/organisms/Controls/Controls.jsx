@@ -44,7 +44,7 @@ export class Controls extends Component<Props, State> {
 
 		return (
 			<button
-				className={styles.control}
+				className={cn([styles.control, styles.controlGroupTop])}
 				onClick={zoomIn}
 				title="Приблизить"
 			>
@@ -58,7 +58,7 @@ export class Controls extends Component<Props, State> {
 
 		return (
 			<button
-				className={styles.control}
+				className={cn([styles.control, styles.controlGroupBottom])}
 				onClick={zoomOut}
 				title="Отдалить"
 			>
@@ -71,8 +71,10 @@ export class Controls extends Component<Props, State> {
 		return (
 			<div className={styles.controlsContainer}>
 				{this.renderReloadControl()}
-				{this.renderZoomInControl()}
-				{this.renderZoomOutControl()}
+				<div className={styles.containerGroup}>
+					{this.renderZoomInControl()}
+					{this.renderZoomOutControl()}
+				</div>
 				{this.renderMapSelect()}
 			</div>
 		);

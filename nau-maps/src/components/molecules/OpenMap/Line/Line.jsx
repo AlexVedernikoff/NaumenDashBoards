@@ -19,9 +19,8 @@ export class Line extends Component<Props, State> {
 	};
 
 	render () {
-		const {color, opacity = 1, part, weight = 8} = this.props;
-		const {data, geopositions} = part;
-		const {header} = data;
+		const {color, opacity = 1, part, weight = 6} = this.props;
+		const {data: {header = ''}, geopositions} = part;
 
 		const positions = geopositions.map(geoposition => new LatLng(geoposition.latitude, geoposition.longitude));
 
@@ -29,7 +28,7 @@ export class Line extends Component<Props, State> {
 			<Polyline
 				bubblingMouseEvents={false}
 				color={color}
-				dashArray={'0, 16'}
+				dashArray={'7, 11'}
 				onClick={this.showSingle()}
 				onContextMenu={this.showContentMenu}
 				opacity={opacity}

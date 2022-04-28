@@ -7,6 +7,13 @@ import React, {Component} from 'react';
 import styles from './PanelPointHeader.less';
 
 export class PanelPointHeader extends Component<Props, State> {
+	handleClickText = () => {
+		const {point: {data: {actions: [action]}}} = this.props;
+		const {link} = action;
+
+		window.open(link, '_blank', 'noopener,noreferrer');
+	};
+
 	showSingle = () => () => {
 		const {point, setSingleObject} = this.props;
 
@@ -19,7 +26,7 @@ export class PanelPointHeader extends Component<Props, State> {
 
 	renderIcon = () => {
 		return (
-			<div className={styles.icon} onClick={this.showSingle()}>
+			<div className={styles.icon} onClick={this.showSingle} title="Показать на карте">
 				<PointMap />
 			</div>
 		);
@@ -28,7 +35,7 @@ export class PanelPointHeader extends Component<Props, State> {
 	renderText = () => {
 		const {point: {data: {header = 'Название отсутствует'}}} = this.props;
 
-		return <div className={styles.text}>{this.truncate(header, 32)}</div>;
+		return <div className={styles.text} onClick={this.handleClickText}>{this.truncate(header, 32)}</div>;
 	};
 
 	render () {

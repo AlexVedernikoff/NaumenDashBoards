@@ -21,7 +21,7 @@ export class Mark extends Component<Props, State> {
 		const {active, point} = this.props;
 		const {data, geopositions, icon} = point;
 		const [positions] = geopositions;
-		const {equipType, header, type} = data;
+		const {equipType, header = '', type} = data;
 		const {options: {iconUrl}} = getCustomOrDefaultIconMarker(equipType || type, active, icon);
 
 		return (
