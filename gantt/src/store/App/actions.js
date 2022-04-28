@@ -1,4 +1,7 @@
 // @flow
+<<<<<<< HEAD
+import {addNewWork, deleteWorkDateRanges, editWorkData, getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, getWorkAttributes, getWorkPageLink, postChangedWorkInterval, postChangedWorkProgress, postChangedWorkRelations, saveData} from 'utils/api';
+=======
 import {
 	addNewWork,
 	addNewWorkForVersionRequest,
@@ -26,6 +29,7 @@ import {
 	saveGanttVersionSettingsRequest,
 	updateGanttVersionSettingsRequest
 } from 'utils/api';
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
@@ -62,6 +66,8 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 };
 
 /**
+<<<<<<< HEAD
+=======
 * Получает все настройки версий
 * @param {string} diagramKey - ключ диаграммы
 * @return {ThunkAction}
@@ -240,6 +246,7 @@ const getGanttVersionDiagramDataCurrent = (workUUID: string, timezone: string): 
 };
 
 /**
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 * Удаляет работу
 * @param {string} workUUID - индификатор работы
 */
@@ -262,8 +269,14 @@ const deleteWork = (workUUID: string): ThunkAction => async (dispatch: Dispatch)
 const postNewWorkData = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+<<<<<<< HEAD
+		const user = await getCurrentUser();
+
+		await addNewWork(workData, classFqn, workUUID, timezone, user);
+=======
 
 		await addNewWork(workData, classFqn, workUUID, timezone);
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -277,11 +290,20 @@ const postNewWorkData = (workData: WorkData, classFqn: string, workUUID: string)
 * @param {string} classFqn - метакласс работы
 * @param {string} workUUID - индификатор работы
 */
+<<<<<<< HEAD
+const postEditedWorkData  = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+		const user = await getCurrentUser();
+
+		await editWorkData(workData, classFqn, workUUID, timezone, user);
+=======
 const postEditedWorkData = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 		await editWorkData(workData, classFqn, workUUID, timezone);
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -397,7 +419,11 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 
 		const {contentCode, subjectUuid} = getContext();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+<<<<<<< HEAD
+		const {attributesMap, commonSettings, currentInterval, diagramKey, endDate, progressCheckbox, startDate, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
+=======
 		const {attributesMap, commonSettings, currentInterval, diagramKey, endDate, progressCheckbox, startDate, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, timeZone);
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 
 		dispatch(setCurrentValueForInterval(currentInterval));
 		dispatch(setRangeTime({endDate, startDate}));
@@ -696,14 +722,19 @@ export {
 	getAppConfig,
 	getGanttData,
 	getListOfWorkAttributes,
+<<<<<<< HEAD
+=======
 	getVersionSettings,
 	getGanttVersionDiagramDataCurrent,
 	getVersionSettingsAll,
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 	getWorlLink,
 	hideLoaderData,
 	hideLoaderSettings,
 	postEditedWorkData,
 	postNewWorkData,
+<<<<<<< HEAD
+=======
 	deleteWorkFromVersionDiagram,
 	changeWorkProgressFromVersion,
 	deleteGanttVersionSettings,
@@ -712,6 +743,7 @@ export {
 	savedGanttVersionSettings,
 	editWorkDateRangesFromVersion,
 	updateGanttVersionSettings,
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 	setAttributesMap,
 	saveListOfAttributes,
 	saveChangedWorkRelations,

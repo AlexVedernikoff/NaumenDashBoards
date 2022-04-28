@@ -29,7 +29,8 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 		case GEOLOCATION_EVENTS.SET_MAP_PANEL:
 			return {
 				...state,
-				mapSelect: action.payload
+				mapSelect: action.payload,
+				timeUpdate: new Date().getTime()
 			};
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
 			return {

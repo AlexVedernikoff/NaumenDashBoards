@@ -17,8 +17,8 @@ class Line extends Component<Props, State> {
 	};
 
 	render () {
-		const {color, part} = this.props;
-		const {data: {header}, geopositions} = part;
+		const {color, opacity = 1, part, weight = 6} = this.props;
+		const {data: {header = ''}, geopositions} = part;
 
 		const positions = geopositions.map(geoposition => [geoposition.latitude, geoposition.longitude]);
 
@@ -30,9 +30,10 @@ class Line extends Component<Props, State> {
 				onContextMenu={this.showContentMenu}
 				options={{
 					balloonCloseButton: false,
+					opacity: opacity,
 					strokeColor: color,
-					strokeStyle: 'shortdot',
-					strokeWidth: 8
+					strokeStyle: [1, 2],
+					strokeWidth: weight
 				}}
 				properties={{
 					hintContent: header

@@ -78,7 +78,11 @@ interface GanttSettingsController
     /**
      * Метод изменения полей в диаграмме версий
      * @param ganttVersionsSettingsClass - настройки диаграммы версий
+<<<<<<< HEAD
+     * @param versionKey - ключ диаграммы версий
+=======
      * @param versionKey - ключ версии диаграммы
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      * @return измененные настройки диаграммы версий
      */
     GanttVersionsSettingsClass updateGanttVersionSettings(GanttVersionsSettingsDTOClass ganttVersionsSettingsDTO,
@@ -366,7 +370,11 @@ class GanttSettingsService
 
     /**
      * Метод получения настроек из хранилища
+<<<<<<< HEAD
+     * @param versionKey - ключ диаграммы версий
+=======
      * @param versionKey - ключ версии диаграммы
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      * @return настройки из хранилища
      */
     GanttVersionsSettingsClass getGanttVersionsSettingsFromDiagramVersionKey(String versionKey)
@@ -385,7 +393,7 @@ class GanttSettingsService
      * @param request - тело запроса
      * @return настройки, отправленные в хранилище
      */
-    GanttVersionsSettingsClass saveGanttVersionSettings(SaveGanttVersionSettingsRequest request)
+    GanttVersionsSettingsClass saveGanttVersionSettings(SaveGanttVersionSettingsRequest request, GetGanttSettingsRequest ganttSettingsRequest, IUUIDIdentifiable user)
     {
         String subjectUUID = request.subjectUUID
         String contentCode = request.contentCode
@@ -433,6 +441,11 @@ class GanttSettingsService
         List<Map<String, Object>> data =
             ganttDataSetService
                 .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null,null)
+<<<<<<< HEAD
+
+        ganttVersionsSettings.works = ganttDataSetService.getGanttDiagramData(ganttSettingsRequest,user).tasks
+=======
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 
         Map<String, String> valueForMapAttributes = [:]
         Map<String, Object> mapAttributesWork = [:]
@@ -479,7 +492,11 @@ class GanttSettingsService
     /**
      * Метод изменения полей в диаграмме версий
      * @param ganttVersionsSettingsClass - настройки диаграммы версий
+<<<<<<< HEAD
+     * @param versionKey - ключ диаграммы версий
+=======
      * @param versionKey - ключ версии диаграммы
+>>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      * @return измененные настройки диаграммы версий
      */
     GanttVersionsSettingsClass updateGanttVersionSettings(GanttVersionsSettingsDTOClass ganttVersionsSettingsDTO,

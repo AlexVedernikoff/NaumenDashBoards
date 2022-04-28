@@ -12,23 +12,25 @@ export class PanelHeader extends Component<Props> {
 	};
 
 	renderIcon = () => {
-		const {setTab} = this.props;
-
 		return (
-			<div className={styles.icon} onClick={setTab} title="Перейти">
+			<div className={styles.icon}>
 				<ListBtnIcon />
 			</div>
 		);
 	};
 
 	renderText = () => {
-		const {name} = this.props;
-		return <div className={styles.text}>{this.truncate(name, 30)}</div>;
+		const {name, showSingleObject} = this.props;
+		const text = showSingleObject ? 'Показать полный список' : name;
+
+		return <div className={styles.text}>{this.truncate(text, 30)}</div>;
 	};
 
 	render () {
+		const {setTab} = this.props;
+
 		return (
-			<div className={styles.container}>
+			<div className={styles.container} onClick={setTab} >
 				{this.renderIcon()}
 				{this.renderText()}
 			</div>
