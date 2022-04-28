@@ -1,5 +1,31 @@
 // @flow
-import {addNewWork, deleteWorkDateRanges, editWorkData, getContext, getCurrentUser, getDataSources, getDiagramData, getInitialSettings, getUserData, getWorkAttributes, getWorkPageLink, postChangedWorkInterval, postChangedWorkProgress, postChangedWorkRelations, saveData} from 'utils/api';
+import {
+	addNewWork,
+	addNewWorkForVersionRequest,
+	changeWorkProgressFromVersionRequest,
+	deleteGanttVersionSettingsRequest,
+	deleteWorkDateRanges,
+	deleteWorkFromVersionDiagramRequest,
+	editWorkData,
+	editWorkDataFromVersionRequest,
+	editWorkDateRangesFromVersionRequest,
+	getContext,
+	getDataSources,
+	getDiagramData,
+	getGanttVersionDiagramData,
+	getGanttVersionsSettings,
+	getGanttVersionsSettingsFromDiagramVersionKey,
+	getInitialSettings,
+	getUserData,
+	getWorkAttributes,
+	getWorkPageLink,
+	postChangedWorkInterval,
+	postChangedWorkProgress,
+	postChangedWorkRelations,
+	saveData,
+	saveGanttVersionSettingsRequest,
+	updateGanttVersionSettingsRequest
+} from 'utils/api';
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
@@ -36,6 +62,184 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 };
 
 /**
+* Получает все настройки версий
+* @param {string} diagramKey - ключ диаграммы
+* @return {ThunkAction}
+*/
+const getVersionSettingsAll = (diagramKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await getGanttVersionsSettings(diagramKey);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Получает настройки версий
+* @param {string} versionKey - ключ диаграммы версий
+* @return {ThunkAction}
+*/
+const getVersionSettings = (diagramKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await getGanttVersionsSettingsFromDiagramVersionKey(diagramKey);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Сохраняет настройки версий диаграммы в хранилище
+* @param {string} title - название версии
+* @param {string} createdDate - дата создания
+* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+* @param {string} subjectUUID - UUID объекта
+*/
+const savedGanttVersionSettings = (title: string, createdDate: string, contentCode: string, subjectUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUUID, title);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Изменяет поля в диаграмме версий
+* @param {string} versionKey - ключ диаграммы версий
+* @param {string} title - название диаграммы
+*/
+const updateGanttVersionSettings = (versionKey: string, title: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await updateGanttVersionSettingsRequest(title, versionKey);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Удаляет диаграмму версий из хранилища
+* @param {string} ganttVersionId  - индекс диаграммы
+*/
+const deleteGanttVersionSettings = (ganttVersionId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await deleteGanttVersionSettingsRequest(ganttVersionId);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Редактирует диапазон дат работ диаграмм версий
+* @param {string} versionKey - ключ диаграммы версий
+* @param {workDateInterval} workDateInterval - объект временных рамок работы
+* @param {string} subjectUUID - UUID объекта
+* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+*/
+const editWorkDateRangesFromVersion = (versionKey: string, workDateInterval: workDateInterval, subjectUUID: string, contentCode: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await editWorkDateRangesFromVersionRequest(contentCode, subjectUUID, versionKey, workDateInterval);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Добавляет новую работу в диаграмму версий
+* @param versionKey - ключ диаграммы версий
+* @param classFqn - метакласс работы
+* @param workData - данные работы
+* @param timezone - таймзона устройства пользователя
+*/
+const addNewWorkForVersion = (classFqn: string, timezone: string, versionKey: string, workData: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await addNewWorkForVersionRequest(classFqn, timezone, versionKey, workData);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Редактирует работы в диаграмме версий
+* @param versionKey - ключ диаграммы версий
+* @param workUUID - индефекатор работы
+* @param workData - данные работы
+* @param classFqn - метакласс работы
+* @param timezone - таймзона устройства пользователя
+*/
+const editWorkDataFromVersion = (classFqn: string, workUUID: string, versionKey: string, workData: string, timezone): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+
+		await editWorkDataFromVersionRequest(classFqn, timezone, workData, workUUID);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Редактирует прогресс работы в диаграмме версий
+* @param versionKey - ключ диаграммы версий
+* @param workUUID - индефекатор работы
+* @param contentCode - ключ контента, на котором расположена диаграмма
+* @param subjectUUID - UUID объекта
+* @param progress - прогресс работы
+*/
+const changeWorkProgressFromVersion = (versionKey: string, workUUID: string, contentCode: string, subjectUUID: string, progress: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await changeWorkProgressFromVersionRequest(contentCode, progress, subjectUUID, versionKey, workUUID);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Удаляет задачу из диаграммы версий
+* @param workUUID - индефекатор работы
+* @param versionKey - ключ диаграммы версий
+*/
+const deleteWorkFromVersionDiagram = (workUUID: string, versionKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await deleteWorkFromVersionDiagramRequest(versionKey, workUUID);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+* Получает данные для построения версий диаграммы Ганта
+* @param {string} workUUID - индефекатор работы
+* @param {string} timezone - таймзона устройства пользователя
+* @returns {ThunkAction}
+*/
+const getGanttVersionDiagramDataCurrent = (workUUID: string, timezone: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await getGanttVersionDiagramData(timezone, workUUID);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
 * Удаляет работу
 * @param {string} workUUID - индификатор работы
 */
@@ -58,9 +262,8 @@ const deleteWork = (workUUID: string): ThunkAction => async (dispatch: Dispatch)
 const postNewWorkData = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const user = await getCurrentUser();
 
-		await addNewWork(workData, classFqn, workUUID, timezone, user);
+		await addNewWork(workData, classFqn, workUUID, timezone);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -74,12 +277,11 @@ const postNewWorkData = (workData: WorkData, classFqn: string, workUUID: string)
 * @param {string} classFqn - метакласс работы
 * @param {string} workUUID - индификатор работы
 */
-const postEditedWorkData  = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const postEditedWorkData = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const user = await getCurrentUser();
 
-		await editWorkData(workData, classFqn, workUUID, timezone, user);
+		await editWorkData(workData, classFqn, workUUID, timezone);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -153,9 +355,8 @@ const saveChangedWorkInterval = (workDateInterval): ThunkAction => async (dispat
 	try {
 		const {contentCode, subjectUuid} = getContext();
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const user = await getCurrentUser();
 
-		await postChangedWorkInterval(timezone, workDateInterval, contentCode, subjectUuid, user);
+		await postChangedWorkInterval(timezone, workDateInterval, contentCode, subjectUuid);
 
 		dispatch(setContentCode(contentCode));
 		dispatch(setSubjectUuid(subjectUuid));
@@ -195,9 +396,8 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(showLoaderData());
 
 		const {contentCode, subjectUuid} = getContext();
-		const user = await getCurrentUser();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const {attributesMap, commonSettings, currentInterval, diagramKey, endDate, progressCheckbox, startDate, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, user, timeZone);
+		const {attributesMap, commonSettings, currentInterval, diagramKey, endDate, progressCheckbox, startDate, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, timeZone);
 
 		dispatch(setCurrentValueForInterval(currentInterval));
 		dispatch(setRangeTime({endDate, startDate}));
@@ -496,11 +696,22 @@ export {
 	getAppConfig,
 	getGanttData,
 	getListOfWorkAttributes,
+	getVersionSettings,
+	getGanttVersionDiagramDataCurrent,
+	getVersionSettingsAll,
 	getWorlLink,
 	hideLoaderData,
 	hideLoaderSettings,
 	postEditedWorkData,
 	postNewWorkData,
+	deleteWorkFromVersionDiagram,
+	changeWorkProgressFromVersion,
+	deleteGanttVersionSettings,
+	addNewWorkForVersion,
+	editWorkDataFromVersion,
+	savedGanttVersionSettings,
+	editWorkDateRangesFromVersion,
+	updateGanttVersionSettings,
 	setAttributesMap,
 	saveListOfAttributes,
 	saveChangedWorkRelations,

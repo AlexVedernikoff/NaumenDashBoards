@@ -15,6 +15,181 @@ export default class Api {
 		return window.jsApi.getCurrentUser();
 	}
 
+	/**
+	* Получает настройки версиий
+	* @param {string} diagramKey - ключ диаграммы
+	* @return {ThunkAction}
+	*/
+	async getGanttVersionsSettings (diagramKey: string) {
+		const url = `exec?func=modules.ganttSettings.getGanttVersionsSettings&params=%27${diagramKey}%27`;
+		const options = {
+			method: 'GET'
+		};
+
+		return this.jsApi.restCall(url, options);
+	}
+
+	/**
+	* Получает настройки версий по ключу версии диаграммы
+	* @param {string} versionKey - ключ диаграммы версий
+	* @return {ThunkAction}
+	*/
+	async getGanttVersionsSettingsFromDiagramVersionKey (versionKey: string) {
+		const url = `exec?func=modules.ganttSettings.getGanttVersionsSettingsFromDiagramVersionKey&params=%27${versionKey}%27`;
+
+		return this.jsApi.restCall(url);
+	}
+
+	/**
+	* Сохраняет настройки версий диаграммы в хранилище
+	* @param {string} title - название версии
+	* @param {string} createdDate - дата создания
+	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+	* @param {string} subjectUUID - UUID объекта
+	*/
+	async saveGanttVersionSettingsRequest (title: string, createdDate: string, contentCode: string, subjectUUID: string) {
+		const url = `exec-post?func=modules.ganttSettings.saveGanttVersionSettings&params=requestContent,user`;
+		const body = {contentCode, createdDate, subjectUUID, title};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Изменяет настройки в диаграмме версий
+	* @param {string} versionKey - ключ диаграммы версий
+	* @param {string} title - название диаграммы
+	*/
+	async updateGanttVersionSettingsRequest (versionKey: string, title: string) {
+		const url = `exec-post?func=modules.ganttSettings.updateGanttVersionSettings&params=requestContent,%27${versionKey}%27`;
+		const body = {title, versionKey};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Удаляет диаграмму версий из хранилища
+	* @param {string} ganttVersionId  - индекс диаграммы
+	*/
+	async deleteGanttVersionSettingsRequest (ganttVersionId: string) {
+		const url = `exec-post?func=modules.ganttSettings.deleteGanttVersionSettings&params=requestContent,%27${ganttVersionId}%27`;
+		const options = {
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Редактирукт диапазон дат работ диаграмм версий
+	* @param {string} versionKey - ключ диаграммы версий
+	* @param {workDateInterval} workDateInterval - объект временных рамок работы
+	* @param {string} subjectUUID - Uuid объекта
+	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+	*/
+	async editWorkDateRangesFromVersionRequest (versionKey: string, workDateInterval: workDateInterval, subjectUUID: string, contentCode: string) {
+		const url = `exec-post?func=modules.ganttWorkHandler.editWorkDateRangesFromVersion&params=requestContent,user,%27${versionKey}%27`;
+		const body = {contentCode, subjectUUID, workDateInterval};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Добавляет новую работу в диаграмму версий
+	* @param {string} versionKey - ключ диаграммы версий
+	* @param {string} classFqn - метакласс работы
+	* @param {workData} workData - данные работы
+	* @param {string} timezone - ключ диаграммы версий
+	*/
+	async addNewWorkForVersionRequest (classFqn: string, timezone: string, versionKey: string, workData: string) {
+		const url = `exec-post?func=modules.ganttWorkHandler.addNewWorkForVersion&params=requestContent,user,%27${versionKey}%27`;
+		const body = {classFqn, timezone, workData};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Редактирует работы в диаграмме версий
+	* @param {string} versionKey - ключ диаграммы версий
+	* @param {string} workUUID - индефекатор работы
+	* @param {workData} workData - данные работы
+	* @param {string} classFqn - метакласс работы
+	* @param {string} timezone - таймзона устройства пользователя
+	*/
+	async editWorkDataFromVersionRequest (classFqn: string, workUUID: string, versionKey: string, workData: string, timezone) {
+		const url = `exec-post?func=modules.ganttWorkHandler.editWorkDataFromVersion&params=requestContent,user,%27${versionKey}%27`;
+		const body = {classFqn, timezone, workData, workUUID};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Редактирует прогресс работы в диаграмме версий
+	* @param {string} versionKey - ключ диаграммы версий
+	* @param {string} workUUID - индефекатор работы
+	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+	* @param {string} subjectUUID - ключ текущей карточки объекта
+	* @param {string} progress - прогресс работы
+	*/
+	async changeWorkProgressFromVersionRequest (versionKey: string, workUUID: string, contentCode: string, subjectUUID: string, progress: string) {
+		const url = `exec-post?func=modules.ganttWorkHandler.changeWorkProgressFromVersion&params=requestContent,user,%27${versionKey}%27`;
+		const body = {contentCode, progress, subjectUUID, workUUID};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Удаляет задачу из диаграммы версий
+	* @param workUUID - UUID редактируемой работы
+	* @param versionKey - ключ диаграммы версий
+	*/
+	async deleteWorkFromVersionDiagramRequest (workUUID: string, versionKey: string) {
+		const url = `exec-post?func=modules.ganttWorkHandler.deleteWorkFromVersion&params=requestContent,user,%27${versionKey}%27`;
+		const body = {versionKey, workUUID};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Получает данные для построения версий диаграммы Ганта
+	* @returns {ThunkAction}
+	*/
+	async getGanttVersionDiagramData () {
+		const url = `exec?func=modules.ganttDataSet.getGanttVersionDiagramData&params=user`;
+		const options = {
+			method: 'GET'
+		};
+
+		return this.jsApi.restCall(url, options);
+	}
+
 	async getInitialSettings (contentCode: string, subjectUUID: string) {
 		const url = `exec-post?func=modules.ganttSettings.getGanttSettings&params=requestContent,user`;
 		const body = {contentCode, subjectUUID};
@@ -37,7 +212,7 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
-	async getDiagramData (contentCode: string, subjectUUID: string, user: UserData, timezone: string) {
+	async getDiagramData (contentCode: string, subjectUUID: string, timezone: string) {
 		const url = `exec-post?func=modules.ganttDataSet.getGanttDiagramData&params=requestContent,user`;
 		const body = {
 			contentCode,
@@ -81,9 +256,8 @@ export default class Api {
 	* @param {string} classFqn - метакласс работы
 	* @param {string} workUUID - индификатор работы
 	* @param {string} timezone - таймзона
-	* @param {UserData} user - объект пользователя
 	*/
-	async addNewWork (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData) {
+	async addNewWork (workData: WorkData, classFqn: string, workUUID: string, timezone: string) {
 		const url = `exec-post?func=modules.ganttWorkHandler.addNewWork&params=requestContent,user`;
 		const body = {classFqn, timezone, workData, workUUID};
 		const options = {
@@ -113,9 +287,8 @@ export default class Api {
 	* @param {string} classFqn - метакласс работы
 	* @param {string} workUUID - индификатор работы
 	* @param {string} timezone - таймзона
-	* @param {UserData} user - объект пользователя
 	*/
-	async editWorkData (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData) {
+	async editWorkData (workData: WorkData, classFqn: string, workUUID: string, timezone: string) {
 		const url = `exec-post?func=modules.ganttWorkHandler.editWorkData&params=requestContent,user`;
 		const body = {classFqn, timezone, workData, workUUID};
 		const options = {
@@ -145,9 +318,9 @@ export default class Api {
 	/**
 	* Отправляет данные изменения временных рамок работ
 	* @param  {string} timezone - таймзона
-	* @param  {workDateInterval} workDateInterval -Объект временных рамок работы
+	* @param  {workDateInterval} workDateInterval - объект временных рамок работы
 	* @param  {string} contentCode - code объекта
-	* @param  {string} subjectUUID - Uuid объекта
+	* @param  {string} subjectUUID - UUID объекта
 	*/
 	async postChangedWorkInterval (timezone: string, workDateInterval, contentCode: string, subjectUUID: string) {
 		const url = `exec-post?func=modules.ganttWorkHandler.editWorkDateRanges&params=requestContent,user`;
@@ -162,9 +335,9 @@ export default class Api {
 
 	/**
 	* Отправляет данные изменненых рабочих связей
-	* @param workRelations - объект связи между работами
-	* @param contentCode - code объекта
-	* @param subjectUUID -  Uuid объекта
+	* @param {workRelations} workRelations - объект связи между работами
+	* @param {string} contentCode - code объекта
+	* @param {string} subjectUUID -  UUID объекта
 	*/
 	async postChangedWorkRelations (workRelations, contentCode: string, subjectUUID: string) {
 		const url = `exec-post?func=modules.ganttWorkHandler.storeWorkRelations&params=requestContent`;
@@ -219,7 +392,7 @@ export default class Api {
 	* @param {string} workUUID - идентификатор работы
 	* @param {number} progress - прогресс работы
 	* @param {string} contentCode - code объекта
-	* @param {string} subjectUUID - Uuid объекта
+	* @param {string} subjectUUID - UUID объекта
 	*/
 	async postChangedWorkProgress (workUUID: string, progress: number, contentCode: string, subjectUUID) {
 		const url = `exec-post?func=modules.ganttWorkHandler.changeWorkProgress&params=requestContent`;

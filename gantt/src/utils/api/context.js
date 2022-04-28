@@ -11,12 +11,120 @@ const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
 });
 
 /**
+* Получает настройки версиий
+* @param {string} diagramKey - ключ диаграммы
+* @return {Promise<Params>}
+*/
+const getGanttVersionsSettings = async (diagramKey: string): Promise<Params> => {
+	return api.getGanttVersionsSettings(diagramKey);
+};
+
+/**
+* Получает настройки версий по ключу версии диаграммы
+* @param {string} versionKey - ключ диаграммы версий
+* @return {Promise<Params>}
+*/
+const getGanttVersionsSettingsFromDiagramVersionKey = async (versionKey: string): Promise<Params> => {
+	return api.getGanttVersionsSettingsFromDiagramVersionKey(versionKey);
+};
+
+/**
+* Сохраняет настройки версий диаграммы в хранилище
+* @param {string} title - название версии
+* @param {string} createdDate - дата создания
+* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+* @param {string} subjectUUID - UUID объекта
+*/
+const saveGanttVersionSettingsRequest = async (title: string, createdDate: string, contentCode: string, subjectUUID: string): Promise<Params> => {
+	api.saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUUID, title);
+};
+
+/**
+* Изменяет настройки в диаграмме версий
+* @param {string} versionKey - ключ диаграммы версий
+* @param {string} title - название диаграммы
+*/
+const updateGanttVersionSettingsRequest = async (versionKey: string, title: string): Promise<Params> => {
+	api.updateGanttVersionSettingsRequest(title, versionKey);
+};
+
+/**
+* Удаляет диаграмму версий из хранилища
+* @param {string} ganttVersionId  - индекс диаграммы
+*/
+const deleteGanttVersionSettingsRequest = async (ganttVersionId: string): Promise<Params> => {
+	api.deleteGanttVersionSettingsRequest(ganttVersionId);
+};
+
+/**
+* Редактирует диапазон дат работ диаграмм версий
+* @param {string} versionKey - ключ диаграммы версий
+* @param {workDateInterval} workDateInterval - объект временных рамок работы
+* @param {string} subjectUUID - UUID  объекта
+* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+*/
+const editWorkDateRangesFromVersionRequest = async (versionKey: string, workDateInterval: workDateInterval, subjectUUID: string, contentCode: string): Promise<Params> => {
+	api.editWorkDateRangesFromVersionRequest(contentCode, subjectUUID, workDateInterval);
+};
+
+/**
+* Добавляет новую работу в диаграмму версий
+* @param {string} versionKey - ключ диаграммы версий
+* @param {string} classFqn - матакласс работы
+* @param {workData} workData - данные работы
+* @param {string} timezone - ключ диаграммы версий
+*/
+const addNewWorkForVersionRequest = async (classFqn: string, timezone: string, versionKey: string, workData: string): Promise<Params> => {
+	api.addNewWorkForVersionRequest(classFqn, timezone, workData);
+};
+
+/**
+* Редактирует работы в диаграмме версий
+* @param {string} versionKey - ключ диаграммы версий
+* @param {string} workUUID - индефекатор работы
+* @param {workData} workData - данные работы
+* @param {string} classFqn - метакласс работы
+* @param {string} timezone - таймзона устройства пользователя
+*/
+const editWorkDataFromVersionRequest = async (classFqn: string, workUUID: string, versionKey: string, workData: string, timezone): Promise<Params> => {
+	api.editWorkDataFromVersionRequest(classFqn, timezone, workData, workUUID);
+};
+
+/**
+* Редактирует прогресса работы в диаграмме версий
+* @param {string} versionKey - ключ диаграммы версий
+* @param {string} workUUID - индефекатор работы
+* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+* @param {string} subjectUUID - UUID  объекта
+* @param {string} progress - прогресс работы
+*/
+const changeWorkProgressFromVersionRequest = async (versionKey: string, workUUID: string, contentCode: string, subjectUUID: string, progress: string): Promise<Params> => {
+	api.changeWorkProgressFromVersionRequest(contentCode, progress, subjectUUID, workUUID);
+};
+
+/**
+* Удаляет задачу из диаграммы версий
+* @param {string} workUUID - индефекатор работы
+* @param {string} versionKey - ключ диаграммы версий
+*/
+const deleteWorkFromVersionDiagramRequest = async (workUUID: string, versionKey: string): Promise<Params> => {
+	api.deleteWorkFromVersionDiagramRequest(versionKey, workUUID);
+};
+
+/**
+* Получает данные для построения версий диаграммы Ганта
+* @return {Promise<Params>}
+*/
+const getGanttVersionDiagramData = async (user: UserData): Promise<Params> => {
+	return api.getGanttVersionDiagramData(user);
+};
+
+/**
  * Получает ссылку на страницу работы
  * @param {string} workUUID - идентификатор работы
  * @returns {string} link - ссылка на карточку работы
  */
 const getWorkPageLink = async (workUUID: string): Promise<Params> => {
-	console.log('contex', api.getWorkPageLink(workUUID));
 	return api.getWorkPageLink(workUUID);
 };
 
@@ -29,8 +137,8 @@ const getCurrentUser = async (): Promise<UserData> => {
 };
 
 /**
- * Вычисляет uuid объекта, на карточке которого выведено ВП.
- * @returns {string} - uuid объекта, на карточке которого выведено ВП.
+ * Вычисляет UUID  объекта, на карточке которого выведено ВП.
+ * @returns {string} - UUID  объекта, на карточке которого выведено ВП.
  */
 const getContext = (): string => {
 	return {
@@ -41,7 +149,7 @@ const getContext = (): string => {
 
 /**
  * Получает данные о пользователе (в тч и его права)
- * @returns {string} - uuid объекта, на карточке которого выведено ВП.
+ * @returns {string} - UUID объекта, на карточке которого выведено ВП.
  */
 const getUserData = async (contentCode: string, subjectUuid: string): Promise<UserData> => {
 	const userData = await api.getUserData(contentCode, subjectUuid);
@@ -60,7 +168,7 @@ const getInitialParams = async (): Promise<Params> => {
 /**
  * Возвращает сохраненные настройки
  * @param contentCode - code объекта
- * @param subjectUuid - Uuid объекта
+ * @param subjectUuid - UUID  объекта
  * @returns {Promise<Params>} - настройки
  */
 const getInitialSettings = async (contentCode: string, subjectUuid: string): Promise<Params> => {
@@ -72,8 +180,8 @@ const getInitialSettings = async (contentCode: string, subjectUuid: string): Pro
  * Возвращает данные с учетом настроек
  * @returns {Promise<Params>} - данные
  */
-const getDiagramData = async (contentCode: string, subjectUuid: string, user: UserData, timezone: string): Promise<Params> => {
-	const data = await api.getDiagramData(contentCode, subjectUuid, user, timezone);
+const getDiagramData = async (contentCode: string, subjectUuid: string, timezone: string): Promise<Params> => {
+	const data = await api.getDiagramData(contentCode, subjectUuid, timezone);
 	return data;
 };
 
@@ -93,10 +201,9 @@ const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string 
 * @param {string} classFqn - метакласс работы
 * @param {string} workUUID - индификатор работы
 * @param {string} timezone - таймзона
-* @param {UserData} user - объект пользователя
 */
-const addNewWork = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData): Promise<Source> => {
-	await api.addNewWork(workData, classFqn, workUUID, timezone, user);
+const addNewWork = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string): Promise<Source> => {
+	await api.addNewWork(workData, classFqn, workUUID, timezone);
 };
 
 /**
@@ -105,10 +212,9 @@ const addNewWork = async (workData: WorkData, classFqn: string, workUUID: string
 * @param {string} classFqn - метакласс работы
 * @param {string} workUUID - индификатор работы
 * @param {string} timezone - таймзона
-* @param {UserData} user - объект пользователя
 */
-const editWorkData = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData): Promise<Source> => {
-	await api.editWorkData(workData, classFqn, timezone, user);
+const editWorkData = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string): Promise<Source> => {
+	await api.editWorkData(workData, classFqn, timezone);
 };
 
 /**
@@ -122,20 +228,19 @@ const deleteWorkDateRanges = async (workUUID: string): Promise<Source> => {
 /**
 * Отправляет данные изменения временных рамок работ
 * @param  {string} timezone - таймзона
-* @param  {workDateInterval} workDateInterval - Объект временных рамок работы
+* @param  {workDateInterval} workDateInterval - объект временных рамок работы
 * @param  {string} contentCode - code объекта
-* @param  {string} subjectUuid - Uuid объекта
-* @param {UserData} user - объект пользователя
+* @param  {string} subjectUuid - UUID объекта
 */
-const postChangedWorkInterval = async (timezone: string, workDateInterval: workDateInterval, contentCode: string, subjectUuid: string, user: UserData): Promise<Source> => {
-	await api.postChangedWorkInterval(timezone, workDateInterval, contentCode, subjectUuid, user);
+const postChangedWorkInterval = async (timezone: string, workDateInterval: workDateInterval, contentCode: string, subjectUuid: string): Promise<Source> => {
+	await api.postChangedWorkInterval(timezone, workDateInterval, contentCode, subjectUuid);
 };
 
 /**
  * Отправляет изменение связей
  * @param workRelations - объект связи между работами
  * @param contentCode - code объекта
- * @param subjectUuid -  Uuid объекта
+ * @param subjectUuid -  UUID объекта
  */
 const postChangedWorkRelations = async (workRelations, contentCode: string, subjectUuid: string) => {
 	await api.postChangedWorkRelations(workRelations, contentCode, subjectUuid);
@@ -155,7 +260,7 @@ const getDataSourceAttributesByTypes = async (classFqn: string, types: string = 
 /**
  * Отправляет сохраненные настройки
  * @param contentCode - code объекта
- * @param subjectUuid - Uuid объекта
+ * @param subjectUuid - UUID объекта
  * @param data - сохраняемые пользователем настройки
  * @returns {Promise<Params>} - новые настройки
  */
@@ -169,7 +274,7 @@ const saveData = async (subjectUuid: string, contentCode: string, data: Settings
  * @param {string} workUUID - идентификатор работы
  * @param {number} progress - прогресс работы
  * @param {string} contentCode - code объекта
- * @param {string} subjectUUID - Uuid объекта
+ * @param {string} subjectUUID - UUID объекта
  */
 const postChangedWorkProgress = async (workUUID: string, progress: number, contentCode: string, subjectUUID: string): Promise<Task> => {
 	await api.postChangedWorkProgress(workUUID, progress, contentCode, subjectUUID);
@@ -216,8 +321,14 @@ const getWorkAttributes = async (attributeGroupCode: string, metaClassFqn: strin
 
 export {
 	addNewWork,
+	addNewWorkForVersionRequest,
+	changeWorkProgressFromVersionRequest,
+	deleteGanttVersionSettingsRequest,
 	deleteWorkDateRanges,
+	deleteWorkFromVersionDiagramRequest,
 	editWorkData,
+	editWorkDataFromVersionRequest,
+	editWorkDateRangesFromVersionRequest,
 	getWorkAttributes,
 	getContext,
 	getCurrentUser,
@@ -225,6 +336,9 @@ export {
 	getDataSourceAttributesByTypes,
 	getDataSources,
 	getDiagramData,
+	getGanttVersionDiagramData,
+	getGanttVersionsSettings,
+	getGanttVersionsSettingsFromDiagramVersionKey,
 	getInitialParams,
 	getInitialSettings,
 	getWorkPageLink,
@@ -233,5 +347,7 @@ export {
 	postChangedWorkRelations,
 	postChangedWorkProgress,
 	postChangedWorkInterval,
-	saveData
+	saveGanttVersionSettingsRequest,
+	saveData,
+	updateGanttVersionSettingsRequest
 };
