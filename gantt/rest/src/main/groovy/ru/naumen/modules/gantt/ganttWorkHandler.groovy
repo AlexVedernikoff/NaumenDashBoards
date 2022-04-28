@@ -91,7 +91,7 @@ interface GanttWorkHandlerController
      * Метод редактирования диапазона дат работ диаграмм версий
      * @param requestContent - тело запроса
      * @param user - пользователь
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      * @return результат обновления
      */
     String editWorkDateRangesFromVersion(Map<String, Object> requestContent,
@@ -101,7 +101,7 @@ interface GanttWorkHandlerController
      * Метод добавления новой работы в диаграмму версий
      * @param requestContent - тело запроса
      * @param user - пользователь
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      * @return результат добавления
      */
     String addNewWorkForVersion(Map<String, String> requestContent,
@@ -112,7 +112,7 @@ interface GanttWorkHandlerController
      * Метод редактирования работы в диаграмме версий
      * @param requestContent - тело запроса
      * @param user - пользователь
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      * @return результат добавления
      */
     String editWorkDataFromVersion(Map<String, String> requestContent,
@@ -122,7 +122,7 @@ interface GanttWorkHandlerController
     /**
      * Метод редактирования прогресса работы в диаграмме версий
      * @param requestContent - тело запроса
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      * @return результат обновления
      */
     String changeWorkProgressFromVersion(Map<String, String> requestContent, String versionKey)
@@ -130,7 +130,7 @@ interface GanttWorkHandlerController
     /**
      * Метод удаления задач из диаграммы версий
      * @param workUUID - UUID редактируемой работы
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      */
     String deleteWorkFromVersion(String workUUID, String versionKey)
 
@@ -320,43 +320,43 @@ class GanttWorkHandlerService
         {
             List<String> warnings = []
 
-        GanttSettingsService ganttSettingsService = GanttSettingsService.instance
+            GanttSettingsService ganttSettingsService = GanttSettingsService.instance
 
-        String diagramKey =
-            ganttSettingsService.generateDiagramKey(request.subjectUUID, request.contentCode)
-        String ganttSettingsFromKeyValue = ganttSettingsService.getJsonSettings(diagramKey)
+            String diagramKey =
+                ganttSettingsService.generateDiagramKey(request.subjectUUID, request.contentCode)
+            String ganttSettingsFromKeyValue = ganttSettingsService.getJsonSettings(diagramKey)
 
-        GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
-            ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
-            : new GanttSettingsClass()
+            GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
+                ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
+                : new GanttSettingsClass()
 
-        api.tx.call {
-            request.workDateInterval.each { workDateData ->
-                ISDtObject work = api.utils.get(workDateData.workUUID)
-                String timezoneString =
-                    api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
-                TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-                Date newDateToUpdate =
-                    Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone)
+            api.tx.call {
+                request.workDateInterval.each { workDateData ->
+                    ISDtObject work = api.utils.get(workDateData.workUUID)
+                    String timezoneString =
+                        api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
+                    TimeZone timezone = TimeZone.getTimeZone(timezoneString)
+                    Date newDateToUpdate =
+                        Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone)
 
-                List<ISDtObject> relatedEntities =
-                    getWorkRelatedEntitiesWithExceededDeadline(work, work, newDateToUpdate)
+                    List<ISDtObject> relatedEntities =
+                        getWorkRelatedEntitiesWithExceededDeadline(work, work, newDateToUpdate)
 
-                String attributeCode = null
-                String metaClassId = work.getMetaClass().getId()
-                ganttSettings.resourceAndWorkSettings.find {
-                    if (it.source.value.value == metaClassId)
-                    {
-                        attributeCode =
-                            workDateData.dateType == WorkEditDateType.startDate ?
-                                it.startWorkAttribute.code : it.endWorkAttribute.code
+                    String attributeCode = null
+                    String metaClassId = work.getMetaClass().getId()
+                    ganttSettings.resourceAndWorkSettings.find {
+                        if (it.source.value.value == metaClassId)
+                        {
+                            attributeCode =
+                                workDateData.dateType == WorkEditDateType.startDate ?
+                                    it.startWorkAttribute.code : it.endWorkAttribute.code
+                        }
                     }
-                }
 
-                api.utils.edit(work, [(attributeCode): newDateToUpdate])
-                updateRelatedEntitiesDeadlines(relatedEntities, newDateToUpdate)
+                    api.utils.edit(work, [(attributeCode): newDateToUpdate])
+                    updateRelatedEntitiesDeadlines(relatedEntities, newDateToUpdate)
+                }
             }
-        }
 
             return new EditWorkDateRangesResponse(updated: true)
         }
@@ -515,7 +515,7 @@ class GanttWorkHandlerService
      * Метод редактирования диапазона дат работ диаграмм версий
      * @param requestContent - тело запроса
      * @param user - пользователь
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      * @return результат обновления
      */
     EditWorkDateRangesResponse editWorkDateRangesFromVersion(EditWorkDateRangesRequest request,
@@ -577,28 +577,39 @@ class GanttWorkHandlerService
      * Метод добавления новой работы в диаграмму версий
      * @param request - тело запроса
      * @param user - пользователь
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      */
     void addNewWorkForVersion(AddNewWorkRequest request,
                               IUUIDIdentifiable user, String versionKey)
     {
-        Map<String, Object> preparedWorkData =
-            prepareWorkDataFromVersion(request, user, versionKey)
-        utils.create(request.classFqn, preparedWorkData)
+        GanttSettingsService service = GanttSettingsService.instance
+        GanttVersionsSettingsClass settingsVersion =
+            service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
+
+        Work work = new Work()
+        work.attributesData.put('request', request)
+        work.attributesData.put('user', user)
+
+        settingsVersion.works.add(work)
     }
 
     /**
      * Метод редактирования работы в диаграмме версий
      * @param request - тело запроса
      * @param user - пользователь
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      */
     void editWorkDataFromVersion(EditWorkDataRequest request,
                                  IUUIDIdentifiable user, String versionKey)
     {
-        Map<String, Object> preparedWorkData =
-            prepareWorkDataFromVersion(request, user, versionKey)
-        utils.edit(request.workUUID, preparedWorkData)
+        GanttSettingsService service = GanttSettingsService.instance
+        GanttVersionsSettingsClass settingsVersion =
+            service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
+
+        Map<String, Object> preparedWorkData = prepareWorkData(request, user)
+        settingsVersion.works.find {
+            utils.edit(request.workUUID, preparedWorkData)
+        }
     }
 
     /**
@@ -634,18 +645,23 @@ class GanttWorkHandlerService
     /**
      * Метод удаления задач из диаграммы версий
      * @param workUUID - UUID редактируемой работы
-     * @param versionKey - ключ диаграммы версий
+     * @param versionKey - ключ версии диаграммы
      */
     String deleteWorkFromVersion(String workUUID, String versionKey)
     {
-        try
-        {
-            utils.delete(utils.get(workUUID))
-            return ("Deleting successful!")
-        }
-        catch (Exception e)
-        {
-            return ("errorMessage: " + e.message)
+        GanttSettingsService service = GanttSettingsService.instance
+        GanttVersionsSettingsClass settingsVersion =
+            service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
+        settingsVersion.works.find {
+            try
+            {
+                utils.delete(workUUID)
+                return ("Deleting successful!")
+            }
+            catch (Exception e)
+            {
+                return ("errorMessage: " + e.message)
+            }
         }
     }
 
@@ -707,39 +723,6 @@ class GanttWorkHandlerService
             {
                 String timezoneString =
                     api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
-                TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-                attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
-                preparedWorkData[attributeCode] = attributeValue
-            }
-        }
-        return preparedWorkData
-    }
-
-    /**
-     * Подготовка данных работ в диаграмме версий для обновления
-     * @param request - тело запроса
-     * @param user - пользователь
-     * @param versionKey - ключ диаграммы версий
-     * @return подготовленные данные работы для добавления/редактирования
-     */
-    private Map<String, Object> prepareWorkDataFromVersion(AddNewWorkRequest request,
-                                                           IUUIDIdentifiable user,
-                                                           String versionKey)
-    {
-        Map<String, Object> preparedWorkData = request.workData
-        Collection<IAttributeWrapper> attributes =
-            api.metainfo.getMetaClass(request.classFqn).getAttributes()
-        preparedWorkData.each {
-            String attributeCode = it.key
-            Object attributeValue = it.value
-
-            IAttributeWrapper attribute = attributes.find {
-                it.code == attributeCode
-            }
-            if (attribute.type.code in AttributeType.DATE_TYPES)
-            {
-                String timezoneString =
-                    api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
                 TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                 attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
                 preparedWorkData[attributeCode] = attributeValue
