@@ -140,7 +140,7 @@ class QueryWrapper implements CriteriaWrapper
         else
         {
             def column = sc.property(attributeCodes)
-                           .with(sc.&count)
+                           .with(sc.&countDistinct)
                            .with(sc.&columnMultiply.rcurry(sc.constant(100.00)))
                            .with(sc.&columnDivide.rcurry(sc.constant(totalCount)))
 
