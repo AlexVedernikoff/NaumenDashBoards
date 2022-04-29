@@ -281,6 +281,7 @@ class DashboardDataSetService
         def offsetUTCMinutes = dashboardUtils.getOffsetUTCMinutes(user?.UUID, frontOffsetMinutes)
         String minValue
         String maxValue
+        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
 
         if (diagramType == DiagramType.TABLE)
         {
@@ -340,7 +341,6 @@ class DashboardDataSetService
                 //а здесь уже важно знать, выводить пустые значения или нет
                 showTableNulls = widgetSettings.showEmptyData
 
-                Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
                 if (!isSourceForEachRow)
                 {
                     res = prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
@@ -353,7 +353,7 @@ class DashboardDataSetService
                 }
             }
             countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings,
-                                         tableRequestSettings?.ignoreLimits)
+                                         tableRequestSettings?.ignoreLimits, isSourceForEachRow)
             if(!(requestHasBreakdown && computationInTableRequest))
             {
                 def fullRes = getDiagramData(
@@ -369,23 +369,43 @@ class DashboardDataSetService
                     }
                 }
                 List aggregations = getSpecificAggregationsList(widgetSettings)
-                def aggregationsSize = aggregations.size()
+                Integer aggregationsSize = aggregations.size()
                 if(fullRes?.find())
                 {
-                    def tempTransponseRes = fullRes?.find()?.transpose()
-                    def finalIndex = aggregationsSize > tempTransponseRes.size() ? tempTransponseRes.size() : aggregationsSize
-                    def transposeRes = tempTransponseRes[0..finalIndex - 1]
+                    List transposeRes = []
+                    if (isSourceForEachRow)
+                    {
+                        transposeRes = fullRes.collect {
+                            [it.head().head()]
+                        }
+                    }
+                    else
+                    {
+                        List tempTransponseRes = fullRes?.find()?.transpose()
+                        Integer finalIndex = aggregationsSize > tempTransponseRes.size() ? tempTransponseRes.size() : aggregationsSize
+                        transposeRes = tempTransponseRes[0..finalIndex - 1]
+                    }
 
-                    Integer percentCntAggregationIndex = getPercentCntAggregationIndexForTable(request, diagramType)
+                    Collection<Integer> percentCntAggregationIndexes
+                    if (isSourceForEachRow)
+                    {
+                        percentCntAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT_CNT)
+                    }
+                    else
+                    {
+                        percentCntAggregationIndexes = [getPercentCntAggregationIndexForTable(request, diagramType)]
+                    }
+
+
                     tableTotals = transposeRes?.withIndex()?.collect { val, i ->
-                        if (i in listIdsOfNormalAggregations)
+                        if (i in listIdsOfNormalAggregations || isSourceForEachRow)
                         {
                             return val.sum {
                                 List<String> countAndPercentValuesForTable
-                                if (i == percentCntAggregationIndex)
+                                if (i in percentCntAggregationIndexes)
                                 {
                                     countAndPercentValuesForTable = it.split(' ')
-                                    return countAndPercentValuesForTable[1] as Double
+                                    return countAndPercentValuesForTable[0] as Double
                                 }
                                 return it as Double
                             }
@@ -508,25 +528,44 @@ class DashboardDataSetService
      * @param templateUUID - код шаблона динамического атрибута
      * @param widgetSettings - настройки виджета
      * @param ignoreLimits - объект с флагами игнорирования пределов
+     * @param isSourceForEachRow - флаг на таблицу без параметра
      * @return итог по количеству данных на виджете
      */
     Integer getTotalAmount(DiagramRequest request, def res, DiagramType diagramType, String templateUUID, Widget widgetSettings = null,
-                           IgnoreLimits ignoreLimits = null)
+                           IgnoreLimits ignoreLimits = null, Boolean isSourceForEachRow = false)
     {
         Integer total = 0
         if(widgetSettings.type in [*DiagramType.CountableTypes, DiagramType.TABLE] && widgetSettings.showTotalAmount)
         {
-            if (widgetSettings?.data.sourceRowName?.findAll())
+            if (isSourceForEachRow)
             {
-                res.each {
-                    it.each {
-                        try
+                Collection<Number> percentCntAggregationIndexes =
+                    getIndexesForTableWithNoParametersByAggregationType(
+                        request,
+                        Aggregation.PERCENT_CNT
+                    )
+                Collection<Number> percentAggregationIndexes =
+                    getIndexesForTableWithNoParametersByAggregationType(
+                        request,
+                        Aggregation.PERCENT
+                    )
+                res.eachWithIndex { value, index ->
+                    value.each {
+                        Double amountToAdd
+                        if (index in percentCntAggregationIndexes)
                         {
-                            total += it[0] as Integer
+                            List<String> countAndPercentValuesForTable = it[0].split(' ')
+                            amountToAdd = countAndPercentValuesForTable[0] as Double
                         }
-                        catch (NumberFormatException e)
+                        else if (index in percentAggregationIndexes)
                         {
+                            amountToAdd = 0
                         }
+                        else
+                        {
+                            amountToAdd = it[0] as Double
+                        }
+                        total += amountToAdd
                     }
                 }
             }
@@ -3511,6 +3550,26 @@ class DashboardDataSetService
     }
 
     /**
+     * Метод получения индексов агрегаций определенного типа для таблицы без параметра
+     * @param request - запрос
+     * @param aggregationFormat - тип аггрегации
+     * @return - индексы агрегаций
+     */
+    Collection<Integer> getIndexesForTableWithNoParametersByAggregationType(DiagramRequest request, Aggregation aggregationFormat)
+    {
+        Collection<Integer> percentCntAggregationIndexes = []
+        request?.data?.eachWithIndex{ entry, index ->
+            entry.value?.aggregations?.each {
+                if (it.type == aggregationFormat)
+                {
+                    return percentCntAggregationIndexes << index
+                }
+            }
+        }
+        return percentCntAggregationIndexes
+    }
+
+    /**
      * Метод приведения значений группировок к читаемому для человека виду
      * @param data - данные запроса
      * @param tempList - результат выборки
@@ -4935,6 +4994,7 @@ class DashboardDataSetService
             aggregationColumns = [columns.find()]
         }
 
+        Collection<Integer> percentAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT)
         if (totalColumn)
         {
             columns[-1].footer = 'Итого'
@@ -4944,18 +5004,74 @@ class DashboardDataSetService
                 {
                     List childrenColumns = aggrCol.columns
                     childrenColumns.each { childCol ->
-                        String keyName = "${aggrCol.header}\$${childCol.header}"
-                        totalCount = aggrCol.aggregation == 'NOT_APPLICABLE'
-                            ? data.count { it.findAll{ k, v -> k == keyName && v != "" } }
-                            : data.sum{it.entrySet().sum{ it.key == keyName ? it.value as Double : 0 }}
-                        childCol.footer = DECIMAL_FORMAT.format(totalCount)
+                        String keyName = "${ aggrCol.header }\$${ childCol.header }"
+                        if (aggrCol.aggregation == 'NOT_APPLICABLE')
+                        {
+                            totalCount = data.count {
+                                it.findAll { k, v -> k == keyName && v != ""
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (sourceRowNames && percentAggregationIndexes)
+                            {
+                                totalCount = '-'
+                            }
+                            else
+                            {
+                                totalCount = data.sum {
+                                    it.entrySet().sum {
+                                        Object value
+                                        if (it.value in String)
+                                        {
+                                            Collection potentialValuesForPercentCntAggregation = it.value.split(' ')
+                                            String countInPercentCntAggregation = potentialValuesForPercentCntAggregation.head()
+                                            if (countInPercentCntAggregation.isNumber()
+                                                && potentialValuesForPercentCntAggregation.size() == 2)
+                                            {
+                                                value = countInPercentCntAggregation
+                                            }
+                                        }
+
+                                        if (!value)
+                                        {
+                                            value = it.value
+                                        }
+                                        it.key == keyName ? value as Double : 0
+                                    }
+                                }
+                            }
+                        }
+                        if (totalCount in String && !totalCount.isNumber())
+                        {
+                            childCol.footer = totalCount
+                        }
+                        else
+                        {
+                            childCol.footer = DECIMAL_FORMAT.format(totalCount)
+                        }
                     }
                 }
                 else
                 {
-                    if(tableTotals)
+                    if (tableTotals)
                     {
-                        totalCount = tableTotals[i]
+                        if (sourceRowNames)
+                        {
+                            if (percentAggregationIndexes)
+                            {
+                                totalCount = '-'
+                            }
+                            else
+                            {
+                                totalCount = tableTotals.sum()
+                            }
+                        }
+                        else
+                        {
+                            totalCount = tableTotals[i]
+                        }
                     }
                     else
                     {
@@ -4963,7 +5079,14 @@ class DashboardDataSetService
                             ? data.count { it[aggrCol.header] != "" }
                             : data.sum { it[aggrCol.header] as Double }
                     }
-                    aggrCol.footer = DECIMAL_FORMAT.format(totalCount)
+                    if (totalCount in String && !totalCount.isNumber())
+                    {
+                        aggrCol.footer = totalCount
+                    }
+                    else
+                    {
+                        aggrCol.footer = DECIMAL_FORMAT.format(totalCount)
+                    }
                 }
             }
         }
