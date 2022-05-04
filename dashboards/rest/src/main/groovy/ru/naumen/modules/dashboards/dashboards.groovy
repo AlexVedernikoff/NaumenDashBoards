@@ -493,15 +493,18 @@ class DashboardsService
             attributeTitle = attribute?.title
         }
 
+        Collection<String> codesOfAddedAttributes = []
         def attributes = ([metaInfo] + metaClassTypes).collectMany { mc ->
             def attributes = types
-                ? mc?.attributes?.findAll { it.type.code in types && !isHiddenAttribute(it) ? it : null }
-                : mc?.attributes?.toList()
+                ? mc?.attributes?.findAll {!codesOfAddedAttributes.contains(it.code) && it.type.code in types && !isHiddenAttribute(it) ? it : null }
+                : mc?.attributes?.findAll {!codesOfAddedAttributes.contains(it.code) }?.toList()
+
+            codesOfAddedAttributes += attributes.collect { it.code }
 
             return attributes
                 ? mappingAttribute(attributes, attributeTitle ?: mc.title, parentClassFqn ? classFqn : mc.code)
                 : []
-        }.unique { it.code }
+        }
 
         return getTimerAttributesWithValue(attributes)
     }
