@@ -5109,7 +5109,7 @@ class DashboardDataSetService
 
         if (sourceRowNames)
         {
-            columns.add(1, new NumberColumn(header: "", accessor: "Источник", footer: ""))
+            columns.add(1, new NumberColumn(header: "", accessor: "Источник", footer: totalColumn ? 'Итого' : ''))
         }
 
         def source = request.data.findResult { k, v -> v.source }
