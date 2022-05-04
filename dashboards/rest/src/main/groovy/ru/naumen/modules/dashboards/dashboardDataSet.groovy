@@ -1572,6 +1572,8 @@ class DashboardDataSetService
         }
         else if (allGroups)
         {
+            Object firstGroupFormat = allGroups.head().format
+            Object firstGroupType = allGroups.head().type
             intermediateData.eachWithIndex { it, index ->
                 Object request = it.value
                 String sourceClassFqn = request.requestData.source.classFqn
@@ -1579,6 +1581,8 @@ class DashboardDataSetService
                 GroupParameter group = allGroups[index].deepClone()
                 group.attribute.sourceCode = sourceClassFqn
                 group.attribute.metaClassFqn = sourceClassFqn
+                group.format = firstGroupFormat
+                group.type = firstGroupType
 
                 request.requestData.groups = [group]
             }
