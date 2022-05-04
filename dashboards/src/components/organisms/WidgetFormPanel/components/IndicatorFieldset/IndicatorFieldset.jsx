@@ -28,8 +28,8 @@ import SelectModal, {SelectItem} from 'components/molecules/SelectModal';
 import t from 'localization';
 import uuid from 'tiny-uuid';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
+import withAttributesHelpers from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers';
 import withFilterForm from 'containers/FilterForm';
-import withHelpers from 'containers/DiagramWidgetForm/HOCs/withHelpers';
 import withType from 'WidgetFormPanel/HOCs/withType';
 import withValues from 'components/organisms/WidgetForm/HOCs/withValues';
 
@@ -390,7 +390,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 }
 
 export default compose(
-	withHelpers,
+	withAttributesHelpers,
 	withValues(DIAGRAM_FIELDS.computedAttrs, DIAGRAM_FIELDS.data),
 	withType,
 	withFilterForm

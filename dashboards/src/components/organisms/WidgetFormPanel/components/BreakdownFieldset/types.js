@@ -1,7 +1,7 @@
 // @flow
 import type {Breakdown, BreakdownItem, SourceData} from 'store/widgetForms/types';
 import type {InjectedProps as ValuesProps} from 'components/organisms/WidgetForm/HOCs/withValues/types';
-import type {InjectedProps as HelpersProps} from 'containers/DiagramWidgetForm/HOCs/withHelpers/types';
+import type {InjectedProps as HelpersProps} from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers/types';
 import type {MixedAttribute, Source} from 'store/widgets/data/types';
 
 type DataSet = {

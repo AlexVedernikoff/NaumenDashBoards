@@ -13,7 +13,7 @@ import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Parameter} from 'store/widgetForms/types';
 import type {Props} from './types';
 import React, {createContext, PureComponent} from 'react';
-import withHelpers from 'containers/DiagramWidgetForm/HOCs/withHelpers';
+import withAttributesHelpers from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers';
 
 const Context: React$Context<Parameter> = createContext({
 	attribute: null,
@@ -132,4 +132,4 @@ export class ParameterFieldset extends PureComponent<Props> {
 	}
 }
 
-export default withHelpers(ParameterFieldset);
+export default withAttributesHelpers(ParameterFieldset);
