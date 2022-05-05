@@ -69,6 +69,20 @@ interface GanttSettingsController
     String getGanttVersionsSettings(String diagramKey)
 
     /**
+     * Метод получения названий и ключей диаграмм версий
+     * @param diagramKey - ключ диаграммы
+     * @return список названий и ключей диаграмм версий
+     */
+    String getGanttVersionTitlesAndKeys(String diagramKey)
+
+    /**
+     * Метод получения настроек из хранилища
+     * @param versionKey - ключ версии диаграммы
+     * @return настройки из хранилища
+     */
+    String getGanttVersionsSettingsFromDiagramVersionKey(String versionKey)
+
+    /**
      * Сохраняет настройки версий диаграммы в хранилище
      * @param requestContent - тело запроса [title:..., createDate: ..., code / key]
      * @return настройки, отправленные в хранилище
@@ -156,6 +170,18 @@ class GanttSettingsImpl implements GanttSettingsController
     String getGanttVersionsSettings(String diagramKey)
     {
         return Jackson.toJsonString(service.getGanttVersionsSettings(diagramKey))
+    }
+
+    @Override
+    String getGanttVersionTitlesAndKeys(String diagramKey)
+    {
+        return Jackson.toJsonString(service.getGanttVersionTitlesAndKeys(diagramKey))
+    }
+
+    @Override
+    String getGanttVersionsSettingsFromDiagramVersionKey(String versionKey)
+    {
+        return Jackson.toJsonString(service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey))
     }
 
     @Override
@@ -369,6 +395,37 @@ class GanttSettingsService
     }
 
     /**
+     * Метод получения названий и ключей диаграмм версий
+     * @param diagramKey - ключ диаграммы
+     * @return список названий и ключей диаграмм версий
+     */
+    Collection<Map<String, String>> getGanttVersionTitlesAndKeys(String diagramKey)
+    {
+        String diagramValue = getJsonSettings(diagramKey)
+        Collection<Map<String, String>> listTitlesAndKeys = []
+
+        GanttSettingsClass ganttSettings = diagramValue
+            ? Jackson.fromJsonString(diagramValue, GanttSettingsClass)
+            : new GanttSettingsClass()
+
+        return ganttSettings.diagramVersionsKeys.collect {
+            String diagramVersionValue = getJsonSettings(it, GANTT_VERSION_NAMESPACE)
+            GanttVersionsSettingsClass ganttVersionsSettings = diagramVersionValue
+                ? Jackson.fromJsonString(diagramVersionValue, GanttVersionsSettingsClass)
+                : new GanttVersionsSettingsClass()
+
+            Map<String, String> mapParams = [:]
+
+            mapParams.title = ganttVersionsSettings.title
+            mapParams.diagramKey = ganttVersionsSettings.versionKey
+
+            listTitlesAndKeys.add(mapParams)
+
+            return listTitlesAndKeys
+        }
+    }
+
+    /**
      * Метод получения настроек из хранилища
 <<<<<<< HEAD
      * @param versionKey - ключ диаграммы версий
@@ -448,11 +505,13 @@ class GanttSettingsService
 >>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 
         Map<String, String> valueForMapAttributes = [:]
-        Map<String, Object> mapAttributesWork = [:]
         String startDateCode = null
         String endDateCode = null
         data.each {
+            Map<String, Object> mapAttributesWork = [:]
             String id = it.id
+            String text = it.text
+            String parent = it.parent
             String startDateValue = it.start_date
             String endDateValue = it.end_date
             String metaClassName = id.substring(id.indexOf(""), id.lastIndexOf('$'))
@@ -464,13 +523,16 @@ class GanttSettingsService
                 endDateCode = valueForMapAttributes.get("end_date")
 
                 mapAttributesWork.id = id
+                mapAttributesWork.text = text
+                mapAttributesWork.parent = parent
                 mapAttributesWork.put(startDateCode, startDateValue)
                 mapAttributesWork.put(endDateCode, endDateValue)
-            }
-            Work work = new Work()
-            work.attributesData = mapAttributesWork
 
-            ganttVersionsSettings.works.add(work)
+                Work work = new Work()
+                work.attributesData = mapAttributesWork
+
+                ganttVersionsSettings.works.add(work)
+            }
         }
 
         Boolean saveJsonSettingsGanttVersion = saveJsonSettings(
