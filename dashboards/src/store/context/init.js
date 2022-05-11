@@ -10,6 +10,7 @@ export const initialContextState: ContextState = {
 	switching: false,
 	temp: null,
 	user: {
+		editable: true,
 		email: '',
 		hasPersonalDashboard: false,
 		name: '',

@@ -370,9 +370,7 @@ class DashboardSettingsImpl extends BaseController implements DashboardSettings
     @Override
     String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        String subjectUUID = requestContent.classFqn
-        String contentCode = requestContent.contentCode
-        return toJson(service.getUserData(subjectUUID, contentCode, user))
+        return toJson(service.getUserData(requestContent, user))
     }
 
     @Override
@@ -1285,19 +1283,27 @@ class DashboardSettingsService
 
     /**
      * Получение данных о пользователе для дашборда
-     * @param subjectUUID - UUID карточки объекта
-     * @param contentCode - код контента
+     * @param requestContent - параметры запроса (classFqn, contentCode)
      * @param user - текущий пользователь
      * @return параметры пользователя
      */
-    Map getUserData(String subjectUUID, String contentCode, IUUIDIdentifiable user)
+    Map getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
+        String classFqn = requestContent.classFqn
+        String contentCode = requestContent.contentCode
+        String dashboardUUID = requestContent.dashboardUUID
+
         String groupUser = getUserGroup(user)
-        Boolean hasPersonalDashboard = user?.login && getDashboardSetting(subjectUUID, contentCode, false, user.login as String)
+
+        IUUIDIdentifiable possibleUser = dashboardUUID ? utils.get(dashboardUUID).userReports : null
+        Boolean editable = (possibleUser == user) || (groupUser in ['MASTER', 'SUPER'])
+        Map editableMap = dashboardUUID ? [editable: editable] : [:]
+
+        Boolean hasPersonalDashboard = user?.login && getDashboardSetting(classFqn, contentCode, false, user.login as String)
         return [groupUser : groupUser,
                 hasPersonalDashboard: hasPersonalDashboard,
                 name: user?.title,
-                email: user?.email]
+                email: user?.email] + editableMap
     }
 
     /**
@@ -2057,11 +2063,11 @@ class DashboardSettingsService
      * @return сгенированный ключ для виджета
      */
     String generateWidgetKey(Collection<String> keys,
-                                     String classFqn,
-                                     String contentCode,
-                                     String login = null,
-                                     String dashboardUUID = null,
-                                     String oldWidgetKey = null)
+                             String classFqn,
+                             String contentCode,
+                             String login = null,
+                             String dashboardUUID = null,
+                             String oldWidgetKey = null)
     {
         String type = utils.get(classFqn)?.metaClass?.toString()
         def loginKeyPart = login ? "_${login}" : ''

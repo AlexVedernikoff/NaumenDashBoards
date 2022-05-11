@@ -1,0 +1,195 @@
+<metainfoContainer>
+	<head>
+		<date>2021-08-25T16:42:17.754+05:00</date>
+		<exportMode>partial</exportMode>
+		<version>4.13.1-SNAPSHOT</version>
+	</head>
+	<tags/>
+	<mail-processor-rules/>
+	<style-templates/>
+	<list-templates/>
+	<content-templates/>
+	<user-events>
+		<event seg-detach="true" seg-id="userEvent$selectmode" seg-type="user-events">
+			<enabled>false</enabled>
+			<fqn>
+				<id>attrs</id>
+				<case>onlyChRadio</case>
+			</fqn>
+			<title lang="client">!!selectmode</title>
+			<uuid>userEvent$selectmode</uuid>
+		</event>
+	</user-events>
+	<event-actions>
+		<action seg-detach="true" seg-id="eventAction$selectmode" seg-type="event_actions">
+			<eventAction seg-detach="false">
+				<script-action>
+					<actionType>ScriptEventAction</actionType>
+					<script>
+						<![CDATA[ selectScript ]]>
+					</script>
+				</script-action>
+				<code>eventAction$selectmode</code>
+				<description lang="client"/>
+				<user-events>
+					<eventType>userEvent</eventType>
+					<event-code>userEvent$selectmode</event-code>
+					<form-code>fedc7330-17b3-ef79-0012-00004942d224</form-code>
+				</user-events>
+				<jmsQueue>Queue.UserEventAction</jmsQueue>
+				<fqn>
+					<id>attrs</id>
+					<case>onlyChRadio</case>
+				</fqn>
+				<on>false</on>
+				<slow>false</slow>
+				<title lang="client">!!selectmode</title>
+				<txType>NEW_TX</txType>
+			</eventAction>
+		</action>
+	</event-actions>
+	<system-jmsqueues/>
+	<user-jmsqueues/>
+	<embedded-applications/>
+	<custom-forms>
+		<form seg-detach="true" seg-id="fedc7330-17b3-ef79-0012-00004942d224" seg-type="custom_forms">
+			<code>fedc7330-17b3-ef79-0012-00004942d224</code>
+			<parameters>
+				<parameter seg-detach="true" seg-id="editable" seg-type="form-parameters">
+					<attrs-for-date-time-restriction-script/>
+					<attrs-in-cof-script/>
+					<code>editable</code>
+					<complexRelation>false</complexRelation>
+					<complexRelationAggrAttrGroups>
+						<entry>
+							<key>
+								<id>ou</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>team</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>employee</id>
+							</key>
+						</entry>
+					</complexRelationAggrAttrGroups>
+					<computable-on-form>false</computable-on-form>
+					<compute-any-catalog-elements-script>select</compute-any-catalog-elements-script>
+					<default-by-script>true</default-by-script>
+					<description/>
+					<is-edit-on-complex-form-only>false</is-edit-on-complex-form-only>
+					<edit-presentaion>
+						<code>catItemEdit</code>
+					</edit-presentaion>
+					<editable>true</editable>
+					<is-filtered-by-script>false</is-filtered-by-script>
+					<hiddenAttrCaption>false</hiddenAttrCaption>
+					<is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+					<hideArchived>false</hideArchived>
+					<required>true</required>
+					<script-for-default>selectDefault</script-for-default>
+					<title lang="client">Режим запуска</title>
+					<type>
+						<code>catalogAnyItem</code>
+						<property code="permittedTypes">[]</property>
+					</type>
+					<view-presentaion>
+						<code>catItemView</code>
+					</view-presentaion>
+				</parameter>
+				<parameter seg-detach="true" seg-id="MinTimeIntervalUpdate" seg-type="form-parameters">
+					<attrs-for-date-time-restriction-script/>
+					<attrs-in-cof-script/>
+					<code>MinTimeIntervalUpdate</code>
+					<complexRelation>false</complexRelation>
+					<complexRelationAggrAttrGroups>
+						<entry>
+							<key>
+								<id>team</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>ou</id>
+							</key>
+						</entry>
+						<entry>
+							<key>
+								<id>employee</id>
+							</key>
+						</entry>
+					</complexRelationAggrAttrGroups>
+					<computable-on-form>false</computable-on-form>
+					<default-by-script>false</default-by-script>
+					<default-value>
+						<long>15</long>
+					</default-value>
+					<description/>
+					<is-edit-on-complex-form-only>false</is-edit-on-complex-form-only>
+					<edit-presentaion>
+						<code>integerEdit</code>
+					</edit-presentaion>
+					<editable>true</editable>
+					<is-filtered-by-script>false</is-filtered-by-script>
+					<hiddenAttrCaption>false</hiddenAttrCaption>
+					<is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+					<hideArchived>false</hideArchived>
+					<required>false</required>
+					<title lang="client">Минимальное допустимое значение интервала обновления, мин</title>
+					<type>
+						<code>integer</code>
+						<property code="permittedTypes">[]</property>
+						<property code="hasGroupSeparator">false</property>
+					</type>
+					<view-presentaion>
+						<code>integerView</code>
+					</view-presentaion>
+				</parameter>
+			</parameters>
+		</form>
+	</custom-forms>
+	<advimport/>
+	<script-modules/>
+	<scripts>
+		<script seg-detach="true" seg-id="select" seg-type="scripts">
+			<code>select</code>
+			<title lang="client">select</title>
+			<mimeType>application/x-groovy</mimeType>
+			<scriptBody>
+				<![CDATA[ return [edit: 'Редактируемый', user: 'Пользовательский', userSource: 'Пользовательский ограниченный', viewOnly: 'Для просмотра'] ]]>
+			</scriptBody>
+			<defaultCategories/>
+			<subjectDependencies/>
+		</script>
+		<script seg-detach="true" seg-id="selectDefault" seg-type="scripts">
+			<code>selectDefault</code>
+			<title lang="client">selectDefault</title>
+			<mimeType>application/x-groovy</mimeType>
+			<scriptBody>
+				<![CDATA[ return 'edit' ]]>
+			</scriptBody>
+			<defaultCategories/>
+			<subjectDependencies/>
+		</script>
+		<script seg-detach="true" seg-id="selectScript" seg-type="scripts">
+			<code>selectScript</code>
+			<title lang="client">selectScript</title>
+			<mimeType>application/x-groovy</mimeType>
+			<scriptBody>
+				<![CDATA[ return null ]]>
+			</scriptBody>
+			<defaultCategories/>
+			<subjectDependencies/>
+		</script>
+	</scripts>
+	<customJSElements/>
+	<fast-link-settings/>
+	<objects/>
+	<transfer-values/>
+	<structured-objects-views/>
+	<libraries/>
+</metainfoContainer>

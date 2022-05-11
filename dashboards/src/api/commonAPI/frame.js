@@ -33,7 +33,7 @@ export default class Frame implements FrameAPI {
 	}
 
 	getViewMode () {
-		return window.jsApi.getViewMode();
+		return window.jsApi.getViewMode?.() ?? null;
 	}
 
 	restCallAsJson (url: string, options: DTOValue) {

@@ -41,7 +41,7 @@ const fakeFetch = (url: string, options: DTOValue): Promise<DTOValue> | null => 
 
 export default class Frame extends fakeExecMFFrame {
 	restCallAsJson (url: string, options: DTOValue) {
-		const fakeUrl = `/sd/services/earest/${url}&accessKey=${process.env.ACCESS_KEY ?? ''}`;
+		const fakeUrl = `/sd/services/rest/${url}&accessKey=${process.env.ACCESS_KEY ?? ''}`;
 		const {headers = {}} = options;
 		const newHeaders = {...headers, 'Content-Type': 'application/json'};
 		const fakePromise = fakeFetch(fakeUrl, options);

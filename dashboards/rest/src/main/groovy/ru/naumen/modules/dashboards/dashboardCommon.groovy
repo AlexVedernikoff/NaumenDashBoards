@@ -3450,6 +3450,10 @@ abstract class Widget
             {
                 fields?.table?.body?.parameterSettings?.fontStyle= null
             }
+            if(!fields?.table?.columnHeader)
+            {
+                fields?.table?.columnHeader = new ColumnHeader()
+            }
             if(fields?.table?.columnHeader?.fontStyle == "")
             {
                 fields?.table?.columnHeader?.fontStyle = null

@@ -49,17 +49,11 @@ export class SourceFieldset extends Component<Props, State> {
 	selectRef: Ref<typeof TreeSelect> = createRef();
 
 	componentDidMount () {
-		const {autoSelectFirstItem, index, sources, value: {source}} = this.props;
+		const {autoSelectFirstItem, index, value: {source}} = this.props;
 
 		if (!source.value) {
 			if (autoSelectFirstItem) {
-				const keys = Object.keys(sources);
-
-				if (keys.length > 0) {
-					const source = sources[keys[0]];
-
-					this.handleSelect({name: '', value: source});
-				}
+				this.handleAutoSelectFirstItem();
 			} else if (index > 0) {
 				const {current: container} = this.containerRef;
 				const {current: select} = this.selectRef;
@@ -71,11 +65,16 @@ export class SourceFieldset extends Component<Props, State> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {descriptor} = this.props.value.source;
+		const {autoSelectFirstItem, sources, value: propsValue} = this.props;
+		const {descriptor, value} = propsValue.source;
 		const {descriptor: prevDescriptor} = prevProps.value.source;
 
 		if (descriptor !== prevDescriptor) {
 			this.resetDynamicAttributes();
+		}
+
+		if (!value && autoSelectFirstItem && sources !== prevProps.sources) {
+			this.handleAutoSelectFirstItem();
 		}
 	}
 
@@ -96,6 +95,17 @@ export class SourceFieldset extends Component<Props, State> {
 		const {index, onChange, value} = this.props;
 
 		onChange(index, {...value, source}, callback);
+	};
+
+	handleAutoSelectFirstItem = () => {
+		const {sources} = this.props;
+		const keys = Object.keys(sources);
+
+		if (keys.length > 0) {
+			const source = sources[keys[0]];
+
+			this.handleSelect({name: '', value: source});
+		}
 	};
 
 	getSourceSelectComponents = memoize(() => ({

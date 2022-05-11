@@ -46,13 +46,17 @@ const getMetaClass = (): ThunkAction => async (dispatch: Dispatch) => {
 };
 
 const getUserData = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
-	const {contentCode, subjectUuid: classFqn} = getState().context;
+	const {context, dashboard} = getState();
+	const {contentCode, subjectUuid: classFqn} = context;
+	const {settings: {dashboardUUID}} = dashboard;
 	const payload = {
 		classFqn,
-		contentCode
+		contentCode,
+		dashboardUUID
 	};
 
 	const {
+		editable,
 		email,
 		groupUser: role,
 		hasPersonalDashboard,
@@ -60,6 +64,7 @@ const getUserData = (): ThunkAction => async (dispatch: Dispatch, getState: GetS
 	} = await api.instance.dashboardSettings.settings.getUserData(payload);
 
 	dispatch(setUserData({
+		editable,
 		email,
 		hasPersonalDashboard,
 		name,

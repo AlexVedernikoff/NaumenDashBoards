@@ -1,5 +1,7 @@
 'use strict';
+
 require('dotenv').config();
+
 const {development, dist, mode} = require('./define');
 const loaders = require('./loaders');
 const localIp = require('my-local-ip');

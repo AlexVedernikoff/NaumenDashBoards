@@ -17,6 +17,7 @@ export type Props = {
 	index: number,
 	isLast: boolean,
 	isMain: boolean,
+	isUserMode: boolean,
 	linkedSources: LinkedDataSourceMap,
 	onAdd: () => void,
 	onChange: (index: number, value: DataSet, callback?: Function) => void,

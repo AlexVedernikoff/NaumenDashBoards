@@ -26,6 +26,7 @@ type Temp = {
 };
 
 export type UserData = {
+	editable: boolean,
 	email: string,
 	hasPersonalDashboard: boolean,
 	name: string,

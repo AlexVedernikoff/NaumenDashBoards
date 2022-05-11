@@ -21,7 +21,7 @@ const reducer = (state: LinkedDataSourcesState = initialDataSourcesState, action
 				...state,
 				[action.payload.id]: {
 					...state[action.payload.id],
-					loading: true,
+					loading: false,
 					map: {
 						...action.payload.sources,
 						[action.payload.id]: {

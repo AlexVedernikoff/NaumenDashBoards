@@ -1,4 +1,5 @@
 // @flow
+import {addMethod} from 'yup';
 import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
 import {checkSourceForParent} from './helpers';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';

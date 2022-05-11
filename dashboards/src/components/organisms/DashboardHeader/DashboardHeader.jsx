@@ -107,11 +107,11 @@ export class DashboardHeader extends Component<Props> {
 	);
 
 	renderDisplayModeButton = () => {
-		const {isEditableContext, layoutMode, user} = this.props;
+		const {isEditableContext, isUserMode, layoutMode, user} = this.props;
 		const isMobileLayoutMode = layoutMode === LAYOUT_MODE.MOBILE;
 		const customTip = isMobileLayoutMode ? t('DashboardHeader::WebSwitch') : t('DashboardHeader::MobileSwitch');
 
-		if (user.role !== USER_ROLES.REGULAR && !isEditableContext) {
+		if (!isUserMode && user.role !== USER_ROLES.REGULAR && !isEditableContext) {
 			return (
 				<div className={styles.displayModeContainer}>
 					<IconButton

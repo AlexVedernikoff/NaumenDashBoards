@@ -8,6 +8,7 @@ import type {UserData} from 'store/context/types';
 export type ConnectedProps = {|
 	dashboards: DashboardsState,
 	isEditableContext: boolean,
+	isUserMode: boolean,
 	layoutMode: LayoutMode,
 	user: UserData,
 	widgets: WidgetMap

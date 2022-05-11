@@ -5,6 +5,7 @@ import type {Props as ComponentProps} from 'TableWidgetForm/components/DataSetSe
 import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {
+	isUserMode: boolean,
 	linkedSources: LinkedDataSourceMap,
 	sources: DataSourceMap
 };

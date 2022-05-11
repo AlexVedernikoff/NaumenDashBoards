@@ -435,6 +435,11 @@ class DashboardsService
 
         def descriptor = listdata.createListDescriptor(source.typeCode, source.code, userUUID)
 
+        def definition = listdata.defineDescriptorAsJson()
+                                 .filters()
+                                 .complex().hide()
+                                 .restriction().hide()
+
         Boolean anyOfDescriptorMetaClassesHasDynamicAttributes = descriptor.getFqns().any {
             checkForDynamicAttributes(it.toString())
         }
@@ -448,7 +453,7 @@ class DashboardsService
             title: source.title,
             children: [],
             hasDynamic: anyOfDescriptorMetaClassesHasDynamicAttributes,
-            descriptor: listdata.listDescriptorAsJson(descriptor))
+            descriptor: listdata.listDescriptorAsJson(descriptor, definition))
         return [totalSource]
     }
 

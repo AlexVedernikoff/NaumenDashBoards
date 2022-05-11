@@ -26,9 +26,10 @@ const isRestrictUserModeDashboard = createSelector(
 );
 
 const isEditableDashboardContext = createSelector(
+	getContext,
 	isUserModeDashboard,
 	isPersonalDashboard,
-	(isUserMode, isPersonal) => isUserMode || isPersonal
+	(context, isUserMode, isPersonal) => (isUserMode && context.user.editable) || isPersonal
 );
 
 const getDashboardDescription = createSelector(

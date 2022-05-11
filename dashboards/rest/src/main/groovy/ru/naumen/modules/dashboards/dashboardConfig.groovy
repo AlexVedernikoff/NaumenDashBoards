@@ -116,7 +116,7 @@ class DashboardConfigImpl extends BaseController implements DashboardConfig
     }
 
     @Override
-		boolean isDashboardMasterGroupEnabled()
+    boolean isDashboardMasterGroupEnabled()
     {
         return service.isDashboardMasterGroupEnabled()
     }

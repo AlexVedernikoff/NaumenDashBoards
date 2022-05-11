@@ -27,6 +27,10 @@ class UserDashboards extends Dashboards {
 	getDataSourceAttributes (params: DTOValue) {
 		return this.transport('dashboards', 'getDataSourceAttributesByGroupCode', ['requestContent'], params);
 	}
+
+	getDynamicAttributeGroups (descriptor: DTOValue) {
+		return this.transport('dashboards', 'getDynamicAttributeGroupsForUser', ['requestContent'], {descriptor});
+	}
 }
 
 export default class ExecUserAPI extends ExecAPI {
