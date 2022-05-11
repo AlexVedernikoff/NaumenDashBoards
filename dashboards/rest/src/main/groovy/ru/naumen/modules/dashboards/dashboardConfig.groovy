@@ -70,14 +70,16 @@ interface DashboardConfig
      * Копирует все данные из таблицы tbl_sys_keyvaluestorage
      * формирует словарь [namespace : [key : value]], и в формате json
      * прикрепляет к атрибуту компании с кодом dashboard
+     * @param allowedNamespaces - список разрешенных спейсов
      */
-    void copyAllKeyValueStorageToFile()
+    void copyAllKeyValueStorageToFile(Collection<String> allowedNamespaces)
 
     /**
      * Обновляет keyValue Storage данными из файла
      * @param file - файл в формате json. Например: [namespace : [key : value]]
+     * @param allowedNamespaces - список разрешенных спейсов
      */
-    void updateDataInKeyValueStorageFromFile(def file)
+    void updateDataInKeyValueStorageFromFile(def file, Collection<String> allowedNamespaces)
 
     /**
      * Обновляет дескрипторы виджетов у дашбордов в хранилище с применения uuid на применение code
@@ -138,15 +140,15 @@ class DashboardConfigImpl extends BaseController implements DashboardConfig
     }
 
     @Override
-    void copyAllKeyValueStorageToFile()
+    void copyAllKeyValueStorageToFile(Collection<String> allowedNamespaces = null)
     {
-        service.copyAllKeyValueStorageToFile()
+        service.copyAllKeyValueStorageToFile(allowedNamespaces)
     }
 
     @Override
-    void updateDataInKeyValueStorageFromFile(def file)
+    void updateDataInKeyValueStorageFromFile(def file, Collection<String> allowedNamespaces = null)
     {
-        service.updateDataInKeyValueStorageFromFile(file)
+        service.updateDataInKeyValueStorageFromFile(file, allowedNamespaces)
     }
 
     @Override
@@ -176,6 +178,11 @@ class DashboardConfigService
     private static final String FILE_TITLE = 'keyValue storage data.json'
     private static final String FILE_FORMAT = 'json'
     private static final String FILE_DESCRIPTION = 'Описание'
+
+    /**
+     * Необходимые неймспейсы, используемые приложением
+     */
+    private static final Collection<String> DASHBOARDS_REQUIRED_NAMESPACES = ["custom_groups","widgets","dashboards","sources","dashboardsSources"]
 
     private static final String GET_ALL_KEY_VALUE_STOGAGE_SQL = """
         SELECT
@@ -619,14 +626,21 @@ class DashboardConfigService
      * Копирует все данные из таблицы tbl_sys_keyvaluestorage
      * формирует словарь [namespace : [key : value]], и в формате json
      * прикрепляет к атрибуту компании с кодом dashboard
+     * @param allowedNamespaces - список разрешенных спейсов
      */
-    void copyAllKeyValueStorageToFile()
+    void copyAllKeyValueStorageToFile(Collection<String> allowedNamespaces = DASHBOARDS_REQUIRED_NAMESPACES)
     {
         def resultMap = [:]
         def resQuery = executeQuery(GET_ALL_KEY_VALUE_STOGAGE_SQL);
         for (def l : resQuery)
         {
             def namespace = l.getAt(0);
+
+            if (!allowedNamespaces.contains(namespace))
+            {
+                continue
+            }
+
             if (resultMap.get(namespace) == null)
             {
                 resultMap.put(namespace, [:]);
@@ -658,7 +672,7 @@ class DashboardConfigService
      * Обновляет keyValue Storage данными из файла
      * @param file - файл в формате json. Например: [namespace : [key : value]]
      */
-    void updateDataInKeyValueStorageFromFile(def file)
+    void updateDataInKeyValueStorageFromFile(def file, Collection<String> allowedNamespaces = DASHBOARDS_REQUIRED_NAMESPACES)
     {
         def slurper = new JsonSlurper()
         def contentForUpdate = slurper.parseText(new String(api.utils.readFileContent(file)));
@@ -667,6 +681,11 @@ class DashboardConfigService
         def counter = 1;
         for (def namespaceForUpdate : contentForUpdate.keySet())
         {
+            if (!allowedNamespaces.contains(namespaceForUpdate))
+            {
+                continue
+            }
+
             def mapInItteration = contentForUpdate.get(namespaceForUpdate);
             for (def keyForUpdate : mapInItteration.keySet())
             {
