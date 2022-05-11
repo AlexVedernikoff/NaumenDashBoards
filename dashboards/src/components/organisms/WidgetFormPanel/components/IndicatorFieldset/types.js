@@ -2,7 +2,7 @@
 import type {ComputedAttr, TableData} from 'src/store/widgets/data/types';
 import type {Indicator, SourceData} from 'store/widgetForms/types';
 import type {InjectedProps as ValuesProps} from 'components/organisms/WidgetForm/HOCs/withValues/types';
-import type {InjectedProps as HelpersProps} from 'containers/DiagramWidgetForm/HOCs/withHelpers/types';
+import type {InjectedProps as HelpersProps} from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers/types';
 import type {InjectedProps as TypeProps} from 'WidgetFormPanel/HOCs/withType/types';
 import type {InjectedProps as OpenFormProps} from 'containers/FilterForm/types';
 import type {OnSelectEvent} from 'components/types';

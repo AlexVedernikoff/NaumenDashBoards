@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'WidgetFormPanel/components/AttributeFieldset/types';
-import type {InjectedProps} from 'containers/DiagramWidgetForm/HOCs/withHelpers/types';
+import type {InjectedProps} from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers/types';
 import type {Parameter, SourceData} from 'store/widgetForms/types';
 
 export type Props = InjectedProps & {

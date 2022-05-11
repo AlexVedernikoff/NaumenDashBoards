@@ -2,15 +2,15 @@
 import type {Context} from './types';
 import {createContext} from 'react';
 
-const HELPERS_CONTEXT = createContext<Context>({
+const ATTRIBUTES_HELPERS_CONTEXT = createContext<Context>({
 	filterAttributeByMainDataSet: () => [],
 	filterAttributesByUsed: () => [],
 	filterBreakdownAttributeByMainDataSet: () => [],
 	getCommonAttributes: () => []
 });
 
-HELPERS_CONTEXT.displayName = 'HELPERS_CONTEXT';
+ATTRIBUTES_HELPERS_CONTEXT.displayName = 'ATTRIBUTES_HELPERS_CONTEXT';
 
 export {
-	HELPERS_CONTEXT
+	ATTRIBUTES_HELPERS_CONTEXT
 };

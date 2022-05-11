@@ -1,11 +1,11 @@
 // @flow
+import {ATTRIBUTES_HELPERS_CONTEXT} from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers';
 import type {Border} from 'store/widgets/data/types';
 import Checkbox from 'components/atoms/LegacyCheckbox';
 import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
-import {HELPERS_CONTEXT} from 'containers/DiagramWidgetForm/HOCs/withHelpers/constants';
 import type {Indicator} from 'store/widgetForms/types';
 import IndicatorFieldset from 'WidgetFormPanel/components/IndicatorFieldset';
 import Label from 'components/atoms/Label';
@@ -63,7 +63,7 @@ export class BorderFieldSet extends PureComponent<Props> {
 			const {dataKey, source} = dataSet;
 
 			return (
-				<HELPERS_CONTEXT.Provider value={this.getEmptyHelpers()}>
+				<ATTRIBUTES_HELPERS_CONTEXT.Provider value={this.getEmptyHelpers()}>
 					<IndicatorFieldset
 						className={styles.indicatorSelect}
 						dataKey={dataKey}
@@ -71,7 +71,7 @@ export class BorderFieldSet extends PureComponent<Props> {
 						source={source}
 						value={indicator ?? DEFAULT_INDICATOR}
 					/>
-				</HELPERS_CONTEXT.Provider>
+				</ATTRIBUTES_HELPERS_CONTEXT.Provider>
 			);
 		}
 
