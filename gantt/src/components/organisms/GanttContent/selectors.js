@@ -1,17 +1,19 @@
 // @flow
 import type {AppState} from 'store/types';
-import {switchProgressCheckbox, switchWorkRelationCheckbox} from 'store/App/actions';
+import {getVersionSettingsAll, switchProgressCheckbox, switchWorkRelationCheckbox} from 'store/App/actions';
 
 const props = (state: AppState) => {
-	const {progressCheckbox, workRelationCheckbox} = state.APP;
+	const {diagramKey, progressCheckbox, workRelationCheckbox} = state.APP;
 
 	return {
+		diagramKey,
 		progressCheckbox,
 		workRelationCheckbox
 	};
 };
 
 const functions = {
+	getVersionSettingsAll,
 	switchProgressCheckbox,
 	switchWorkRelationCheckbox
 };

@@ -16,17 +16,17 @@ export default class Api {
 	}
 
 	/**
-	* Получает настройки версиий
+	* Получает названия и ключи версий
 	* @param {string} diagramKey - ключ диаграммы
 	* @return {ThunkAction}
 	*/
-	async getGanttVersionsSettings (diagramKey: string) {
-		const url = `exec?func=modules.ganttSettings.getGanttVersionsSettings&params=%27${diagramKey}%27`;
+	async getGanttVersionTitlesAndKeys (diagramKey: string) {
+		const url = `exec?func=modules.ganttSettings.getGanttVersionTitlesAndKeys&params=%27${diagramKey}%27`;
 		const options = {
 			method: 'GET'
 		};
 
-		return this.jsApi.restCall(url, options);
+		return this.jsApi.restCallAsJson(url, options);
 	}
 
 	/**
@@ -36,8 +36,11 @@ export default class Api {
 	*/
 	async getGanttVersionsSettingsFromDiagramVersionKey (versionKey: string) {
 		const url = `exec?func=modules.ganttSettings.getGanttVersionsSettingsFromDiagramVersionKey&params=%27${versionKey}%27`;
+		const options = {
+			method: 'GET'
+		};
 
-		return this.jsApi.restCall(url);
+		return this.jsApi.restCallAsJson(url, options);
 	}
 
 	/**
@@ -256,14 +259,8 @@ export default class Api {
 	* @param {string} classFqn - метакласс работы
 	* @param {string} workUUID - индификатор работы
 	* @param {string} timezone - таймзона
-<<<<<<< HEAD
-	* @param {UserData} user - объект пользователя
-	*/
-	async addNewWork (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData) {
-=======
 	*/
 	async addNewWork (workData: WorkData, classFqn: string, workUUID: string, timezone: string) {
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 		const url = `exec-post?func=modules.ganttWorkHandler.addNewWork&params=requestContent,user`;
 		const body = {classFqn, timezone, workData, workUUID};
 		const options = {
@@ -293,14 +290,8 @@ export default class Api {
 	* @param {string} classFqn - метакласс работы
 	* @param {string} workUUID - индификатор работы
 	* @param {string} timezone - таймзона
-<<<<<<< HEAD
-	* @param {UserData} user - объект пользователя
-	*/
-	async editWorkData (workData: WorkData, classFqn: string, workUUID: string, timezone: string, user: UserData) {
-=======
 	*/
 	async editWorkData (workData: WorkData, classFqn: string, workUUID: string, timezone: string) {
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
 		const url = `exec-post?func=modules.ganttWorkHandler.editWorkData&params=requestContent,user`;
 		const body = {classFqn, timezone, workData, workUUID};
 		const options = {

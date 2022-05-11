@@ -35,6 +35,7 @@ export const initialAppState: AppState = {
 		name: '',
 		role: USER_ROLES.REGULAR
 	},
+	versions: [],
 	workAttributes: [],
 	workLink: 'link',
 	workProgresses: {},

@@ -6,6 +6,11 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SET_LIST_VERSIONS:
+			return {
+				...state,
+				versions: action.payload
+			};
 		case APP_EVENTS.SET_WORK_LINK:
 			return {
 				...state,

@@ -12,6 +12,7 @@ import {
 	getDataSourceAttributesByTypes,
 	getDataSources,
 	getDiagramData,
+	getGanttVersionsSettingsFromDiagramVersionKey,
 	getInitialParams,
 	getInitialSettings,
 	getUserData,
@@ -21,6 +22,7 @@ import {
 	postChangedWorkInterval,
 	postChangedWorkProgress,
 	postChangedWorkRelations,
+	getGanttVersionTitlesAndKeys,
 	saveData
 } from './context';
 
@@ -29,6 +31,7 @@ export {
 	deleteWorkDateRanges,
 	editWorkData,
 	getAttributeGroups,
+	getGanttVersionsSettingsFromDiagramVersionKey,
 	getWorkAttributes,
 	getContext,
 	getCurrentUser,
@@ -44,6 +47,7 @@ export {
 	postChangedWorkRelations,
 	postChangedWorkInterval,
 	postChangedWorkProgress,
+	getGanttVersionTitlesAndKeys,
 	saveData
 };
 

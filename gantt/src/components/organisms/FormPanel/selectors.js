@@ -1,9 +1,9 @@
 // @flow
 import type {AppState} from 'store/types';
-import {cancelSettings, changeScale, saveSettings, setCommonSettings, setRangeTime, setResourceSettings, switchWorkRelationCheckbox} from 'store/App/actions';
+import {cancelSettings, changeScale, getGanttData, getVersionSettings, getVersionSettingsAll, saveSettings, setCommonSettings, setRangeTime, setResourceSettings, switchWorkRelationCheckbox} from 'store/App/actions';
 
 const props = (state: AppState) => {
-	const {currentInterval, diagramKey, endDate, errorSettings, loadingSettings, progressCheckbox, resources, settings, sources, startDate, workProgresses, workRelationCheckbox} = state.APP;
+	const {currentInterval, diagramKey, endDate, errorSettings, loadingSettings, progressCheckbox, resources, settings, sources, startDate, versions, workProgresses, workRelationCheckbox} = state.APP;
 
 	return {
 		currentInterval,
@@ -16,6 +16,7 @@ const props = (state: AppState) => {
 		settings,
 		sources,
 		startDate,
+		versions,
 		workProgresses,
 		workRelationCheckbox
 	};
@@ -24,6 +25,9 @@ const props = (state: AppState) => {
 const functions = {
 	cancelSettings,
 	changeScale,
+	getGanttData,
+	getVersionSettings,
+	getVersionSettingsAll,
 	saveSettings,
 	setCommonSettings,
 	setRangeTime,
