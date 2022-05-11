@@ -22,6 +22,8 @@ const АctionBar = props => {
 	const [showModalConfirmation, setShowModalConfirmation] = useState(false);
 	const [showModalSave, setShowModalSave] = useState(false);
 	const [valueError, setValueError] = useState('');
+	const [showListVersions, setShowListVersions] = useState(false);
+
 	const panelButtons = [
 		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'}
 	];
@@ -234,10 +236,10 @@ const АctionBar = props => {
 					submitText="Сохранить"
 				>
 					<div className={styles.inputInnerwrapper}>
-						<label htmlFor="name">Название:</label> <input id="name" />
+						<label htmlFor="name">Название:</label> <TextInput label="Название" maxLength={30} onChange={changeEndDate} value={inputEndDate} />
 					</div>
 					<div className={styles.inputInnerwrapper}>
-						<label htmlFor="date">Дата и время:</label> <input id="date" />
+						<label htmlFor="date">Дата и время:</label> <TextInput label="Дата и время" maxLength={30} onChange={changeEndDate} placeholder="дд.мм.гггг, чч:мм:сс" value={inputEndDate} />
 					</div>
 				</Modal>
 			);
@@ -274,12 +276,58 @@ const АctionBar = props => {
 		return editMode ? <IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} onClick={handleToggle} tip="Настройка" /> : null;
 	};
 
+	const handleVersionButtonClick = () => {
+		const {diagramKey} = props;
+
+		setShowListVersions(true);
+		setActive(false);
+
+		props.getVersionSettingsAll(diagramKey);
+	};
+
+	const handleCurrentButtonClick  = () => {
+		setActive(true);
+		props.getGanttData();
+	};
+
+	const handleModalClose = () => {
+		setShowListVersions(!showListVersions);
+	};
+
+	const renderVersion = (version) => {
+		return (
+			<div key={version[0].diagramKey} onClick={() => props.getVersionSettings(version[0].diagramKey)}>{version[0].title}</div>
+		);
+	};
+
+	const renderVersions = () => props.versions.map(renderVersion);
+
+	const renderModalListVersions = () => {
+		if (showListVersions) {
+			return (
+				<Modal
+					className={styles.modal}
+					notice={true}
+					onClose={handleModalClose}
+					onSubmit={handleModalClose}
+					submitText="Закрыть"
+				>
+					<ul>
+						{renderVersions()}
+					</ul>
+				</Modal>
+			);
+		}
+
+		return null;
+	};
+
 	const renderPanel = () => {
 		return (
 			<div className={styles.container}>
 				<div className={styles.leftContainer}>
-					<Button className={`${styles.btn} ${styles.btnVersions} ${active ? styles.unActive : ''}`} onClick={() => setActive(false)}>Версии</Button>
-					<Button className={` ${styles.btn} ${styles.btnCurrent} ${!active ? styles.unActive : ''}`} onClick={() => setActive(true)}>Текущий</Button>
+					<Button className={`${styles.btn} ${styles.btnVersions} ${active ? styles.unActive : ''}`} onClick={handleVersionButtonClick}>Версии</Button>
+					<Button className={` ${styles.btn} ${styles.btnCurrent} ${!active ? styles.unActive : ''}`} onClick={handleCurrentButtonClick } >Текущий</Button>
 				</div>
 				<div className={styles.container}>
 					<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_OUT} onClick={zoomIn} tip="Уменьшить масштаб" />
@@ -303,6 +351,7 @@ const АctionBar = props => {
 			{renderModalConfirmation()}
 			{renderModalSave()}
 			{renderModalSecondLevel()}
+			{renderModalListVersions()}
 		</div>
 	);
 };
