@@ -3,12 +3,13 @@ import AxisTooltip from 'components/molecules/RechartTooltip';
 import {Bar, CartesianGrid, ComposedChart, LabelList, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import BarLabel from 'components/molecules/BarLabel';
 import {COMBO_TYPES} from 'store/widgets/data/constants';
+import EmptyWidget from 'components/molecules/EmptyWidget';
 import type {Props, State} from './types';
 import ReChartWidget from 'components/molecules/ReChartWidget';
 import React, {PureComponent} from 'react';
 import RechartLegend from 'components/molecules/RechartLegend';
 import t from 'localization';
-import {XCategoryLabel} from 'components/molecules/AxisLabels';
+import {XCategoryLabel, YTitleLabel} from 'components/molecules/AxisLabels';
 
 export class ComboWidget extends PureComponent<Props, State> {
 	state = {
@@ -128,26 +129,39 @@ export class ComboWidget extends PureComponent<Props, State> {
 		return null;
 	}
 
-	renderComboChart = () => {
-		const {options: {data, series, yaxis}} = this.state;
-		const margin = {bottom: 5, left: 30, right: 30, top: 5};
+	renderChart = () => {
+		const {options: {data}} = this.state;
 
 		if (data) {
 			return (
 				<ResponsiveContainer height="100%" width="100%">
-					<ComposedChart data={data} margin={margin} >
-						<Tooltip content={this.renderTooltipContent} />
-						<CartesianGrid strokeDasharray="3 3" />
-						{this.renderXAxis()}
-						{yaxis.map(this.renderYAxis)}
-						{series.map(this.renderSeries)}
-						{this.renderLegend()}
-					</ComposedChart>
+					{this.renderComboChart()}
 				</ResponsiveContainer>
 			);
 		}
 
 		return null;
+	};
+
+	renderComboChart = () => {
+		const {widget} = this.props;
+		const {options: {data, series, yaxis}} = this.state;
+		const margin = {bottom: 5, left: 30, right: 30, top: 5};
+
+		if (data.length !== 0) {
+			return (
+				<ComposedChart data={data} margin={margin} >
+					<Tooltip content={this.renderTooltipContent} />
+					<CartesianGrid strokeDasharray="3 3" />
+					{this.renderXAxis()}
+					{yaxis.map(this.renderYAxis)}
+					{series.map(this.renderSeries)}
+					{this.renderLegend()}
+				</ComposedChart>
+			);
+		}
+
+		return <EmptyWidget widget={widget} />;
 	};
 
 	renderDataLabels = (dataKey: string, id: string, isBar: boolean) => {
@@ -248,7 +262,9 @@ export class ComboWidget extends PureComponent<Props, State> {
 		const {axisName: value, fontFamily, fontSize, height, show, showName} = xaxis;
 
 		if (show) {
-			const labelStyle = showName ? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value} : null;
+			const labelStyle = showName
+				? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
+				: null;
 
 			return (
 				<XAxis
@@ -289,14 +305,19 @@ export class ComboWidget extends PureComponent<Props, State> {
 		const {axisName: value, color, dataKey, fontFamily, fontSize, max, min, show, showName, width} = yaxis;
 
 		if (show) {
-			let labelStyle = null;
 			const orientation = idx === 0 ? 'left' : 'right';
-
-			if (showName) {
-				labelStyle = idx === 0
-					? {angle: -90, fontFamily, fontSize, offset: fontSize, position: 'insideLeft', value}
-					: {angle: 90, fontFamily, fontSize, offset: fontSize, position: 'insideRight', value};
-			}
+			const label = showName
+				? (
+					<YTitleLabel
+						color={color}
+						fontFamily={fontFamily}
+						fontSize={fontSize}
+						offset={fontSize}
+						orientation={orientation}
+						value={value}
+					/>
+				)
+				: null;
 
 			return (
 				<YAxis
@@ -305,7 +326,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 					fontSize={fontSize}
 					interval={0}
 					key={dataKey}
-					label={labelStyle}
+					label={label}
 					orientation={orientation}
 					stroke={color}
 					tickFormatter={formatters.indicator(dataKey)}
@@ -324,7 +345,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 
 		return (
 			<ReChartWidget data={data} updateOptions={updateOptions} widget={widget}>
-				{this.renderComboChart()}
+				{this.renderChart()}
 			</ReChartWidget>
 		);
 	}

@@ -1,12 +1,13 @@
 // @flow
 import AxisTooltip from 'components/molecules/RechartTooltip';
 import {CartesianGrid, LabelList, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
+import EmptyWidget from 'components/molecules/EmptyWidget';
 import type {Props, State} from './types';
 import ReChartWidget from 'components/molecules/ReChartWidget';
 import React, {PureComponent} from 'react';
 import RechartLegend from 'components/molecules/RechartLegend';
 import t from 'localization';
-import {XCategoryLabel} from 'components/molecules/AxisLabels';
+import {XCategoryLabel, YTitleLabel} from 'components/molecules/AxisLabels';
 
 export class LinesWidget extends PureComponent<Props, State> {
 	state = {
@@ -52,6 +53,20 @@ export class LinesWidget extends PureComponent<Props, State> {
 				value: formatters.tooltip(value)
 			}
 		});
+	};
+
+	renderChart = () => {
+		const {options: {data}} = this.state;
+
+		if (data) {
+			return (
+				<ResponsiveContainer height="100%" width="100%">
+					{this.renderLinesChart()}
+				</ResponsiveContainer>
+			);
+		}
+
+		return null;
 	};
 
 	renderDataLabels = (key: string) => {
@@ -122,26 +137,25 @@ export class LinesWidget extends PureComponent<Props, State> {
 	};
 
 	renderLinesChart = () => {
+		const {widget} = this.props;
 		const {options} = this.state;
 		const {data, series, stackOffset} = options;
 		const margin = {bottom: 5, left: 30, right: 30, top: 5};
 
-		if (data) {
+		if (data.length !== 0) {
 			return (
-				<ResponsiveContainer height="100%" width="100%">
-					<LineChart barGap={1} data={data} layout="horizontal" margin={margin} stackOffset={stackOffset}>
-						<Tooltip content={this.renderTooltipContent} />
-						<CartesianGrid strokeDasharray="3 3" vertical={false} />
-						{this.renderXAxis()}
-						{this.renderYAxis()}
-						{series.map(this.renderLine)}
-						{this.renderLegend()}
-					</LineChart>
-				</ResponsiveContainer>
+				<LineChart barGap={1} data={data} layout="horizontal" margin={margin} stackOffset={stackOffset}>
+					<Tooltip content={this.renderTooltipContent} />
+					<CartesianGrid strokeDasharray="3 3" vertical={false} />
+					{this.renderXAxis()}
+					{this.renderYAxis()}
+					{series.map(this.renderLine)}
+					{this.renderLegend()}
+				</LineChart>
 			);
 		}
 
-		return null;
+		return <EmptyWidget widget={widget} />;
 	};
 
 	renderRechartLegend = () => {
@@ -174,7 +188,9 @@ export class LinesWidget extends PureComponent<Props, State> {
 		const {axisName: value, fontFamily, fontSize, height, show, showName} = xaxis;
 
 		if (show) {
-			const labelStyle = showName ? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value} : null;
+			const labelStyle = showName
+				? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
+				: null;
 
 			return (
 				<XAxis
@@ -214,7 +230,9 @@ export class LinesWidget extends PureComponent<Props, State> {
 		const {axisName: value, fontFamily, fontSize, show, showName, width} = yaxis;
 
 		if (show) {
-			const labelStyle = showName ? {angle: -90, fontFamily, fontSize, offset: 5, position: 'left', value} : null;
+			const label = showName
+				? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={value} />
+				: null;
 
 			return (
 				<YAxis
@@ -222,7 +240,7 @@ export class LinesWidget extends PureComponent<Props, State> {
 					fontFamily={fontFamily}
 					fontSize={fontSize}
 					interval={0}
-					label={labelStyle}
+					label={label}
 					tickFormatter={formatters.indicator}
 					type="number"
 					width={width}
@@ -239,7 +257,7 @@ export class LinesWidget extends PureComponent<Props, State> {
 
 		return (
 			<ReChartWidget data={data} updateOptions={updateOptions} widget={widget}>
-				{this.renderLinesChart()}
+				{this.renderChart()}
 			</ReChartWidget>
 		);
 	}

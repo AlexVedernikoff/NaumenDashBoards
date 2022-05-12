@@ -1,5 +1,6 @@
 ﻿,"ru","en","de","pl"
 "LoadingContent::Loading","Загрузка...","Loading...","Wird geladen...","Ładowanie..."
+"LoadingContent::Empty","Данные отсутствуют","No data available","Keine Daten","Brak danych"
 "Startup::Loading","Загрузка...","Loading...","Wird geladen...","Ładowanie..."
 "store::buildData::DefaultRecordBuildDataError","По указанным данным невозможно построить таблицу (недостаточно данных). Измените, пожалуйста, параметры.","It is impossible to make a table from the specified data (not enough data). Please change the parameters.","Es ist unmöglich, aus den angegebenen Daten eine Tabelle zu zeichnen (unzureichende Daten). Bitte ändern Sie die Parameter.","Nie można utworzyć tabeli z podanych danych (za mało danych). Proszę zmienić parametry."
 "store::buildData::DefaultRecordBuildDiagramError","По указанным данным невозможно нарисовать диаграмму (недостаточно данных). Измените, пожалуйста, параметры.","It is impossible to make a diagram from the specified data (not enough data). Please change the parameters.","Es ist unmöglich, aus den angegebenen Daten ein Diagramm zu zeichnen (unzureichende Daten). Bitte ändern Sie die Parameter.","Nie można utworzyć diagramu z podanych danych (za mało danych). Proszę zmienić parametry."
@@ -22,6 +23,8 @@
 "DashboardHeader::SaveYourself","Сохранить себе","Keep it",,
 "DashboardHeader::Personal","Личный","Personal",,
 "DashboardHeader::Common","Общий","Shared",,
+"DashboardHeader::CollapseTopPanel","Свернуть верхнюю панель","Collapse the top panel",,
+"DashboardHeader::ExpandTopPanel","Развернуть верхнюю панель","Expand the top panel",,
 "ExportByEmailButton::SendToEmail","Отправить на почту","Send to mail",,
 "Chart::CountTotals","Итого: {countTotals}","Total: {countTotals}",,
 "Kebab::Menu","Меню","Menu",,
@@ -305,7 +308,7 @@
 "WidgetsGrid::ContextMenuCreateText","Добавить текст","Add text",,
 "WidgetsGrid::EmptyGridPart1","Отсутствуют данные для отображения. Чтобы создать виджет, нажмите","There is no data to display. To create a widget, tap",,
 "WidgetsGrid::EmptyGridAction","здесь","there"," ",
-"WidgetsGrid::EmptyGridPart2","или кликнете правой кнопкой мыши на свободное пространство","or click right mouse button on empty space",,
+"WidgetsGrid::EmptyGridPart2","или кликните правой кнопкой мыши на свободное пространство","or click right mouse button on empty space",,
 "WidgetsGrid::EmptyMobileMessage","Отсутствуют данные для отображения. Для редактирования дашборда необходимо открыть полную версию приложения на компьютере","There is no data to display. To edit the dashboard you need to open the desktop version",,
 "WidgetsGrid::ConfirmCloseWindow","В случае закрытия окна все изменения на данном дашборде будут сброшены. Перейти на другую вкладку?","If you close the window, all changes on this dashboard will be reset. Switch to another tab?",,
 "WidgetsGrid::Loading","Загрузка...","Loading...","Wird geladen...","Ładowanie..."
