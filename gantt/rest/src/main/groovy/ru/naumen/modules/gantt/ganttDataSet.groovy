@@ -137,7 +137,8 @@ class GanttDataSetService
             }
             data.tasks = data.tasks.findResults{
                 def startAndEndDateExist = it.start_date && it.end_date
-                if(!startAndEndDateExist && it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
+                if (!startAndEndDateExist &&
+                    it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
                 {
                     return null
                 }
@@ -152,7 +153,7 @@ class GanttDataSetService
 
     /**
      * Метод получения данных для построения версий диаграммы Ганта
-     * @param versionKey - ключ версии диаграммы
+     * @param versionKey - ключ диаграммы версии
      * @param user - пользователь
      * @param timezone - таймзона
      * @return данные для построения диаграммы Ганта
