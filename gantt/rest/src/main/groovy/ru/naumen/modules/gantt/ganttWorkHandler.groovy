@@ -91,11 +91,7 @@ interface GanttWorkHandlerController
      * Метод редактирования диапазона дат работ диаграмм версий
      * @param requestContent - тело запроса
      * @param user - пользователь
-<<<<<<< HEAD
      * @param versionKey - ключ диаграммы версий
-=======
-     * @param versionKey - ключ версии диаграммы
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      * @return результат обновления
      */
     String editWorkDateRangesFromVersion(Map<String, Object> requestContent,
@@ -105,11 +101,7 @@ interface GanttWorkHandlerController
      * Метод добавления новой работы в диаграмму версий
      * @param requestContent - тело запроса
      * @param user - пользователь
-<<<<<<< HEAD
      * @param versionKey - ключ диаграммы версий
-=======
-     * @param versionKey - ключ версии диаграммы
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      * @return результат добавления
      */
     String addNewWorkForVersion(Map<String, String> requestContent,
@@ -120,11 +112,7 @@ interface GanttWorkHandlerController
      * Метод редактирования работы в диаграмме версий
      * @param requestContent - тело запроса
      * @param user - пользователь
-<<<<<<< HEAD
      * @param versionKey - ключ диаграммы версий
-=======
-     * @param versionKey - ключ версии диаграммы
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      * @return результат добавления
      */
     String editWorkDataFromVersion(Map<String, String> requestContent,
@@ -134,11 +122,7 @@ interface GanttWorkHandlerController
     /**
      * Метод редактирования прогресса работы в диаграмме версий
      * @param requestContent - тело запроса
-<<<<<<< HEAD
      * @param versionKey - ключ диаграммы версий
-=======
-     * @param versionKey - ключ версии диаграммы
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      * @return результат обновления
      */
     String changeWorkProgressFromVersion(Map<String, String> requestContent, String versionKey)
@@ -146,11 +130,7 @@ interface GanttWorkHandlerController
     /**
      * Метод удаления задач из диаграммы версий
      * @param workUUID - UUID редактируемой работы
-<<<<<<< HEAD
      * @param versionKey - ключ диаграммы версий
-=======
-     * @param versionKey - ключ версии диаграммы
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      */
     String deleteWorkFromVersion(String workUUID, String versionKey)
 
@@ -535,11 +515,7 @@ class GanttWorkHandlerService
      * Метод редактирования диапазона дат работ диаграмм версий
      * @param requestContent - тело запроса
      * @param user - пользователь
-<<<<<<< HEAD
      * @param versionKey - ключ диаграммы версий
-=======
-     * @param versionKey - ключ версии диаграммы
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      * @return результат обновления
      */
     EditWorkDateRangesResponse editWorkDateRangesFromVersion(EditWorkDateRangesRequest request,
@@ -601,50 +577,31 @@ class GanttWorkHandlerService
      * Метод добавления новой работы в диаграмму версий
      * @param request - тело запроса
      * @param user - пользователь
-<<<<<<< HEAD
-     * @param versionKey - ключ диаграммы версий
-=======
      * @param versionKey - ключ версии диаграммы
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      */
     void addNewWorkForVersion(AddNewWorkRequest request,
                               IUUIDIdentifiable user, String versionKey)
     {
-<<<<<<< HEAD
-        Map<String, Object> preparedWorkData =
-            prepareWorkDataFromVersion(request, user, versionKey)
-        utils.create(request.classFqn, preparedWorkData)
-=======
         GanttSettingsService service = GanttSettingsService.instance
         GanttVersionsSettingsClass settingsVersion =
             service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
 
         Work work = new Work()
-        work.attributesData.put('request', request)
-        work.attributesData.put('user', user)
+        work.attributesData.request = request
+        work.attributesData.user = user
 
         settingsVersion.works.add(work)
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
     }
 
     /**
      * Метод редактирования работы в диаграмме версий
      * @param request - тело запроса
      * @param user - пользователь
-<<<<<<< HEAD
-     * @param versionKey - ключ диаграммы версий
-=======
      * @param versionKey - ключ версии диаграммы
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
      */
     void editWorkDataFromVersion(EditWorkDataRequest request,
                                  IUUIDIdentifiable user, String versionKey)
     {
-<<<<<<< HEAD
-        Map<String, Object> preparedWorkData =
-            prepareWorkDataFromVersion(request, user, versionKey)
-        utils.edit(request.workUUID, preparedWorkData)
-=======
         GanttSettingsService service = GanttSettingsService.instance
         GanttVersionsSettingsClass settingsVersion =
             service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
@@ -653,7 +610,6 @@ class GanttWorkHandlerService
         settingsVersion.works.find {
             utils.edit(request.workUUID, preparedWorkData)
         }
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
     }
 
     /**
@@ -689,20 +645,6 @@ class GanttWorkHandlerService
     /**
      * Метод удаления задач из диаграммы версий
      * @param workUUID - UUID редактируемой работы
-<<<<<<< HEAD
-     * @param versionKey - ключ диаграммы версий
-     */
-    String deleteWorkFromVersion(String workUUID, String versionKey)
-    {
-        try
-        {
-            utils.delete(utils.get(workUUID))
-            return ("Deleting successful!")
-        }
-        catch (Exception e)
-        {
-            return ("errorMessage: " + e.message)
-=======
      * @param versionKey - ключ версии диаграммы
      */
     String deleteWorkFromVersion(String workUUID, String versionKey)
@@ -720,7 +662,6 @@ class GanttWorkHandlerService
             {
                 return ("errorMessage: " + e.message)
             }
->>>>>>> 7511963558d2926d8273e38a42a28301906e94b5
         }
     }
 
