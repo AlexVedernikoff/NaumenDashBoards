@@ -8,7 +8,7 @@ const RANGES_POSITION_OPTIONS: Array<{title: LangType, value: $Keys<typeof RANGE
 		value: RANGES_POSITION.CURVE
 	},
 	{
-		title: 'BordersRangesStyleBox::OnArc',
+		title: 'BordersRangesStyleBox::InLegend',
 		value: RANGES_POSITION.LEGEND
 	}
 ];

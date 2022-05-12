@@ -162,7 +162,9 @@ type ExportByEmailButton = 'ExportByEmailButton::SendToEmail';
 type DashboardPanel = 'DashboardPanel::LoadingContent';
 
 // components/organisms/DiagramWidget/components/LoadingContent
-type LoadingContent = 'LoadingContent::Loading';
+type LoadingContent =
+ | 'LoadingContent::Loading'
+ | 'LoadingContent::Empty';
 
 // components/organisms/ExportByEmailForm/components/FormFooter
 type ExportByEmailFormFormFooter =

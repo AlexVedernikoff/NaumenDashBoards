@@ -1,5 +1,6 @@
 {
 	"LoadingContent::Loading": "Loading...",
+	"LoadingContent::Empty": "No data available",
 	"Startup::Loading": "Loading...",
 	"store::buildData::DefaultRecordBuildDataError": "It is impossible to make a table from the specified data (not enough data). Please change the parameters.",
 	"store::buildData::DefaultRecordBuildDiagramError": "It is impossible to make a diagram from the specified data (not enough data). Please change the parameters.",
@@ -22,6 +23,8 @@
 	"DashboardHeader::SaveYourself": "Keep it",
 	"DashboardHeader::Personal": "Personal",
 	"DashboardHeader::Common": "Shared",
+	"DashboardHeader::CollapseTopPanel": "Collapse the top panel",
+	"DashboardHeader::ExpandTopPanel": "Expand the top panel",
 	"ExportByEmailButton::SendToEmail": "Send to mail",
 	"Chart::CountTotals": "Total: {countTotals}",
 	"Kebab::Menu": "Menu",

@@ -2,12 +2,13 @@
 import AxisTooltip from 'components/molecules/RechartTooltip';
 import {Bar, BarChart, CartesianGrid, Cell, LabelList, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import BarLabel from 'components/molecules/BarLabel';
+import EmptyWidget from 'components/molecules/EmptyWidget';
 import type {Props, State} from './types';
 import ReChartWidget from 'components/molecules/ReChartWidget';
 import React, {PureComponent} from 'react';
 import RechartLegend from 'components/molecules/RechartLegend';
 import t from 'localization';
-import {YCategoryLabel} from 'components/molecules/AxisLabels';
+import {YCategoryLabel, YTitleLabel} from 'components/molecules/AxisLabels';
 
 export class BarWidget extends PureComponent<Props, State> {
 	state = {
@@ -89,21 +90,34 @@ export class BarWidget extends PureComponent<Props, State> {
 	};
 
 	renderBarChart = () => {
+		const {widget} = this.props;
 		const {options} = this.state;
 		const {data, series, stackOffset} = options;
 		const margin = {bottom: 5, left: 30, right: 30, top: 5};
 
+		if (data.length !== 0) {
+			return (
+				<BarChart barGap={1} data={data} layout="vertical" margin={margin} stackOffset={stackOffset}>
+					<Tooltip content={this.renderTooltipContent} />
+					<CartesianGrid horizontal={false} strokeDasharray="3 3" />
+					{this.renderXAxis()}
+					{this.renderYAxis()}
+					{series.map(this.renderBar)}
+					{this.renderLegend()}
+				</BarChart>
+			);
+		}
+
+		return <EmptyWidget widget={widget} />;
+	};
+
+	renderChart = () => {
+		const {options: {data}} = this.state;
+
 		if (data) {
 			return (
 				<ResponsiveContainer height="100%" width="100%">
-					<BarChart barGap={1} data={data} layout="vertical" margin={margin} stackOffset={stackOffset}>
-						<Tooltip content={this.renderTooltipContent} />
-						<CartesianGrid horizontal={false} strokeDasharray="3 3" />
-						{this.renderXAxis()}
-						{this.renderYAxis()}
-						{series.map(this.renderBar)}
-						{this.renderLegend()}
-					</BarChart>
+					{this.renderBarChart()}
 				</ResponsiveContainer>
 			);
 		}
@@ -186,7 +200,9 @@ export class BarWidget extends PureComponent<Props, State> {
 		const {axisName: value, fontFamily, fontSize, show, showName} = xaxis;
 
 		if (show) {
-			const labelStyle = showName ? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value} : null;
+			const labelStyle = showName
+				? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
+				: null;
 
 			return (
 				<XAxis
@@ -208,13 +224,15 @@ export class BarWidget extends PureComponent<Props, State> {
 		const {axisName, fontFamily, fontSize, show, showName, width} = yaxis;
 
 		if (show) {
-			const labelStyle = showName ? {angle: -90, fontFamily, fontSize, offset: 5, position: 'left', value: axisName} : null;
+			const label = showName
+				? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={axisName} />
+				: null;
 
 			return (
 				<YAxis
 					dataKey="name"
 					interval={0}
-					label={labelStyle}
+					label={label}
 					tick={this.renderYAxisTick()}
 					tickFormatter={formatters.parameter}
 					type="category"
@@ -246,7 +264,7 @@ export class BarWidget extends PureComponent<Props, State> {
 
 		return (
 			<ReChartWidget data={data} updateOptions={updateOptions} widget={widget}>
-				{this.renderBarChart()}
+				{this.renderChart()}
 			</ReChartWidget>
 		);
 	}

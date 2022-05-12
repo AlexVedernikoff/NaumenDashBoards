@@ -1,6 +1,7 @@
 // @flow
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from 'recharts';
 import {darkenColor} from './helpers.js';
+import EmptyWidget from 'components/molecules/EmptyWidget';
 import PieLabel from './components/PieLabel';
 import type {Props, State} from './types';
 import ReChartWidget from 'components/molecules/ReChartWidget';
@@ -37,6 +38,20 @@ export class PieWidget extends PureComponent<Props, State> {
 		} else if (params.mode === 'success') {
 			drillDown(widget, params.index, params.mixin);
 		}
+	};
+
+	renderChart = () => {
+		const {options: {data}} = this.state;
+
+		if (data) {
+			return (
+				<ResponsiveContainer height="100%" width="100%">
+					{this.renderPieChart()}
+				</ResponsiveContainer>
+			);
+		}
+
+		return null;
 	};
 
 	renderLabel = props => {
@@ -94,24 +109,23 @@ export class PieWidget extends PureComponent<Props, State> {
 	);
 
 	renderPieChart = () => {
+		const {widget} = this.props;
 		const {options: {data, formatters}, tooltipColor} = this.state;
 		const formatter = (value, name, props) => [formatters.label(value), formatters.category(name)];
 		const contentStyle = {backgroundColor: tooltipColor, padding: '5px'};
 		const itemStyle = {color: '#FFFFFF'};
 
-		if (data) {
+		if (data.length !== 0) {
 			return (
-				<ResponsiveContainer height="100%" width="100%">
-					<PieChart>
-						<Tooltip contentStyle={contentStyle} formatter={formatter} itemStyle={itemStyle} />
-						{this.renderPie(data)}
-						{this.renderLegend()}
-					</PieChart>
-				</ResponsiveContainer>
+				<PieChart>
+					<Tooltip contentStyle={contentStyle} formatter={formatter} itemStyle={itemStyle} />
+					{this.renderPie(data)}
+					{this.renderLegend()}
+				</PieChart>
 			);
 		}
 
-		return null;
+		return <EmptyWidget widget={widget} />;
 	};
 
 	renderRechartLegend = () => {
@@ -131,7 +145,7 @@ export class PieWidget extends PureComponent<Props, State> {
 
 		return (
 			<ReChartWidget data={data} updateOptions={updateOptions} widget={widget}>
-				{this.renderPieChart()}
+				{this.renderChart()}
 			</ReChartWidget>
 		);
 	}

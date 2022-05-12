@@ -41,11 +41,11 @@ export class ReChartWidget extends PureComponent<Props> {
 
 		if (showTotalAmount) {
 			const style = {fontFamily, fontSize, height: fontSize};
-			const {countTotals = 0} = data ?? {};
+			const {countTotals} = data ?? {};
 
 			return (
 				<div className={styles.total} style={style}>
-					<T countTotals={countTotals} text="Chart::CountTotals" />
+					<T countTotals={countTotals ?? 0} text="Chart::CountTotals" />
 				</div>
 			);
 		}

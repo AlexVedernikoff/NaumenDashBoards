@@ -1,5 +1,6 @@
 {
 	"LoadingContent::Loading": "Ładowanie...",
+	"LoadingContent::Empty": "Brak danych",
 	"Startup::Loading": "Ładowanie...",
 	"store::buildData::DefaultRecordBuildDataError": "Nie można utworzyć tabeli z podanych danych (za mało danych). Proszę zmienić parametry.",
 	"store::buildData::DefaultRecordBuildDiagramError": "Nie można utworzyć diagramu z podanych danych (za mało danych). Proszę zmienić parametry.",
@@ -22,6 +23,8 @@
 	"DashboardHeader::SaveYourself": "",
 	"DashboardHeader::Personal": "",
 	"DashboardHeader::Common": "",
+	"DashboardHeader::CollapseTopPanel": "",
+	"DashboardHeader::ExpandTopPanel": "",
 	"ExportByEmailButton::SendToEmail": "",
 	"Chart::CountTotals": "",
 	"Kebab::Menu": "",

@@ -36,3 +36,18 @@ export type CategoryLabelProps = {
 export type CategoryLabelState = {
 	trimString: string,
 };
+
+export type YTitleLabelProps = {
+	color: string,
+	fontFamily: string,
+	fontSize: number | string,
+	offset: number,
+	orientation: 'left' | 'right',
+	value: string,
+	viewBox: {
+		height: number,
+		width: number,
+		x: number,
+		y: number,
+	}
+};

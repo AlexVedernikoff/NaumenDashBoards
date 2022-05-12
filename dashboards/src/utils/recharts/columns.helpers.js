@@ -70,7 +70,15 @@ const getXAxisCategory = (
 		}
 	}
 
-	const {height, labels: multilineLabels, mode} = calculateCategoryHeight(labels, settings, maxHeight, width);
+	const {height: categoryHeight, labels: multilineLabels, mode} = calculateCategoryHeight(labels, settings, maxHeight, width);
+	let height = categoryHeight;
+
+	if (settings.showName) {
+		const labels = widget.data.map(dataSet => dataSet.xAxisName);
+		const labelSize = calculateStringsSize([labels], settings.fontFamily, settings.fontSize)[0];
+
+		height += labelSize.height;
+	}
 
 	return {...settings, axisName, height, mode, multilineLabels, width};
 };

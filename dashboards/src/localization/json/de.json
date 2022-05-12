@@ -1,5 +1,6 @@
 {
 	"LoadingContent::Loading": "Wird geladen...",
+	"LoadingContent::Empty": "Keine Daten",
 	"Startup::Loading": "Wird geladen...",
 	"store::buildData::DefaultRecordBuildDataError": "Es ist unmöglich, aus den angegebenen Daten eine Tabelle zu zeichnen (unzureichende Daten). Bitte ändern Sie die Parameter.",
 	"store::buildData::DefaultRecordBuildDiagramError": "Es ist unmöglich, aus den angegebenen Daten ein Diagramm zu zeichnen (unzureichende Daten). Bitte ändern Sie die Parameter.",
@@ -22,6 +23,8 @@
 	"DashboardHeader::SaveYourself": "",
 	"DashboardHeader::Personal": "",
 	"DashboardHeader::Common": "",
+	"DashboardHeader::CollapseTopPanel": "",
+	"DashboardHeader::ExpandTopPanel": "",
 	"ExportByEmailButton::SendToEmail": "",
 	"Chart::CountTotals": "",
 	"Kebab::Menu": "",
