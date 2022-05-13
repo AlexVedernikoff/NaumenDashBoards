@@ -95,6 +95,12 @@ const exportSheet = async (name: string, data: TableBuildData) => {
 		tableName = `${tableName.substring(0, 27)}...`;
 	}
 
+	const badChars = /[\][*?/\\]/ig;
+
+	if (badChars.test(tableName)) {
+		tableName = tableName.replace(badChars, '_');
+	}
+
 	XLSX.utils.book_append_sheet(workbook, sheet, tableName);
 
 	const file = XLSX.write(workbook, {bookType: 'xlsx', type: 'binary'});
