@@ -1,6 +1,7 @@
 // @flow
 import Cell from 'Table/components/Cell';
 import type {CellConfigProps, ColumnsWidth, OnClickCellProps, ValueProps} from 'components/organisms/Table/types';
+import cn from 'classnames';
 import type {Column, ColumnType, ParameterColumn} from 'store/widgets/buildData/types';
 import {COLUMN_TYPES, IGNORE_TABLE_DATA_LIMITS_SETTINGS} from 'store/widgets/buildData/constants';
 import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
@@ -376,9 +377,12 @@ export class TableWidget extends PureComponent<Props, State> {
 
 	renderLinkValue = (props: ValueProps) => {
 		const {fontColor: color, value} = props;
+		const className = cn(styles.link, {
+			[styles.empty]: value === '\u00A0'
+		});
 
 		return (
-			<span className={styles.link} style={{color}}>
+			<span className={className} style={{color}}>
 				{value}
 			</span>
 		);
