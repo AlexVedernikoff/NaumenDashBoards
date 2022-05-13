@@ -4473,12 +4473,20 @@ class DashboardDataSetService
         {
             def breakdownAttributeValue = attributes.find { it.type == ColumnType.BREAKDOWN }
             Collection <Column> parameterColumns = attributes.findResults { attrValue ->
-                if (attrValue.type == ColumnType.PARAMETER)
+							def attributeSecondLevel = attrValue.attribute?.ref
+							def accessorAndAtribut
+							if(attributeSecondLevel != null){
+								accessorAndAtribut = attrValue.name +" (" + attributeSecondLevel?.title + ")"
+							}
+							else{
+								accessorAndAtribut = attrValue.name
+							}
+							if (attrValue.type == ColumnType.PARAMETER)
                 {
                     return new Column(
                         footer:      "",
-                        accessor:    attrValue.name,
-                        header:      attrValue.name,
+                        accessor:    accessorAndAtribut,
+                        header:      accessorAndAtribut,
                         attribute:   attrValue.attribute,
                         type:        attrValue.type,
                         group:       attrValue.group
@@ -4488,8 +4496,8 @@ class DashboardDataSetService
                 {
                     return new AggregationColumn(
                         footer:      "",
-                        accessor:    attrValue.name,
-                        header:      attrValue.name,
+                        accessor:    accessorAndAtribut,
+                        header:      accessorAndAtribut,
                         attribute:   attrValue.attribute,
                         type:        attrValue.type,
                         aggregation: attrValue.aggregation,
@@ -4500,10 +4508,18 @@ class DashboardDataSetService
             return parameterColumns
         }
         return attributes.collect { attrValue ->
+					def attributeSecondLevel = attrValue.attribute?.ref
+					def accessorAndAtribut
+					if(attributeSecondLevel != null){
+						accessorAndAtribut = attrValue.name +" (" + attributeSecondLevel?.title + ")"
+					}
+					else{
+						accessorAndAtribut = attrValue.name
+					}
             return new Column(
                 footer: "",
-                accessor: attrValue.name,
-                header: attrValue.name,
+                accessor: accessorAndAtribut,
+                header: accessorAndAtribut,
                 attribute: attrValue.attribute,
                 type: attrValue.type,
                 group: attrValue.group,
@@ -4873,11 +4889,17 @@ class DashboardDataSetService
             ? breakdownValues[0..DashboardUtils.tableBreakdownLimit - 1]
             : breakdownValues
 
-        Collection <Column> columns = collectColumns(attributes, hasBreakdown, customValuesInBreakdown ?: breakdownValues)
+			Collection<Column> columns = collectColumns(attributes, hasBreakdown, customValuesInBreakdown ?: breakdownValues)
 
-        List<String> attributeNames = attributes.name
-        if (sourceRowNames && hasBreakdown)
-        {
+			List<String> attributeNames = attributes.collect{ attribut ->
+				def secondAttribut = attribut?.attribute?.ref?.title
+				if(secondAttribut != null){
+					return  attribut.name + " (" + attribut?.attribute?.ref?.title+ ")"
+				}
+				return  attribut.name
+			}
+
+			if (sourceRowNames && hasBreakdown) {
             attributeNames << attributeNames[attributeNames.size() - 1]
             attributeNames[attributeNames.size() - 2] = 'Источник'
         }
