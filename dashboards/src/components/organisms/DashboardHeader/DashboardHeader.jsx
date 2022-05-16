@@ -213,6 +213,8 @@ export class DashboardHeader extends Component<Props> {
 		if (role !== SUPER && !isUserMode && !hasPersonalDashboard && !personalDashboard && editableDashboard) {
 			return this.renderNavButton(t('DashboardHeader::SaveYourself'), createPersonalDashboard, personalDashboardCreating);
 		}
+
+		return null;
 	};
 
 	renderSwitchDashboardButton = () => {
