@@ -64,6 +64,24 @@ const extend = (target: Object, source: Object): Object => {
 const deepClone = (object: Object) => JSON.parse(JSON.stringify(object));
 
 /**
+ * Вырезает смещение из даты
+ * @param {Date} date - дата с выставленным timeZone
+ * @returns {string} - значение смещения
+ */
+const shiftTimeZone = (date: Date) => {
+	const timezone = /(GMT.*\))/.exec(new Date(date));
+	const deviation = timezone[0].slice(5, 6);
+	const sign = timezone[0].slice(3, 4);
+	let deleteDeviation = `${deviation}`;
+
+	if (sign === '-') {
+		deleteDeviation = `'-'${deviation}`;
+	}
+
+	return deleteDeviation;
+};
+
+/**
  * Проверяет относится ли операционная система пользователя к семейству MasOS
  * @returns {boolean}
  */
@@ -118,5 +136,6 @@ export {
 	getMapValues,
 	isMacOS,
 	isObject,
-	omit
+	omit,
+	shiftTimeZone
 };

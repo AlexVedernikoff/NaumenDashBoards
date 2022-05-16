@@ -14,11 +14,12 @@ import cn from 'classnames';
 import type {Column, ResourceSetting} from 'src/store/App/types';
 import {CommonSettings} from 'store/App/types';
 import {connect} from 'react-redux';
-import {deepClone} from 'src/helpers';
+import {deepClone, shiftTimeZone} from 'src/helpers';
 import {defaultColumn} from 'src/store/App/constants';
 import {defaultResourceSetting} from 'store/App/constants';
 import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
+import {gantt} from 'naumen-gantt';
 import {getChild, getIndexBottomNeighbor, getNeighbor, getUpdatedLevel, skipChildren} from './utils';
 import GridLayout from 'react-grid-layout';
 import {IntervalSelectionCriterion, ScaleNames} from './consts';
@@ -46,6 +47,8 @@ const FormPanel = (props: Props) => {
 	const [inputMonthDays, setInputMonthDays] = useState('');
 	const [inputLastDays, setinputLastDays] = useState('');
 	const [currentInterval, setCurrentInterval] = useState({label: 'с ... по', value: 'INTERVAL'});
+	const [startDate, setStartDate] = useState('');
+	const [endDate, setEndDate] = useState('');
 
 	useEffect(() => {
 		setCurrentInterval(props.currentInterval);
@@ -221,12 +224,18 @@ const FormPanel = (props: Props) => {
 	};
 
 	const handleSave = () => {
-		const {diagramKey, endDate, progressCheckbox, saveSettings, settings, startDate, workProgresses, workRelationCheckbox} = props;
+		const {diagramKey, progressCheckbox, saveSettings, settings, workProgresses, workRelationCheckbox} = props;
 		const newError = checkingSettings();
+		const deleteDeviationForEndDate = shiftTimeZone(endDate);
+		const deleteDeviationForStartDate = shiftTimeZone(startDate);
 
 		setError(newError);
 
 		if (!newError) {
+			sibmitRange();
+			setEndDate(gantt.date.add(new Date(endDate), deleteDeviationForEndDate, 'hour'));
+			setStartDate(gantt.date.add(new Date(startDate), deleteDeviationForStartDate, 'hour'));
+
 			saveSettings({commonSettings: settings, currentInterval, diagramKey, endDate, progressCheckbox, resourceAndWorkSettings: resources, startDate, workProgresses, workRelationCheckbox});
 		}
 	};
@@ -319,6 +328,9 @@ const FormPanel = (props: Props) => {
 					startDate: newStartDate
 				};
 
+				setStartDate(newStartDate);
+				setEndDate(newEndDate);
+
 				props.setRangeTime(date);
 				setValueError('');
 			} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
@@ -344,6 +356,9 @@ const FormPanel = (props: Props) => {
 					startDate: today
 				};
 
+				setStartDate(today);
+				setEndDate(new Date(monthDays));
+
 				props.setRangeTime(date);
 				setValueError('');
 			}
@@ -363,6 +378,9 @@ const FormPanel = (props: Props) => {
 					startDate: new Date(monthDays)
 				};
 
+				setStartDate(new Date(monthDays));
+				setEndDate(today);
+
 				props.setRangeTime(date);
 			}
 		} else if (valueInterval.value === 'NEXTDAYS') {
@@ -370,6 +388,9 @@ const FormPanel = (props: Props) => {
 				endDate: new Date(),
 				startDate: new Date()
 			};
+
+			setStartDate(new Date());
+			setEndDate(new Date());
 
 			props.setRangeTime(date);
 		}

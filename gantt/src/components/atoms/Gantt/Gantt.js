@@ -3,7 +3,7 @@ import './styles.less';
 import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
-import {deepClone} from 'helpers';
+import {deepClone, shiftTimeZone} from 'helpers';
 import {gantt} from 'naumen-gantt';
 import Modal from 'src/components/atoms/Modal';
 import ModalTask from 'components/atoms/ModalTask';
@@ -157,31 +157,12 @@ const Gantt = (props: Props) => {
 		gantt.attachEvent('onAfterTaskDrag', debounce(function (id) {
 			const task = gantt.getTask(id);
 			const newTasks = store.APP.tasks;
-			let startDate = '';
-			let endDate = '';
 
-			const shiftingTimeZone = (date) => {
-				const timezone = /(GMT.*\))/.exec(new Date(date));
-				const deviation = timezone[0].slice(5, 6);
-				const sign = timezone[0].slice(3, 4);
-				let deleteDeviation = `${deviation}`;
+			const deleteDeviationForEndDate = shiftTimeZone(task.end_date);
+			const deleteDeviationForStartDate = shiftTimeZone(task.start_date);
 
-				if (sign === '-') {
-					deleteDeviation = `'-'${deviation}`;
-					return deleteDeviation;
-				}
-
-				if (date === task.start_date) {
-					startDate = gantt.date.add(new Date(date), deleteDeviation, 'hour');
-					return startDate;
-				} else {
-					endDate = gantt.date.add(new Date(date), deleteDeviation, 'hour');
-					return endDate;
-				}
-			};
-
-			shiftingTimeZone(task.start_date);
-			shiftingTimeZone(task.end_date);
+			const startDate = gantt.date.add(new Date(task.start_date), deleteDeviationForStartDate, 'hour');
+			const endDate = gantt.date.add(new Date(task.end_date), deleteDeviationForEndDate, 'hour');
 
 			const {saveChangedWorkInterval, saveChangedWorkProgress} = props;
 
