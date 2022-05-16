@@ -2,9 +2,9 @@
 import type {AxisChartOptions} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getAxisFormatter} from './formater';
-import {getAxisWidget, getDataLabels, getLegendOptions, getSeriesData, getSeriesInfo, getTotalCalculator} from './helpers';
+import {getAxisWidget, getDataLabels, getLegendOptions, getSeriesData, getSeriesInfo, getTotalCalculator, getXAxisCategory} from './helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {getXAxisCategory, getYAxisNumber} from './columns.helpers';
+import {getYAxisNumber} from './columns.helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import {makeGeneratorAxisDrillDownOptions} from './drillDown.helpers';
 import type {Widget} from 'store/widgets/data/types';

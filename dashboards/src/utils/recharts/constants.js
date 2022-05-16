@@ -86,6 +86,12 @@ export const RULER_WIDTH = 10;
 
 export const AXIS_FONT_SIZE = 12;
 
+export const X_AXIS_HEIGHT = 8;
+
+export const ROTATE_AXIS_COEFFICIENT = 0.6;
+
+export const DEFAULT_WIDGET_WIDTH = 320;
+
 export const DEFAULT_DATA_LABEL_COLOR = '#323232';
 
 export const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {

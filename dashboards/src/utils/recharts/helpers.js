@@ -3,6 +3,7 @@ import {AXIS_FONT_SIZE} from 'utils/recharts/constants';
 import type {
 	AxisOptions,
 	CalculateCategoryHeightResult,
+	CalculateCategoryRotateHeight,
 	CalculateCategoryWidthResult,
 	DataLabelsOptions,
 	MultilineHeightResult,
@@ -33,6 +34,7 @@ import {
 } from 'store/widgets/data/constants';
 import {
 	DEFAULT_LEGEND,
+	DEFAULT_WIDGET_WIDTH,
 	LABEL_DRAW_MODE,
 	LEGEND_ALIGN,
 	LEGEND_DISPLAY_TYPES,
@@ -41,7 +43,9 @@ import {
 	LEGEND_POSITIONS,
 	LEGEND_VERTICAL_ALIGN,
 	LEGEND_WIDTH_PERCENT,
-	RULER_WIDTH
+	ROTATE_AXIS_COEFFICIENT,
+	RULER_WIDTH,
+	X_AXIS_HEIGHT
 } from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
@@ -660,6 +664,32 @@ const calculateCategoryHeight = (
 };
 
 /**
+ * Быстрый расчет высоты для категорий на оси X, когда нам изначально понятно,
+ * что все надписи не влезут
+ * @param {Array<string>} labels - метки данных
+ * @param {AxisOptions} params - параметры оси
+ * @param {number} maxHeight - максимальная ширина для подписей
+ * @param {number} width - высота оси
+ * @returns {CalculateCategoryRotateHeight} - высота и метод размещения меток
+ */
+const calculateCategoryRotateHeight = (
+	labels: Array<string>,
+	params: AxisOptions,
+	maxHeight: number,
+	width: number
+): CalculateCategoryRotateHeight => {
+	const fixWidth = width === 0 ? DEFAULT_WIDGET_WIDTH : width; // FIX: когда React еще не прокинул ref
+	const interval = Math.trunc((labels.length * params.fontSize * ROTATE_AXIS_COEFFICIENT) / fixWidth);
+	const calcLabels = interval === 0 ? labels : labels.filter((l, idx) => idx % (interval + 1) === 0);
+	const rotateHeight = checkRotateHeight(calcLabels, params) + X_AXIS_HEIGHT;
+
+	return {
+		height: Math.min(maxHeight, rotateHeight),
+		interval
+	};
+};
+
+/**
  * Формирует информацию о рядах данных для осевых диаграмм
  * @param {Chart} widget - виджет
  * @param {DiagramBuildData} data - данные
@@ -747,8 +777,58 @@ const calculateYAxisNumberWidth = (maxString: string, settings: AxisOptions, axi
 	return result;
 };
 
+/**
+ * Формирование настроек осей X при отображении категорий (столбчатая, линейная, комбо)
+ * @param {AxisWidget | ComboWidget} widget - виджет
+ * @param {HTMLDivElement} container - общий контейнер
+ * @param {Array<string>} labels - подписи категорий
+ * @param {string} axisName - название оси
+ * @returns {AxisOptions} - настройки оси X
+ */const getXAxisCategory = (
+	widget: AxisWidget | ComboWidget,
+	container: HTMLDivElement,
+	labels: Array<string> = [],
+	axisName: string = ''
+): AxisOptions => {
+	const settings = getRechartAxisSetting(widget.parameter);
+	const addPlaceForName = settings.showName ? settings.fontSize * 2 : 0;
+	const maxHeight = LEGEND_HEIGHT - addPlaceForName;
+	let {width} = container.getBoundingClientRect();
+
+	if (widget.legend && widget.legend.show) {
+		const {position} = widget.legend;
+
+		if (position === LEGEND_POSITIONS.left || position === LEGEND_POSITIONS.right) {
+			width -= width * LEGEND_WIDTH_PERCENT;
+		}
+	}
+
+	let result;
+	const fastRotateWidth = labels.length * settings.fontSize * ROTATE_AXIS_COEFFICIENT;
+
+	if (width < fastRotateWidth) {
+		const {height, interval} = calculateCategoryRotateHeight(labels, settings, maxHeight, width);
+
+		result = {...settings, axisName, height, interval, mode: LABEL_DRAW_MODE.ROTATE};
+	} else {
+		const {height, labels: multilineLabels, mode} = calculateCategoryHeight(labels, settings, maxHeight, width);
+
+		result = {...settings, axisName, height, interval: 0, mode, multilineLabels};
+	}
+
+	if (settings.showName) {
+		const labels = widget.data.map(dataSet => dataSet.xAxisName);
+		const labelSize = calculateStringsSize([labels], settings.fontFamily, settings.fontSize)[0];
+
+		result.height += labelSize.height;
+	}
+
+	return result;
+};
+
 export {
 	calculateCategoryHeight,
+	calculateCategoryRotateHeight,
 	calculateCategoryWidth,
 	calculateStringsSize,
 	calculateYAxisNumberWidth,
@@ -767,6 +847,7 @@ export {
 	getRechartAxisSetting,
 	getSeriesData,
 	getSeriesInfo,
+	getXAxisCategory,
 	getSpeedometerWidget,
 	getSummaryWidget,
 	getTotalCalculator

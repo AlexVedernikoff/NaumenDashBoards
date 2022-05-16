@@ -196,7 +196,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 
 	renderXAxis = () => {
 		const {formatters, xaxis} = this.state.options;
-		const {axisName: value, fontFamily, fontSize, height, show, showName} = xaxis;
+		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xaxis;
 
 		if (show) {
 			const labelStyle = showName
@@ -211,7 +211,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 					fontFamily={fontFamily}
 					fontSize={fontSize}
 					height={height}
-					interval={0}
+					interval={interval}
 					label={labelStyle}
 					tick={this.renderXCategoryLabel()}
 					tickFormatter={formatters.parameter}

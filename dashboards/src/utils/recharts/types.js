@@ -77,6 +77,7 @@ export type AxisOptions = {
 	fontFamily: string,
 	fontSize: number,
 	height?: number,
+	interval: number,
 	mode: $Keys<typeof LABEL_DRAW_MODE>,
 	multilineLabels?: Labels,
 	show: boolean,
@@ -199,6 +200,11 @@ export type CalculateCategoryHeightResult = {
 	height: number,
 	labels?: Labels,
 	mode: $Keys<typeof LABEL_DRAW_MODE>
+};
+
+export type CalculateCategoryRotateHeight = {
+	height: number,
+	interval: number
 };
 
 export type CalculateStringsSizeItem = {
