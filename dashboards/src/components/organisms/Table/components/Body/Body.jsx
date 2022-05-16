@@ -4,6 +4,7 @@ import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
+import {SCROLL_BORDERS_WIDTH} from './constants';
 import styles from './styles.less';
 
 export class Body extends PureComponent<Props, State> {
@@ -15,7 +16,7 @@ export class Body extends PureComponent<Props, State> {
 
 		if (body) {
 			const {clientWidth, offsetWidth} = body;
-			const scrollBarWidth = offsetWidth - clientWidth;
+			const scrollBarWidth = offsetWidth - clientWidth + SCROLL_BORDERS_WIDTH;
 
 			onChangeScrollBarWidth(scrollBarWidth);
 		}

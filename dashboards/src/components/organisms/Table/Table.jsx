@@ -245,30 +245,30 @@ export class Table extends PureComponent<Props, State> {
 
 	handleChangeColumnWidth = (columnWidth: number, column: Column) => {
 		const {columns, columnsRatioWidth, getNewColumnsWidth = this.getNewColumnsWidth, onChangeColumnWidth} = this.props;
-		const {columnsWidth} = this.state;
-		const {current: container} = this.tableRef;
+		const {columnsWidth, containerWidth} = this.state;
 		const {accessor} = column;
+		const newColumnsWidth = getNewColumnsWidth(column, columnWidth, columnsWidth, containerWidth);
+		const fixedPositions = this.getFixedPositions(newColumnsWidth);
+		const width = sumColumnsWidth(newColumnsWidth, columns);
 
-		if (container) {
-			const {clientWidth: containerWidth} = container;
-			const newColumnsWidth = getNewColumnsWidth(column, columnWidth, columnsWidth, containerWidth);
-			const fixedPositions = this.getFixedPositions(newColumnsWidth);
-			const width = sumColumnsWidth(newColumnsWidth, columns);
+		if (width >= containerWidth) {
+			this.setState(() => ({
+				columnsWidth: newColumnsWidth,
+				fixedPositions,
+				width
+			}));
 
-			if (width >= containerWidth) {
-				this.setState(() => ({
-					columnsWidth: newColumnsWidth,
-					fixedPositions,
-					width
-				}));
-
-				columnsRatioWidth[accessor] = Number((columnWidth / containerWidth).toFixed(2));
-				onChangeColumnWidth && onChangeColumnWidth(columnsRatioWidth);
-			}
+			columnsRatioWidth[accessor] = Number((columnWidth / containerWidth).toFixed(2));
+			onChangeColumnWidth && onChangeColumnWidth(columnsRatioWidth);
 		}
 	};
 
-	handleChangeScrollBarWidth = (scrollBarWidth: number) => this.setState({scrollBarWidth});
+	handleChangeScrollBarWidth = (scrollBarWidth: number) => {
+		const {containerWidth: oldContainerWidth} = this.state;
+		const containerWidth = oldContainerWidth - scrollBarWidth;
+
+		this.setState({containerWidth, scrollBarWidth}, this.recalculateColumnsWidth);
+	};
 
 	handleChangeSorting = (sorting: TableSorting) => {
 		const {onChangeSorting} = this.props;
@@ -282,20 +282,26 @@ export class Table extends PureComponent<Props, State> {
 	handlePrevClick = () => this.setState({page: this.state.page - 1}, this.fetch);
 
 	handleResize = (newWidth: number) => {
+		const {containerWidth, scrollBarWidth} = this.state;
+		const calcWidth = newWidth - scrollBarWidth;
+
+		if (calcWidth !== containerWidth) {
+			this.setState({containerWidth: calcWidth}, this.recalculateColumnsWidth);
+		}
+	};
+
+	recalculateColumnsWidth = () => {
 		const {columns} = this.props;
 		const {columnsWidth, containerWidth} = this.state;
+		let newColumnsWidth = columnsWidth;
 
-		if (newWidth !== containerWidth) {
-			let newColumnsWidth = columnsWidth;
+		newColumnsWidth = this.getColumnsWidthByTableWidth(containerWidth, columns, newColumnsWidth);
+		newColumnsWidth = this.applyColumnsRatioWidth(containerWidth, newColumnsWidth);
 
-			newColumnsWidth = this.getColumnsWidthByTableWidth(newWidth, columns, newColumnsWidth);
-			newColumnsWidth = this.applyColumnsRatioWidth(newWidth, newColumnsWidth);
+		const width = sumColumnsWidth(newColumnsWidth, columns);
+		const fixedPositions = this.getFixedPositions(newColumnsWidth);
 
-			const width = sumColumnsWidth(newColumnsWidth, columns);
-			const fixedPositions = this.getFixedPositions(newColumnsWidth);
-
-			this.setState({columnsWidth: newColumnsWidth, containerWidth: newWidth, fixedPositions, width});
-		}
+		this.setState({columnsWidth: newColumnsWidth, fixedPositions, width});
 	};
 
 	renderBody = () => {
