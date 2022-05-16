@@ -30,7 +30,10 @@ trait CriteriaWrapper
 
     List execute(IApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean hasBreakdown = false, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
     {
-        criteria.add(api.whereClause.eq(api.selectClause.property('removed'), false)) // Костыль, все архивированные объекты исключаются из результата
+        if (criteria.currentMetaClass.hasAttribute('removed')) // Костыль, все архивированные объекты исключаются из результата
+        {
+            criteria.add(api.whereClause.eq(api.selectClause.property('removed'), false))
+        }
         if(diagramType == DiagramType.TABLE)
         {
             if(paginationSettings)
