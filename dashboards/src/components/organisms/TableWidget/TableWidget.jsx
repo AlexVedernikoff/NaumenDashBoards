@@ -192,6 +192,7 @@ export class TableWidget extends PureComponent<Props, State> {
 				newColumnsWidth[column.accessor] = columnsWidth[column.accessor] / ratio;
 			}
 		});
+
 		const sumWidth = sumColumnsWidth(newColumnsWidth, columns);
 
 		if (minWidth && minWidth > sumWidth) {
