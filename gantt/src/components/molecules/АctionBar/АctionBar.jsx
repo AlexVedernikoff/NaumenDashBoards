@@ -36,14 +36,22 @@ const АctionBar = props => {
 			onClick={props.onClick}
 		>{item.icon}
 		</IconButton>);
-	const {addNewTask, editMode, handleToggle, name, refresh, settings} = props;
+	const {addNewTask, editMode, endDate, handleToggle, name, refresh, startDate, settings} = props;
 	const newSettings = deepClone(settings);
 	let indexScaleName;
 
 	useEffect(() => {
-		setInputEndDate(props.endDate);
-		setInputStartDate(props.startDate);
-	}, [props.endDate, props.startDate]);
+		if (typeof endDate !== 'string' && typeof startDate !== 'string') {
+			const inputEndDate  = new Date(endDate).toLocaleString(endDate);
+			const inputstartDate = new Date(startDate).toLocaleString(startDate);
+
+			setInputEndDate(inputEndDate);
+			setInputStartDate(inputstartDate);
+		} else {
+			setInputEndDate(endDate);
+			setInputStartDate(startDate);
+		}
+	}, [endDate, startDate]);
 
 	const onSelectStartDate = value => {
 		setInputStartDate(new Date(value).toLocaleString());
