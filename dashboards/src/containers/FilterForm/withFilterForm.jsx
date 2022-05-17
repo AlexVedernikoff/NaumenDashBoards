@@ -90,7 +90,9 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 
 			return attributes.filter(
 				attribute => groupsAttributes.find(
-					({attributeCode, metaClassCode}) => attribute.code === attributeCode && attribute.metaClassFqn === metaClassCode
+					({attributeCode, metaClassCode}) =>
+						attribute.code === attributeCode
+						&& (attribute.declaredMetaClass ?? attribute.metaClassFqn) === metaClassCode
 				)
 			);
 		};
