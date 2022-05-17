@@ -281,7 +281,7 @@ class DashboardDataSetService
         def offsetUTCMinutes = dashboardUtils.getOffsetUTCMinutes(user?.UUID, frontOffsetMinutes)
         String minValue
         String maxValue
-        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
+        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll() && diagramType == DiagramType.TABLE
 
         if (diagramType == DiagramType.TABLE)
         {
@@ -1233,7 +1233,7 @@ class DashboardDataSetService
         Boolean hasTableNotOnlyBaseSources = (tempWidgetSettings?.data*.source.value.value as Set).size() > 1
         Boolean isDiagramTypeNotCount = !(diagramType in [DiagramType.CountTypes, DiagramType.RoundTypes])
         Boolean isDiagramTypeCount = diagramType in DiagramType.CountTypes
-        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
+        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll() && diagramType == DiagramType.TABLE
         def commonBreakdown
         if(!isDiagramTypeCount && !isDiagramTypeTable)
         {
@@ -5559,7 +5559,7 @@ class DashboardDataSetService
             }
         }
 
-        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll()
+        Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll() && (widgetSettings.type as DiagramType) == DiagramType.TABLE
         if (isSourceForEachRow && breakdownAttributes)
         {
             breakdownAttributes = [breakdownAttributes.head()]
