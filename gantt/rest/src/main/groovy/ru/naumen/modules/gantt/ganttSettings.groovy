@@ -553,16 +553,16 @@ class GanttSettingsService
     }
 
     /**
-     * Метод для проверки переноса настроек с версии диаграммы на основную диаграмму
-     * @param diagramKey - ключ основной диаграммы
+     * Метод для переноса настроек и данных с версии диаграммы на основную диаграмму
      * @param versionKey - ключ версии диаграммы
+     * @param diagramKey - ключ основной диаграммы
      * @return true/false
      */
-    Boolean applyVersion (String versionKey, String diagramKey)
+    Boolean applyVersion(String versionKey, String diagramKey)
     {
-        GanttDataSetService ganttDataSetService = GanttDataSetService.instance
 
-        GanttVersionsSettingsClass ganttVersionsSettings = getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
+        GanttVersionsSettingsClass ganttVersionsSettings =
+            getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
         GanttSettingsClass ganttSettings = ganttVersionsSettings.ganttSettings
 
         Boolean saveJsonSettingsGantt = saveJsonSettings(
@@ -575,67 +575,22 @@ class GanttSettingsService
             throw new Exception('Настройки не были сохранены!')
         }
 
-        Map<String, Map<String, String>> mapAttributes = [:]
-
-        ganttSettings.resourceAndWorkSettings.each {
-            if (it.type == SourceType.WORK)
+        ganttVersionsSettings.works.each {
+            switch (it.statusWork)
             {
-                String startAttributeCode = it.startWorkAttribute.code
-                String endAttributeCode = it.endWorkAttribute.code
-                mapAttributes[it.source.value.value] = ['start_date': startAttributeCode,
-                                                        'end_date'  : endAttributeCode]
+                case StatusWork.ADDED:
+                    utils.create(it.classFqn, it.attributesData)
+                    break
+                case StatusWork.EDITED:
+                    utils.edit(it.workUUID, it.attributesData)
+                    break
+                case StatusWork.DELETED:
+                    utils.delete(it.workUUID)
+                    break
             }
         }
 
-        GanttVersionsSettingsClass ganttVersionsSettingsNew = new GanttVersionsSettingsClass(
-            title: ganttVersionsSettings.title,
-            createdDate: ganttVersionsSettings.createdDate,
-            versionKey: ganttVersionsSettings.versionKey,
-            ganttSettings: ganttSettings
-        )
-
-        List<Map<String, Object>> data =
-            ganttDataSetService
-                .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null,null)
-
-        Map<String, String> valueForMapAttributes = [:]
-        Map<String, Object> mapAttributesWork = [:]
-        String startDateCode = null
-        String endDateCode = null
-        data.each {
-            String id = it.id
-            String text = it.text
-            String parent = it.parent
-            String startDateValue = it.start_date
-            String endDateValue = it.end_date
-            String metaClassName = utils.get(id).getMetainfo().toString()
-            valueForMapAttributes = mapAttributes[metaClassName]
-
-            if (valueForMapAttributes)
-            {
-                startDateCode = valueForMapAttributes.start_date
-                endDateCode = valueForMapAttributes.end_date
-
-                mapAttributesWork.id = id
-                mapAttributesWork.text = text
-                mapAttributesWork.parent = parent
-                mapAttributesWork[startDateCode] = startDateValue
-                mapAttributesWork[endDateCode] = endDateValue
-            }
-            logger.info("mapAttributesWork: " + mapAttributesWork)
-            Work work = new Work()
-            work.attributesData = mapAttributesWork
-
-            ganttVersionsSettingsNew.works.add(work)
-        }
-
-        Boolean saveJsonSettingsGanttVersion = saveJsonSettings(
-            diagramKey,
-            Jackson.toJsonString(ganttVersionsSettingsNew),
-            GANTT_NAMESPACE
-        )
-
-        return saveJsonSettingsGanttVersion
+        return saveJsonSettingsGantt
     }
 
     /**
@@ -924,6 +879,13 @@ enum ScaleEnum
     YEAR
 }
 
+enum StatusWork
+{
+    DELETED,
+    ADDED,
+    EDITED
+}
+
 /**
  * Тип источника
  */
@@ -1154,6 +1116,9 @@ class GanttVersionsSettingsDTOClass
 class Work
 {
     Map<String, Object> attributesData = [:]
+    StatusWork statusWork
+    String workUUID
+    String classFqn
 }
 
 /**

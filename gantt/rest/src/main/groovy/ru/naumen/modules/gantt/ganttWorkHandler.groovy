@@ -578,8 +578,9 @@ class GanttWorkHandlerService
      * @param request - тело запроса
      * @param user - пользователь
      * @param versionKey - ключ версии диаграммы
+     * @return результат добавления
      */
-    void addNewWorkForVersion(AddNewWorkRequest request,
+    String addNewWorkForVersion(AddNewWorkRequest request,
                               IUUIDIdentifiable user, String versionKey)
     {
         GanttSettingsService service = GanttSettingsService.instance
@@ -590,7 +591,8 @@ class GanttWorkHandlerService
         work.attributesData.request = request
         work.attributesData.user = user
 
-        settingsVersion.works.add(work)
+        return settingsVersion.works.add(work) ? work.statusWork = StatusWork.ADDED :
+            "Не удалось добавить новую работу!"
     }
 
     /**
@@ -607,9 +609,19 @@ class GanttWorkHandlerService
             service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
 
         Map<String, Object> preparedWorkData = prepareWorkData(request, user)
-        settingsVersion.works.find {
-            utils.edit(request.workUUID, preparedWorkData)
+        settingsVersion.works.each {
+            if (utils.edit(request.workUUID, preparedWorkData))
+            {
+                it.statusWork = StatusWork.EDITED
+            }
         }
+    }
+
+    void editWorkData(EditWorkDataRequest request, IUUIDIdentifiable user)
+    {
+        Map<String, Object> preparedWorkData = prepareWorkData(request, user)
+        ScriptDtObject res = utils.get(request.workUUID)
+        utils.edit(res, preparedWorkData)
     }
 
     /**
@@ -656,13 +668,15 @@ class GanttWorkHandlerService
             try
             {
                 utils.delete(workUUID)
-                return ("Deleting successful!")
             }
             catch (Exception e)
             {
-                return ("errorMessage: " + e.message)
+                return "errorMessage: " + e.message
             }
+
+            it.statusWork = StatusWork.DELETED
         }
+        return "Работа удалена успешно"
     }
 
     /**
