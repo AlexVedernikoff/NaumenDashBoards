@@ -1,6 +1,5 @@
 // @flow
 import api from 'api';
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
 import {connect} from 'react-redux';
 import type {Context} from 'utils/descriptorUtils/types';
 import {createFilterContext, getFilterContext, parseCasesAndGroupCode} from 'utils/descriptorUtils';
@@ -38,18 +37,13 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		generateRestriction = async (classFqn: string, attrGroupCode: string | null) => {
 			const {sources} = this.props;
 			const result = {};
-			const attributes = await this.getFilterAttributes(classFqn, attrGroupCode);
 
 			result[classFqn] = attrGroupCode ?? 'system';
 
-			attributes.forEach(attribute => {
-				const {property, type} = attribute;
+			Object.keys(sources).forEach(key => {
+				const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(sources, key);
 
-				if (type in ATTRIBUTE_SETS.REFERENCE && property && !(property in result)) {
-					const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(sources, property);
-
-					result[property] = sourceFilterAttributeGroup ?? 'system';
-				}
+				result[key] = sourceFilterAttributeGroup ?? 'system';
 			});
 
 			return result;
