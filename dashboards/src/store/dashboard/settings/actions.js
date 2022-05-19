@@ -249,7 +249,6 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 
 		dispatch(createToast({
 			text: errorMessage,
-			time: 1500,
 			type: 'error'
 		}));
 	}
@@ -285,7 +284,6 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 
 		dispatch(createToast({
 			text: errorMessage,
-			time: 1500,
 			type: 'error'
 		}));
 	}
