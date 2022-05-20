@@ -224,6 +224,7 @@ const FormPanel = (props: Props) => {
 	};
 
 	const handleSave = () => {
+		sibmitRange();
 		const {diagramKey, progressCheckbox, saveSettings, settings, workProgresses, workRelationCheckbox} = props;
 		const newError = checkingSettings();
 		const deleteDeviationForEndDate = shiftTimeZone(endDate);
@@ -232,7 +233,6 @@ const FormPanel = (props: Props) => {
 		setError(newError);
 
 		if (!newError) {
-			sibmitRange();
 			setEndDate(gantt.date.add(new Date(endDate), deleteDeviationForEndDate, 'hour'));
 			setStartDate(gantt.date.add(new Date(startDate), deleteDeviationForStartDate, 'hour'));
 
@@ -266,11 +266,13 @@ const FormPanel = (props: Props) => {
 	const onSelectStartDate = (value) => {
 		setInputStartDate(new Date(value).toLocaleString());
 		setShowDatePickerStartDate(false);
+		setStartDate(new Date(value));
 	};
 
 	const onSelectEndDate = (value) => {
 		setInputEndDate(new Date(value).toLocaleString());
 		setShowDatePickerEndDate(!showDatePickerEndDate);
+		setEndDate(new Date(value));
 	};
 
 	const renderDatePickerStartDate = () => {
@@ -363,9 +365,9 @@ const FormPanel = (props: Props) => {
 				setValueError('');
 			}
 		} else if (valueInterval.value === 'LASTDAYS') {
-			if (isNaN(inputMonthDays)) {
+			if (isNaN(inputLastDays)) {
 				setValueError('Некорректное значение');
-			} else if (!inputMonthDays.length) {
+			} else if (!inputLastDays.length) {
 				setValueError('Заполните поле');
 			} else {
 				const today = new Date();
@@ -380,6 +382,7 @@ const FormPanel = (props: Props) => {
 
 				setStartDate(new Date(monthDays));
 				setEndDate(today);
+				setValueError('');
 
 				props.setRangeTime(date);
 			}

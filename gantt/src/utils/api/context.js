@@ -202,8 +202,8 @@ const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string 
 * @param {string} workUUID - индификатор работы
 * @param {string} timezone - таймзона
 */
-const addNewWork = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string): Promise<Source> => {
-	await api.addNewWork(workData, classFqn, workUUID, timezone);
+const addNewWork = async (workData: WorkData, classFqn: string, timezone: string, workUUID: string): Promise<Source> => {
+	await api.addNewWork(workData, classFqn, workUUID, timezone, workUUID);
 };
 
 /**
@@ -213,8 +213,8 @@ const addNewWork = async (workData: WorkData, classFqn: string, workUUID: string
 * @param {string} workUUID - индификатор работы
 * @param {string} timezone - таймзона
 */
-const editWorkData = async (workData: WorkData, classFqn: string, workUUID: string, timezone: string): Promise<Source> => {
-	await api.editWorkData(workData, classFqn, timezone);
+const editWorkData = async (workData: WorkData, classFqn: string, timezone: string, workUUID: string): Promise<Source> => {
+	await api.editWorkData(workData, classFqn, timezone, workUUID);
 };
 
 /**

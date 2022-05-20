@@ -260,7 +260,7 @@ export default class Api {
 	* @param {string} workUUID - индификатор работы
 	* @param {string} timezone - таймзона
 	*/
-	async addNewWork (workData: WorkData, classFqn: string, workUUID: string, timezone: string) {
+	async addNewWork (workData: WorkData, classFqn: string, timezone: string, workUUID: string) {
 		const url = `exec-post?func=modules.ganttWorkHandler.addNewWork&params=requestContent,user`;
 		const body = {classFqn, timezone, workData, workUUID};
 		const options = {
@@ -291,7 +291,7 @@ export default class Api {
 	* @param {string} workUUID - индификатор работы
 	* @param {string} timezone - таймзона
 	*/
-	async editWorkData (workData: WorkData, classFqn: string, workUUID: string, timezone: string) {
+	async editWorkData (workData: WorkData, classFqn: string, timezone: string, workUUID: string) {
 		const url = `exec-post?func=modules.ganttWorkHandler.editWorkData&params=requestContent,user`;
 		const body = {classFqn, timezone, workData, workUUID};
 		const options = {

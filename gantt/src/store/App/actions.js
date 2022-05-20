@@ -185,7 +185,6 @@ const addNewWorkForVersion = (classFqn: string, timezone: string, versionKey: st
 */
 const editWorkDataFromVersion = (classFqn: string, workUUID: string, versionKey: string, workData: string, timezone): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-
 		await editWorkDataFromVersionRequest(classFqn, timezone, workData, workUUID);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
@@ -267,7 +266,7 @@ const postNewWorkData = (workData: WorkData, classFqn: string, workUUID: string)
 	try {
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		await addNewWork(workData, classFqn, workUUID, timezone);
+		await addNewWork(workData, classFqn, timezone, workUUID);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -285,7 +284,7 @@ const postEditedWorkData = (workData: WorkData, classFqn: string, workUUID: stri
 	try {
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		await editWorkData(workData, classFqn, workUUID, timezone);
+		await editWorkData(workData, classFqn, timezone, workUUID);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
