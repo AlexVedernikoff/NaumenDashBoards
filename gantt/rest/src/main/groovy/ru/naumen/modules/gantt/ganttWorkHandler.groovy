@@ -523,8 +523,8 @@ class GanttWorkHandlerService
                     }
                 }
 
-                Work workToEdit = ganttVersionSettings.works.find {
-                    it.workUUID == workDateData.workUUID
+                DiagramEntity workToEdit = ganttVersionSettings.diagramEntities.find {
+                    it.entityUUID == workDateData.workUUID
                 }
                 workToEdit.attributesData[attributeCode] = newDateToUpdate
             }
@@ -561,12 +561,12 @@ class GanttWorkHandlerService
         GanttVersionsSettingsClass ganttVersionSettings =
             service.getGanttVersionsSettings(versionKey)
 
-        Work work = new Work()
+        DiagramEntity work = new DiagramEntity()
         work.attributesData = request.workData
         work.classFqn = request.classFqn
         work.statusWork = StatusWork.ADDED
 
-        ganttVersionSettings.works << work
+        ganttVersionSettings.diagramEntities << work
 
         if (!service.saveJsonSettings(
             versionKey,
@@ -589,8 +589,8 @@ class GanttWorkHandlerService
         GanttVersionsSettingsClass ganttVersionSettings =
             service.getGanttVersionsSettings(versionKey)
 
-        Work workToEdit = ganttVersionSettings.works.find {
-            it.workUUID == request.workUUID
+        DiagramEntity workToEdit = ganttVersionSettings.diagramEntities.find {
+            it.entityUUID == request.workUUID
         }
         workToEdit.attributesData.putAll(request.workData)
         workToEdit.statusWork = StatusWork.EDITED
@@ -641,8 +641,8 @@ class GanttWorkHandlerService
         GanttVersionsSettingsClass ganttVersionSettings =
             service.getGanttVersionsSettings(versionKey)
 
-        Work workToDelete = ganttVersionSettings.works.find {
-            it.workUUID == workUUID
+        DiagramEntity workToDelete = ganttVersionSettings.diagramEntities.find {
+            it.entityUUID == workUUID
         }
         workToDelete.statusWork = StatusWork.DELETED
 
@@ -714,39 +714,6 @@ class GanttWorkHandlerService
             {
                 String timezoneString =
                     api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
-                TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-                attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
-                preparedWorkData[attributeCode] = attributeValue
-            }
-        }
-        return preparedWorkData
-    }
-
-    /**
-     * Подготовка данных работ в диаграмме версий для обновления
-     * @param request - тело запроса
-     * @param user - пользователь
-     * @param versionKey - ключ диаграммы версий
-     * @return подготовленные данные работы для добавления/редактирования
-     */
-    private Map<String, Object> prepareWorkDataFromVersion(AddNewWorkRequest request,
-                                                           IUUIDIdentifiable user,
-                                                           String versionKey)
-    {
-        Map<String, Object> preparedWorkData = request.workData
-        Collection<IAttributeWrapper> attributes =
-            api.metainfo.getMetaClass(request.classFqn).getAttributes()
-        preparedWorkData.each {
-            String attributeCode = it.key
-            Object attributeValue = it.value
-
-            IAttributeWrapper attribute = attributes.find {
-                it.code == attributeCode
-            }
-            if (attribute.type.code in AttributeType.DATE_TYPES)
-            {
-                String timezoneString =
-                    api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
                 TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                 attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
                 preparedWorkData[attributeCode] = attributeValue

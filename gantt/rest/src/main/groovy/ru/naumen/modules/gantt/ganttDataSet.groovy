@@ -16,7 +16,6 @@ import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
 import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.shared.IUUIDIdentifiable
-import java.time.ZonedDateTime
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 
@@ -93,6 +92,7 @@ class GanttDataSetService
         data.workRelations = settings.workRelations
         data.workRelationCheckbox = settings.workRelationCheckbox
         data.progressCheckbox = settings.progressCheckbox
+        data.currentInterval = settings.currentInterval
 
         if (settings.startDate && settings.endDate)
         {
@@ -104,24 +104,13 @@ class GanttDataSetService
             data.endDate = ed.format(GANTT_DATE_PATTERN)
         }
 
-        data.currentInterval = settings.currentInterval
-
-        GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
-        settings.resourceAndWorkSettings.each {
-            String metaClassCode = it.source.value.value
-            data.attributesMap.put(
-                metaClassCode,
-                ganttWorkHandlerService.getAttributeGroups(metaClassCode)
-            )
-        }
-
         if (!(settings?.resourceAndWorkSettings))
         {
             data.tasks = []
         }
         else
         {
-            data.tasks = buildDataListFromSettings(settings.resourceAndWorkSettings, null, null)
+            data.tasks = buildDataListFromSettings(settings.resourceAndWorkSettings, null)
             def timezone =
                 TimeZone.getTimeZone(
                     api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
@@ -158,62 +147,51 @@ class GanttDataSetService
      * @param timezone - таймзона
      * @return данные для построения диаграммы Ганта
      */
-    GanttVersionDiagramData getGanttVersionDiagramData(String versionKey,
+    GanttDiagramData getGanttVersionDiagramData(String versionKey,
                                                        IUUIDIdentifiable user,
                                                        String timezone)
     {
         GanttSettingsService service = GanttSettingsService.instance
-        GanttVersionsSettingsClass settings =
-            service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
-        GanttVersionDiagramData data = new GanttVersionDiagramData()
+        GanttVersionsSettingsClass ganttVersionsSettings = service.getGanttVersionsSettings(versionKey)
+        GanttDiagramData data = new GanttDiagramData()
 
-        data.commonSettings = settings.ganttSettings.commonSettings
-        data.diagramKey = settings.ganttSettings.diagramKey
-        data.workRelations = settings.ganttSettings.workRelations
-        data.workProgresses = settings.ganttSettings.workProgresses
-        data.workRelationCheckbox = settings.ganttSettings.workRelationCheckbox
-        data.progressCheckbox = settings.ganttSettings.progressCheckbox
-        data.startDate = settings.ganttSettings.startDate
-        data.endDate = settings.ganttSettings.endDate
-        data.diagramVersionsKeys = settings.ganttSettings.diagramVersionsKeys
-        data.createdDate = settings.createdDate
-        data.title = settings.title
-        data.versionKey = settings.versionKey
+        data.commonSettings = ganttVersionsSettings.ganttSettings.commonSettings
+        data.diagramKey = ganttVersionsSettings.ganttSettings.diagramKey
+        data.workRelations = ganttVersionsSettings.ganttSettings.workRelations
+        data.workRelationCheckbox = ganttVersionsSettings.ganttSettings.workRelationCheckbox
+        data.progressCheckbox = ganttVersionsSettings.ganttSettings.progressCheckbox
 
-        GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
-        settings.ganttSettings.resourceAndWorkSettings.each {
-            String metaClassCode = it.source.value.value
-            data.attributesMap.put(
-                metaClassCode,
-                ganttWorkHandlerService.getAttributeGroups(metaClassCode)
-            )
+        if (ganttVersionsSettings.ganttSettings.startDate && ganttVersionsSettings.ganttSettings.endDate)
+        {
+            String startDate = ganttVersionsSettings.ganttSettings.startDate
+            String endDate = ganttVersionsSettings.ganttSettings.endDate
+            Date sd = Date.parse("yyyy-MM-dd'T'HH:mm:ss", startDate)
+            Date ed = Date.parse("yyyy-MM-dd'T'HH:mm:ss", endDate)
+            data.startDate = sd.format(GANTT_DATE_PATTERN)
+            data.endDate = ed.format(GANTT_DATE_PATTERN)
         }
 
-        if (!(settings?.ganttSettings.resourceAndWorkSettings))
+        if (!ganttVersionsSettings.ganttSettings.resourceAndWorkSettings)
         {
             data.tasks = []
         }
         else
         {
             data.tasks =
-                buildDataListFromSettings(
-                    settings.ganttSettings.resourceAndWorkSettings,
-                    null,
-                    versionKey
-                )
+                buildDataListFromSettings(ganttVersionsSettings.ganttSettings.resourceAndWorkSettings, null, versionKey)
             TimeZone timeZone =
                 TimeZone.getTimeZone(
                     api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: timezone
                 )
             ResourceAndWorkSettings workAttributeSettings =
-                settings.ganttSettings.resourceAndWorkSettings.find {
+                ganttVersionsSettings.ganttSettings.resourceAndWorkSettings.find {
                     it.startWorkAttribute && it.endWorkAttribute
                 }
 
             data.tasks.each {
                 formatWorkDates(it, workAttributeSettings, timeZone)
                 setWorkTypeToProjectIfItHasChildren(it, data.tasks)
-                setWorkProgressVersion(it, settings)
+                setWorkProgressVersion(it, ganttVersionsSettings.ganttSettings)
                 setColumnDateFormats(it, timeZone)
             }
         }
@@ -345,9 +323,9 @@ class GanttDataSetService
      * @param versionKey - ключ версии диаграммы
      * @return список Map<String, String> параметров для построения диаграммы
      */
-    private List<Map<String, String>> buildDataListFromSettings(List<ResourceAndWorkSettings> settingsList,
+    private List<Map<String, String>> buildDataListFromSettings(Collection<ResourceAndWorkSettings> settingsList,
                                                                 String parentUUID,
-                                                                String versionKey)
+                                                                String versionKey = null)
     {
         /* За текущую настройку из списка настроек, берется 1-ый элемент settingsList[0]. В цикле совершается поиск таких
            настроек, для которых уровень вложенности level равен level-у текущей. Таким образом находятся по сути соседние
@@ -372,8 +350,8 @@ class GanttDataSetService
         //Closure prepare = { (it?.type in AttributeType.LINK_TYPES) ? ("${it.code}.title") : it.code }
 
         GanttSettingsService service = GanttSettingsService.instance
-        GanttVersionsSettingsClass settingsVersion =
-            service.getGanttVersionsSettingsFromDiagramVersionKey(versionKey)
+        GanttVersionsSettingsClass ganttVersionSettings =
+            service.getGanttVersionsSettings(versionKey)
 
         def result = []
         Closure updateIfMetaClass = { item, attr ->
@@ -439,10 +417,10 @@ class GanttDataSetService
             Source source = settings.source
             // Так как из БД нельзя получить повторяющиеся колонки, то имена атрибутов делаем уникальными.
             List<String> listAttributes = mapAttributes.values().toList().unique()
-            def res = []
-            if (versionKey != null)
+            def res
+            if (versionKey)
             {
-                res = settingsVersion.works
+                res = ganttVersionSettings.diagramEntities
             }
             else
             {

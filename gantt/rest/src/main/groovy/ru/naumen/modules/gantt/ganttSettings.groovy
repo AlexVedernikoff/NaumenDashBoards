@@ -464,11 +464,13 @@ class GanttSettingsService
         Map<String, Object> mapAttributesWork = [:]
 
         data.each {
-            Work work = new Work()
-            work.workUUID = it.id
-            work.attributesData.title = it.text
+            DiagramEntity entity = new DiagramEntity()
+            entity.entityUUID = it.id
+            entity.attributesData.title = it.text
+            entity.parent = it.parent
+            entity.sourceType = it.type as SourceType
 
-            String metaClassName = utils.get(work.workUUID).getMetainfo().toString()
+            String metaClassName = utils.get(entity.entityUUID).getMetainfo().toString()
             metaClassMapAttributes = mapAttributes[metaClassName]
 
             if (metaClassMapAttributes)
@@ -476,7 +478,7 @@ class GanttSettingsService
                 mapAttributesWork[metaClassMapAttributes.start_date] = it.start_date
                 mapAttributesWork[metaClassMapAttributes.end_date] = it.end_date
             }
-            ganttVersionSettings.works << work
+            ganttVersionSettings.diagramEntities << entity
         }
 
         if (saveJsonSettings(
@@ -507,17 +509,17 @@ class GanttSettingsService
             throw new Exception('Настройки не были сохранены!')
         }
 
-        ganttVersionSettings.works.each {
+        ganttVersionSettings.diagramEntities.each {
             switch (it.statusWork)
             {
                 case StatusWork.ADDED:
                     utils.create(it.classFqn, it.attributesData)
                     break
                 case StatusWork.EDITED:
-                    utils.edit(it.workUUID, it.attributesData)
+                    utils.edit(it.entityUUID, it.attributesData)
                     break
                 case StatusWork.DELETED:
-                    utils.delete(it.workUUID)
+                    utils.delete(it.entityUUID)
                     break
             }
         }
@@ -1004,7 +1006,7 @@ class GanttVersionsSettingsClass
     /**
      * Настройки для источников - работ
      */
-    Collection<Work> works = []
+    Collection<DiagramEntity> diagramEntities = []
     /**
      * Ключ диаграммы версий
      */
@@ -1039,26 +1041,34 @@ class UpdateGanttVersionsSettingsRequest
 }
 
 /**
- * Класс, описывающий работы, сохраненные в версии диаграммы
+ * Класс, описывающий сущности, сохраненные в версии диаграммы
  */
-class Work
+class DiagramEntity
 {
     /**
-     * Данные атрибутов работы
+     * Данные атрибутов сущности
      */
     Map<String, Object> attributesData = [:]
     /**
-     * Состояние работы
+     * Состояние сущности
      */
     StatusWork statusWork
     /**
-     * UUID работы
+     * UUID сущности
      */
-    String workUUID
+    String entityUUID
     /**
-     * Код метакласса работы
+     * Код метакласса сущности
      */
     String classFqn
+    /**
+     * Тип сущности
+     */
+    SourceType sourceType
+    /**
+     * UUID ресурса для работы
+     */
+    String parent
 }
 
 /**
@@ -1096,10 +1106,6 @@ class GanttDiagramData extends BaseGanttDiagramData
      */
     def tasks
     /**
-     * Карта групп атрибутов по метаклассу работы
-     */
-    Map<String, Collection> attributesMap = [:]
-    /**
      * Настройки для источников - старт работ
      */
     String startDate
@@ -1111,33 +1117,6 @@ class GanttDiagramData extends BaseGanttDiagramData
      * Настройки интервала
      */
     CurrentInterval currentInterval
-}
-
-/**
- * Данные версий диаграммы Ганта для построения
- */
-class GanttVersionDiagramData extends GanttDiagramData
-{
-    /**
-     * Ключ диаграммы версий
-     */
-    String versionKey
-    /**
-     * Название диаграммы
-     */
-    String title
-    /**
-     * Дата создания диаграммы
-     */
-    Date createdDate
-    /**
-     * Настройки для источников - ресурсов/работ
-     */
-    Collection<ResourceAndWorkSettings> resourceAndWorkSettings
-    /**
-     * Настройки для источников - версий диаграмм Ганта
-     */
-    Collection<String> diagramVersionsKeys = []
 }
 
 /**
