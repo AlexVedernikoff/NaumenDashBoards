@@ -36,19 +36,19 @@ const Gantt = (props: Props) => {
 				]
 			},
 			{
-				min_column_width: 50,
+				min_column_width: 120,
 				name: 'week',
 				scale_height: HEIGHT_HEADER,
 				scales: [
 					{format: function (date) {
 						const dateToStr = gantt.date.date_to_str('%d %M');
-						const endDate = gantt.date.add(date, -6, 'day');
+						const endDate = gantt.date.add(date, 6, 'day');
 						const weekNum = gantt.date.date_to_str('%W')(date);
-						return '#' + weekNum + ', ' + dateToStr(endDate) + ' - ' + dateToStr(date);
+						return '#' + weekNum + ', ' + dateToStr(date) + ' - ' + dateToStr(endDate);
 					},
 					step: 1,
 					unit: 'week'},
-					{format: '%j %D', unit: 'day'}
+					{format: '%j %D', unit: 'day', step: 1}
 				]
 			},
 			{
@@ -113,30 +113,29 @@ const Gantt = (props: Props) => {
 	};
 
 	useEffect(() => {
-		gantt.plugins({
-			auto_scheduling: true
-		});
-
+		gantt.config.autoscroll = true;
 		gantt.config.auto_scheduling = true;
+		gantt.config.columns = configureAdaptedColumns();
+		gantt.config.drag_project = true;
+		gantt.config.drag_multiple = true;
+		gantt.config.duration_unit = 'minute';
+		gantt.config.duration_step = 1;
+		gantt.config.fit_tasks = true;
+		gantt.config.open_tree_initially = true;
+		gantt.config.resize_rows = true;
+		gantt.config.scale_offset_minimal = false;
+		gantt.config.scroll_size = 6;
+
+		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
+
 		gantt.attachEvent('onAfterLinkDelete', () => {
 			const links = gantt.getLinks();
 
 			props.saveChangedWorkRelations(links);
 		});
 
-		gantt.config.drag_project = true;
-		handleHeaderClick();
 		gantt.plugins({ multiselect: true });
-		gantt.config.drag_multiple = true;
-		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
-		gantt.config.open_tree_initially = true;
-		gantt.config.columns = configureAdaptedColumns();
-		gantt.config.resize_rows = true;
-		gantt.config.duration_unit = 'minute';
-		gantt.config.duration_step = 1;
-		gantt.config.scroll_size = 6;
-		gantt.config.autoscroll = true;
 		gantt.templates.parse_date = (dateStr) => {
 			const timezone = /(GMT.*\))/.exec(new Date(dateStr));
 			const deviation = timezone[0].slice(5, 6);
@@ -151,6 +150,12 @@ const Gantt = (props: Props) => {
 			const newDate = gantt.date.add(new Date(dateStr), deleteDeviation, 'hour');
 			return gantt.date.convert_to_utc(new Date(newDate));
 		};
+
+		handleHeaderClick();
+
+		gantt.plugins({
+			auto_scheduling: true
+		});
 
 		gantt.ext.zoom.init(zoomConfig);
 
@@ -207,7 +212,6 @@ const Gantt = (props: Props) => {
 		}
 
 		generateGridWidth();
-		gantt.config.fit_tasks = true;
 		gantt.init(ganttContainer.current);
 		gantt.clearAll();
 
