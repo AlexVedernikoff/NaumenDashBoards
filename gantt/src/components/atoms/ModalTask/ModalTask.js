@@ -1,12 +1,12 @@
 // @flow
-import 'naumen-gantt/codebase/dhtmlxgantt.css';
+import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
 import cn from 'classnames';
 import {
 	Datepicker, IconButton, TextInput, Select
 } from 'naumen-common-components';
 import {deepClone} from 'helpers';
 import {deleteWork, getWorlLink, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
-import {gantt} from 'naumen-gantt';
+import {gantt} from 'dhtmlx-gantt';
 import Modal from 'components/atoms/Modal/Modal';
 import React, {useEffect, useState} from 'react';
 import styles from './styles.less';
@@ -24,7 +24,7 @@ const ModalTask = (props: Props) => {
 	const [valueError, setValueError] = useState('');
 	const [initPage, setInitPage] = useState(false);
 	const [options, setOptions] = useState([]);
-	const [currentMetaClassFqn, setСurrentMetaClassFqn] = useState('');
+	const [currentMetaClassFqn, setCurrentMetaClassFqn] = useState('');
 	const {attributesMap, getListOfWorkAttributes} = props;
 	const dispatch = useDispatch();
 	const store = useSelector(state => state);
@@ -45,7 +45,7 @@ const ModalTask = (props: Props) => {
 			});
 
 			setOptions(listEmployeeAtrributes);
-			setСurrentMetaClassFqn('employee');
+			setCurrentMetaClassFqn('employee');
 		} else {
 			const listserviceAtrributes = attributesMap.serviceCall$PMTask ? attributesMap.serviceCall$PMTask : attributesMap.serviceCall;
 			const listEmployeeAtrributes = listserviceAtrributes.map(i => {
@@ -53,7 +53,7 @@ const ModalTask = (props: Props) => {
 			});
 
 			setOptions(listEmployeeAtrributes);
-			attributesMap.serviceCall$PMTask ? setСurrentMetaClassFqn('serviceCall$PMTask') : setСurrentMetaClassFqn('serviceCall');
+			attributesMap.serviceCall$PMTask ? setCurrentMetaClassFqn('serviceCall$PMTask') : setCurrentMetaClassFqn('serviceCall');
 		}
 
 		setShowModal(true);
@@ -109,15 +109,15 @@ const ModalTask = (props: Props) => {
 				});
 
 				const workDate = {
-					PMFinDateEarly: newEndDate,
-					PMPlanDate: newStartDate,
+					registrationDate: newEndDate,
+					stateStartTime: newStartDate,
 					title: currentValue
 				};
 
 				const tasksTwo = gantt.getTaskByTime();
 
 				tasks.push(tasksTwo[tasksTwo.length - 1]);
-				dispatch(postNewWorkData(workDate, currentMetaClassFqn, taskId));
+				dispatch(postNewWorkData(workDate, currentMetaClassFqn));
 				dispatch(setColumnTask(tasks));
 				gantt.render();
 			} else {
@@ -128,8 +128,8 @@ const ModalTask = (props: Props) => {
 						i.code1 = currentValue;
 
 						const workDate = {
-							PMFinDateEarly: newEndDate,
-							PMPlanDate: newStartDate,
+							registrationDate: newEndDate,
+							stateStartTime: newStartDate,
 							title: currentValue
 						};
 

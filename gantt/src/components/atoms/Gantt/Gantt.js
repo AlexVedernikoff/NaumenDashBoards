@@ -1,11 +1,10 @@
 // @flow
 import './styles.less';
-import 'naumen-gantt/codebase/dhtmlxgantt.css';
+import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
 import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
 import {deepClone, shiftTimeZone} from 'helpers';
-import {gantt} from 'naumen-gantt';
-import Modal from 'src/components/atoms/Modal';
+import {gantt} from 'dhtmlx-gantt';
 import ModalTask from 'components/atoms/ModalTask';
 import {postEditedWorkData, setColumnSettings, setColumnTask} from 'store/App/actions';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
@@ -172,6 +171,10 @@ const Gantt = (props: Props) => {
 			const {saveChangedWorkInterval, saveChangedWorkProgress} = props;
 
 			newTasks.forEach(i => {
+				i.code1 = task.text;
+				i.title = task.text;
+				i.text = task.text;
+
 				if (i.id === task.id) {
 					i.start_date = startDate;
 					i.end_date = endDate;
@@ -187,9 +190,7 @@ const Gantt = (props: Props) => {
 			);
 			task.start_date = startDate;
 			task.end_date = endDate;
-
 			saveChangedWorkProgress(task.id, task.progress);
-
 			dispatch(setColumnTask(newTasks));
 		}, 100));
 
@@ -365,7 +366,7 @@ const Gantt = (props: Props) => {
 				for (const key in i) {
 					if (key === state.columnName) {
 						i[key] = state.newValue;
-						i.text = i.code1;
+						i.text = state.newValue;
 					}
 				}
 			}

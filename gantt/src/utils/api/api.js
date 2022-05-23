@@ -260,9 +260,9 @@ export default class Api {
 	* @param {string} workUUID - индификатор работы
 	* @param {string} timezone - таймзона
 	*/
-	async addNewWork (workData: WorkData, classFqn: string, timezone: string, workUUID: string) {
+	async addNewWork (workData: WorkData, classFqn: string, timezone: string) {
 		const url = `exec-post?func=modules.ganttWorkHandler.addNewWork&params=requestContent,user`;
-		const body = {classFqn, timezone, workData, workUUID};
+		const body = {classFqn, timezone, workData};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -275,7 +275,7 @@ export default class Api {
 	* Удаляет работу
 	* @param {string} workUUID - индификатор работы
 	*/
-	async deleteWor (workUUID) {
+	async deleteWorkDateRanges (workUUID) {
 		const url = `exec-post?func=modules.ganttWorkHandler.deleteWorkDateRanges&params=%27${workUUID}%27`;
 		const options = {
 			method: 'POST'
@@ -310,7 +310,7 @@ export default class Api {
 	 * @returns {ThunkAction}
 	 */
 	async getWorkAttributes (metaClassFqn, attributeGroupCode, workUUID: string) {
-		const url = `exec-post?func=modules.ganttWorkHandler.getWorkAttributes&params=%27${metaClassFqn}%27,%27${attributeGroupCode}%27,${null}`;
+		const url = `exec?func=modules.ganttWorkHandler.getWorkAttributes&params=%27${metaClassFqn}%27,%27${attributeGroupCode}%27,${null}`;
 		const options = {
 			method: 'GET'
 		};
