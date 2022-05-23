@@ -97,8 +97,8 @@ export type AppState = {
 };
 
 export type WorkData = {
-	PMFinDateEarly?: string,
-	PMPlanDate?: string,
+	registrationDate?: string,
+	stateStartTime?: string,
 	title: string
 };
 
