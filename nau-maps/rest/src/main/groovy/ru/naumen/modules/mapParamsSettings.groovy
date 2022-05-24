@@ -30,7 +30,6 @@ def getObjects()
     }
     return trails + additionalEquipment + points + additionalSections
 }
-
 /**
  * Метод по "обрамлению" объекта трассы в правильный формат для фронта
  * @param trailBuilder - объект трассы собственного формата
@@ -38,11 +37,15 @@ def getObjects()
  */
 private def mapTrail(TrailBuilder trailBuilder)
 {
-    return trailBuilder ? [type        : trailBuilder.type,
-                           geopositions: trailBuilder.geopositions,
-                           parts       : trailBuilder.parts.findResults { mapSection(it) },
-                           equipments  : trailBuilder.equipments.findResults { mapPoint(it) },
-                           data        : trailBuilder] : [:]
+	def getSettingsWizardSettings = new SettingsProvider(api).getSettings().defaultVisualization
+	return trailBuilder ? [type        : trailBuilder.type,
+												 geopositions: trailBuilder.geopositions,
+												 parts       : trailBuilder.parts.findResults { mapSection(it) },
+												 equipments  : trailBuilder.equipments.findResults { mapPoint(it) },
+												 data        : trailBuilder,
+												 color       : getSettingsWizardSettings?.colour,
+												 opacity     : getSettingsWizardSettings?.opacity,
+												 weight      : getSettingsWizardSettings?.width] : [:]
 }
 
 /**
@@ -52,9 +55,9 @@ private def mapTrail(TrailBuilder trailBuilder)
  */
 private def mapSection(SectionBuilder sectionBuilder)
 {
-    return sectionBuilder ? [type        : sectionBuilder.type,
-                             geopositions: sectionBuilder.geopositions,
-                             data        : sectionBuilder] : [:]
+	return sectionBuilder ? [type        : sectionBuilder.type,
+													 geopositions: sectionBuilder.geopositions,
+													 data        : sectionBuilder] : [:]
 }
 
 /**
@@ -64,8 +67,12 @@ private def mapSection(SectionBuilder sectionBuilder)
  */
 private def mapPoint(BasePointBuilder basePointBuilder)
 {
-    return basePointBuilder ? [type        : MapObjectType.POINT,
-                               geopositions: basePointBuilder?.geopositions,
-                               icon        : basePointBuilder?.icon,
-                               data        : basePointBuilder] : [:]
+	def getSettingsWizardSettings = new SettingsProvider(api).getSettings().defaultVisualization
+	return basePointBuilder ? [type        : MapObjectType.POINT,
+														 geopositions: basePointBuilder?.geopositions,
+														 icon        : basePointBuilder?.icon,
+														 data        : basePointBuilder,
+														 color       : getSettingsWizardSettings?.colour,
+														 opacity     : getSettingsWizardSettings?.opacity,
+														 weight      : getSettingsWizardSettings?.width] : [:]
 }
