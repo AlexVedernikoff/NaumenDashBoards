@@ -58,15 +58,18 @@
 		display: flex;
 		height: 32px;
 		justify-content: space-between;
+		margin-bottom: 30px;
 		max-width: 80%;
-		overflow: hidden;
-		padding: 0 12px;
 		width: 100%;
 
 		input {
 			border: none;
 			font-size: 13px;
 			width: calc(100% - 24px);
+		}
+
+		&:last-child {
+			margin-bottom: 0;
 		}
 	}
 
@@ -113,6 +116,11 @@
 		}
 	}
 
+	.itemBlock {
+		display: flex;
+		justify-content: space-between;
+	}
+
 	.leftContainer {
 		align-items: center;
 		box-sizing: border-box;
@@ -121,6 +129,16 @@
 		justify-content: left;
 		padding: 8px 10px;
 		width: 100%;
+	}
+
+	.listTitle {
+		padding-left: 0;
+		margin: 0;
+
+		div {
+			cursor: pointer;
+			margin-bottom: 10px;
+		}
 	}
 
 	.unActive {

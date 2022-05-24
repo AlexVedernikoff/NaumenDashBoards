@@ -135,7 +135,7 @@ export default class FakeApi {
 		];
 	}
 
-	getGanttVersionsSettingsFromDiagramVersionKey () {
+	getGanttVersionsSettings () {
 		return 'GantVersion';
 	}
 
@@ -153,5 +153,13 @@ export default class FakeApi {
 
 	openFilterForm (context) {
 		return String(context);
+	}
+
+	saveGanttVersionSettingsRequest () {
+		return 'root$101';
+	}
+
+	deleteGanttVersionSettingsRequest () {
+		return 'root$101';
 	}
 }

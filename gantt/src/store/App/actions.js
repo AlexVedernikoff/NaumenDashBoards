@@ -14,7 +14,7 @@ import {
 	getDiagramData,
 	getGanttVersionDiagramData,
 	getGanttVersionTitlesAndKeys,
-	getGanttVersionsSettingsFromDiagramVersionKey,
+	getGanttVersionsSettings,
 	getInitialSettings,
 	getUserData,
 	getWorkAttributes,
@@ -85,7 +85,7 @@ const getVersionSettingsAll = (diagramKey: string): ThunkAction => async (dispat
 */
 const getVersionSettings = (versionKey:string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const version = await getGanttVersionsSettingsFromDiagramVersionKey(versionKey);
+		const version = await getGanttVersionsSettings(versionKey);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -735,6 +735,7 @@ export {
 	setCurrentValueForInterval,
 	setDiagramLinksData,
 	setDiagramData,
+	setListVersions,
 	setRangeTime,
 	setResourceSettings,
 	showLoaderSettings,
