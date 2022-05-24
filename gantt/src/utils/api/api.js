@@ -34,8 +34,8 @@ export default class Api {
 	* @param {string} versionKey - ключ диаграммы версий
 	* @return {ThunkAction}
 	*/
-	async getGanttVersionsSettingsFromDiagramVersionKey (versionKey: string) {
-		const url = `exec?func=modules.ganttSettings.getGanttVersionsSettingsFromDiagramVersionKey&params=%27${versionKey}%27`;
+	async getGanttVersionsSettings (versionKey: string) {
+		const url = `exec?func=modules.ganttSettings.getGanttVersionsSettings&params=%27${versionKey}%27`;
 		const options = {
 			method: 'GET'
 		};
@@ -50,7 +50,7 @@ export default class Api {
 	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
 	* @param {string} subjectUUID - UUID объекта
 	*/
-	async saveGanttVersionSettingsRequest (title: string, createdDate: string, contentCode: string, subjectUUID: string) {
+	async saveGanttVersionSettingsRequest (contentCode: string, createdDate: string, subjectUUID: string, title: string) {
 		const url = `exec-post?func=modules.ganttSettings.saveGanttVersionSettings&params=requestContent,user`;
 		const body = {contentCode, createdDate, subjectUUID, title};
 		const options = {

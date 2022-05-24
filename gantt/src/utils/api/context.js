@@ -24,8 +24,8 @@ const getGanttVersionTitlesAndKeys = async (diagramKey: string): Promise<Params>
 * @param {string} versionKey - ключ диаграммы версий
 * @return {Promise<Params>}
 */
-const getGanttVersionsSettingsFromDiagramVersionKey = async (versionKey: string): Promise<Params> => {
-	return api.getGanttVersionsSettingsFromDiagramVersionKey(versionKey);
+const getGanttVersionsSettings = async (versionKey: string): Promise<Params> => {
+	return api.getGanttVersionsSettings(versionKey);
 };
 
 /**
@@ -35,7 +35,7 @@ const getGanttVersionsSettingsFromDiagramVersionKey = async (versionKey: string)
 * @param {string} contentCode - ключ контента, на котором расположена диаграмма
 * @param {string} subjectUUID - UUID объекта
 */
-const saveGanttVersionSettingsRequest = async (title: string, createdDate: string, contentCode: string, subjectUUID: string): Promise<Params> => {
+const saveGanttVersionSettingsRequest = async (contentCode: string, createdDate: string, subjectUUID: string, title: string): Promise<Params> => {
 	api.saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUUID, title);
 };
 
@@ -338,7 +338,7 @@ export {
 	getDiagramData,
 	getGanttVersionDiagramData,
 	getGanttVersionTitlesAndKeys,
-	getGanttVersionsSettingsFromDiagramVersionKey,
+	getGanttVersionsSettings,
 	getInitialParams,
 	getInitialSettings,
 	getWorkPageLink,

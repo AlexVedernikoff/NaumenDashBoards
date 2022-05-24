@@ -4,6 +4,7 @@ import FakeApi from './fakeApi';
 import {
 	addNewWork,
 	deleteWorkDateRanges,
+	deleteGanttVersionSettingsRequest,
 	editWorkData,
 	getAttributeGroups,
 	getContext,
@@ -12,7 +13,7 @@ import {
 	getDataSourceAttributesByTypes,
 	getDataSources,
 	getDiagramData,
-	getGanttVersionsSettingsFromDiagramVersionKey,
+	getGanttVersionsSettings,
 	getInitialParams,
 	getInitialSettings,
 	getUserData,
@@ -23,15 +24,17 @@ import {
 	postChangedWorkProgress,
 	postChangedWorkRelations,
 	getGanttVersionTitlesAndKeys,
-	saveData
+	saveData,
+	saveGanttVersionSettingsRequest
 } from './context';
 
 export {
 	addNewWork,
 	deleteWorkDateRanges,
+	deleteGanttVersionSettingsRequest,
 	editWorkData,
 	getAttributeGroups,
-	getGanttVersionsSettingsFromDiagramVersionKey,
+	getGanttVersionsSettings,
 	getWorkAttributes,
 	getContext,
 	getCurrentUser,
@@ -48,7 +51,8 @@ export {
 	postChangedWorkInterval,
 	postChangedWorkProgress,
 	getGanttVersionTitlesAndKeys,
-	saveData
+	saveData,
+	saveGanttVersionSettingsRequest
 };
 
 export const api = process.env.NODE_ENV === 'development' ? new FakeApi() : new Api();

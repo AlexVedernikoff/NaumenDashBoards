@@ -16,6 +16,7 @@ const АctionBar = props => {
 	const [active, setActive] = useState(true);
 	const [inputStartDate, setInputStartDate] = useState(new Date(props.startDate).toLocaleString());
 	const [inputEndDate, setInputEndDate] = useState(new Date(props.endDate).toLocaleString());
+	const [nameValue, setNameValue] = useState('');
 	const [showModal, setShowModal] = useState(false);
 	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
@@ -42,7 +43,7 @@ const АctionBar = props => {
 
 	useEffect(() => {
 		if (typeof endDate !== 'string' && typeof startDate !== 'string') {
-			const inputEndDate  = new Date(endDate).toLocaleString(endDate);
+			const inputEndDate = new Date(endDate).toLocaleString(endDate);
 			const inputstartDate = new Date(startDate).toLocaleString(startDate);
 
 			setInputEndDate(inputEndDate);
@@ -233,6 +234,18 @@ const АctionBar = props => {
 		setShowModalConfirmation(!showModalConfirmation);
 	};
 
+	const changeNameValue = target => {
+		setNameValue(target.value);
+	};
+
+	const submitSaveVersion = () => {
+		const title = deepClone(nameValue);
+
+		props.savedGanttVersionSettings(title, new Date().toLocaleString());
+
+		setShowModalSave(!showModalSave);
+	};
+
 	const renderModalSecondLevel = () => {
 		if (showModalSave) {
 			return (
@@ -240,14 +253,14 @@ const АctionBar = props => {
 					className={styles.modal}
 					notice={true}
 					onClose={() => setShowModalSave(!showModalSave)}
-					onSubmit={() => sibmitSave()}
+					onSubmit={submitSaveVersion}
 					submitText="Сохранить"
 				>
 					<div className={styles.inputInnerwrapper}>
-						<label htmlFor="name">Название:</label> <TextInput label="Название" maxLength={30} onChange={changeEndDate} value={inputEndDate} />
+						<TextInput label="Название" maxLength={30} onChange={changeNameValue} value={nameValue} />
 					</div>
 					<div className={styles.inputInnerwrapper}>
-						<label htmlFor="date">Дата и время:</label> <TextInput label="Дата и время" maxLength={30} onChange={changeEndDate} placeholder="дд.мм.гггг, чч:мм:сс" value={inputEndDate} />
+						<TextInput label="Дата и время создания" maxLength={30} placeholder="дд.мм.гггг, чч:мм:сс" value={new Date().toLocaleString()} />
 					</div>
 				</Modal>
 			);
@@ -302,9 +315,21 @@ const АctionBar = props => {
 		setShowListVersions(!showListVersions);
 	};
 
+	const selectedVersion = version => {
+		props.getVersionSettings(version[0].diagramKey);
+		handleModalClose();
+	};
+
+	const deleteVersion = (title, diagramKey) => {
+		const versions = deepClone(props.versions).filter(version => version[0].title !== title);
+
+		props.deleteGanttVersionSettings(diagramKey);
+		props.setListVersions(versions);
+	};
+
 	const renderVersion = (version) => {
 		return (
-			<div key={version[0].diagramKey} onClick={() => props.getVersionSettings(version[0].diagramKey)}>{version[0].title}</div>
+			<div className={styles.itemBlock}><div key={version[0].diagramKey} onClick={() => selectedVersion(version)}>{version[0].title}</div><div onClick={() => deleteVersion(version[0].title, version[0].diagramKey)}>Удалить</div></div>
 		);
 	};
 
@@ -320,7 +345,7 @@ const АctionBar = props => {
 					onSubmit={handleModalClose}
 					submitText="Закрыть"
 				>
-					<ul>
+					<ul className={styles.listTitle}>
 						{renderVersions()}
 					</ul>
 				</Modal>
