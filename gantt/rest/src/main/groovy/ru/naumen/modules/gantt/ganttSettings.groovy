@@ -208,7 +208,7 @@ class GanttSettingsImpl implements GanttSettingsController
 @Singleton
 class GanttSettingsService
 {
-    private static final String GANTT_VERSION_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss"
+    private static final String GANTT_VERSION_DATE_PATTERN = "dd.MM.yyyy, HH:mm:ss"
     private static final String MAIN_FQN = 'abstractBO'
     private static final String OLD_GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'

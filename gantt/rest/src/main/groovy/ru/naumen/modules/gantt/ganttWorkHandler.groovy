@@ -325,13 +325,19 @@ class GanttWorkHandlerService
                         getWorkRelatedEntitiesWithExceededDeadline(work, work, newDateToUpdate)
 
                     String attributeCode = null
-                    String metaClassId = work.getMetaClass().getId()
+                    Object metaClass = api.metainfo.getMetaClass(work.getMetaClass())
+                    String metaClassCode = metaClass.code
+                    String parentMetaClassCode = metaClass.parent?.code
                     ganttSettings.resourceAndWorkSettings.find {
-                        if (it.source.value.value == metaClassId)
+                        if (it.source.value.value in [metaClassCode, parentMetaClassCode])
                         {
                             attributeCode =
                                 workDateData.dateType == WorkEditDateType.startDate ?
                                     it.startWorkAttribute.code : it.endWorkAttribute.code
+                            if (attributeCode.contains('@'))
+                            {
+                                attributeCode = attributeCode.split('@').last()
+                            }
                         }
                     }
 
@@ -344,7 +350,7 @@ class GanttWorkHandlerService
         }
         catch (Exception e)
         {
-            return EditWorkDateRangesResponse(errorMessage: e.message)
+            return new EditWorkDateRangesResponse(errorMessage: e.message)
         }
     }
 
@@ -513,13 +519,19 @@ class GanttWorkHandlerService
                     Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone)
 
                 String attributeCode = null
-                String metaClassId = work.getMetaClass().getId()
+                Object metaClass = api.metainfo.getMetaClass(work.getMetaClass())
+                String metaClassCode = metaClass.code
+                String parentMetaClassCode = metaClass.parent?.code
                 ganttVersionSettings.ganttSettings.resourceAndWorkSettings.find {
-                    if (it.source.value.value == metaClassId)
+                    if (it.source.value.value in [metaClassCode, parentMetaClassCode])
                     {
                         attributeCode =
                             workDateData.dateType == WorkEditDateType.startDate ?
                                 it.startWorkAttribute.code : it.endWorkAttribute.code
+                        if (attributeCode.contains('@'))
+                        {
+                            attributeCode = attributeCode.split('@').last()
+                        }
                     }
                 }
 
@@ -530,11 +542,11 @@ class GanttWorkHandlerService
             }
 
             if (
-            ganttSettingsService.saveJsonSettings(
-                versionKey,
-                Jackson.toJsonString(ganttVersionSettings),
-                GanttSettingsService.GANTT_VERSION_NAMESPACE
-            )
+                ganttSettingsService.saveJsonSettings(
+                    versionKey,
+                    Jackson.toJsonString(ganttVersionSettings),
+                    GanttSettingsService.GANTT_VERSION_NAMESPACE
+                )
             )
             {
                 return new EditWorkDateRangesResponse(updated: true)
