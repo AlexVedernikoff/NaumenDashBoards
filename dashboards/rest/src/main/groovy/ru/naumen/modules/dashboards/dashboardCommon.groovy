@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import ru.naumen.core.shared.dto.ISDtObject
+import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 
 import java.util.concurrent.TimeUnit
 import com.fasterxml.jackson.core.type.TypeReference
@@ -553,6 +554,39 @@ class DashboardUtils
         /* Полученное смещение возвращается с отрицательным знаком,
            чтобы можно было прибавлять его методом DateUtils.addMinutes. */
         return -offset
+    }
+
+    /**
+     * Метод определяющий режим отладки
+     * @return флаг на включение режима отладки
+     */
+    static Boolean isDebugMode()
+    {
+        Boolean isDebugMode = false
+        ISDtObject rootObject = getApi().utils.findFirst('root', [:])
+        IMetaClassWrapper rootMetaInfo = getApi().metainfo.getMetaClass(rootObject.getMetaClass())
+
+        if (rootMetaInfo.hasAttribute('debugMode'))
+        {
+            isDebugMode = rootObject.debugMode
+        }
+
+        return isDebugMode
+    }
+
+    /**
+     * Метод логирования данных
+     * @param moduleName - названия модуля
+     * @param rowNumber - номер строки
+     * @param variableName - название переменной
+     * @param value - значение
+     */
+    static void log(String moduleName, Integer rowNumber, String variableName, String value)
+    {
+        if (isDebugMode())
+        {
+            getLogger().info("DASHBOARD_LOG ${moduleName} ${rowNumber} ${variableName} = ${value}")
+        }
     }
 
     /**
