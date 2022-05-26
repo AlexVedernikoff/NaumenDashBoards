@@ -55,7 +55,7 @@ class GanttDataSetImpl implements GanttDataSetController
     @Override
     String getGanttVersionDiagramData(String versionKey, IUUIDIdentifiable user, String timezone)
     {
-        return service.getGanttVersionDiagramData(versionKey, user, timezone)
+        return toJson(service.getGanttVersionDiagramData(versionKey, user, timezone))
     }
 }
 
@@ -102,6 +102,15 @@ class GanttDataSetService
             Date ed = Date.parse("yyyy-MM-dd'T'HH:mm:ss", endDate)
             data.startDate = sd.format(GANTT_DATE_PATTERN)
             data.endDate = ed.format(GANTT_DATE_PATTERN)
+        }
+
+        GanttWorkHandlerService ganttWorkHandlerService = GanttWorkHandlerService.instance
+        settings.resourceAndWorkSettings.each {
+            String metaClassCode = it.source.value.value
+            data.attributesMap.put(
+                metaClassCode,
+                ganttWorkHandlerService.getAttributeGroups(metaClassCode)
+            )
         }
 
         if (!(settings?.resourceAndWorkSettings))
