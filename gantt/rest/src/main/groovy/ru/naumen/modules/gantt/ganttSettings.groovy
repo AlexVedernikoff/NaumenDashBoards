@@ -253,6 +253,17 @@ class GanttSettingsService
     {
         def metaInfo = api.metainfo.getMetaClass(request.classFqn)
         def metaClassTypes = api.metainfo.getTypes(request.classFqn)
+        List<String> parentMetaClassCodes = []
+
+        if (request.parentClassFqn)
+        {
+            def metaClass = api.metainfo.getMetaClass(request.parentClassFqn)
+            parentMetaClassCodes << metaClass.code
+            while (metaClass = metaClass.parent)
+            {
+                parentMetaClassCodes << metaClass.code
+            }
+        }
 
         Collection<Attribute> attributes = ([metaInfo] + metaClassTypes).collectMany { mc ->
             def attributes = request.types
@@ -265,7 +276,7 @@ class GanttSettingsService
             {
                 attributes = attributes.findAll {
                     it.type.code in AttributeType.LINK_TYPES &&
-                    it.type.relatedMetaClass.code == request.parentClassFqn ? it : null
+                    it.type.relatedMetaClass.code in parentMetaClassCodes ? it : null
                 }
             }
 
