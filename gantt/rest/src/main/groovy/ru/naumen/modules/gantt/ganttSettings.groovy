@@ -63,10 +63,10 @@ interface GanttSettingsController
 
     /**
      * Метод получения названий и ключей версий диаграммы
-     * @param diagramKey - ключ диаграммы
+     * @param requestContent - тело запроса
      * @return список названий и ключей диаграмм версий
      */
-    String getGanttVersionTitlesAndKeys(String diagramKey)
+    String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent)
 
     /**
      * Метод получения настроек из хранилища
@@ -163,9 +163,9 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String getGanttVersionTitlesAndKeys(String diagramKey)
+    String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent)
     {
-        return Jackson.toJsonString(service.getGanttVersionTitlesAndKeys(diagramKey))
+        return Jackson.toJsonString(service.getGanttVersionTitlesAndKeys(requestContent.diagramKey))
     }
 
     @Override
@@ -381,14 +381,29 @@ class GanttSettingsService
             ? Jackson.fromJsonString(ganttSettingsJsonValue, GanttSettingsClass)
             : new GanttSettingsClass()
 
-        return ganttSettings.diagramVersionsKeys.collect {
+        Collection<String> versionKeysToRemove = []
+
+        Collection<Map<String, String>> result = ganttSettings.diagramVersionsKeys.findResults {
             GanttVersionsSettingsClass ganttVersionSettings = getGanttVersionsSettings(it)
 
-            return [
-                'title': ganttVersionSettings.title,
-                'diagramKey': ganttVersionSettings.versionKey
-            ]
+            if (ganttVersionSettings.title)
+            {
+                return [
+                    'title': ganttVersionSettings.title,
+                    'diagramKey': ganttVersionSettings.versionKey
+                ]
+            }
+            else
+            {
+                versionKeysToRemove << it
+                return null
+            }
         }
+
+        ganttSettings.diagramVersionsKeys -= versionKeysToRemove
+        saveJsonSettings(diagramKey, toJson(ganttSettings))
+
+        return result
     }
 
     /**
@@ -1105,6 +1120,10 @@ class GanttDiagramData extends BaseGanttDiagramData
      * Данные для построения диаграммы
      */
     def tasks
+    /**
+     * Коды групп атрибутов, сгруппированные по метаклассу работ
+     */
+    Map<String, Collection> attributesMap = [:]
     /**
      * Настройки для источников - старт работ
      */
