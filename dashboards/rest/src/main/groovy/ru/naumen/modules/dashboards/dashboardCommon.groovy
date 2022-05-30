@@ -60,6 +60,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import ru.naumen.core.shared.IUUIDIdentifiable
+import ru.naumen.commons.shared.FxException
+import groovy.json.JsonSlurper
 
 import javax.transaction.Transaction
 import java.util.stream.Stream
@@ -516,6 +518,11 @@ class DashboardUtils
     static final Integer maxValuesCount = 40000
 
     /**
+     * Неймспейс для хранения дашбордов
+     */
+    private static final String DASHBOARD_NAMESPACE = 'dashboards'
+
+    /**
      * Метод возвращает смещение часового пояса пользователя относительно серверного времени
      * @param userUUID - уникальный идентификатор пользователя
      * @param offsetUTCMinutesFromBrowser - смещение в минутах относительно 0 часового пояса, полученное с фронта
@@ -554,6 +561,136 @@ class DashboardUtils
         /* Полученное смещение возвращается с отрицательным знаком,
            чтобы можно было прибавлять его методом DateUtils.addMinutes. */
         return -offset
+    }
+
+    /**
+     * Метод корректировки виджетов, в дескрипторе которых ошибка
+     * @param widgetKeys - ключи виджетов, которые нужно скорректировать
+     */
+    static void correctWidgetsWithDescriptorError(Collection<String> widgetKeys)
+    {
+        JsonSlurper slurper = new JsonSlurper()
+        DashboardConfigService service = DashboardConfigService.instance
+
+        List allDashboardKeys = service.getDashboardKeys('widgets', DASHBOARD_NAMESPACE)
+        allDashboardKeys += service.getDashboardKeys('widgetIds', DASHBOARD_NAMESPACE)
+
+        allDashboardKeys.each { dashboardKey ->
+            String dashboardSettings = getApi().keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
+            Map<String, Object> dashboard = slurper.parseText(dashboardSettings)
+            Collection<Map<String, Object>> widgets = dashboard.widgets.findResults {
+                if (it in String)
+                {
+                    return slurper.parseText(it)
+                }
+                return it
+            }
+
+            widgets.each { widget ->
+                if (!(widget.id in widgetKeys) || !hasWidgetDescriptorError(widget))
+                {
+                    return
+                }
+                widget.data?.each { data ->
+                    if (!data.source?.descriptor)
+                    {
+                        return
+                    }
+                    Map<String, Object> descriptor = slurper.parseText(data.source.descriptor)
+                    String cartObjectMetaClassCode = descriptor.cardObjectUuid.split('\\$').first()
+                    ISDtObject existingObject = getUtils().findFirst(cartObjectMetaClassCode, [:])
+                    descriptor.cardObjectUuid = existingObject.UUID
+                    data.source.descriptor = toJson(descriptor)
+                }
+            }
+            dashboard.widgets = widgets
+            getApi().keyValue.put(DASHBOARD_NAMESPACE, dashboardKey, toJson(dashboard))
+        }
+    }
+
+    /**
+     * Метод получения данных о виджетах, в дескрипторе которых ошибка
+     * @param getOnlyKeys - флаг на получение только ключей виджетов или более подобрных данных
+     * @return данные о виджетах, у которых в дескрипторе ошибка
+     */
+    static Collection<Object> getWidgetsDataWithDescriptorError(Boolean getOnlyKeys = false)
+    {
+        JsonSlurper slurper = new JsonSlurper()
+        DashboardConfigService service = DashboardConfigService.instance
+
+        List allDashboardKeys = service.getDashboardKeys('widgets', DASHBOARD_NAMESPACE)
+        allDashboardKeys += service.getDashboardKeys('widgetIds', DASHBOARD_NAMESPACE)
+
+        Collection<Map<String, Object>> allWidgets = allDashboardKeys.collectMany { dashboardKey ->
+            String dashboardSettings = getApi().keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
+            Map<String, Object> dashboard = slurper.parseText(dashboardSettings)
+            return dashboard.widgets.findResults {
+                if (it in String)
+                {
+                    return slurper.parseText(it)
+                }
+                return it
+            }
+        }
+
+        Collection<Map<String, Object>> widgetsWithError =
+            allWidgets.findAll(this.&hasWidgetDescriptorError)
+
+        Collection<Object> widgetsWithErrorData
+        if (getOnlyKeys)
+        {
+            widgetsWithErrorData = widgetsWithError.collect {
+                return it.id
+            }
+        }
+        else
+        {
+            widgetsWithErrorData = widgetsWithError.collect {
+                Map<String, Object> dataWithDescriptor = getFirstWidgetDataWithDescriptor(it)
+                Map<String, Object> descriptor =
+                    slurper.parseText(dataWithDescriptor.source.descriptor)
+
+                return [
+                    'name'          : it.name,
+                    'id'            : it.id,
+                    'cartObjectUUID': descriptor.cardObjectUuid
+                ]
+            }
+        }
+
+        return widgetsWithErrorData
+    }
+
+    /**
+     * Метод проверки объекта, на карточке которого находится виджет
+     * @param widget - виджет
+     * @return флаг - существует ли объект, на карточке которого находится виджет
+     */
+    static Boolean hasWidgetDescriptorError(Map<String, Object> widget)
+    {
+        JsonSlurper slurper = new JsonSlurper()
+        Map<String, Object> dataWithDescriptor = getFirstWidgetDataWithDescriptor(widget)
+        Boolean isWidgetWithError = false
+
+        if (dataWithDescriptor?.source?.descriptor)
+        {
+            Map<String, Object> descriptor = slurper.parseText(dataWithDescriptor.source.descriptor)
+            isWidgetWithError = !getApi().utils.load(descriptor.cardObjectUuid)
+        }
+
+        return isWidgetWithError
+    }
+
+    /**
+     * Метод получения первой настройки виджета data, у которой есть дескриптор
+     * @param widget - виджет
+     * @return настройка data
+     */
+    static Map<String, Object> getFirstWidgetDataWithDescriptor(Map<String, Object> widget)
+    {
+        return widget.data.find {
+            return it.source?.descriptor
+        }
     }
 
     /**
@@ -1150,7 +1287,7 @@ class DashboardUtils
     {
         if(widget && widget.type != DiagramType.TEXT)
         {
-            def slurper = new groovy.json.JsonSlurper()
+            JsonSlurper slurper = new JsonSlurper()
             widget?.data?.each { data ->
                 def descriptor = data?.source?.descriptor
                 if(descriptor)
@@ -4384,7 +4521,7 @@ class WidgetFilterResponse
 
     static Collection<WidgetFilterResponse> getWidgetFiltersCollection(def fields)
     {
-        def slurper = new groovy.json.JsonSlurper()
+        JsonSlurper slurper = new JsonSlurper()
         if(fields instanceof String)
         {
             fields =  slurper.parseText(fields)
