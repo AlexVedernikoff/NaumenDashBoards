@@ -460,7 +460,14 @@ class GanttSettingsService
             {
                 String startAttributeCode = it.startWorkAttribute.code
                 String endAttributeCode = it.endWorkAttribute.code
-                mapAttributes[it.source.value.value] = ['start_date': startAttributeCode,
+                String metaClassCode = it.source.value.value
+
+                if (metaClassCode.contains('$'))
+                {
+                    metaClassCode = metaClassCode.split('\\$').first()
+                }
+
+                mapAttributes[metaClassCode] = ['start_date': startAttributeCode,
                                                         'end_date'  : endAttributeCode]
             }
         }
@@ -473,10 +480,7 @@ class GanttSettingsService
         )
 
         List<Map<String, Object>> data = ganttDataSetService
-            .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null, null)
-
-        Map<String, String> metaClassMapAttributes = [:]
-        Map<String, Object> mapAttributesWork = [:]
+            .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null)
 
         data.each {
             DiagramEntity entity = new DiagramEntity()
@@ -485,13 +489,13 @@ class GanttSettingsService
             entity.parent = it.parent
             entity.sourceType = it.type as SourceType
 
-            String metaClassName = utils.get(entity.entityUUID).getMetainfo().toString()
-            metaClassMapAttributes = mapAttributes[metaClassName]
+            String metaClassCode = entity.entityUUID.split('\\$').first()
+            Map<String, String> metaClassMapAttributes = mapAttributes[metaClassCode]
 
             if (metaClassMapAttributes)
             {
-                mapAttributesWork[metaClassMapAttributes.start_date] = it.start_date
-                mapAttributesWork[metaClassMapAttributes.end_date] = it.end_date
+                entity.attributesData[metaClassMapAttributes.start_date] = it.start_date
+                entity.attributesData[metaClassMapAttributes.end_date] = it.end_date
             }
             ganttVersionSettings.diagramEntities << entity
         }

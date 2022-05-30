@@ -16,6 +16,7 @@ import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
 import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.shared.IUUIDIdentifiable
+import ru.naumen.core.shared.dto.ISDtObject
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 
@@ -31,12 +32,11 @@ interface GanttDataSetController
 
     /**
      * Метод получения данных для построения версий диаграммы Ганта
-     * @param versionKey - ключ версии диаграммы
+     * @param requestData - тело запроса
      * @param user - пользователь
-     * @param timezone - таймзона
      * @return данные для построения диаграммы Ганта
      */
-    String getGanttVersionDiagramData(String versionKey, IUUIDIdentifiable user, String timezone)
+    String getGanttVersionDiagramData(Map<String, String> requestData, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
@@ -53,9 +53,9 @@ class GanttDataSetImpl implements GanttDataSetController
     }
 
     @Override
-    String getGanttVersionDiagramData(String versionKey, IUUIDIdentifiable user, String timezone)
+    String getGanttVersionDiagramData(Map<String, String> requestData, IUUIDIdentifiable user)
     {
-        return toJson(service.getGanttVersionDiagramData(versionKey, user, timezone))
+        return toJson(service.getGanttVersionDiagramData(requestData.versionKey, user, requestData.timezone))
     }
 }
 
@@ -133,18 +133,7 @@ class GanttDataSetService
                 setWorkProgress(it, settings)
                 setColumnDateFormats(it, timezone)
             }
-            data.tasks = data.tasks.findResults{
-                def startAndEndDateExist = it.start_date && it.end_date
-                if (!startAndEndDateExist &&
-                    it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
-                {
-                    return null
-                }
-                else
-                {
-                    return it
-                }
-            }
+            data.tasks = filterTasksWithNoDateRanges(data.tasks)
         }
         return data
     }
@@ -186,8 +175,7 @@ class GanttDataSetService
         }
         else
         {
-            data.tasks =
-                buildDataListFromSettings(ganttVersionsSettings.ganttSettings.resourceAndWorkSettings, null, versionKey)
+            data.tasks = generateTasksForDiagramVersion(ganttVersionsSettings)
             TimeZone timeZone =
                 TimeZone.getTimeZone(
                     api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: timezone
@@ -200,11 +188,129 @@ class GanttDataSetService
             data.tasks.each {
                 formatWorkDates(it, workAttributeSettings, timeZone)
                 setWorkTypeToProjectIfItHasChildren(it, data.tasks)
-                setWorkProgressVersion(it, ganttVersionsSettings.ganttSettings)
+                setWorkProgressVersion(it, ganttVersionsSettings)
                 setColumnDateFormats(it, timeZone)
             }
+            data.tasks = filterTasksWithNoDateRanges(data.tasks)
         }
         return data
+    }
+
+    /**
+     * Метод фильтрации работ, у которых отсутствуют даты для отображения на диаграмме
+     * @param tasks - работы
+     * @return отфильтрованные работы
+     */
+    private Collection<Map<String, Object>> filterTasksWithNoDateRanges(Collection<Map<String, Object>> tasks)
+    {
+        return tasks.findResults {
+            Boolean startAndEndDateExist = it.start_date && it.end_date
+            if (!startAndEndDateExist &&
+                it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
+            {
+                return null
+            }
+            else
+            {
+                return it
+            }
+        }
+    }
+
+    /**
+     * Метод генерации данных версии диаграммы для отображения
+     * @param ganttVersionsSettings - настройки версии диаграммы
+     * @return данные версии диаграммы
+     */
+    private Collection<Map<String, Object>> generateTasksForDiagramVersion(
+        GanttVersionsSettingsClass ganttVersionsSettings)
+    {
+        Collection<Map<String, Object>> tasks = []
+
+        Map<String, Collection<DiagramEntity>> diagramEntitiesGroupedByMetaClassCode =
+            ganttVersionsSettings.diagramEntities.groupBy {
+                it.entityUUID.split('\\$').first()
+            }
+
+        ganttVersionsSettings.ganttSettings.resourceAndWorkSettings.each {
+            String settingsMetaClassCode = it.source.value.value
+            if (settingsMetaClassCode.contains('$'))
+            {
+                settingsMetaClassCode = settingsMetaClassCode.split('\\$').first()
+            }
+            Collection<DiagramEntity> diagramEntities =
+                diagramEntitiesGroupedByMetaClassCode[settingsMetaClassCode]
+            if (!diagramEntities)
+            {
+                return
+            }
+
+            Map<String, String> mapAttributes = ['id': 'UUID', 'text': 'title']
+            if (it.type as SourceType == SourceType.WORK)
+            {
+                if (it.startWorkAttribute)
+                {
+                    mapAttributes.start_date = it.startWorkAttribute.code.split('@').last()
+                }
+                if (it.endWorkAttribute)
+                {
+                    mapAttributes.end_date = it.endWorkAttribute.code.split('@').last()
+                }
+            }
+            it.attributeSettings.each {
+                mapAttributes[it.code] = it.attribute.code
+            }
+
+            diagramEntities.each { entity ->
+                Map<String, Object> task = [:]
+                task.parent = entity.parent
+                task.level = entity.sourceType as SourceType == SourceType.RESOURCE ? 0 : 1
+                task.type = entity.sourceType
+                mapAttributes.keySet().each { fieldCode ->
+                    task[fieldCode] =
+                        getAttributeValueForVersionEntity(entity, mapAttributes[fieldCode])
+                    if (task[fieldCode] && fieldCode in ['start_date', 'end_date'] && !(task[fieldCode] in Date))
+                    {
+                        task[fieldCode] = new Date(task[fieldCode])
+                    }
+                }
+                tasks << task
+            }
+        }
+
+        return tasks
+    }
+
+    /**
+     * Метод получения значения атрибута объекта для версии диаграммы
+     * @param entity - объект диаграммы
+     * @param attributeCode - код атрибута
+     * @return значение атрибута
+     */
+    private Object getAttributeValueForVersionEntity(DiagramEntity entity, String attributeCode)
+    {
+        Object value = null
+        if (entity.attributesData[attributeCode])
+        {
+            value = entity.attributesData[attributeCode]
+        }
+        else
+        {
+            ISDtObject entityInSystem = utils.load(entity.entityUUID)
+            if (entityInSystem)
+            {
+                if (api.metainfo.getMetaClass(entityInSystem).hasAttribute(attributeCode))
+                {
+                    value = entityInSystem[attributeCode]
+                    if (value in ISDtObject)
+                    {
+                        value = value.UUID
+                    }
+                }
+            }
+        }
+
+        return value
     }
 
     /**
@@ -248,9 +354,9 @@ class GanttDataSetService
      * @param work - работа
      * @param ganttSettings - настройки диаграммы, где хранится прогресс
      */
-    private void setWorkProgressVersion(Map work, GanttVersionsSettingsClass ganttSettings)
+    private void setWorkProgressVersion(Map work, GanttVersionsSettingsClass ganttVersionSettings)
     {
-        Double progress = ganttSettings.ganttSettings.workProgresses[work.id]
+        Double progress = ganttVersionSettings.ganttSettings.workProgresses[work.id]
         work.progress = progress ?: 0
     }
 
@@ -333,8 +439,7 @@ class GanttDataSetService
      * @return список Map<String, String> параметров для построения диаграммы
      */
     private List<Map<String, String>> buildDataListFromSettings(Collection<ResourceAndWorkSettings> settingsList,
-                                                                String parentUUID,
-                                                                String versionKey = null)
+                                                                String parentUUID)
     {
         /* За текущую настройку из списка настроек, берется 1-ый элемент settingsList[0]. В цикле совершается поиск таких
            настроек, для которых уровень вложенности level равен level-у текущей. Таким образом находятся по сути соседние
@@ -357,10 +462,6 @@ class GanttDataSetService
 
         // Closure для подготовки кодов аттрибутов для запроса в БД.
         //Closure prepare = { (it?.type in AttributeType.LINK_TYPES) ? ("${it.code}.title") : it.code }
-
-        GanttSettingsService service = GanttSettingsService.instance
-        GanttVersionsSettingsClass ganttVersionSettings =
-            service.getGanttVersionsSettings(versionKey)
 
         def result = []
         Closure updateIfMetaClass = { item, attr ->
@@ -426,19 +527,11 @@ class GanttDataSetService
             Source source = settings.source
             // Так как из БД нельзя получить повторяющиеся колонки, то имена атрибутов делаем уникальными.
             List<String> listAttributes = mapAttributes.values().toList().unique()
-            def res
-            if (versionKey)
-            {
-                res = ganttVersionSettings.diagramEntities
-            }
-            else
-            {
-                res = getListResultsForParent(
-                    source, mapAttributes['parent'], parentUUID?.takeWhile {
-                    it != '_'
-                }, listAttributes
-                )
-            }
+            List<List<String>> res = getListResultsForParent(
+                source, mapAttributes['parent'], parentUUID?.takeWhile {
+                it != '_'
+            }, listAttributes
+            )
 
             if (res)
             {
@@ -500,7 +593,7 @@ class GanttDataSetService
                         result.add(it)
                         // Рекурсивный вызов для "потомков". Список с настройками передается со второго элемента.
                         result.addAll(
-                            buildDataListFromSettings(settingsList[(i + 1)..-1], it['id'], null)
+                            buildDataListFromSettings(settingsList[(i + 1)..-1], it['id'])
                         )
                         return
                     }
