@@ -230,6 +230,22 @@ class DashboardConfigService
     }
 
     /**
+     * Метод получения ключей дашбордов
+     * @param objName - название объекта
+     * @param namespace - название неймспейса
+     * @return массив из ключей дашбордов
+     */
+    List getDashboardKeys(String objName, String namespace)
+    {
+        def slurper = new JsonSlurper()
+
+        return api.keyValue.find(namespace, '') { key, value ->
+            def settings = slurper.parseText(value)
+            settings.containsKey(objName)
+        }.keySet().toList()
+    }
+
+    /**
      * Метод получения ключей необходимых объектов
      * @param objName - название объекта
      * @param namespace - название неймспейса
@@ -245,22 +261,6 @@ class DashboardConfigService
         }.values().collectMany { el ->
             return el ? slurper.parseText(el)?.get(objName) : null
         }
-    }
-
-    /**
-     * Метод получения ключей дашбордов
-     * @param objName - название объекта
-     * @param namespace - название неймспейса
-     * @return массив из ключей дашбордов
-     */
-    private List getDashboardKeys(String objName, String namespace)
-    {
-        def slurper = new JsonSlurper()
-
-        return api.keyValue.find(namespace, '') { key, value ->
-            def settings = slurper.parseText(value)
-            settings.containsKey(objName)
-        }.keySet().toList()
     }
 
     /**
