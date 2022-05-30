@@ -1,6 +1,6 @@
 // @flow
 import type {AppState} from 'store/types';
-import type {ConnectedProps, WidgetProps} from './types';
+import type {ConnectedFunctions, ConnectedProps, WidgetProps} from './types';
 import {drillDown} from 'store/widgets/links/actions';
 import {fetchBuildData} from 'store/widgets/buildData/actions';
 import {getWidgetBuildData} from 'store/widgets/data/selectors';
@@ -16,8 +16,8 @@ export const props = (state: AppState, props: WidgetProps): ConnectedProps => {
 	};
 };
 
-export const functions = {
+export const functions: ConnectedFunctions = {
 	drillDown,
 	fetchBuildData,
-	setWarningMessage
+	setWidgetWarning: setWarningMessage
 };
