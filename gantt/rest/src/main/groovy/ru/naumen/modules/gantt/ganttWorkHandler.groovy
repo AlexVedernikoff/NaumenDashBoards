@@ -18,6 +18,7 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.core.server.script.api.metainfo.*
+import static groovy.json.JsonOutput.toJson
 
 @Field @Lazy @Delegate GanttWorkHandlerController ganttWorkHandler = new GanttWorkHandlerImpl()
 
@@ -160,8 +161,7 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
     @Override
     String getWorkAttributes(String metaClassFqn, String attributeGroupCode, String workUUID = null)
     {
-        return
-        Jackson.toJsonString(service.getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID))
+        return Jackson.toJsonString(service.getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID))
     }
 
     @Override
@@ -538,7 +538,7 @@ class GanttWorkHandlerService
                 DiagramEntity workToEdit = ganttVersionSettings.diagramEntities.find {
                     it.entityUUID == workDateData.workUUID
                 }
-                workToEdit.attributesData[attributeCode] = newDateToUpdate
+                workToEdit.attributesData[attributeCode] = newDateToUpdate.toTimestamp().getTime()
             }
 
             if (
@@ -558,7 +558,7 @@ class GanttWorkHandlerService
         }
         catch (Exception e)
         {
-            return EditWorkDateRangesResponse(errorMessage: e.message)
+            return new EditWorkDateRangesResponse(errorMessage: e.message)
         }
     }
 
