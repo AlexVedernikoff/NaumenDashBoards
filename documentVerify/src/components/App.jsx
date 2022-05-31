@@ -3,7 +3,7 @@ import 'styles/app.less';
 import DocumentVerifyContent from 'containers/DocumentVerifyContent';
 import DocumentVerifyPopup from 'containers/DocumentVerifyPopup';
 import DocumentVerifyTable from 'containers/DocumentVerifyTable';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Startup from 'containers/Startup';
 
 export const App = () => {
@@ -12,6 +12,15 @@ export const App = () => {
 	const onSwitchView = () => {
 		setSwitchView(!switchView);
 	};
+
+	useEffect(() => {
+		const checkHeight = window.setInterval(function () {
+			if (window.frameElement && window.frameElement.height) {
+				window.frameElement.setAttribute('style', `height:${window.frameElement.height}px`);
+				clearInterval(checkHeight);
+			}
+		}, 10);
+	});
 
 	return (
 		<Startup>
