@@ -16,6 +16,7 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import static MessageProvider.*
 import groovy.json.JsonSlurper
 import static groovy.json.JsonOutput.toJson
+import ru.naumen.core.server.script.api.DbApi$Query
 
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
@@ -34,21 +35,42 @@ trait CriteriaWrapper
         {
             criteria.add(api.whereClause.eq(api.selectClause.property('removed'), false))
         }
+        Boolean isDebugMode = DashboardUtils.isDebugMode()
         if(diagramType == DiagramType.TABLE)
         {
             if(paginationSettings)
             {
+                if (isDebugMode)
+                {
+                    DbApi$Query query = api.db.query(criteria)
+                    DashboardUtils.log('dashboardQueryWrapper', 43, 'query', query.hq.getQueryString())
+                }
                 return api.db.query(criteria).setFirstResult(paginationSettings.firstElementIndex).setMaxResults(paginationSettings.pageSize).list()
             }
             if (ignoreParameterLimit)
             {
+                if (isDebugMode)
+                {
+                    DbApi$Query query = api.db.query(criteria)
+                    DashboardUtils.log('dashboardQueryWrapper', 49, 'query', query.hq.getQueryString())
+                }
                 return api.db.query(criteria).list()
             }
             else
             {
+                if (isDebugMode)
+                {
+                    DbApi$Query query = api.db.query(criteria)
+                    DashboardUtils.log('dashboardQueryWrapper', 55, 'query', query.hq.getQueryString())
+                }
                 return api.db.query(criteria).setMaxResults(DashboardUtils.tableParameterLimit).list()
             }
 
+        }
+        if (isDebugMode)
+        {
+            DbApi$Query query = api.db.query(criteria)
+            DashboardUtils.log('dashboardQueryWrapper', 61, 'query', query.hq.getQueryString())
         }
         return api.db.query(criteria).setMaxResults(hasBreakdown ? 5000 : 100).list()
     }
