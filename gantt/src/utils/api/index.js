@@ -6,6 +6,7 @@ import {
 	deleteWorkDateRanges,
 	deleteGanttVersionSettingsRequest,
 	editWorkData,
+	editWorkDateRangesFromVersionRequest,
 	getAttributeGroups,
 	getContext,
 	getCurrentUser,
@@ -34,9 +35,9 @@ export {
 	deleteGanttVersionSettingsRequest,
 	editWorkData,
 	getAttributeGroups,
+	getContext,
 	getGanttVersionsSettings,
 	getWorkAttributes,
-	getContext,
 	getCurrentUser,
 	getDataSourceAttributes,
 	getDataSourceAttributesByTypes,
@@ -52,7 +53,8 @@ export {
 	postChangedWorkProgress,
 	getGanttVersionTitlesAndKeys,
 	saveData,
-	saveGanttVersionSettingsRequest
+	saveGanttVersionSettingsRequest,
+	editWorkDateRangesFromVersionRequest
 };
 
 export const api = process.env.NODE_ENV === 'development' ? new FakeApi() : new Api();

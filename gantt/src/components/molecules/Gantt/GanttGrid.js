@@ -7,9 +7,8 @@ import React from 'react';
 import styles from './styles.less';
 
 const GanttGrid = (props: Props) => {
-	const {allLinks, attributesMap, columns, getGanttData, getListOfWorkAttributes, loading, newTask, postNewWorkData, progress, progressCheckbox, resources, rollUp, saveChangedWorkInterval, saveChangedWorkProgress, saveChangedWorkRelations, scale, switchProgressCheckbox, tasks, workAttributes, workLink, workRelationCheckbox, workRelations} = props;
 
-	if (loading) {
+	if (props.loading) {
 		return (
 			<div className={styles.center}>
 				<Loader size={50} />
@@ -21,31 +20,33 @@ const GanttGrid = (props: Props) => {
 		<div style={{height: '100vh', width: '100%'}}>
 			<div className="gantt-container" style={{height: '100%', position: 'absolute', width: '100%'}}>
 				<Gantt
-					allLinks={allLinks}
-					attributesMap={attributesMap}
-					columns={columns}
+					allLinks={props.allLinks}
+					attributesMap={props.attributesMap}
+					columns={props.columns}
+					currentVersion={props.currentVersion}
+					editWorkDateRangesFromVersion={props.editWorkDateRangesFromVersion}
 					flag={props.flag}
-					getGanttData={getGanttData}
-					getListOfWorkAttributes={getListOfWorkAttributes}
-					newTask={newTask}
+					getGanttData={props.getGanttData}
+					getListOfWorkAttributes={props.getListOfWorkAttributes}
+					newTask={props.newTask}
 					postEditedWorkData={props.postEditedWorkData}
-					postNewWorkData={postNewWorkData}
-					progress={progress}
-					progressCheckbox={progressCheckbox}
+					postNewWorkData={props.postNewWorkData}
+					progress={props.progress}
+					progressCheckbox={props.progressCheckbox}
 					refresh={props.refresh}
-					resources={resources}
-					rollUp={rollUp}
-					saveChangedWorkInterval ={saveChangedWorkInterval }
-					saveChangedWorkProgress={saveChangedWorkProgress}
-					saveChangedWorkRelations={saveChangedWorkRelations}
-					scale={scale}
+					resources={props.resources}
+					rollUp={props.rollUp}
+					saveChangedWorkInterval ={props.saveChangedWorkInterval }
+					saveChangedWorkProgress={props.saveChangedWorkProgress}
+					saveChangedWorkRelations={props.saveChangedWorkRelations}
+					scale={props.scale}
 					style={{height: '100%', width: '100%'}}
-					switchProgressCheckbox={switchProgressCheckbox}
-					tasks={tasks}
-					workAttributes={workAttributes}
-					workLink={workLink}
-					workRelationCheckbox={workRelationCheckbox}
-					workRelations={workRelations}
+					switchProgressCheckbox={props.switchProgressCheckbox}
+					tasks={props.tasks}
+					workAttributes={props.workAttributes}
+					workLink={props.workLink}
+					workRelationCheckbox={props.workRelationCheckbox}
+					workRelations={props.workRelations}
 				/>
 			</div>
 		</div>

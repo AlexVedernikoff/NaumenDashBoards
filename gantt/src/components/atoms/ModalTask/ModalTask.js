@@ -1,12 +1,13 @@
 // @flow
-import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
+import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import cn from 'classnames';
 import {
 	Datepicker, IconButton, TextInput, Select
 } from 'naumen-common-components';
 import {deepClone} from 'helpers';
 import {deleteWork, getWorlLink, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
-import {gantt} from 'dhtmlx-gantt';
+import {gantt} from 'naumen-gantt';
+import {listMetaClass} from './consts';
 import Modal from 'components/atoms/Modal/Modal';
 import React, {useEffect, useState} from 'react';
 import styles from './styles.less';
@@ -36,10 +37,14 @@ const ModalTask = (props: Props) => {
 	gantt.showLightbox = id => {
 		setTaskId(id);
 		const task = gantt.getTask(id);
-		dispatch(getWorlLink(task.id));
-		const metaClass = toString(task.id).includes('employee');
 
-		if (metaClass) {
+		dispatch(getWorlLink(task.id));
+
+		const currentMetaClass = listMetaClass.find(metaclass => task.id.includes(metaclass));
+
+		setCurrentMetaClassFqn(currentMetaClass);
+
+		if (currentMetaClass) {
 			const listEmployeeAtrributes = attributesMap.employee?.map(i => {
 				return i.title;
 			});

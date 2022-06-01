@@ -1,10 +1,10 @@
 // @flow
 import './styles.less';
-import 'dhtmlx-gantt/codebase/dhtmlxgantt.css';
+import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import CheckedMenu from 'components/atoms/CheckedMenu';
 import {codeMainColumn} from 'src/store/App/constants';
 import {deepClone, shiftTimeZone} from 'helpers';
-import {gantt} from 'dhtmlx-gantt';
+import {gantt} from 'naumen-gantt';
 import ModalTask from 'components/atoms/ModalTask';
 import {postEditedWorkData, setColumnSettings, setColumnTask} from 'store/App/actions';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
@@ -14,8 +14,16 @@ import './gant-export';
 const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
-	const {attributesMap, columns, getListOfWorkAttributes, resources, rollUp, scale, tasks, workProgresses, workRelations} = props;
-	const [currentMetaClassFqn, setСurrentMetaClassFqn] = useState('');
+	const {
+		attributesMap,
+		columns,
+		currentVersion,
+		getListOfWorkAttributes,
+		resources, rollUp, scale,
+		tasks,
+		workProgresses,
+		workRelations
+	} = props;
 	const [showMenu, setShowMenu] = useState(false);
 	const [initPage, setInitPage] = useState(false);
 	const [res, setRes] = useState([]);
@@ -112,6 +120,7 @@ const Gantt = (props: Props) => {
 	};
 
 	useEffect(() => {
+		gantt.config.auto_scheduling = true;
 		gantt.config.autoscroll = true;
 		gantt.config.auto_scheduling = true;
 		gantt.config.columns = configureAdaptedColumns();
@@ -133,7 +142,12 @@ const Gantt = (props: Props) => {
 			props.saveChangedWorkRelations(links);
 		});
 
-		gantt.plugins({ multiselect: true });
+		gantt.plugins({
+			auto_scheduling: true,
+			marker: true,
+			multiselect: true,
+			tooltip: true
+		});
 
 		gantt.templates.parse_date = (dateStr) => {
 			const timezone = /(GMT.*\))/.exec(new Date(dateStr));
@@ -152,53 +166,8 @@ const Gantt = (props: Props) => {
 
 		handleHeaderClick();
 
-		gantt.plugins({
-			auto_scheduling: true
-		});
-
 		gantt.ext.zoom.init(zoomConfig);
-
-		gantt.attachEvent('onAfterTaskDrag', debounce(function (id) {
-			const task = gantt.getTask(id);
-			const newTasks = store.APP.tasks;
-
-			const deleteDeviationForEndDate = shiftTimeZone(task.end_date);
-			const deleteDeviationForStartDate = shiftTimeZone(task.start_date);
-
-			const startDate = gantt.date.add(new Date(task.start_date), deleteDeviationForStartDate, 'hour');
-			const endDate = gantt.date.add(new Date(task.end_date), deleteDeviationForEndDate, 'hour');
-
-			const {saveChangedWorkInterval, saveChangedWorkProgress} = props;
-
-			newTasks.forEach(i => {
-				i.code1 = task.text;
-				i.title = task.text;
-				i.text = task.text;
-
-				if (i.id === task.id) {
-					i.start_date = startDate;
-					i.end_date = endDate;
-					i.progress = task.progress;
-				}
-			});
-
-			saveChangedWorkInterval(
-				[
-					{dateType: 'startDate', value: startDate, workUUID: task.id},
-					{dateType: 'endDate', value: endDate, workUUID: task.id}
-				]
-			);
-			task.start_date = startDate;
-			task.end_date = endDate;
-			saveChangedWorkProgress(task.id, task.progress);
-			dispatch(setColumnTask(newTasks));
-		}, 100));
-
 		gantt.i18n.setLocale('ru');
-		gantt.plugins({marker: true});
-		gantt.plugins({
-			tooltip: true
-		});
 		gantt.templates.tooltip_text = function (start, end, task) {
 			return task[codeMainColumn];
 		};
@@ -221,7 +190,55 @@ const Gantt = (props: Props) => {
 
 			props.saveChangedWorkRelations(links);
 		});
+
+		gantt.config.auto_scheduling_compatibility = true;
+
+		gantt.config.auto_scheduling = true;
 	}, []);
+
+	gantt.attachEvent('onAfterTaskDrag', debounce(function (id) {
+		const task = gantt.getTask(id);
+		const newTasks = store.APP.tasks;
+
+		const deleteDeviationForEndDate = shiftTimeZone(task.end_date);
+		const deleteDeviationForStartDate = shiftTimeZone(task.start_date);
+
+		const startDate = gantt.date.add(new Date(task.start_date), deleteDeviationForStartDate, 'hour');
+		const endDate = gantt.date.add(new Date(task.end_date), deleteDeviationForEndDate, 'hour');
+
+		const {editWorkDateRangesFromVersion, saveChangedWorkInterval, saveChangedWorkProgress} = props;
+
+		newTasks.forEach(i => {
+			i.code1 = task.text;
+			i.title = task.text;
+			i.text = task.text;
+
+			if (i.id === task.id) {
+				i.start_date = startDate;
+				i.end_date = endDate;
+				i.progress = task.progress;
+			}
+		});
+
+		if (currentVersion === '') {
+			saveChangedWorkInterval(
+				[
+					{dateType: 'startDate', value: startDate, workUUID: task.id},
+					{dateType: 'endDate', value: endDate, workUUID: task.id}
+				]
+			);
+		} else {
+			editWorkDateRangesFromVersion(currentVersion, [
+				{dateType: 'startDate', value: startDate, workUUID: task.id},
+				{dateType: 'endDate', value: endDate, workUUID: task.id}
+			]);
+		}
+
+		task.start_date = startDate;
+		task.end_date = endDate;
+		saveChangedWorkProgress(task.id, task.progress);
+		dispatch(setColumnTask(newTasks));
+	}, 100));
 
 	// Изменяет прогресс в задачах при изменении store.APP.workProgresses
 	useEffect(() => {

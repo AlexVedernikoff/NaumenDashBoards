@@ -128,10 +128,14 @@ export default class FakeApi {
 		await new Promise(resolve => setTimeout(() => resolve(), 300));
 	}
 
+	async editWorkDateRangesFromVersionRequest () {
+		await new Promise(resolve => setTimeout(() => resolve(), 300));
+	}
+
 	getGanttVersionTitlesAndKeys () {
 		return [
-			[{'diagramKey': '4ab88ac6-9af9-49f4-9006-447216df1c97', 'title': 'test1'}],
-			[{'diagramKey': '4ab88ac6-9af9-49f4-9006-447216df1c98', 'title': 'test2'}]
+			{'diagramKey': '4ab88ac6-9af9-49f4-9006-447216df1c97', 'title': 'test1'},
+			{'diagramKey': '4ab88ac6-9af9-49f4-9006-447216df1c98', 'title': 'test2'}
 		];
 	}
 
