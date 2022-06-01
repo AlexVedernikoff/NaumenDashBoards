@@ -7,9 +7,11 @@ const schema = object({
 	...baseSchema,
 	data: array().of(object({
 		breakdown: mixed().when(DIAGRAM_FIELDS.type, {
-			else: mixed().requiredByCompute(array().conditionalBreakdown()),
+			/* eslint-disable sort-keys, sort-keys-fix/sort-keys-fix */
 			is: type => type === COMBO_TYPES.COLUMN_STACKED,
-			then: array().breakdown()
+			then: array().breakdown(false),
+			else: mixed().requiredByCompute(array().conditionalBreakdown(false))
+			/* eslint-enable */
 		}),
 		indicators: mixed().requiredByCompute(array().indicators(false)),
 		parameters: array().parameters(false),
