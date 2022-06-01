@@ -9,6 +9,7 @@ export const initialAppState: AppState = {
 	},
 	contentCode: '',
 	currentInterval: {},
+	currentVersion: '',
 	diagramKey: '',
 	endDate: new Date(),
 	errorCommon: false,

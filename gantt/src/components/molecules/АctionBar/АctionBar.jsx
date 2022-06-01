@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import {Datepicker} from 'components/molecules/Datepicker/Datepicker.jsx';
 import {deepClone} from 'helpers';
 import {functions, props} from 'components/organisms/FormPanel/selectors';
+import {gantt} from 'naumen-gantt';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import React, {useEffect, useState} from 'react';
@@ -11,6 +12,7 @@ import {ScaleNames} from 'components/organisms/FormPanel/consts';
 import styles from './styles.less';
 import Modal from 'components/atoms/Modal/Modal';
 import {TextInput} from 'components/atoms/TextInput/TextInput';
+import {useDispatch} from 'react-redux';
 
 const АctionBar = props => {
 	const [active, setActive] = useState(true);
@@ -24,6 +26,8 @@ const АctionBar = props => {
 	const [showModalSave, setShowModalSave] = useState(false);
 	const [valueError, setValueError] = useState('');
 	const [showListVersions, setShowListVersions] = useState(false);
+
+	const dispatch = useDispatch();
 
 	const panelButtons = [
 		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'}
@@ -242,6 +246,7 @@ const АctionBar = props => {
 		const title = deepClone(nameValue);
 
 		props.savedGanttVersionSettings(title, new Date().toLocaleString());
+		dispatch(props.setCurrentVersion(''));
 
 		setShowModalSave(!showModalSave);
 	};
@@ -306,9 +311,10 @@ const АctionBar = props => {
 		props.getVersionSettingsAll(diagramKey);
 	};
 
-	const handleCurrentButtonClick  = () => {
+	const handleCurrentButtonClick = () => {
 		setActive(true);
 		props.getGanttData();
+		dispatch(props.setCurrentVersion(''));
 	};
 
 	const handleModalClose = () => {
@@ -316,12 +322,13 @@ const АctionBar = props => {
 	};
 
 	const selectedVersion = version => {
-		props.getVersionSettings(version[0].diagramKey);
+		props.getVersionSettings(version.diagramKey);
 		handleModalClose();
+		gantt.render();
 	};
 
 	const deleteVersion = (title, diagramKey) => {
-		const versions = deepClone(props.versions).filter(version => version[0].title !== title);
+		const versions = deepClone(props.versions).filter(version => version.title !== title);
 
 		props.deleteGanttVersionSettings(diagramKey);
 		props.setListVersions(versions);
@@ -329,7 +336,12 @@ const АctionBar = props => {
 
 	const renderVersion = (version) => {
 		return (
-			<div className={styles.itemBlock}><div key={version[0].diagramKey} onClick={() => selectedVersion(version)}>{version[0].title}</div><div onClick={() => deleteVersion(version[0].title, version[0].diagramKey)}>Удалить</div></div>
+			<div className={styles.itemBlock}>
+				<div key={version.diagramKey} onClick={() => selectedVersion(version)}>
+					{version.title}
+				</div>
+				<div onClick={() => deleteVersion(version.title, version.diagramKey)}>Удалить</div>
+			</div>
 		);
 	};
 

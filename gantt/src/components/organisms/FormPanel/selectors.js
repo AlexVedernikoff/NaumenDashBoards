@@ -1,9 +1,39 @@
 // @flow
 import type {AppState} from 'store/types';
-import {cancelSettings, changeScale, deleteGanttVersionSettings, getGanttData, getVersionSettings, getVersionSettingsAll, saveSettings, savedGanttVersionSettings, setCommonSettings, setListVersions, setRangeTime, setResourceSettings, switchWorkRelationCheckbox} from 'store/App/actions';
+import {
+	cancelSettings,
+	changeScale,
+	deleteGanttVersionSettings,
+	getGanttData,
+	getVersionSettings,
+	getVersionSettingsAll,
+	saveSettings,
+	savedGanttVersionSettings,
+	setCommonSettings,
+	setCurrentVersion,
+	setListVersions,
+	setRangeTime,
+	setResourceSettings,
+	switchWorkRelationCheckbox
+} from 'store/App/actions';
 
 const props = (state: AppState) => {
-	const {currentInterval, diagramKey, endDate, errorSettings, loadingSettings, progressCheckbox, resources, settings, sources, startDate, versions, workProgresses, workRelationCheckbox} = state.APP;
+	const {
+		currentInterval,
+		diagramKey,
+		endDate,
+		errorSettings,
+		loadingSettings,
+		progressCheckbox,
+		resources,
+		settings,
+		sources,
+		startDate,
+		versionKey,
+		versions,
+		workProgresses,
+		workRelationCheckbox
+	} = state.APP;
 
 	return {
 		currentInterval,
@@ -16,6 +46,7 @@ const props = (state: AppState) => {
 		settings,
 		sources,
 		startDate,
+		versionKey,
 		versions,
 		workProgresses,
 		workRelationCheckbox
@@ -32,6 +63,7 @@ const functions = {
 	saveSettings,
 	savedGanttVersionSettings,
 	setCommonSettings,
+	setCurrentVersion,
 	setListVersions,
 	setRangeTime,
 	setResourceSettings,

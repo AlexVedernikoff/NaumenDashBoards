@@ -83,9 +83,19 @@ const getVersionSettingsAll = (diagramKey: string): ThunkAction => async (dispat
 * @param {string} versionKey - ключ диаграммы версий
 * @return {ThunkAction}
 */
-const getVersionSettings = (versionKey:string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const version = await getGanttVersionsSettings(versionKey);
+		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+		const {workRelations, workProgresses, diagramKey, commonSettings, endDate, startDate, tasks} = await getGanttVersionsSettings(versionKey, timezone);
+
+		dispatch(setColumnTask(tasks));
+		dispatch(setCurrentVersion(versionKey));
+		dispatch(changeWorkProgress(workProgresses));
+		dispatch(setDiagramKey(diagramKey));
+		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
+		dispatch(setDiagramLinksData(workRelations || []));
+		dispatch(setRangeTime({endDate, startDate}));
+		dispatch(saveMasterSettings());
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -97,8 +107,6 @@ const getVersionSettings = (versionKey:string): ThunkAction => async (dispatch: 
 * Сохраняет настройки версий диаграммы в хранилище
 * @param {string} title - название версии
 * @param {string} createdDate - дата создания
-* @param {string} contentCode - ключ контента, на котором расположена диаграмма
-* @param {string} subjectUUID - UUID объекта
 */
 const savedGanttVersionSettings = (title: string, createdDate: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
@@ -145,12 +153,13 @@ const deleteGanttVersionSettings = (ganttVersionId: string): ThunkAction => asyn
 * Редактирует диапазон дат работ диаграмм версий
 * @param {string} versionKey - ключ диаграммы версий
 * @param {workDateInterval} workDateInterval - объект временных рамок работы
-* @param {string} subjectUUID - UUID объекта
-* @param {string} contentCode - ключ контента, на котором расположена диаграмма
 */
-const editWorkDateRangesFromVersion = (versionKey: string, workDateInterval: workDateInterval, subjectUUID: string, contentCode: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const editWorkDateRangesFromVersion = (versionKey: string, workDateInterval: workDateInterval): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		await editWorkDateRangesFromVersionRequest(contentCode, subjectUUID, versionKey, workDateInterval);
+		const {contentCode, subjectUuid} = getContext();
+		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+		await editWorkDateRangesFromVersionRequest(subjectUuid, contentCode, timezone, versionKey, workDateInterval);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -160,10 +169,10 @@ const editWorkDateRangesFromVersion = (versionKey: string, workDateInterval: wor
 
 /**
 * Добавляет новую работу в диаграмму версий
-* @param versionKey - ключ диаграммы версий
-* @param classFqn - метакласс работы
-* @param workData - данные работы
+* @param classFqn - метакласс работы,
 * @param timezone - таймзона устройства пользователя
+* @param versionKey - ключ диаграммы версий
+* @param workData - данные работы
 */
 const addNewWorkForVersion = (classFqn: string, timezone: string, versionKey: string, workData: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
@@ -177,13 +186,13 @@ const addNewWorkForVersion = (classFqn: string, timezone: string, versionKey: st
 
 /**
 * Редактирует работы в диаграмме версий
-* @param versionKey - ключ диаграммы версий
-* @param workUUID - индефекатор работы
-* @param workData - данные работы
 * @param classFqn - метакласс работы
+* @param workUUID - индефекатор работы
+* @param versionKey - ключ диаграммы версий
+* @param workData - данные работы
 * @param timezone - таймзона устройства пользователя
 */
-const editWorkDataFromVersion = (classFqn: string, workUUID: string, versionKey: string, workData: string, timezone): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const editWorkDataFromVersion = (classFqn: string, workUUID: string, versionKey: string, workData: string, timezone: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		await editWorkDataFromVersionRequest(classFqn, workData, timezone, workUUID);
 	} catch (error) {
@@ -244,7 +253,7 @@ const getGanttVersionDiagramDataCurrent = (workUUID: string, timezone: string): 
 
 /**
 * Удаляет работу
-* @param {string} workUUID - индификатор работы
+* @param {string} workUUID - идентификатор работы
 */
 const deleteWork = (workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
@@ -260,7 +269,6 @@ const deleteWork = (workUUID: string): ThunkAction => async (dispatch: Dispatch)
 * Отправляет новый объект работы
 * @param {WorkData} workData - данные работы
 * @param {string} classFqn - метакласс работы
-* @param {string} workUUID - индификатор работы
 */
 const postNewWorkData = (workData: WorkData, classFqn: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
@@ -278,7 +286,7 @@ const postNewWorkData = (workData: WorkData, classFqn: string): ThunkAction => a
 * Отправляет измененный объект работы
 * @param {WorkData} workData - данные работы
 * @param {string} classFqn - метакласс работы
-* @param {string} workUUID - индификатор работы
+* @param {string} workUUID - идентификатор работы
 */
 const postEditedWorkData = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
@@ -294,12 +302,12 @@ const postEditedWorkData = (workData: WorkData, classFqn: string, workUUID: stri
 
 /**
  * Получает список аттрибутов работы
- * @param {string} attributeGroupCode - код группы аттрибутов
  * @param {string} metaClassFqn - метакласс работы
+ * @param {string} attributeGroupCode - код группы аттрибутов
  * @param {string} workUUID - идентификатор работы
  * @returns {ThunkAction}
  */
-const getListOfWorkAttributes = (metaClassFqn, attributeGroupCode, workUUID): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getListOfWorkAttributes = (metaClassFqn: string, attributeGroupCode: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const workAttributes = await getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID);
 
@@ -443,7 +451,15 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
 };
 
 /**
- * Установить список версий
+ * Устанавливает текущую версию
+ */
+ const setCurrentVersion = payload => ({
+	payload,
+	type: APP_EVENTS.SET_CURRENT_VERSION
+});
+
+/**
+ * Устанавливает список версий
  */
  const setListVersions = payload => ({
 	payload,
@@ -451,7 +467,7 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
 });
 
 /**
- * Установить ссылку работы
+ * Устанавливает ссылку работы
  * @param {CurrentInterval} currentInterval - Текущий интервал
  */
  const setWorkLink = (workLink: string) => ({
@@ -460,7 +476,7 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
 });
 
 /**
- * Установить текущенее значение для интервала
+ * Устанавливает текущенее значение для интервала
  * @param {CurrentInterval} currentInterval - Текущий интервал
  */
  const setCurrentValueForInterval = (currentInterval: CurrentInterval) => ({
@@ -720,8 +736,8 @@ export {
 	deleteGanttVersionSettings,
 	addNewWorkForVersion,
 	editWorkDataFromVersion,
-	savedGanttVersionSettings,
 	editWorkDateRangesFromVersion,
+	savedGanttVersionSettings,
 	updateGanttVersionSettings,
 	setAttributesMap,
 	saveListOfAttributes,
@@ -733,6 +749,7 @@ export {
 	setCommonSettings,
 	setColumnTask,
 	setCurrentValueForInterval,
+	setCurrentVersion,
 	setDiagramLinksData,
 	setDiagramData,
 	setListVersions,

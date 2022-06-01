@@ -19,7 +19,7 @@ import {defaultColumn} from 'src/store/App/constants';
 import {defaultResourceSetting} from 'store/App/constants';
 import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
-import {gantt} from 'dhtmlx-gantt';
+import {gantt} from 'naumen-gantt';
 import {getChild, getIndexBottomNeighbor, getNeighbor, getUpdatedLevel, skipChildren} from './utils';
 import GridLayout from 'react-grid-layout';
 import {IntervalSelectionCriterion, ScaleNames} from './consts';
