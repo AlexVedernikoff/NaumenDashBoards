@@ -220,12 +220,14 @@ addMethod(array, 'indicators', function (singleCheck = true) {
 	return this.of(schema);
 });
 
-addMethod(array, 'breakdown', function () {
+addMethod(array, 'breakdown', function (singleCheck = true) {
 	return this.of(lazy((item: BreakdownItem, options: Object) => {
 		const {parent} = options;
-		const schema = mixed()
-			.requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.breakdown))
-			.singleAttributeUse();
+		let schema = mixed().requiredAttribute(getErrorMessage(DIAGRAM_FIELDS.breakdown));
+
+		if (singleCheck) {
+			schema = schema.singleAttributeUse(true);
+		}
 
 		return parent[0] === item ? schema.group(DIAGRAM_FIELDS.breakdown) : schema;
 	})).default(getDefaultBreakdown(''));
@@ -235,10 +237,10 @@ addMethod(array, 'breakdown', function () {
  * Правило валидации разбвивки в зависимости от ее динамического добавления
  * @returns {object}
  */
-addMethod(array, 'conditionalBreakdown', function () {
+addMethod(array, 'conditionalBreakdown', function (singleCheck = true) {
 	return this.when(DIAGRAM_FIELDS.breakdown, {
 		is: breakdown => Array.isArray(breakdown),
-		then: array().breakdown()
+		then: array().breakdown(singleCheck)
 	});
 });
 
