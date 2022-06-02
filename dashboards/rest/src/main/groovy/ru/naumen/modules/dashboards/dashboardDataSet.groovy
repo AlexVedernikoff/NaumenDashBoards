@@ -285,6 +285,7 @@ class DashboardDataSetService
 
         if (diagramType == DiagramType.TABLE)
         {
+            widgetSettings.showEmptyData = true
             if (widgetSettings.data.head().sourceRowName != null)
             {
                 widgetSettings.data.each { dataSet ->
@@ -579,10 +580,19 @@ class DashboardDataSetService
             else
             {
                 //флаг на проверку, что пришедший датасет уже правильно построен
-                Boolean dataAndResultAlreadyOk = request?.data?.every{ key, value ->
-                    value.aggregations.type.every { it == Aggregation.COUNT_CNT }
-                } && diagramType in DiagramType.CountableTypes  &&
-                                             request.requisite.every {it.nodes.every {it.type == 'DEFAULT'}}
+                Boolean dataAndResultAlreadyOk =
+                    diagramType == DiagramType.TABLE && request.requisite.every {
+                        it.showNulls
+                    } || request?.data?.every { key, value ->
+                        value.aggregations.type.every {
+                            it == Aggregation.COUNT_CNT
+                        }
+                    } && diagramType in DiagramType.CountableTypes &&
+                    request.requisite.every {
+                        it.nodes.every {
+                            it.type == 'DEFAULT'
+                        }
+                    }
 
                 //иначе датасет получается по-новому
                 if(!dataAndResultAlreadyOk)
