@@ -144,7 +144,8 @@ export class ParamsTab extends PureComponent<Props> {
 	render () {
 		const {onChange, type, values} = this.props;
 		const {data, displayMode, navigation, showSubTotalAmount, showTotalAmount} = values;
-		const subTotalAmountView = type.value === WIDGET_TYPES.COLUMN_STACKED;
+		const stackedTypes = [WIDGET_TYPES.COLUMN_STACKED, WIDGET_TYPES.BAR_STACKED];
+		const subTotalAmountView = stackedTypes.includes(type.value);
 
 		return (
 			<Fragment>

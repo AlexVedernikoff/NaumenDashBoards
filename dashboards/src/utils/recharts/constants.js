@@ -1,5 +1,4 @@
 // @flow
-import type {DefaultChartSettings} from './types';
 import {DEFAULT_FONT, TEXT_HANDLERS} from 'store/widgets/data/constants';
 
 const BLOCK: 'BLOCK' = 'BLOCK';
@@ -94,7 +93,12 @@ export const DEFAULT_WIDGET_WIDTH = 320;
 
 export const DEFAULT_DATA_LABEL_COLOR = '#323232';
 
-export const DEFAULT_CHART_SETTINGS: DefaultChartSettings = {
+export const SUB_TOTAL_POSITION = {
+	INNER: 'INNER',
+	OUTER: 'OUTER'
+};
+
+export const DEFAULT_CHART_SETTINGS = {
 	axis: {
 		fontFamily: DEFAULT_FONT,
 		fontSize: 12,

@@ -51,3 +51,27 @@ export type YTitleLabelProps = {
 		y: number,
 	}
 };
+
+export type TotalCustomLabelProps = {
+	fill: string,
+	fontFamily: string,
+	fontSize: number,
+	formatter: (value: number) => string,
+	height: number,
+	index: number;
+	name: string,
+	offset: number,
+	position: string,
+	type: 'columns' | 'bars',
+	value: number,
+	viewBox: {height: number, width: number, x: number, y: number},
+	width: number,
+	x: number,
+	y: number,
+};
+
+export type TotalCustomLabelState = {
+	height: number,
+	value: string,
+	width: number
+};
