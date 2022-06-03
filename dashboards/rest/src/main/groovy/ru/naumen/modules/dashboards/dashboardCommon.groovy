@@ -2725,8 +2725,9 @@ class NewSourceValue
 class SourceValue extends ValueWithLabel<String>
 {
     /**
-     * value - classFqn источника
+     * Дескриптор источника
      */
+    String descriptor = ''
 }
 
 /**
