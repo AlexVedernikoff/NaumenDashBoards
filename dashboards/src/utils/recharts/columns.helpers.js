@@ -1,7 +1,7 @@
 // @flow
 import type {AxisOptions, RechartData} from './types';
 import type {AxisWidget} from 'store/widgets/data/types';
-import {calculateStringsSize, getRechartAxisSetting} from './helpers';
+import {calculateStringsSize, getNiceScale, getRechartAxisSetting} from './helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 
 /**
@@ -24,7 +24,8 @@ const normalizeSeries = (data: RechartData): RechartData =>
 const getYAxisNumber = (
 	widget: AxisWidget,
 	data: DiagramBuildData,
-	axisName: string = ''
+	axisName: string = '',
+	isNormalized: boolean = false
 ): AxisOptions => {
 	const settings = getRechartAxisSetting(widget.indicator);
 	let maxValueLength = 0;
@@ -46,7 +47,10 @@ const getYAxisNumber = (
 		width += (sizes[1]?.height ?? 0);
 	}
 
-	return {...settings, axisName, width};
+	const showSubTotalAmount = widget.showSubTotalAmount;
+	const domain = [0, value => isNormalized ? 1 : getNiceScale(value, showSubTotalAmount)];
+
+	return {...settings, axisName, domain, width};
 };
 
 export {

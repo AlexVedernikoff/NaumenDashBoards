@@ -7,8 +7,9 @@ import type {Props, State} from './types';
 import ReChartWidget from 'components/molecules/ReChartWidget';
 import React, {PureComponent} from 'react';
 import RechartLegend from 'components/molecules/RechartLegend';
+import {SUB_TOTAL_POSITION} from 'utils/recharts/constants';
 import t from 'localization';
-import {YCategoryLabel, YTitleLabel} from 'components/molecules/AxisLabels';
+import {TotalCustomLabel, YCategoryLabel, YTitleLabel} from 'components/molecules/AxisLabels';
 
 export class BarWidget extends PureComponent<Props, State> {
 	state = {
@@ -71,6 +72,7 @@ export class BarWidget extends PureComponent<Props, State> {
 				stackId={stackId}
 			>
 				{this.renderDataLabels(key)}
+				{this.renderTotalDataLabels(idx)}
 				{this.renderBarCells(color, key, breakdownLabels, idx) }
 			</Bar>
 		);
@@ -193,6 +195,30 @@ export class BarWidget extends PureComponent<Props, State> {
 				{...tooltip}
 			/>
 		);
+	};
+
+	renderTotalDataLabels = idx => {
+		const {dataLabels, formatters, series, subTotalGetter} = this.state.options;
+		const {fontFamily, fontSize} = dataLabels;
+
+		if (subTotalGetter && idx === series.length - 1) {
+			const {getter, position} = subTotalGetter;
+			const content = position === SUB_TOTAL_POSITION.OUTER ? null : <TotalCustomLabel type="bars" />;
+			const labelPosition = position === SUB_TOTAL_POSITION.OUTER ? 'right' : 'insideRight';
+
+			return (
+				<LabelList
+					content={content}
+					fontFamily={fontFamily}
+					fontSize={fontSize}
+					formatter={formatters.dataLabel}
+					position={labelPosition}
+					valueAccessor={({name}) => getter(name) }
+				/>
+			);
+		}
+
+		return null;
 	};
 
 	renderXAxis = () => {

@@ -4,7 +4,7 @@ import type {AxisFormatter, CircleFormatter, ComboFormatter, NumberFormatter} fr
 import type {AxisSettings, BordersStyle, DataLabels, FontStyle, Group, Legend, Ranges, SpeedometerIndicatorSettings, TextHandler} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
-import {LABEL_DRAW_MODE, LEGEND_ALIGN, LEGEND_LAYOUT, LEGEND_VERTICAL_ALIGN} from './constants';
+import {LABEL_DRAW_MODE, LEGEND_ALIGN, LEGEND_LAYOUT, LEGEND_VERTICAL_ALIGN, SUB_TOTAL_POSITION} from './constants';
 
 export type Labels = Array<Array<string>>;
 
@@ -26,6 +26,11 @@ export type GetCircleDrillDownOptions = (breakdown: string) => DrillDownOptions;
 
 export type GetComboDrillDownOptions = (dataKey: string, parameter: string, breakdown?: string) => DrillDownOptions;
 
+export type SubTotalGetter = {
+	getter: (parameter: string) => number,
+	position: $Keys<typeof SUB_TOTAL_POSITION>
+};
+
 export type RechartDataItem = {
 	name: string,
 	[column: string]: number
@@ -40,6 +45,8 @@ export type RechartPieDataItem = {
 };
 
 export type RechartPieData = Array<RechartPieDataItem>;
+
+export type RechartDomain = number | string | (value: number) => number;
 
 export type SeriesInfo = Array<{
 	breakdownLabels: null | Array<string>,
@@ -74,6 +81,7 @@ export type ReChartLegend = {
 
 export type AxisOptions = {
 	axisName: string,
+	domain: ?[RechartDomain, RechartDomain],
 	fontFamily: string,
 	fontSize: number,
 	height?: number,
@@ -107,6 +115,7 @@ export type AxisChartOptions = {
 	stacked: ?boolean,
 	stackId: ?string,
 	stackOffset: ?string,
+	subTotalGetter: ?SubTotalGetter,
 	type: 'AxisChartOptions',
 	xaxis: AxisOptions,
 	yaxis: AxisOptions

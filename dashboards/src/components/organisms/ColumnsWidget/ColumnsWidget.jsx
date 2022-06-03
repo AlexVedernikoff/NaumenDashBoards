@@ -7,8 +7,9 @@ import type {Props, State} from './types';
 import ReChartWidget from 'components/molecules/ReChartWidget';
 import React, {PureComponent} from 'react';
 import RechartLegend from 'components/molecules/RechartLegend';
+import {SUB_TOTAL_POSITION} from 'utils/recharts/constants';
 import t from 'localization';
-import {XCategoryLabel, YTitleLabel} from 'components/molecules/AxisLabels';
+import {TotalCustomLabel, XCategoryLabel, YTitleLabel} from 'components/molecules/AxisLabels';
 
 export class ColumnsWidget extends PureComponent<Props, State> {
 	state = {
@@ -71,6 +72,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 				stackId={stackId}
 			>
 				{this.renderDataLabels(key)}
+				{this.renderTotalDataLabels(idx)}
 				{this.renderBarCells(color, key, breakdownLabels, idx) }
 			</Bar>
 		);
@@ -194,6 +196,30 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 		);
 	};
 
+	renderTotalDataLabels = idx => {
+		const {dataLabels, formatters, series, subTotalGetter} = this.state.options;
+		const {fontFamily, fontSize} = dataLabels;
+
+		if (subTotalGetter && idx === series.length - 1) {
+			const {getter, position} = subTotalGetter;
+			const content = position === SUB_TOTAL_POSITION.OUTER ? null : <TotalCustomLabel type="columns" />;
+			const labelPosition = position === SUB_TOTAL_POSITION.OUTER ? 'top' : 'insideTop';
+
+			return (
+				<LabelList
+					content={content}
+					fontFamily={fontFamily}
+					fontSize={fontSize}
+					formatter={formatters.dataLabel}
+					position={labelPosition}
+					valueAccessor={({name}) => getter(name) }
+				/>
+			);
+		}
+
+		return null;
+	};
+
 	renderXAxis = () => {
 		const {formatters, xaxis} = this.state.options;
 		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xaxis;
@@ -241,7 +267,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 
 	renderYAxis = () => {
 		const {formatters, yaxis} = this.state.options;
-		const {axisName: value, fontFamily, fontSize, show, showName, width} = yaxis;
+		const {axisName: value, domain, fontFamily, fontSize, show, showName, width} = yaxis;
 
 		if (show) {
 			const label = showName
@@ -250,6 +276,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 
 			return (
 				<YAxis
+					domain={domain}
 					fontFamily={fontFamily}
 					fontSize={fontSize}
 					interval={0}

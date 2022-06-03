@@ -10,7 +10,8 @@ import type {
 	ReChartLegend,
 	RechartData,
 	RechartDataItem,
-	SeriesInfo
+	SeriesInfo,
+	SubTotalGetter
 } from './types';
 import type {
 	AxisSettings,
@@ -45,6 +46,7 @@ import {
 	LEGEND_WIDTH_PERCENT,
 	ROTATE_AXIS_COEFFICIENT,
 	RULER_WIDTH,
+	SUB_TOTAL_POSITION,
 	X_AXIS_HEIGHT
 } from './constants';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
@@ -55,13 +57,25 @@ import {SEPARATOR} from 'store/widgets/buildData/constants';
 /**
  * Округляет число до ближайшего минимального круглого числа, большего чем value
  * @param {number} value - исходное число
+ * @param {boolean} additiveLow - флаг, определяющий, дополнять ли до 5 значения меньше 100
  * @returns {number} - округленное число
  */
-const getNiceScale = (value: number) => {
-	const exponent = Math.round(Math.log10(value) - 1);
-	const converter = Math.pow(10, exponent);
+const getNiceScale = (value: number, additiveLow: boolean = false) => {
+	let result = value;
 
-	return Math.ceil(value / converter) * converter;
+	if (additiveLow && value < 100) {
+		const remainder = value % 5;
+		const additive = 5 - remainder;
+
+		result = value + additive;
+	} else {
+		const exponent = Math.round(Math.log10(value) - 1);
+		const converter = Math.pow(10, exponent);
+
+		result = Math.ceil(value / converter) * converter;
+	}
+
+	return result;
 };
 
 /**
@@ -826,6 +840,35 @@ const calculateYAxisNumberWidth = (maxString: string, settings: AxisOptions, axi
 	return result;
 };
 
+/**
+ * Создает функцию и параметры для отображения промежуточных итогов по параметру
+ * @param {AxisWidget} widget - виджет
+ * @param {RechartData} data - данные по виджету
+ * @param {boolean} usePercentage - признак того что в расчете используются проценты
+ * @returns {SubTotalGetter} - функция и параметры для отображения промежуточных итогов, null - если показывать
+ * промежуточные итоги не нужно.
+ */
+const makeSubTotalGetter = (widget: AxisWidget, data: RechartData, usePercentage: boolean): SubTotalGetter | null => {
+	let result = null;
+
+	if (widget.showSubTotalAmount) {
+		const cache = {};
+
+		data.forEach(({name, ...dataSet}) => {
+			const sum = Object.values(dataSet).reduce((acc, item) => acc + (+item), 0);
+
+			cache[name] = sum;
+		});
+
+		result = {
+			getter: (parameter: string) => cache[parameter],
+			position: usePercentage ? SUB_TOTAL_POSITION.INNER : SUB_TOTAL_POSITION.OUTER
+		};
+	}
+
+	return result;
+};
+
 export {
 	calculateCategoryHeight,
 	calculateCategoryRotateHeight,
@@ -850,5 +893,6 @@ export {
 	getXAxisCategory,
 	getSpeedometerWidget,
 	getSummaryWidget,
-	getTotalCalculator
+	getTotalCalculator,
+	makeSubTotalGetter
 };
