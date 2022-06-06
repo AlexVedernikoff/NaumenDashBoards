@@ -16,6 +16,7 @@ export const withBaseWidget = <Config: WidgetProps>(
 	class WithBaseWidget extends PureComponent<Config & ComponentProps, ComponentState> {
 		state = {
 			container: null,
+			hiddenSeries: [],
 			options: {}
 		};
 
@@ -46,12 +47,24 @@ export const withBaseWidget = <Config: WidgetProps>(
 			}
 		}
 
+		handleToggleSeriesShow = (seriesName: string) => this.setState(({hiddenSeries: oldHiddenSeries}) => {
+			let hiddenSeries;
+
+			if (oldHiddenSeries.includes(seriesName)) {
+				hiddenSeries = oldHiddenSeries.filter(series => series !== seriesName);
+			} else {
+				hiddenSeries = [...oldHiddenSeries, seriesName];
+			}
+
+			return {hiddenSeries};
+		});
+
 		updateOptions = (container: HTMLDivElement) => this.setState({container});
 
 		renderContent = () => {
 			const {buildData: {data, error, loading}, drillDown, setWidgetWarning, ...props} = this.props;
 			const {widget} = props;
-			const {options} = this.state;
+			const {hiddenSeries, options} = this.state;
 
 			if (!error && !loading && options) {
 				return (
@@ -60,8 +73,10 @@ export const withBaseWidget = <Config: WidgetProps>(
 							{...props}
 							data={data}
 							drillDown={drillDown}
+							hiddenSeries={hiddenSeries}
 							options={options}
 							setWidgetWarning={setWidgetWarning}
+							toggleSeriesShow={this.handleToggleSeriesShow}
 							updateOptions={this.updateOptions}
 						/>
 					</Content>

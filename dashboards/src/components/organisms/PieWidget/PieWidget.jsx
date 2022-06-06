@@ -66,10 +66,11 @@ export class PieWidget extends PureComponent<Props, State> {
 	};
 
 	renderLegend = () => {
-		const {options: {legend}} = this.state;
+		const {options: {data, legend}} = this.state;
 
 		if (legend && legend.show) {
 			const {align, height, layout, style, verticalAlign, width} = legend;
+			const payload = data.map(({color, name}) => ({color, type: 'rect', value: name}));
 
 			return (
 				<Legend
@@ -77,6 +78,7 @@ export class PieWidget extends PureComponent<Props, State> {
 					content={this.renderRechartLegend()}
 					height={height}
 					layout={layout}
+					payload={payload}
 					verticalAlign={verticalAlign}
 					width={width}
 					wrapperStyle={{padding: '5px', ...style}}
@@ -88,10 +90,13 @@ export class PieWidget extends PureComponent<Props, State> {
 	};
 
 	renderPie = data => {
+		const {hiddenSeries} = this.props;
 		const {options: {innerRadius}} = this.state;
+		const showData = data.filter(item => !hiddenSeries.includes(item.name));
+
 		return (
 			<Pie
-				data={data}
+				data={showData}
 				dataKey="value"
 				innerRadius={innerRadius}
 				isAnimationActive={false}
@@ -99,7 +104,7 @@ export class PieWidget extends PureComponent<Props, State> {
 				labelLine={false}
 				onClick={this.handleClick}
 			>
-				{data.map(this.renderPieCell)}
+				{showData.map(this.renderPieCell)}
 			</Pie>
 		);
 	};
@@ -129,13 +134,16 @@ export class PieWidget extends PureComponent<Props, State> {
 	};
 
 	renderRechartLegend = () => {
+		const {hiddenSeries, toggleSeriesShow} = this.props;
 		const {options: {formatters, legend}} = this.state;
 		const {textHandler} = legend;
 
 		return (
 			<RechartLegend
 				formatter={formatters.category}
+				hiddenSeries={hiddenSeries}
 				textHandler={textHandler}
+				toggleSeriesShow={toggleSeriesShow}
 			/>
 		);
 	};

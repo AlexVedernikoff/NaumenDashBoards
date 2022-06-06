@@ -57,13 +57,16 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 	};
 
 	renderBar = ({breakdownLabels, color, key, label}, idx) => {
+		const {hiddenSeries} = this.props;
 		const {stackId} = this.state.options;
 		const fill = color(label);
+		const hide = hiddenSeries.includes(key);
 
 		return (
 			<Bar
 				dataKey={key}
 				fill={fill}
+				hide={hide}
 				isAnimationActive={false}
 				key={key}
 				onClick={this.handleClick(key)}
@@ -172,13 +175,16 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 	};
 
 	renderRechartLegend = () => {
+		const {hiddenSeries, toggleSeriesShow} = this.props;
 		const {options: {formatters, legend}} = this.state;
 		const {textHandler} = legend;
 
 		return (
 			<RechartLegend
 				formatter={formatters.legend}
+				hiddenSeries={hiddenSeries}
 				textHandler={textHandler}
+				toggleSeriesShow={toggleSeriesShow}
 			/>
 		);
 	};
