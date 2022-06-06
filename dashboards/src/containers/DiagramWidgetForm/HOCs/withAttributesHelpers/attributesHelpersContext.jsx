@@ -107,7 +107,7 @@ export const withAttributesHelperContext = <Config: Props>(Component: React$Comp
 			if (options && options.length > 0) {
 				const mainDataSet = data.find(ds => !ds.sourceForCompute);
 
-				if (mainDataSet.breakdown.length > 0) {
+				if (mainDataSet && mainDataSet.breakdown && mainDataSet.breakdown.length > 0) {
 					const {attribute} = mainDataSet.breakdown[0];
 
 					result = filterByAttribute(options, attribute, false);
