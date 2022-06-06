@@ -2,7 +2,7 @@
 
 const {BundleStatsWebpackPlugin} = require('bundle-stats-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
-const {development, isUserModeInclude, license, storybook} = require('./define');
+const {development, isUserModeInclude, license, storybook, title} = require('./define');
 const Dotenv = require('dotenv-webpack');
 const GroovyWebpackPlugin = require('groovy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -42,7 +42,7 @@ const plugins = [
 	new HtmlWebpackPlugin({
 		filename: 'index.html',
 		template: './src/index.html',
-		title: 'SMP Embedded Application',
+		title,
 		version: `${packagejson.name}_v${packagejson.version}`
 	}),
 	new CopyPlugin([

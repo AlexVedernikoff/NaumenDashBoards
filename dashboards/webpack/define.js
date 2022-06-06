@@ -11,6 +11,7 @@ const production = environment === 'production';
 const src = resolve(__dirname, '../src');
 const storybook = !!process.env.STORYBOOK;
 const isUserModeInclude = process.env.USER_MODE === 'true';
+const title = process.env.description ?? 'SMP Embedded Application';
 
 module.exports = {
 	development,
@@ -20,5 +21,6 @@ module.exports = {
 	mode: environment,
 	production,
 	src,
-	storybook
+	storybook,
+	title
 };
