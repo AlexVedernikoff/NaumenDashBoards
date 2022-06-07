@@ -17,6 +17,13 @@ const root = document.getElementById('root');
 if (root) {
 	const store = configureStore();
 
+	const checkHeight = window.setInterval(function () {
+		if (window.frameElement && window.frameElement.height) {
+			window.frameElement.setAttribute('style', `height:${window.frameElement.height}px`);
+				clearInterval(checkHeight);
+		}
+	}, 10);
+
 	render(
 		<Provider store={store}>
 			<App />
