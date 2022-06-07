@@ -24,6 +24,7 @@ export type Props = {
 	comboFormatter: ComboValueFormatter,
 	formatter: ValueFormatter,
 	height: number,
+	hiddenSeries: Array<string>,
 	iconSize: number,
 	inactiveColor: string,
 	layout: Layout,
@@ -35,6 +36,7 @@ export type Props = {
 	},
 	payload: Array<Payload>,
 	textHandler: TextHandler,
+	toggleSeriesShow?: (series: string) => void,
 	verticalAlign: VerticalAlign,
 	width: number,
 	wrapperStyle: CSSStyleDeclaration

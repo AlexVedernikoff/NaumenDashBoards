@@ -33,12 +33,15 @@ export type InjectLoadingProps = {
 export type InjectOptionsProps = {
 	data: DiagramBuildData,
 	drillDown: DrillDown,
+	hiddenSeries: Array<string>,
 	options: CommonOptions,
 	setWidgetWarning: (info: SetWidgetWarning) => void,
+	toggleSeriesShow: (series: string) => void,
 	updateOptions: (container: HTMLDivElement) => void
 };
 
 export type ComponentState = {
 	container: HTMLDivElement | null,
+	hiddenSeries: Array<string>,
 	options: CommonOptions | null
 };

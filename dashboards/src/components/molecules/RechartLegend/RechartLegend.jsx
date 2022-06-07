@@ -12,6 +12,7 @@ export class RechartLegend extends PureComponent<Props> {
 		chartHeight: 0,
 		chartWidth: 0,
 		height: 0,
+		hiddenSeries: [],
 		iconSize: 32,
 		inactiveColor: '#ccc',
 		layout: 'horizontal',
@@ -28,7 +29,7 @@ export class RechartLegend extends PureComponent<Props> {
 	};
 
 	getRenderLegendItem = (isHorizontal: boolean, isCrop: boolean) => {
-		const {comboFormatter, formatter, iconSize} = this.props;
+		const {comboFormatter, formatter, hiddenSeries, iconSize} = this.props;
 		const itemClass = cn({
 			[styles.legendItem]: true,
 			[styles.displayInlineHorizontalItem]: isHorizontal,
@@ -50,15 +51,35 @@ export class RechartLegend extends PureComponent<Props> {
 				valueData = comboFormatter(dataKeyClear)(value);
 			}
 
+			const itemLabelClass = cn({
+				[styles.legendItemLabel]: true,
+				[styles.legendItemLabelHidden]: hiddenSeries.includes(value)
+			});
+
 			return (
 				<div className={itemClass} key={key}>
 					<svg className={styles.legendItemBox} height={iconSize} viewBox={viewBox} width={iconSize}>
 						{this.renderIcon(item)}
 					</svg>
-					<span title={valueData}>{valueData}</span>
+					<span
+						className={itemLabelClass}
+						onClick={this.handleToggleSeriesShow(value)}
+						title={valueData}
+					>
+						{valueData}
+					</span>
 				</div>
 			);
 		};
+	};
+
+	handleToggleSeriesShow = (seriesName: string) => () => {
+		const {hiddenSeries, payload, toggleSeriesShow} = this.props;
+		const enable = hiddenSeries.includes(seriesName) || payload.length > (hiddenSeries.length + 1);
+
+		if (toggleSeriesShow && enable) {
+			toggleSeriesShow(seriesName);
+		}
 	};
 
 	renderIcon = (item: Payload) => {

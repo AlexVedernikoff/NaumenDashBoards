@@ -114,8 +114,11 @@ export class LinesWidget extends PureComponent<Props, State> {
 	};
 
 	renderLine = ({breakdownLabels, color, key, label}, idx) => {
+		const {hiddenSeries} = this.props;
 		const fill = color(label);
 		const dot = {stroke: fill, strokeWidth: 4};
+		const hide = hiddenSeries.includes(key);
+
 		return (
 			<Line
 				activeDot={{
@@ -125,6 +128,7 @@ export class LinesWidget extends PureComponent<Props, State> {
 				}}
 				dataKey={key}
 				dot={dot}
+				hide={hide}
 				isAnimationActive={false}
 				key={key}
 				stroke={fill}
@@ -159,13 +163,16 @@ export class LinesWidget extends PureComponent<Props, State> {
 	};
 
 	renderRechartLegend = () => {
+		const {hiddenSeries, toggleSeriesShow} = this.props;
 		const {options: {formatters, legend}} = this.state;
 		const {textHandler} = legend;
 
 		return (
 			<RechartLegend
 				formatter={formatters.legend}
+				hiddenSeries={hiddenSeries}
 				textHandler={textHandler}
+				toggleSeriesShow={toggleSeriesShow}
 			/>
 		);
 	};

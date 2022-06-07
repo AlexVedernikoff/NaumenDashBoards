@@ -87,12 +87,15 @@ export class ComboWidget extends PureComponent<Props, State> {
 	};
 
 	renderBar = ({color, key, label}, stackId: string | null) => {
+		const {hiddenSeries} = this.props;
 		const id = `${key} ${label}`;
+		const hide = hiddenSeries.includes(label);
 
 		return (
 			<Bar
 				dataKey={id}
 				fill={color}
+				hide={hide}
 				isAnimationActive={false}
 				key={id}
 				name={label}
@@ -192,8 +195,11 @@ export class ComboWidget extends PureComponent<Props, State> {
 	};
 
 	renderLine = ({color, key, label}) => {
+		const {hiddenSeries} = this.props;
 		const id = `${key} ${label}`;
 		const dot = {stroke: color, strokeWidth: 4};
+		const hide = hiddenSeries.includes(label);
+
 		return (
 			<Line
 				activeDot={{
@@ -203,6 +209,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 				}}
 				dataKey={id}
 				dot={dot}
+				hide={hide}
 				isAnimationActive={false}
 				key={id}
 				name={label}
@@ -217,13 +224,16 @@ export class ComboWidget extends PureComponent<Props, State> {
 	};
 
 	renderRechartLegend = () => {
+		const {hiddenSeries, toggleSeriesShow} = this.props;
 		const {options: {formatters, legend}} = this.state;
 		const {textHandler} = legend;
 
 		return (
 			<RechartLegend
 				comboFormatter={formatters.legend}
+				hiddenSeries={hiddenSeries}
 				textHandler={textHandler}
+				toggleSeriesShow={toggleSeriesShow}
 			/>
 		);
 	};
