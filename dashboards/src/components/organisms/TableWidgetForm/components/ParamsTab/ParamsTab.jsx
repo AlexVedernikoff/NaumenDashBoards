@@ -131,6 +131,10 @@ export class ParamsTab extends PureComponent<Props> {
 				this.setBreakdown();
 			}
 
+			if ((newData[0].breakdown?.length ?? 0) === 0) {
+				newData = newData.map(dataSet => ({...dataSet, breakdown: undefined}));
+			}
+
 			onChange(DIAGRAM_FIELDS.data, newData, callback);
 		}
 	};
@@ -288,13 +292,15 @@ export class ParamsTab extends PureComponent<Props> {
 		const isLast = data.length === 1;
 		const isMain = index === this.mainIndex;
 		const isDifferentAggregations = hasDifferentAggregations(data);
+		const hasBreakdownMain = (data[0]?.breakdown?.length ?? 0) > 0;
+		const disableBreakdown = isDifferentAggregations || (!isMain && !hasBreakdownMain);
 
 		return (
 			<CALC_TOTAL_CONTEXT.Provider key={`DataSetSettings_${dataSet.dataKey}`} value={calcTotalColumn}>
 				<SingleRowDataSetSettings
 					components={this.getDataSetSettingsComponents()}
+					disableBreakdown={disableBreakdown}
 					index={index}
-					isDifferentAggregations={isDifferentAggregations}
 					isLast={isLast}
 					isMain={isMain}
 					onAdd={this.handleAddDataSet}
