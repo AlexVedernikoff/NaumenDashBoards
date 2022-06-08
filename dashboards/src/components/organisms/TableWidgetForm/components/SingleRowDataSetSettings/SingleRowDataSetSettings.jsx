@@ -1,5 +1,6 @@
 // @flow
 import type {Breakdown, Indicator} from 'store/widgetForms/types';
+import type {BreakdownContext, Props} from './types';
 import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
 import {CALC_TOTAL_CONTEXT} from 'TableWidgetForm/components/ParamsTab/constants';
 import FormBox from 'components/molecules/FormBox';
@@ -10,20 +11,19 @@ import IndicatorsBox from 'TableWidgetForm/components/IndicatorsBox';
 import type {IndicatorsFormBoxProps} from 'TableWidgetForm/components/DataSetSettings/types';
 import memoize from 'memoize-one';
 import type {OnChangeEvent} from 'components/types';
-import type {Props} from './types';
 import React, {createContext, Fragment, PureComponent} from 'react';
 import SourceBox from 'WidgetFormPanel/components/SourceBox';
 import SourceFieldset from 'containers/SourceFieldset';
 import t from 'localization';
 import TextInput from 'components/atoms/TextInput';
 
-const BREAKDOWN_CONTEXT = createContext(null);
+const BREAKDOWN_CONTEXT = createContext<?BreakdownContext>(null);
 
 BREAKDOWN_CONTEXT.displayName = 'BREAKDOWN_CONTEXT';
 
 export class SingleRowDataSetSettings extends PureComponent<Props> {
 	getIndicatorsBoxComponents = memoize(() => ({
-		FormBox: this.renderIndicatorsFormBox,
+		FormBox: this.renderIndicatorsFormBoxWithContext,
 		FormBoxControls: this.renderIndicatorsControl
 	}));
 
@@ -50,7 +50,7 @@ export class SingleRowDataSetSettings extends PureComponent<Props> {
 	handleClickSumButton = () => this.props.onChangeCalcTotalColumn();
 
 	renderBreakdownFieldSet = breakdown => {
-		const {index, isDifferentAggregations, value} = this.props;
+		const {disableBreakdown, index, value} = this.props;
 		const {dataKey, indicators} = value;
 		const {attribute} = indicators?.[0] ?? {};
 		const isMain = index === 0;
@@ -59,7 +59,7 @@ export class SingleRowDataSetSettings extends PureComponent<Props> {
 			<BreakdownFieldset
 				breakdownIndex={index}
 				dataKey={dataKey}
-				disabled={isDifferentAggregations}
+				disabled={disableBreakdown}
 				index={index}
 				indicator={attribute}
 				isMain={isMain}
@@ -73,13 +73,14 @@ export class SingleRowDataSetSettings extends PureComponent<Props> {
 	};
 
 	renderIndicatorsBox = () => {
-		const {components, index, value} = this.props;
+		const {components, disableBreakdown, index, value} = this.props;
 
 		if (!value.sourceForCompute) {
 			const {breakdown, dataKey, indicators, source} = value;
+			const contextValue = {breakdown, disableBreakdown};
 
 			return (
-				<BREAKDOWN_CONTEXT.Provider value={breakdown}>
+				<BREAKDOWN_CONTEXT.Provider value={contextValue}>
 					<IndicatorsBox
 						canAddIndicators={false}
 						canCreateInterestRelative={true}
@@ -121,14 +122,19 @@ export class SingleRowDataSetSettings extends PureComponent<Props> {
 		return null;
 	};
 
-	renderIndicatorsFormBox = ({children, ...props}: IndicatorsFormBoxProps) => (
+	renderIndicatorsFormBox = ({children, ...props}: IndicatorsFormBoxProps) => (context: ?BreakdownContext) => {
+		const breakdown = context?.breakdown;
+		return (
+			<FormBox {...props}>
+				{children}
+				{this.renderBreakdownFieldSet(breakdown)}
+			</FormBox>
+		);
+	};
+
+	renderIndicatorsFormBoxWithContext = (props: IndicatorsFormBoxProps) => (
 		<BREAKDOWN_CONTEXT.Consumer>
-			{breakdown => (
-				<FormBox {...props}>
-					{children}
-					{this.renderBreakdownFieldSet(breakdown)}
-				</FormBox>
-			)}
+			{this.renderIndicatorsFormBox(props)}
 		</BREAKDOWN_CONTEXT.Consumer>
 	);
 

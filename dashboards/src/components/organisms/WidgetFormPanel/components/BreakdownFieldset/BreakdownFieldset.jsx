@@ -241,7 +241,9 @@ export class BreakdownFieldset extends Component<Props> {
 
 	render () {
 		const {className, disabled} = this.props;
-		const CN = cn(className, disabled && styles.disabled);
+		const CN = cn(className, {
+			[styles.disabled]: disabled
+		});
 
 		return (
 			<div className={CN}>
