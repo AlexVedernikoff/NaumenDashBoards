@@ -52,57 +52,19 @@ class MapSettings
     @JsonSchemaMeta(title = 'API')
     Collection<APISettings> interfaceSettings = [new APISettings()]
     @UiSchemaMeta(hidden = 'All')
-    BugFix commonSettings = new BugFix()
+    BugsFix commonSettings = new BugsFix()
 }
 
 @JsonSchemaMeta(title = ' ')
-class BugFix
+class BugsFix
 {
     @UiSchemaMeta(hidden = 'All')
-    String scheme = 'bugfix'
+    String scheme = 'bugsfix'
 }
 
 /**
- * Настройки для владки 'Стратегии вывода объектов'
+ * Абстрактный класс необходимый для отображения подвложенностей 'Точки' и 'Линии'
  */
-@JsonSchemaMeta(requiredFields = ['pathCoordinatLatitude', 'pathCoordinatLongitud'])
-class CoordinatesSettings
-{
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
-    @JsonSchemaMeta(title = 'Путь к координатам широты')
-    String pathCoordinatLatitude = ""
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
-    @JsonSchemaMeta(title = 'Путь к координатам долготы')
-    String pathCoordinatLongitud = ""
-}
-
-@JsonSchemaMeta(requiredFields = ['pathIcon'], title = 'Характеристики точки')
-class PointCharacteristics
-{
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
-    @JsonSchemaMeta(title = 'Путь к иконке')
-    String pathIcon = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
-    @JsonSchemaMeta(title = 'Путь к тексту для всплывающей подсказки')
-    String pathTextTooltip = ''
-}
-
-@JsonSchemaMeta(requiredFields = ['strategy'], title = 'Стратегия определения обьектов для отображения на карте ')
-class StrategyDeterminingObjectsMap
-{
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
-    @JsonSchemaMeta(title = 'Стратегия', nullable = false)
-    String strategy = ''
-}
-
-@JsonSchemaMeta(requiredFields = ['strategy'], title = 'Стратегия определения обьектов для отображения на карте ')
-class StrategyDeterminingObjectsMapLines
-{
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
-    @JsonSchemaMeta(title = 'Стратегия', nullable = false)
-    String strategy = ''
-}
-
 @JsonSchemaOneOf(key = 'typeMap', classes = [PointSettings, LinesSettings])
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -119,6 +81,9 @@ abstract class AbstractPointCharacteristics
     String typeMap = ''
 }
 
+/**
+ * Настройки для вкладки 'Точки'
+ */
 @CustomProperty(name = 'typeMap', value = 'pointSettings')
 @JsonSchemaMeta(requiredFields = ['nameStrategy', 'codeStrategy', 'metaclassObjects'], title = 'Точки')
 class PointSettings extends AbstractPointCharacteristics
@@ -139,7 +104,7 @@ class PointSettings extends AbstractPointCharacteristics
     CoordinatesSettings coordinatesSettings = new CoordinatesSettings()
     @JsonSchemaMeta(title = 'Характеристики точки')
     PointCharacteristics pointCharacteristics = new PointCharacteristics()
-    @JsonSchemaMeta(title = 'Стратегия определения обьектов для отображения на карте ')
+    @JsonSchemaMeta(title = 'Стратегия определения объектов для отображения на карте ')
     StrategyDeterminingObjectsMap strategyDeterminingObjectsMap = new StrategyDeterminingObjectsMap()
 
     @UiSchemaMeta(widget = 'textarea')
@@ -150,6 +115,48 @@ class PointSettings extends AbstractPointCharacteristics
     String placesUse = ''
 }
 
+/**
+ * Настройки для встройки 'Координаты'
+ */
+@JsonSchemaMeta(requiredFields = ['pathCoordinatLatitude', 'pathCoordinatLongitud'])
+class CoordinatesSettings
+{
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @JsonSchemaMeta(title = 'Путь к координатам широты')
+    String pathCoordinatLatitude = ""
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @JsonSchemaMeta(title = 'Путь к координатам долготы')
+    String pathCoordinatLongitud = ""
+}
+
+/**
+ * Настройки для встройки 'Характеристики точки'
+ */
+@JsonSchemaMeta(requiredFields = ['pathIcon'], title = 'Характеристики точки')
+class PointCharacteristics
+{
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @JsonSchemaMeta(title = 'Путь к иконке')
+    String pathIcon = ''
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @JsonSchemaMeta(title = 'Путь к тексту для всплывающей подсказки')
+    String pathTextTooltip = ''
+}
+
+/**
+ * Настройки для встройки 'Стратегия определения объектов для отображения на карт'
+ */
+@JsonSchemaMeta(requiredFields = ['strategy'], title = 'Стратегия определения объектов для отображения на карте')
+class StrategyDeterminingObjectsMap
+{
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @JsonSchemaMeta(title = 'Стратегия', nullable = false)
+    String strategy = ''
+}
+
+/**
+ * Настройки для владки 'Линии'
+ */
 @CustomProperty(name = 'typeMap', value = 'linesSettings')
 @JsonSchemaMeta(requiredFields = ['nameStrategy', 'codeStrategy', 'metaclassObjects', 'typeGraphicObject', 'metaclassObjectsLines'], title = 'Линии')
 class LinesSettings extends AbstractPointCharacteristics
@@ -170,12 +177,11 @@ class LinesSettings extends AbstractPointCharacteristics
 
     @JsonSchemaMeta(title = 'Характеристики линии')
     CharacteristicsLine characteristicsLine = new CharacteristicsLine()
-    @JsonSchemaMeta(title = 'Характеристики линии')
+    @JsonSchemaMeta(title = 'Координаты')
     CoordinatesLine coordinatesLine = new CoordinatesLine()
 
     @JsonSchemaMeta(title = 'Отображение окончания линии точками')
     Boolean displayingEndLineDots = null
-
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjectsLines')
     @JsonSchemaMeta(title = 'Путь к иконке А', description = 'Иконка для окончания линии. Если не указана, используется иконка по умолчанию для графического объекта Точка')
     String pathIconA = ''
@@ -186,7 +192,7 @@ class LinesSettings extends AbstractPointCharacteristics
     @JsonSchemaMeta(title = 'Путь для всплывающей подсказки')
     String pathTooltip = ''
 
-    @JsonSchemaMeta(title = 'Стратегия определения обьектов для отображения на карте ')
+    @JsonSchemaMeta(title = 'Стратегия определения обьектов для отображения на карте')
     StrategyDeterminingObjectsMapLines strategyDeterminingObjectsMapLines = new StrategyDeterminingObjectsMapLines()
 
     @UiSchemaMeta(widget = 'textarea')
@@ -197,6 +203,9 @@ class LinesSettings extends AbstractPointCharacteristics
     String placesUse = ''
 }
 
+/**
+ * Настройки для встройки 'Характеристики линии'
+ */
 class CharacteristicsLine
 {
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
@@ -213,6 +222,9 @@ class CharacteristicsLine
     DrawingLineStyle drawingLineStyle
 }
 
+/**
+ * Настройки для встройки 'Координаты'
+ */
 @JsonSchemaMeta(requiredFields = ['pathCoordinatesLatitudeA', 'pathCoordinatesLongitudA', 'pathCoordinatesLatitudeB', 'pathCoordinatesLongitudB'])
 class CoordinatesLine
 {
@@ -231,7 +243,18 @@ class CoordinatesLine
 }
 
 /**
- * Настройки для владки 'Визуализация по умолчанию'
+ * Настройки для встройки 'Стратегия определения объектов для отображения на карте '
+ */
+@JsonSchemaMeta(requiredFields = ['strategy'], title = 'Стратегия определения обьектов для отображения на карте ')
+class StrategyDeterminingObjectsMapLines
+{
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
+    @JsonSchemaMeta(title = 'Стратегия', nullable = false)
+    String strategy = ''
+}
+
+/**
+ * Настройки для вкладки 'Визуализация по умолчанию'
  */
 @JsonSchemaMeta(requiredFields = ['colorLineMap', 'width', 'opacity', 'lineStyle'], title = ' ')
 class DefaultVisualization
@@ -249,6 +272,9 @@ class DefaultVisualization
     Collection<CharacteristicsDisplayListObjects> points
 }
 
+/**
+ * Настройки для списка 'Стиль'-ей линии
+ */
 enum DrawingLineStyle
 {
     @UiTitle(title = 'сплошная')
@@ -257,6 +283,9 @@ enum DrawingLineStyle
     dashedLine
 }
 
+/**
+ * Настройки для встройки 'Характеристики для вывода в списке объектов'
+ */
 @JsonSchemaMeta(requiredFields = ['metaclassCharacteristicsDisplay', 'attributeGroup'], title = ' ')
 class CharacteristicsDisplayListObjects
 {
@@ -275,9 +304,9 @@ class CharacteristicsDisplayListObjects
 class APISettings
 {
     @JsonSchemaMeta(title = 'Ключ API Яндекс Карты')
-    String yandexMapsAPIrey = ''
+    String yandex = ''
     @JsonSchemaMeta(title = 'Ключ API Google Maps')
-    String googlMapsAPIrey = ''
+    String google = ''
 }
 
 Object getDefaultSettings(def initSettings)
@@ -309,6 +338,7 @@ class SettingsProvider
         if (actualVersion != null)
         {
             int actualVersionNumber = actualVersion as Integer
+
             if (actualVersionNumber > -1)
             {
                 String settingsJson = api.keyValue.get(nameSpace, "settings$actualVersion")
@@ -338,13 +368,12 @@ void saveSettings(MapSettings settings)
 
 void postSaveActions()
 {
-    MapSettings settings = new SettingsProvider().getSettings()
-    Collection<? extends Object> strategies =
-        settings?.defaultVisualization ?: [] as Collection<StrategiesOutputObjects>
+    def settings = new SettingsProvider().getSettings()
+    def strategies = settings?.abstractPointCharacteristics ?: [] as Collection<PointSettings>
     strategies.each {
-        if (!it.colorLineMap)
+        if (!it.codeStrategy)
         {
-            it.code = "colorLineMap${ it.title.hashCode() }"
+            it.codeStrategy = "codeStrategy"
         }
     }
     saveSettings(settings)
