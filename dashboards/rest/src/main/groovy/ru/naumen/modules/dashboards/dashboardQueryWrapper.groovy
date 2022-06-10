@@ -547,8 +547,11 @@ class QueryWrapper implements CriteriaWrapper
                     }
                     else
                     {
-                        criteria.addGroupColumn(column)
-                        criteria.addColumn(column)
+                        Object notNullName = sc.selectCase()
+                                            .when(api.whereClause.isNull(column), '')
+                                            .otherwise(column)
+                        criteria.addGroupColumn(notNullName)
+                        criteria.addColumn(notNullName)
                     }
 
                 }
@@ -931,6 +934,11 @@ class QueryWrapper implements CriteriaWrapper
             }
 
             Comparison type = parameter.type
+            if(type == Comparison.NOT_NULL)
+            {
+                Object sc = api.selectClause
+                criteria.add(api.whereClause.ne(sc.property(columnCode), sc.constant('')))
+            }
             switch (type)
             {
                 case Comparison.IS_NULL:
