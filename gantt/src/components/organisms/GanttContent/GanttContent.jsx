@@ -2,6 +2,7 @@
 import АctionBar from 'components/molecules/АctionBar';
 import GanttGrid from 'components/molecules/Gantt';
 import GanttPanel from 'containers/GanttPanel';
+import ErrorBoundary from 'src/components/organisms/ErrorBoundary/ErrorBoundary.jsx';
 import type {Props} from 'containers/GanttContent/types';
 import {connect} from 'react-redux';
 import React, {PureComponent} from 'react';
@@ -59,14 +60,14 @@ export class GanttContent extends PureComponent<Props> {
 
 		return errorData
 			? <p>Ошибка загрузки данных</p>
-			: <GanttGrid
+			: <ErrorBoundary><GanttGrid
 				allLinks={allLinks}
 				flag={flag}
 				newTask={newTask}
 				progress={progress}
 				refresh={refresh}
 				style={{height: '100%', width: '100%'}}
-			/>;
+			></GanttGrid></ErrorBoundary>;
 	};
 
 	renderPanel = () => {

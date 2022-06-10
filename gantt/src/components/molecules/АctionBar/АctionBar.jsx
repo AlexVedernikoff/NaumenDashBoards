@@ -16,8 +16,10 @@ import {useDispatch} from 'react-redux';
 
 const АctionBar = props => {
 	const [active, setActive] = useState(true);
-	const [inputStartDate, setInputStartDate] = useState(new Date(props.startDate).toLocaleString());
-	const [inputEndDate, setInputEndDate] = useState(new Date(props.endDate).toLocaleString());
+
+	const [inputStartDate, setInputStartDate] = useState(props.startDate ? new Date(props.startDate).toLocaleString() : undefined);
+	const [inputEndDate, setInputEndDate] = useState(props.endDate ? new Date(props.endDate).toLocaleString() : undefined);
+
 	const [nameValue, setNameValue] = useState('');
 	const [showModal, setShowModal] = useState(false);
 	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
@@ -46,15 +48,17 @@ const АctionBar = props => {
 	let indexScaleName;
 
 	useEffect(() => {
-		if (typeof endDate !== 'string' && typeof startDate !== 'string') {
-			const inputEndDate = new Date(endDate).toLocaleString(endDate);
-			const inputstartDate = new Date(startDate).toLocaleString(startDate);
+		if (endDate && startDate) {
+			if (typeof endDate !== 'string' && typeof startDate !== 'string') {
+				const inputEndDate = new Date(endDate).toLocaleString(endDate);
+				const inputstartDate = new Date(startDate).toLocaleString(startDate);
 
-			setInputEndDate(inputEndDate);
-			setInputStartDate(inputstartDate);
-		} else {
-			setInputEndDate(endDate);
-			setInputStartDate(startDate);
+				setInputEndDate(inputEndDate);
+				setInputStartDate(inputstartDate);
+			} else {
+				setInputEndDate(endDate);
+				setInputStartDate(startDate);
+			}
 		}
 	}, [endDate, startDate]);
 
