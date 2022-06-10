@@ -134,6 +134,11 @@ const Gantt = (props: Props) => {
 		gantt.config.scale_offset_minimal = false;
 		gantt.config.scroll_size = 6;
 
+		if (gantt.config.start_date && gantt.config.end_date) {
+			gantt.config.start_date = store.APP.startDate;
+			gantt.config.end_date = store.APP.endDate;
+		}
+
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
 		gantt.attachEvent('onAfterLinkDelete', () => {

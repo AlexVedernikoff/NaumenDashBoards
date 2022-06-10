@@ -76,6 +76,19 @@
 		padding: 10px 30px;
 		flex-direction: row;
 		justify-content: space-between;
+
+		&:last-child {
+			opacity: .7;
+			pointer-events: none;
+
+			& input {
+				opacity: .7;
+
+				&::placeholder {
+					color: #767676 !important;
+				}
+			}
+		}
 	}
 
 	.title {
