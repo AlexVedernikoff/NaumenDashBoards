@@ -934,7 +934,7 @@ class QueryWrapper implements CriteriaWrapper
             }
 
             Comparison type = parameter.type
-            if(type == Comparison.NOT_NULL)
+            if(columnCode.equals('firstName'))
             {
                 Object sc = api.selectClause
                 criteria.add(api.whereClause.ne(sc.property(columnCode), sc.constant('')))
