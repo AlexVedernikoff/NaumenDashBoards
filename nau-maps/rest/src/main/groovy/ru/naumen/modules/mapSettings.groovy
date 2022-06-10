@@ -368,8 +368,8 @@ void saveSettings(MapSettings settings)
 
 void postSaveActions()
 {
-    def settings = new SettingsProvider().getSettings()
-    def strategies = settings?.abstractPointCharacteristics ?: [] as Collection<PointSettings>
+    MapSettings settings = new SettingsProvider().getSettings()
+    Collection<? extends AbstractPointCharacteristics> strategies = settings?.abstractPointCharacteristics ?: [] as Collection<PointSettings>
     strategies.each {
         if (!it.codeStrategy)
         {
