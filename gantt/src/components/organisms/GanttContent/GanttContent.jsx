@@ -2,7 +2,11 @@
 import АctionBar from 'components/molecules/АctionBar';
 import GanttGrid from 'components/molecules/Gantt';
 import GanttPanel from 'containers/GanttPanel';
+<<<<<<< HEAD
+import ErrorBoundary from '../ErrorBoundary/ErrorBoundary.jsx';
+=======
 import ErrorBoundary from 'src/components/organisms/ErrorBoundary/ErrorBoundary.jsx';
+>>>>>>> 080e4fa063a47d8ced64ab24d18c323d9eecd56f
 import type {Props} from 'containers/GanttContent/types';
 import {connect} from 'react-redux';
 import React, {PureComponent} from 'react';

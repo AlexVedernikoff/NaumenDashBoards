@@ -2,7 +2,7 @@
 import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import cn from 'classnames';
 import {
-	Datepicker, IconButton, TextInput, Select
+	Datepicker, IconButton, Select, TextInput
 } from 'naumen-common-components';
 import {deepClone} from 'helpers';
 import {deleteWork, getWorlLink, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
@@ -105,9 +105,9 @@ const ModalTask = (props: Props) => {
 			if (!coincidence) {
 				generateId();
 				gantt.createTask({
-					id: ID,
 					code1: currentValue,
 					end_date: newEndDate,
+					id: ID,
 					start_date: newStartDate,
 					text: currentValue,
 					type: 'WORK'
@@ -272,10 +272,10 @@ const ModalTask = (props: Props) => {
 
 		if (initPage) {
 			gantt.createTask({
-				id: ID,
 				code1: currentValue,
-				end_date: new Date,
-				start_date: new Date,
+				end_date: new Date(),
+				id: ID,
+				start_date: new Date(),
 				text: currentValue,
 				type: 'WORK'
 			});
@@ -291,7 +291,7 @@ const ModalTask = (props: Props) => {
 					<input name="delete" onClick={remove} type="button" value="Удалить" />
 				</div>
 				<div className={styles.buttons_grops}>
-					<a className="workLink" href={props.workLink} target="_blank">Переход на карточку работы</a>
+					<a className="workLink" href={props.workLink} rel="noreferrer" target="_blank">Переход на карточку работы</a>
 					<input name="close" onClick={cancel} type="button" value="Отмена" />
 					<input name="save" onClick={save} type="button" value="Сохранить" />
 				</div>

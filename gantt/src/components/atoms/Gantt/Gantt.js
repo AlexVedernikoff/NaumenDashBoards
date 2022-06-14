@@ -1,4 +1,5 @@
 // @flow
+import './gant-export';
 import './styles.less';
 import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import CheckedMenu from 'components/atoms/CheckedMenu';
@@ -9,7 +10,6 @@ import ModalTask from 'components/atoms/ModalTask';
 import {postEditedWorkData, setColumnSettings, setColumnTask} from 'store/App/actions';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import './gant-export';
 
 const HEIGHT_HEADER = 70;
 
@@ -55,7 +55,7 @@ const Gantt = (props: Props) => {
 					},
 					step: 1,
 					unit: 'week'},
-					{format: '%j %D', unit: 'day', step: 1}
+					{format: '%j %D', step: 1, unit: 'day'}
 				]
 			},
 			{
@@ -119,6 +119,44 @@ const Gantt = (props: Props) => {
 		};
 	};
 
+	const editWorkInterval = () => {
+		const tasks = gantt.getTaskByTime();
+		const keys = ['end_date', 'start_date', 'id'];
+
+		const tasksWithoutExcess = tasks.map((obj) => keys.reduce((acc, key) => {
+			acc[key] = obj[key];
+			return acc;
+		}, {}));
+
+		const newTasks = tasksWithoutExcess.map(function (obj) {
+			return {'endDate': obj.end_date, 'startDate': obj.start_date, 'workUUID': obj.id};
+		});
+
+		const arr = [];
+
+		newTasks.map(obj => {
+			const startDateTask = {
+				dateType: 'startDate',
+				value: obj.startDate,
+				workUUID: obj.workUUID
+			};
+
+			arr.push(startDateTask);
+
+			const EndDateTask = {
+				dateType: 'endDate',
+				value: obj.endDate,
+				workUUID: obj.workUUID
+			};
+
+			arr.push(EndDateTask);
+		});
+
+		const taskswithoutResource = arr.filter(i => !i.workUUID.includes('employee'));
+
+		currentVersion === '' ? props.saveChangedWorkInterval(taskswithoutResource) : props.editWorkDateRangesFromVersion(currentVersion, taskswithoutResource);
+	};
+
 	useEffect(() => {
 		gantt.config.auto_scheduling = true;
 		gantt.config.autoscroll = true;
@@ -133,6 +171,7 @@ const Gantt = (props: Props) => {
 		gantt.config.resize_rows = true;
 		gantt.config.scale_offset_minimal = false;
 		gantt.config.scroll_size = 6;
+		gantt.config.round_dnd_dates = false;
 
 		if (gantt.config.start_date && gantt.config.end_date) {
 			gantt.config.start_date = store.APP.startDate;
@@ -194,6 +233,7 @@ const Gantt = (props: Props) => {
 			const links = gantt.getLinks();
 
 			props.saveChangedWorkRelations(links);
+			editWorkInterval();
 		});
 
 		gantt.config.auto_scheduling_compatibility = true;
@@ -211,7 +251,7 @@ const Gantt = (props: Props) => {
 		const startDate = gantt.date.add(new Date(task.start_date), deleteDeviationForStartDate, 'hour');
 		const endDate = gantt.date.add(new Date(task.end_date), deleteDeviationForEndDate, 'hour');
 
-		const {editWorkDateRangesFromVersion, saveChangedWorkInterval, saveChangedWorkProgress} = props;
+		const {saveChangedWorkProgress} = props;
 
 		newTasks.forEach(i => {
 			i.code1 = task.text;
@@ -225,19 +265,7 @@ const Gantt = (props: Props) => {
 			}
 		});
 
-		if (currentVersion === '') {
-			saveChangedWorkInterval(
-				[
-					{dateType: 'startDate', value: startDate, workUUID: task.id},
-					{dateType: 'endDate', value: endDate, workUUID: task.id}
-				]
-			);
-		} else {
-			editWorkDateRangesFromVersion(currentVersion, [
-				{dateType: 'startDate', value: startDate, workUUID: task.id},
-				{dateType: 'endDate', value: endDate, workUUID: task.id}
-			]);
-		}
+		editWorkInterval();
 
 		task.start_date = startDate;
 		task.end_date = endDate;
@@ -338,7 +366,7 @@ const Gantt = (props: Props) => {
 	useEffect(() => {
 		if (initPage) {
 			gantt.exportToPDF({
-				name: "mygantt.pdf"
+				name: 'mygantt.pdf'
 			});
 		}
 
