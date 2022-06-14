@@ -7,7 +7,6 @@ import React from 'react';
 import styles from './styles.less';
 
 const GanttGrid = (props: Props) => {
-
 	if (props.loading) {
 		return (
 			<div className={styles.center}>

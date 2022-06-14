@@ -48,7 +48,7 @@ export class Modal extends Component<Props> {
 		return (
 			<div className={styles.modal}>
 				<div className={this.getContainerCN()} onClick={this.prevent}>
-					{this.renderModalButtons()}	
+					{this.renderModalButtons()}
 					{this.renderModalBody()}
 				</div>
 			</div>

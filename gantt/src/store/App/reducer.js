@@ -137,8 +137,8 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 		case APP_EVENTS.SET_LINKS_DIAGRAM_DATA:
 			return {
 				...state,
-				workRelations: action.payload,
-				loading: true
+				loading: true,
+				workRelations: action.payload
 			};
 		case APP_EVENTS.SET_DIAGRAM_DATA:
 			return {
