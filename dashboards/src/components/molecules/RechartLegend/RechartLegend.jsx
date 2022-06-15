@@ -57,13 +57,12 @@ export class RechartLegend extends PureComponent<Props> {
 			});
 
 			return (
-				<div className={itemClass} key={key}>
+				<div className={itemClass} key={key} onClick={this.handleToggleSeriesShow(value)}>
 					<svg className={styles.legendItemBox} height={iconSize} viewBox={viewBox} width={iconSize}>
 						{this.renderIcon(item)}
 					</svg>
 					<span
 						className={itemLabelClass}
-						onClick={this.handleToggleSeriesShow(value)}
 						title={valueData}
 					>
 						{valueData}
