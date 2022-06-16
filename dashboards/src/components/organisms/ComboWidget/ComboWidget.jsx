@@ -150,6 +150,11 @@ export class ComboWidget extends PureComponent<Props, State> {
 		const {widget} = this.props;
 		const {options: {data, series, yaxis}} = this.state;
 		const margin = {bottom: 5, left: 30, right: 30, top: 5};
+		const {COLUMN, COLUMN_STACKED, LINE} = COMBO_TYPES;
+		const typesOrder = {[COLUMN]: 1, [COLUMN_STACKED]: 0, [LINE]: 2};
+		const sortedSeries = series.sort((rowA, rowB) =>
+			typesOrder[rowA.type ?? COLUMN] - typesOrder[rowB.type ?? COLUMN]
+		);
 
 		if (data.length !== 0) {
 			return (
@@ -158,7 +163,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 					<CartesianGrid strokeDasharray="3 3" />
 					{this.renderXAxis()}
 					{yaxis.map(this.renderYAxis)}
-					{series.map(this.renderSeries)}
+					{sortedSeries.map(this.renderSeries)}
 					{this.renderLegend()}
 				</ComposedChart>
 			);
