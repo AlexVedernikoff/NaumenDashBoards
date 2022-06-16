@@ -780,7 +780,7 @@ export default [
 			},
 			{
 				'children': [],
-				'classFqn': 'serviceCall$PMTask',
+				'classFqn': 'serviceCall',
 				'title': '\u041f\u0440\u043e\u0435\u043a\u0442\u043d\u0430\u044f \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u044c'
 			}
 		],

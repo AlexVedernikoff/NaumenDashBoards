@@ -26,6 +26,7 @@ const Gantt = (props: Props) => {
 	} = props;
 	const [showMenu, setShowMenu] = useState(false);
 	const [initPage, setInitPage] = useState(false);
+	const [column, setColumn] = useState('');
 	const [res, setRes] = useState([]);
 	const [position, setPosition] = useState({left: 0, top: 0});
 	const dispatch = useDispatch();
@@ -328,6 +329,16 @@ const Gantt = (props: Props) => {
 	useEffect(() => {
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
+		tasks.forEach(task => {
+			for (let key in task) {
+				if (task[key] === true) {
+					task[key] = 'да';
+				} else if (task[key] === false) {
+					task[key] = 'нет';
+				}
+			}
+		});
+
 		gantt.clearAll();
 		gantt.parse((JSON.stringify({data: tasks, links: workRelations})));
 		gantt.showDate(new Date());
@@ -409,6 +420,11 @@ const Gantt = (props: Props) => {
 	const inlineEditors = gantt.ext.inlineEditors;
 
 	inlineEditors.attachEvent('onBeforeSave', debounce(function (state) {
+		setColumn(state.columnName);
+
+		const code = props.resources[0].attributeSettings.find(item => item.code === state.columnName
+			? item.attribute : props.resources[1].attributeSettings.find(item => item.code === state.columnName ? item.attribute : null));
+		const attributeCode = code.attribute.code;
 		const newTasks = deepClone(tasks);
 
 		newTasks.map(function (i) {
@@ -424,9 +440,9 @@ const Gantt = (props: Props) => {
 
 		newTasks.find(i => {
 			if (i.id === state.id) {
-				const workDate = {
-					title: state.newValue
-				};
+				const workDate = {};
+
+				workDate[attributeCode] = state.newValue;
 
 				if (i.id.includes('s')) {
 					const metaClassStr = 'serviceCall$PMTask';
@@ -525,6 +541,7 @@ const Gantt = (props: Props) => {
 				newTask={props.newTask}
 				postEditedWorkData={props.postEditedWorkData}
 				postNewWorkData={props.postNewWorkData}
+				resources={props.resources}
 				workAttributes={props.workAttributes}
 				workLink={props.workLink}
 			/>

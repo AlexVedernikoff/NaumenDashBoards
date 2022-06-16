@@ -8,13 +8,8 @@ import {
 	saveChangedWorkInterval,
 	saveChangedWorkProgress,
 	saveChangedWorkRelations,
-<<<<<<< HEAD
 	setRangeTime,
 	switchProgressCheckbox
-=======
-	switchProgressCheckbox,
-	setRangeTime
->>>>>>> 080e4fa063a47d8ced64ab24d18c323d9eecd56f
 } from 'store/App/actions';
 
 const props = (state: AppState) => {
@@ -60,13 +55,8 @@ const functions = {
 	saveChangedWorkInterval,
 	saveChangedWorkProgress,
 	saveChangedWorkRelations,
-<<<<<<< HEAD
 	setRangeTime,
 	switchProgressCheckbox
-=======
-	switchProgressCheckbox,
-	setRangeTime
->>>>>>> 080e4fa063a47d8ced64ab24d18c323d9eecd56f
 };
 
 export {
