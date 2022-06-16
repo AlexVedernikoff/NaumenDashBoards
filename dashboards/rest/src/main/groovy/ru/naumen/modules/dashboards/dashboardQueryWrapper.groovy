@@ -169,9 +169,10 @@ class QueryWrapper implements CriteriaWrapper
                            .with(sc.&columnMultiply.rcurry(sc.constant(100.00)))
                            .with(sc.&columnDivide.rcurry(sc.constant(totalCount)))
 
+            IApiCriteriaColumn countColumn
             if (withCount)
             {
-                IApiCriteriaColumn countColumn = sc.property(attributeCodes).with(sc.&count)
+                countColumn = sc.property(attributeCodes).with(sc.&count)
                 column = sc.concat(
                     sc.cast(countColumn, 'string'),
                     sc.constant(' '),
@@ -445,7 +446,7 @@ class QueryWrapper implements CriteriaWrapper
                                     RequestData requestData, AggregationParameter parameter,
                                     DiagramType diagramType, Integer top, Boolean onlyFilled)
     {
-        if (parameter.type == Aggregation.PERCENT || (diagramType == DiagramType.TABLE && parameter.type == Aggregation.PERCENT_CNT))
+        if (parameter.type == Aggregation.PERCENT || parameter.type == Aggregation.PERCENT_CNT)
         {
             def totalAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
             def totalParameter = new AggregationParameter(

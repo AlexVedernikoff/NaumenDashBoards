@@ -399,7 +399,7 @@ class DashboardDataSetService
                     }
                     else
                     {
-                        percentCntAggregationIndexes = [getPercentCntAggregationIndexForTable(request, diagramType)]
+                        percentCntAggregationIndexes = [getPercentCntAggregationIndex(request, diagramType)]
                     }
 
 
@@ -3126,7 +3126,7 @@ class DashboardDataSetService
                         Closure formatAggregation = this.&formatAggregationSet.rcurry(
                             listIdsOfNormalAggregations,
                             onlyFilled,
-                            getPercentCntAggregationIndexForTable(request, diagramType)
+                            getPercentCntAggregationIndex(request, diagramType)
                         )
                         Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                         def res = filtering?.withIndex()?.collectMany { filters, i ->
@@ -3264,7 +3264,7 @@ class DashboardDataSetService
                                 res,
                                 listIdsOfNormalAggregations,
                                 onlyFilled,
-                                getPercentCntAggregationIndexForTable(request, diagramType)
+                                getPercentCntAggregationIndex(request, diagramType)
                             )
                             def filtersTitle = title.any {it[0] != ''}
                                 ? (title[i] as Set)?.withIndex().findResults { val, idx ->
@@ -3552,17 +3552,14 @@ class DashboardDataSetService
      * @param diagramType - тип диаграммы
      * @return - индекс агрегации типа PERCENT_CNT для таблицы
      */
-    Integer getPercentCntAggregationIndexForTable(DiagramRequest request, DiagramType diagramType)
+    Integer getPercentCntAggregationIndex(DiagramRequest request, DiagramType diagramType)
     {
         Integer percentCntAggregationIndex
-        if (diagramType == DiagramType.TABLE)
-        {
-            percentCntAggregationIndex = request?.data?.findResult { key, value ->
-                value?.aggregations?.withIndex()?.findResult { val, index ->
-                    if (val.type == Aggregation.PERCENT_CNT)
-                    {
-                        return index
-                    }
+        percentCntAggregationIndex = request?.data?.findResult { key, value ->
+            value?.aggregations?.withIndex()?.findResult { val, index ->
+                if (val.type == Aggregation.PERCENT_CNT)
+                {
+                    return index
                 }
             }
         }
@@ -6166,7 +6163,7 @@ class DashboardDataSetService
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(
                     listIdsOfNormalAggregations,
                     diagramType in DiagramType.CountTypes ? false : onlyFilled,
-                    getPercentCntAggregationIndexForTable(request, diagramType)
+                    getPercentCntAggregationIndex(request, diagramType)
                 )
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
                 def res = dashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
@@ -6244,7 +6241,7 @@ class DashboardDataSetService
                     res,
                     listIdsOfNormalAggregations,
                     diagramType in DiagramType.CountTypes ? false : onlyFilled,
-                    getPercentCntAggregationIndexForTable(request, diagramType)
+                    getPercentCntAggregationIndex(request, diagramType)
                 )]
                 return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, formatResult(total, aggregationCnt), parameter,
                                                       parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
