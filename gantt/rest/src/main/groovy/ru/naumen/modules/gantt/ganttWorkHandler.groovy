@@ -458,7 +458,7 @@ class GanttWorkHandlerService
      */
     void editWorkData(EditWorkDataRequest request, IUUIDIdentifiable user)
     {
-        Map<String, Object> preparedWorkData = prepareWorkData(request, user)
+        Map<String, Object> preparedWorkData = prepareWorkDataToUpdate(request, user)
         ISDtObject res = utils.get(request.workUUID)
         utils.edit(res, preparedWorkData)
     }
@@ -735,6 +735,68 @@ class GanttWorkHandlerService
     }
 
     /**
+     * Подготовка данных при редактировании ячеек
+     * @param request - тело запроса
+     * @param user - пользователь
+     * @return подготовленные данные работы для добавления/редактирования
+     */
+    private Map<String, Object> prepareWorkDataToUpdate(EditWorkDataRequest request,
+                                                        IUUIDIdentifiable user)
+    {
+        Map<String, Object> preparedWorkData = request.workData
+        if (preparedWorkData.size() > 1)
+        {
+            preparedWorkData.each {
+                if (it.key == 'title')
+                {
+                    preparedWorkData = [(it.key): (it.value)]
+                }
+            }
+        }
+        if (preparedWorkData*.key.get(0) == 'title')
+        {
+            Collection<IAttributeWrapper> attributes =
+                api.metainfo.getMetaClass(request.classFqn).getAttributes()
+            preparedWorkData.each {
+                String attributeCode = it.key
+                Object attributeValue = it.value
+
+                IAttributeWrapper attribute = attributes.find {
+                    it.code == attributeCode
+                }
+                if (attribute.type.code in AttributeType.DATE_TYPES)
+                {
+                    String timezoneString =
+                        api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
+                    TimeZone timezone = TimeZone.getTimeZone(timezoneString)
+                    attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
+                    preparedWorkData[attributeCode] = attributeValue
+                }
+            }
+            return preparedWorkData
+        }
+        else
+        {
+            GanttSettingsService service = GanttSettingsService.instance
+            Map<String, String> requestContent = [:]
+            requestContent << ["contentCode": request.contentCode, "subjectUUID":
+                request.subjectUuid]
+            GetGanttSettingsRequest requestGetGant = new ObjectMapper()
+                .convertValue(requestContent, GetGanttSettingsRequest)
+            GanttSettingsClass settings = service.getGanttSettings(requestGetGant)
+            def codeСolumns = settings.resourceAndWorkSettings.get(0).attributeSettings
+            codeСolumns.each {
+                if (it.code == preparedWorkData*.key.get(0))
+                {
+                    preparedWorkData = [(it.attribute.code.toString()): (
+                        preparedWorkData*.value.get(0))]
+                }
+            }
+            return preparedWorkData
+        }
+    }
+
+    /**
      * Метод получения статусов объекта
      * @param classFqn - тип объекта
      * @return список статусов
@@ -967,6 +1029,15 @@ class EditWorkDataRequest extends AddNewWorkRequest
      * UUID редактируемой работы
      */
     String workUUID
+
+    /**
+     * Ключ текущей карточки объекта
+     */
+    String subjectUuid
+    /**
+     * Ключ контента, на котором расположена диаграмма
+     */
+    String contentCode
 }
 
 /**

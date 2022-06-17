@@ -295,7 +295,7 @@ class GanttSettingsService
                 it.type in ATTRIBUTE_TYPES_ALLOWED_FOR_EDITION
             }
         }
-
+        attributes = attributes.findAll() {it.type != "object"}
         return attributes
     }
 
