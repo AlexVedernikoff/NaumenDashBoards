@@ -183,19 +183,13 @@ class DashboardConfigService
     private static final Collection<String> DASHBOARDS_REQUIRED_NAMESPACES = ["custom_groups","widgets","dashboards","sources","dashboardsSources"]
 
     private static final String GET_ALL_KEY_VALUE_STOGAGE_SQL = """
-        SELECT
-            name_space, key_, value
-        FROM
-            tbl_sys_keyvaluestorage
+        SELECT name_space, key_, value
+        FROM tbl_sys_keyvaluestorage
         """
     private static final String CHECK_ON_EXIST_SQL = """
-        SELECT
-            value
-        FROM
-            tbl_sys_keyvaluestorage
-        WHERE
-            name_space = '%s'
-            AND key_ = '%s'
+        SELECT value
+        FROM tbl_sys_keyvaluestorage
+        WHERE name_space = '%s' AND key_ = '%s'
         FETCH FIRST 1 ROWS ONLY
         """
 
