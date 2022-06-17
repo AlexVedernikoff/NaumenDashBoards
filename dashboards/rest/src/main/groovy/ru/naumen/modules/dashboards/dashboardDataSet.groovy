@@ -3081,6 +3081,7 @@ class DashboardDataSetService
                        PaginationSettings paginationSettings = null)
     {
         assert request: "Empty request!"
+        Boolean isSourceForEachRow = requestContent?.data?.sourceRowName?.findAll() && diagramType == DiagramType.TABLE
         return request.requisite.collect { requisite ->
             Boolean onlyFilled = !requisite.showNulls
             Boolean notBlank = !requisite.showBlank
@@ -3161,7 +3162,14 @@ class DashboardDataSetService
                                                newRequestData?.aggregations?.any { it?.type in Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE]  }
                             if (hasStateOrTimer)
                             {
-                                partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations)
+                                Boolean resWithPercentCnt = false
+                                if (isSourceForEachRow)
+                                {
+                                    Collection<Integer> percentCntAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT_CNT)
+                                    resWithPercentCnt = i in percentCntAggregationIndexes
+                                }
+
+                                partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations, resWithPercentCnt)
                             }
                             filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
                             return prepareResultListListForTop(partial, filterListSize, top, parameterFilters, breakdownFilters, i)
@@ -4130,9 +4138,10 @@ class DashboardDataSetService
      * Метод подготовки данных, среди которых есть значения статуса
      * @param res - сет данных
      * @param aggregationCnt - количество агрегаций в запросе
+     * @param resWithPercentCnt - флаг, является ли текущий результат с типом агрегации PERCENT_CNT
      * @return обновленный сет данных
      */
-    private List prepareRequestWithStates(List res, List listIdsOfNormalAggregations)
+    private List prepareRequestWithStates(List res, List listIdsOfNormalAggregations, Boolean resWithPercentCnt = false)
     {
         def list = res
         Set stateValues = []
@@ -4160,7 +4169,7 @@ class DashboardDataSetService
                 }
                 List totalAggregation = aggregationCnt > 1
                     ? getTotalAggregation(resValue, aggregationCnt)
-                    : [DECIMAL_FORMAT.format(resValue[0].sum { it[0] as Double })]
+                    : [!resWithPercentCnt ? DECIMAL_FORMAT.format(resValue[0].sum { it[0] as Double }) : resValue[0][0][0]]
                 resValue = resValue[1..-1]
                 totalAggregation.eachWithIndex() {aggr, i -> resValue.add(listIdsOfNormalAggregations[i], aggr) }
                 return resValue
@@ -6130,6 +6139,7 @@ class DashboardDataSetService
      */
     private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean notBlank, Boolean onlyFilled,  DiagramType diagramType, def requestContent, IgnoreLimits ignoreLimits, PaginationSettings paginationSettings = null)
     {
+        Boolean isSourceForEachRow = requestContent?.data?.sourceRowName?.findAll() && diagramType == DiagramType.TABLE
         String nodeType = node.type
         Boolean isDiagramTypeTable = diagramType == DiagramType.TABLE
         switch (nodeType.toLowerCase())
@@ -6175,7 +6185,16 @@ class DashboardDataSetService
                                    requestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] }
                 if (hasStateOrTimer)
                 {
-                    total = prepareRequestWithStates(total, listIdsOfNormalAggregations)
+                    Boolean resWithPercentCnt = false
+                    if (isSourceForEachRow)
+                    {
+                        Integer dataSetIndex = request.requisite.findIndexOf {
+                            it.nodes.first().dataKey == node.dataKey
+                        }
+                        Collection<Integer> percentCntAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT_CNT)
+                        resWithPercentCnt = dataSetIndex in percentCntAggregationIndexes
+                    }
+                    total = prepareRequestWithStates(total, listIdsOfNormalAggregations, resWithPercentCnt)
                 }
                 return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
                                                       parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
