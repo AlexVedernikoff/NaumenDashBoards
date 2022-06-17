@@ -451,7 +451,8 @@ class DashboardDataSetService
 
                 return mappingStandardDiagram(res, legend, reverseGroups, changeLabels, reverseLabels, format, groupFormat, countTotals)
             case DiagramType.RoundTypes:
-                return mappingRoundDiagram(res, countTotals)
+                Integer percentCntAggregationIndex = getPercentCntAggregationIndex(request, diagramType)
+                return mappingRoundDiagram(res, countTotals, percentCntAggregationIndex != null)
             case DiagramType.CountTypes:
                 return mappingSummaryDiagram(res, diagramType, minValue, maxValue)
             case TABLE:
@@ -4296,9 +4297,10 @@ class DashboardDataSetService
     /**
      * Метод преобразования результата выборки к круговой диаграмме
      * @param list - данные диаграмы
+     * @param isAggregationTypePercentCnt - флаг, является ли тип агрегации PERCENT_CNT
      * @return RoundDiagram
      */
-    private RoundDiagram mappingRoundDiagram(List list, Integer countTotals)
+    private RoundDiagram mappingRoundDiagram(List list, Integer countTotals, Boolean isAggregationTypePercentCnt)
     {
         def resultDataSet = list.head() as List<List>
         def transposeDataSet = resultDataSet.transpose()
@@ -4310,7 +4312,7 @@ class DashboardDataSetService
                 def (aggregationResult, groupResult) = transposeDataSet
                 checkAggregationAndBreakdownListSize(aggregationResult as Set, groupResult as Set)
                 return new RoundDiagram(series: (aggregationResult as List).collect {
-                    it as Double
+                    isAggregationTypePercentCnt ? it : it as Double
                 }, labels: groupResult, countTotals: countTotals)
             default:
                 String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
