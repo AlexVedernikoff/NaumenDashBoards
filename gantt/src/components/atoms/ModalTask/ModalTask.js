@@ -26,50 +26,12 @@ const ModalTask = (props: Props) => {
 	const [initPage, setInitPage] = useState(false);
 	const [options, setOptions] = useState([]);
 	const [currentMetaClassFqn, setCurrentMetaClassFqn] = useState('');
-	const {attributesMap, getListOfWorkAttributes} = props;
+	const {attributesMap, getListOfWorkAttributes, resources} = props;
 	const dispatch = useDispatch();
 	const store = useSelector(state => state);
 
 	const onChange = target => {
 		setCurrentValue(target.value);
-	};
-
-	gantt.showLightbox = id => {
-		setTaskId(id);
-		const task = gantt.getTask(id);
-
-		dispatch(getWorlLink(task.id));
-
-		const currentMetaClass = listMetaClass.find(metaclass => task.id.includes(metaclass));
-
-		setCurrentMetaClassFqn(currentMetaClass);
-
-		if (currentMetaClass) {
-			const listEmployeeAtrributes = attributesMap.employee?.map(i => {
-				return i.title;
-			});
-
-			setOptions(listEmployeeAtrributes);
-			setCurrentMetaClassFqn('employee');
-		} else {
-			const listserviceAtrributes = attributesMap.serviceCall$PMTask ? attributesMap.serviceCall$PMTask : attributesMap.serviceCall;
-			const listEmployeeAtrributes = listserviceAtrributes.map(i => {
-				return i.title;
-			});
-
-			setOptions(listEmployeeAtrributes);
-			attributesMap.serviceCall$PMTask ? setCurrentMetaClassFqn('serviceCall$PMTask') : setCurrentMetaClassFqn('serviceCall');
-		}
-
-		setShowModal(true);
-
-		setCurrentValue(task.text);
-		setInputStartDate('');
-		setInputEndDate('');
-	};
-
-	gantt.hideLightbox = () => {
-		setTaskId(null);
 	};
 
 	const convertDateToNormal = date => {
@@ -84,6 +46,45 @@ const ModalTask = (props: Props) => {
 		const modifiedDateStr = new Date(withoutDotsandDash);
 
 		return modifiedDateStr;
+	};
+
+	gantt.showLightbox = id => {
+		setTaskId(id);
+
+		const task = gantt.getTask(id);
+
+		dispatch(getWorlLink(task.id));
+
+		const currentMetaClass = listMetaClass.find(metaclass => toString(task.id).includes(metaclass) ? metaclass : 'serviceCall');
+
+		setCurrentMetaClassFqn(currentMetaClass);
+
+		let attributeKey = '';
+
+		for (let key in attributesMap) {
+			if (currentMetaClass === key) {
+				attributeKey = attributesMap[key];
+			}
+		}
+
+		if (currentMetaClass) {
+			const listEmployeeAtrributes = attributeKey?.map(i => {
+				return i.title;
+			});
+
+			setOptions(listEmployeeAtrributes);
+			setCurrentMetaClassFqn(currentMetaClass);
+		}
+
+		setShowModal(true);
+
+		setCurrentValue(task.text);
+		setInputStartDate(new Date((task.start_date)).toLocaleString());
+		setInputEndDate(new Date((task.end_date)).toLocaleString());
+	};
+
+	gantt.hideLightbox = () => {
+		setTaskId(null);
 	};
 
 	let ID = '';
@@ -113,11 +114,15 @@ const ModalTask = (props: Props) => {
 					type: 'WORK'
 				});
 
+				const attrStartDate = resources[1].startWorkAttribute.code;
+				const attrEndDate = resources[1].endWorkAttribute.code;
+
 				const workDate = {
-					registrationDate: newEndDate,
-					stateStartTime: newStartDate,
 					title: currentValue
 				};
+
+				workDate[attrStartDate] = newStartDate;
+				workDate[attrEndDate] = newEndDate;
 
 				const tasksTwo = gantt.getTaskByTime();
 
@@ -131,12 +136,16 @@ const ModalTask = (props: Props) => {
 						i.start_date = newStartDate;
 						i.end_date = newEndDate;
 						i.code1 = currentValue;
-
+						i.text = currentValue;
+						i.title = currentValue;
+						const attrStartDate = resources[1].startWorkAttribute.code;
+						const attrEndDate = resources[1].endWorkAttribute.code;
 						const workDate = {
-							registrationDate: newEndDate,
-							stateStartTime: newStartDate,
 							title: currentValue
 						};
+
+						workDate[attrStartDate] = newStartDate;
+						workDate[attrEndDate] = newEndDate;
 
 						dispatch(postEditedWorkData(workDate, currentMetaClassFqn, taskId));
 					}
@@ -356,11 +365,13 @@ const ModalTask = (props: Props) => {
 		}
 	};
 
+	const classs = styles.modal + ' ' + styles.modalLink;
+
 	const renderModal = () => {
 		if (showModalError) {
 			return (
 				<Modal
-					className={styles.modal}
+					className={classs}
 					notice={true}
 					onClose={() => setShowModalError(false)}
 					onSubmit={() => setShowModalError(false)}

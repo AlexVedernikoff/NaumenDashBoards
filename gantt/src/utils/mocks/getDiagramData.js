@@ -8,7 +8,7 @@ const data = {
 			{"code": "search_unlic", "title": "Атрибуты результатов поиска для нелицензированных пользователей"},
 			{"code": "0f31f516-1b18-4863-829c-d36c462ab0d7", "title": "Для формы добавления заявки"}
 		],
-		"serviceCall$PMTask": [
+		"serviceCall": [
 			{"code": "DlyaSlozhnoiFormyDobavleniyaVDublyah", "title": "Для сложной формы добавления в дублях"},
 			{"code": "11eaebc5-dd95-4ea0-88fc-7304c034d1a0", "title": "Для карточки команды-ответственной"}
 		]
@@ -74,7 +74,7 @@ const data = {
 			"id":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
 			"text":"SD111",
 			"code1":"SD111",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u041e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u0435",
+			"5af9985a-79b4-42b9-9d0f-635f6d80561e": false,
 			"start_date":"2021-11-11T11:55:26",
 			"end_date": "2021-11-13T11:55:26",
 			"level":0,
@@ -136,14 +136,6 @@ export const getDiagramData = () => {
 				'start_date': '2021-10-14T00:00:50+0000',
 				'end_date': '2021-10-14T00:01:50+0000',
 			},
-			{
-				'id': '456789jk2' + Math.random(),
-				'code1': 'Другое23456789' + Math.random(),
-				'd951f7': '4577777776',
-				'd951f9': '16-04-2019',
-				'duration': 480,
-				'start_date': null
-			}
 		);
 	}
 

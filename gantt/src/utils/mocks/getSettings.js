@@ -58,7 +58,7 @@ export default {
 							"title": "Дата архивирования",
 							"type": "dateTime"
 						},
-						"code": "d951f9"
+						"code": "code1"
 					},
 					{
 						"attribute": {
@@ -71,7 +71,7 @@ export default {
 							"sourceName": "Инцидент",
 							"title": "Головной запрос"
 						},
-						"code": "d951f7"
+						"code": "code2"
 					},
 				],
 				"communicationResourceAttribute": null,
