@@ -24,6 +24,7 @@ export type Props = ValuesProps<Values> & HelpersProps & {
 	className: string,
 	dataKey: string,
 	disabled: boolean,
+	filterAttributesByMain: boolean,
 	getUsedDataKeys?: (data: Array<DataSet>) => Array<string>,
 	index: number,
 	indicator: MixedAttribute | null,

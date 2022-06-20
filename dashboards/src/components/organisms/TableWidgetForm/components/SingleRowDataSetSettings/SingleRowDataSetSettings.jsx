@@ -60,6 +60,7 @@ export class SingleRowDataSetSettings extends PureComponent<Props> {
 				breakdownIndex={index}
 				dataKey={dataKey}
 				disabled={disableBreakdown}
+				filterAttributesByMain={true}
 				index={index}
 				indicator={attribute}
 				isMain={isMain}

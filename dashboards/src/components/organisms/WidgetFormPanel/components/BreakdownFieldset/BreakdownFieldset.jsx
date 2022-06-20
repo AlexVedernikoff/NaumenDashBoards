@@ -41,6 +41,7 @@ export class BreakdownFieldset extends Component<Props> {
 		className: '',
 		dataKey: '',
 		disabled: false,
+		filterAttributesByMain: false,
 		isMain: true,
 		onlyCommonAttributes: false,
 		required: false,
@@ -102,10 +103,10 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, index: number = 0): Array<Attribute> => {
-		const {helpers, index: dataSetIndex, onlyCommonAttributes, value} = this.props;
+		const {filterAttributesByMain, helpers, index: dataSetIndex, onlyCommonAttributes, value} = this.props;
 		let attributes = onlyCommonAttributes ? helpers.getCommonAttributes(options) : options;
 
-		if (index > this.mainIndex) {
+		if (filterAttributesByMain && index > this.mainIndex) {
 			attributes = helpers.filterBreakdownAttributeByMainDataSet(attributes, dataSetIndex);
 		}
 
