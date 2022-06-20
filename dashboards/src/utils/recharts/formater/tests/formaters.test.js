@@ -13,8 +13,7 @@ import {
 	makeFormatterByNumberFormat,
 	notationConverter,
 	percentFormat,
-	sevenDaysFormatter,
-	splitFormatter,
+	sevenDaysFormatter
 } from 'utils/recharts/formater/helpers'
 import {AXIS_FORMAT_TYPE, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/data/constants';
 
@@ -117,19 +116,6 @@ describe('Formatters test', () => {
 	it('percentFormat', () => {
 		expect(percentFormat('')).toBe('');
 		expect(percentFormat('1')).toBe('1%');
-	});
-
-	it('splitFormatter', () => {
-		const noSplitFormatter = splitFormatter(false);
-		const formatter = splitFormatter(true);
-
-		expect(noSplitFormatter('')).toBe('');
-		expect(noSplitFormatter('12345')).toBe('12345');
-
-		expect(formatter('')).toEqual(['']);
-		expect(formatter('12345')).toEqual(['12345']);
-		expect(formatter('wer wer')).toEqual(['wer','wer']);
-		expect(formatter('qwe qwe  ')).toEqual(['qwe','qwe','','']);
 	});
 
 	it('sevenDaysFormatter', () => {

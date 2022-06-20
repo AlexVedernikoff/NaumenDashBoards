@@ -2,13 +2,14 @@
 import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT} from 'store/widgets/data/constants';
 import {
 	checkInfinity,
+	checkNumber,
+	cntPercentFormatter,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
-	storedFormatter,
-	totalPercentFormatter
+	storedFormatter
 } from './helpers';
-import type {CircleFormatter, NumberFormatter, ValueFormatter} from './types';
+import type {CircleFormatter, NumberFormatter, PercentStore, ValueFormatter} from './types';
 import type {CircleWidget, NumberAxisFormat} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
@@ -17,7 +18,7 @@ import {hasCountPercent, hasMSInterval, hasPercent, parseMSInterval} from 'store
 const getDataFormatter = (
 	widget: CircleWidget,
 	format: NumberAxisFormat,
-	totalCalculator: (() => number) | null
+	percentStore: PercentStore
 ): NumberFormatter => {
 	const dataSet = getMainDataSet(widget.data);
 	const {indicators} = dataSet;
@@ -30,21 +31,17 @@ const getDataFormatter = (
 	let formatter = null;
 
 	if (usesMSInterval) {
-		formatter = parseMSInterval;
+		formatter = checkNumber(parseMSInterval);
 	} else {
 		const numberFormat = !format.additional && usesPercent ? {...format, additional: '%'} : format;
 
 		formatter = makeFormatterByNumberFormat(numberFormat);
 
-		if (usesCntPercent && totalCalculator != null) {
-			const total = totalCalculator();
-
-			if (total !== 0) {
-				formatter = totalPercentFormatter(formatter, total);
-			}
+		if (usesCntPercent) {
+			formatter = cntPercentFormatter(formatter, percentStore);
+		} else {
+			formatter = checkInfinity(formatter);
 		}
-
-		formatter = checkInfinity(formatter);
 	}
 
 	return formatter;
@@ -73,14 +70,14 @@ const getCategoryFormatter = (widget: CircleWidget): ValueFormatter => {
  * @param {CircleWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
- * @param {() => number} totalCalculator - расчет общего количества элементов на диаграмме
+ * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {CircleFormatter} - объект с функциями форматерами и параметрами построения
  */
 const getCircleFormatterBase = (
 	widget: CircleWidget,
 	labels: Array<string> | Array<number>,
 	container: HTMLDivElement,
-	totalCalculator: () => number
+	percentStore: PercentStore = {}
 ): CircleFormatter => {
 	const {dataLabels} = widget;
 	const dataLabelsFormat = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
@@ -88,7 +85,7 @@ const getCircleFormatterBase = (
 		? dataLabelsFormat
 		: DEFAULT_NUMBER_AXIS_FORMAT;
 	const categoryFormatter = getCategoryFormatter(widget);
-	const dataLabelsFormatter = getDataFormatter(widget, normalizedDataLabelsFormat, totalCalculator);
+	const dataLabelsFormatter = getDataFormatter(widget, normalizedDataLabelsFormat, percentStore);
 
 	return {
 		category: categoryFormatter,
@@ -102,7 +99,7 @@ const getCircleFormatterBase = (
  * @param {CircleWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
- * @param {() => number} totalCalculator - расчет общего количества элементов на диаграмме
+ * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {CircleFormatter} - объект с функциями форматерами и параметрами построения
  */
 // eslint-disable-next-line no-unused-vars
@@ -110,11 +107,11 @@ const getCircleFormatterDebug = (
 	widget: CircleWidget,
 	labels: Array<string> | Array<number>,
 	container: HTMLDivElement,
-	totalCalculator: () => number
+	percentStore: PercentStore = {}
 ): CircleFormatter => {
 	const {clientWidth} = container;
 	const store = {container: {clientWidth}, labels, widget};
-	const baseFormatter = getCircleFormatterBase(widget, labels, container, totalCalculator);
+	const baseFormatter = getCircleFormatterBase(widget, labels, container, percentStore);
 	const category = [];
 	const label = [];
 

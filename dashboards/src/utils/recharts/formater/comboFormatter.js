@@ -2,12 +2,12 @@
 import {
 	checkInfinity,
 	checkZero,
+	cntPercentFormatter,
 	makeFormatterByFormat,
 	percentFormat,
-	sevenDaysFormatter,
-	totalPercentFormatter
+	sevenDaysFormatter
 } from './helpers';
-import type {ComboFormatter, ComboNumberFormatter, ComboValueFormatter, ValueFormatter} from './types';
+import type {ComboFormatter, ComboNumberFormatter, ComboValueFormatter, PercentStore, ValueFormatter} from './types';
 import type {ComboWidget} from 'store/widgets/data/types';
 import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
@@ -43,7 +43,7 @@ const oldValueFormatter = (usesPercent: boolean, showZero: boolean) => {
 const getDataFormatters = (
 	widget: ComboWidget,
 	checkShowEmptyData: boolean,
-	totalCalculator: ((dataKey: string) => number) | null
+	percentStore: PercentStore = {}
 ): ComboNumberFormatter => {
 	const formatters = {};
 
@@ -65,10 +65,8 @@ const getDataFormatters = (
 			} else {
 				formatter = oldValueFormatter(usesPercent, showZero);
 
-				if (totalCalculator !== null && usesCountPercent) {
-					const total = totalCalculator(dataKey);
-
-					formatter = totalPercentFormatter(formatter, total);
+				if (usesCountPercent) {
+					formatter = cntPercentFormatter(formatter, percentStore);
 				}
 			}
 
@@ -121,20 +119,20 @@ const getLegendFormatter = (widget: ComboWidget, container: HTMLDivElement, crop
  * @param {ComboWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
- * @param {() => number} totalCalculator -  расчет общего количества элементов на диаграмме
+ * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {ComboFormatter} - объект с функциями форматерами и параметрами построения
  */
 const getComboFormatterBase = (
 	widget: ComboWidget,
 	labels: Array<string> | Array<number>,
 	container: HTMLDivElement,
-	totalCalculator: (dataKey: string) => number
+	percentStore: PercentStore = {}
 ): ComboFormatter => {
 	const categoryFormatter = getCategoryFormatter(widget);
-	const indicatorFormatter = getDataFormatters(widget, false, null);
+	const indicatorFormatter = getDataFormatters(widget, false);
 
 	return {
-		dataLabel: getDataFormatters(widget, true, totalCalculator),
+		dataLabel: getDataFormatters(widget, true, percentStore),
 		indicator: indicatorFormatter,
 		legend: getLegendFormatter(widget, container, true),
 		parameter: categoryFormatter

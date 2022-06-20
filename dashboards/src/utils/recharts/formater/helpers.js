@@ -1,7 +1,7 @@
 // @flow
 import type {AxisFormat, LabelFormat, NumberAxisFormat} from 'store/widgets/data/types';
 import {AXIS_FORMAT_TYPE, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/data/constants';
-import type {CTXValue, NumberFormatter, StringFormatter, ValueFormatter} from './types';
+import type {CTXValue, NumberFormatter, PercentStore, StringFormatter, ValueFormatter} from './types';
 import {compose} from 'redux';
 import moment from 'utils/moment.config';
 import {SEPARATOR, TITLE_SEPARATOR} from 'store/widgets/buildData/constants';
@@ -110,11 +110,12 @@ export const checkString = (successFormatter: StringFormatter) => (value?: strin
  * @returns {Function} - функция-форматер, возвращающая переданное значение, если значение не число, иначе результат вызова successFormatter
  * в другом случае
  */
-export const checkNumber = (successFormatter: NumberFormatter) => (value: string | number): string => {
-	const numValue = typeof value === 'string' ? parseFloat(value) : value;
-	// $FlowFixMe - parseFloat(string) - isNaN => typeof value === 'string'
-	return isNaN(numValue) ? value : successFormatter(numValue);
-};
+export const checkNumber = (successFormatter: NumberFormatter): ValueFormatter =>
+	(value: string | number): string => {
+		const numValue = typeof value === 'string' ? parseFloat(value) : value;
+		// $FlowFixMe - parseFloat(string) - isNaN => typeof value === 'string'
+		return isNaN(numValue) ? value : successFormatter(numValue);
+	};
 
 /**
  * Форматтер для добавления строки в конец значения
@@ -128,20 +129,6 @@ export const additionalFormat = (additional: string): StringFormatter => value =
  * @returns {StringFormatter} - функция-форматер
  */
 export const percentFormat: StringFormatter = additionalFormat('%');
-
-/**
- * Форматтер разбивающий (или нет) строку на несколько строк
- * @param {boolean} split - разбивать или нет строку
- * @param {boolean} splitter - строка разбивки, по умолчанию пробел
- * @returns {Function} - функция-форматер
- */
-export const splitFormatter = (split: boolean, splitter: string = ' ') => {
-	if (split) {
-		return (value: string) => value.split(splitter);
-	}
-
-	return defaultStringFormatter;
-};
 
 /**
  * Форматтер для группировки SEVEN_DAYS
@@ -275,29 +262,38 @@ export const storedFormatter = (
 
 /**
  * Создание форматера для CNT(%) типа агрегации
- * @param {NumberFormatter} StringFormatter - функция-форматер для значения
- * @param {number} total - общее количество элементов в ряду
+ * @param {NumberFormatter} formatter - функция-форматер для значения
+ * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {Function} - функция-форматер
  */
-export const totalPercentFormatter = (StringFormatter: NumberFormatter, total: number): NumberFormatter => {
-	if (total !== 0) {
-		const percentFormatter = makeFormatterByNumberFormat({
-			additional: '%',
-			symbolCount: null,
-			type: AXIS_FORMAT_TYPE.NUMBER_FORMAT
-		});
+export const cntPercentFormatter = (
+	formatter: NumberFormatter,
+	percentStore: PercentStore
+): NumberFormatter => {
+	const percentFormatter = makeFormatterByNumberFormat({
+		additional: '%',
+		symbolCount: null,
+		type: AXIS_FORMAT_TYPE.NUMBER_FORMAT
+	});
+	const percentFormatterWithCheck = checkNumber(percentFormatter);
+	const valueFormatter = checkNumber(formatter);
 
-		return (value: number) => {
-			const valueStr = StringFormatter(value);
+	return (value: number): string => {
+		let result = '';
 
-			if (valueStr !== '') {
-				const percentStr = percentFormatter(value / total * 100);
-				return `${valueStr} (${percentStr})`;
+		if (value) {
+			const valueStr = valueFormatter(value);
+			const percent = percentStore[value];
+
+			if (percent) {
+				const percentStr = percentFormatterWithCheck(percent);
+
+				result = `${valueStr} (${percentStr})`;
+			} else {
+				result = `${valueStr}`;
 			}
+		}
 
-			return '';
-		};
-	}
-
-	return StringFormatter;
+		return result;
+	};
 };

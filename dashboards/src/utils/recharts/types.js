@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {AxisFormatter, CircleFormatter, ComboFormatter, NumberFormatter} from './formater/types';
+import type {AxisFormatter, CircleFormatter, ComboFormatter, NumberFormatter, PercentStore} from './formater/types';
 import type {AxisSettings, BordersStyle, DataLabels, FontStyle, Group, Legend, Ranges, SpeedometerIndicatorSettings, TextHandler} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
@@ -37,6 +37,24 @@ export type RechartDataItem = {
 };
 
 export type RechartData = Array<RechartDataItem>;
+
+export type RechartSeriesData = {
+	data: RechartData,
+	percentStore: PercentStore
+};
+
+export type RechartCircleItem = {
+	color: string,
+	name: string,
+	value: number
+};
+
+export type CircleData = Array<RechartCircleItem>;
+
+export type RechartCircleData = {
+	data: CircleData,
+	percentStore: PercentStore
+};
 
 export type RechartPieDataItem = {
 	color: string,
@@ -122,7 +140,7 @@ export type AxisChartOptions = {
 };
 
 export type CircleChartOptions = {
-	data: RechartData,
+	data: CircleData,
 	dataLabels: DataLabelsOptions,
 	formatters: CircleFormatter,
 	getDrillDownOptions: GetCircleDrillDownOptions,
@@ -244,4 +262,9 @@ export type DefaultChartSettings = {
 export type MultilineHeightResult = {
 	height: number,
 	labels: Labels
+};
+
+export type ValueFromSeriesLabelResult = {
+	percent: ?number,
+	value: ?number
 };
