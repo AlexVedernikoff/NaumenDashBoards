@@ -784,8 +784,8 @@ class GanttWorkHandlerService
             GetGanttSettingsRequest requestGetGant = new ObjectMapper()
                 .convertValue(requestContent, GetGanttSettingsRequest)
             GanttSettingsClass settings = service.getGanttSettings(requestGetGant)
-            def codeСolumns = settings.resourceAndWorkSettings.get(0).attributeSettings
-            codeСolumns.each {
+            Collection <AttributeSettings> codeColumns = settings.resourceAndWorkSettings.get(0).attributeSettings
+            codeColumns.each {
                 if (it.code == preparedWorkData*.key.get(0))
                 {
                     preparedWorkData = [(it.attribute.code.toString()): (
@@ -1031,11 +1031,11 @@ class EditWorkDataRequest extends AddNewWorkRequest
     String workUUID
 
     /**
-     * Ключ текущей карточки объекта
+     * Идентификатор текущей карточки объекта
      */
     String subjectUuid
     /**
-     * Ключ контента, на котором расположена диаграмма
+     * Код контента, на котором расположена диаграмма
      */
     String contentCode
 }
