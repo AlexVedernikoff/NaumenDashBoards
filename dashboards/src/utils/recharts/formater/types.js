@@ -2,6 +2,8 @@
 
 export type CTXValue = Object;
 
+export type PercentStore = {[id: number]: number};
+
 export type NumberFormatter = (value: number) => string;
 
 export type StringFormatter = (value: string) => string;

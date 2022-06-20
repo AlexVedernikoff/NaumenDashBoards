@@ -2,7 +2,7 @@
 import type {AxisChartOptions} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getAxisFormatter} from './formater';
-import {getAxisWidget, getDataLabels, getLegendOptions, getSeriesData, getSeriesInfo, getTotalCalculator} from './helpers';
+import {getAxisWidget, getDataLabels, getLegendOptions, getSeriesData, getSeriesInfo} from './helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {getXAxisNumber, getYAxisCategory} from './bar.helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
@@ -11,7 +11,7 @@ import type {Widget} from 'store/widgets/data/types';
 
 const getOptions = (
 	widget: Widget,
-	data: DiagramBuildData,
+	rawData: DiagramBuildData,
 	container: HTMLDivElement,
 	globalColorsSettings: GlobalCustomChartColorsSettings
 ): $Shape<AxisChartOptions> => {
@@ -21,22 +21,23 @@ const getOptions = (
 		const buildDataSet = getBuildSet(axisWidget);
 
 		if (buildDataSet) {
-			const totalCalculator = getTotalCalculator(data);
-			const formatters = getAxisFormatter(axisWidget, data.labels, container, totalCalculator);
+			const {labels} = rawData;
+			const {data, percentStore} = getSeriesData(rawData);
+			const formatters = getAxisFormatter(axisWidget, labels, container, percentStore);
 			const {xAxisName, yAxisName} = buildDataSet;
 			const getDrillDownOptions = makeGeneratorAxisDrillDownOptions(axisWidget);
 
 			return {
-				data: getSeriesData(data),
+				data,
 				dataLabels: getDataLabels(axisWidget),
 				formatters,
 				getDrillDownOptions,
 				legend: getLegendOptions(container, axisWidget.legend),
-				series: getSeriesInfo(axisWidget, data, globalColorsSettings),
+				series: getSeriesInfo(axisWidget, rawData, globalColorsSettings),
 				stacked: false,
 				type: 'AxisChartOptions',
 				xaxis: getXAxisNumber(axisWidget, yAxisName),
-				yaxis: getYAxisCategory(axisWidget, container, data.labels.map(formatters.parameter), xAxisName)
+				yaxis: getYAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName)
 			};
 		}
 	}

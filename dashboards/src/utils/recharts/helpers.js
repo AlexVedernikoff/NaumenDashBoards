@@ -8,10 +8,13 @@ import type {
 	DataLabelsOptions,
 	MultilineHeightResult,
 	ReChartLegend,
+	RechartCircleData,
 	RechartData,
 	RechartDataItem,
+	RechartSeriesData,
 	SeriesInfo,
-	SubTotalGetter
+	SubTotalGetter,
+	ValueFromSeriesLabelResult
 } from './types';
 import type {
 	AxisSettings,
@@ -159,12 +162,45 @@ const equalLabels = (label1: string, label2: string) => {
 };
 
 /**
+ * Нормализует значение, полученное с сервера, получая значение и процент (если указан)
+ * @param {string | number} value - значение, полученное с сервера
+ * @returns {ValueFromSeriesLabelResult} - значение, разделенное на само значение и процент
+ *  от общего количества, если указано1
+ */
+const getValueFromSeriesLabel = (value?: string | number): ValueFromSeriesLabelResult => {
+	let result: ValueFromSeriesLabelResult = {
+		percent: null,
+		value: null
+	};
+
+	if (typeof value === 'string') {
+		if (value.indexOf(' ')) {
+			const [valueStr, percentStr] = value.split(' ');
+
+			result = {
+				percent: parseFloat(percentStr),
+				value: parseFloat(valueStr)
+			};
+		} else {
+			result.value = parseFloat(value);
+		}
+	} else if (typeof value === 'number') {
+		result.value = value;
+	}
+
+	return result;
+};
+
+/**
  * Формирует данные для осевых графиков rechart
  * @param {DiagramBuildData} data  - данные от сервера
- * @returns {RechartData} - данные для rechart
+ * @returns {RechartSeriesData} - данные для rechart
  */
-const getSeriesData = (data: DiagramBuildData): RechartData => {
-	const result = [];
+const getSeriesData = (data: DiagramBuildData): RechartSeriesData => {
+	const result = {
+		data: [],
+		percentStore: {}
+	};
 	const {labels, series} = data;
 
 	labels.forEach((label, i) => {
@@ -172,11 +208,20 @@ const getSeriesData = (data: DiagramBuildData): RechartData => {
 
 		series.forEach(({data, dataKey, name}) => {
 			const id = dataKey ?? name ?? 'value';
+			const {percent, value} = getValueFromSeriesLabel(data[i]);
 
-			item[id] = +data[i];
+			if (value) {
+				item[id] = value;
+
+				if (percent) {
+					result.percentStore[value] = percent;
+				}
+			} else {
+				item[id] = 0;
+			}
 		});
 
-		result.push(item);
+		result.data.push(item);
 	});
 
 	return result;
@@ -185,10 +230,13 @@ const getSeriesData = (data: DiagramBuildData): RechartData => {
 /**
  * Формирует данные для комбо графиков rechart
  * @param {DiagramBuildData} data  - данные от сервера
- * @returns {RechartData} - данные для rechart
+ * @returns {RechartSeriesData} - данные для rechart
  */
-const getComboSeriesData = (data: DiagramBuildData): RechartData => {
-	const result = [];
+const getComboSeriesData = (data: DiagramBuildData): RechartSeriesData => {
+	const result = {
+		data: [],
+		percentStore: {}
+	};
 	const {labels, series} = data;
 
 	labels.forEach((label, i) => {
@@ -196,11 +244,20 @@ const getComboSeriesData = (data: DiagramBuildData): RechartData => {
 
 		series.forEach(({data, dataKey, name}) => {
 			const id = `${dataKey} ${name}`;
+			const {percent, value} = getValueFromSeriesLabel(data[i]);
 
-			item[id] = +data[i];
+			if (value) {
+				item[id] = value;
+
+				if (percent) {
+					result.percentStore[value] = percent;
+				}
+			} else {
+				item[id] = 0;
+			}
 		});
 
-		result.push(item);
+		result.data.push(item);
 	});
 
 	return result;
@@ -211,24 +268,38 @@ const getComboSeriesData = (data: DiagramBuildData): RechartData => {
  * @param {CircleWidget} widget - виджет
  * @param {DiagramBuildData} data - данные от сервера
  * @param {GlobalCustomChartColorsSettings} globalColorsSettings - глобальные цвета
- * @returns {RechartData} - данные для rechart
+ * @returns {RechartCircleData} - данные для rechart
  */
 const getCircleSeriesData = (
 	widget: CircleWidget,
 	data: DiagramBuildData,
 	globalColorsSettings: GlobalCustomChartColorsSettings
-): RechartData => {
-	const {labels, series} = data;
+): RechartCircleData => {
+	const result = {
+		data: [],
+		percentStore: {}
+	};
 
+	const {labels, series} = data;
 	const getColor = widget.colorsSettings.type === CHART_COLORS_SETTINGS_TYPES.AUTO
 		? getAutoColor(widget.colorsSettings.auto.colors)
 		: getColorForLabel(widget.colorsSettings.custom, globalColorsSettings);
 
-	const result = labels.map((label, i) => ({
-		color: getColor(label, i),
-		name: label,
-		value: series[i]
-	}));
+	labels.forEach((label, i) => {
+		const {percent, value} = getValueFromSeriesLabel(series[i]);
+
+		if (value) {
+			result.data.push({
+				color: getColor(label, i),
+				name: label,
+				value
+			});
+
+			if (percent) {
+				result.percentStore[value] = percent;
+			}
+		}
+	});
 
 	return result;
 };
@@ -744,33 +815,6 @@ const getDataLabels = (widget: AxisWidget | CircleWidget | ComboWidget): DataLab
 };
 
 /**
- * Возвращает функцию для расчета общего количества данных на диаграмме
- * @param {DiagramBuildData} data - данные конкретного графика
- * @returns {() => number}
- */
-const getTotalCalculator = (data: DiagramBuildData) => (targetDataKey?: ?string = null) => {
-	let result = 0;
-
-	data.series.forEach(({data: row, dataKey}) => {
-		if (targetDataKey === null || dataKey === targetDataKey) {
-			row.forEach(item => {
-				if (typeof item === 'number') {
-					result += item;
-				} else if (typeof item === 'string') {
-					const itemValue = Number.parseInt(item);
-
-					if (!isNaN(itemValue)) {
-						result += itemValue;
-					}
-				}
-			});
-		}
-	});
-
-	return result;
-};
-
-/**
  * Расчет ширины Y оси с индикатором
  * TODO: такое же есть в колоночных
  * @param {string} maxString - максимально значение на оси
@@ -893,6 +937,5 @@ export {
 	getXAxisCategory,
 	getSpeedometerWidget,
 	getSummaryWidget,
-	getTotalCalculator,
 	makeSubTotalGetter
 };

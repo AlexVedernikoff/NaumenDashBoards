@@ -1,15 +1,16 @@
 // @flow
 import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT} from 'store/widgets/data/constants';
-import type {AxisFormatter, CTXValue, NumberFormatter, ValueFormatter} from './types';
+import type {AxisFormatter, CTXValue, PercentStore, ValueFormatter} from './types';
 import type {AxisWidget, NumberAxisFormat} from 'store/widgets/data/types';
 import {
 	checkInfinity,
+	checkNumber,
 	checkZero,
+	cntPercentFormatter,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
-	storedFormatter,
-	totalPercentFormatter
+	storedFormatter
 } from './helpers';
 import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
@@ -38,7 +39,7 @@ const getLegendFormatter = (widget: AxisWidget, container: HTMLDivElement): Valu
  * Создает форматер для меток и оси индикатора
  * @param {AxisWidget} widget - виджет
  * @param {NumberAxisFormat} format - установленный пользователем формат, используется только для меток данных
- * @param {() => number} totalCalculator -  расчет общего количества элементов на диаграмме
+ * @param {PercentStore} percentStore - данные для cnt(%)
  * @param {boolean} checkShowEmptyData - указывает на необходимость показывать скрытые данные
  * @param {boolean} checkPercentAggregation - указывает на необходимость добавлять % по умолчанию, при процентной агрегации
  * @returns {ValueFormatter} - функция-форматер
@@ -46,10 +47,10 @@ const getLegendFormatter = (widget: AxisWidget, container: HTMLDivElement): Valu
 const getDataFormatter = (
 	widget: AxisWidget,
 	format: NumberAxisFormat,
-	totalCalculator: (() => number) | null,
+	percentStore: PercentStore = {},
 	checkShowEmptyData: boolean,
 	checkPercentAggregation: boolean = true
-): NumberFormatter => {
+): ValueFormatter => {
 	const dataSet = getMainDataSet(widget.data);
 	const {breakdown, indicators, parameters, showEmptyData} = dataSet;
 	const {aggregation, attribute: indicatorAttribute} = indicators[0];
@@ -62,25 +63,23 @@ const getDataFormatter = (
 	let formatter = null;
 
 	if (usesMSInterval) {
-		formatter = parseMSInterval;
+		formatter = checkNumber(parseMSInterval);
 	} else {
 		const numberFormat = !format.additional && format.additional !== '' && usesPercent ? {...format, additional: '%'} : format;
 
 		formatter = makeFormatterByNumberFormat(numberFormat);
 
-		if (usesCntPercent && totalCalculator != null) {
-			const total = totalCalculator();
+		if (usesCntPercent) {
+			formatter = cntPercentFormatter(formatter, percentStore);
+		} else {
+			formatter = checkInfinity(formatter);
 
-			if (total !== 0) {
-				formatter = totalPercentFormatter(formatter, total);
+			if (!showZero) {
+				formatter = checkZero(formatter);
 			}
 		}
 
-		formatter = checkInfinity(formatter);
-
-		if (!showZero) {
-			formatter = checkZero(formatter);
-		}
+		formatter = checkNumber(formatter);
 	}
 
 	return formatter;
@@ -146,14 +145,14 @@ const getTooltipNormalizer = (widget: AxisWidget): ((number) => number) => {
  * @param {AxisWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
- * @param {() => number} totalCalculator - расчет общего количества элементов на диаграмме
+ * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {AxisFormatter} - объект с функциями форматерами и параметрами построения
  */
 const getAxisFormatterBase = (
 	widget: AxisWidget,
 	labels: Array<string> | Array<number>,
 	container: HTMLDivElement,
-	totalCalculator: () => number
+	percentStore: PercentStore = {}
 ): AxisFormatter => {
 	const {dataLabels} = widget;
 	const categoryFormatter = getCategoryFormatter(widget);
@@ -164,11 +163,11 @@ const getAxisFormatterBase = (
 	const indicatorsFormat = {...DEFAULT_NUMBER_AXIS_FORMAT, symbolCount: null};
 
 	return {
-		dataLabel: getDataFormatter(widget, normalizedDataLabelsFormat, totalCalculator, true, true),
-		indicator: getDataFormatter(widget, indicatorsFormat, null, false, false),
+		dataLabel: getDataFormatter(widget, normalizedDataLabelsFormat, percentStore, true, true),
+		indicator: getDataFormatter(widget, indicatorsFormat, percentStore, false, false),
 		legend: getLegendFormatter(widget, container),
 		parameter: categoryFormatter,
-		tooltip: compose(getDataFormatter(widget, normalizedDataLabelsFormat, totalCalculator, false, true), getTooltipNormalizer(widget))
+		tooltip: compose(getDataFormatter(widget, normalizedDataLabelsFormat, percentStore, false, true), getTooltipNormalizer(widget))
 
 	};
 };
@@ -179,7 +178,7 @@ const getAxisFormatterBase = (
  * @param {AxisWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета
- * @param {() => number} totalCalculator - расчет общего количества элементов на диаграмме
+ * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {AxisFormatter} - объект с функциями форматерами и параметрами построения
  */
 // eslint-disable-next-line no-unused-vars
@@ -187,11 +186,11 @@ const getAxisFormatterDebug = (
 	widget: AxisWidget,
 	labels: Array<string> | Array<number>,
 	container: HTMLDivElement,
-	totalCalculator: () => number
+	percentStore: PercentStore
 ): AxisFormatter => {
 	const {clientWidth} = container;
 	const store = {container: {clientWidth}, labels, widget};
-	const baseFormatter = getAxisFormatterBase(widget, labels, container, totalCalculator);
+	const baseFormatter = getAxisFormatterBase(widget, labels, container, percentStore);
 	const dataLabel = [];
 	const indicator = [];
 	const legend = [];
