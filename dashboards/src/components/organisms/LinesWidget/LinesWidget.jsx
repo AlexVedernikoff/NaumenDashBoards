@@ -259,8 +259,7 @@ export class LinesWidget extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {updateOptions, widget} = this.props;
-		const {data} = this.state.options;
+		const {data, updateOptions, widget} = this.props;
 
 		return (
 			<ReChartWidget data={data} updateOptions={updateOptions} widget={widget}>
