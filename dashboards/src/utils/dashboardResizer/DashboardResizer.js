@@ -18,13 +18,19 @@ export class DashboardResizer {
 	}
 
 	getContentHeight (): number | null {
-		let addHeight = DASHBOARD_HEADER_HEIGHT;
+		let result = null;
 
-		if (this.isMobile || !this.showHeader) {
-			addHeight = 0;
+		if (gridRef.current) {
+			let addHeight = DASHBOARD_HEADER_HEIGHT;
+
+			if (this.isMobile || !this.showHeader) {
+				addHeight = 0;
+			}
+
+			result = gridRef.current.getBoundingClientRect().height + addHeight;
 		}
 
-		return gridRef.current && gridRef.current.getBoundingClientRect().height + addHeight;
+		return result;
 	}
 
 	getFrameInitHeight (): number {
@@ -63,6 +69,11 @@ export class DashboardResizer {
 		callback();
 		this.sizeWillBeChanged = false;
 	}, {once: true});
+
+	resetAndResize = (callback?: Function) => {
+		this.setCustomHeight(this.getFrameInitHeight());
+		this.resize(callback);
+	};
 
 	resetHeight = () => this.isFullSize() ? this.setFullHeight() : this.setCustomHeight(this.getFrameInitHeight());
 
