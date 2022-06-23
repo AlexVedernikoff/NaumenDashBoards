@@ -185,8 +185,12 @@ class QueryWrapper implements CriteriaWrapper
             String sortingType = parameter.sortingType
             if (sortingType)
             {
-                Closure sorting = getSorting(sortingType)
-                column.with(sorting).with(criteria.&addOrder)
+                if (parameter.type == Aggregation.PERCENT_CNT){
+                    criteria.addOrder(ApiCriteriaOrders.desc(countColumn))
+                }
+                else if(parameter.type == Aggregation.PERCENT){
+                    criteria.addOrder(ApiCriteriaOrders.desc(column))
+                }
             }
         }
         if(totalValueCriteria)
