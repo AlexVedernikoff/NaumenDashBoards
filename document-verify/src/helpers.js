@@ -1,5 +1,17 @@
 // @flow
 /**
+ * Функция, которая устанавливает высоту встройки по высоте родительского окна
+ */
+function setHeight () {
+	const {body} = document;
+	const height = `${window.frameElement.height}px`;
+
+	if (body.style.height !== height) {
+		body.style.height = height;
+	}
+}
+
+/**
  * Возвращает функцию, которая не будет срабатывать, пока продолжает вызываться
  * @param {Function} func - функция, которую необходимо обернуть
  * @param {number} ms - количество миллисекунд для проверки повторного вызова
@@ -118,5 +130,6 @@ export {
 	getMapValues,
 	isMacOS,
 	isObject,
-	omit
+	omit,
+	setHeight
 };

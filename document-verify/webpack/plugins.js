@@ -30,17 +30,10 @@ const plugins = [
 ];
 
 if (license === 'use') {
-	const packageReplacer = {};
-	packageReplacer.search = `package ru.naumen.modules.${packagejson.name}`;
-	packageReplacer.replacer = packageReplacer.search;
-	packageReplacer.replacer += '_v';
-	packageReplacer.replacer += packagejson.version.split('.').join('_').split('-')[0].toString();
-
 	plugins.push(new GroovyWebpackPlugin({
-		editBySuperusers: false,
 		output: './dist/privateModules.xml',
-		paths: ['./rest/src/main/groovy/ru/naumen/modules/dashboards'],
-		replacers: [packageReplacer]
+		paths: ['./rest/src/main/groovy/ru/naumen/modules/documentVerify'],
+		recursive: true
 	}));
 }
 

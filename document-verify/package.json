@@ -12,6 +12,7 @@
   "description": "Embedded application 'Verification' for 'SMP'",
   "dependencies": {
     "apexcharts": "^3.26.2",
+		"bestzip": "^2.2.1",
     "canvg": "^3.0.2",
     "dhtmlx-gantt": "^7.1.4",
     "dom4": "^2.1.5",
@@ -166,15 +167,15 @@
     "react"
   ],
   "license": "ISC",
-  "name": "DocumentDecisionsVerify",
+  "name": "document-verify",
   "repository": {
     "type": "git",
     "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
-    "build-dev": "npm run clear && cross-env NODE_ENV=development webpack --config ./webpack/config.js && npm run zip",
-    "build-license": "npm run clear && cross-env NODE_ENV=production LICENSE=use webpack --config ./webpack/config.js && npm run zip",
+    "build-dev": "cross-env NODE_ENV=development webpack --config ./webpack/config.js && npm run zip",
+    "build-license": "cross-env NODE_ENV=production LICENSE=use webpack --config ./webpack/config.js && npm run zip",
     "clear": "rm -rf ./dist/*",
     "clear-zip": "rm *.zip",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --config ./webpack/config.js",
