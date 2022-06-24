@@ -525,7 +525,6 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 else if(lastParameterAttributeType in AttributeType.HAS_UUID_TYPES)
                 {
-
                     def lastColumn =  sc.property(
                         LinksAttributeMarshaller.marshal(
                             attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'),
@@ -533,12 +532,30 @@ class QueryWrapper implements CriteriaWrapper
                     if(lastParameterAttributeType == AttributeType.META_CLASS_TYPE)
                     {
                         lastColumn = sc.property(
-                            attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'))
+                            attributeChains.takeWhile {
+                                it.type in AttributeType.HAS_UUID_TYPES
+                            }.code.with(this.&replaceMetaClassCode).join('.')
+                        )
                     }
-                    column = sc.concat(
-                        sc.property(attributeCodes),
-                        sc.constant(LinksAttributeMarshaller.delimiter),
-                        lastColumn)
+                    String columnStringValue = LinksAttributeMarshaller.marshal(
+                        attributeChains.takeWhile {
+                            it.type in AttributeType.HAS_UUID_TYPES
+                        }.code.with(this.&replaceMetaClassCode).join('.'),
+                        DashboardQueryWrapperUtils.UUID_CODE
+                    ).toString()
+
+                    Object columnFirst = sc.property(attributeCodes)
+                    Object columnSecond = sc.property(columnStringValue)
+                    column = sc.selectCase()
+                               .when(api.whereClause.isNull(columnSecond), columnFirst)
+                               .otherwise(
+                                   sc.concat(
+                                       columnFirst,
+                                       sc.constant(LinksAttributeMarshaller.delimiter),
+                                       columnSecond
+                                   )
+                               )
+
                     criteria.addGroupColumn(column)
                     criteria.addColumn(column)
                 }
