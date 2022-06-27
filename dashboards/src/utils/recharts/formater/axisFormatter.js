@@ -1,6 +1,6 @@
 // @flow
 import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT} from 'store/widgets/data/constants';
-import type {AxisFormatter, CTXValue, PercentStore, ValueFormatter} from './types';
+import type {AxisFormatter, PercentStore, ValueFormatter} from './types';
 import type {AxisWidget, NumberAxisFormat} from 'store/widgets/data/types';
 import {
 	checkInfinity,
@@ -15,8 +15,7 @@ import {
 import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasCountPercent, hasMSInterval, hasPercent, isStackedChart, parseMSInterval} from 'store/widgets/helpers';
-import memoize from 'memoize-one';
+import {hasCountPercent, hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
 
 /**
  * Создает форматер для блока легенды
@@ -100,44 +99,6 @@ const getCategoryFormatter = (widget: AxisWidget): ValueFormatter => {
 	}
 
 	return makeFormatterByFormat(parameter.format ?? getDefaultFormatForAttribute(attribute, group), false);
-};
-
-/**
- * Создает оболочку для синхронизации значений подсказок и значений на графике
- * @param {AxisWidget} widget - виджет
- * @returns {Function} - функция-нормализатор
- */
-const getTooltipNormalizer = (widget: AxisWidget): ((number) => number) => {
-	const dataSet = getMainDataSet(widget.data);
-	const {indicators} = dataSet;
-	const {aggregation, attribute: indicatorAttribute} = indicators[0];
-	const stacked = isStackedChart(widget.type);
-	const usesPercent = hasPercent(indicatorAttribute, aggregation);
-
-	if (stacked && usesPercent) {
-		const calculatePercent = memoize((value: number, dataPointIndex: number, series: Array<Array<number | ?string>>): number => {
-			const fullSum = series.reduce((sm, row) => {
-				const rowVal = row[dataPointIndex];
-				let parsedValue = 0;
-
-				if (typeof rowVal === 'number') {
-					parsedValue = rowVal;
-				} else if (typeof rowVal === 'string') {
-					parsedValue = Number.parseFloat(rowVal);
-				}
-
-				return sm + parsedValue;
-			}, 0);
-			return value / fullSum * 100;
-		});
-
-		return (value: number, ctx: CTXValue): number => {
-			const {dataPointIndex, series} = ctx;
-			return calculatePercent(value, dataPointIndex, series);
-		};
-	}
-
-	return (value: number) => value;
 };
 
 /**
