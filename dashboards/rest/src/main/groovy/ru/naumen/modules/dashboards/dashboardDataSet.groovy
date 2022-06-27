@@ -3779,7 +3779,7 @@ class DashboardDataSetService
                                 value = ObjectMarshaller.marshal(value, uuid)
                             }
                         }
-                        value = !value ? getNullValue(diagramType, fromBreakdown) : value
+                    value = (value == null || value.equals('')) ? getNullValue(diagramType, fromBreakdown) : value
                         return value.toString().replaceAll("\\<.*?>","")
                 }
             case GroupType.DAY:

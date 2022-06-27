@@ -569,12 +569,14 @@ class QueryWrapper implements CriteriaWrapper
                     }
                     else
                     {
-                        Object notNullName = sc.selectCase()
-                                            .when(api.whereClause.isNull(column), '')
-                                            .otherwise(column)
-                        criteria.addGroupColumn(notNullName)
-                        criteria.addColumn(notNullName)
+                        Object attributeColumn = sc.property(attributeCodes)
+                        column = sc.selectCase()
+                                   .when(api.whereClause.isNull(attributeColumn), '')
+                                   .otherwise(attributeColumn)
+                        criteria.addGroupColumn(column)
+                        criteria.addColumn(column)
                     }
+                }
 
                 }
                 String sortingType = parameter.sortingType
@@ -1552,6 +1554,9 @@ class DashboardQueryWrapperUtils
                         attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'string')
                     }
                 }
+                break
+            case AttributeType.NUMBER_TYPES:
+                attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'integer')
                 break
             default:
                 if (!(attributeType in AttributeType.ALL_ATTRIBUTE_TYPES))
