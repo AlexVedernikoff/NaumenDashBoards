@@ -27,7 +27,6 @@ const POSITION_BOTTOM = {
 	bottom: 0,
 	inset: 'auto 0 0',
 	left: 0,
-	padding: '10px 0 0 10px',
 	right: 0
 };
 
