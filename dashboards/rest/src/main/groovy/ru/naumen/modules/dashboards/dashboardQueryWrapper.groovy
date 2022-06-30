@@ -1215,7 +1215,9 @@ class DashboardQueryWrapperUtils
     {
         validate(requestData)
         validate(requestData.source)
-        def wrapper = QueryWrapper.build(requestData.source, templateUUID)
+        def apiMetainfo = api.metainfo
+        Source requestDataSource  =  checkingPresenceAttribute(requestData, diagramType, apiMetainfo)
+        def wrapper = QueryWrapper.build(requestDataSource, templateUUID)
         def criteria = wrapper.criteria
         Boolean totalValueCriteria = false
         wrapper.locale = currentUserLocale
@@ -1703,6 +1705,42 @@ class DashboardQueryWrapperUtils
             }
         }
         return attribute
+    }
+
+    /**
+     * Метод проверки, наличия атрибута у класса
+     * @param requestData - запрос на получение данных
+     * @param diagramType - тип диаграммы
+     * @param apiMetainfo - API метаинформация для запросов в ДБ
+     * @return данные для добавления кооректного источника
+     */
+    private static Source checkingPresenceAttribute(RequestData requestData,
+                                                    DiagramType diagramType,
+                                                    def apiMetainfo)
+    {
+        def listAtr = apiMetainfo.getTypes(requestData.source.classFqn)
+        def metaClassName = apiMetainfo.getMetaClass(requestData.source.classFqn).attributeCodes
+        def atrObg = requestData.groups.collect {
+            it.attribute.code
+        }
+        def atrObgData = requestData.groups.collect {
+            it?.attribute?.metaClassFqn
+        }
+
+        Source requestDataSource = requestData.source
+        atrObg.each {
+            if (it != null && !(metaClassName.contains(it)))
+            {
+                atrObgData.each { atrObgDataClassFqn ->
+                    if (it != requestData.source.classFqn)
+                    {
+                        requestDataSource = new Source(classFqn: atrObgDataClassFqn, descriptor: "")
+                    }
+                }
+            }
+        }
+
+        return requestDataSource
     }
 }
 return
