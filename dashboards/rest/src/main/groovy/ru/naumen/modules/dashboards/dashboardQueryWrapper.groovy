@@ -17,6 +17,7 @@ import static MessageProvider.*
 import groovy.json.JsonSlurper
 import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.server.script.api.DbApi$Query
+import ru.naumen.core.server.script.api.IMetainfoApi
 
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
@@ -1215,9 +1216,9 @@ class DashboardQueryWrapperUtils
     {
         validate(requestData)
         validate(requestData.source)
-        def apiMetainfo = api.metainfo
+        IMetainfoApi apiMetainfo = api.metainfo
         Source requestDataSource  =  checkingPresenceAttribute(requestData, diagramType, apiMetainfo)
-        def wrapper = QueryWrapper.build(requestDataSource, templateUUID)
+        QueryWrapper wrapper = QueryWrapper.build(requestDataSource, templateUUID)
         def criteria = wrapper.criteria
         Boolean totalValueCriteria = false
         wrapper.locale = currentUserLocale
@@ -1716,14 +1717,14 @@ class DashboardQueryWrapperUtils
      */
     private static Source checkingPresenceAttribute(RequestData requestData,
                                                     DiagramType diagramType,
-                                                    def apiMetainfo)
+                                                    IMetainfoApi apiMetainfo)
     {
-        def listAtr = apiMetainfo.getTypes(requestData.source.classFqn)
-        def metaClassName = apiMetainfo.getMetaClass(requestData.source.classFqn).attributeCodes
-        def atrObg = requestData.groups.collect {
+        Object listAtr = apiMetainfo.getTypes(requestData.source.classFqn)
+        Object metaClassName = apiMetainfo.getMetaClass(requestData.source.classFqn).attributeCodes
+        ArrayList atrObg = requestData.groups.collect {
             it.attribute.code
         }
-        def atrObgData = requestData.groups.collect {
+        ArrayList atrObgData = requestData.groups.collect {
             it?.attribute?.metaClassFqn
         }
 
