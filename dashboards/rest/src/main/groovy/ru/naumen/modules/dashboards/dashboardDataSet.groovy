@@ -179,7 +179,7 @@ class DashboardDataSetService
 
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormatSymbols().with {
         setDecimalSeparator('.' as char)
-        new DecimalFormat("#.##", it)
+        new DecimalFormat("#.####", it)
     }
 
     private static final String blankData = 'Не заполнено'
@@ -3524,13 +3524,13 @@ class DashboardDataSetService
         {
             return listOfLists
         }
-
         return listOfLists.findResults { List list ->
-            if (exceptNulls && list[listIdsOfNormalAggregations*.toLong()].every { !it || it == 0 })
+            if (exceptNulls && list[listIdsOfNormalAggregations*.toLong()].every {
+                !it || it == 0
+            })
             {
                 return null
             }
-
             if (listIdsOfNormalAggregations.size() > 0)
             {
                 listIdsOfNormalAggregations.each { index ->
@@ -3539,9 +3539,13 @@ class DashboardDataSetService
                     {
                         countAndPercentValuesForTable = list[index].split(' ')
                         list[index] = countAndPercentValuesForTable[1]
+                        if (list[index].charAt(0) == ',')
+                        {
+                            list[index] = '0' + list[index].replace(',', '.')
+                        }
                     }
-
-                    list[index] = list[index] = list[index] && !(list[index].toDouble().isNaN() || list[index].toDouble().isInfinite())
+                    list[index] = list[index] = list[index] && !(
+                        list[index].toDouble().isNaN() || list[index].toDouble().isInfinite())
                         ? DECIMAL_FORMAT.format(list[index] as Double)
                         : DECIMAL_FORMAT.format(0)
 
