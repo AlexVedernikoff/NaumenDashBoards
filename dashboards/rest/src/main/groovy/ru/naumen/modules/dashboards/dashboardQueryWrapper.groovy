@@ -1217,7 +1217,7 @@ class DashboardQueryWrapperUtils
         validate(requestData)
         validate(requestData.source)
         IMetainfoApi apiMetainfo = api.metainfo
-        Source requestDataSource  =  checkingPresenceAttribute(requestData, diagramType, apiMetainfo)
+        Source requestDataSource  =  assigningСorrectSource(requestData, diagramType, apiMetainfo)
         QueryWrapper wrapper = QueryWrapper.build(requestDataSource, templateUUID)
         def criteria = wrapper.criteria
         Boolean totalValueCriteria = false
@@ -1709,38 +1709,38 @@ class DashboardQueryWrapperUtils
     }
 
     /**
-     * Метод проверки, наличия атрибута у класса
+     * Метод назначения, источника в зависимости от принадлежности атрибута классу или типу
      * @param requestData - запрос на получение данных
      * @param diagramType - тип диаграммы
      * @param apiMetainfo - API метаинформация для запросов в ДБ
-     * @return данные для добавления кооректного источника
+     * @return коректное значение источника
      */
     private static Source checkingPresenceAttribute(RequestData requestData,
                                                     DiagramType diagramType,
                                                     IMetainfoApi apiMetainfo)
     {
-        Collection<IMetaClassWrapper> listChildTypes = apiMetainfo.getTypes(requestData.source.classFqn)
-        Collection<String> listAttributes = apiMetainfo.getMetaClass(requestData.source.classFqn).attributeCodes
+        Collection<IMetaClassWrapper> listChildTypes =
+            apiMetainfo.getTypes(requestData.source.classFqn)
+        Collection<String> listAttributes =
+            apiMetainfo.getMetaClass(requestData.source.classFqn).attributeCodes
         Collection<String> listAttributeCodes = requestData.groups.collect {
             it.attribute.code
         }
         Collection<String> listMetaClassFqn = requestData.groups.collect {
             it?.attribute?.metaClassFqn
         }
-
         Source requestDataSource = requestData.source
-        listAttributeCodes.each {
-            if (it && !(listAttributes.contains(it)))
+        listAttributeCodes.each { metaclassAttributeCodes ->
+            if (metaclassAttributeCodes && !(listAttributes.contains(metaclassAttributeCodes)))
             {
                 listMetaClassFqn.each { atrObgDataClassFqn ->
-                    if (it != requestData.source.classFqn)
+                    if (atrObgDataClassFqn != requestData.source.classFqn)
                     {
                         requestDataSource = new Source(classFqn: atrObgDataClassFqn, descriptor: "")
                     }
                 }
             }
         }
-
         return requestDataSource
     }
 }
