@@ -1719,20 +1719,20 @@ class DashboardQueryWrapperUtils
                                                     DiagramType diagramType,
                                                     IMetainfoApi apiMetainfo)
     {
-        Object listAtr = apiMetainfo.getTypes(requestData.source.classFqn)
-        Object metaClassName = apiMetainfo.getMetaClass(requestData.source.classFqn).attributeCodes
-        ArrayList atrObg = requestData.groups.collect {
+        Collection<IMetaClassWrapper> listChildTypes = apiMetainfo.getTypes(requestData.source.classFqn)
+        Collection<String> listAttributes = apiMetainfo.getMetaClass(requestData.source.classFqn).attributeCodes
+        Collection<String> listAttributeCodes = requestData.groups.collect {
             it.attribute.code
         }
-        ArrayList atrObgData = requestData.groups.collect {
+        Collection<String> listMetaClassFqn = requestData.groups.collect {
             it?.attribute?.metaClassFqn
         }
 
         Source requestDataSource = requestData.source
-        atrObg.each {
-            if (it != null && !(metaClassName.contains(it)))
+        listAttributeCodes.each {
+            if (it && !(listAttributes.contains(it)))
             {
-                atrObgData.each { atrObgDataClassFqn ->
+                listMetaClassFqn.each { atrObgDataClassFqn ->
                     if (it != requestData.source.classFqn)
                     {
                         requestDataSource = new Source(classFqn: atrObgDataClassFqn, descriptor: "")
