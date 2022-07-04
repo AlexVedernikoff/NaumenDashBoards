@@ -718,11 +718,11 @@ class DashboardUtils
      * @param variableName - название переменной
      * @param value - значение
      */
-    static void log(String moduleName, Integer rowNumber, String variableName, String value)
+    static void log(String moduleName, Integer rowNumber, String variableName, def value)
     {
         if (isDebugMode())
         {
-            getLogger().info("DASHBOARD_LOG ${moduleName} ${rowNumber} ${variableName} = ${value}")
+            getLogger().info("DASHBOARD_LOG ${moduleName} ${rowNumber} ${variableName} = ${getLogger().info(value)}")
         }
     }
 
