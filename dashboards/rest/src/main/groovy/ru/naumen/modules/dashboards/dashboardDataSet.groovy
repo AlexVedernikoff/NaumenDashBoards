@@ -170,7 +170,7 @@ class DashboardDataSetService
         this.logger = logger
     }
 
-    MessageProvider messageProvider = MessageProvider.instance
+    MessageProvider messageProvider = new MessageProvider(utils)
 
     private static final List<String> NOMINATIVE_RUSSIAN_MONTH = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
                                                                   'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
@@ -1783,6 +1783,10 @@ class DashboardDataSetService
      */
     private GroupType getDTIntervalGroupType(String groupType)
     {
+        if (!groupType)
+        {
+            groupType = ''
+        }
         switch (groupType.toLowerCase())
         {
             case 'overlap':

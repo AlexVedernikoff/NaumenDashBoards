@@ -1478,7 +1478,7 @@ class DashboardDrilldownService
                 {
                     return filterBuilder.OR(attr.code, 'null', null)
                 }
-                intervalValue = dashboardUtils.convertValueToInterval(intervalValue as Long, DashboardDataSetService.instance.getDTIntervalGroupType(intervalType))
+                intervalValue = dashboardUtils.convertValueToInterval(intervalValue as Long, dashboardDataSetService.getDTIntervalGroupType(intervalType))
                 def interval = api.types.newDateTimeInterval([intervalValue as long, intervalType as String])
                 return filterBuilder.OR(code, 'contains', interval)
             case AttributeType.TIMER_TYPES:
