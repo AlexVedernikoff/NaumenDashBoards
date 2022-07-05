@@ -321,7 +321,7 @@ class DashboardDataSetService
                                             widgetFilters, offsetUTCMinutes, showTableNulls, showTableBlanks,
                                             computationInTableRequest, tableTop, tableSorting)
 
-            DashboardUtils.log('dashboardDataSet', 323, 'request', request, false)
+            DashboardUtils.log('dashboardDataSet', 323, 'request', request, true)
 
             Integer aggregationCnt = request?.data?.findResult { key, value ->
                 value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
@@ -340,7 +340,7 @@ class DashboardDataSetService
             res = getDiagramData(request, diagramType, templateUUID, aggregationCnt, widgetSettings,
                                  tableRequestSettings?.ignoreLimits, noPaginationInSQL ? null : paginationSettings)
 
-            DashboardUtils.log('dashboardDataSet', 342, 'res', res, false)
+            DashboardUtils.log('dashboardDataSet', 342, 'res', res, true)
 
             if (computationInTableRequest)
             {
@@ -427,9 +427,9 @@ class DashboardDataSetService
         else
         {
             request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters, offsetUTCMinutes)
-            DashboardUtils.log('dashboardDataSet', 429, 'request', request, false)
+            DashboardUtils.log('dashboardDataSet', 429, 'request', request, true)
             res = getDiagramData(request, diagramType, templateUUID)
-            DashboardUtils.log('dashboardDataSet', 431, 'res', res, false)
+            DashboardUtils.log('dashboardDataSet', 431, 'res', res, true)
             countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings)
             if(diagramType == DiagramType.SPEEDOMETER)
             {

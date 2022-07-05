@@ -726,14 +726,8 @@ class DashboardUtils
     {
         if (isDebugMode())
         {
-            if (convertStringValue)
-            {
-                String valueToLog = toJson(value)
-                getLogger()
-                    .info("DASHBOARD_LOG ${ moduleName } ${ rowNumber } ${ variableName } = ${ valueToLog }")
-            }
-            getLogger()
-                .info("DASHBOARD_LOG ${ moduleName } ${ rowNumber } ${ variableName } = ${ value }")
+            String valueToLog =  convertStringValue ? toJson(value) : value.toString()
+            getLogger().info("DASHBOARD_LOG ${ moduleName } ${ rowNumber } ${ variableName } = ${ valueToLog }")
         }
     }
 
