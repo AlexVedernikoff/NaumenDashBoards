@@ -1217,7 +1217,7 @@ class DashboardQueryWrapperUtils
         validate(requestData)
         validate(requestData.source)
         IMetainfoApi apiMetainfo = api.metainfo
-        Source requestDataSource  =  assigningСorrectSource(requestData, diagramType, apiMetainfo)
+        Source requestDataSource  =  assigningCorrectSource(requestData, diagramType, apiMetainfo)
         QueryWrapper wrapper = QueryWrapper.build(requestDataSource, templateUUID)
         def criteria = wrapper.criteria
         Boolean totalValueCriteria = false
@@ -1713,11 +1713,11 @@ class DashboardQueryWrapperUtils
      * @param requestData - запрос на получение данных
      * @param diagramType - тип диаграммы
      * @param apiMetainfo - API метаинформация для запросов в ДБ
-     * @return коректное значение источника
+     * @return корректное значение источника
      */
-    private static Source checkingPresenceAttribute(RequestData requestData,
-                                                    DiagramType diagramType,
-                                                    IMetainfoApi apiMetainfo)
+    private static Source assigningCorrectSource(RequestData requestData,
+                                                 DiagramType diagramType,
+                                                 IMetainfoApi apiMetainfo)
     {
         Collection<IMetaClassWrapper> listChildTypes =
             apiMetainfo.getTypes(requestData.source.classFqn)
@@ -1730,15 +1730,17 @@ class DashboardQueryWrapperUtils
             it?.attribute?.metaClassFqn
         }
         Source requestDataSource = requestData.source
-        listAttributeCodes.each { metaclassAttributeCodes ->
-            if (metaclassAttributeCodes && !(listAttributes.contains(metaclassAttributeCodes)))
+        if (listAttributeCodes.any {
+            it && !(it in listAttributes)
+        })
+        {
+            int lastSuitableSourceIdx = listMetaClassFqn.findLastIndexOf {
+                it != requestData.source.classFqn
+            }
+            if (lastSuitableSourceIdx != -1)
             {
-                listMetaClassFqn.each { atrObgDataClassFqn ->
-                    if (atrObgDataClassFqn != requestData.source.classFqn)
-                    {
-                        requestDataSource = new Source(classFqn: atrObgDataClassFqn, descriptor: "")
-                    }
-                }
+                String attrObjDataClassFqn = listMetaClassFqn[lastSuitableSourceIdx]
+                requestDataSource = new Source(classFqn: attrObjDataClassFqn, descriptor: "")
             }
         }
         return requestDataSource
