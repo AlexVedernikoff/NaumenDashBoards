@@ -494,7 +494,7 @@ class QueryWrapper implements CriteriaWrapper
         def sc = api.selectClause
         GroupType groupType = parameter.type
         String[] attributeCodes = parameter.attribute.attrChains()*.code
-                                           .with(this.&replaceMetaClassCode)
+                                           .with(this.&replaceMetaClassCode.rcurry(true))
         IApiCriteriaColumn column = sc.property(attributeCodes)
         def attributeChains = parameter.attribute.attrChains()
 
