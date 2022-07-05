@@ -1555,6 +1555,12 @@ class DashboardQueryWrapperUtils
                     }
                 }
                 break
+            case AttributeType.NUMBER_TYPES:
+                if(ableToUseBaseOrTitle && localizationIsOn)
+                {
+                    attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'integer')
+                }
+                break
             default:
                 if (!(attributeType in AttributeType.ALL_ATTRIBUTE_TYPES))
                 {
