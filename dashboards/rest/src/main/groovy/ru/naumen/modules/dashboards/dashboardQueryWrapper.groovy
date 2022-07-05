@@ -17,6 +17,7 @@ import static MessageProvider.*
 import groovy.json.JsonSlurper
 import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.server.script.api.DbApi$Query
+import ru.naumen.core.server.script.api.IMetainfoApi
 
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
@@ -1215,7 +1216,9 @@ class DashboardQueryWrapperUtils
     {
         validate(requestData)
         validate(requestData.source)
-        def wrapper = QueryWrapper.build(requestData.source, templateUUID)
+        IMetainfoApi apiMetainfo = api.metainfo
+        Source requestDataSource  =  assigningCorrectSource(requestData, diagramType, apiMetainfo)
+        QueryWrapper wrapper = QueryWrapper.build(requestDataSource, templateUUID)
         def criteria = wrapper.criteria
         Boolean totalValueCriteria = false
         wrapper.locale = currentUserLocale
@@ -1709,6 +1712,44 @@ class DashboardQueryWrapperUtils
             }
         }
         return attribute
+    }
+
+    /**
+     * Метод назначения, источника в зависимости от принадлежности атрибута классу или типу
+     * @param requestData - запрос на получение данных
+     * @param diagramType - тип диаграммы
+     * @param apiMetainfo - API метаинформация для запросов в ДБ
+     * @return корректное значение источника
+     */
+    private static Source assigningCorrectSource(RequestData requestData,
+                                                 DiagramType diagramType,
+                                                 IMetainfoApi apiMetainfo)
+    {
+        Collection<IMetaClassWrapper> listChildTypes =
+            apiMetainfo.getTypes(requestData.source.classFqn)
+        Collection<String> listAttributes =
+            apiMetainfo.getMetaClass(requestData.source.classFqn).attributeCodes
+        Collection<String> listAttributeCodes = requestData.groups.collect {
+            it.attribute.code
+        }
+        Collection<String> listMetaClassFqn = requestData.groups.collect {
+            it?.attribute?.metaClassFqn
+        }
+        Source requestDataSource = requestData.source
+        if (listAttributeCodes.any {
+            it && !(it in listAttributes)
+        })
+        {
+            int lastSuitableSourceIdx = listMetaClassFqn.findLastIndexOf {
+                it != requestData.source.classFqn
+            }
+            if (lastSuitableSourceIdx != -1)
+            {
+                String attrObjDataClassFqn = listMetaClassFqn[lastSuitableSourceIdx]
+                requestDataSource = new Source(classFqn: attrObjDataClassFqn, descriptor: "")
+            }
+        }
+        return requestDataSource
     }
 }
 return
