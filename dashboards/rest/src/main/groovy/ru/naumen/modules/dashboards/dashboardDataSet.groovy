@@ -429,6 +429,7 @@ class DashboardDataSetService
             request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters, offsetUTCMinutes)
             DashboardUtils.log('dashboardDataSet', 429, 'request', request, true)
             res = getDiagramData(request, diagramType, templateUUID)
+            replaceResultAttributeMetaClass(res, request)
             DashboardUtils.log('dashboardDataSet', 431, 'res', res, true)
             countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings)
             if(diagramType == DiagramType.SPEEDOMETER)
@@ -639,6 +640,26 @@ class DashboardDataSetService
             }
         }
         return total
+    }
+
+    /**
+     * Метод замены итоговых данных, в том случае когда атрибут metaClass
+     * @param res - датасет по запросу
+     * @param diagramType - тип диаграммы
+     * @param request - текущий запрос на построение
+     */
+    void replaceResultAttributeMetaClass(Collection res, DiagramRequest request)
+    {
+        if (request?.data?.every { key, value ->
+            value?.groups?.every {
+                it?.attribute?.type == 'metaClass'
+            }
+        })
+        {
+            res[0].each {
+                it[1] = metainfo.getMetaClass(it[1].split('#')[0]).title + '#' + it[1].split('#')[1]
+            }
+        }
     }
 
     /**
