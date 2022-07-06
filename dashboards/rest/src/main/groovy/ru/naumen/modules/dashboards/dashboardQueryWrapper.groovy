@@ -1559,7 +1559,7 @@ class DashboardQueryWrapperUtils
                 }
                 break
             case AttributeType.NUMBER_TYPES:
-                if(ableToUseBaseOrTitle && localizationIsOn)
+                if(ableToUseBaseOrTitle && !forAggregation)
                 {
                     attribute.attrChains().last().ref = new Attribute(code: 'title', type: 'integer')
                 }
