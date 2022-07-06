@@ -650,14 +650,17 @@ class DashboardDataSetService
      */
     void replaceResultAttributeMetaClass(Collection res, DiagramRequest request)
     {
-        if (request?.data?.every { key, value ->
-            value?.groups?.every {
+
+        Boolean checkTypeMetaClass = request?.data?.every { key, value ->
+            value?.groups.size() != 0 ? value?.groups?.every {
                 it?.attribute?.type == 'metaClass'
-            }
-        })
+            } : false
+        }
+        if (checkTypeMetaClass)
         {
             res[0].each {
-                it[1] = metainfo.getMetaClass(it[1].split('#')[0]).title + '#' + it[1].split('#')[1]
+                String firstAtribute = it[1].split('#')[0]
+                it[1] = metainfo.getMetaClass(firstAtribute).title + '#' + firstAtribute
             }
         }
     }
