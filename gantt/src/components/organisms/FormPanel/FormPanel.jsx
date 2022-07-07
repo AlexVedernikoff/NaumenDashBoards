@@ -523,6 +523,40 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
+	const renderCheckboxMilestoneBlock = () => {
+		return (
+			<div onClick={props.handleToggleMilestoneBlock}>
+				<FormControl className={cn(styles.checkbox)} label="Отображать контрольные точки" small={true}>
+					<Checkbox checked={props.milestones} name="Checkbox" onChange={props.handleToggleMilestoneBlock} value={props.milestones} />
+				</FormControl>
+			</div>
+		);
+	};
+
+	const renderCheckboxStateMilestoneBlock = () => {
+		const {settings} = props;
+
+		return (
+			<div onClick={handleToggleStateMilestoneBlock}>
+				<FormControl className={cn(styles.checkbox)} label="Отображать состояние контрольных точек" small={true}>
+					<Checkbox checked={settings.rollUp} name="Checkbox" onChange={handleToggleStateMilestoneBlock} value={settings.rollUp} />
+				</FormControl>
+			</div>
+		);
+	};
+
+	const renderCheckboxWorksWithoutDates = () => {
+		const {settings} = props;
+
+		return (
+			<div onClick={handleToggleWorksWithoutDates}>
+				<FormControl className={cn(styles.checkbox)} label="Отображать работы без даты начала и даты завершения" small={true}>
+					<Checkbox checked={settings.rollUp} name="Checkbox" onChange={handleToggleWorksWithoutDates} value={settings.rollUp} />
+				</FormControl>
+			</div>
+		);
+	};
+
 	const renderButtonCommonBlock = () => (
 		<Button className={styles.button} variant="ADDITIONAL">
 			<div className={styles.bigButton} onClick={handleOpenColumnSettingsModal}> </div>
@@ -548,6 +582,9 @@ const FormPanel = (props: Props) => {
 				{renderCheckboxProgress()}
 				{renderCheckboxСonnections()}
 				{renderCheckboxCommonBlock()}
+				{renderCheckboxMilestoneBlock()}
+				{renderCheckboxStateMilestoneBlock()}
+				{renderCheckboxWorksWithoutDates()}
 				<div className={styles.form} id='panelSettingsButton'>
 					{renderButtonCommonBlock()}
 					{renderForm()}

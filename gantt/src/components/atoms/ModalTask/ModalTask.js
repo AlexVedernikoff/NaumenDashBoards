@@ -2,7 +2,7 @@
 import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import cn from 'classnames';
 import {
-	Datepicker, IconButton, Select, TextInput
+	Checkbox, Datepicker, IconButton, Select, TextInput
 } from 'naumen-common-components';
 import {deepClone} from 'helpers';
 import {deleteWork, getWorlLink, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
@@ -48,10 +48,12 @@ const ModalTask = (props: Props) => {
 		return modifiedDateStr;
 	};
 
+	const [currentTask, setCurrentTask] = useState({});
 	gantt.showLightbox = id => {
 		setTaskId(id);
 
 		const task = gantt.getTask(id);
+		setCurrentTask(task);
 
 		dispatch(getWorlLink(task.id));
 
@@ -340,6 +342,22 @@ const ModalTask = (props: Props) => {
 		);
 	});
 
+	const [active, setActive] = useState(false);
+
+	const handleCheckboxChange = () => {
+		setActive(!active);
+
+		if (currentTask.type === 'milestone') {
+			const gantt_selected = document.querySelector('.gantt_milestone.gantt_selected');
+
+			if (active) {
+				gantt_selected.classList.remove('completed');
+			} else {
+				gantt_selected.classList.add('completed');
+			}
+		}
+	};
+
 	const renderModalTask = () => {
 		if (showModal) {
 			return (
@@ -355,6 +373,7 @@ const ModalTask = (props: Props) => {
 						</div>
 						<div className={styles.interval}>
 							{listDataInterval}
+							<Checkbox checked={active} name="Checkbox" onChange={handleCheckboxChange} value={active} />
 						</div>
 						{props.workAttributes.map(i => <div key={i.code}><label>{i.title}</label> <TextInput className={styles.input} maxLength={30}></TextInput></div>)}
 					</div>

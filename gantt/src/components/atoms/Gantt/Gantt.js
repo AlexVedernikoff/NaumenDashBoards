@@ -173,6 +173,16 @@ const Gantt = (props: Props) => {
 		gantt.config.scale_offset_minimal = false;
 		gantt.config.scroll_size = 6;
 		gantt.config.round_dnd_dates = false;
+		gantt.config.order_branch = true;
+
+
+		gantt.templates.progress_text = (start, end, task) => {
+			gantt.getState().drag_id === task.id ? Math.round(task.progress * 100) + '%' : '';
+		};
+
+		gantt.templates.rightside_text = (start, end, task) => {
+			task.type === gantt.config.types.milestone ? task.text : '';
+		};
 
 		if (gantt.config.start_date && gantt.config.end_date) {
 			gantt.config.start_date = store.APP.startDate;
@@ -194,6 +204,8 @@ const Gantt = (props: Props) => {
 			tooltip: true
 		});
 
+		gantt.templates.tooltip_text = (start, end, task) => '<b>Текущий прогресс:</b> ' + Math.round(task.progress * 100) + '%';
+
 		gantt.templates.parse_date = (dateStr) => {
 			const timezone = /(GMT.*\))/.exec(new Date(dateStr));
 			const deviation = timezone[0].slice(5, 6);
@@ -213,9 +225,6 @@ const Gantt = (props: Props) => {
 
 		gantt.ext.zoom.init(zoomConfig);
 		gantt.i18n.setLocale('ru');
-		gantt.templates.tooltip_text = function (start, end, task) {
-			return task[codeMainColumn];
-		};
 
 		if (!gantt._markers.fullOrder.length) {
 			gantt.addMarker({
@@ -372,6 +381,21 @@ const Gantt = (props: Props) => {
 		gantt.config.show_links = props.workRelationCheckbox;
 		gantt.render();
 	}, [props.workRelationCheckbox]);
+
+	// Отображает контрольные точки при изменении props.workMilestonesCheckbox
+	useEffect(() => {
+		const tasks = gantt.getTaskByTime();
+
+		tasks.forEach(item => {
+			if (item.hide_bar === '') {
+				item.hide_bar = true;
+			} else if (item.hide_bar === true) {
+				item.hide_bar = '';
+			}
+		});
+
+		gantt.render();
+	}, [props.milestones]);
 
 	// Экспортирует диаграмму при изменении props.flag
 	useEffect(() => {

@@ -17,9 +17,11 @@ export class GanttContent extends PureComponent<Props> {
 		this.handleToggle = this.handleToggle.bind(this);
 		this.handleToggleProgress = this.handleToggleProgress.bind(this);
 		this.handleToggleLinks = this.handleToggleLinks.bind(this);
+		this.handleToggleMilestoneBlock = this.handleToggleMilestoneBlock.bind(this);
 		this.addNewTask = this.addNewTask.bind(this);
 		this.state = {
 			flag: false,
+			milestones: '',
 			name: 'Просмотреть',
 			newTask: false,
 			refresh: false,
@@ -40,6 +42,10 @@ export class GanttContent extends PureComponent<Props> {
 		this.props.switchWorkRelationCheckbox(!this.props.workRelationCheckbox);
 	};
 
+	handleToggleMilestoneBlock = () => {
+		this.setState({ milestones: !this.state.milestones });
+	};
+
 	handleToggleProgress = () => {
 		this.props.switchProgressCheckbox(!this.props.progressCheckbox);
 	};
@@ -56,13 +62,14 @@ export class GanttContent extends PureComponent<Props> {
 
 	renderGanttGrid = () => {
 		const {errorData} = this.props;
-		const {allLinks, flag, newTask, progress, refresh} = this.state;
+		const {allLinks, flag, milestones, newTask, progress, refresh} = this.state;
 
 		return errorData
 			? <p>Ошибка загрузки данных</p>
 			: <ErrorBoundary><GanttGrid
 				allLinks={allLinks}
 				flag={flag}
+				milestones={milestones}
 				newTask={newTask}
 				progress={progress}
 				refresh={refresh}
@@ -78,8 +85,11 @@ export class GanttContent extends PureComponent<Props> {
 				allLinks={this.state.allLinks}
 				handleToggle={this.handleToggle}
 				handleToggleLinks={this.handleToggleLinks}
+				handleToggleMilestoneBlock={this.handleToggleMilestoneBlock}
 				handleToggleProgress={this.handleToggleProgress}
-				progress={this.state.progress} swiped={this.state.swiped}
+				milestones={this.state.milestones}
+				progress={this.state.progress}
+				swiped={this.state.swiped}
 			/> : null;
 	};
 

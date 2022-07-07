@@ -107,6 +107,28 @@ const data = {
 			"level":0,
 			"type":"RESOURCE"
 		},
+		{
+			"id":"serviceCall$2418501_572397e3-0c6a-4ef9-bd45-c3d2cd64b99d211",
+			"text":"Промежуточная точка",
+			"code1":"точка",
+			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
+			"level":0,
+			"hide_bar": '',
+			"type":"milestone",
+			"start_date":"2021-11-11T11:55:26",
+		},
+
+		{
+			"id":"serviceCall$2418501_572397e3-0c6a-4ef9-bd45-c3d2cd64b99d21",
+			"text":"Контрольная точка",
+			"code1":"точка2",
+			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
+			"level":1,
+			"hide_bar": '',
+			"type":"milestone",
+			"start_date":"2021-11-13T12:55:26",
+			"parent": "serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887"
+		},
 	],
 	"workRelations":[
         { 
