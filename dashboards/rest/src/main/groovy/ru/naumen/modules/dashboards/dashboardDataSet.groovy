@@ -645,22 +645,21 @@ class DashboardDataSetService
     /**
      * Метод замены итоговых данных, в том случае когда атрибут metaClass
      * @param res - датасет по запросу
-     * @param diagramType - тип диаграммы
      * @param request - текущий запрос на построение
      */
     void replaceResultAttributeMetaClass(Collection res, DiagramRequest request)
     {
-
         Boolean checkTypeMetaClass = request?.data?.every { key, value ->
-            value?.groups.size() != 0 ? value?.groups?.every {
+            value?.groups.size() != 0 && value?.groups?.every {
                 it?.attribute?.type == 'metaClass'
-            } : false
+            }
         }
         if (checkTypeMetaClass)
         {
             res[0].each {
-                String firstAtribute = it[1].split('#')[0]
-                it[1] = metainfo.getMetaClass(firstAtribute).title + '#' + firstAtribute
+                String secondDataElementFront =  MetaClassMarshaller.unmarshal(it[1]).first()
+                String firstDataElementFront = metainfo.getMetaClass(secondDataElementFront).title
+                it[1] = MetaClassMarshaller.marshal(firstDataElementFront, secondDataElementFront)
             }
         }
     }
