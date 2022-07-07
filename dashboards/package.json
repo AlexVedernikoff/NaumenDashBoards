@@ -189,5 +189,5 @@
     "build-storybook": "cross-env STORYBOOK=true NODE_ENV=production build-storybook",
     "generate-localize": "node ./utils/generate-localization.js"
   },
-  "version": "3.0.0-0"
+  "version": "3.0.1-0"
 }
