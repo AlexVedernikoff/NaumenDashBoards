@@ -649,17 +649,35 @@ class DashboardDataSetService
      */
     void replaceResultAttributeMetaClass(Collection res, DiagramRequest request)
     {
-        Boolean checkTypeMetaClass = request?.data?.every { key, value ->
-            value?.groups.size() != 0 && value?.groups?.every {
+        Boolean isTypeMetaClass = request?.data?.every { key, value ->
+            value?.groups.size() != 0 && value?.groups?.any {
                 it?.attribute?.type == 'metaClass'
             }
         }
-        if (checkTypeMetaClass)
+        if (isTypeMetaClass)
         {
-            res[0].each {
-                String secondDataElementFront =  MetaClassMarshaller.unmarshal(it[1]).first()
-                String firstDataElementFront = metainfo.getMetaClass(secondDataElementFront).title
-                it[1] = MetaClassMarshaller.marshal(firstDataElementFront, secondDataElementFront)
+            res.first().each { resArraysData ->
+                for (int i = 0; i < resArraysData.size(); i++)
+                {
+                    try
+                    {
+                        String secondDataElement =
+                            MetaClassMarshaller.unmarshal(resArraysData[i]).last()
+                        if (metainfo.getMetaClass(secondDataElement))
+                        {
+                            String firstDataElement =
+                                metainfo.getMetaClass(secondDataElement) ?
+                                    metainfo.getMetaClass(secondDataElement).title :
+                                    MetaClassMarshaller.unmarshal(resArraysData[i]).first()
+                            resArraysData[i] =
+                                MetaClassMarshaller.marshal(firstDataElement, secondDataElement)
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        //результат не требует замены элементов
+                    }
+                }
             }
         }
     }
