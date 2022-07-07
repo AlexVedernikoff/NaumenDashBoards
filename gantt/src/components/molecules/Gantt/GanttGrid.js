@@ -27,6 +27,7 @@ const GanttGrid = (props: Props) => {
 					flag={props.flag}
 					getGanttData={props.getGanttData}
 					getListOfWorkAttributes={props.getListOfWorkAttributes}
+					milestones={props.milestones}
 					newTask={props.newTask}
 					postEditedWorkData={props.postEditedWorkData}
 					postNewWorkData={props.postNewWorkData}

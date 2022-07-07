@@ -12,7 +12,9 @@ export class GanttPanel extends PureComponent<Props, State> {
 			allLinks={this.props.allLinks}
 			handleToggle={this.props.handleToggle}
 			handleToggleLinks={this.props.handleToggleLinks}
+			handleToggleMilestoneBlock={this.props.handleToggleMilestoneBlock}
 			handleToggleProgress={this.props.handleToggleProgress}
+			milestones={this.props.milestones}
 			progress={this.props.progress}
 		/>;
 		return (

@@ -193,7 +193,7 @@ const Resource = (props: Props) => {
 		return (
 			<div onClick={handleCheckboxChange}>
 				<FormControl className={cn(styles.checkbox)} label='Вложенный ресурс' small={true}>
-					<Checkbox checked={resource.nested} name='Checkbox' value={resource.nested} />
+					<Checkbox checked={resource.nested} name="Checkbox" value={resource.nested} />
 				</FormControl>
 			</div>
 		);
