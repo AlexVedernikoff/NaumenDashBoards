@@ -14,7 +14,7 @@ const schema = object({
 			/* eslint-enable */
 		}),
 		indicators: mixed().requiredByCompute(array().indicators(false)),
-		parameters: array().parameters(false),
+		parameters: mixed().requiredByCompute(array().parameters(false)),
 		source: object().source(),
 		top: object().topSettings()
 	})),

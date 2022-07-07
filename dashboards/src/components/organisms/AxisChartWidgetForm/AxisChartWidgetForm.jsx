@@ -27,10 +27,8 @@ export class AxisChartWidgetForm extends PureComponent<Props> {
 
 				return hasConditionalBreakdown ? array().conditionalBreakdown() : array().breakdown();
 			})),
-			indicators: mixed().requiredByCompute(
-				array().indicators()
-			),
-			parameters: array().parameters(),
+			indicators: mixed().requiredByCompute(array().indicators()),
+			parameters: mixed().requiredByCompute(array().parameters()),
 			source: object().source(),
 			top: object().topSettings()
 		})),

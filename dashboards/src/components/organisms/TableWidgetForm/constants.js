@@ -1,5 +1,4 @@
 // @flow
-import {addMethod} from 'yup';
 import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
 import {checkSourceForParent} from './helpers';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
@@ -28,7 +27,9 @@ const schema = object({
 		object({
 			breakdown: mixed().requiredByCompute(array().conditionalBreakdown()),
 			indicators: mixed().requiredByCompute(array().indicators()),
-			parameters: array().requiredByNotIndependentSource(array().parameters()),
+			parameters: mixed().requiredByCompute(
+				array().requiredByNotIndependentSource(array().parameters())
+			),
 			source: object().source().test(
 				'check-source-for-parent',
 				t('TableWidgetForm::Scheme::WrongSource'),
