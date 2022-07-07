@@ -18,6 +18,7 @@ import groovy.json.JsonSlurper
 import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.server.script.api.DbApi$Query
 import ru.naumen.core.server.script.api.IMetainfoApi
+import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
@@ -579,7 +580,6 @@ class QueryWrapper implements CriteriaWrapper
                     }
                 }
 
-                }
                 String sortingType = parameter.sortingType
                 if (sortingType)
                 {
@@ -1646,7 +1646,7 @@ class DashboardQueryWrapperUtils
         try
         {
             def criteria = getApi().db.createCriteria().addSource('ou')
-                              .addColumn(getApi().selectClause.count(getApi().selectClause.property(localizationIsOn ? 'title.base' : 'title')))
+                                   .addColumn(getApi().selectClause.count(getApi().selectClause.property(localizationIsOn ? 'title.base' : 'title')))
             def res = getApi().db.query(criteria).list()
             return true
         }
