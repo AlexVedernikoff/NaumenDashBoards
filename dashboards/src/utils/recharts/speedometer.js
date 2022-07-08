@@ -32,8 +32,7 @@ const getOptions = (
 			const formatter = getSpeedometerFormatter(speedometerWidget, container);
 			const {indicator, ranges} = speedometerWidget;
 			const {title, total} = data;
-			const widgetTooltip = buildDataSet.indicators?.[0]?.tooltip;
-			const tooltip = widgetTooltip && widgetTooltip.show ? widgetTooltip.title : null;
+			const tooltip = buildDataSet.indicators?.[0]?.tooltip;
 			const {height, width} = container.getBoundingClientRect();
 
 			return {

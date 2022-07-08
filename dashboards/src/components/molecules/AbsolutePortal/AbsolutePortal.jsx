@@ -70,7 +70,6 @@ export class AbsolutePortal extends Component<Props, State> {
 
 	getElementRect = () => {
 		const {current: element} = this.props.elementRef;
-
 		return element && element.getBoundingClientRect();
 	};
 

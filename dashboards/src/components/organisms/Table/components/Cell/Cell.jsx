@@ -1,13 +1,13 @@
 // @flow
 import cn from 'classnames';
-import type {DefaultProps, Props, State} from './types';
+import type {DefaultProps, Props} from './types';
 import {DEFAULT_TABLE_VALUE, FONT_STYLES, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import React, {Fragment, PureComponent} from 'react';
 import settingsStyles from 'styles/settings.less';
 import styles from './styles.less';
 import WidgetTooltip from 'components/molecules/WidgetTooltip';
 
-export class Cell extends PureComponent<Props, State> {
+export class Cell extends PureComponent<Props> {
 	static defaultProps: DefaultProps = {
 		children: null,
 		className: '',
@@ -22,10 +22,6 @@ export class Cell extends PureComponent<Props, State> {
 		tip: '',
 		value: '',
 		width: '100%'
-	};
-
-	state = {
-		position: null
 	};
 
 	getDefaultValue = () => {
@@ -44,8 +40,6 @@ export class Cell extends PureComponent<Props, State> {
 		}
 	};
 
-	handleClearTooltip = () => this.setState({position: null});
-
 	handleClick = (e: MouseEvent) => {
 		const {column, onClick, row, rowIndex, value} = this.props;
 
@@ -61,25 +55,17 @@ export class Cell extends PureComponent<Props, State> {
 		}
 	};
 
-	handleTooltipShow = ({clientX: x, clientY: y}: MouseEvent) => {
-		this.setState({position: {x, y}});
-	};
-
 	renderValue = () => {
 		const {column, components, fontColor, tooltip, value} = this.props;
-		const {position} = this.state;
 		const {Value} = components;
 		const renderValue = value || this.getDefaultValue();
 
 		if (tooltip?.show) {
 			return (
 				<Fragment>
-					<div
-						onMouseEnter={this.handleTooltipShow}
-						onMouseLeave={this.handleClearTooltip}
-					>
+					<div>
 						<Value column={column} fontColor={fontColor} value={renderValue} />
-						<WidgetTooltip position={position} tooltip={tooltip} />
+						<WidgetTooltip tooltip={tooltip} />
 					</div>
 				</Fragment>
 			);

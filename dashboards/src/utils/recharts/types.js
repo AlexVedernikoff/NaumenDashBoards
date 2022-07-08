@@ -5,6 +5,7 @@ import type {AxisSettings, BordersStyle, DataLabels, FontStyle, Group, Legend, R
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {LABEL_DRAW_MODE, LEGEND_ALIGN, LEGEND_LAYOUT, LEGEND_VERTICAL_ALIGN, SUB_TOTAL_POSITION} from './constants';
+import type {WidgetTooltip} from 'store/widgets/data/types.js';
 
 export type Labels = Array<Array<string>>;
 
@@ -161,7 +162,7 @@ export type SpeedometerDataOptions = {
 	formatter: NumberFormatter,
 	style: SpeedometerIndicatorSettings,
 	title: string,
-	tooltip: string | null,
+	tooltip: ?WidgetTooltip,
 	total: number
 };
 
@@ -194,7 +195,7 @@ export type ComboChartOptions = {
 
 export type SummaryData = {
 	formatter: NumberFormatter,
-	tooltip: string | null
+	tooltip: ?WidgetTooltip,
 };
 
 export type SummaryStyle = {

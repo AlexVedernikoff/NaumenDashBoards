@@ -607,6 +607,9 @@ type WidgetFormSimpleWidgetTooltipForm =
   | 'WidgetForm::SimpleWidgetTooltipForm::Tooltip'
   | 'WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle';
 
+type WidgetTooltip =
+ | 'WidgetTooltip::DefaultHeader';
+
 // containers/DashboardPanel
 type DashboardPanelContainers =
   | 'DashboardPanel::Dashboards'
@@ -939,10 +942,11 @@ export type LangType =
   | WidgetAddPanel
   | WidgetForm
   | WidgetFormChoiceWidgetTooltipForm
-  | WidgetFormSimpleWidgetTooltipForm
   | WidgetFormPanel
+  | WidgetFormSimpleWidgetTooltipForm
   | WidgetKebab
   | WidgetKebabContainers
   | WidgetNameBox
   | WidgetSelectBox
-  | WidgetsGrid;
+  | WidgetsGrid
+  | WidgetTooltip;
