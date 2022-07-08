@@ -394,8 +394,8 @@ const getLegendOptions = (container: HTMLDivElement, legend: ?Legend): ReChartLe
 		const [align, verticalAlign] = transformLegendPosition(position);
 		const {height: containerHeight, width: containerWidth} = container.getBoundingClientRect();
 		let layout = LEGEND_LAYOUT.VERTICAL;
-		let height = null;
-		let width = null;
+		let height;
+		let width;
 		const style = {fontFamily, fontSize, maxWidth: undefined};
 
 		if (align === LEGEND_ALIGN.CENTER) {
