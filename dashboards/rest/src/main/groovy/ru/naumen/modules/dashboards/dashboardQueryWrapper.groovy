@@ -571,7 +571,7 @@ class QueryWrapper implements CriteriaWrapper
                     }
                     else
                     {
-                        IApi Criteria Column attributeColumn = sc.property(attributeCodes)
+                        IApiCriteriaColumn attributeColumn = sc.property(attributeCodes)
                         column = parameter.attribute.type == 'integer' ? attributeColumn :
                             sc.selectCase().when(api.whereClause.isNull(attributeColumn), '')
                               .otherwise(attributeColumn)
