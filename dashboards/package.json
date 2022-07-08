@@ -171,10 +171,10 @@
   },
   "scripts": {
     "build": "npm run clear && cross-env NODE_ENV=production LICENSE=use webpack --config ./webpack/config.js && npm run zip",
-    "build-usermode": "npm run clear && cross-env NODE_ENV=production USER_MODE=true LICENSE=use webpack --config ./webpack/config.js && npm run zip",
-    "build-no-module": "npm run clear && cross-env NODE_ENV=production USER_MODE=true webpack --config ./webpack/config.js && npm run zip",
-    "build-dev": "npm run clear && cross-env NODE_ENV=development webpack --config ./webpack/config.js && npm run zip",
-    "build-stats": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js --json > stats.json",
+    "build:usermode": "npm run clear && cross-env NODE_ENV=production USER_MODE=true LICENSE=use webpack --config ./webpack/config.js && npm run zip:user",
+    "build:no-module": "npm run clear && cross-env NODE_ENV=production USER_MODE=true webpack --config ./webpack/config.js && npm run zip",
+    "build:dev": "npm run clear && cross-env NODE_ENV=development webpack --config ./webpack/config.js && npm run zip",
+    "build:stats": "npm run clear && cross-env NODE_ENV=production webpack --config ./webpack/config.js --json > stats.json",
     "clear": "cp .env.build .env; rm -rf ./dist/*; npm run clear-zip",
     "clear-zip": "rm *.zip; test 0",
     "dev": "cp -f .env.develop .env; cross-env NODE_ENV=development webpack-dev-server --config ./webpack/config.js",
@@ -185,8 +185,9 @@
     "test:update": "cross-env API_DRIVER=exec-dev jest --updateSnapshot",
     "test:watch": "cross-env API_DRIVER=exec-dev npm run test -- --watch",
     "zip": "cd ./dist && zip -r \"../$npm_package_name-v$npm_package_version.zip\" ./* && cd ..",
+    "zip:user": "cd ./dist && zip -r \"../$npm_package_name-users-v$npm_package_version.zip\" ./* && cd ..",
     "storybook": "cross-env STORYBOOK=true start-storybook -p 6006",
-    "build-storybook": "cross-env STORYBOOK=true NODE_ENV=production build-storybook",
+    "build:storybook": "cross-env STORYBOOK=true NODE_ENV=production build-storybook",
     "generate-localize": "node ./utils/generate-localization.js"
   },
   "version": "3.0.1-0"
