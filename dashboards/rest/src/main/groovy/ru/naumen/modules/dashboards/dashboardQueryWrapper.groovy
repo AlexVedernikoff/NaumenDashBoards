@@ -571,10 +571,10 @@ class QueryWrapper implements CriteriaWrapper
                     }
                     else
                     {
-                        Object attributeColumn = sc.property(attributeCodes)
-                        column = sc.selectCase()
-                                   .when(api.whereClause.isNull(attributeColumn), '')
-                                   .otherwise(attributeColumn)
+                        IApi Criteria Column attributeColumn = sc.property(attributeCodes)
+                        column = parameter.attribute.type == 'integer' ? attributeColumn :
+                            sc.selectCase().when(api.whereClause.isNull(attributeColumn), '')
+                              .otherwise(attributeColumn)
                         criteria.addGroupColumn(column)
                         criteria.addColumn(column)
                     }
