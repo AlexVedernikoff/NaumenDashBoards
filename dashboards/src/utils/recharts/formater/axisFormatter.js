@@ -7,6 +7,7 @@ import {
 	checkNumber,
 	checkZero,
 	cntPercentFormatter,
+	formatMSInterval,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
@@ -15,7 +16,7 @@ import {
 import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasCountPercent, hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
+import {hasCountPercent, hasMSInterval, hasPercent} from 'store/widgets/helpers';
 
 /**
  * Создает форматер для блока легенды
@@ -62,7 +63,7 @@ const getDataFormatter = (
 	let formatter = null;
 
 	if (usesMSInterval) {
-		formatter = checkNumber(parseMSInterval);
+		formatter = checkNumber(formatMSInterval);
 	} else {
 		const numberFormat = !format.additional && format.additional !== '' && usesPercent ? {...format, additional: '%'} : format;
 

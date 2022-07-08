@@ -7,6 +7,7 @@ import {
 	checkZero,
 	defaultNumberFormatter,
 	defaultStringFormatter,
+	formatMSInterval,
 	getLabelFormatter,
 	loggerFormatter,
 	makeFormatterByFormat,
@@ -210,6 +211,40 @@ describe('Formatters test', () => {
 		expect(formatter(1019)).toBe('1.02тыс.');
 	});
 
+	it('formatMSInterval', () => {
+		expect(formatMSInterval(0)).toBe('0')
+		expect(formatMSInterval(100)).toBe('100')
 
+		const sec = 1000;
+		expect(formatMSInterval(1 * sec)).toBe(' 1 c')
+		expect(formatMSInterval(15 * sec)).toBe(' 15 c')
+		expect(formatMSInterval(15 * sec + 421)).toBe(' 15 с')
 
+		const min = sec * 60;
+		expect(formatMSInterval(1 * min)).toBe(' 1 мин')
+		expect(formatMSInterval(6 * min)).toBe(' 6 мин')
+		expect(formatMSInterval(4 * min + 25 * sec + 15)).toBe(' 4 мин 25 с')
+
+		const hours = min * 60;
+		expect(formatMSInterval(1 * hours)).toBe(' 1 ч')
+		expect(formatMSInterval(2 * hours)).toBe(' 2 ч')
+		expect(formatMSInterval(2 * hours + 20 * sec)).toBe(' 2 ч 20 с')
+		expect(formatMSInterval(2 * hours + 1 * min + 25)).toBe(' 2 ч 60 с')
+		expect(formatMSInterval(5 * hours + 14 * min + 25)).toBe(' 5 ч 840 с')
+
+		const days = hours * 24;
+		expect(formatMSInterval(1 * days)).toBe(' 1 д')
+		expect(formatMSInterval(2 * days)).toBe(' 2 д')
+		expect(formatMSInterval(5 * days + 14 * min + 25)).toBe(' 120 ч 840 с')
+		expect(formatMSInterval(5 * days + 14 * min + 15 * sec)).toBe(' 120 ч 855 с')
+		expect(formatMSInterval(5 * days + 2 * hours + 14 * min + 15 * sec)).toBe(' 122 ч 855 с')
+
+		const week = days * 7;
+		expect(formatMSInterval(1 * week)).toBe(' 1 нед')
+		expect(formatMSInterval(2 * week)).toBe(' 2 нед')
+		expect(formatMSInterval(2 * week + 14 * min + 25)).toBe(' 336 ч 840 с')
+		expect(formatMSInterval(2 * week + 14 * min + 15 * sec)).toBe(' 336 ч 855 с')
+		expect(formatMSInterval(2 * week + 2 * hours + 14 * min + 15 * sec)).toBe(' 338 ч 855 с')
+		expect(formatMSInterval(2 * week + 3 * days + 2 * hours + 14 * min + 15 * sec)).toBe(' 410 ч 855 с')
+	});
 });

@@ -3,6 +3,7 @@ import {
 	checkInfinity,
 	checkZero,
 	cntPercentFormatter,
+	formatMSInterval,
 	makeFormatterByFormat,
 	percentFormat,
 	sevenDaysFormatter
@@ -12,7 +13,7 @@ import type {ComboWidget} from 'store/widgets/data/types';
 import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasCountPercent, hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
+import {hasCountPercent, hasMSInterval, hasPercent} from 'store/widgets/helpers';
 
 const oldValueToNumberFormatter = (value: ?number): string => {
 	if (typeof value === 'number') {
@@ -61,7 +62,7 @@ const getDataFormatters = (
 			let formatter = null;
 
 			if (usesMSInterval) {
-				formatter = parseMSInterval;
+				formatter = formatMSInterval;
 			} else {
 				formatter = oldValueFormatter(usesPercent, showZero);
 

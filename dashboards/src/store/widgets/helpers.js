@@ -7,15 +7,13 @@ import {
 	DEFAULT_AGGREGATION,
 	DEFAULT_SYSTEM_GROUP,
 	GROUP_WAYS,
-	INTEGER_AGGREGATION,
-	INTERVALS
+	INTEGER_AGGREGATION
 } from './constants';
 import {DISPLAY_MODE, WIDGET_TYPES} from './data/constants';
 import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
-import t from 'localization';
 
 const createDefaultGroup = (data?: string | null, attribute?: Attribute) => {
 	if (!data || typeof data !== 'string') {
@@ -111,26 +109,6 @@ const hasMSInterval = (attribute: MixedAttribute | null, aggregation: string): b
 	Boolean(attribute && attribute.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION);
 
 /**
- * Преобразует интервал из миллисекунд в понятный для пользователя вид
- * @param {number} ms - значение интервала в миллисекундах
- * @returns {string}
- */
-const parseMSInterval = (ms: number) => {
-	const intervalData = INTERVALS.find(({max, min}) => ms > min && ms < max);
-
-	if (intervalData) {
-		const {label, min} = intervalData;
-		let intervalValue = ms / min;
-
-		intervalValue = ms > INTERVALS[INTERVALS.length - 1].min ? intervalValue.toFixed(2) : Math.round(intervalValue);
-
-		return t(label, {value: intervalValue});
-	}
-
-	return ms;
-};
-
-/**
  * Сообщает используется ли в наборе данных виджета разбивка
  * @param {object} widget - виджет
  * @returns {boolean}
@@ -216,6 +194,5 @@ export {
 	isAxisChart,
 	isCircleChart,
 	isHorizontalChart,
-	isStackedChart,
-	parseMSInterval
+	isStackedChart
 };
