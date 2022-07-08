@@ -859,7 +859,7 @@ class DashboardDataSetService
     {
         return widgetSettings.data.findResult { value ->
             def xAxis = value.parameters.find()
-            if (xAxis.attribute.type in AttributeType.DATE_TYPES && xAxis.group.way == Way.SYSTEM)
+            if (xAxis.attribute?.type in AttributeType.DATE_TYPES && xAxis.group.way == Way.SYSTEM)
             {
                 return xAxis.group[field]
             }
