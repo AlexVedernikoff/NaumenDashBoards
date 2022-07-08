@@ -5,17 +5,18 @@ import {dataSelector, exportParamsSelector, filtersOnWidgetSelector, modeSelecto
 import {drillDown, openNavigationLink} from 'store/widgets/links/actions';
 import {editWidgetChunkData, removeWidgetWithConfirm, saveWidgetWithNewFilters, selectWidget} from 'store/widgets/data/actions';
 import {exportTableToXLSX} from 'store/widgets/buildData/actions';
-import {isEditableDashboardContext} from 'store/dashboard/settings/selectors';
+import {isEditableDashboardContext, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {USER_ROLES} from 'store/context/constants';
 
 export const props = (state: AppState, ownProps: OwnProps): ConnectedProps => {
 	const {context, dashboard} = state;
 	const {widget} = ownProps;
 	const isEditableContext = isEditableDashboardContext(state);
+	const isUserMode = isUserModeDashboard(state);
 	const editable = context.user.role !== USER_ROLES.REGULAR || isEditableContext;
 	const personalDashboard = dashboard.settings.personal;
 	const navigation = navigationSelector(widget);
-	const mode = (editable && !personalDashboard) ? modeSelector(widget) : null;
+	const mode = (editable && !isUserMode && !personalDashboard) ? modeSelector(widget) : null;
 	const exportParams = exportParamsSelector(widget);
 	const data = dataSelector(widget);
 	const filtersOnWidget = filtersOnWidgetSelector(widget);
