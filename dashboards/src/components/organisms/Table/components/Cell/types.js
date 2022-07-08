@@ -1,7 +1,6 @@
 // @flow
 import type {Column, Components, OnClickCell, Row} from 'Table/types';
 import type {DefaultTableValue, FontStyle, TextAlign, TextHandler, WidgetTooltip} from 'store/widgets/data/types';
-import type {Position} from 'src/components/molecules/WidgetTooltip/components/Message/types.js';
 import type {SingleRowInfo} from 'store/widgets/buildData/types';
 
 export type DefaultProps = {|
@@ -28,8 +27,4 @@ export type Props = {
 	last: boolean,
 	onClick?: OnClickCell,
 	tooltip?: WidgetTooltip
-};
-
-export type State = {
-	position: Position | null,
 };

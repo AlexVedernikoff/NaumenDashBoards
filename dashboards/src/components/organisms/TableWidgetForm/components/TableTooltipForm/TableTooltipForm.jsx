@@ -4,6 +4,8 @@ import {deepClone} from 'helpers';
 import {DEFAULT_TOOLTIP_SETTINGS} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import ExtendButton from 'components/atoms/ExtendButton';
+import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
+import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
 import IconButton from 'components/atoms/IconButton';
@@ -56,11 +58,20 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		};
 	}
 
+	getHandleChangeIndicatorFont = indicatorRef => ({name, value}) => {
+		const {onChange} = this.props;
+		const {newValue} = this.state;
+
+		indicatorRef.tooltip = {...indicatorRef.tooltip, [name]: value, show: true};
+
+		onChange(DIAGRAM_FIELDS.data, newValue);
+	};
+
 	getHandleChangeIndicatorText = indicatorRef => ({value: title}: OnChangeEvent<string>) => {
 		const {onChange} = this.props;
 		const {newValue} = this.state;
 
-		indicatorRef.tooltip = {show: true, title};
+		indicatorRef.tooltip = {...indicatorRef.tooltip, show: true, title};
 
 		onChange(DIAGRAM_FIELDS.data, newValue);
 	};
@@ -86,6 +97,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		if (addKey && removeKey) {
 			newSelectRef.tooltip = {show: true, title: oldSelectRef.tooltip?.title ?? ''};
 			oldSelectRef.tooltip = {show: false, title: ''};
+
 			const newIndicatorPositions = indicatorPositions.filter(key => removeKey !== key);
 
 			onChange(DIAGRAM_FIELDS.data, newValue);
@@ -139,6 +151,11 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		this.setState({indicatorPositions: newIndicatorPositions});
 	};
 
+	handleChangeTitleFont = ({name, value}) => {
+		const {onChange, value: {tooltip}} = this.props;
+		return onChange(DIAGRAM_FIELDS.tooltip, {...tooltip, [name]: value});
+	};
+
 	handleChangeTooltipShow = ({value: change}: OnChangeEvent<boolean>) => {
 		const {onChange, value: {tooltip}} = this.props;
 		return onChange(DIAGRAM_FIELDS.tooltip, {...tooltip, show: !change});
@@ -172,31 +189,14 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		if (attribute) {
 			const {code, sourceCode = ''} = attribute;
 			const key = `${sourceCode} ${code} ${aggregation} ${idx}`;
-			const {unusedIndicators} = this.state;
 			const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = indicator;
-			const focus = tooltip.title === '';
 
 			if (tooltip.show) {
 				return (
 					<Fragment key={key}>
-						<FormField className={styles.tooltipIndicator} label={t('TableWidgetForm::TableTooltipForm::Indicator')}>
-							<Select
-								getOptionLabel={(option: Indicator) => option.attribute?.title ?? ''}
-								getOptionValue={option => option}
-								onSelect={this.getHandleSelectIndicator(indicator)}
-								options={unusedIndicators}
-								value={indicator}
-							/>
-							{showDeleteButton && this.renderIndicatorRemoveButton(indicator)}
-						</FormField>
-						<FormField label={t('TableWidgetForm::TableTooltipForm::TooltipText')}>
-							<TextArea
-								focusOnMount={focus}
-								name={DIAGRAM_FIELDS.title}
-								onChange={this.getHandleChangeIndicatorText(indicator)}
-								value={tooltip.title}
-							/>
-						</FormField>
+						{this.renderIndicatorSelect(indicator, showDeleteButton)}
+						{this.renderIndicatorTextArea(indicator)}
+						{this.renderIndicatorFontOptions(indicator)}
 					</Fragment>
 				);
 			}
@@ -215,6 +215,18 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		}
 
 		return null;
+	};
+
+	renderIndicatorFontOptions = (indicator: Indicator) => {
+		const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = indicator;
+		const {fontFamily = DEFAULT_TOOLTIP_SETTINGS.fontFamily, fontSize = DEFAULT_TOOLTIP_SETTINGS.fontSize} = tooltip;
+
+		return (
+			<FormField row>
+				<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.getHandleChangeIndicatorFont(indicator)} value={fontFamily} />
+				<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.getHandleChangeIndicatorFont(indicator)} value={fontSize} />
+			</FormField>
+		);
 	};
 
 	renderIndicatorList = () => {
@@ -245,6 +257,38 @@ class TableTooltipForm extends PureComponent<Props, State> {
 	renderIndicatorRemoveButton = (indicator: Indicator) => (
 		<IconButton className={styles.removeButton} icon={ICON_NAMES.BASKET} onClick={this.getHandleClickRemoveButton(indicator)} />
 	);
+
+	renderIndicatorSelect = (indicator: Indicator, showDeleteButton: boolean) => {
+		const {unusedIndicators} = this.state;
+		return (
+			<FormField className={styles.tooltipIndicator} label={t('TableWidgetForm::TableTooltipForm::Indicator')}>
+				<Select
+					getOptionLabel={(option: Indicator) => option.attribute?.title ?? ''}
+					getOptionValue={option => option}
+					onSelect={this.getHandleSelectIndicator(indicator)}
+					options={unusedIndicators}
+					value={indicator}
+				/>
+				{showDeleteButton && this.renderIndicatorRemoveButton(indicator)}
+			</FormField>
+		);
+	};
+
+	renderIndicatorTextArea = (indicator: Indicator) => {
+		const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = indicator;
+		const focus = tooltip.title === '';
+
+		return (
+			<FormField label={t('TableWidgetForm::TableTooltipForm::TooltipText')}>
+				<TextArea
+					focusOnMount={focus}
+					name={DIAGRAM_FIELDS.title}
+					onChange={this.getHandleChangeIndicatorText(indicator)}
+					value={tooltip.title}
+				/>
+			</FormField>
+		);
+	};
 
 	renderIndicatorToggle = () => {
 		const {showIndicators} = this.state;
@@ -277,6 +321,25 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		}
 	};
 
+	renderTitleFont = () => {
+		const {
+			show,
+			fontFamily = DEFAULT_TOOLTIP_SETTINGS.fontFamily,
+			fontSize = DEFAULT_TOOLTIP_SETTINGS.fontSize
+		} = this.state.tooltip;
+
+		if (show) {
+			return (
+				<FormField row>
+					<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleChangeTitleFont} value={fontFamily} />
+					<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleChangeTitleFont} value={fontSize} />
+				</FormField>
+			);
+		}
+
+		return null;
+	};
+
 	renderTitleToggle = () => {
 		const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = this.props.value;
 		const {show} = tooltip;
@@ -293,6 +356,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		<Fragment>
 			{this.renderTitleToggle()}
 			{this.renderTitle()}
+			{this.renderTitleFont()}
 		</Fragment>
 	);
 

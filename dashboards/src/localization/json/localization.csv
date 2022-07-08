@@ -319,6 +319,7 @@
 "WidgetForm::ChoiceWidgetTooltipForm::AtIndicator","В показателе","At indicator",,
 "WidgetForm::SimpleWidgetTooltipForm::Tooltip","Подсказка","Tooltip",,
 "WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle","Подсказка в заголовке","Tooltip at title",,
+"WidgetTooltip::DefaultHeader","Информация","Information","Information","Informacja"
 "DashboardPanel::Dashboards","Дашборды","Dashboards",,
 "DashboardPanel::NewWidget","Новый виджет","New widget",,
 "DateGroupModal::Day","День","Days",,

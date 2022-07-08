@@ -133,8 +133,12 @@ export type BreakdownItem = {
 export type Breakdown = Array<BreakdownItem>;
 
 export type WidgetTooltip = {
+	fontFamily?: string,
+	fontSize?: number,
+	header?: string,
 	show: boolean,
-	title: string
+	text?: string,
+	title?: string
 };
 
 export type Indicator = {

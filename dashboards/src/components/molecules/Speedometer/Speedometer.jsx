@@ -102,6 +102,8 @@ export class Speedometer extends PureComponent<Props, State> {
 
 			return {arcX, arcY, fontSizeScale, graphHeight, graphWidth, height, legendHeight, legendPosition, legendWidth, radius, width};
 		}
+
+		return null;
 	}
 
 	renderBorderValue = (x: number, value: number) => {

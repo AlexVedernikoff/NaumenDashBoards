@@ -321,6 +321,7 @@
 	"WidgetForm::ChoiceWidgetTooltipForm::AtIndicator": "At indicator",
 	"WidgetForm::SimpleWidgetTooltipForm::Tooltip": "Tooltip",
 	"WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle": "Tooltip at title",
+	"WidgetTooltip::DefaultHeader": "Information",
 	"DashboardPanel::Dashboards": "Dashboards",
 	"DashboardPanel::NewWidget": "New widget",
 	"DateGroupModal::Day": "Days",

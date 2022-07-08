@@ -5,6 +5,8 @@ import type {DataSet} from 'store/widgetForms/axisChartForm/types';
 import {deepClone} from 'helpers';
 import {DEFAULT_TOOLTIP_SETTINGS} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
+import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
+import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
 import FormField from 'components/molecules/FormField';
 import type {OnChangeEvent} from 'components/types';
 import type {Props, State} from './types';
@@ -13,6 +15,7 @@ import t, {translateObjectsArray} from 'localization';
 import TextArea from 'components/atoms/TextArea';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 import type {Values} from 'components/organisms/AxisChartWidgetForm/types';
+import type {WidgetTooltip} from 'store/widgets/data/types';
 
 class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 	state = {
@@ -44,15 +47,32 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 	changeShow = (showTooltip: boolean, showIndicator: boolean) => {
 		const {onChange, value} = this.props;
 		const newValue: Values = deepClone(value);
-		const indicator = newValue.data.find(data => !data.sourceForCompute)?.indicators?.[0];
-		const tooltip = {show: showTooltip, title: newValue.tooltip?.title ?? ''};
+		const indicator = this.getIndicator(newValue.data);
+		const tooltip = {...value.tooltip, show: showTooltip, title: newValue.tooltip?.title ?? ''};
 
 		if (indicator) {
-			indicator.tooltip = {show: showIndicator, title: indicator.tooltip?.title ?? ''};
+			indicator.tooltip = {...indicator.tooltip, show: showIndicator, title: indicator.tooltip?.title ?? ''};
 		}
 
 		onChange(DIAGRAM_FIELDS.tooltip, tooltip);
 		onChange(DIAGRAM_FIELDS.data, newValue.data);
+	};
+
+	getIndicator = (data: ?Array<DataSet>) => data?.find(data => !data.sourceForCompute)?.indicators?.[0];
+
+	getSelectedTooltip = () => {
+		const {indicator, selected, tooltip} = this.state;
+		return selected === DIAGRAM_FIELDS.tooltip ? tooltip : indicator;
+	};
+
+	handleChangeFontFamily = ({value: fontFamily}) => {
+		const selectedTooltip = this.getSelectedTooltip();
+		return this.setSelectedTooltip({...selectedTooltip, fontFamily});
+	};
+
+	handleChangeFontSize = ({value: fontSize}) => {
+		const selectedTooltip = this.getSelectedTooltip();
+		return this.setSelectedTooltip({...selectedTooltip, fontSize});
 	};
 
 	handleChangeShowType = ({value: field}: OnChangeEvent<string>) => {
@@ -64,47 +84,92 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 	};
 
 	handleChangeText = ({value: title}: OnChangeEvent<string>) => {
-		const {onChange, value: {data}} = this.props;
-		const {selected} = this.state;
-		const isTooltipSelected = selected === DIAGRAM_FIELDS.tooltip;
-		const newTitleValue = {show: isTooltipSelected, title};
-		const newDataValue: Array<DataSet> = deepClone(data);
-		const indicator = newDataValue.find(data => !data.sourceForCompute)?.indicators?.[0];
-
-		if (indicator) {
-			indicator.tooltip = {show: !isTooltipSelected, title};
-		}
-
-		onChange(DIAGRAM_FIELDS.tooltip, newTitleValue);
-		onChange(DIAGRAM_FIELDS.data, newDataValue);
+		const selectedTooltip = this.getSelectedTooltip();
+		return this.setSelectedTooltip({...selectedTooltip, title});
 	};
 
 	handleShow = ({value: change}: OnChangeEvent<boolean>) => this.changeShow(!change, false);
 
-	render () {
-		const {indicator, selected, tooltip} = this.state;
-		const show = indicator.show || tooltip.show;
-		const value = selected === DIAGRAM_FIELDS.tooltip ? tooltip.title : indicator.title;
+	setSelectedTooltip = (tooltip: WidgetTooltip) => {
+		const {onChange, value} = this.props;
+		const {selected} = this.state;
+
+		if (selected === DIAGRAM_FIELDS.tooltip) {
+			const newTooltip = {...value.tooltip, ...tooltip, show: true};
+
+			onChange(DIAGRAM_FIELDS.tooltip, newTooltip);
+		} else {
+			const {data} = value;
+			const newDataValue: Array<DataSet> = deepClone(data);
+			const indicator = this.getIndicator(newDataValue);
+
+			if (indicator) {
+				indicator.tooltip = {...indicator.tooltip, ...tooltip, show: true};
+				onChange(DIAGRAM_FIELDS.data, newDataValue);
+			}
+		}
+	};
+
+	renderFontOptions = () => {
+		const {
+			fontFamily = DEFAULT_TOOLTIP_SETTINGS.fontFamily,
+			fontSize = DEFAULT_TOOLTIP_SETTINGS.fontSize
+		} = this.getSelectedTooltip();
+
+		return (
+			<FormField row>
+				<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.handleChangeFontFamily} value={fontFamily} />
+				<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.handleChangeFontSize} value={fontSize} />
+			</FormField>
+		);
+	};
+
+	renderSelect = () => {
+		const {selected} = this.state;
 		const options = translateObjectsArray('title', CHOOSE_OPTIONS);
 
 		return (
-			<ToggableFormBox name={DIAGRAM_FIELDS.show} onToggle={this.handleShow} showContent={show} title={t('WidgetForm::ChoiceWidgetTooltipForm::Tooltip')} >
-				<FormField>
-					<CheckIconButtonGroup
-						onChange={this.handleChangeShowType}
-						options={options}
-						value={selected}
-					/>
-				</FormField>
-				<FormField>
-					<TextArea
-						focusOnMount={true}
-						maxLength={1000}
-						name={selected}
-						onChange={this.handleChangeText}
-						value={value}
-					/>
-				</FormField>
+			<FormField>
+				<CheckIconButtonGroup
+					onChange={this.handleChangeShowType}
+					options={options}
+					value={selected}
+				/>
+			</FormField>
+		);
+	};
+
+	renderText = () => {
+		const {selected} = this.state;
+		const {title} = this.getSelectedTooltip();
+
+		return (
+			<FormField>
+				<TextArea
+					focusOnMount={true}
+					maxLength={1000}
+					name={selected}
+					onChange={this.handleChangeText}
+					value={title}
+				/>
+			</FormField>
+		);
+	};
+
+	render () {
+		const {indicator, tooltip} = this.state;
+		const show = indicator.show || tooltip.show;
+
+		return (
+			<ToggableFormBox
+				name={DIAGRAM_FIELDS.show}
+				onToggle={this.handleShow}
+				showContent={show}
+				title={t('WidgetForm::ChoiceWidgetTooltipForm::Tooltip')}
+			>
+				{this.renderSelect()}
+				{this.renderText()}
+				{this.renderFontOptions()}
 			</ToggableFormBox>
 		);
 	}

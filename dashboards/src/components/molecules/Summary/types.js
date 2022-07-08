@@ -1,7 +1,6 @@
 // @flow
 import type {DivRef} from 'components/types';
 import type {FontStyle} from 'store/widgets/data/types';
-import type {Position} from 'components/molecules/WidgetTooltip/components/Message/types';
 import type {SummaryOptions} from 'utils/recharts/types';
 
 export type Options = SummaryOptions & {
@@ -21,5 +20,4 @@ export type Props = {
 export type State = {
 	fontSize: number | null,
 	height: number,
-	tooltipPosition: ?Position
 };

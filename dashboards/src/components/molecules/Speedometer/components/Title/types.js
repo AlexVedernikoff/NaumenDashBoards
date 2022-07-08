@@ -1,7 +1,7 @@
 // @flow
 import type {ComponentProps as TextProps} from 'components/molecules/Speedometer/components/Text/types';
 import type {FontStyle} from 'store/widgets/data/types';
-import type {Position} from 'components/molecules/WidgetTooltip/components/Message/types';
+import type {WidgetTooltip} from 'store/widgets/data/types.js';
 
 export type Components = {
 	Text: React$ComponentType<TextProps>,
@@ -21,11 +21,7 @@ export type Props = {
 	fontSizeScale: number,
 	style: TextStyle,
 	title: string,
-	tooltip: string | null,
+	tooltip: ?WidgetTooltip,
 	width: number,
 	y: number
-};
-
-export type State = {
-	tooltipPosition: ?Position
 };

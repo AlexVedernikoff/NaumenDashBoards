@@ -1,35 +1,19 @@
 // @flow
-import type {Components, Props, State} from './types';
-import Message from 'components/molecules/WidgetTooltip/components/Message';
-import React, {Fragment, PureComponent} from 'react';
+import type {Components, Props} from './types';
+import React, {forwardRef, PureComponent} from 'react';
 import Text from 'components/molecules/Speedometer/components/Text';
+import WidgetTooltip from 'components/molecules/WidgetTooltip';
 
-export class Title extends PureComponent<Props, State> {
+export class Title extends PureComponent<Props> {
 	tooltipPositionTimer = null;
 
 	components: Components = {
 		Text
 	};
 
-	state = {
-		tooltipPosition: null
-	};
-
 	getComponents = () => {
 		const {components} = this.props;
 		return components ? {...this.components, ...components} : this.components;
-	};
-
-	handleClearTooltip = () => {
-		clearTimeout(this.tooltipPositionTimer);
-		this.setState({tooltipPosition: null});
-	};
-
-	handleTooltipShow = (e: MouseEvent) => {
-		const {clientX: x, clientY: y} = e;
-
-		clearTimeout(this.tooltipPositionTimer);
-		this.tooltipPositionTimer = setTimeout(() => this.setState({tooltipPosition: {x, y}}), 300);
 	};
 
 	renderDefaultTooltip = () => {
@@ -53,52 +37,47 @@ export class Title extends PureComponent<Props, State> {
 		);
 	};
 
-	renderTooltip = () => {
-		const {tooltip} = this.props;
-		const {tooltipPosition} = this.state;
+	renderTooltipIcon = (props, ref) => {
+		const {children, onClick} = props;
+		const textStyle = {
+			color: '#4D92C8',
+			fontSize: '0.84em'
+		};
 
-		if (tooltip) {
-			const textStyle = {
-				color: '#4D92C8',
-				fontSize: '0.84em'
-			};
-
-			return (
-				<Fragment>
-					&nbsp;
-					<tspan
-						baselineShift='25%'
-						fill={textStyle.color}
-						fontSize={textStyle.fontSize}
-						style={textStyle}
-					>
-					[?]
-					</tspan>
-					<Message position={tooltipPosition} text={tooltip} />
-				</Fragment>
-			);
-		}
-
-		return null;
+		return (
+			<tspan
+				baselineShift="25%"
+				fill={textStyle.color}
+				fontSize={textStyle.fontSize}
+				onClick={onClick}
+				ref={ref}
+				style={textStyle}
+			>
+				{children}
+			</tspan>
+		);
 	};
 
 	render () {
-		const {centerX, fontSizeScale, style, y} = this.props;
+		const {centerX, fontSizeScale, style, tooltip, y} = this.props;
 		const {Text} = this.getComponents();
 
 		return (
 			<Text
 				dominantBaseline="middle"
 				fontSizeScale={fontSizeScale}
-				onMouseLeave={this.handleClearTooltip}
-				onMouseMove={this.handleTooltipShow}
 				style={style}
 				textAnchor="middle"
 				x={centerX}
 				y={y}
 			>
 				{this.renderTitle()}
-				{this.renderTooltip()}
+				<WidgetTooltip
+					components={{
+						Icon: forwardRef(this.renderTooltipIcon)
+					}}
+					tooltip={tooltip}
+				/>
 			</Text>
 		);
 	}

@@ -22,13 +22,12 @@ const getOptions = (
 			const formatter = getTotalFormatter(summaryWidget, container);
 			const {indicator} = summaryWidget;
 			const {fontColor, fontFamily, fontSize, fontStyle} = indicator;
-			const widgetTooltip = buildDataSet.indicators?.[0]?.tooltip;
-			const tooltip = widgetTooltip && widgetTooltip.show ? widgetTooltip.title : null;
+			const widgetTooltip = buildDataSet.indicators?.[0]?.tooltip ?? {show: false};
 
 			return {
 				data: {
 					formatter: formatter.data,
-					tooltip
+					tooltip: widgetTooltip
 				},
 				style: {
 					color: fontColor,
