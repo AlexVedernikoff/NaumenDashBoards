@@ -95,35 +95,6 @@ const INTEGER_AGGREGATION = {
 	SUM
 };
 
-// Периоды атрибута типа dtInterval
-const INTERVALS = [
-	{
-		label: 'store::widgets::Seconds',
-		max: 60000,
-		min: 1000
-	},
-	{
-		label: 'store::widgets::Minutes',
-		max: 36e5,
-		min: 60000
-	},
-	{
-		label: 'store::widgets::Hours',
-		max: 864e5,
-		min: 36e5
-	},
-	{
-		label: 'store::widgets::Days',
-		max: 6048e5,
-		min: 864e5
-	},
-	{
-		label: 'store::widgets::Weeks',
-		max: Infinity,
-		min: 6048e5
-	}
-];
-
 // Режимы отображения виджета
 const DISPLAY_MODE_OPTIONS = [
 	{
@@ -149,6 +120,5 @@ export {
 	GROUP_WAYS,
 	INTEGER_AGGREGATION,
 	INTERVAL_SYSTEM_GROUP,
-	INTERVALS,
 	TIMER_STATUSES
 };

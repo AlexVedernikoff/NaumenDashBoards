@@ -3,6 +3,7 @@ import type {AxisFormat, LabelFormat, NumberAxisFormat} from 'store/widgets/data
 import {AXIS_FORMAT_TYPE, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/data/constants';
 import type {CTXValue, NumberFormatter, PercentStore, StringFormatter, ValueFormatter} from './types';
 import {compose} from 'redux';
+import {INTERVALS} from './constants';
 import moment from 'utils/moment.config';
 import {SEPARATOR, TITLE_SEPARATOR} from 'store/widgets/buildData/constants';
 import t from 'localization';
@@ -296,4 +297,66 @@ export const cntPercentFormatter = (
 
 		return result;
 	};
+};
+
+/**
+ * Преобразует интервал из миллисекунд в понятный для пользователя вид
+ * @param {number} ms - значение интервала в миллисекундах
+ * @returns {string} - Человекочитаемый формат интервала
+ * - В случае целого числа недель, дней, часов или минут, выводим в соответствии с полученным значением:
+ * --- если получилось от 1000 мс до 60 000 мс - в секундах,
+ * --- от 60 000 мс до 3 600 000 мс - в минутах,
+ * --- от 3 600 000 мс до 86 400 000 мс - в часах,
+ * --- от 86 400 000 мс до 604 800 000 мс - в днях,
+ * --- от 604 800 000 - в неделях
+ * - В случае если нельзя вывести целое число недель, дней, часов или минут:
+ * --- если получилось от 1000 мс до 60 000 мс - в секундах,
+ * --- от 60 000 мс до 3 600 000 мс - целую часть в минутах, остаток в секундах
+ * --- от 3 600 000 мс до 86 400 000 мс - целую часть в часах, остаток в секундах
+ * --- от 86 400 000 мс до 604 800 000 мс -  целую часть в часах,  остаток в секундах
+ * --- от 604 800 000 - целую часть в часах,  остаток в секундах
+ */
+export const formatMSInterval = (ms: number): string => {
+	let result = ms.toString();
+	const intervalDataIndex = INTERVALS.findIndex(({max, min}) => ms >= min && ms < max);
+
+	if (intervalDataIndex !== -1) {
+		const {label, min} = INTERVALS[intervalDataIndex];
+		const remainder = ms % min;
+
+		if (remainder === 0) {
+			const intervalValue = Math.trunc(ms / min);
+
+			result = t(label, {value: intervalValue});
+		} else {
+			const {min: sec} = INTERVALS[0];
+			const {min} = INTERVALS[1];
+			const {min: h} = INTERVALS[2];
+			let seconds = 0;
+			let minutes = 0;
+			let hours = 0;
+
+			switch (intervalDataIndex) {
+				case 0:
+					// выводим в секундах
+					seconds = Math.trunc(ms / sec);
+					result = t('recharts::formatMSInterval::SecondsFraction', {seconds});
+					break;
+				case 1:
+					// выводим в минутах
+					minutes = Math.trunc(ms / min);
+					seconds = Math.trunc(ms % min / sec);
+					result = t('recharts::formatMSInterval::MinutesFraction', {minutes, seconds});
+					break;
+				default:
+					// выводим в часах
+					hours = Math.trunc(ms / h);
+					seconds = Math.trunc(ms % h / sec);
+					result = t('recharts::formatMSInterval::HoursFraction', {hours, seconds});
+					break;
+			}
+		}
+	}
+
+	return result;
 };

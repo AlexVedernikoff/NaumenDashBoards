@@ -4,6 +4,7 @@ import {
 	checkInfinity,
 	checkNumber,
 	cntPercentFormatter,
+	formatMSInterval,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
@@ -13,7 +14,7 @@ import type {CircleFormatter, NumberFormatter, PercentStore, ValueFormatter} fro
 import type {CircleWidget, NumberAxisFormat} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasCountPercent, hasMSInterval, hasPercent, parseMSInterval} from 'store/widgets/helpers';
+import {hasCountPercent, hasMSInterval, hasPercent} from 'store/widgets/helpers';
 
 const getDataFormatter = (
 	widget: CircleWidget,
@@ -31,7 +32,7 @@ const getDataFormatter = (
 	let formatter = null;
 
 	if (usesMSInterval) {
-		formatter = checkNumber(parseMSInterval);
+		formatter = checkNumber(formatMSInterval);
 	} else {
 		const numberFormat = !format.additional && usesPercent ? {...format, additional: '%'} : format;
 

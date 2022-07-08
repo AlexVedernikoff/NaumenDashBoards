@@ -776,12 +776,7 @@ type StoreSourcesSourcesFilters =
 type StoreWidgets =
   | 'store::widgets::Web'
   | 'store::widgets::Any'
-  | 'store::widgets::Mobile'
-  | 'store::widgets::Seconds'
-  | 'store::widgets::Minutes'
-  | 'store::widgets::Hours'
-  | 'store::widgets::Days'
-  | 'store::widgets::Weeks';
+  | 'store::widgets::Mobile';
 
 // store/widgets/buildData
 type StoreBuildData =
@@ -814,7 +809,18 @@ type Formatter =
   | 'Formatter::Trillion';
 
 // utils/export
-type Export = 'export::Dashboard';
+type Export =
+  | 'export::Dashboard';
+
+type RechartsFormatMSInterval =
+  | 'recharts::formatMSInterval::Seconds'
+  | 'recharts::formatMSInterval::Minutes'
+  | 'recharts::formatMSInterval::Hours'
+  | 'recharts::formatMSInterval::Days'
+  | 'recharts::formatMSInterval::Weeks'
+  | 'recharts::formatMSInterval::SecondsFraction'
+  | 'recharts::formatMSInterval::MinutesFraction'
+  | 'recharts::formatMSInterval::HoursFraction';
 
 export type LangType =
   | AndCondition
@@ -887,6 +893,7 @@ export type LangType =
   | NumberParameterFormat
   | OrConditionControl
   | ParametersDataBox
+  | RechartsFormatMSInterval
   | SavedFilters
   | SearchInput
   | Select
