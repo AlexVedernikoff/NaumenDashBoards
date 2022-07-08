@@ -6,7 +6,8 @@ import {
 	DEFAULT_AGGREGATION_OPTIONS,
 	INTEGER_AGGREGATION_OPTIONS,
 	NOT_APPLICABLE_OPTION,
-	PERCENT_APPLICABLE_OPTION
+	PERCENT_APPLICABLE_OPTION,
+	PERCENT_COUNT_APPLICABLE_OPTION
 } from './constants';
 
 const getAggregationOptions = (attribute: Attribute | null, hasPercentAggregation: boolean = true, withNotApplicableAggregation: boolean = false) => {
@@ -29,7 +30,9 @@ const getAggregationOptions = (attribute: Attribute | null, hasPercentAggregatio
 	}
 
 	if (!hasPercentAggregation) {
-		options = options.filter(item => item.value !== PERCENT_APPLICABLE_OPTION.value);
+		const percentTypes = [PERCENT_APPLICABLE_OPTION.value, PERCENT_COUNT_APPLICABLE_OPTION.value];
+
+		options = options.filter(item => !percentTypes.includes(item.value));
 	}
 
 	return options;

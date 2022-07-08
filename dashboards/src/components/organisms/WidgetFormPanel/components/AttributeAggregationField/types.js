@@ -6,7 +6,7 @@ import type {RenderValueProps} from 'components/molecules//MiniSelect/types';
 
 export type AggregationOption = {
 	label: string,
-	value: $Keys<typeof DEFAULT_AGGREGATION> | $Keys<typeof INTEGER_AGGREGATION>;
+	value: $Values<typeof DEFAULT_AGGREGATION> | $Values<typeof INTEGER_AGGREGATION>;
 };
 
 export type Props = {
