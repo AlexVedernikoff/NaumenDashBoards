@@ -1,4 +1,6 @@
 // @flow
+import type {CreateImageOptions, ExportPNGOptions} from './types';
+import {DEFAULT_CREATE_IMAGE_OPTIONS, DEFAULT_EXPORT_PNG_OPTIONS} from './constants';
 import {isLegacyBrowser, save} from './helpers';
 
 /**
@@ -81,14 +83,17 @@ const handleShowUnnecessaryElements = (container: HTMLDivElement, show: boolean)
 
 /**
  * Создает canvas элемент снимка
+ *
  * @param {HTMLDivElement} container - DOM элемент с графиком виджета
- * @param {boolean} addBackgroundColor - признак добавления подложки
- * @param {string} backgroundColor - цвет подложки
+ * @param {CreateImageOptions} options - опции экспорта
  * @returns {Promise<Blob>}
  */
-const createImage = async (container: HTMLDivElement, addBackgroundColor: boolean = true, backgroundColor: string = '#FFF') => {
+const createImage = async (container: HTMLDivElement, options: CreateImageOptions = {}) => {
+	const {addBackgroundColor, backgroundColor, scale} = {...DEFAULT_CREATE_IMAGE_OPTIONS, ...options};
+
 	const {default: html2canvas} = await import('html2canvas');
 	let config = {
+		scale,
 		scrollY: 0
 	};
 
@@ -134,14 +139,16 @@ const createPng = async (image: HTMLCanvasElement, name: string = '', toDownload
 
 /**
  * Создает снимок div-элемента
+ *
  * @param {HTMLDivElement} container - DOM элемент с графиком виджета
- * @param {boolean} addBackground - признак добавления подложки
- * @param {string} name - название файла для экспорта
- * @param {boolean} toDownload - признак сохранения файла
+ * @param {ExportPNGOptions} options - опции экспорта
  * @returns {Promise<Blob>}
  */
-const exportPNG = async (container: HTMLDivElement, addBackground: boolean = true, name: string = '', toDownload: boolean = false) => {
-	const image = await createImage(container, addBackground, '#EFF3F8');
+const exportPNG = async (container: HTMLDivElement, options: ExportPNGOptions) => {
+	const {addBackgroundColor, name} = {...DEFAULT_EXPORT_PNG_OPTIONS, ...options};
+	const imageOptions = {addBackgroundColor, backgroundColor: '#EFF3F8'};
+	const image = await createImage(container, imageOptions);
+
 	return createPng(image, name, true);
 };
 

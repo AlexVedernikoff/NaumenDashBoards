@@ -6,9 +6,11 @@ import {exportPNG} from './core';
 import {FILE_VARIANTS} from './constants';
 import type {TableBuildData} from 'store/widgets/buildData/types';
 import type {TableWidget, Widget} from 'store/widgets/data/types';
+import type {WidgetStoreItem} from './types';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 class Exporter {
-	store: {[id: string]: HTMLDivElement};
+	store: {[id: string]: WidgetStoreItem};
 	layout: Array<string>;
 
 	constructor () {
@@ -16,7 +18,7 @@ class Exporter {
 		this.layout = [];
 	}
 
-	getWidgetContainer (widgetId: string): ?HTMLDivElement {
+	getWidgetContainer (widgetId: string): ?WidgetStoreItem {
 		if (widgetId in this.store) {
 			return this.store[widgetId];
 		}
@@ -24,8 +26,8 @@ class Exporter {
 		return null;
 	}
 
-	registerWidgetContainer (widgetId: string, container: HTMLDivElement) {
-		this.store[widgetId] = container;
+	registerWidgetContainer (widgetId: string, container: HTMLDivElement, type: $Keys<typeof WIDGET_TYPES>) {
+		this.store[widgetId] = {container, type};
 	}
 
 	unregisterWidgetContainer (widgetId: string) {
@@ -34,24 +36,6 @@ class Exporter {
 
 	setLayout (layout: Array<string>) {
 		this.layout = layout;
-	}
-
-	/* depricated */
-	async createContextName () {
-		const contextName = await createContextName();
-		return contextName;
-	}
-
-	/* depricated */
-	async getSnapshotName (widgetName: string) {
-		const snapshotName = await getSnapshotName(widgetName);
-		return snapshotName;
-	}
-
-	/* depricated */
-	async exportSheet (name: string, data: TableBuildData) {
-		const sheet = await exportSheet(name, data);
-		return sheet;
 	}
 
 	async exportWidgetAsSheet (widget: TableWidget, data: TableBuildData) {
@@ -65,7 +49,8 @@ class Exporter {
 
 		if (container) {
 			const name = await getSnapshotName(widget.name);
-			const pdf = await exportPDF([container], name, save);
+			const options = {name, toDownload: save};
+			const pdf = await exportPDF([container], options);
 			return pdf;
 		}
 
@@ -77,7 +62,8 @@ class Exporter {
 		const containers = this.layout.map(this.getWidgetContainer.bind(this)).filter(Boolean);
 
 		if (containers.length > 0) {
-			const pdf = await exportPDF(containers, name, save);
+			const options = {name, toDownload: save};
+			const pdf = await exportPDF(containers, options);
 			return pdf;
 		}
 
@@ -89,7 +75,8 @@ class Exporter {
 
 		if (container) {
 			const name = await getSnapshotName(widget.name);
-			const png = await exportPNG(container, false, name, save);
+			const options = {addBackgroundColor: false, name, toDownload: save};
+			const png = await exportPNG(container.container, options);
 			return png;
 		}
 
@@ -98,7 +85,8 @@ class Exporter {
 
 	async exportDashboardAsPNG (container: HTMLDivElement, save: boolean = false) {
 		const name = await createContextName();
-		const png = await exportPNG(container, true, name, save);
+		const options = {addBackgroundColor: true, name, toDownload: save};
+		const png = await exportPNG(container, options);
 		return png;
 	}
 }

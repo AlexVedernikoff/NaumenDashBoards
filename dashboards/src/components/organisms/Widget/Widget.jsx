@@ -31,7 +31,7 @@ export class Widget extends PureComponent<Props, State> {
 		const {forwardedRef, widget} = this.props;
 
 		if (forwardedRef && forwardedRef.current) {
-			exporter.registerWidgetContainer(widget.id, forwardedRef.current);
+			exporter.registerWidgetContainer(widget.id, forwardedRef.current, widget.type);
 		}
 	}
 
