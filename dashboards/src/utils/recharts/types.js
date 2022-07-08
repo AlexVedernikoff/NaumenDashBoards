@@ -89,13 +89,13 @@ export type CircleSeries = Array<{
 
 export type ReChartLegend = {
 	align: $Values<typeof LEGEND_ALIGN>,
-	height: number | null,
+	height?: number,
 	layout: $Values<typeof LEGEND_LAYOUT>,
 	show: boolean,
 	style: Object,
 	textHandler: TextHandler,
 	verticalAlign: $Values<typeof LEGEND_VERTICAL_ALIGN>,
-	width: number | null,
+	width?: number,
 };
 
 export type AxisOptions = {

@@ -229,7 +229,7 @@ export class BarWidget extends PureComponent<Props, State> {
 
 	renderXAxis = () => {
 		const {options: {formatters, xaxis}} = this.state;
-		const {axisName: value, fontFamily, fontSize, show, showName} = xaxis;
+		const {axisName: value, domain, fontFamily, fontSize, show, showName} = xaxis;
 
 		if (show) {
 			const labelStyle = showName
@@ -238,6 +238,7 @@ export class BarWidget extends PureComponent<Props, State> {
 
 			return (
 				<XAxis
+					domain={domain}
 					fontFamily={fontFamily}
 					fontSize={fontSize}
 					interval={0}

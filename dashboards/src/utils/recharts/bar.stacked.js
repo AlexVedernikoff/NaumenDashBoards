@@ -36,20 +36,24 @@ const getOptions = (
 				seriesData = normalizeSeries(seriesData);
 			}
 
+			const legend = getLegendOptions(container, axisWidget.legend);
+			const yaxis = getYAxisCategory(axisWidget, container, labels, formatters.parameter, xAxisName);
+			const xaxis = getXAxisNumber(axisWidget, container, [legend, yaxis], yAxisName, usesPercent);
+
 			return {
 				data: seriesData,
 				dataLabels: getDataLabels(axisWidget),
 				formatters,
 				getDrillDownOptions,
-				legend: getLegendOptions(container, axisWidget.legend),
+				legend,
 				series: getSeriesInfo(axisWidget, rawData, globalColorsSettings),
 				stackId: 'stacked',
 				stackOffset: usesPercent ? 'expand' : 'none',
 				stacked: true,
 				subTotalGetter,
 				type: 'AxisChartOptions',
-				xaxis: getXAxisNumber(axisWidget, yAxisName),
-				yaxis: getYAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName)
+				xaxis,
+				yaxis
 			};
 		}
 	}

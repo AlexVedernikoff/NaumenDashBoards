@@ -36,8 +36,8 @@ const getOptions = (
 				series: getSeriesInfo(axisWidget, rawData, globalColorsSettings),
 				stacked: false,
 				type: 'AxisChartOptions',
-				xaxis: getXAxisNumber(axisWidget, yAxisName),
-				yaxis: getYAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName)
+				xaxis: getXAxisNumber(axisWidget, container, [], yAxisName),
+				yaxis: getYAxisCategory(axisWidget, container, labels, formatters.parameter, xAxisName)
 			};
 		}
 	}

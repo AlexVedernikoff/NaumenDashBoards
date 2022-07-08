@@ -54,13 +54,11 @@ export const LEGEND_WIDTH_PERCENT = 0.2;
 
 export const DEFAULT_LEGEND = {
 	align: LEGEND_ALIGN.CENTER,
-	height: null,
 	layout: LEGEND_LAYOUT.HORIZONTAL,
 	show: false,
 	style: {},
 	textHandler: 'CROP',
-	verticalAlign: LEGEND_VERTICAL_ALIGN.MIDDLE,
-	width: null
+	verticalAlign: LEGEND_VERTICAL_ALIGN.MIDDLE
 };
 
 export const XAXIS_MAX_WIDTH = 120;
