@@ -400,8 +400,8 @@ const DEFAULT_AXIS_FORMAT: $Shape<{[key: $Values<typeof AXIS_FORMAT_TYPE>]: Axis
 const DEFAULT_TOOLTIP_SETTINGS = {
 	fontFamily: DEFAULT_FONT,
 	fontSize: 13,
-	info: '',
 	show: false,
+	text: '',
 	title: ''
 };
 
