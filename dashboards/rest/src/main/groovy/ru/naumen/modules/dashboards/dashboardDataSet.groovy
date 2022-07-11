@@ -453,7 +453,12 @@ class DashboardDataSetService
                 return mappingStandardDiagram(res, legend, reverseGroups, changeLabels, reverseLabels, format, groupFormat, countTotals)
             case DiagramType.RoundTypes:
                 Integer percentCntAggregationIndex = getPercentCntAggregationIndex(request, diagramType)
-                return mappingRoundDiagram(res, countTotals, percentCntAggregationIndex != null)
+                Boolean checkTypeMetaClass = widgetSettings?.data?.each { value ->
+                    value?.indicators?.any {
+                        it?.aggregation == "PERCENT_CNT"
+                    }
+                }
+                return mappingRoundDiagram(res, countTotals, percentCntAggregationIndex != null || checkTypeMetaClass)
             case DiagramType.CountTypes:
                 return mappingSummaryDiagram(res, diagramType, minValue, maxValue)
             case TABLE:
