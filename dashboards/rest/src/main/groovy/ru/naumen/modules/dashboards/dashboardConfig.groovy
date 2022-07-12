@@ -189,8 +189,7 @@ class DashboardConfigService
     private static final String CHECK_ON_EXIST_SQL = """
         SELECT value
         FROM tbl_sys_keyvaluestorage
-        WHERE name_space = '%s' AND key_ = '%s'
-        FETCH FIRST 1 ROWS ONLY
+        WHERE name_space = '%s' AND key_ = '%s'        
         """
 
     /**
@@ -611,7 +610,7 @@ class DashboardConfigService
     private def executeQuery(def query)
     {
         def sessionFactory = beanFactory.getBean("sessionFactory")
-        return sessionFactory.getCurrentSession().createSQLQuery(query).list()
+        return sessionFactory.getCurrentSession().createSQLQuery(query).list().first()
     }
 
     /**
