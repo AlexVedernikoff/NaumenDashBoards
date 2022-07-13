@@ -469,7 +469,9 @@ class QueryWrapper implements CriteriaWrapper
                 attribute: filterAttribute)
                 : null
 
-            def wrappedQuery = QueryWrapper.build(requestData.source)
+            IMetainfoApi apiMetainfo = api.metainfo
+            Source requestDataSource  =  DashboardQueryWrapperUtils.assigningCorrectSource(requestData, diagramType, apiMetainfo)
+            def wrappedQuery = QueryWrapper.build(requestDataSource)
             def wrappedCriteria = wrappedQuery.criteria
             if (filterParameter && onlyFilled)
             {
