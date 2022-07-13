@@ -66,7 +66,7 @@ export class WidgetTooltip extends PureComponent<Props, State> {
 
 		if (showModal) {
 			return (
-				<AbsolutePortal elementRef={this.ref}>
+				<AbsolutePortal elementRef={this.ref} isModal={false} onClickOutside={this.handleHideModal}>
 					{this.renderModal()}
 				</AbsolutePortal>
 			);

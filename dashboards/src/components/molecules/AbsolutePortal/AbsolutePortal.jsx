@@ -1,4 +1,5 @@
 // @flow
+import cn from 'classnames';
 import {createPortal} from 'react-dom';
 import OutsideClickDetector from 'components/atoms/OutsideClickDetector';
 import type {Props, State} from './types';
@@ -8,6 +9,7 @@ import styles from './styles.less';
 
 export class AbsolutePortal extends Component<Props, State> {
 	static defaultProps = {
+		isModal: true,
 		minOffset: 25
 	};
 
@@ -57,9 +59,10 @@ export class AbsolutePortal extends Component<Props, State> {
 	};
 
 	createContainer = () => {
+		const {isModal} = this.props;
 		const div = document.createElement('div');
 
-		div.className = styles.container;
+		div.className = cn(styles.container, {[styles.modal]: isModal});
 
 		if (document.body !== null) {
 			document.body.appendChild(div);
