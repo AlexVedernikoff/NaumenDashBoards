@@ -3579,7 +3579,7 @@ class DashboardDataSetService
                               DiagramType diagramType)
     {
         Boolean diagramTypeStacked = (diagramType == DiagramType.BAR_STACKED) || (diagramType == DiagramType.COLUMN_STACKED)
-        Boolean isTypeMetaClass = request?.data?.any { key, value -> value.aggregations.any { it.type == Aggregation.PERCENT }}
+        Boolean typeAggregation = request?.data?.any { key, value -> value.aggregations.any { it.type == Aggregation.PERCENT }}
         if (listIdsOfNormalAggregations.size() < 1)
         {
             return listOfLists
