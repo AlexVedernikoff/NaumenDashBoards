@@ -96,7 +96,7 @@ export const withBaseWidget = <Config: WidgetProps>(
 			const {options} = this.state;
 
 			if (loading && (!options || !options.type || options.type === 'EmptyChartOptions')) {
-				return (<p className={styles.loading}><T text="LoadingContent::Loading" /></p>);
+				return (<div className={styles.loading}><T text="LoadingContent::Loading" /></div>);
 			}
 
 			return null;
