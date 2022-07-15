@@ -21,3 +21,4 @@ rest/stand.json
 .env
 
 .DS_Store
+.browserslistrc

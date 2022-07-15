@@ -1,13 +1,14 @@
 // @flow
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
-import type {Props} from 'containers/Startup/types';
+import type {Props} from 'components/containers/Startup/types';
 import React, {useEffect} from 'react';
 import styles from './styles.less';
 
-const Startup = ({children, error, getDataVerify, loading}: Props) => {
+const Startup = ({children, error, getDataEntity, loading}: Props) => {
+
 	useEffect(() => {
-		getDataVerify();
+		getDataEntity();
 	}, []);
 
 	if (loading) {

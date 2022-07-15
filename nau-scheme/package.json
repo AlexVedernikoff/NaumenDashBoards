@@ -9,7 +9,7 @@
     "url": "https://gitsd.naumen.ru/nordclan/nordclan/issues"
   },
   "contributors": [],
-  "description": "Embedded application 'Verification' for 'SMP'",
+  "description": "Embedded application Scheme Inventory",
   "dependencies": {
     "apexcharts": "3.26.2",
     "canvg": "3.0.7",
@@ -107,14 +107,16 @@
     "jest-canvas-mock": "2.3.1",
     "jest-cli": "23.6.0",
     "jest-enzyme": "7.1.2",
+    "konva": "^8.3.10",
     "less": "3.13.1",
     "less-loader": "4.1.0",
     "mini-css-extract-plugin": "0.4.5",
     "my-local-ip": "1.0.0",
     "postcss-loader": "2.1.6",
-    "react": "16.14.0",
-    "react-dom": "16.14.0",
-    "react-test-renderer": "16.14.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-konva": "^18.2.1",
+    "react-test-renderer": "^18.0.0",
     "redux": "4.0.5",
     "redux-logger": "3.0.6",
     "redux-thunk": "2.3.0",
@@ -122,6 +124,7 @@
     "style-loader": "0.21.0",
     "uglifyjs-webpack-plugin": "2.2.0",
     "url-loader": "1.1.2",
+    "use-image": "^1.0.12",
     "webpack": "4.46.0",
     "webpack-bundle-analyzer": "4.4.0",
     "webpack-cli": "3.3.12",
@@ -166,7 +169,7 @@
     "react"
   ],
   "license": "ISC",
-  "name": "SchemeInventory",
+  "name": "nau-scheme",
   "repository": {
     "type": "git",
     "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"

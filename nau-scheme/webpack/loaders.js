@@ -46,20 +46,20 @@ module.exports = {
 				{
 					loader: 'less-loader',
 					options: {
-						relativeUrls: true,
-						sourceMap: define.development,
 						paths: [
 							resolve(define.src)
-						]
+						],
+						relativeUrls: true,
+						sourceMap: define.development
 					}
 				}
 			]
 		},
 		{
-			test: /\.svg$/,
 			issuer: {
 				include: /\.jsx?$/
 			},
+			test: /\.svg$/,
 			use: [
 				{
 					loader: '@svgr/webpack'
@@ -67,10 +67,10 @@ module.exports = {
 			]
 		},
 		{
-			test: /\.(gif|png|jpg|jpeg|woff|woff2|ttf|eot|svg)$/,
 			issuer: {
 				exclude: /\.jsx?$/
 			},
+			test: /\.(gif|png|jpg|jpeg|woff|woff2|ttf|eot|svg)$/,
 			use: [
 				{
 					loader: 'file-loader'
