@@ -3177,6 +3177,8 @@ class DashboardDataSetService
                         RequestData newRequestData = requestData.clone()
                         Closure formatAggregation = this.&formatAggregationSet.rcurry(
                             listIdsOfNormalAggregations,
+                            request,
+                            diagramType,
                             onlyFilled,
                             getPercentCntAggregationIndex(request, diagramType)
                         )
@@ -3322,6 +3324,8 @@ class DashboardDataSetService
                             res = formatAggregationSet(
                                 res,
                                 listIdsOfNormalAggregations,
+                                request,
+                                diagramType,
                                 onlyFilled,
                                 getPercentCntAggregationIndex(request, diagramType)
                             )
@@ -3561,26 +3565,32 @@ class DashboardDataSetService
      * Метод округления числовых результатов
      * @param listOfLists - список данных
      * @param listIdsOfNormalAggregations - список индексов агрегаций в датасете
+     * @param request - запрос
+     * @param diagramType  - тип диаграммы
      * @param exceptNulls - убирать 0
      * @param percentCntAggregationIndex - индекс агрегации типа PERCENT_CNT
      * @return список округлённых числовых значений
      */
     List formatAggregationSet(List listOfLists,
                               List listIdsOfNormalAggregations,
+                              DiagramRequest request,
+                              DiagramType diagramType,
                               Boolean exceptNulls = false,
-                              Integer percentCntAggregationIndex = null)
+                              Integer percentCntAggregationIndex = null
+                             )
     {
+        Boolean diagramTypeStacked = (diagramType == DiagramType.BAR_STACKED) || (diagramType == DiagramType.COLUMN_STACKED)
+        Boolean isTypeMetaClass = request?.data?.any { key, value -> value.aggregations.any { it.type == Aggregation.PERCENT }}
         if (listIdsOfNormalAggregations.size() < 1)
         {
             return listOfLists
         }
         return listOfLists.findResults { List list ->
-            if (exceptNulls && list[listIdsOfNormalAggregations*.toLong()].every {
-                !it || it == 0
-            })
+            if (exceptNulls && list[listIdsOfNormalAggregations*.toLong()].every { !it })
             {
                 return null
             }
+
             if (listIdsOfNormalAggregations.size() > 0)
             {
                 listIdsOfNormalAggregations.each { index ->
@@ -3589,19 +3599,21 @@ class DashboardDataSetService
                     {
                         countAndPercentValuesForTable = list[index].split(' ')
                         list[index] = countAndPercentValuesForTable[1]
-                        if (list[index].charAt(0) == ',')
+                    }
+                    if (!(diagramTypeStacked && isTypeMetaClass))
+                    {
+                        list[index] = list[index] = list[index] && !(
+                            list[index].toDouble().isNaN() || list[index].toDouble().isInfinite())
+                            ? DECIMAL_FORMAT.format(list[index] as Double)
+                            : DECIMAL_FORMAT.format(0)
+                        if (index == percentCntAggregationIndex && countAndPercentValuesForTable)
                         {
-                            list[index] = '0' + list[index].replace(',', '.')
+                            list[index] = countAndPercentValuesForTable[0] + ' ' + list[index]
                         }
                     }
-                    list[index] = list[index] = list[index] && !(
-                        list[index].toDouble().isNaN() || list[index].toDouble().isInfinite())
-                        ? DECIMAL_FORMAT.format(list[index] as Double)
-                        : DECIMAL_FORMAT.format(0)
-
-                    if (index == percentCntAggregationIndex && countAndPercentValuesForTable)
+                    else
                     {
-                        list[index] = countAndPercentValuesForTable[0] + ' ' + list[index]
+                        list[index] = (list[index] as Double)
                     }
                 }
                 return list
@@ -6228,6 +6240,8 @@ class DashboardDataSetService
                 //важно для таблицы
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(
                     listIdsOfNormalAggregations,
+                    request,
+                    diagramType,
                     diagramType in DiagramType.CountTypes ? false : onlyFilled,
                     getPercentCntAggregationIndex(request, diagramType)
                 )
@@ -6315,6 +6329,8 @@ class DashboardDataSetService
                 Map total = [(node.title): formatAggregationSet(
                     res,
                     listIdsOfNormalAggregations,
+                    request,
+                    diagramType,
                     diagramType in DiagramType.CountTypes ? false : onlyFilled,
                     getPercentCntAggregationIndex(request, diagramType)
                 )]
