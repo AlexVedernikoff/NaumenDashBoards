@@ -1,23 +1,13 @@
 // @flow
 import 'styles/app.less';
-import DocumentVerifyContent from 'containers/DocumentVerifyContent';
-import DocumentVerifyPopup from 'containers/DocumentVerifyPopup';
-import DocumentVerifyTable from 'containers/DocumentVerifyTable';
-import React, {useState} from 'react';
-import Startup from 'containers/Startup';
+import Content from 'components/organisms/Content';
+import React from 'react';
+import Startup from 'components/organisms/Startup';
 
 export const App = () => {
-	const [switchView, setSwitchView] = useState(false);
-
-	const onSwitchView = () => {
-		setSwitchView(!switchView);
-	};
-
 	return (
 		<Startup>
-			<DocumentVerifyPopup />
-			<DocumentVerifyContent onSwitchView={onSwitchView} switchView={switchView} />
-			<DocumentVerifyTable onSwitchView={onSwitchView} switchView={switchView} />
+			<Content />
 		</Startup>
 	);
 };

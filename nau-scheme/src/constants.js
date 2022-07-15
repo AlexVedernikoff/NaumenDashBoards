@@ -2,9 +2,9 @@
 import configureStore from 'store';
 
 const store = configureStore();
-const root = document.getElementById('root');
+const container = document.getElementById('root');
 
 export {
-	root,
+	container,
 	store
 };

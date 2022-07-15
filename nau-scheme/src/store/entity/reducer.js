@@ -1,9 +1,9 @@
 // @flow
 import {defaultVerifyAction, initialVerifyState} from './init';
-import type {VerifyAction, VerifyState} from './types';
+import type {EntityState} from './types';
 import {VERIFY_EVENTS} from './constants';
 
-const reducer = (state: VerifyState = initialVerifyState, action: VerifyAction = defaultVerifyAction): VerifyState => {
+const reducer = (state: EntityState = initialVerifyState, action: defaultVerifyAction): EntityState => {
 	switch (action.type) {
 		case VERIFY_EVENTS.SHOW_LOADER_DATA:
 			return {
@@ -16,12 +16,7 @@ const reducer = (state: VerifyState = initialVerifyState, action: VerifyAction =
 				...state,
 				loading: false
 			};
-		case VERIFY_EVENTS.SET_UUID_DOCUMENT:
-			return {
-				...state,
-				uuidDocument: action.payload
-			};
-		case VERIFY_EVENTS.SET_VERIFY_DATA:
+		case VERIFY_EVENTS.SET_DATA:
 			return {
 				...state,
 				data: action.payload

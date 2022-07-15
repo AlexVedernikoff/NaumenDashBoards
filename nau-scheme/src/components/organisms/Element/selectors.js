@@ -1,6 +1,6 @@
 // @flow
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {getDataEntity} from 'store/entity/actions';
+import {getVerify} from 'store/verify/actions';
 import type {State} from 'store/types';
 
 /**
@@ -8,13 +8,13 @@ import type {State} from 'store/types';
  * @returns {ConnectedProps}
  */
 export const props = (state: State): ConnectedProps => {
-	const {data} = state.entity;
+	const {verify} = state;
 
 	return {
-		data
+		verify
 	};
 };
 
 export const functions: ConnectedFunctions = {
-	getDataEntity
+	getVerify
 };

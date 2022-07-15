@@ -1,23 +1,14 @@
 // @flow
-import type {VerifyAction, VerifyState} from './types';
+import type {EntityState} from './types';
 import {VERIFY_EVENTS} from './constants';
 
-export const initialVerifyState: VerifyState = {
-	data: {
-		document: '',
-		entities: [],
-		message: '',
-		object: ''
-	},
+export const initialVerifyState: EntityState = {
+	data: [],
 	error: false,
-	loading: false,
-	notification: {
-		isSuccess: true,
-		show: false
-	}
+	loading: false
 };
 
-export const defaultVerifyAction: VerifyAction = {
+export const defaultVerifyAction = {
 	payload: null,
 	type: VERIFY_EVENTS.EMPTY_DATA
 };

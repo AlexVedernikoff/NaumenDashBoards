@@ -7,13 +7,14 @@ import {VERIFY_EVENTS} from './constants';
  * Получает данные, необходимые для работы
  * @returns {ThunkAction}
  */
-const getDataVerify = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getDataEntity = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+
 	try {
 		dispatch(showLoaderData());
 
 		const entity = await getEntity();
 
-		dispatch(setEntityData({...entity}));
+		dispatch(setEntityData([...entity]));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -50,9 +51,9 @@ const setErrorData = (payload: string) => ({
  */
 const setEntityData = (payload: string) => ({
 	payload,
-	type: VERIFY_EVENTS.SET_VERIFY_DATA
+	type: VERIFY_EVENTS.SET_DATA
 });
 
 export {
-	getDataVerify
+	getDataEntity
 };
