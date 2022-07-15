@@ -3177,10 +3177,10 @@ class DashboardDataSetService
                         RequestData newRequestData = requestData.clone()
                         Closure formatAggregation = this.&formatAggregationSet.rcurry(
                             listIdsOfNormalAggregations,
-                            onlyFilled,
-                            getPercentCntAggregationIndex(request, diagramType),
                             request,
-                            diagramType
+                            diagramType,
+                            onlyFilled,
+                            getPercentCntAggregationIndex(request, diagramType)
                         )
                         Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                         def res = filtering?.withIndex()?.collectMany { filters, i ->
@@ -3324,10 +3324,10 @@ class DashboardDataSetService
                             res = formatAggregationSet(
                                 res,
                                 listIdsOfNormalAggregations,
-                                onlyFilled,
-                                getPercentCntAggregationIndex(request, diagramType),
                                 request,
-                                diagramType
+                                diagramType,
+                                onlyFilled,
+                                getPercentCntAggregationIndex(request, diagramType)
                             )
                             def filtersTitle = title.any {it[0] != ''}
                                 ? (title[i] as Set)?.withIndex().findResults { val, idx ->
@@ -3565,27 +3565,28 @@ class DashboardDataSetService
      * Метод округления числовых результатов
      * @param listOfLists - список данных
      * @param listIdsOfNormalAggregations - список индексов агрегаций в датасете
-     * @param exceptNulls - убирать 0
-     * @param percentCntAggregationIndex - индекс агрегации типа PERCENT_CNT
      * @param request - запрос
      * @param diagramType  - тип диаграммы
+     * @param exceptNulls - убирать 0
+     * @param percentCntAggregationIndex - индекс агрегации типа PERCENT_CNT
      * @return список округлённых числовых значений
      */
     List formatAggregationSet(List listOfLists,
                               List listIdsOfNormalAggregations,
-                              Boolean exceptNulls = false,
-                              Integer percentCntAggregationIndex = null,
                               DiagramRequest request,
-                              DiagramType diagramType)
+                              DiagramType diagramType,
+                              Boolean exceptNulls = false,
+                              Integer percentCntAggregationIndex = null
+                             )
     {
         Boolean diagramTypeStacked = (diagramType == DiagramType.BAR_STACKED) || (diagramType == DiagramType.COLUMN_STACKED)
-        Boolean typeAggregation = request?.data?.any { key, value -> value.aggregations.any { it.type == Aggregation.PERCENT }}
+        Boolean isTypeMetaClass = request?.data?.any { key, value -> value.aggregations.any { it.type == Aggregation.PERCENT }}
         if (listIdsOfNormalAggregations.size() < 1)
         {
             return listOfLists
         }
         return listOfLists.findResults { List list ->
-            if (exceptNulls && list[listIdsOfNormalAggregations*.toLong()].every { !it || it == 0 })
+            if (exceptNulls && list[listIdsOfNormalAggregations*.toLong()].every { !it })
             {
                 return null
             }
@@ -6239,10 +6240,10 @@ class DashboardDataSetService
                 //важно для таблицы
                 Closure formatAggregation = this.&formatAggregationSet.rcurry(
                     listIdsOfNormalAggregations,
-                    diagramType in DiagramType.CountTypes ? false : onlyFilled,
-                    getPercentCntAggregationIndex(request, diagramType),
                     request,
-                    diagramType
+                    diagramType,
+                    diagramType in DiagramType.CountTypes ? false : onlyFilled,
+                    getPercentCntAggregationIndex(request, diagramType)
                 )
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
                 def res = dashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
@@ -6328,10 +6329,10 @@ class DashboardDataSetService
                 Map total = [(node.title): formatAggregationSet(
                     res,
                     listIdsOfNormalAggregations,
-                    diagramType in DiagramType.CountTypes ? false : onlyFilled,
-                    getPercentCntAggregationIndex(request, diagramType),
                     request,
-                    diagramType
+                    diagramType,
+                    diagramType in DiagramType.CountTypes ? false : onlyFilled,
+                    getPercentCntAggregationIndex(request, diagramType)
                 )]
                 return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, formatResult(total, aggregationCnt), parameter,
                                                       parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
