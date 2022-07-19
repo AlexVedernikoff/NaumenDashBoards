@@ -12,9 +12,12 @@ export class DashboardResizer {
 	isMobile = false;
 	showHeader = true;
 
-	constructor (store: Store) {
-		this.store = store;
+	constructor () {
 		this.isMobile = isMobile().any;
+	}
+
+	setStore (store: Store) {
+		this.store = store;
 	}
 
 	getContentHeight (): number | null {

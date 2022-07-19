@@ -4,9 +4,9 @@ import type {Source} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 import type {TreeNode} from 'components/types';
 
-export type ClearSearchObjects = (source: Source, attribute: Attribute) => ThunkAction;
+export type ClearSearchObjectsAction = (source: Source, attribute: Attribute) => ThunkAction;
 
-export type SearchObjects = (source: Source, attribute: Attribute, value: string, includingArchival: boolean) => ThunkAction;
+export type SearchObjectsAction = (source: Source, attribute: Attribute, value: string, includingArchival: boolean) => ThunkAction;
 
 export type RawObjectData = {
 	children: number,

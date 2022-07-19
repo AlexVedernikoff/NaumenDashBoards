@@ -1,6 +1,6 @@
 // @flow
 import type {DataSourceMap} from 'store/sources/data/types';
-import type {DynamicGroupsMap, FetchDynamicAttributeGroups, FetchDynamicAttributes} from 'store/sources/dynamicGroups/types';
+import type {DynamicGroupsMap, FetchDynamicAttributeGroupsAction, FetchDynamicAttributesAction} from 'store/sources/dynamicGroups/types';
 
 export type ConnectedProps = {
 	dynamicGroups: DynamicGroupsMap,
@@ -8,8 +8,8 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	fetchDynamicAttributeGroups: FetchDynamicAttributeGroups,
-	fetchDynamicAttributes: FetchDynamicAttributes
+	fetchDynamicAttributeGroups: FetchDynamicAttributeGroupsAction,
+	fetchDynamicAttributes: FetchDynamicAttributesAction
 };
 
 export type Props = ConnectedFunctions & ConnectedProps;

@@ -1,6 +1,6 @@
 // @flow
-import type {DrillDown, OpenCardObject} from 'store/widgets/links/types';
-import type {FetchTableBuildData} from 'store/widgets/buildData/types';
+import type {DrillDownAction, OpenCardObjectAction} from 'store/widgets/links/types';
+import type {FetchTableBuildDataAction} from 'store/widgets/buildData/types';
 import type {InjectOptionsProps} from 'containers/withBaseWidget/types';
 import type {TableWidget} from 'store/widgets/data/types';
 
@@ -9,9 +9,9 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	drillDown: DrillDown,
-	openCardObject: OpenCardObject,
-	updateData: FetchTableBuildData,
+	drillDown: DrillDownAction,
+	openCardObject: OpenCardObjectAction,
+	updateData: FetchTableBuildDataAction,
 	updateWidget: TableWidget => Object
 };
 

@@ -1,6 +1,6 @@
 // @flow
-import type {FetchUsers, UsersState} from 'store/users/types';
-import type {SendToEmails} from 'store/dashboard/settings/types';
+import type {FetchUsersAction, UsersState} from 'store/users/types';
+import type {SendToEmailsAction} from 'store/dashboard/settings/types';
 import type {UserData} from 'store/context/types';
 
 export type ConnectedProps = {|
@@ -10,8 +10,8 @@ export type ConnectedProps = {|
 |};
 
 export type ConnectedFunctions = {|
-	fetchUsers: FetchUsers,
-	sendToEmails: SendToEmails
+	fetchUsers: FetchUsersAction,
+	sendToEmails: SendToEmailsAction
 |};
 
 export type Props = {

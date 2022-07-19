@@ -3,9 +3,10 @@ import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps, OwnProps} from './types';
 import {dataSelector, exportParamsSelector, filtersOnWidgetSelector, modeSelector, navigationSelector} from './helpers';
 import {drillDown, openNavigationLink} from 'store/widgets/links/actions';
-import {editWidgetChunkData, removeWidgetWithConfirm, saveWidgetWithNewFilters, selectWidget} from 'store/widgets/data/actions';
+import {editWidgetChunkData, saveWidgetWithNewFilters} from 'store/widgets/actions';
 import {exportTableToXLSX} from 'store/widgets/buildData/actions';
 import {isEditableDashboardContext, isUserModeDashboard} from 'store/dashboard/settings/selectors';
+import {removeWidgetWithConfirm, selectWidget} from 'store/widgets/data/actions';
 import {USER_ROLES} from 'store/context/constants';
 
 export const props = (state: AppState, ownProps: OwnProps): ConnectedProps => {

@@ -1,3 +1,6 @@
 // @flow
 import DashboardResizer from './DashboardResizer';
-export default DashboardResizer;
+
+const dashboardResizer = new DashboardResizer();
+
+export default dashboardResizer;

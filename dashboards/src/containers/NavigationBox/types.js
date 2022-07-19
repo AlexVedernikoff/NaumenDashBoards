@@ -1,5 +1,5 @@
 // @flow
-import type {DashboardsState, FetchDashboards} from 'store/dashboards/types';
+import type {DashboardsState, FetchDashboardsAction} from 'store/dashboards/types';
 import type {UserData} from 'store/context/types';
 
 export type ConnectedProps = {
@@ -9,7 +9,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	fetchDashboards: FetchDashboards
+	fetchDashboards: FetchDashboardsAction
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;

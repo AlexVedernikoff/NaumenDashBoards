@@ -2,7 +2,7 @@
 import type {AppState} from 'store/types';
 import {changeTableFormValues} from 'store/widgetForms/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {saveWidget} from 'store/widgets/data/actions';
+import {saveWidget} from 'store/widgets/actions';
 
 export const props = (state: AppState): ConnectedProps => ({
 	values: state.widgetForms.tableForm

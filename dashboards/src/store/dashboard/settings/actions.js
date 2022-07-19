@@ -11,7 +11,7 @@ import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
 import {DASHBOARD_EVENTS, EDIT_PANEL_POSITION, MAX_AUTO_UPDATE_INTERVAL} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {fetchBuildData} from 'store/widgets/buildData/actions';
+import {fetchBuildData} from 'store/widgets/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
 import {
 	getContext,

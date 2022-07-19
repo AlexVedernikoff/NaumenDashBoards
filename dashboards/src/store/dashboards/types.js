@@ -2,7 +2,7 @@
 import {DASHBOARDS_EVENTS} from './constants';
 import type {ThunkAction} from 'store/types';
 
-export type FetchDashboards = () => ThunkAction;
+export type FetchDashboardsAction = () => ThunkAction;
 
 export type WidgetItem = {
 	label: string,

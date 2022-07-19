@@ -1,12 +1,12 @@
 // @flow
-import type {AttributesMap, FetchAttributes} from 'store/sources/attributes/types';
+import type {AttributesMap, FetchAttributesAction} from 'store/sources/attributes/types';
 
 export type ConnectedProps = {
 	attributes: AttributesMap
 };
 
 export type ConnectedFunctions = {
-	fetchAttributes: FetchAttributes
+	fetchAttributes: FetchAttributesAction
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;

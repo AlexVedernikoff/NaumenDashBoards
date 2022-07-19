@@ -1,5 +1,5 @@
 // @flow
-import type {AddNewWidget, ValidateWidgetToCopyResult, WidgetMap} from 'store/widgets/data/types';
+import type {AddNewWidgetAction, ValidateWidgetToCopyResult, WidgetMap} from 'store/widgets/data/types';
 import type {DashboardsState} from 'store/dashboards/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {ThunkAction} from 'store/types';
@@ -15,7 +15,7 @@ export type ConnectedProps = {|
 |};
 
 export type ConnectedFunctions = {|
-	addNewWidget: AddNewWidget,
+	addNewWidget: AddNewWidgetAction,
 	copyWidget: (dashboardId: string, widgetId: string, ignoreCustomGroups?: boolean) => ThunkAction,
 	fetchDashboards: () => ThunkAction,
 	validateWidgetToCopy: (dashboardId: string, widgetId: string) => ThunkAction

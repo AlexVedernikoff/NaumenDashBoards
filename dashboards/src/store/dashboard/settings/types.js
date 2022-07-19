@@ -7,7 +7,7 @@ export type LayoutMode = $Keys<typeof LAYOUT_MODE>;
 export type LayoutBreakpoint = $Values<typeof LAYOUT_BREAKPOINTS>;
 export type LayoutBreakpointsData<T> = {[LayoutBreakpoint]: T};
 
-export type SendToEmails = (name: string, type: string, file: Blob, users: Array<User>) => ThunkAction;
+export type SendToEmailsAction = (name: string, type: string, file: Blob, users: Array<User>) => ThunkAction;
 
 export type AutoUpdateSettings = {
 	defaultInterval: number,

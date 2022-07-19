@@ -2,7 +2,7 @@
 import type {ThunkAction} from 'store/types';
 import {USERS_EVENTS} from './constants';
 
-export type FetchUsers = () => ThunkAction;
+export type FetchUsersAction = () => ThunkAction;
 
 export type User = {
 	email: string,

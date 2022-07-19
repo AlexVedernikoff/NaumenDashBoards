@@ -80,18 +80,18 @@ export type ResultWithMessage = {result: true} | {message: string, result: false
 
 export type UpdateSourcesFilterResult = {filterId: string, result: true} | {message: string, result: false};
 
-export type CheckApplyFilter = (source: string, sourceFilter: SourceFiltersItem) => ThunkAction;
+export type CheckApplyFilterAction = (source: string, sourceFilter: SourceFiltersItem) => ThunkAction;
 
 export type DispatchCheckApplyFilter = (source: string, sourceFilter: SourceFiltersItem) => Promise<ResultWithMessage>;
 
-export type FetchSourcesFilters = (metaClass: string) => ThunkAction;
+export type FetchSourcesFiltersAction = (metaClass: string) => ThunkAction;
 
 export type DispatchFetchSourcesFilters = (metaClass: string) => Promise<void>;
 
-export type UpdateSourcesFilter = (source: string, filter: SourceFiltersItem) => ThunkAction;
+export type UpdateSourcesFilterAction = (source: string, filter: SourceFiltersItem) => ThunkAction;
 
 export type DispatchUpdateSourcesFilter = (source: string, filter: SourceFiltersItem) => Promise<UpdateSourcesFilterResult>;
 
-export type DeleteSourcesFilter = (source: string, filterId: string) => ThunkAction;
+export type DeleteSourcesFilterAction = (source: string, filterId: string) => ThunkAction;
 
 export type DispatchDeleteSourcesFilter = (source: string, filterId: string) => Promise<ResultWithMessage>;

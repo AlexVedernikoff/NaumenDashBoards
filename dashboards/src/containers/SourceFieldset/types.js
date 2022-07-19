@@ -1,19 +1,19 @@
 // @flow
 import type {AttrSetConditions} from 'utils/descriptorUtils/types';
-import type {Attribute, FetchAttributeByCode, FetchAttributes} from 'store/sources/attributes/types';
+import type {Attribute, FetchAttributeByCodeAction, FetchAttributesAction} from 'store/sources/attributes/types';
 import type {Breakdown, Indicator, Parameter, SourceData} from 'store/widgetForms/types';
 import type {
-	CheckApplyFilter,
-	DeleteSourcesFilter,
+	CheckApplyFilterAction,
+	DeleteSourcesFilterAction,
 	DispatchCheckApplyFilter,
 	DispatchDeleteSourcesFilter,
 	DispatchFetchSourcesFilters,
 	DispatchUpdateSourcesFilter,
-	FetchSourcesFilters,
+	FetchSourcesFiltersAction,
 	SourceFiltersItem,
-	UpdateSourcesFilter
+	UpdateSourcesFilterAction
 } from 'store/sources/sourcesFilters/types';
-import type {ClearDynamicAttributeGroups} from 'store/sources/dynamicGroups/types';
+import type {ClearDynamicAttributeGroupsAction} from 'store/sources/dynamicGroups/types';
 import type {DataSourceMap} from 'store/sources/data/types';
 import type {InjectedProps as OpenFormProps} from 'containers/FilterForm/types';
 import type {OnLoadCallback} from 'store/sources/types';
@@ -45,16 +45,16 @@ export type DispatchFetchAttributes = (classFqn: string, parentClassFqn?: ?strin
 export type DispatchFetchAttributeByCode = (classFqn: string, attribute: Attribute) => Promise<Attribute>;
 
 export type ConnectedFunctions = {
-	fetchAttributeByCode: FetchAttributeByCode,
-	fetchSourcesFilters: FetchSourcesFilters,
-	onCheckApplyFilter: CheckApplyFilter,
-	onDeleteSourcesFilter: DeleteSourcesFilter,
-	onFetchAttributes: FetchAttributes,
-	onUpdateSourcesFilter: UpdateSourcesFilter
+	fetchAttributeByCode: FetchAttributeByCodeAction,
+	fetchSourcesFilters: FetchSourcesFiltersAction,
+	onCheckApplyFilter: CheckApplyFilterAction,
+	onDeleteSourcesFilter: DeleteSourcesFilterAction,
+	onFetchAttributes: FetchAttributesAction,
+	onUpdateSourcesFilter: UpdateSourcesFilterAction
 };
 
 export type DispatchConnectedFunctions = {
-	clearDynamicAttributeGroups: ClearDynamicAttributeGroups,
+	clearDynamicAttributeGroups: ClearDynamicAttributeGroupsAction,
 	fetchAttributeByCode: DispatchFetchSourcesFilters,
 	fetchSourcesFilters: DispatchFetchSourcesFilters,
 	onCheckApplyFilter: DispatchCheckApplyFilter,

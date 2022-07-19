@@ -36,4 +36,4 @@ export type RefAttributesAction =
 
 export type RefAttributesState = AttributesMap;
 
-export type FetchRefAttributes = (refAttr: Attribute, attrSetConditions: ?AttrSetConditions, onLoadCallback?: OnLoadCallback) => ThunkAction;
+export type FetchRefAttributesAction = (refAttr: Attribute, attrSetConditions: ?AttrSetConditions, onLoadCallback?: OnLoadCallback) => ThunkAction;

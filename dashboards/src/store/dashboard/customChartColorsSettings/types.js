@@ -79,6 +79,6 @@ export type Action =
 
 export type State = Map;
 
-export type SaveCustomChartColorsSettings = (settings: CustomChartColorsSettingsData) => ThunkAction;
+export type SaveCustomChartColorsSettingsAction = (settings: CustomChartColorsSettingsData) => ThunkAction;
 
-export type RemoveCustomChartColorsSetting = (key: Key) => ThunkAction;
+export type RemoveCustomChartColorsSettingAction = (key: Key) => ThunkAction;

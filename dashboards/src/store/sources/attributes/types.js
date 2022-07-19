@@ -70,11 +70,11 @@ export type AttributesAction =
 
 export type AttributesState = AttributesMap;
 
-export type FetchAttributes = (
+export type FetchAttributesAction = (
 	classFqn: string,
 	parentClassFqn?: ?string,
 	attrSetConditions: ?AttrSetConditions,
 	onLoadCallback?: OnLoadCallback
 ) => ThunkAction;
 
-export type FetchAttributeByCode = (classFqn: string, attribute: Attribute) => ThunkAction;
+export type FetchAttributeByCodeAction = (classFqn: string, attribute: Attribute) => ThunkAction;

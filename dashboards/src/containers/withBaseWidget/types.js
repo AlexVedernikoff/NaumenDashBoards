@@ -1,15 +1,15 @@
 // @flow
 import type {Chart, SetWidgetWarning} from 'store/widgets/data/types';
-import type {DiagramBuildData, DiagramData, FetchBuildData} from 'store/widgets/buildData/types';
+import type {DiagramBuildData, DiagramData, FetchBuildDataAction} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';
-import type {DrillDown} from 'store/widgets/links/types';
+import type {DrillDownAction} from 'store/widgets/links/types';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 
 type CommonOptions = Object;
 
 export type ConnectedFunctions = {
-	drillDown: DrillDown,
-	fetchBuildData: FetchBuildData,
+	drillDown: DrillDownAction,
+	fetchBuildData: FetchBuildDataAction,
 	setWidgetWarning: (info: SetWidgetWarning) => void,
 };
 
@@ -32,7 +32,7 @@ export type InjectLoadingProps = {
 
 export type InjectOptionsProps = {
 	data: DiagramBuildData,
-	drillDown: DrillDown,
+	drillDown: DrillDownAction,
 	hiddenSeries: Array<string>,
 	options: CommonOptions,
 	setWidgetWarning: (info: SetWidgetWarning) => void,
