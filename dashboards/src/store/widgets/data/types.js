@@ -566,16 +566,18 @@ export type AnyWidget =
 	| TextWidget
 ;
 
-export type EditWidgetChunkData = (widget: Widget, chunkData: Object) => ThunkAction;
+export type EditWidgetChunkDataAction = (widget: Widget, chunkData: Object, refreshData?: boolean) => ThunkAction;
+
+export type UpdateWidgetAction = (widget: Widget, chunkData: Object, refreshData?: boolean) => ThunkAction;
 
 export type SetWidgetWarning = {
 	id: string,
 	message: string,
 };
 
-export type ClearWidgetFilters = (widget: Widget) => ThunkAction;
+export type ClearWidgetFiltersAction = (widget: Widget) => ThunkAction;
 
-export type CallWidgetFilters = (widget: Widget, dataSetIndex: number, filterIndex: number) => ThunkAction;
+export type CallWidgetFiltersAction = (widget: Widget, dataSetIndex: number, filterIndex: number) => ThunkAction;
 
 export type AddWidget = {
 	payload: NewWidget,
@@ -714,11 +716,11 @@ export type WidgetsDataState = {
 	validatingToCopy: ChangingState
 };
 
-export type SetUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
+export type SetUseGlobalChartSettingsAction = (key: string, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
 
-export type SaveWidgetWithNewFilters = (widget: $Shape<Widget>) => ThunkAction;
+export type SaveWidgetWithNewFiltersAction = (widget: $Shape<Widget>) => ThunkAction;
 
-export type AddNewWidget = (widget: NewWidget) => ThunkAction;
+export type AddNewWidgetAction = (widget: NewWidget) => ThunkAction;
 
 export type DispatchAddNewWidget = (widget: NewWidget) => Promise<void>;
 

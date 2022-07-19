@@ -1,7 +1,8 @@
 // @flow
-import {addNewWidget, copyWidget, validateWidgetToCopy} from 'store/widgets/data/actions';
+import {addNewWidget, validateWidgetToCopy} from 'store/widgets/data/actions';
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
+import {copyWidget} from 'store/widgets/actions';
 import {fetchDashboards} from 'store/dashboards/actions';
 import {isEditableDashboardContext, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 

@@ -92,9 +92,9 @@ export type TableBuildData = {
 	total: number
 };
 
-export type FetchBuildData = Widget => ThunkAction;
+export type FetchBuildDataAction = Widget => ThunkAction;
 
-export type FetchTableBuildData = (widget: TableWidget, page?: number, update?: boolean) => ThunkAction;
+export type FetchTableBuildDataAction = (widget: TableWidget, page?: number, update?: boolean) => ThunkAction;
 
 export type BuildData<Data> = {
 	data: Data | null,

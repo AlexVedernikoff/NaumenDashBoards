@@ -1,5 +1,5 @@
 // @flow
-import type {AttributesMap, FetchAttributes} from 'store/sources/attributes/types';
+import type {AttributesMap, FetchAttributesAction} from 'store/sources/attributes/types';
 import {REGULAR_TABS, TABS} from 'src/containers/DiagramWidgetForm/constants';
 import type {Schema} from 'components/types';
 import type {SetFieldValue, Values} from 'components/organisms/WidgetForm/types';
@@ -18,7 +18,7 @@ export type ConnectedProps = {
 
 export type ConnectedFunctions = {
 	cancelForm: () => void,
-	fetchAttributes: FetchAttributes,
+	fetchAttributes: FetchAttributesAction,
 	setLoadingStateAttributes: (classFqn: string, state: boolean) => void
 };
 

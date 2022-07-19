@@ -4,7 +4,7 @@ import type {ConnectedFunctions, ConnectedProps, OwnerProps} from './types';
 import {getCustomColorsSettingsKeyByData} from 'store/widgets/data/helpers';
 import {getWidgetsBuildData} from 'store/widgets/data/selectors';
 import {removeCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
-import {setUseGlobalChartSettings} from 'store/widgets/data/actions';
+import {setUseGlobalChartSettings} from 'store/widgets/actions';
 
 export const props = (state: AppState, props: OwnerProps): ConnectedProps => {
 	const {type, values, widget} = props;

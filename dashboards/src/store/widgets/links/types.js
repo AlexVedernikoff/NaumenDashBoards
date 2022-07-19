@@ -34,11 +34,11 @@ export type LinkMap = {
 	[key: string]: Link
 };
 
-export type DrillDown = (widget: Widget, index: number, mixin?: DrillDownMixin) => ThunkAction;
+export type DrillDownAction = (widget: Widget, index: number, mixin?: DrillDownMixin) => ThunkAction;
 
-export type OpenCardObject = (value: string) => ThunkAction;
+export type OpenCardObjectAction = (value: string) => ThunkAction;
 
-export type OpenNavigationLink = (dashboardCode: string, widgetId: string) => ThunkAction;
+export type OpenNavigationLinkAction = (dashboardCode: string, widgetId: string) => ThunkAction;
 
 export type RequestLink = {
 	payload: string,

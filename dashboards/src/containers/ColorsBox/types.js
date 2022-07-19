@@ -2,12 +2,12 @@
 import type {DiagramData} from 'store/widgets/buildData/types';
 import type {
 	GlobalCustomChartColorsSettings,
-	RemoveCustomChartColorsSetting
+	RemoveCustomChartColorsSettingAction
 } from 'store/dashboard/customChartColorsSettings/types';
 import type {InjectedProps} from 'WidgetFormPanel/HOCs/withType/types';
 import type {InjectedProps as TypeInjectedProps} from 'components/organisms/WidgetFormPanel/HOCs/withType/types';
 import type {Props as ComponentProps} from 'WidgetFormPanel/components/ColorsBox/types';
-import type {SetUseGlobalChartSettings, Widget} from 'store/widgets/data/types';
+import type {SetUseGlobalChartSettingsAction, Widget} from 'store/widgets/data/types';
 import type {Values} from 'components/organisms/WidgetForm/types';
 
 export type ConnectedProps = {|
@@ -16,8 +16,8 @@ export type ConnectedProps = {|
 |};
 
 export type ConnectedFunctions = {|
-	removeCustomChartColorsSettings: RemoveCustomChartColorsSetting,
-	setUseGlobalChartSettings: SetUseGlobalChartSettings
+	removeCustomChartColorsSettings: RemoveCustomChartColorsSettingAction,
+	setUseGlobalChartSettings: SetUseGlobalChartSettingsAction
 |};
 
 export type ContainerProps = InjectedProps & {|

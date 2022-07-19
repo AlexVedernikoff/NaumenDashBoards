@@ -1,8 +1,8 @@
 // @flow
 import {DASHBOARD_EVENTS} from './constants';
+import dashboardResizer from 'utils/dashboardResizer';
 import {defaultDashboardAction, initialDashboardState} from './init';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
-import {resizer as dashboardResizer} from 'app.constants';
 import type {SettingsAction, SettingsState} from './types';
 
 const reducer = (state: SettingsState = initialDashboardState, action: SettingsAction = defaultDashboardAction): SettingsState => {

@@ -1,12 +1,12 @@
 // @flow
-import type {AddNewWidget, DispatchAddNewWidget, FocusWidget, ResetFocusedWidget, Widget} from 'store/widgets/data/types';
+import type {AddNewWidgetAction, DispatchAddNewWidget, FocusWidget, ResetFocusedWidget, Widget} from 'store/widgets/data/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {Layouts, LayoutsPayloadForChange} from 'store/dashboard/layouts/types';
 import type {ThunkAction} from 'store/types';
 import type {UserData} from 'store/context/types';
 
 export type ConnectedFunctions = {
-	addNewWidget: AddNewWidget,
+	addNewWidget: AddNewWidgetAction,
 	changeLayouts: (payload: LayoutsPayloadForChange) => ThunkAction,
 	focusWidget: FocusWidget,
 	resetFocusedWidget: ResetFocusedWidget,

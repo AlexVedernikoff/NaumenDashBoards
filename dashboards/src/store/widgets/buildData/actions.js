@@ -1,12 +1,21 @@
 // @flow
-import type {AnyWidget, AxisWidget, Chart, ComboWidget, SummaryWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import type {
+	AnyWidget,
+	AxisWidget,
+	Chart,
+	ComboWidget,
+	EditWidgetChunkDataAction,
+	SummaryWidget,
+	TableWidget,
+	UpdateWidgetAction,
+	Widget
+} from 'store/widgets/data/types';
 import api from 'api';
 import {ApiError} from 'api/errors';
 import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
 import {BUILD_DATA_EVENTS} from './constants';
 import {DEFAULT_NUMBER_AXIS_FORMAT, LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
-import {editWidgetChunkData, updateWidget} from 'store/widgets/data/actions';
 import exporter from 'utils/export';
 import {getAllWidgets} from 'store/widgets/data/selectors';
 import {getWidgetFilterOptionsDescriptors, removeCodesFromTableData} from './helpers';
@@ -21,7 +30,12 @@ import t from 'localization';
  * @param {number} pageSize - размер страницы
  * @returns {Promise<TableBuildData>}
  */
-const getDataForTableDiagram = async (state: AppState, widget: TableWidget, pageNumber: number, pageSize: number): Promise<TableBuildData> => {
+const getDataForTableDiagram = async (
+	state: AppState,
+	widget: TableWidget,
+	pageNumber: number,
+	pageSize: number
+): Promise<TableBuildData> => {
 	const {context, dashboard} = state;
 	const {
 		ignoreDataLimits: ignoreLimits = {
@@ -85,23 +99,30 @@ const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update
  * @param {TableWidget} widget - данные виджета
  * @returns {ThunkAction}
  */
-const exportTableToXLSX = (widget: TableWidget): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const state = getState();
-	const {total} = state.widgets.buildData[widget.id]?.data ?? {};
+const exportTableToXLSX = (widget: TableWidget): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		const state = getState();
+		const {total} = state.widgets.buildData[widget.id]?.data ?? {};
 
-	if (total) {
-		const data = await getDataForTableDiagram(state, widget, 1, total);
+		if (total) {
+			const data = await getDataForTableDiagram(state, widget, 1, total);
 
-		exporter.exportWidgetAsSheet(widget, removeCodesFromTableData(data));
-	}
-};
+			exporter.exportWidgetAsSheet(widget, removeCodesFromTableData(data));
+		}
+	};
 
 /**
  * Получаем данные построения для диаграмм
  * @param {Widget} widget - данные виджета
+ * @param {EditWidgetChunkDataAction} editWidgetChunkData - thunk частичного изменения виджета
+ * @param {UpdateWidgetAction} updateWidget - thunk обновления виджета
  * @returns {ThunkAction}
  */
-const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
+const fetchDiagramBuildData = (
+	widget: Widget,
+	editWidgetChunkData: EditWidgetChunkDataAction,
+	updateWidget: UpdateWidgetAction
+): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 		dispatch(requestBuildData(widget));
 
@@ -116,8 +137,8 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 				widgetFilters
 			);
 
-			await dispatch(checkDiagramsDataLimits(widget.id, data));
-			await dispatch(checkComputedFormat(widget.id, data));
+			await dispatch(checkDiagramsDataLimits(widget.id, data, editWidgetChunkData));
+			await dispatch(checkComputedFormat(widget.id, data, updateWidget));
 			dispatch(receiveBuildData({data, id: widget.id}));
 		} catch (e) {
 			let error = t('store::buildData::DefaultRecordBuildDiagramError');
@@ -131,13 +152,19 @@ const fetchDiagramBuildData = (widget: Widget): ThunkAction =>
 	};
 
 /**
- * Проверяет и согласовывает ограничения и вид отображения виджета
+ * Проверяет и согласует ограничения и вид отображения виджета
  *
  * @param {string} widgetId - id виджет для проверки
  * @param {DiagramBuildData} data - данные для проверки отображения
- * @returns {ThunkAction<Promise>} - обещание, которое будет разрешено после всех проверок и согласований с пользователем.
+ * @param {EditWidgetChunkDataAction} editWidgetChunkData - thunk частичного изменения виджета
+ * @returns {ThunkAction<Promise>} - обещание, которое будет разрешено после всех проверок и согласований
+ * с пользователем.
  */
-const checkDiagramsDataLimits = (widgetId: string, data: DiagramBuildData): ThunkAction =>
+const checkDiagramsDataLimits = (
+	widgetId: string,
+	data: DiagramBuildData,
+	editWidgetChunkData: EditWidgetChunkDataAction
+): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 		const widgets = getAllWidgets(getState());
 		const widget = widgets.find(item => item.id === widgetId);
@@ -163,13 +190,14 @@ const checkDiagramsDataLimits = (widgetId: string, data: DiagramBuildData): Thun
 	};
 
 /**
- * Проверяет и согласовывает вид меток по умолчанию. Для данных с целочисленным форматом - формат по умолчанию с 0 значений, для нецелочисленных с 2
- *
+ * Проверяет и согласует вид меток по умолчанию. Для данных с целочисленным форматом - формат по умолчанию с 0
+ * значений, для нецелочисленных с 2
  * @param {string} widgetId - id виджет для проверки
  * @param {DiagramBuildData} data - данные для проверки отображения
+ * @param {UpdateWidgetAction} updateWidget - thunk обновления виджета
  * @returns {ThunkAction<Promise>} - обещание, которое будет разрешено после всех проверок
  */
-const checkComputedFormat = (widgetId: string, data: DiagramBuildData): ThunkAction =>
+const checkComputedFormat = (widgetId: string, data: DiagramBuildData, updateWidget: UpdateWidgetAction): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 		const widgets = getAllWidgets(getState());
 		const widget = widgets.find(item => item.id === widgetId);
@@ -216,6 +244,7 @@ const checkComputedFormat = (widgetId: string, data: DiagramBuildData): ThunkAct
 					let {indicator} = summary;
 
 					indicator = {...indicator, computedFormat: {...DEFAULT_NUMBER_AXIS_FORMAT, symbolCount: 2}};
+
 					const updatedWidgetData = {...summary, indicator};
 
 					await dispatch(updateWidget(updatedWidgetData));
@@ -227,18 +256,25 @@ const checkComputedFormat = (widgetId: string, data: DiagramBuildData): ThunkAct
 /**
  * Получаем данные построения для конкретного виджета
  * @param {Widget} widget - данные виджета
+ * @param {EditWidgetChunkDataAction} editWidgetChunkData - thunk частичного изменения виджета
+ * @param {UpdateWidgetAction} updateWidget - thunk обновления виджета
  * @returns {ThunkAction}
  */
-const fetchBuildData = (widget: Widget): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const {TABLE} = WIDGET_TYPES;
+const fetchBuildData = (
+	widget: Widget,
+	editWidgetChunkData: EditWidgetChunkDataAction,
+	updateWidget: UpdateWidgetAction
+): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
+		const {TABLE} = WIDGET_TYPES;
 
-	switch (widget.type) {
-		case TABLE:
-			return dispatch(fetchTableBuildData(widget));
-		default:
-			return dispatch(fetchDiagramBuildData(widget));
-	}
-};
+		switch (widget.type) {
+			case TABLE:
+				return dispatch(fetchTableBuildData(widget));
+			default:
+				return dispatch(fetchDiagramBuildData(widget, editWidgetChunkData, updateWidget));
+		}
+	};
 
 const receiveBuildData = (payload: ReceiveBuildDataPayload) => ({
 	payload,
