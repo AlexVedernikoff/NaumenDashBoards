@@ -27,17 +27,12 @@ export class Select extends Component<Props, State> {
 		showMenu: false
 	};
 
-	components = {
-		Caret: IconButton,
-		IndicatorsContainer: Container,
-		List: List,
-		MenuContainer: Container,
-		MenuHeader: Container,
-		Message: Container,
-		SearchInput: SearchInput,
-		Value,
-		ValueContainer: Container,
-		...this.props.components
+	fetchOptions = () => {
+		const {fetchOptions, loading, options} = this.props;
+
+		if (!loading && options.length === 0 && typeof fetchOptions === 'function') {
+			fetchOptions();
+		}
 	};
 
 	searchInputRef: Ref<'input'> = createRef();
@@ -54,13 +49,18 @@ export class Select extends Component<Props, State> {
 		}
 	}
 
-	fetchOptions = () => {
-		const {fetchOptions, loading, options} = this.props;
-
-		if (!loading && options.length === 0 && typeof fetchOptions === 'function') {
-			fetchOptions();
-		}
-	};
+	getComponents = () => ({
+		Caret: IconButton,
+		IndicatorsContainer: Container,
+		List: List,
+		MenuContainer: Container,
+		MenuHeader: Container,
+		Message: Container,
+		SearchInput: SearchInput,
+		Value,
+		ValueContainer: Container,
+		...this.props.components
+	});
 
 	getFoundOptions = (searchValue: string): Array<Option> => {
 		const {getOptionLabel, options} = this.props;
@@ -76,7 +76,7 @@ export class Select extends Component<Props, State> {
 	};
 
 	getListComponents = () => {
-		const {ListOption} = this.components;
+		const {ListOption} = this.getComponents();
 		return {
 			ListOption: ListOption ?? ListOptionDefault
 		};
@@ -108,7 +108,7 @@ export class Select extends Component<Props, State> {
 	hideMenu = () => this.setState({showMenu: false});
 
 	renderIndicators = () => {
-		const {Caret, IndicatorsContainer} = this.components;
+		const {Caret, IndicatorsContainer} = this.getComponents();
 
 		return (
 			<IndicatorsContainer className={styles.indicatorsContainer}>
@@ -120,7 +120,7 @@ export class Select extends Component<Props, State> {
 
 	renderLabel = (): React$Node => {
 		const {editable, forwardedLabelInputRef, getOptionLabel, disabled, multiple, placeholder, value, values = []} = this.props;
-		const {Value} = this.components;
+		const {Value} = this.getComponents();
 		let label = placeholder;
 		let usePlaceholder = true;
 
@@ -160,7 +160,7 @@ export class Select extends Component<Props, State> {
 	renderList = (): React$Node => {
 		const {getOptionLabel, getOptionValue, getOptions, loading, multiple, options: allOptions, value, values} = this.props;
 		const {foundOptions, searchValue} = this.state;
-		const {List} = this.components;
+		const {List} = this.getComponents();
 		const options = searchValue ? foundOptions : allOptions;
 
 		if (!loading) {
@@ -185,20 +185,22 @@ export class Select extends Component<Props, State> {
 	renderLoader = () => this.props.loading ? <Loader className={styles.loader} size={15} /> : null;
 
 	renderLoadingMessage = () => {
-		const {Message} = this.components;
+		const {Message} = this.getComponents();
 		const {loading, loadingMessage} = this.props;
 
 		return loading && <Message className={styles.message}><T text={loadingMessage} /></Message>;
 	};
 
 	renderMenu = (): React$Node => {
-		const {showMenu} = this.state;
-		const {MenuContainer} = this.components;
+		const {options: allOptions} = this.props;
+		const {foundOptions, searchValue, showMenu} = this.state;
+		const {MenuContainer} = this.getComponents();
+		const options = searchValue ? foundOptions : allOptions;
 
 		if (showMenu) {
 			return (
 				<OutsideClickDetector onClickOutside={this.hideMenu}>
-					<MenuContainer className={styles.menu}>
+					<MenuContainer className={styles.menu} options={options}>
 						{this.renderMenuHeader()}
 						{this.renderSearchInput()}
 						{this.renderNoOptionsMessage()}
@@ -215,7 +217,7 @@ export class Select extends Component<Props, State> {
 
 	renderMenuHeader = (): React$Node => {
 		const {loading, menuHeaderMessage} = this.props;
-		const {MenuHeader} = this.components;
+		const {MenuHeader} = this.getComponents();
 
 		if (!loading && menuHeaderMessage) {
 			return (
@@ -228,7 +230,7 @@ export class Select extends Component<Props, State> {
 
 	renderNoOptionsMessage = (): React$Node => {
 		const {loading, noOptionsMessage, options} = this.props;
-		const {Message} = this.components;
+		const {Message} = this.getComponents();
 
 		return !loading && options.length === 0 ? <Message className={styles.message}><T text={noOptionsMessage} /></Message> : null;
 	};
@@ -236,7 +238,7 @@ export class Select extends Component<Props, State> {
 	renderNotFoundMessage = (): React$Node => {
 		const {loading, notFoundMessage} = this.props;
 		const {foundOptions, searchValue} = this.state;
-		const {Message} = this.components;
+		const {Message} = this.getComponents();
 
 		return !loading && searchValue && foundOptions.length === 0
 			? <Message className={styles.message}><T text={notFoundMessage} /></Message>
@@ -245,7 +247,7 @@ export class Select extends Component<Props, State> {
 
 	renderSearchInput = (): React$Node => {
 		const {isSearching} = this.props;
-		const {SearchInput} = this.components;
+		const {SearchInput} = this.getComponents();
 		const {searchValue} = this.state;
 
 		if (isSearching) {
@@ -264,7 +266,7 @@ export class Select extends Component<Props, State> {
 	};
 
 	renderValueContainer = () => {
-		const {ValueContainer} = this.components;
+		const {ValueContainer} = this.getComponents();
 
 		return (
 			<ValueContainer className={styles.valueContainer} onClick={this.handleClick}>

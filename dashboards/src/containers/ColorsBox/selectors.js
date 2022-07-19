@@ -12,7 +12,8 @@ export const props = (state: AppState, props: OwnerProps): ConnectedProps => {
 
 	return {
 		buildData: getWidgetsBuildData(state)[widget.id],
-		globalColorsSettings: state.dashboard.customChartColorsSettings[key]?.data
+		globalColorsSettings: state.dashboard.customChartColorsSettings[key]?.data,
+		position: state.dashboard.settings.editPanelPosition
 	};
 };
 

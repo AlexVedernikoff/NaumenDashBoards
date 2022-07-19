@@ -1,5 +1,6 @@
 // @flow
 import type {DiagramData} from 'store/widgets/buildData/types';
+import type {EditPanelPosition} from 'store/dashboard/settings/types';
 import type {
 	GlobalCustomChartColorsSettings,
 	RemoveCustomChartColorsSettingAction
@@ -12,7 +13,8 @@ import type {Values} from 'components/organisms/WidgetForm/types';
 
 export type ConnectedProps = {|
 	buildData?: DiagramData,
-	globalColorsSettings: GlobalCustomChartColorsSettings
+	globalColorsSettings: GlobalCustomChartColorsSettings,
+	position: EditPanelPosition
 |};
 
 export type ConnectedFunctions = {|

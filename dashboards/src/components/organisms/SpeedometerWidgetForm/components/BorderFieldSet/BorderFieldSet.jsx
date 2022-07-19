@@ -85,10 +85,17 @@ export class BorderFieldSet extends PureComponent<Props> {
 			getErrorPath(DIAGRAM_FIELDS.borders, name, DIAGRAM_FIELDS.value),
 			getErrorPath(DIAGRAM_FIELDS.borders, name, DIAGRAM_FIELDS.indicator)
 		];
+		let absoluteIndicator = null;
+
+		if (indicator) {
+			const {aggregation, attribute, tooltip} = indicator;
+
+			absoluteIndicator = {aggregation, attribute, tooltip};
+		}
 
 		return (
 			<FormField label={label} paths={paths} small>
-				{this.renderAbsoluteEdit(name, isNumber, value, indicator)}
+				{this.renderAbsoluteEdit(name, isNumber, value, absoluteIndicator)}
 			</FormField>
 		);
 	};

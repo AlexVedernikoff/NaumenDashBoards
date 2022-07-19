@@ -1,7 +1,9 @@
 // @flow
 import AbsolutePortal from 'components/molecules/AbsolutePortal';
+import cn from 'classnames';
 import ColorPicker from 'components/molecules/ColorPicker';
 import type {DivRef} from 'components/types';
+import {EDIT_PANEL_POSITION} from 'store/dashboard/settings/constants';
 import FormField from 'components/molecules/FormField';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
@@ -51,14 +53,20 @@ export class AutoColorsSettings extends PureComponent<Props, State> {
 	);
 
 	renderColorPicker = () => {
-		const {colors} = this.props.value;
+		const {position, value} = this.props;
 		const {colorIndex, showPicker} = this.state;
+		const {colors} = value;
+		const className = cn({
+			[styles.picker]: true,
+			[styles.right]: position === EDIT_PANEL_POSITION.RIGHT,
+			[styles.left]: position === EDIT_PANEL_POSITION.LEFT
+		});
 
 		if (showPicker) {
 			return (
 				<AbsolutePortal elementRef={this.ref} onClickOutside={this.hidePicker}>
 					<ColorPicker
-						className={styles.picker}
+						className={className}
 						onChange={this.changeColor}
 						onClose={this.hidePicker}
 						value={colors[colorIndex]}

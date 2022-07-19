@@ -5,7 +5,7 @@ import cn from 'classnames';
 import type {Column, ColumnsWidth, Components, FixedPositions, Props, State, ValueProps} from './types';
 import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
-import {DEFAULT_TABLE_SETTINGS} from './constants';
+import {DEFAULT_TABLE_SETTINGS} from 'store/widgetForms/tableForm/constants';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import HeaderCell from './components/HeaderCell';

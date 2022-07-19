@@ -1,7 +1,8 @@
 // @flow
 import CheckIconButtonGroup from 'components/molecules/CheckIconButtonGroup';
 import {CHOOSE_OPTIONS} from './constants';
-import type {DataSet} from 'store/widgetForms/axisChartForm/types';
+import type {DataSet as SummaryDataSet, Values as SummaryValues} from 'store/widgetForms/summaryForm/types';
+import type {DataSet as SpeedometerDataSet, Values as SpeedometerValues} from 'store/widgetForms/speedometerForm/types';
 import {deepClone} from 'helpers';
 import {DEFAULT_TOOLTIP_SETTINGS} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
@@ -14,7 +15,6 @@ import React, {PureComponent} from 'react';
 import t, {translateObjectsArray} from 'localization';
 import TextArea from 'components/atoms/TextArea';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
-import type {Values} from 'components/organisms/AxisChartWidgetForm/types';
 import type {WidgetTooltip} from 'store/widgets/data/types';
 
 class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
@@ -46,7 +46,7 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 
 	changeShow = (showTooltip: boolean, showIndicator: boolean) => {
 		const {onChange, value} = this.props;
-		const newValue: Values = deepClone(value);
+		const newValue: SummaryValues | SpeedometerValues = deepClone(value);
 		const indicator = this.getIndicator(newValue.data);
 		const tooltip = {...value.tooltip, show: showTooltip, title: newValue.tooltip?.title ?? ''};
 
@@ -58,7 +58,7 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 		onChange(DIAGRAM_FIELDS.data, newValue.data);
 	};
 
-	getIndicator = (data: ?Array<DataSet>) => data?.find(data => !data.sourceForCompute)?.indicators?.[0];
+	getIndicator = (data: ?Array<SummaryDataSet | SpeedometerDataSet>) => data?.find(data => !data.sourceForCompute)?.indicators?.[0];
 
 	getSelectedTooltip = () => {
 		const {indicator, selected, tooltip} = this.state;
@@ -100,7 +100,7 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 			onChange(DIAGRAM_FIELDS.tooltip, newTooltip);
 		} else {
 			const {data} = value;
-			const newDataValue: Array<DataSet> = deepClone(data);
+			const newDataValue: Array<SummaryDataSet | SpeedometerDataSet> = deepClone(data);
 			const indicator = this.getIndicator(newDataValue);
 
 			if (indicator) {

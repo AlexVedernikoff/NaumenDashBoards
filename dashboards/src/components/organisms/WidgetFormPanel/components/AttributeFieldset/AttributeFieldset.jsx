@@ -109,13 +109,13 @@ export class AttributeFieldset extends PureComponent<Props> {
 	};
 
 	renderRefSelect = () => {
-		const {components, disabled, removable, value} = this.props;
+		const {components, disabled, refComponents, removable, value} = this.props;
 
 		if (value && value.type in ATTRIBUTE_SETS.REFERENCE) {
 			return (
 				<RefSelect
 					attrSetConditions={this.getAttrSetConditions()}
-					components={components}
+					components={refComponents ?? components}
 					disabled={disabled}
 					droppable={true}
 					getOptions={this.getRefOptions}

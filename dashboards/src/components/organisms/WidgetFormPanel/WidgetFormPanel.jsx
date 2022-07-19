@@ -4,6 +4,7 @@ import CircleChartWidgetForm from 'containers/CircleChartWidgetForm';
 import ComboChartWidgetForm from 'containers/ComboChartWidgetForm';
 import memoize from 'memoize-one';
 import NewWidget from 'store/widgets/data/NewWidget';
+import PivotWidgetForm from 'containers/PivotWidgetForm';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import SpeedometerWidgetForm from 'containers/SpeedometerWidgetForm';
@@ -61,7 +62,7 @@ export class WidgetFormPanel extends PureComponent<Props, State> {
 	renderForm = () => {
 		const {widget} = this.props;
 		const {initialized, type} = this.state;
-		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE, TEXT} = WIDGET_TYPES;
+		const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, PIVOT_TABLE, SPEEDOMETER, SUMMARY, TABLE, TEXT} = WIDGET_TYPES;
 
 		if (!initialized) {
 			return null;
@@ -85,6 +86,8 @@ export class WidgetFormPanel extends PureComponent<Props, State> {
 				return <SummaryWidgetForm widget={widget} />;
 			case TABLE:
 				return <TableWidgetForm widget={widget} />;
+			case PIVOT_TABLE:
+				return <PivotWidgetForm widget={widget} />;
 			case TEXT:
 				return <TextWidgetForm widget={widget} />;
 			default:

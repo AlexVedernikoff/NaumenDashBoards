@@ -19,6 +19,7 @@ export type Props = {
 	onChangeLabel: (event: OnSelectEvent, index: number, callback?: Function) => void,
 	onRemove?: (index: number) => void,
 	onSelect: (event: OnSelectEvent, index: number) => void,
+	refComponents: ?Components,
 	removable: boolean,
 	source: SourceData,
 	value: Attribute | null
