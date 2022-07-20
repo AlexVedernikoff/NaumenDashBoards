@@ -3,7 +3,10 @@ import type {AttrSetConditions} from 'utils/descriptorUtils/types';
 import type {Breakdown, Indicator, SourceData} from './types';
 import type {DataSet as TableDataSet} from 'store/widgetForms/tableForm/types';
 import {DEFAULT_AGGREGATION, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import {DEFAULT_PARAMETER} from 'store/widgetForms/constants';
+import {omit} from 'helpers';
 import {parseCasesAndGroupCode} from 'utils/descriptorUtils';
+import type {PivotIndicator} from 'store/widgetForms/pivotForm/types';
 
 /**
  * Возвращает разбивку по умолчанию
@@ -45,6 +48,9 @@ const fixIndicatorsAggregation = (indicators: ?Array<Indicator>): Array<Indicato
 		? {...indicator, aggregation: DEFAULT_AGGREGATION.COUNT}
 		: indicator) ?? [];
 
+const fixPivotIndicators = (indicators: null | Array<Indicator> | Array<PivotIndicator>): Array<Indicator> =>
+	indicators?.map(indicator => indicator) ?? [];
+
 /**
  * Заменяет агрегацию N/A на агрегацию CNT в индикаторах источника данных
  * @param {TableDataSet} dataSet - изначальный источник данных
@@ -69,10 +75,22 @@ const fixLeaveOneParameters = (dataSet: TableDataSet): TableDataSet => {
 			...dataSet,
 			parameters: dataSet.parameters.slice(0, 1)
 		};
+	} else if (!dataSet.parameters || dataSet.parameters.length === 0) {
+		result = {
+			...dataSet,
+			parameters: [DEFAULT_PARAMETER]
+		};
 	}
 
 	return result;
 };
+
+/**
+ * Очищает параметры из таблицы для круговой диаграммы
+ * @param {TableDataSet} dataSet - изначальный источник данных
+ * @returns {TableDataSet}
+ */
+const fixRemoveParameters = (dataSet: TableDataSet): TableDataSet => omit(dataSet, 'parameters');
 
 /**
  * Оставляет только один индикатор в источнике
@@ -93,10 +111,12 @@ const fixLeaveOneIndicator = (dataSet: TableDataSet): TableDataSet => {
 };
 
 export {
-	getDefaultBreakdown,
-	fixLeaveOneParameters,
 	fixIndicatorsAggregation,
 	fixIndicatorsAggregationDataSet,
 	fixLeaveOneIndicator,
+	fixLeaveOneParameters,
+	fixPivotIndicators,
+	fixRemoveParameters,
+	getDefaultBreakdown,
 	parseAttrSetConditions
 };

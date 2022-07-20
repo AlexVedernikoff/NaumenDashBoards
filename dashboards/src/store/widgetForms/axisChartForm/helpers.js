@@ -9,6 +9,7 @@ import type {Values as CircleValues} from 'store/widgetForms/circleChartForm/typ
 import type {Values as ComboValues} from 'store/widgetForms/comboChartForm/types';
 import type {Values as SpeedometerValues} from 'store/widgetForms/speedometerForm/types';
 import type {Values as SummaryValues} from 'store/widgetForms/summaryForm/types';
+import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
 
 /**
  * Создает базовый объект данных осевого графика
@@ -201,10 +202,49 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 	};
 };
 
+/**
+ * Изменяет значения формы осевых графиков относительно изменений в форме сводке
+ * @param {State} state - состояние формы осевых графиков
+ * @param {PivotValues} values - значения формы сводки
+ * @returns {State}
+ */
+const changeValuesByPivot = (state: State, values: PivotValues): State => {
+	const {
+		data,
+		displayMode,
+		header,
+		name,
+		navigation,
+		templateName,
+		tooltip
+	} = values;
+	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAggregationDataSet);
+
+	return {
+		...state,
+		data: data.map((dataSet, index) => {
+			const prevDataSet = state.data[index] ?? createAxisDataSet(dataSet.dataKey);
+			const transDataSet = transformDataSet(dataSet);
+
+			return {
+				...prevDataSet,
+				...transDataSet
+			};
+		}),
+		displayMode,
+		header,
+		name,
+		navigation,
+		templateName,
+		tooltip
+	};
+};
+
 export {
 	changeValuesByCircleChart,
 	changeValuesByComboChart,
-	changeValuesByTable,
+	changeValuesByPivot,
 	changeValuesBySpeedometerOrSummary,
+	changeValuesByTable,
 	createAxisDataSet
 };

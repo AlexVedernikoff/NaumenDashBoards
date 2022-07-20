@@ -10,6 +10,7 @@ import type {Values as CircleChartValues} from 'store/widgetForms/circleChartFor
 import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
 import type {Values as SpeedometerValues} from 'store/widgetForms/speedometerForm/types';
 import type {Values as SummaryValues} from 'store/widgetForms/summaryForm/types';
+import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
 
 /**
  * Создает базовый объект данных комбо-графика
@@ -20,6 +21,12 @@ const createComboDataSet = (dataKey: string): DataSet => ({
 	...createAxisDataSet(dataKey),
 	type: COMBO_TYPES.COLUMN
 });
+
+const mapComboDataSet = (state: State, transform: Function = item => item) =>
+	(dataSet, index: number) => {
+		const prevDataSet = state.data[index] ?? createComboDataSet(dataSet.dataKey);
+		return {...prevDataSet, ...transform(dataSet)};
+	};
 
 /**
  * Изменяет значения формы комба-графика относительно изменений в форме осевых графиков
@@ -49,11 +56,7 @@ const changeValuesByAxisChart = (state: State, values: AxisChartValues): State =
 	return {
 		colorsSettings,
 		computedAttrs,
-		data: data.map((dataSet, index) => {
-			const prevDataSet = state.data[index] ?? createComboDataSet(dataSet.dataKey);
-
-			return {...prevDataSet, ...dataSet};
-		}),
+		data: data.map(mapComboDataSet(state)),
 		dataLabels: omit(dataLabels, 'format'),
 		displayMode,
 		header,
@@ -95,11 +98,7 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
 		...state,
 		colorsSettings,
 		computedAttrs,
-		data: data.map((dataSet, index) => {
-			const prevDataSet = state.data[index] ?? createComboDataSet(dataSet.dataKey);
-
-			return {...prevDataSet, ...dataSet};
-		}),
+		data: data.map(mapComboDataSet(state)),
 		dataLabels,
 		displayMode,
 		header,
@@ -133,11 +132,7 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 	return {
 		...state,
 		computedAttrs,
-		data: data.map((dataSet, index) => {
-			const prevDataSet = state.data[index] ?? createComboDataSet(dataSet.dataKey);
-
-			return {...prevDataSet, ...dataSet};
-		}),
+		data: data.map(mapComboDataSet(state)),
 		displayMode,
 		header,
 		name,
@@ -170,14 +165,7 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 	return {
 		...state,
 		computedAttrs,
-		data: data.map((dataSet, index) => {
-			const prevDataSet = state.data[index] ?? createComboDataSet(dataSet.dataKey);
-
-			return {
-				...prevDataSet,
-				...transformDataSet(dataSet)
-			};
-		}),
+		data: data.map(mapComboDataSet(state, transformDataSet)),
 		displayMode,
 		header,
 		name,
@@ -188,10 +176,41 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 	};
 };
 
+/**
+ * Изменяет значения формы осевых графиков относительно изменений в форме сводке
+ * @param {State} state - состояние формы осевых графиков
+ * @param {TableValues} values - значения формы сводки
+ * @returns {State}
+ */
+const changeValuesByPivot = (state: State, values: PivotValues): State => {
+	const {
+		data,
+		displayMode,
+		header,
+		name,
+		navigation,
+		templateName,
+		tooltip
+	} = values;
+	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAggregationDataSet);
+
+	return {
+		...state,
+		data: data.map(mapComboDataSet(state, transformDataSet)),
+		displayMode,
+		header,
+		name,
+		navigation,
+		templateName,
+		tooltip
+	};
+};
+
 export {
 	changeValuesByAxisChart,
 	changeValuesByCircleChart,
 	changeValuesBySpeedometerOrSummary,
 	changeValuesByTable,
+	changeValuesByPivot,
 	createComboDataSet
 };

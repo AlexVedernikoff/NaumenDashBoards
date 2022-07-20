@@ -1,12 +1,14 @@
 // @flow
+import {compose} from 'redux';
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_SOURCE} from 'store/widgetForms/constants';
-import {fixIndicatorsAggregation} from 'store/widgetForms/helpers';
+import {fixIndicatorsAggregation, fixPivotIndicators} from 'store/widgetForms/helpers';
 import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
 import type {Values as CircleChartValues} from 'src/store/widgetForms/circleChartForm/types';
 import type {Values as ComboChartValues} from 'src/store/widgetForms/comboChartForm/types';
 import type {Values as TableValues} from 'src/store/widgetForms/tableForm/types';
 import type {Values as SummaryValues} from 'src/store/widgetForms/summaryForm/types';
+import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
 
 /**
  * Создает базовый объект данных спидометра
@@ -26,7 +28,7 @@ const createSpeedometerDataSet = (dataKey: string): DataSet => ({
  * @param {AxisChartValues | CircleChartValues | ComboChartValues | TableValues | SummaryValues} values - значения остальных форм
  * @returns {State}
  */
-const changeValues = (state: State, values: AxisChartValues | CircleChartValues | ComboChartValues | TableValues | SummaryValues): State => {
+const changeValues = (state: State, values: AxisChartValues | CircleChartValues | ComboChartValues | TableValues | SummaryValues | PivotValues): State => {
 	const {borders, indicator, parameter, ranges} = state;
 	const {
 		computedAttrs,
@@ -44,10 +46,11 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 		computedAttrs,
 		data: data.map(dataSet => {
 			const {dataKey, indicators, source, sourceForCompute} = dataSet;
+			const transformIndicators = compose(fixPivotIndicators, fixIndicatorsAggregation);
 
 			return {
 				dataKey,
-				indicators: fixIndicatorsAggregation(indicators).slice(0, 1),
+				indicators: transformIndicators(indicators).slice(0, 1),
 				source,
 				sourceForCompute
 			};

@@ -3,24 +3,18 @@ import {DEFAULT_AGGREGATION, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widge
 import type {Indicator, Parameter, SourceData} from './types';
 import uuid from 'tiny-uuid';
 
-const CHANGE_AXIS_CHART_FORM_VALUES: 'widgetForms/changeAxisChartFormValues' = 'widgetForms/changeAxisChartFormValues';
-const CHANGE_CIRCLE_CHART_FORM_VALUES: 'widgetForms/changeCircleChartFormValues' = 'widgetForms/changeCircleChartFormValues';
-const CHANGE_COMBO_CHART_FORM_VALUES: 'widgetForms/changeComboChartFormValues' = 'widgetForms/changeComboChartFormValues';
-const CHANGE_SPEEDOMETER_FORM_VALUES: 'widgetForms/changeSpeedometerFormValues' = 'widgetForms/changeSpeedometerFormValues';
-const CHANGE_SUMMARY_FORM_VALUES: 'widgetForms/changeSummaryFormValues' = 'widgetForms/changeSummaryFormValues';
-const CHANGE_TABLE_FORM_VALUES: 'widgetForms/changeTableFormValues' = 'widgetForms/changeTableFormValues';
-const CHANGE_TEXT_FORM_VALUES: 'widgetForms/changeTextFormValues' = 'widgetForms/changeTextFormValues';
 const RESET_FORM: 'widgetForms/resetForm' = 'widgetForms/resetForm';
 const SET_USER_MODE: 'widgetForms/setUserMode' = 'widgetForms/setUserMode';
 
 const EVENTS = {
-	CHANGE_AXIS_CHART_FORM_VALUES,
-	CHANGE_CIRCLE_CHART_FORM_VALUES,
-	CHANGE_COMBO_CHART_FORM_VALUES,
-	CHANGE_SPEEDOMETER_FORM_VALUES,
-	CHANGE_SUMMARY_FORM_VALUES,
-	CHANGE_TABLE_FORM_VALUES,
-	CHANGE_TEXT_FORM_VALUES,
+	CHANGE_AXIS_CHART_FORM_VALUES: 'widgetForms/changeAxisChartFormValues',
+	CHANGE_CIRCLE_CHART_FORM_VALUES: 'widgetForms/changeCircleChartFormValues',
+	CHANGE_COMBO_CHART_FORM_VALUES: 'widgetForms/changeComboChartFormValues',
+	CHANGE_PIVOT_FORM_VALUES: 'widgetForms/changePivotFormValues',
+	CHANGE_SPEEDOMETER_FORM_VALUES: 'widgetForms/changeSpeedometerFormValues',
+	CHANGE_SUMMARY_FORM_VALUES: 'widgetForms/changeSummaryFormValues',
+	CHANGE_TABLE_FORM_VALUES: 'widgetForms/changeTableFormValues',
+	CHANGE_TEXT_FORM_VALUES: 'widgetForms/changeTextFormValues',
 	RESET_FORM,
 	SET_USER_MODE
 };
