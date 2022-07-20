@@ -211,11 +211,41 @@ export type SummaryOptions = {
 	type: 'SummaryOptions',
 };
 
+/** PIVOT */
+
+export type PivotDataRowStyle = {
+	backgroundColor?: string
+};
+
+export type PivotDataRow = {
+	children: ?Array<PivotDataRow>,
+	level: number,
+	style: PivotDataRowStyle,
+	values: Array<string>,
+};
+
+export type PivotColumnFlat = {
+	key: string
+};
+
+export type PivotSeriesData = Array<PivotDataRow>;
+
+export type PivotColumn = Object;
+
+export type PivotOptions = {
+	columnsList: Array<PivotColumnFlat>,
+	columnWidth: number,
+	data: PivotSeriesData,
+	headers: Array<PivotColumn>,
+	type: 'PivotOptions',
+};
+
 export type ChartOptions =
 	| EmptyChartOptions
 	| AxisChartOptions
 	| CircleChartOptions
 	| ComboChartOptions
+	| PivotOptions
 	| SpeedometerOptions
 	| SummaryOptions;
 
