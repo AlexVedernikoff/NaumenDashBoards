@@ -1,11 +1,13 @@
 // @flow
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER, DEFAULT_SOURCE} from 'store/widgetForms/constants';
+import {fixPivotIndicators} from 'store/widgetForms/helpers';
 import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
 import type {Values as CircleChartValues} from 'src/store/widgetForms/circleChartForm/types';
 import type {Values as ComboChartValues} from 'src/store/widgetForms/comboChartForm/types';
 import type {Values as SpeedometerValues} from 'src/store/widgetForms/speedometerForm/types';
 import type {Values as SummaryValues} from 'src/store/widgetForms/summaryForm/types';
+import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
 
 /**
  * Создает базовый объект данных таблицы
@@ -181,6 +183,49 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 };
 
 /**
+ * Изменяет значения формы осевых графиков относительно изменений в форме сводке
+ * @param {State} state - состояние формы осевых графиков
+ * @param {PivotValues} values - значения формы сводки
+ * @returns {State}
+ */
+const changeValuesByPivot = (state: State, values: PivotValues): State => {
+	const {
+		computedAttrs,
+		data,
+		displayMode,
+		header,
+		name,
+		navigation,
+		templateName,
+		tooltip
+	} = values;
+
+	return {
+		...state,
+		computedAttrs,
+		data: data.map((dataSet, index) => {
+			const {parameters} = state.data[index] ?? createTableDataSet(dataSet.dataKey);
+			const {dataKey, indicators, source, sourceForCompute} = dataSet;
+
+			return {
+				breakdown: [],
+				dataKey,
+				indicators: fixPivotIndicators(indicators),
+				parameters,
+				source,
+				sourceForCompute
+			};
+		}),
+		displayMode,
+		header,
+		name,
+		navigation,
+		templateName,
+		tooltip
+	};
+};
+
+/**
  * Проверяет, что источник вычисляется как одна строка, без применения параметров
  * @param {?DataSet} dataSet - источник
  * @returns {boolean} - возвращает true, если источник установлен и вычисляется как одна строка, иначе false
@@ -188,9 +233,10 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 const isDontUseParamsForDataSet = (dataSet: ?DataSet) => dataSet && typeof dataSet.sourceRowName === 'string';
 
 export {
-	changeValuesByCircleChart,
 	changeValuesByAxisOrComboCharts,
+	changeValuesByCircleChart,
+	changeValuesByPivot,
 	changeValuesBySpeedometerOrSummary,
-	isDontUseParamsForDataSet,
-	createTableDataSet
+	createTableDataSet,
+	isDontUseParamsForDataSet
 };

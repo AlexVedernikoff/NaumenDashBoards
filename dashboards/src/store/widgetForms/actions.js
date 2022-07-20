@@ -6,6 +6,7 @@ import {EVENTS} from './constants';
 import type {Values as AxisValues} from './axisChartForm/types';
 import type {Values as CircleValues} from './circleChartForm/types';
 import type {Values as ComboValues} from './comboChartForm/types';
+import type {Values as PivotValues} from './pivotForm/types';
 import type {Values as SpeedometerValues} from './speedometerForm/types';
 import type {Values as SummaryValues} from './summaryForm/types';
 import type {Values as TableValues} from './tableForm/types';
@@ -13,11 +14,11 @@ import type {Values as TextValues} from './textForm/types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 const setWidgetValues = (widget: AnyWidget) => (dispatch: Dispatch) => {
-	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY, TABLE, TEXT} = WIDGET_TYPES;
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, PIVOT_TABLE, SPEEDOMETER, SUMMARY, TABLE, TEXT} = WIDGET_TYPES;
 	const {id, type, ...rest} = widget;
-	const values = deepClone(rest);
+	const values: Object = deepClone(rest);
 
-	switch (widget.type) {
+	switch (type) {
 		case BAR:
 		case BAR_STACKED:
 		case COLUMN:
@@ -29,6 +30,8 @@ const setWidgetValues = (widget: AnyWidget) => (dispatch: Dispatch) => {
 			return dispatch(changeCircleChartFormValues(values));
 		case COMBO:
 			return dispatch(changeComboChartFormValues(values));
+		case PIVOT_TABLE:
+			return dispatch(changePivotFormValues(values));
 		case SPEEDOMETER:
 			return dispatch(changeSpeedometerFormValues(values));
 		case SUMMARY:
@@ -84,6 +87,11 @@ const changeTextFormValues = (payload: TextValues) => ({
 	type: EVENTS.CHANGE_TEXT_FORM_VALUES
 });
 
+const changePivotFormValues = (payload: PivotValues) => ({
+	payload,
+	type: EVENTS.CHANGE_PIVOT_FORM_VALUES
+});
+
 const resetForm = () => ({
 	type: EVENTS.RESET_FORM
 });
@@ -92,6 +100,7 @@ export {
 	changeAxisChartFormValues,
 	changeCircleChartFormValues,
 	changeComboChartFormValues,
+	changePivotFormValues,
 	changeSpeedometerFormValues,
 	changeSummaryFormValues,
 	changeTableFormValues,

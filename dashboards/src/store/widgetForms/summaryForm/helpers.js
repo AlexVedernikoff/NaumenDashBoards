@@ -1,12 +1,14 @@
 // @flow
+import {compose} from 'redux';
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_SOURCE} from 'store/widgetForms/constants';
-import {fixIndicatorsAggregation} from 'store/widgetForms/helpers';
+import {fixIndicatorsAggregation, fixPivotIndicators} from 'store/widgetForms/helpers';
 import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
 import type {Values as CircleChartValues} from 'store/widgetForms/circleChartForm/types';
 import type {Values as ComboChartValues} from 'store/widgetForms/comboChartForm/types';
 import type {Values as SpeedometerValues} from 'store/widgetForms/speedometerForm/types';
 import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
+import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
 
 /**
  * Создает базовый объект данных сводки
@@ -26,7 +28,7 @@ const createSummaryDataSet = (dataKey: string): DataSet => ({
  * @param {AxisChartValues | CircleChartValues | ComboChartValues | TableValues | SpeedometerValues} values - значения остальных форм
  * @returns {State}
  */
-const changeValues = (state: State, values: AxisChartValues | CircleChartValues | ComboChartValues | TableValues | SpeedometerValues): State => {
+const changeValues = (state: State, values: AxisChartValues | CircleChartValues | ComboChartValues | PivotValues | TableValues | SpeedometerValues): State => {
 	const {indicator} = state;
 	const {
 		computedAttrs,
@@ -43,10 +45,11 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 		computedAttrs,
 		data: data.map(dataSet => {
 			const {dataKey, indicators, source, sourceForCompute} = dataSet;
+			const transformIndicators = compose(fixPivotIndicators, fixIndicatorsAggregation);
 
 			return {
 				dataKey,
-				indicators: fixIndicatorsAggregation(indicators).slice(0, 1),
+				indicators: transformIndicators(indicators).slice(0, 1),
 				source,
 				sourceForCompute
 			};
