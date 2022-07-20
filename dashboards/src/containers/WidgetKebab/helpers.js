@@ -16,14 +16,14 @@ import t, {translateObjectsArray} from 'localization';
 
 /**
  * Преобразует AnyWidget в Widget
- * @param {AnyWidget} awidget - виджет
+ * @param {AnyWidget} widget - виджет
  * @returns {Widget|null} - Widget в случае если тип AnyWidget подходит для Widget, иначе - null
  */
-const parseDiagramWidget = (awidget: AnyWidget): ?Widget => {
+const parseDiagramWidget = (widget: AnyWidget): ?Widget => {
 	let result: ?Widget = null;
 
-	if (awidget.type !== WIDGET_TYPES.TEXT) {
-		result = awidget;
+	if (widget.type !== WIDGET_TYPES.TEXT) {
+		result = widget;
 	}
 
 	return result;
@@ -31,14 +31,14 @@ const parseDiagramWidget = (awidget: AnyWidget): ?Widget => {
 
 /**
  * Формирует данные для отображения кнопки навигации
- * @param {AnyWidget} awidget - виджет
+ * @param {AnyWidget} widget - виджет
  * @returns  {NavigationProps}
  */
-const navigationSelector = memoize((awidget: AnyWidget): NavigationProps | null => {
-	const widget = parseDiagramWidget(awidget);
+const navigationSelector = memoize((widget: AnyWidget): NavigationProps | null => {
+	const diagramWidget = parseDiagramWidget(widget);
 
-	if (widget) {
-		const {navigation} = widget;
+	if (diagramWidget) {
+		const {navigation} = diagramWidget;
 
 		if (navigation.show) {
 			const {showTip, tip} = navigation;
@@ -52,14 +52,14 @@ const navigationSelector = memoize((awidget: AnyWidget): NavigationProps | null 
 
 /**
  * Формирует данные для перехода по кнопке навигации
- * @param   {AnyWidget}  awidget  [awidget description]
+ * @param   {AnyWidget}  widget - виджет
  * @returns {NavigationData}
  */
-const getDataForNavigation = memoize((awidget: AnyWidget): ?NavigationData => {
-	const widget = parseDiagramWidget(awidget);
+const getDataForNavigation = memoize((widget: AnyWidget): ?NavigationData => {
+	const diagramWidget = parseDiagramWidget(widget);
 
-	if (widget) {
-		const {navigation} = widget;
+	if (diagramWidget) {
+		const {navigation} = diagramWidget;
 		const {dashboard, widget: navigationWidget} = navigation;
 
 		if (dashboard) {
@@ -90,11 +90,11 @@ const getDisplayModeIcon = (displayMode: DisplayMode) => {
 
 /**
  * Формирует спецификацию отображения выпадающего списка выбора режима отображения
- * @param {AnyWidget} awidget - виджет
+ * @param {AnyWidget} widget - виджет
  * @returns {DropDownParams} - спецификация отображения выпадающего списка
  */
-const modeSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
-	const {displayMode} = awidget;
+const modeSelector = memoize((widget: AnyWidget): ?DropDownParams => {
+	const {displayMode} = widget;
 	const availableOptions = translateObjectsArray('label', DISPLAY_MODE_OPTIONS);
 	const value = availableOptions.find(item => item.value === displayMode) || availableOptions[0];
 	return {
@@ -107,17 +107,17 @@ const modeSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 
 /**
  * Формирует спецификацию отображения выпадающего списка экспорта виджета
- * @param {AnyWidget} awidget - виджет
+ * @param {AnyWidget} widget - виджет
  * @returns {DropDownParams} - спецификация отображения выпадающего списка
  */
-const exportParamsSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
-	const widget = parseDiagramWidget(awidget);
+const exportParamsSelector = memoize((widget: AnyWidget): ?DropDownParams => {
+	const diagramWidget = parseDiagramWidget(widget);
 
-	if (widget) {
+	if (diagramWidget) {
 		const {PDF, PNG, XLSX} = FILE_VARIANTS;
 		const availableOptions = [PDF, PNG];
 
-		if (widget.type === DIAGRAM_WIDGET_TYPES.TABLE) {
+		if (diagramWidget.type === DIAGRAM_WIDGET_TYPES.TABLE) {
 			availableOptions.push(XLSX);
 		}
 
@@ -134,16 +134,16 @@ const exportParamsSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
 
 /**
  * Формирует спецификацию отображения выпадающего списка перехода на страницу источника
- * @param {AnyWidget} awidget - виджет
+ * @param {AnyWidget} widget - виджет
  * @returns {DropDownParams} - спецификация отображения выпадающего списка
  */
-const dataSelector = memoize((awidget: AnyWidget): ?DropDownParams => {
-	const widget = parseDiagramWidget(awidget);
+const dataSelector = memoize((widget: AnyWidget): ?DropDownParams => {
+	const diagramWidget = parseDiagramWidget(widget);
 
-	if (widget) {
+	if (diagramWidget) {
 		const availableOptions = [];
 
-		widget.data.forEach(({source, sourceForCompute}, value) => {
+		diagramWidget.data.forEach(({source, sourceForCompute}, value) => {
 			if (!sourceForCompute) {
 				availableOptions.push({
 					label: source.value.label,

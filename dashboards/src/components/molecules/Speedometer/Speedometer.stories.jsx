@@ -5,10 +5,21 @@ const DEFAULT_PROPS = {
 	color: '#c1bdbd',
 	options: {
 		borders: {
+			formatter: val => val.toString(),
 			max: 2000,
-			min: 0
+			min: 0,
+			style: {
+				fontFamily: 'Roboto',
+				fontSize: 16
+			}
 		},
-		data: {formatter: (val) => val},
+		data: {
+			formatter: val => val,
+			style: {
+				fontFamily: 'Roboto',
+				fontSize: 16
+			}
+		},
 		ranges: {
 			data: [{
 				// использовать шестнадцатеричное представление, т.к. по нему рассчитывается яркость
@@ -16,6 +27,7 @@ const DEFAULT_PROPS = {
 				from: 0,
 				to: 100
 			}],
+			formatter: val => val,
 			style: {
 				displayType: 'BLOCK',
 				fontFamily: 'Roboto',
@@ -28,6 +40,7 @@ const DEFAULT_PROPS = {
 			type: 'PERCENT',
 			use: false
 		},
+		size: {height: 300, width: 300},
 		title: 'Уникальный идентификатор',
 		value: 995
 	}

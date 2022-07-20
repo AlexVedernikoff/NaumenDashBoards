@@ -54,9 +54,16 @@ export class ColorsBox extends PureComponent<Props> {
 	};
 
 	renderAutoColorsSettings = () => {
-		const {auto} = this.props.value;
+		const {position, value} = this.props;
+		const {auto} = value;
 
-		return <AutoColorsSettings onChange={this.handleChangeAutoSettings} value={auto} />;
+		return (
+			<AutoColorsSettings
+				onChange={this.handleChangeAutoSettings}
+				position={position}
+				value={auto}
+			/>
+		);
 	};
 
 	renderCustomColorsSettings = () => {

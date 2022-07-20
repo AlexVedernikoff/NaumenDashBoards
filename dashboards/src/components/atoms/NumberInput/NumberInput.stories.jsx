@@ -12,7 +12,8 @@ export default {
 
 const Template = args => {
 	const [{value}, updateArgs] = useArgs();
-	const onChange = (event) => {
+
+	const onChange = event => {
 		const {value: newValue} = event;
 
 		action('onChange')(event);

@@ -11,7 +11,8 @@ export default {
 
 export const Component = args => {
 	const [{value}, updateArgs] = useArgs();
-	const onChange = (value) => {
+
+	const onChange = value => {
 		action('onChange')(value);
 		updateArgs({value});
 	};

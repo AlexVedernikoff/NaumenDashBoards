@@ -64,7 +64,9 @@ const extend = (target: Object, source: Object): Object => {
  * @param {object} object - исходный объект
  * @returns {object}
  */
-const deepClone = (object: Object) => JSON.parse(JSON.stringify(object));
+function deepClone<T: Object> (object: T): T {
+	return JSON.parse(JSON.stringify(object));
+}
 
 /**
  * Проверяет относится ли операционная система пользователя к семейству MasOS

@@ -3,7 +3,7 @@ import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
 import FormBox from 'components/molecules/FormBox';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
-import type {Indicator} from 'store/widgets/data/types';
+import type {Indicator} from 'store/widgetForms/types';
 import IndicatorFieldset from 'WidgetFormPanel/components/IndicatorFieldset';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
