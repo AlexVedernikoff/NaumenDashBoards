@@ -623,14 +623,14 @@ class GanttSettingsService
             Boolean columnForWorkAdditionExists = ganttSettings.commonSettings.columnSettings.any {
                 it.code == 'add'
             }
-            if (!columnForWorkAdditionExists)
-            {
-                ganttSettings.commonSettings.columnSettings << new ColumnSettings(
-                    show: true,
-                    code: 'add',
-                    title: ''
-                )
-            }
+            //if (!columnForWorkAdditionExists)
+            //{
+            //    ganttSettings.commonSettings.columnSettings << new ColumnSettings(
+            //        show: true,
+            //        code: 'add',
+            //        title: ''
+            //    )
+            //}
         }
     }
 
