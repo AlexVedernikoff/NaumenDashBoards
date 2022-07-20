@@ -4,7 +4,7 @@ import type {FrameAPI} from 'api/interfaces';
 
 export default class Frame implements FrameAPI {
 	getApplicationCode () {
-		return window.jsApi.findApplicationCode();
+		return window.jsApi?.findApplicationCode?.() ?? '';
 	}
 
 	getContentCode () {
@@ -20,8 +20,7 @@ export default class Frame implements FrameAPI {
 	}
 
 	getCurrentLocale () {
-		const {getCurrentLocale} = window.jsApi;
-		return getCurrentLocale?.() ?? 'client';
+		return window.jsApi?.getCurrentLocale?.() ?? 'client';
 	}
 
 	getCurrentUser () {

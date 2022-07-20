@@ -26,6 +26,7 @@ import type {
 	CustomChartColorsSettingsData,
 	Legend,
 	LegendPosition,
+	PivotWidget,
 	SpeedometerWidget,
 	SummaryWidget,
 	Widget
@@ -34,7 +35,8 @@ import {
 	CHART_COLORS_SETTINGS_TYPES,
 	DEFAULT_BREAKDOWN_COLOR,
 	DEFAULT_CHART_COLORS,
-	DIAGRAM_WIDGET_TYPES
+	DIAGRAM_WIDGET_TYPES,
+	WIDGET_TYPES
 } from 'store/widgets/data/constants';
 import {
 	DEFAULT_LEGEND,
@@ -326,6 +328,16 @@ const getCircleWidget = (widget: Widget): ?CircleWidget => {
 	const {DONUT, PIE} = DIAGRAM_WIDGET_TYPES;
 
 	if (widget.type === PIE || widget.type === DONUT) {
+		result = widget;
+	}
+
+	return result;
+};
+
+const getPivotWidget = (widget: Widget): ?PivotWidget => {
+	let result: ?PivotWidget = null;
+
+	if (widget.type === WIDGET_TYPES.PIVOT_TABLE) {
 		result = widget;
 	}
 
@@ -931,11 +943,12 @@ export {
 	getDataLabels,
 	getLegendOptions,
 	getNiceScale,
+	getPivotWidget,
 	getRechartAxisSetting,
 	getSeriesData,
 	getSeriesInfo,
-	getXAxisCategory,
 	getSpeedometerWidget,
 	getSummaryWidget,
+	getXAxisCategory,
 	makeSubTotalGetter
 };
