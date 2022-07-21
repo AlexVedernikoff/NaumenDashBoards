@@ -31,7 +31,7 @@ const getYAxisNumber = (
 ): AxisOptions => {
 	const settings = getRechartAxisSetting(widget.indicator);
 	const formattedSeries = data.series.flatMap(el => el.data.map(val => formatter(val)));
-	const maxValueLength = Math.max(...formattedSeries.map(val => String(val)).length));
+	const maxValueLength = Math.max(...formattedSeries.map(val => String(val).length));
 	const maxString = Array(maxValueLength + 1).fill('0').join('');
 	const sizes = calculateStringsSize([[maxString], [axisName]], settings.fontFamily, settings.fontSize);
 	let width = sizes[0]?.width ?? 0;
