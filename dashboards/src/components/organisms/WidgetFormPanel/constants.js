@@ -40,6 +40,7 @@ const borders = 'borders';
 const breakdown = 'breakdown';
 const breakdownFormat = 'breakdownFormat';
 const calcTotalColumn = 'calcTotalColumn';
+const checked = 'checked';
 const colorsSettings = 'colorsSettings';
 const computedAttrs = 'computedAttrs';
 const count = 'count';
@@ -52,16 +53,19 @@ const format = 'format';
 const from = 'from';
 const header = 'header';
 const indicator = 'indicator';
+const indicatorGrouping = 'indicatorGrouping';
 const indicators = 'indicators';
 const isNumber = 'isNumber';
 const legend = 'legend';
 const legendPosition = 'legendPosition';
+const links = 'links';
 const name = 'name';
 const navigation = 'navigation';
 const max = 'max';
 const min = 'min';
 const parameter = 'parameter';
 const parameters = 'parameters';
+const parametersOrder = 'parametersOrder';
 const position = 'position';
 const ranges = 'ranges';
 const scale = 'scale';
@@ -92,14 +96,33 @@ const useName = 'useName';
 const value = 'value';
 const xAxisName = 'xAxisName';
 const yAxisName = 'yAxisName';
+const defaultValue = 'defaultValue';
+const indicatorSettings = 'indicatorSettings';
+const pageSize = 'pageSize';
+const parameterSettings = 'parameterSettings';
+const showRowNum = 'showRowNum';
+const pivot = 'pivot';
+const parameterRowColor = 'parameterRowColor';
+
+const PIVOT_FIELDS = {
+	defaultValue,
+	indicatorSettings,
+	pageSize,
+	parameterRowColor,
+	parameterSettings,
+	pivot,
+	showRowNum
+};
 
 const DIAGRAM_FIELDS = {
 	...FIELDS,
 	...LABEL_FORMAT_FIELDS,
+	...PIVOT_FIELDS,
 	borders,
 	breakdown,
 	breakdownFormat,
 	calcTotalColumn,
+	checked,
 	colorsSettings,
 	computedAttrs,
 	count,
@@ -112,16 +135,19 @@ const DIAGRAM_FIELDS = {
 	from,
 	header,
 	indicator,
+	indicatorGrouping,
 	indicators,
 	isNumber,
 	legend,
 	legendPosition,
+	links,
 	max,
 	min,
 	name,
 	navigation,
 	parameter,
 	parameters,
+	parametersOrder,
 	position,
 	ranges,
 	scale,

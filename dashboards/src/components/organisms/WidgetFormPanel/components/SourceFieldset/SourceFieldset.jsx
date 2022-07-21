@@ -33,6 +33,7 @@ import {withCommonDialog} from 'containers/CommonDialogs/withCommonDialog';
 
 export class SourceFieldset extends Component<Props, State> {
 	static defaultProps = {
+		autoFillIndicators: true,
 		parentClassFqn: null,
 		removable: true,
 		showSourceRowName: false,
@@ -299,20 +300,26 @@ export class SourceFieldset extends Component<Props, State> {
 	showSaveForm = () => this.setState({mode: MODE.SAVE, showEditForm: true});
 
 	updateAttributes = async (attributes: Array<Attribute>) => {
-		const {fetchAttributesByCode, index, onChange, value} = this.props;
+		const {autoFillIndicators, fetchAttributesByCode, index, onChange, value} = this.props;
 		const {breakdown, dataKey, parameters, source} = value;
 		const classFqn = source.value?.value;
-		let indicators = [DEFAULT_INDICATOR];
-		const attribute = attributes.find(attribute => attribute.code === 'UUID') ?? null;
+		const newValue = {...value};
 
-		if (attribute) {
-			indicators = [{
-				aggregation: getDefaultAggregation(attribute),
-				attribute
-			}];
+		if (autoFillIndicators) {
+			const attribute = attributes.find(attribute => attribute.code === 'UUID') ?? null;
+			const indicators = [];
+
+			if (attribute) {
+				indicators.push({
+					aggregation: getDefaultAggregation(attribute),
+					attribute
+				});
+			} else {
+				indicators.push(DEFAULT_INDICATOR);
+			}
+
+			newValue.indicators = indicators;
 		}
-
-		const newValue = {...value, indicators};
 
 		if (breakdown) {
 			const defaultBreakdown = getDefaultBreakdown(dataKey)[0];

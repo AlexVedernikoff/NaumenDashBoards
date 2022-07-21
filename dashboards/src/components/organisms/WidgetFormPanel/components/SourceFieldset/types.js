@@ -11,6 +11,7 @@ type FetchAttributesByCode = (
 	) => Promise<Array<Parameter | BreakdownItem>>;
 
 export type Props = CommonDialogContextProps & ContainerProps & {
+	autoFillIndicators: boolean,
 	fetchAttributesByCode: FetchAttributesByCode,
 	index: number,
 	onChange: (index: number, dataSet: DataSet, callback?: Function) => void,
