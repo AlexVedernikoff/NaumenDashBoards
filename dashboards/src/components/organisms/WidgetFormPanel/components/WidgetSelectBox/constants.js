@@ -58,6 +58,11 @@ const WIDGET_OPTIONS: Array<{icon: $Keys<typeof ICON_NAMES>, tip: LangType, valu
 		icon: ICON_NAMES.SPEEDOMETER,
 		tip: 'WidgetSelectBox::Speedometer',
 		value: WIDGET_TYPES.SPEEDOMETER
+	},
+	{
+		icon: ICON_NAMES.PIVOT_TABLE,
+		tip: 'WidgetSelectBox::Pivot',
+		value: WIDGET_TYPES.PIVOT_TABLE
 	}
 ];
 

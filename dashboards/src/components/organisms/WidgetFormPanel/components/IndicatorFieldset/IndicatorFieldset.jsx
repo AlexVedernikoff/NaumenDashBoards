@@ -11,20 +11,20 @@ import Container from 'components/atoms/Container';
 import CreationPanel from 'components/atoms/CreationPanel';
 import {deepClone} from 'helpers';
 import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
+import type {DiagramDataSet, Indicator} from 'store/widgetForms/types';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FieldButton from 'components/atoms/FieldButton';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
 import {getSourceAttribute} from 'store/sources/attributes/helpers';
-import type {Indicator} from 'store/widgetForms/types';
 import {isDontUseParamsForDataSet} from 'store/widgets/data/helpers';
-import memoize from 'memoize-one';
 import type {OnSelectEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props, State} from './types';
 import React, {createContext, PureComponent} from 'react';
 import SelectModal, {SelectItem} from 'components/molecules/SelectModal';
+import SourcesAndFieldsExtended from 'WidgetFormPanel/components/SourcesAndFieldsExtended';
 import t from 'localization';
 import uuid from 'tiny-uuid';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -56,10 +56,13 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		return onChange(index, indicator, callback);
 	};
 
-	getComponents = memoize(() => ({
-		Field: this.renderFieldWithContext,
-		MenuContainer: this.renderMenuContainer
-	}));
+	getHandleChangeDataSet = (index: number) => (dataSetIndex: number, dataSet: DiagramDataSet) => {
+		const {onChangeDataSet} = this.props;
+
+		if (onChangeDataSet) {
+			onChangeDataSet(index, dataSetIndex, dataSet);
+		}
+	};
 
 	getHandleClickSourcePercentageRelative = () => {
 		const handler = async () => {
@@ -116,6 +119,11 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		return () => { handler(); };
 	};
 
+	getMainComponents = () => ({
+		Field: this.renderFieldWithContext,
+		MenuContainer: this.renderMenuContainer(true)
+	});
+
 	getMainOptions = (options: Array<Attribute>): Array<mixed> => {
 		const {dataSetIndex, helpers, type, value, values} = this.props;
 
@@ -143,8 +151,13 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			attributes = helpers.filterAttributeByMainDataSet(options, dataSetIndex);
 		}
 
-		return [...values.computedAttrs, ...attributes];
+		return [...(values.computedAttrs ?? []), ...attributes];
 	};
+
+	getRefComponents = () => ({
+		Field: this.renderFieldWithContext,
+		MenuContainer: this.renderMenuContainer(false)
+	});
 
 	handleChangeLabel = ({value: attribute}: OnSelectEvent, index: number, callback?: Function) => this.change({
 		...this.props.value,
@@ -326,8 +339,13 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		</Context.Consumer>
 	);
 
-	renderMenuContainer = (props: ContainerProps) => {
+	renderMenuContainer = (isMain: boolean) => (props: ContainerProps) => {
+		const {dataSets} = this.props;
 		const {children, className} = props;
+
+		if (dataSets) {
+			return this.renderSourcesAndFields(className, children);
+		}
 
 		return (
 			<Container className={className}>
@@ -361,6 +379,24 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		}
 	};
 
+	renderSourcesAndFields = (className: string, fieldSelectMainContainer: React$Node) => {
+		const {dataSetIndex, dataSets, index, value} = this.props;
+		const {attribute} = value;
+
+		return (
+			<SourcesAndFieldsExtended
+				className={className}
+				dataSetIndex={dataSetIndex}
+				dataSets={dataSets}
+				onChangeDataSet={this.getHandleChangeDataSet(index)}
+				value={attribute}
+			>
+				{fieldSelectMainContainer}
+				<CreationPanel onClick={this.handleClickCreationPanel} text={t('IndicatorFieldset::CreateField')} />
+			</SourcesAndFieldsExtended>
+		);
+	};
+
 	render () {
 		const {className, dataKey, dataSetIndex, index, onRemove, removable, source, value} = this.props;
 		const {attribute} = value;
@@ -369,7 +405,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			<Context.Provider value={value}>
 				<FormField className={className} path={getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.indicators, index)}>
 					<AttributeFieldset
-						components={this.getComponents()}
+						components={this.getMainComponents()}
 						dataKey={dataKey}
 						dataSetIndex={dataSetIndex}
 						getMainOptions={this.getMainOptions}
@@ -377,6 +413,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 						onChangeLabel={this.handleChangeLabel}
 						onRemove={onRemove}
 						onSelect={this.handleSelectIndicator}
+						refComponents={this.getRefComponents()}
 						removable={removable}
 						source={source}
 						value={attribute}

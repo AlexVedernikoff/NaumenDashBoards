@@ -32,6 +32,7 @@ const PieWidget = React.lazy(() => import('components/organisms/PieWidget'));
 const SpeedometerWidget = React.lazy(() => import('containers/SpeedometerWidget'));
 const SummaryWidget = React.lazy(() => import('containers/SummaryWidget'));
 const TableWidget = React.lazy(() => import('containers/TableWidget'));
+const PivotWidget = React.lazy(() => import('components/organisms/PivotWidget'));
 const TextWidget = React.lazy(() => import('components/organisms/TextWidget'));
 
 export class WidgetsGrid extends Component<Props, State> {
@@ -315,6 +316,7 @@ export class WidgetsGrid extends Component<Props, State> {
 			DONUT,
 			LINE,
 			PIE,
+			PIVOT_TABLE,
 			SPEEDOMETER,
 			SUMMARY,
 			TABLE,
@@ -341,6 +343,8 @@ export class WidgetsGrid extends Component<Props, State> {
 				return <SummaryWidget widget={widget} />;
 			case TABLE:
 				return <TableWidget widget={widget} />;
+			case PIVOT_TABLE:
+				return <PivotWidget widget={widget} />;
 			case TEXT:
 				return <TextWidget widget={widget} />;
 			default:

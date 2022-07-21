@@ -3,16 +3,17 @@ import type {Attribute} from 'store/sources/attributes/types';
 import AttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset';
 import AttributeGroupField from 'containers/AttributeGroupField';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import Container from 'components/atoms/Container';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
 import type {Group} from 'store/widgets/data/types';
-import memoize from 'memoize-one';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Parameter} from 'store/widgetForms/types';
 import type {Props} from './types';
-import React, {createContext, PureComponent} from 'react';
+import React, {Component, createContext} from 'react';
+import SourcesAndFieldsExtended from 'WidgetFormPanel/components/SourcesAndFieldsExtended';
 import withAttributesHelpers from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers';
 
 const Context: React$Context<Parameter> = createContext({
@@ -23,7 +24,7 @@ const Context: React$Context<Parameter> = createContext({
 
 Context.displayName = 'PARAMETER_FIELDSET_CONTEXT';
 
-export class ParameterFieldset extends PureComponent<Props> {
+export class ParameterFieldset extends Component<Props> {
 	static defaultProps = {
 		disabled: false,
 		disabledGroup: false,
@@ -43,9 +44,22 @@ export class ParameterFieldset extends PureComponent<Props> {
 		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
 	};
 
-	getComponents = memoize(() => ({
+	getHandleChangeDataSet = (index: number) => (dataSetIndex: number) => {
+		const {onChangeDataSet} = this.props;
+
+		if (onChangeDataSet) {
+			onChangeDataSet(index, dataSetIndex);
+		}
+	};
+
+	getMainComponents = () => ({
+		Field: this.renderGroupWithContext,
+		MenuContainer: this.renderMenuContainer
+	});
+
+	getRefComponents = () => ({
 		Field: this.renderGroupWithContext
-	}));
+	});
 
 	handleChangeGroup = (group: Group, attribute: Attribute) => this.change({
 		...this.props.value,
@@ -103,6 +117,37 @@ export class ParameterFieldset extends PureComponent<Props> {
 		</Context.Consumer>
 	);
 
+	renderMenuContainer = ({children, className}) => {
+		const {dataSets} = this.props;
+
+		if (dataSets) {
+			return this.renderSourcesAndFields(className, children);
+		}
+
+		return (
+			<Container className={className}>
+				{children}
+			</Container>
+		);
+	};
+
+	renderSourcesAndFields = (className: string, fieldSelectMainContainer: Array<React$Node>) => {
+		const {dataSetIndex, dataSets, index, value} = this.props;
+		const {attribute} = value;
+
+		return (
+			<SourcesAndFieldsExtended
+				className={className}
+				dataSetIndex={dataSetIndex}
+				dataSets={dataSets}
+				onChangeDataSet={this.getHandleChangeDataSet(index)}
+				value={attribute}
+			>
+				{fieldSelectMainContainer}
+			</SourcesAndFieldsExtended>
+		);
+	};
+
 	render () {
 		const {dataKey, dataSetIndex, disabled, index, onRemove, removable, source, value} = this.props;
 		const {attribute} = value;
@@ -111,7 +156,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 			<Context.Provider value={value}>
 				<FormField path={getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.parameters, index)}>
 					<AttributeFieldset
-						components={this.getComponents()}
+						components={this.getMainComponents()}
 						dataKey={dataKey}
 						dataSetIndex={dataSetIndex}
 						disabled={disabled}
@@ -121,6 +166,7 @@ export class ParameterFieldset extends PureComponent<Props> {
 						onChangeLabel={this.handleChangeLabel}
 						onRemove={onRemove}
 						onSelect={this.handleSelect}
+						refComponents={this.getRefComponents()}
 						removable={removable}
 						renderRefField={this.renderGroup}
 						source={source}
