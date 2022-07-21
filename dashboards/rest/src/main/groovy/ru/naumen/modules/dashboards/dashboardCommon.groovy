@@ -90,7 +90,8 @@ enum DiagramType
     SUMMARY,
     SPEEDOMETER,
     TABLE,
-    TEXT
+    TEXT,
+    PIVOT_TABLE
 
     static List<DiagramType> StandardTypes = [COLUMN, COLUMN_STACKED, LINE, BAR, BAR_STACKED]
     static List<DiagramType> RoundTypes = [DONUT, PIE]
@@ -493,6 +494,16 @@ enum Condition
         return values().find { it.frontTitle == frontTitle }
     }
 }
+
+/**
+ * Тип показателя в сводной таблице
+ */
+enum PivotIndicatorType
+{
+    GROUP_INDICATOR_INFO,
+    INDICATOR_INFO
+}
+
 //endregion
 
 @InjectApi
@@ -837,7 +848,7 @@ class DashboardUtils
                         }
                         return it
                     }
-            case TablePrevAndCurrentAndNew:
+            case [TablePrevAndCurrentAndNew, PivotTable]:
                 if(dataOrZeroWidget.find() instanceof TablePrevData)
                 {
                     return dataOrZeroWidget
@@ -1032,6 +1043,34 @@ class DashboardUtils
                     type: oldFormatWidget.type as DiagramType,
                     diagramType: oldFormatWidget.diagramType,
                     tooltip: oldFormatWidget?.tooltip
+                )
+            case PivotTable:
+                return new PivotTable(
+                    computedAttrs: oldFormatWidget.computedAttrs as Collection<ComputedAttr>,
+                    calcTotalColumn: calcTotalColumn,
+                    diagramName: oldFormatWidget.diagramName,
+                    navigation: oldFormatWidget.navigation as Navigation,
+                    templateName: oldFormatWidget.templateName,
+                    name: oldFormatWidget.name,
+                    id: oldFormatWidget.id,
+                    displayMode: oldFormatWidget.displayMode as DisplayMode,
+                    header: oldFormatWidget.header as Header,
+                    columnsRatioWidth: oldFormatWidget.columnsRatioWidth,
+                    showEmptyData: oldFormatWidget.showEmptyData,
+                    showBlankData: oldFormatWidget.showBlankData,
+                    showSubTotalAmount: oldFormatWidget.showSubTotalAmount,
+                    showTotalAmount: oldFormatWidget.showTotalAmount,
+                    showRowNum: oldFormatWidget.showRowNum,
+                    sorting: oldFormatWidget.sorting as Sorting,
+                    table: oldFormatWidget.table as TableObject,
+                    data: oldFormatWidget.data as Collection<DiagramNowData>,
+                    top: oldFormatWidget.top as Top ?: new Top(),
+                    type: oldFormatWidget.type as DiagramType,
+                    diagramType: oldFormatWidget.diagramType,
+                    tooltip: oldFormatWidget?.tooltip,
+                    links: oldFormatWidget?.links,
+                    indicatorGrouping: oldFormatWidget?.indicatorGrouping,
+                    parametersOrder: oldFormatWidget?.parametersOrder
                 )
             case TablePrevAndCurrentAndNew:
                 return new TablePrevAndCurrentAndNew(
@@ -1598,6 +1637,8 @@ class RequestData
     Collection<AggregationParameter> aggregations
     Collection<GroupParameter> groups
     Collection<Collection<FilterParameter>> filters
+    Collection<Source> sources
+    Collection<PivotLink> links
 }
 
 class Source
@@ -1605,6 +1646,7 @@ class Source
     String classFqn
     String descriptor
     Collection<FilterList> filterList
+    String dataKey
 
     @Override
     Source clone() throws CloneNotSupportedException
@@ -1612,7 +1654,8 @@ class Source
         return new Source(
             classFqn: this.classFqn,
             descriptor: this.descriptor,
-            filterList: this.filterList
+            filterList: this.filterList,
+            dataKey: this.dataKey
         )
     }
 }
@@ -1625,7 +1668,13 @@ abstract class Parameter<T>
     String sortingType
 }
 
-class AggregationParameter extends Parameter<Aggregation> {}
+class AggregationParameter extends Parameter<Aggregation>
+{
+    /**
+     * Разбивка на показателе
+     */
+    NewBreakdown breakdown
+}
 
 class GroupParameter extends Parameter<GroupType>
 {
@@ -2110,6 +2159,12 @@ class Constants {
                 value['diagramType'] == 'Text' ||
                 value.hasField('textSettings')
             }
+        },
+        (PivotTable): { value ->
+            return use(JacksonUtils) {
+                value['diagramType'] == 'PivotTable' ||
+                (value['type'] as DiagramType) == DiagramType.PIVOT_TABLE
+            }
         }
     ]
 
@@ -2127,6 +2182,11 @@ class Constants {
         (TableCurrentData): { value ->
             return use(JacksonUtils) {
                 value.hasField('parameters') && value.hasField('descriptor')
+            }
+        },
+        (PivotTableData) : { value ->
+            return use(JacksonUtils) {
+                value.hasField('parameters') || value.hasField('indicators')
             }
         },
         (CircleAndSummaryCurrentData): { value ->
@@ -2300,6 +2360,21 @@ class DeserializationHelper
         ]
         module.addDeserializer(Format, formatDataWidgetDeserializer)
 
+        StdDeserializer pivotIndicatorTypeDeserializer = new PredictorBasedPolymorphicDeserializer()
+        pivotIndicatorTypeDeserializer.predictors = [
+            (IndicatorInfo): { value ->
+                return use(JacksonUtils) {
+                    (value['type'] as PivotIndicatorType) == PivotIndicatorType.INDICATOR_INFO
+                }
+            },
+            (GroupIndicatorInfo): { value ->
+                return use(JacksonUtils) {
+                    (value['type'] as PivotIndicatorType) == PivotIndicatorType.GROUP_INDICATOR_INFO
+                }
+            }
+        ]
+        module.addDeserializer(IndicatorSubject, pivotIndicatorTypeDeserializer)
+
         mapper.registerModule(module)
     }
 }
@@ -2372,6 +2447,17 @@ class TableObject
 }
 
 /**
+ * Класс, описывающий внутренности сводной таблицы для фронта
+ */
+class PivotTableObject extends TableObject
+{
+    /**
+     * Объект, описывающий тело таблицы для фронта
+     */
+    PivotTableBody body = new PivotTableBody()
+}
+
+/**
  * Класс, описывающий заголовок колонки таблицы для фронта
  */
 class ColumnHeader
@@ -2427,6 +2513,17 @@ class TableBody
      * Способ обработки текста
      */
     TextHandler textHandler = TextHandler.CROP
+}
+
+/**
+ * Класс, описывающий тело сводной таблицы
+ */
+class PivotTableBody extends TableBody
+{
+    /**
+     * Цвет рамки параметра
+     */
+    String parameterRowColor
 }
 
 /**
@@ -2733,6 +2830,10 @@ class SourceValue extends ValueWithLabel<String>
      * Дескриптор источника
      */
     String descriptor = ''
+    /**
+     * Ключ глобального фильтра
+     */
+    String filterId
 }
 
 /**
@@ -3013,6 +3114,14 @@ class NewIndicator
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     TooltipSettings tooltip
+    /**
+     * Разбивка на показателе
+     */
+    NewBreakdown breakdown
+    /**
+     * Ключ показателя
+     */
+    String key
 }
 
 /**
@@ -3522,7 +3631,7 @@ abstract class Widget
                     data = [(dataKey): dataBody]
                 }
             }
-            else if((fields.type as DiagramType) == DiagramType.TABLE)
+            else if((fields.type as DiagramType) in [DiagramType.TABLE, DiagramType.PIVOT_TABLE])
             {
                 data = fields.order.collect { index ->
                     def dataKey = fields."dataKey_$index"
@@ -3914,6 +4023,30 @@ class TableCurrentData extends DiagramNowData
      * Источник старого формата
      */
     SourceValue source
+    /**
+     * Фильтрация источника
+     */
+    String descriptor
+}
+
+/**
+ * Класс, описывающий данные для построения сводной таблицы
+ */
+@Canonical
+class PivotTableData extends DiagramNowData
+{
+    /**
+     * Коллекция показателей
+     */
+    Collection<NewIndicator> indicators
+    /**
+     * Коллекция параметров
+     */
+    Collection<NewParameter> parameters
+    /**
+     * Источник старого формата
+     */
+    NewSourceValue source
     /**
      * Фильтрация источника
      */
@@ -4336,6 +4469,121 @@ class TablePrevAndCurrentAndNew extends NewDiagrams implements IHasTotalSettings
 }
 
 /**
+ * Класс, описывающий сводные таблицы
+ */
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
+class PivotTable extends TablePrevAndCurrentAndNew
+{
+    /**
+     * Связи между источниками
+     */
+    Collection<PivotLink> links
+
+    /**
+     * Группировки показателей
+     */
+    Collection<IndicatorSubject> indicatorGrouping
+
+    /**
+     * Порядок параметров
+     */
+    Collection<ParameterOrder> parametersOrder
+
+    /**
+     * Настройки стилей таблицы
+     */
+    PivotTableObject pivot
+}
+
+/**
+ * Класс, описывающий порядок параметров
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+class ParameterOrder
+{
+    /**
+     * Ключ показателя
+     */
+    String dataKey
+
+    /**
+     * Параметр
+     */
+    NewParameter parameter
+}
+
+/**
+ * Класс, описывающий связь между источниками
+ */
+class PivotLink
+{
+    /**
+     * Атрибут связи между источниками
+     */
+    Attribute attribute
+
+    /**
+     * Ключ данных первого источника
+     */
+    String dataKey1
+
+    /**
+     * Ключ данных второго источника
+     */
+    String dataKey2
+}
+
+/**
+ * Класс, описывающий группу показателей для сводной таблицы
+ */
+class GroupIndicatorInfo extends IndicatorSubject
+{
+    /**
+     * Список элементов показателей
+     */
+    Collection<IndicatorSubject> children
+
+    /**
+     * Флаг, имеет ли группа показателей сумму
+     */
+    Boolean hasSum
+}
+
+/**
+ * Класс, описывающий показатель для сводной таблицы
+ */
+class IndicatorInfo extends IndicatorSubject
+{
+    /**
+     * Флаг, имеет ли показатель разбивку
+     */
+    Boolean hasBreakdown
+}
+
+/**
+ * Класс, описывающий элемент показателя для сводной таблицы
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+class IndicatorSubject
+{
+    /**
+     * Ключ элемента
+     */
+    String key
+
+    /**
+     * Название элемента
+     */
+    String label
+
+    /**
+     * Тип показателя
+     */
+    PivotIndicatorType type
+}
+
+/**
  * Класс, описывающий настройку игнорирования ограничений датасета
  */
 class IgnoreLimits
@@ -4729,6 +4977,21 @@ class TooltipSettings
      * Текст подсказки
      */
     String title
+
+    /**
+     * Размер шрифта
+     */
+    String fontSize
+
+    /**
+     * Шрифт
+     */
+    String fontFamily
+
+    /**
+     * Текст
+     */
+    String text
 }
 
 /**
