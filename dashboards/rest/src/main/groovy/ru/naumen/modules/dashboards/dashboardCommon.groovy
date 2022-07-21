@@ -4966,6 +4966,7 @@ class TableRequestSettings
 /**
  * Настройки подсказки для виджета
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 class TooltipSettings
 {
     /**

@@ -3329,13 +3329,18 @@
                                                    newRequestData?.aggregations?.any { it?.type in Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE]  }
                                 if (hasStateOrTimer)
                                 {
-                                    Boolean resWithPercentCnt = false
+                                    Boolean resWithPercentCnt
+                                    Collection<Integer> percentCntAggregationIndexes
                                     if (isSourceForEachRow)
                                     {
-                                        Collection<Integer> percentCntAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT_CNT)
-                                        resWithPercentCnt = i in percentCntAggregationIndexes
+                                        percentCntAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT_CNT)
                                     }
-    
+                                    else
+                                    {
+                                        percentCntAggregationIndexes = [getPercentCntAggregationIndex(request, diagramType)]
+                                    }
+
+                                    resWithPercentCnt = i in percentCntAggregationIndexes
                                     partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations, resWithPercentCnt)
                                 }
                                 filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
@@ -6461,15 +6466,21 @@
                                        requestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] }
                     if (hasStateOrTimer)
                     {
-                        Boolean resWithPercentCnt = false
+                        Boolean resWithPercentCnt
+                        Collection<Integer> percentCntAggregationIndexes
+                        Integer dataSetIndex = request.requisite.findIndexOf {
+                            it.nodes.first().dataKey == node.dataKey
+                        }
                         if (isSourceForEachRow)
                         {
-                            Integer dataSetIndex = request.requisite.findIndexOf {
-                                it.nodes.first().dataKey == node.dataKey
-                            }
-                            Collection<Integer> percentCntAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT_CNT)
-                            resWithPercentCnt = dataSetIndex in percentCntAggregationIndexes
+                            percentCntAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT_CNT)
                         }
+                        else
+                        {
+                            percentCntAggregationIndexes = [getPercentCntAggregationIndex(request, diagramType)]
+                        }
+
+                        resWithPercentCnt = dataSetIndex in percentCntAggregationIndexes
                         total = prepareRequestWithStates(total, listIdsOfNormalAggregations, resWithPercentCnt)
                     }
                     return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
