@@ -111,7 +111,7 @@ class QueryWrapper implements CriteriaWrapper
         return new QueryWrapper(source, templateUUID)
     }
 
-    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, boolean fromSevenDays = false, Integer top = null)
+    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, IApiCriteria criteriaForColumn, boolean fromSevenDays = false, Integer top = null)
     {
         Aggregation aggregationType = parameter.type
         def sc = api.selectClause
@@ -120,11 +120,11 @@ class QueryWrapper implements CriteriaWrapper
         Closure aggregation = getAggregation(aggregationType)
         String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode.rcurry(true))
 
-        IApiCriteriaColumn column = sc.property(attributeCodes)
+        IApiCriteriaColumn column = sc.property(criteriaForColumn, attributeCodes)
         if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
             aggregationType == Aggregation.AVG)
         {
-            column = sc.property(attributeCodes).with(sc.&cast.rcurry('float'))
+            column = sc.property(criteriaForColumn, attributeCodes).with(sc.&cast.rcurry('float'))
         }
 
         if (fromSevenDays && (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
@@ -404,10 +404,18 @@ class QueryWrapper implements CriteriaWrapper
      * @param wrapper - текущий запрос в БД
      * @param parameter - параметр с группой для добавления
      * @param diagramType - тип диаграммы
+     * @param source - источник
+     * @param sourceMetaClassCriteriaMap - маппинг метаклассов источников и критерий
      * @return текущий запрос в БД с добавленной группой
      */
-    QueryWrapper processGroup(QueryWrapper wrapper, IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, Source source)
+    QueryWrapper processGroup(QueryWrapper wrapper, IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, Source source, Map<String, Object> sourceMetaClassCriteriaMap)
     {
+        IApiCriteria criteriaForColumn = criteria
+        if (diagramType == DiagramType.PIVOT_TABLE && parameter.attribute.metaClassFqn != source.classFqn)
+        {
+            criteriaForColumn = sourceMetaClassCriteriaMap[parameter.attribute.metaClassFqn]
+        }
+
         if (parameter.type == GroupType.SEVEN_DAYS)
         {
             Date startMinDate
@@ -430,12 +438,12 @@ class QueryWrapper implements CriteriaWrapper
             else
             {
                 parameter.type = GroupType.OVERLAP
-                wrapper.group(criteria, totalValueCriteria, parameter, diagramType)
+                wrapper.group(criteria, totalValueCriteria, parameter, diagramType, criteria)
             }
         }
         else
         {
-            wrapper.group(criteria, totalValueCriteria, parameter, diagramType)
+            wrapper.group(criteria, totalValueCriteria, parameter, diagramType, criteriaForColumn)
         }
         return wrapper
     }
@@ -446,12 +454,20 @@ class QueryWrapper implements CriteriaWrapper
      * @param requestData - данные для запроса
      * @param parameter - параметр с агрегацией для добавления
      * @param diagramType - тип диаграммы
+     * @param top - лимит
+     * @param onlyFilled - флаг - показывать ли только заполненные
+     * @param sourceMetaClassCriteriaMap - маппинг метаклассов источников и критерий
      * @return текущий запрос в БД с добавленной агрегацией
      */
     QueryWrapper processAggregation(QueryWrapper wrapper, IApiCriteria criteria, Boolean totalValueCriteria,
                                     RequestData requestData, AggregationParameter parameter,
-                                    DiagramType diagramType, Integer top, Boolean onlyFilled)
+                                    DiagramType diagramType, Integer top, Boolean onlyFilled, Map<String, Object> sourceMetaClassCriteriaMap)
     {
+        IApiCriteria criteriaForColumn = criteria
+        if (diagramType == DiagramType.PIVOT_TABLE && parameter.attribute.metaClassFqn != requestData.source.classFqn)
+        {
+            criteriaForColumn = sourceMetaClassCriteriaMap[parameter.attribute.metaClassFqn]
+        }
         if (parameter.type == Aggregation.PERCENT || parameter.type == Aggregation.PERCENT_CNT)
         {
             def totalAttribute = new Attribute(title: 'id', code: 'id', type: 'integer')
@@ -477,7 +493,7 @@ class QueryWrapper implements CriteriaWrapper
             {
                 wrappedQuery.filtering(wrappedCriteria, totalValueCriteria, [filterParameter])
             }
-            int totalCount = wrappedQuery.aggregate(wrappedCriteria, totalValueCriteria, totalParameter, false, top)
+            int totalCount = wrappedQuery.aggregate(wrappedCriteria, totalValueCriteria, totalParameter, wrappedCriteria, false, top)
                                          .result.head().head()
 
             wrapper.percentAggregate(criteria, totalValueCriteria, parameter, totalCount, parameter.type == Aggregation.PERCENT_CNT)
@@ -488,17 +504,17 @@ class QueryWrapper implements CriteriaWrapper
         }
         else
         {
-            wrapper.aggregate(criteria, totalValueCriteria, parameter, false, top)
+            wrapper.aggregate(criteria, totalValueCriteria, parameter, criteriaForColumn, false, top)
         }
     }
 
-    QueryWrapper group(IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType)
+    QueryWrapper group(IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, IApiCriteria criteriaForColumn)
     {
         def sc = api.selectClause
         GroupType groupType = parameter.type
         String[] attributeCodes = parameter.attribute.attrChains()*.code
                                            .with(this.&replaceMetaClassCode)
-        IApiCriteriaColumn column = sc.property(attributeCodes)
+        IApiCriteriaColumn column = sc.property(criteriaForColumn, attributeCodes)
         def attributeChains = parameter.attribute.attrChains()
 
         //в цепочке атрибутов может прийти свыше 2-х только в случае, если выбран ссылочный атрибут,
@@ -520,22 +536,22 @@ class QueryWrapper implements CriteriaWrapper
             case GroupType.OVERLAP:
                 if (attributeCodes.any {it.toLowerCase().contains('state')} && lastParameterAttributeType == AttributeType.STATE_TYPE)
                 {
-                    column = sc.concat(sc.property(attributeCodes),
+                    column = sc.concat(sc.property(criteriaForColumn, attributeCodes),
                                        sc.constant(StateMarshaller.delimiter),
-                                       sc.property(getMetaCaseIdCode(attributeChains)))
+                                       sc.property(criteriaForColumn, getMetaCaseIdCode(attributeChains)))
                     criteria.addGroupColumn(column)
-                    criteria.addGroupColumn(sc.property(getMetaCaseIdCode(attributeChains)))
+                    criteria.addGroupColumn(sc.property(criteriaForColumn, getMetaCaseIdCode(attributeChains)))
                     criteria.addColumn(column)
                 }
                 else if(lastParameterAttributeType in AttributeType.HAS_UUID_TYPES)
                 {
-                    def lastColumn =  sc.property(
+                    def lastColumn =  sc.property(criteriaForColumn,
                         LinksAttributeMarshaller.marshal(
                             attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'),
                             DashboardQueryWrapperUtils.UUID_CODE))
                     if(lastParameterAttributeType == AttributeType.META_CLASS_TYPE)
                     {
-                        lastColumn = sc.property(
+                        lastColumn = sc.property(criteriaForColumn,
                             attributeChains.takeWhile {
                                 it.type in AttributeType.HAS_UUID_TYPES
                             }.code.with(this.&replaceMetaClassCode).join('.')
@@ -548,8 +564,8 @@ class QueryWrapper implements CriteriaWrapper
                         DashboardQueryWrapperUtils.UUID_CODE
                     ).toString()
 
-                    Object columnFirst = sc.property(attributeCodes)
-                    Object columnSecond = sc.property(columnStringValue)
+                    Object columnFirst = sc.property(criteriaForColumn, attributeCodes)
+                    Object columnSecond = sc.property(criteriaForColumn, columnStringValue)
                     column = sc.selectCase()
                                .when(api.whereClause.isNull(columnSecond), columnFirst)
                                .otherwise(
@@ -567,13 +583,13 @@ class QueryWrapper implements CriteriaWrapper
                 {
                     if(attributeChains?.find {it?.type == AttributeType.TIMER_TYPE}?.timerValue == TimerValue.VALUE )
                     {
-                        def timerColumn = sc.columnDivide(sc.property(attributeCodes), sc.constant(1000))
+                        def timerColumn = sc.columnDivide(sc.property(criteriaForColumn, attributeCodes), sc.constant(1000))
                         criteria.addGroupColumn(timerColumn)
                         criteria.addColumn(timerColumn)
                     }
                     else
                     {
-                        IApiCriteriaColumn attributeColumn = sc.property(attributeCodes)
+                        IApiCriteriaColumn attributeColumn = sc.property(criteriaForColumn, attributeCodes)
 
                         switch (parameter.attribute.type)
                         {
@@ -1238,6 +1254,36 @@ class DashboardQueryWrapperUtils
         wrapper.locale = currentUserLocale
         locale = currentUserLocale
 
+        Map<String, String> sourceDataKeyMetaClassMap
+        Map<String, Object> sourceMetaClassCriteriaMap
+        Map<String, Object> sourceDataKeyCriteriaMap = [:]
+
+        if (diagramType == DiagramType.PIVOT_TABLE)
+        {
+            sourceDataKeyMetaClassMap = requestData.sources.findResults {
+                return [(it.dataKey): it.classFqn]
+            }.collectEntries()
+
+            requestData.links.each { link ->
+                IApiCriteria criteriaToJoinFrom
+                if (link.dataKey1 == requestData.source.dataKey)
+                {
+                    criteriaToJoinFrom = criteria
+                }
+                else
+                {
+                    criteriaToJoinFrom = sourceDataKeyCriteriaMap[link.dataKey1]
+                }
+
+                IApiCriteria criteriaToJoin = criteriaToJoinFrom.addLeftJoin(link.attribute.code)
+                sourceDataKeyCriteriaMap[link.dataKey2] = criteriaToJoin
+            }
+
+            sourceMetaClassCriteriaMap = sourceDataKeyCriteriaMap.collect { key, value ->
+                return [(sourceDataKeyMetaClassMap[key]): value]
+            }.collectEntries()
+        }
+
         requestData.aggregations.each { validate(it as AggregationParameter) }
         //необходимо, чтобы не кэшировать обработку у предыдущей агрегации
         def clonedAggregations = requestData.aggregations.collect {
@@ -1280,7 +1326,7 @@ class DashboardQueryWrapperUtils
                 criteria = wrapper.criteria
                 totalValueCriteria = false
             }
-            wrapper.processAggregation(wrapper, criteria, totalValueCriteria, requestData, it as AggregationParameter, diagramType, top, onlyFilled)
+            wrapper.processAggregation(wrapper, criteria, totalValueCriteria, requestData, it as AggregationParameter, diagramType, top, onlyFilled, sourceMetaClassCriteriaMap)
         }
 
         wrapper.setCases(requestData.source.classFqn,
@@ -1299,7 +1345,7 @@ class DashboardQueryWrapperUtils
                 criteria = wrapper.criteria
                 totalValueCriteria = false
             }
-            wrapper.processGroup(wrapper, criteria, totalValueCriteria, it as GroupParameter, diagramType, requestData.source)
+            wrapper.processGroup(wrapper, criteria, totalValueCriteria, it as GroupParameter, diagramType, requestData.source, sourceMetaClassCriteriaMap)
         }
 
         Set filterAttributeSourceCodes = requestData.filters?.collectMany { filters ->

@@ -197,6 +197,14 @@ interface Dashboards
      * @return список кодов атрибутов группы
      */
     String getNonMetadataAttributesData(String classFqn, String attrGroupCode)
+
+    /**
+     * Метод получения списка связанных между метаклассами атрибутов
+     * @param parentClassFqn - код класса главного источника
+     * @param classFqn - код класса нового источника
+     * @return список связанных атрибутов
+     */
+    String getLinkedAttributes(String parentClassFqn, String classFqn)
 }
 
 @InheritConstructors
@@ -357,6 +365,12 @@ class DashboardsImpl extends BaseController implements Dashboards
     String getNonMetadataAttributesData(String classFqn, String attrGroupCode)
     {
         return toJson(service.getNonMetadataAttributesData(classFqn, attrGroupCode))
+    }
+
+    @Override
+    String getLinkedAttributes(String parentClassFqn, String classFqn)
+    {
+        return toJson(service.getLinkedAttributes(parentClassFqn, classFqn))
     }
 }
 
@@ -1294,6 +1308,24 @@ class DashboardsService
         }
 
         return attributesData
+    }
+
+    /**
+     * Метод получения списка связанных между метаклассами атрибутов
+     * @param parentClassFqn - код класса главного источника
+     * @param classFqn - код класса нового источника
+     * @return список связанных атрибутов
+     */
+    Collection<Attribute> getLinkedAttributes(String parentClassFqn, String classFqn)
+    {
+        IMetaClassWrapper metaClass = metainfo.getMetaClass(parentClassFqn)
+
+        List<IAttributeWrapper> platformAttributes = metaClass.attributes.findAll {
+            return it.type.code in [AttributeType.OBJECT_TYPE, AttributeType.BACK_BO_LINKS_TYPE] &&
+                   it.type.relatedMetaClass?.code == classFqn
+        }
+
+        return mappingAttribute(platformAttributes, null, parentClassFqn)
     }
 
     /**
