@@ -48,7 +48,7 @@ const getOptions = (
 				subTotalGetter,
 				type: 'AxisChartOptions',
 				xaxis: getXAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName),
-				yaxis: getYAxisNumber(axisWidget, rawData, yAxisName, usesPercent)
+				yaxis: getYAxisNumber(axisWidget, rawData, formatters.indicator, yAxisName, usesPercent)
 			};
 		}
 	}

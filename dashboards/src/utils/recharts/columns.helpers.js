@@ -3,6 +3,7 @@ import type {AxisOptions, RechartData} from './types';
 import type {AxisWidget} from 'store/widgets/data/types';
 import {calculateStringsSize, getNiceScale, getRechartAxisSetting} from './helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
+import type {ValueFormatter} from 'utils/recharts/formater/types';
 
 /**
  * Нормализация данных для процентных столбовых диаграмм
@@ -24,21 +25,13 @@ const normalizeSeries = (data: RechartData): RechartData =>
 const getYAxisNumber = (
 	widget: AxisWidget,
 	data: DiagramBuildData,
+	formatter: ValueFormatter,
 	axisName: string = '',
 	isNormalized: boolean = false
 ): AxisOptions => {
 	const settings = getRechartAxisSetting(widget.indicator);
-	let maxValueLength = 0;
-
-	data.series.forEach(row => {
-		const valLengths = row.data.map(val => ('' + val).length);
-		const maxRowValueLength = Math.max(...valLengths);
-
-		if (maxRowValueLength > maxValueLength) {
-			maxValueLength = maxRowValueLength;
-		}
-	});
-
+	const formattedSeries = data.series.flatMap(el => el.data.map(val => formatter(val)));
+	const maxValueLength = Math.max(...formattedSeries.map(val => String(val)).length));
 	const maxString = Array(maxValueLength + 1).fill('0').join('');
 	const sizes = calculateStringsSize([[maxString], [axisName]], settings.fontFamily, settings.fontSize);
 	let width = sizes[0]?.width ?? 0;

@@ -24,7 +24,7 @@ export type FormatterParams = {
 
 export type AxisFormatter = {
 	dataLabel: NumberFormatter,
-	indicator: NumberFormatter,
+	indicator: ValueFormatter,
 	legend: ValueFormatter,
 	parameter: ValueFormatter,
 	tooltip: ValueFormatter
