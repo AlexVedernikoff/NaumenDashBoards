@@ -37,7 +37,7 @@ const getOptions = (
 				stacked: false,
 				type: 'AxisChartOptions',
 				xaxis: getXAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName),
-				yaxis: getYAxisNumber(axisWidget, rawData, yAxisName)
+				yaxis: getYAxisNumber(axisWidget, rawData, formatters.indicator, yAxisName)
 			};
 		}
 	}

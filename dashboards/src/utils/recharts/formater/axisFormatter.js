@@ -56,7 +56,7 @@ const getDataFormatter = (
 	const {aggregation, attribute: indicatorAttribute} = indicators[0];
 	const usesMSInterval = hasMSInterval(indicatorAttribute, aggregation);
 	const usesPercent = checkPercentAggregation && hasPercent(indicatorAttribute, aggregation);
-	const usesCntPercent = hasCountPercent(indicatorAttribute, aggregation);
+	const usesCntPercent = checkPercentAggregation && hasCountPercent(indicatorAttribute, aggregation);
 	const {CUSTOM} = GROUP_WAYS;
 	const hasCustomGroup = parameters[0].group.way === CUSTOM || breakdown?.[0].group.way === CUSTOM;
 	const showZero = checkShowEmptyData && hasCustomGroup && showEmptyData;
