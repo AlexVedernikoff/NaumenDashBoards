@@ -3,11 +3,11 @@
 //Код: mapSchemes
 //Назначение:
 /**
- *
  *  Мастер настройки для ВП I итерация
- *
  */
+
 //Версия: 1.0
+//Категория: скриптовый модуль
 package ru.naumen.modules.inventory
 
 import com.amazonaws.util.json.Jackson
@@ -25,10 +25,12 @@ import groovy.transform.Canonical
     title = 'Нажмите "Сохранить", чтобы продолжить',
     description = 'Нажмите "Сохранить", чтобы продолжить'
 )
-
-/**
- * Артефакт от портала, обязательно нужны какие-то инициирующие настройки
- */
+class ConstantSchemes{
+    public static final String NAME_MECHANISM_SETTINGS = 'schemes'
+    public static final String EMBEDDED_APPLICATION_CODE = 'testSvg'
+    public static final String ACTUAL_VERSION = 'actualVersion'
+    public static final String FIRST_PART_STRATEGY_CODE = 'schemesStrategy'
+}
 class SchemesInitialSettings
 {
     @JsonSchemaMeta(title = 'Инициирование настроек')
@@ -63,23 +65,20 @@ class MetaClassObjectSchemes
 
     static MetaClassObjectSchemes fromString(String fqn)
     {
-        def fqnParts = fqn.tokenize('$')
-        def id = fqnParts[0]
-        def caseId = fqnParts.size() > 1 ? fqnParts[1] : ''
-        return new MetaClassObjectSchemes(id, caseId)
+        Collection<String> fqnParts = fqn.tokenize('$')
+        String id = fqnParts[0]
+        String caseId = fqnParts.size() > 1 ? fqnParts[1] : ''
+        return new MetaClassObject(id, caseId)
     }
 }
 
-/**
- * Артефакт от портала первый уровень полей - вкладки, поэто значащие поля, на втором уровне
- */
 class SchemesInitialContainer
 {
     @JsonSchemaMeta(title = 'Соглашаюсь настраивать инвентори', description = 'Обязательный шаг, без этого настройки не проинициализируются')
     Boolean enable
 }
 
-@MechanismSettings(name = 'schemes')
+@MechanismSettings(name = ConstantSchemes.NAME_MECHANISM_SETTINGS)
 class SchemesSettings
 {
     @JsonSchemaMeta(title = 'Стратегии вывода объектов')
@@ -109,7 +108,7 @@ class BugFixSchema
 )
 @JsonSubTypes([
     @JsonSubTypes.Type(value =
-        HierarchyCommunicationSettings, name = 'hierarchyCommunicationSettings'),
+    HierarchyCommunicationSettings, name = 'hierarchyCommunicationSettings'),
     @JsonSubTypes.Type(value = ObjecRelationshipsSettings, name = 'objecRelationshipsSettings')])
 abstract class AbstractSchemesCharacteristics
 {
@@ -125,11 +124,11 @@ class HierarchyCommunicationSettings extends AbstractSchemesCharacteristics
         typeSchemes = 'hierarchyCommunicationSettings'
     }
     @JsonSchemaMeta(title = ' ')
-    Collection<СontentHierarchyCommunicationSettings> strategies = [new СontentHierarchyCommunicationSettings()]
+    Collection<ContentHierarchyCommunicationSettings> strategies = [new ContentHierarchyCommunicationSettings()]
 }
 
 @JsonSchemaMeta(requiredFields = ['hierarchyNameStrategy', 'hierarchyCodeStrategy'], title = ' ')
-class СontentHierarchyCommunicationSettings
+class ContentHierarchyCommunicationSettings
 {
     @JsonSchemaMeta(title = 'Название стратегии')
     String hierarchyNameStrategy = ''
@@ -181,11 +180,11 @@ class ObjecRelationshipsSettings extends AbstractSchemesCharacteristics
         typeSchemes = 'objecRelationshipsSettings'
     }
     @JsonSchemaMeta(title = ' ')
-    Collection<СontentObjecRelationshipsSettings> strategies = [new СontentObjecRelationshipsSettings()]
+    Collection<ContentObjecRelationshipsSettings> strategies = [new ContentObjecRelationshipsSettings()]
 }
 
 @JsonSchemaMeta(requiredFields = ['objectNameStrategy', 'objectCodeStrategy', 'scriptText'], title = ' ')
-class СontentObjecRelationshipsSettings
+class ContentObjecRelationshipsSettings
 {
     @JsonSchemaMeta(title = 'Название стратегии')
     String objectNameStrategy = ''
@@ -308,50 +307,29 @@ Object getInitSettings()
     return new SchemesInitialSettings()
 }
 
-@InjectApi
-class SettingsProvider
-{
-    SchemesSettings getSettings()
-    {
-        String nameSpace = 'schemes'
-        String actualVersion = api.keyValue.get(nameSpace, 'actualVersion')
-        if (actualVersion != null)
-        {
-            int actualVersionNumber = actualVersion as Integer
-
-            if (actualVersionNumber > -1)
-            {
-                String settingsJson = api.keyValue.get(nameSpace, "settings$actualVersion")
-                SettingsWithTimeStampSchemes settings =
-                    Jackson.fromJsonString(settingsJson, SettingsWithTimeStampSchemes)
-                return settings.settings
-            }
-        }
-        return null
-    }
-}
 
 void saveSettings(SchemesSettings settings)
 {
-    def nameSpace = 'schemes'
-    Integer actualVersion = api.keyValue.get(nameSpace, 'actualVersion') as Integer ?: 0
+    String nameSpace = ConstantSchemes.NAME_MECHANISM_SETTINGS
+    Integer actualVersion = api.keyValue.get(nameSpace, ConstantSchemes.ACTUAL_VERSION) as Integer ?: 0
 
-    def settingsJson = Jackson.toJsonString(
+    String settingsJson = Jackson.toJsonString(
         new SettingsWithTimeStampSchemes(
             settings: settings,
             timestamp: new Date().time
         )
     )
+
     actualVersion++
     api.keyValue.put(nameSpace, "settings$actualVersion", settingsJson)
-    api.keyValue.put(nameSpace, 'actualVersion', actualVersion.toString())
+    api.keyValue.put(nameSpace, ConstantSchemes.ACTUAL_VERSION, actualVersion.toString())
 }
 
 String getContents()
 {
-    def level = 0
-    return JsonOutput.toJson(
-        api.apps.listContents('testSvg').collect {
+    Integer level = 0
+    return Jackson.toJsonString(
+        api.apps.listContents(ConstantSchemes.EMBEDDED_APPLICATION_CODE).collect {
             [title: it.contentTitle, uuid: it.contentUuid, level: level++, selectable: true]
         }
     )
@@ -359,13 +337,13 @@ String getContents()
 
 String getContentTitle()
 {
-    Collection<IAppContentInfo> contentInfo = api.apps.listContents('testSvg')
-    def argum = []
+    Collection<IAppContentInfo> contentInfo = api.apps.listContents(ConstantSchemes.EMBEDDED_APPLICATION_CODE)
+    Collection<LinkedHashMap> argum = []
     contentInfo.collect {
         argum << [selectable: true, title: it.contentTitle, uuid:
             it.tabUuid, level: 0, extra: 'тест']
     }
-    return JsonOutput.toJson(argum)
+    return Jackson.toJsonString(argum)
 }
 
 @InjectApi
@@ -373,8 +351,8 @@ class SettingsProviderSchemes
 {
     SchemesSettings getSettings()
     {
-        String nameSpace = 'schemes'
-        String actualVersion = api.keyValue.get(nameSpace, 'actualVersion')
+        String nameSpace = ConstantSchemes.NAME_MECHANISM_SETTINGS
+        String actualVersion = api.keyValue.get(nameSpace, ConstantSchemes.ACTUAL_VERSION)
         if (actualVersion != null)
         {
             int actualVersionNumber = actualVersion as Integer
@@ -404,25 +382,25 @@ void postSaveActions()
 
     hierarchyCommunicationSettings.each {
         it.strategies.each { code ->
-            def codeStrategy = code?.hierarchyCodeStrategy
-            def nameStrategy = code?.hierarchyNameStrategy
-            if ((codeStrategy == "schemesStrategy" || codeStrategy == "") && nameStrategy != "")
+            String codeStrategy = code?.hierarchyCodeStrategy
+            String nameStrategy = code?.hierarchyNameStrategy
+            if ((codeStrategy == ConstantSchemes.FIRST_PART_STRATEGY_CODE || codeStrategy == "") && nameStrategy != "")
             {
-                def hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
+                integer hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
                     (nameStrategy.hashCode() * -1)
-                code?.hierarchyCodeStrategy = "schemesStrategy" + hashCode
+                code?.hierarchyCodeStrategy = ConstantSchemes.FIRST_PART_STRATEGY_CODE + hashCode
             }
         }
     }
     objecRelationshipsSettings.each {
         it.strategies.each { code ->
-            def codeStrategy = code?.objectCodeStrategy
-            def nameStrategy = code?.objectNameStrategy
-            if ((codeStrategy == "schemesStrategy" || codeStrategy == "") && nameStrategy != "")
+            String codeStrategy = code?.objectCodeStrategy
+            String nameStrategy = code?.objectNameStrategy
+            if ((codeStrategy == ConstantSchemes.FIRST_PART_STRATEGY_CODE || codeStrategy == "") && nameStrategy != "")
             {
-                def hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
+                integer hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
                     (nameStrategy.hashCode() * -1)
-                code?.objectCodeStrategy = "schemesStrategy" + hashCode
+                code?.objectCodeStrategy = ConstantSchemes.FIRST_PART_STRATEGY_CODE + hashCode
             }
         }
     }
