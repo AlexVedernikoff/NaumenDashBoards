@@ -1,0 +1,18 @@
+@import '/styles/variables';
+
+:local {
+	.grid {
+		position: relative;
+
+		:global(.react-draggable) {
+			transition-duration: .3s;
+			transition-property: transform;
+		}
+
+		:global(.react-draggable-dragging) {
+			transition-duration: 0s;
+			transition-property: transform;
+		}
+
+	}
+}
