@@ -1,0 +1,51 @@
+@import '/styles/variables';
+
+:local {
+	.addButton {
+		display: inline-flex;
+		gap: 5px;
+		justify-content: flex-start;
+		padding-bottom: 17px;
+		padding-top: 15px ;
+		text-align: left;
+
+		.icon {
+			color: @info;
+		}
+
+		.iconDisabled {
+			color: @dimgrey;
+		}
+
+		&:hover, :active {
+			.icon {
+				color: @black;
+			}
+		}
+	}
+
+	.container {
+		height: fit-content;
+		min-height: 500px;
+		overflow: hidden;
+		padding: 24px;
+	}
+
+	.button {
+		height: 32px;
+		width: 32px;
+	}
+
+	.element {
+		align-items: center;
+		display: flex;
+		gap: 15px;
+		justify-content: flex-start;
+		margin-bottom: 15px;
+	}
+
+	.footer {
+		display: flex;
+		justify-content: flex-end;
+	}
+}
