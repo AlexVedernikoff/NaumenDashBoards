@@ -64,7 +64,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		}
 	};
 
-	getHandleClickSourcePercentageRelative = () => {
+	getClickSourcePercentageRelativeHandler = () => {
 		const handler = async () => {
 			this.setState({showSelectionModal: false});
 
@@ -95,7 +95,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		return () => { handler(); };
 	};
 
-	getHandleEditPercentageRelativeAttribute = (attribute: PercentageRelativeAttr | null) => {
+	getEditPercentageRelativeAttributeHandler = (attribute: PercentageRelativeAttr | null) => {
 		const handler = async () => {
 			const {openFilterForm, source} = this.props;
 			const {value} = source;
@@ -360,7 +360,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		const {attribute} = value;
 
 		if (attribute && attribute.type === ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR) {
-			return <FieldButton onClick={this.getHandleEditPercentageRelativeAttribute(attribute)}>f(%)</FieldButton>;
+			return <FieldButton onClick={this.getEditPercentageRelativeAttributeHandler(attribute)}>f(%)</FieldButton>;
 		}
 
 		return null;
@@ -373,7 +373,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			return (
 				<SelectModal onClose={this.handleCloseSelectionModal}>
 					<SelectItem onClick={this.handleClickMathFormula} text='IndicatorFieldset::MathFormula' />
-					<SelectItem onClick={this.getHandleClickSourcePercentageRelative()} text='IndicatorFieldset::SourcePercentageRelative' />
+					<SelectItem onClick={this.getClickSourcePercentageRelativeHandler()} text='IndicatorFieldset::SourcePercentageRelative' />
 				</SelectModal>
 			);
 		}

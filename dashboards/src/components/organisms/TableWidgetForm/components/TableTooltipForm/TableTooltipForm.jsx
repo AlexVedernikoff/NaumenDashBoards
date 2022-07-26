@@ -58,7 +58,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		};
 	}
 
-	getHandleChangeIndicatorFont = indicatorRef => ({name, value}) => {
+	getChangeIndicatorFontHandler = indicatorRef => ({name, value}) => {
 		const {onChange} = this.props;
 		const {newValue} = this.state;
 
@@ -67,7 +67,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		onChange(DIAGRAM_FIELDS.data, newValue);
 	};
 
-	getHandleChangeIndicatorText = indicatorRef => ({value: title}: OnChangeEvent<string>) => {
+	getChangeIndicatorTextHandler = indicatorRef => ({value: title}: OnChangeEvent<string>) => {
 		const {onChange} = this.props;
 		const {newValue} = this.state;
 
@@ -76,7 +76,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		onChange(DIAGRAM_FIELDS.data, newValue);
 	};
 
-	getHandleClickRemoveButton = indicatorRef => () => {
+	getClickRemoveButtonHandler = indicatorRef => () => {
 		const {onChange} = this.props;
 		const {indicatorPositions, newValue} = this.state;
 		const removeKey = indicatorToKey(indicatorRef);
@@ -88,7 +88,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		this.setState({indicatorPositions: newIndicatorPositions});
 	};
 
-	getHandleSelectIndicator = (oldSelectRef: Indicator) => ({value: newSelectRef}: OnChangeEvent<Indicator>) => {
+	getSelectIndicatorHandler = (oldSelectRef: Indicator) => ({value: newSelectRef}: OnChangeEvent<Indicator>) => {
 		const {onChange} = this.props;
 		const {indicatorPositions, newValue} = this.state;
 		const removeKey = indicatorToKey(oldSelectRef);
@@ -223,8 +223,8 @@ class TableTooltipForm extends PureComponent<Props, State> {
 
 		return (
 			<FormField row>
-				<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.getHandleChangeIndicatorFont(indicator)} value={fontFamily} />
-				<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.getHandleChangeIndicatorFont(indicator)} value={fontSize} />
+				<FontFamilySelect name={DIAGRAM_FIELDS.fontFamily} onSelect={this.getChangeIndicatorFontHandler(indicator)} value={fontFamily} />
+				<FontSizeSelect name={DIAGRAM_FIELDS.fontSize} onSelect={this.getChangeIndicatorFontHandler(indicator)} value={fontSize} />
 			</FormField>
 		);
 	};
@@ -255,7 +255,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 	};
 
 	renderIndicatorRemoveButton = (indicator: Indicator) => (
-		<IconButton className={styles.removeButton} icon={ICON_NAMES.BASKET} onClick={this.getHandleClickRemoveButton(indicator)} />
+		<IconButton className={styles.removeButton} icon={ICON_NAMES.BASKET} onClick={this.getClickRemoveButtonHandler(indicator)} />
 	);
 
 	renderIndicatorSelect = (indicator: Indicator, showDeleteButton: boolean) => {
@@ -265,7 +265,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 				<Select
 					getOptionLabel={(option: Indicator) => option.attribute?.title ?? ''}
 					getOptionValue={option => option}
-					onSelect={this.getHandleSelectIndicator(indicator)}
+					onSelect={this.getSelectIndicatorHandler(indicator)}
 					options={unusedIndicators}
 					value={indicator}
 				/>
@@ -283,7 +283,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 				<TextArea
 					focusOnMount={focus}
 					name={DIAGRAM_FIELDS.title}
-					onChange={this.getHandleChangeIndicatorText(indicator)}
+					onChange={this.getChangeIndicatorTextHandler(indicator)}
 					value={tooltip.title}
 				/>
 			</FormField>

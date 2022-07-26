@@ -27,7 +27,7 @@ export class SingleRowDataSetSettings extends PureComponent<Props> {
 		FormBoxControls: this.renderIndicatorsControl
 	}));
 
-	getHandleChangeSourceRowNameValue = (index: number) => ({value: sourceRowName}: OnChangeEvent<string>) => {
+	getChangeSourceRowNameValueHandler = (index: number) => ({value: sourceRowName}: OnChangeEvent<string>) => {
 		const {onChange, value} = this.props;
 		return onChange(index, {...value, sourceRowName});
 	};
@@ -165,7 +165,7 @@ export class SingleRowDataSetSettings extends PureComponent<Props> {
 			<FormBox title={t('TableWidgetForm::SingleRowDataSetSettings::SourceRowName')}>
 				<FormField>
 					<TextInput
-						onChange={this.getHandleChangeSourceRowNameValue(index)}
+						onChange={this.getChangeSourceRowNameValueHandler(index)}
 						placeholder={t('TableWidgetForm::SingleRowDataSetSettings::SourceRowNamePlaceholder')}
 						value={sourceRowName}
 					/>
