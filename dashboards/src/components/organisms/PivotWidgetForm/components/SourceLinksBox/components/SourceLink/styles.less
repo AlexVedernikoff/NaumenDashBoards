@@ -1,0 +1,76 @@
+@import '/styles/variables';
+
+:local {
+	.link {
+		position: relative;
+
+		.sources {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			width: 100%;
+
+			.first, .second {
+				flex: 0 1 auto;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.arrow {
+				flex: 0 0 1.5em;
+				text-align: center;
+			}
+		}
+		.connection {
+			color: @darkgrey;
+			display: flex;
+
+			.connectIcon {
+				align-self: center;
+				flex: 0 0 16px;
+				margin-right: 2px;
+			}
+
+			.attribute {
+				flex: 1 1 auto;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+		}
+
+		.actions {
+			display: flex;
+			position: absolute;
+			right: 5px;
+			top: 0;
+			visibility: hidden;
+
+			.actionButton {
+				background-color: @lightgrey;
+				margin-left: 8px;
+			}
+		}
+
+		&:hover .actions{
+			visibility: visible;
+		}
+	}
+
+	.picker {
+		height: 315px;
+		min-width: 280px;
+		position: absolute;
+		top: -235px;
+
+		&.right {
+			right: calc(100% + 12px);
+		}
+
+		&.left {
+			left: calc(100% + 12px);
+		}
+	}
+}

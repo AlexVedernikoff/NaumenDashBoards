@@ -27,7 +27,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 		return null;
 	}
 
-	getHandleBarMouseEnter = (key: string, label: string, fill: string) => {
+	getBarMouseEnterHandler = (key: string, label: string, fill: string) => {
 		const {options: {formatters}} = this.state;
 		const parameterFormatter = formatters.parameter;
 		const valueFormatter = formatters.dataLabel(key);
@@ -46,7 +46,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 		};
 	};
 
-	getHandleDotMouseEnter = (key: string, label: string, fill: string) => {
+	getDotMouseEnterHandler = (key: string, label: string, fill: string) => {
 		const {options: {formatters}} = this.state;
 		const parameterFormatter = formatters.parameter;
 		const valueFormatter = formatters.dataLabel(key);
@@ -100,7 +100,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 				key={id}
 				name={label}
 				onClick={this.handleBarClick(key, label)}
-				onMouseEnter={this.getHandleBarMouseEnter(key, label, color)}
+				onMouseEnter={this.getBarMouseEnterHandler(key, label, color)}
 				onMouseLeave={this.handleClearTooltip}
 				stackId={stackId}
 				yAxisId={key}
@@ -210,7 +210,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 				activeDot={{
 					onClick: this.handleDotClick(key, label),
 					onMouseLeave: this.handleClearTooltip,
-					onMouseOver: this.getHandleDotMouseEnter(key, label, color)
+					onMouseOver: this.getDotMouseEnterHandler(key, label, color)
 				}}
 				dataKey={id}
 				dot={dot}

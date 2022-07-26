@@ -1,0 +1,36 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		background: @white;
+		border: 1px solid @grey;
+		border-radius: @border-radius;
+		border-radius: @border-radius;
+		box-shadow: @grey-box-shadow;
+		display: flex;
+		flex-direction: column;
+		width: fit-content;
+	}
+
+	.header {
+		background: @bgBlue;
+		flex: 0 0 auto;
+		font-weight: 500;
+		padding: 8px 14px;
+		white-space: nowrap;
+	}
+
+	.editPlace {
+		flex: 1 1 auto;
+	}
+
+
+	.footer {
+		background: @bgBlue;
+		display: flex;
+		flex: 0 0 auto;
+		flex-wrap: nowrap;
+		gap: 6px;
+		padding: 8px 14px;
+	}
+}
