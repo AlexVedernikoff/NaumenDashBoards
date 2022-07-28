@@ -22,6 +22,7 @@ export type DataSet = $Exact<{
 export type Values = $Exact<{
 	borders: Borders,
 	computedAttrs: Array<ComputedAttr>,
+	// $FlowFixMe
 	data: Array<DataSet>,
 	displayMode: DisplayMode,
 	header: Header,

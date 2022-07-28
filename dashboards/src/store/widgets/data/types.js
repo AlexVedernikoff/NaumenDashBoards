@@ -615,7 +615,6 @@ export type DataSet =
 	| CircleData
 	| ComboData
 	| SummaryData
-	| SpeedometerData
 	| TableData
 	| PivotData;
 

@@ -11,7 +11,7 @@ export class ParameterRowColorBox extends PureComponent<Props, State> {
 		color: DEFAULT_PRESET_COLOR
 	};
 
-	getHandleChangeColor = (value: string) => () => {
+	getChangeColorHandler = (value: string) => () => {
 		const {name, onChange} = this.props;
 		return onChange({name, value});
 	};
@@ -26,7 +26,7 @@ export class ParameterRowColorBox extends PureComponent<Props, State> {
 		});
 
 		return (
-			<div className={styles.colorsItem} key={value} onClick={this.getHandleChangeColor(value)} style={style}>
+			<div className={styles.colorsItem} key={value} onClick={this.getChangeColorHandler(value)} style={style}>
 				<Icon className={CN} height={34} name={ICON_NAMES.ROW_COLOR} viewBox="0 0 50 34" width={50} />
 			</div>);
 	};

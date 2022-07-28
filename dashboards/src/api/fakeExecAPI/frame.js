@@ -1,14 +1,8 @@
 // @flow
 import type {DTOValue} from 'api/types';
-import data from './fakeData.json';
 import fakeExecMFFrame from 'api/fakeExecMFAPI/frame';
 
 const fakeDataList = [
-	{
-		body: '',
-		data: data['modules.dashboardSettings.getSettings'],
-		url: 'func=modules.dashboardSettings.getSettingsExample'
-	}
 	// {
 	// body: '',
 	// data: data['modules.dashboardSettings.getUserData'],

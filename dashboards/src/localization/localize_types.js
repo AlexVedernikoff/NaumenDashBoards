@@ -430,9 +430,14 @@ type PivotWidgetFormSourceLinkEditor =
 
 type SourcesAndFieldsExtended =
 	| 'SourcesAndFieldsExtended::ParameterSelection'
+	| 'SourcesAndFieldsExtended::IndicatorSelection'
 	| 'SourcesAndFieldsExtended::SourceParameter'
-	| 'SourcesAndFieldsExtended::Parameter'
-;
+	| 'SourcesAndFieldsExtended::Parameter';
+
+type PivotWidget =
+	| 'PivotWidget::HideChildren'
+	| 'PivotWidget::ShowChildren'
+	| 'PivotWidget::Sum';
 
 // components/organisms/TextWidgetForm
 type TextWidgetForm =
@@ -1033,6 +1038,7 @@ export type LangType =
   | TableWidgetFormSingleRowDataSetSettings
   | TableWidgetFormTableBox
   | TableWidgetFormTableTooltipForm
+  | PivotWidget
   | PivotWidgetForm
   | PivotWidgetFormGroupingBox
   | PivotWidgetFormIndicatorsGroupBox
