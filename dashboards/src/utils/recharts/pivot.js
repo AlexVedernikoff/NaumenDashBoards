@@ -1,7 +1,8 @@
 // @flow
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {getColumnWidth, getSeriesData, parseColumns} from './pivot.helpers';
+import {getColumnWidth, getSeriesData, parseColumns, parseColumnsFlat, parseMetadata} from './pivot.helpers';
+import {getPivotFormatter} from './formater';
 import {getPivotWidget} from './helpers';
 import type {PivotOptions} from './types';
 import type {Widget} from 'store/widgets/data/types';
@@ -14,16 +15,25 @@ const getOptions = (
 	const pivotWidget = getPivotWidget(widget);
 
 	if (pivotWidget) {
+		const {pivot: {body: bodyStyle, columnHeader: headerStyle}} = pivotWidget;
 		const buildDataSet = getBuildSet(pivotWidget);
-		const data = getSeriesData(rawData);
-		const headers = parseColumns(pivotWidget, data);
-		const columnsList = parseColumns(pivotWidget, data);
-		const columnWidth = getColumnWidth(columnsList, container);
 
 		if (buildDataSet) {
+			const metadata = parseMetadata(rawData);
+			const data = getSeriesData(rawData, metadata);
+			const {columns: headers, totalHeight: headHeight} = parseColumns(pivotWidget, data, metadata.breakdown);
+			const columnsList = parseColumnsFlat(headers);
+			const columnWidth = getColumnWidth(columnsList, container);
+			const formatters = getPivotFormatter(pivotWidget, data, container);
+
 			return {
+				bodyStyle,
 				columnWidth,
 				columnsList,
+				data,
+				formatters,
+				headHeight,
+				headerStyle,
 				headers,
 				type: 'PivotOptions'
 			};
