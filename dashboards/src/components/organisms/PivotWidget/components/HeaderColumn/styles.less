@@ -1,0 +1,58 @@
+@import '/styles/variables';
+
+:local {
+	.column {
+		border-right: solid 1px @ninegrey;
+		box-sizing: border-box;
+		display: flex;
+    	flex-direction: column;
+		position: relative;
+
+		&:last-child {
+			border-right: none;
+		}
+	}
+
+	.parameter {
+		background-color: @white;
+		border-left: solid 1px @ninegrey;
+		left: 0;
+		position: sticky;
+		top: 0;
+		z-index: 2;
+	}
+
+	.divider{
+		bottom: 0;
+		cursor: col-resize;
+		position: absolute;
+		right: -5px;
+		top: 0;
+		width: 10px;
+		z-index: 4;
+	}
+
+	.subColumns {
+		border-top: solid 1px @ninegrey;
+		box-sizing: border-box;
+		display: flex;
+    	flex-direction: row;
+	}
+
+	.title {
+		align-items: center;
+		box-sizing: border-box;
+		display: flex;
+		font-weight: 500;
+		height: 2em;
+		justify-content: flex-start;
+		padding-left: 9px;
+
+		.titleWrap{
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			width: 100%;
+		}
+	}
+}
