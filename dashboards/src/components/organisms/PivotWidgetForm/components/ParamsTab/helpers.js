@@ -1,18 +1,18 @@
 // @flow
 import type {IndicatorGrouping, IndicatorInfo} from 'store/widgets/data/types';
 import {INDICATOR_GROUPING_TYPE} from 'store/widgets/data/constants';
-import type {PivotValueUpdate} from './types';
+import type {IndicatorsUpdate, PivotValueUpdate} from './types';
 import type {Values} from 'components/organisms/PivotWidgetForm/types';
 
 /**
- * Фильтрует показатели по ключам, а также синхронизирует их имена
+ * Фильтрует показатели по ключам, а также синхронизирует их имена и разбивку
  * @param {IndicatorGrouping} indicatorGrouping - группировка показателей
- * @param {object} indicators - связка ключ показателя - имя показателя
+ * @param {object} indicators - объект связки, где key - ключ показателя, а value - наличие разбивки и имя показателя
  * @returns {IndicatorGrouping} - новая группировка показателей
  */
 export const filterIndicatorGroupingByKeys = (
 	indicatorGrouping: IndicatorGrouping,
-	indicators: {[key: string]: string}
+	indicators: IndicatorsUpdate
 ): IndicatorGrouping => {
 	const result = [];
 
@@ -27,7 +27,9 @@ export const filterIndicatorGroupingByKeys = (
 			const {key} = value;
 
 			if (key in indicators) {
-				result.push({...value, label: indicators[key]});
+				const {hasBreakdown, label} = indicators[key];
+
+				result.push({...value, hasBreakdown, label});
 			}
 		}
 	});
@@ -66,11 +68,14 @@ export const getValuesDataUpdate = (values: Values): PivotValueUpdate => {
 	const {data, indicatorGrouping, links, parametersOrder} = values;
 	const dataKeys = data.map(dataSet => dataSet.dataKey);
 	const dataKeysSet = new Set(dataKeys);
-	const indicatorsKeys = {};
+	const indicatorsKeys: IndicatorsUpdate = {};
 
 	data.forEach(dataSet =>
-		dataSet.indicators.forEach(indicator => {
-			indicatorsKeys[indicator.key] = indicator.attribute?.title ?? '';
+		dataSet.indicators.filter(Boolean).forEach(indicator => {
+			indicatorsKeys[indicator.key] = {
+				hasBreakdown: !!indicator.breakdown,
+				label: indicator.attribute?.title ?? ''
+			};
 		})
 	);
 
@@ -96,7 +101,7 @@ export const getUnusedIndicators = (values: Values): Array<IndicatorInfo> => {
 		const groupingKeysSet = new Set(getAllKeysInIndicatorGrouping(indicatorGrouping));
 
 		data.forEach(({indicators}) =>
-			indicators.forEach(({attribute, breakdown, key}) => {
+			indicators.filter(Boolean).forEach(({attribute, breakdown, key}) => {
 				if (!groupingKeysSet.has(key)) {
 					result.push({
 						hasBreakdown: !!breakdown?.attribute,

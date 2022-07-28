@@ -1,7 +1,7 @@
 // @flow
 import BodySettingsBox from 'PivotWidgetForm/components/BodySettingsBox';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
-import {DEFAULT_TABLE_SETTINGS} from 'store/widgetForms/pivotForm/constants';
+import {DEFAULT_PIVOT_SETTINGS} from 'store/widgetForms/pivotForm/constants';
 import HeaderSettingsBox from 'PivotWidgetForm/components/HeaderSettingsBox';
 import type {PivotBodySettings, PivotHeaderSettings} from 'store/widgets/data/types';
 import type {Props} from './types';
@@ -9,6 +9,10 @@ import React, {PureComponent} from 'react';
 import t from 'localization';
 
 export class PivotStyleBox extends PureComponent<Props> {
+	static defaultProps = {
+		value: DEFAULT_PIVOT_SETTINGS
+	};
+
 	handleChangeBodySettings = (settings: PivotBodySettings) => {
 		const {name, onChange, value} = this.props;
 

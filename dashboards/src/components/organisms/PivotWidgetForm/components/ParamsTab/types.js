@@ -13,3 +13,10 @@ export type PivotValueUpdate = {
 	links: Array<PivotLink>,
 	parametersOrder: Array<ParameterOrder>,
 };
+
+export type IndicatorsUpdate = {
+	[key: string]: {
+		hasBreakdown: boolean,
+		label: string
+	}
+};

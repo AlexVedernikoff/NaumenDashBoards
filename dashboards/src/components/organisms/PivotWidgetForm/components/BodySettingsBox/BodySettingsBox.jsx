@@ -2,7 +2,7 @@
 import CellSettingsBox from 'TableWidgetForm/components/CellSettingsBox';
 import Checkbox from 'components/atoms/Checkbox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import {EMPTY_DATA_OPTIONS, PAGE_SIZES} from './constants';
+import {EMPTY_DATA_OPTIONS} from './constants';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
 import Label from 'components/atoms/Label';
@@ -37,7 +37,7 @@ export class BodySettingsBox extends PureComponent<Props> {
 	};
 
 	render () {
-		const {defaultValue, pageSize, parameterRowColor, showRowNum, textAlign, textHandler} = this.props.value;
+		const {defaultValue, parameterRowColor, showRowNum, textAlign, textHandler} = this.props.value;
 
 		return (
 			<div className={styles.container}>
@@ -51,18 +51,6 @@ export class BodySettingsBox extends PureComponent<Props> {
 							value={showRowNum}
 						/>
 					</FormControl>
-				</FormField>
-				<FormField className={styles.pageSizeField}>
-					<Select
-						className={styles.pageSizeSelect}
-						name={DIAGRAM_FIELDS.pageSize}
-						onSelect={this.handleSelect}
-						options={PAGE_SIZES}
-						value={pageSize}
-					/>
-					<div className={styles.pageSizeSelectLabel}>
-						<T text="TableWidgetForm::BodySettingsBox::RowCountLimit" />
-					</div>
 				</FormField>
 				<FormField label={t('TableWidgetForm::BodySettingsBox::Wrap')}>
 					<TextHandlerControl name={DIAGRAM_FIELDS.textHandler} onChange={this.handleChange} value={textHandler} />

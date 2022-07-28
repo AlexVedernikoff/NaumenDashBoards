@@ -53,7 +53,12 @@ export class ParametersDataBox extends PureComponent<Props> {
 		onChange(newValue);
 	};
 
-	handleRemove = () => null;
+	handleRemove = (index: number) => {
+		const {onChange, value} = this.props;
+		const newValue = value.filter((_, idx) => idx !== index);
+
+		onChange(newValue);
+	};
 
 	renderFieldset = (parameter: ParameterOrder, index: number, parameters: Array<ParameterOrder>) => {
 		const {data} = this.props;

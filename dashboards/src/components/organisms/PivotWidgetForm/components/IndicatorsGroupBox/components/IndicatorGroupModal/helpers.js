@@ -38,9 +38,10 @@ const getChecked = (value: IndicatorGrouping): IndicatorGrouping => {
  */
 const removeElementsFromIndicatorGrouping = (value: IndicatorGrouping, elements: IndicatorGrouping): IndicatorGrouping => {
 	const result = [];
+	const elementsKeys = elements.map(item => item.key);
 
 	value.forEach(item => {
-		if (!elements.includes(item)) {
+		if (!elementsKeys.includes(item.key)) {
 			let addElement = item;
 
 			if (item.type === INDICATOR_GROUPING_TYPE.GROUP_INDICATOR_INFO && item.children) {

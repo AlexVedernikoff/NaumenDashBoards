@@ -8,7 +8,6 @@ import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import t from 'localization';
 import TextAlignControl from 'WidgetFormPanel/components/TextAlignControl';
-import TextHandlerControl from 'WidgetFormPanel/components/TextHandlerControl';
 
 export class HeaderSettingsBox extends PureComponent<Props> {
 	handleChange = ({name, value}: OnChangeInputEvent) => this.updateSettings(name, value);
@@ -37,7 +36,7 @@ export class HeaderSettingsBox extends PureComponent<Props> {
 	};
 
 	render () {
-		const {fontColor, fontStyle, textAlign, textHandler} = this.props.value;
+		const {fontColor, fontStyle, textAlign} = this.props.value;
 
 		return (
 			<Fragment>
@@ -47,7 +46,6 @@ export class HeaderSettingsBox extends PureComponent<Props> {
 				</FormField>
 				<FormField row>
 					<TextAlignControl name={DIAGRAM_FIELDS.textAlign} onChange={this.handleChange} value={textAlign} />
-					<TextHandlerControl name={DIAGRAM_FIELDS.textHandler} onChange={this.handleChange} value={textHandler} />
 				</FormField>
 			</Fragment>
 		);
