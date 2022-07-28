@@ -65,21 +65,25 @@ export class ParametersDataBox extends PureComponent<Props> {
 		const {dataKey, parameter: value} = parameter;
 		const dataSetIndex = data.findIndex(item => item.dataKey === dataKey);
 
-		return (
-			<ParameterFieldset
-				dataKey={dataKey}
-				dataSetIndex={dataSetIndex}
-				dataSets={data}
-				index={index}
-				key={index}
-				onChange={this.handleChange}
-				onChangeDataSet={this.handleChangeDataSet}
-				onRemove={this.handleRemove}
-				removable={true}
-				source={data[dataSetIndex].source}
-				value={value}
-			/>
-		);
+		if (dataSetIndex !== -1) {
+			return (
+				<ParameterFieldset
+					dataKey={dataKey}
+					dataSetIndex={dataSetIndex}
+					dataSets={data}
+					index={index}
+					key={index}
+					onChange={this.handleChange}
+					onChangeDataSet={this.handleChangeDataSet}
+					onRemove={this.handleRemove}
+					removable={true}
+					source={data[dataSetIndex].source}
+					value={value}
+				/>
+			);
+		}
+
+		return null;
 	};
 
 	renderRightControl = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddButton} round={false} />;
