@@ -4,7 +4,6 @@ import type {Breakdown} from 'store/widgetForms/types';
 import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
 import {createPivotIndicator} from 'store/widgetForms/pivotForm/helpers';
 import type {DataSet, PivotIndicator} from 'store/widgetForms/pivotForm/types';
-import {deepClone} from 'helpers';
 import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
 import FormBox from 'components/molecules/FormBox';
 import IconButton from 'components/atoms/IconButton';
@@ -167,13 +166,11 @@ export class IndicatorsDataBox extends Component<Props, State> {
 		const {values} = this.state;
 
 		if (onChange) {
-			const newData = deepClone(data);
+			const newData = data.map(dataSet => ({...dataSet, indicators: []}));
 
 			values.forEach(item => {
-				if (!newData[item.dataSetIndex].indicators) {
-					newData[item.dataSetIndex].indicators = [item.indicator];
-				} else {
-					newData[item.dataSetIndex].indicators[item.index] = item.indicator;
+				if (item.indicator?.attribute) {
+					newData[item.dataSetIndex].indicators.push(item.indicator);
 				}
 			});
 

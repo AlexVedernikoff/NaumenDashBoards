@@ -23,7 +23,9 @@ export class MainSelect extends Component<Props> {
 	});
 
 	componentDidUpdate (prevProps: Props) {
-		if (this.props.source !== prevProps.source) {
+		const {attributes, source} = this.props;
+
+		if (source?.value !== prevProps.source?.value && source?.value && !attributes[source.value]) {
 			this.fetchAttributes();
 		}
 	}
