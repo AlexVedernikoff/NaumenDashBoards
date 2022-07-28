@@ -610,7 +610,7 @@ class DashboardConfigService
     private def executeQuery(def query)
     {
         def sessionFactory = beanFactory.getBean("sessionFactory")
-        return sessionFactory.getCurrentSession().createSQLQuery(query).list().first()
+        return sessionFactory.getCurrentSession().createSQLQuery(query).list()
     }
 
     /**
@@ -685,7 +685,11 @@ class DashboardConfigService
                    по нему было равно NULL, или такого ключа не было. */
                 logger.info("workerKeyValueStorage >>> update ${counter++}/${total}")
                 def query = String.format(CHECK_ON_EXIST_SQL, namespaceForUpdate, keyForUpdate);
-                def currentValue = api.tx.call { executeQuery(query) };
+                def currentValue = api.tx.call { executeQuery(query).first() };
+                if (Proxy.isProxyClass(currentValue.class))
+                {
+                    currentValue = currentValue.getSubString(1, (int) currentValue.length())
+                }
                 def resultPut = api.keyValue.put(namespaceForUpdate, keyForUpdate, newValue);
                 if (!resultPut)
                 {
