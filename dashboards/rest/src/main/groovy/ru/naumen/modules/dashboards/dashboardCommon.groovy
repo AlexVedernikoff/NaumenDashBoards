@@ -1062,7 +1062,7 @@ class DashboardUtils
                     showTotalAmount: oldFormatWidget.showTotalAmount,
                     showRowNum: oldFormatWidget.showRowNum,
                     sorting: oldFormatWidget.sorting as Sorting,
-                    table: oldFormatWidget.table as TableObject,
+                    pivot: oldFormatWidget.pivot as PivotTableObject,
                     data: oldFormatWidget.data as Collection<DiagramNowData>,
                     top: oldFormatWidget.top as Top ?: new Top(),
                     type: oldFormatWidget.type as DiagramType,
@@ -1674,6 +1674,14 @@ class AggregationParameter extends Parameter<Aggregation>
      * Разбивка на показателе
      */
     NewBreakdown breakdown
+    /**
+     * Ключ агрегации
+     */
+    String key
+    /**
+     * Фильтрация на показателе
+     */
+    String descriptor
 }
 
 class GroupParameter extends Parameter<GroupType>
@@ -2174,6 +2182,11 @@ class Constants {
                 value.hasField('xAxis')
             }
         },
+        (PivotTableData) : { value ->
+            return use(JacksonUtils) {
+                (value.hasField('type') || value['type'] == 'PivotDataSet')
+            }
+        },
         (DiagramNewData) : { value ->
             return use(JacksonUtils) {
                 (value.hasField('indicators') || value['sourceForCompute']) && !value.hasField('descriptor')
@@ -2182,11 +2195,6 @@ class Constants {
         (TableCurrentData): { value ->
             return use(JacksonUtils) {
                 value.hasField('parameters') && value.hasField('descriptor')
-            }
-        },
-        (PivotTableData) : { value ->
-            return use(JacksonUtils) {
-                value.hasField('parameters') || value.hasField('indicators')
             }
         },
         (CircleAndSummaryCurrentData): { value ->
@@ -3122,6 +3130,10 @@ class NewIndicator
      * Ключ показателя
      */
     String key
+    /**
+     * Фильтрация на показателе
+     */
+    String descriptor
 }
 
 /**
@@ -4051,6 +4063,10 @@ class PivotTableData extends DiagramNowData
      * Фильтрация источника
      */
     String descriptor
+    /**
+     * Тип датасета
+     */
+    String type
 }
 
 /**

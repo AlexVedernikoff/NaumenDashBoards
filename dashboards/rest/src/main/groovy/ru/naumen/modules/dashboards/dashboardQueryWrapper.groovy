@@ -111,7 +111,18 @@ class QueryWrapper implements CriteriaWrapper
         return new QueryWrapper(source, templateUUID)
     }
 
-    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, IApiCriteria criteriaForColumn, boolean fromSevenDays = false, Integer top = null)
+    /**
+     * Метод агрегирования параметров
+     * @param criteria - критерия
+     * @param totalValueCriteria - критерия для вычисления процента
+     * @param parameter - параметр агрегации
+     * @param criteriaForColumn - критерия для колонок
+     * @param fromSevenDays
+     * @param top - лимит
+     * @param requestData - запрос
+     * @return объект обертки запроса
+     */
+    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, IApiCriteria criteriaForColumn, boolean fromSevenDays, Integer top, RequestData requestData)
     {
         Aggregation aggregationType = parameter.type
         def sc = api.selectClause
@@ -133,7 +144,52 @@ class QueryWrapper implements CriteriaWrapper
             column = castDynamicToType(attribute, column)
             criteria.add(api.filters.attrValueEq('totalValue.linkTemplate', linkTemplateUuid))
         }
-        column.with(aggregation).with(criteria.&addColumn)
+
+        column = column.with(aggregation)
+
+        if (parameter.descriptor)
+        {
+            IApiCriteria subCriteria =
+                criteria.subquery().addSource(criteria.getCurrentMetaClass().fqn as String)
+            subCriteria.addColumn(column)
+
+            requestData.groups.each { group ->
+                String attributePropertyPath = group.attribute.code
+                Boolean titleMustBeAddedToPath = false
+
+                if (group.attribute.ref)
+                {
+                    attributePropertyPath += '.' + group.attribute.ref.code
+                    titleMustBeAddedToPath = group.attribute.ref.type in AttributeType.LINK_TYPES
+                }
+                else
+                {
+                    titleMustBeAddedToPath = group.attribute.type in AttributeType.LINK_TYPES
+                }
+                if (titleMustBeAddedToPath)
+                {
+                    attributePropertyPath += '.title'
+                }
+
+                subCriteria.add(
+                    api.whereClause.eq(
+                        sc.property(attributePropertyPath),
+                        sc.property(
+                            criteriaForColumn ?: criteria,
+                            attributePropertyPath
+                        )
+                    )
+                )
+            }
+
+            criteria.addColumn(subCriteria)
+        }
+        else
+        {
+            criteria.addColumn(column)
+        }
+
+
         String sortingType = parameter.sortingType
         if (sortingType)
         {
@@ -493,7 +549,7 @@ class QueryWrapper implements CriteriaWrapper
             {
                 wrappedQuery.filtering(wrappedCriteria, totalValueCriteria, [filterParameter])
             }
-            int totalCount = wrappedQuery.aggregate(wrappedCriteria, totalValueCriteria, totalParameter, wrappedCriteria, false, top)
+            int totalCount = wrappedQuery.aggregate(wrappedCriteria, totalValueCriteria, totalParameter, wrappedCriteria, false, top, requestData)
                                          .result.head().head()
 
             wrapper.percentAggregate(criteria, totalValueCriteria, parameter, totalCount, parameter.type == Aggregation.PERCENT_CNT)
@@ -504,7 +560,7 @@ class QueryWrapper implements CriteriaWrapper
         }
         else
         {
-            wrapper.aggregate(criteria, totalValueCriteria, parameter, criteriaForColumn, false, top)
+            wrapper.aggregate(criteria, totalValueCriteria, parameter, criteriaForColumn, false, top, requestData)
         }
     }
 
@@ -1276,6 +1332,12 @@ class DashboardQueryWrapperUtils
                 }
 
                 IApiCriteria criteriaToJoin = criteriaToJoinFrom.addLeftJoin(link.attribute.code)
+                Source criteriaToJsonSource = requestData.sources.find { it.dataKey == link.dataKey2 }
+                if (criteriaToJsonSource.descriptor)
+                {
+                    api.listdata.addFilters(criteriaToJoin, api.listdata.createListDescriptor(criteriaToJsonSource.descriptor))
+                }
+
                 sourceDataKeyCriteriaMap[link.dataKey2] = criteriaToJoin
             }
 
@@ -1291,7 +1353,8 @@ class DashboardQueryWrapperUtils
                 title: it.title,
                 type: it.type,
                 attribute: it.attribute.deepClone(),
-                sortingType: top ? 'DESC' : it.sortingType
+                sortingType: top ? 'DESC' : it.sortingType,
+                descriptor: it.descriptor
             )
         }
 
@@ -1408,6 +1471,29 @@ class DashboardQueryWrapperUtils
             it?.type == Aggregation.NOT_APPLICABLE
         } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0
         return wrapper.getResult(requestHasOneNoneAggregation, diagramType, hasBreakdown, ignoreParameterLimit, paginationSettings)
+    }
+
+    /**
+     * Метод получения дескриптора с фильтрами из дескриптора источника и дескриптора показателя
+     * @param sourceDescriptor - дескриптор источника
+     * @param indicatorDescriptor - дескриптор показателя
+     * @return дескриптор с обоими фильтрами
+     */
+    String getDescriptorWithMergedFilters(String sourceDescriptor, String indicatorDescriptor)
+    {
+        JsonSlurper slurper = new JsonSlurper()
+        Map<String, Object> parsedSourceDescriptor = sourceDescriptor ? slurper.parseText(sourceDescriptor) : [:]
+        Map<String, Object> parsedIndicatorDescriptor = indicatorDescriptor ? slurper.parseText(indicatorDescriptor) : [:]
+
+        if (parsedSourceDescriptor.filters)
+        {
+            parsedSourceDescriptor.filters.each {
+                parsedIndicatorDescriptor.filters << it
+            }
+        }
+
+        indicatorDescriptor = toJson(parsedIndicatorDescriptor)
+        return indicatorDescriptor
     }
 
     /**

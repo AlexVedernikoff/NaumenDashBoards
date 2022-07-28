@@ -407,7 +407,7 @@
                         }
                         else
                         {
-                            percentCntAggregationIndexes = [getPercentCntAggregationIndex(request, diagramType)]
+                            percentCntAggregationIndexes = getPercentCntAggregationIndexes(request)
                         }
     
     
@@ -460,7 +460,8 @@
     
                     return mappingStandardDiagram(res, legend, reverseGroups, changeLabels, reverseLabels, format, groupFormat, countTotals)
                 case DiagramType.RoundTypes:
-                    Integer percentCntAggregationIndex = getPercentCntAggregationIndex(request, diagramType)
+                    Collection<Integer> percentCntAggregationIndexes = getPercentCntAggregationIndexes(request)
+                    Integer percentCntAggregationIndex = percentCntAggregationIndexes ? percentCntAggregationIndexes.first() : null
                     Boolean checkTypeMetaClass = widgetSettings?.data?.each { value ->
                         value?.indicators?.any {
                             it?.aggregation == "PERCENT_CNT"
@@ -518,9 +519,9 @@
          */
         private List applyIndicatorsBreakdown(RequestData requestData, List res)
         {
-            Collection<AggregationParameter> aggregationsForRestore = requestData.aggregations
+            Collection<AggregationParameter> allAggregations = requestData.aggregations
             Collection<AggregationParameter> aggregationsWithBreakdown =
-                aggregationsForRestore.findAll {
+                allAggregations.findAll {
                     it.breakdown != null
                 }
     
@@ -545,15 +546,17 @@
             }
     
             Integer groupsCount = requestData.groups.size()
-            aggregationBreakdownResult.eachWithIndex { aggregation, breakdownResult, aggregationIndex ->
+            Integer aggregationsCount = allAggregations.size()
+            aggregationBreakdownResult.eachWithIndex { aggregation, breakdownResult, index ->
+                Integer aggregationIndex = allAggregations.findIndexOf { it == aggregation }
                 res[0].each { resultItem ->
                     List matchBreakdownResultItems = []
                     breakdownResult.each { breakdownResultItem ->
                         Boolean breakdownResultItemMatch = true
-                        for (int i = breakdownResultItem.size() - 1; i > resultItem.size() - groupsCount; i--)
+                        for (int i = breakdownResultItem.size() - 1; i > resultItem.size() - groupsCount - (aggregationsCount - 1); i--)
                         {
                             breakdownResultItemMatch =
-                                breakdownResultItemMatch && resultItem[i - 1] == breakdownResultItem[i - 1]
+                                breakdownResultItemMatch && resultItem[i - 1 + (aggregationsCount - 1)] == breakdownResultItem[i - 1]
                         }
     
                         if (breakdownResultItemMatch)
@@ -561,9 +564,9 @@
                             matchBreakdownResultItems << breakdownResultItem
                         }
                     }
-    
+
                     matchBreakdownResultItems = matchBreakdownResultItems.collect {
-                        return [it[aggregationIndex], it[it.size() - 1]]
+                        return [it[index], it[it.size() - 1]]
                     }
                     resultItem[aggregationIndex] = matchBreakdownResultItems
                 }
@@ -1396,7 +1399,9 @@
                         type: indicator.aggregation,
                         attribute: indicator.attribute,
                         sortingType: sortingType,
-                        breakdown: indicator?.breakdown
+                        breakdown: indicator?.breakdown,
+                        key: indicator?.key,
+                        descriptor: indicator.descriptor
                     )
                 } : []
                 boolean dynamicInAggregate
@@ -2021,7 +2026,7 @@
                 }
     
                 String sourceCode = requestData.source.classFqn
-                String mergedDescriptor = getDescriptorWithMergedFilters(
+                String mergedDescriptor = dashboardQueryWrapperUtils.getDescriptorWithMergedFilters(
                     requestData.source.descriptor,
                     aggregations.head().attribute.descriptor
                 )
@@ -2053,29 +2058,6 @@
             }
     
             return updatedRequestData
-        }
-    
-        /**
-         * Метод получения дескриптора с фильтрами из дескриптора источника и дескриптора показателя
-         * @param sourceDescriptor - дескриптор источника
-         * @param indicatorDescriptor - дескриптор показателя
-         * @return дескриптор с обоими фильтрами
-         */
-        private String getDescriptorWithMergedFilters(String sourceDescriptor, String indicatorDescriptor)
-        {
-            JsonSlurper slurper = new JsonSlurper()
-            Map<String, Object> parsedSourceDescriptor = sourceDescriptor ? slurper.parseText(sourceDescriptor) : [:]
-            Map<String, Object> parsedIndicatorDescriptor = indicatorDescriptor ? slurper.parseText(indicatorDescriptor) : [:]
-    
-            if (parsedSourceDescriptor.filters)
-            {
-                parsedSourceDescriptor.filters.each {
-                    parsedIndicatorDescriptor.filters << it
-                }
-            }
-    
-            indicatorDescriptor = toJson(parsedIndicatorDescriptor)
-            return indicatorDescriptor
         }
     
         /**
@@ -3294,7 +3276,7 @@
                                 request,
                                 diagramType,
                                 onlyFilled,
-                                getPercentCntAggregationIndex(request, diagramType)
+                                getPercentCntAggregationIndexes(request)
                             )
                             Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                             def res = filtering?.withIndex()?.collectMany { filters, i ->
@@ -3337,7 +3319,7 @@
                                     }
                                     else
                                     {
-                                        percentCntAggregationIndexes = [getPercentCntAggregationIndex(request, diagramType)]
+                                        percentCntAggregationIndexes = getPercentCntAggregationIndexes(request)
                                     }
 
                                     resWithPercentCnt = i in percentCntAggregationIndexes
@@ -3446,7 +3428,7 @@
                                     request,
                                     diagramType,
                                     onlyFilled,
-                                    getPercentCntAggregationIndex(request, diagramType)
+                                    getPercentCntAggregationIndexes(request)
                                 )
                                 def filtersTitle = title.any {it[0] != ''}
                                     ? (title[i] as Set)?.withIndex().findResults { val, idx ->
@@ -3687,7 +3669,7 @@
          * @param request - запрос
          * @param diagramType  - тип диаграммы
          * @param exceptNulls - убирать 0
-         * @param percentCntAggregationIndex - индекс агрегации типа PERCENT_CNT
+         * @param percentCntAggregationIndexes - индексы агрегации типа PERCENT_CNT
          * @return список округлённых числовых значений
          */
         List formatAggregationSet(List listOfLists,
@@ -3695,7 +3677,7 @@
                                   DiagramRequest request,
                                   DiagramType diagramType,
                                   Boolean exceptNulls = false,
-                                  Integer percentCntAggregationIndex = null
+                                  Collection<Integer> percentCntAggregationIndexes = []
                                  )
         {
             Boolean diagramTypeStacked = (diagramType == DiagramType.BAR_STACKED) || (diagramType == DiagramType.COLUMN_STACKED)
@@ -3714,7 +3696,7 @@
                 {
                     listIdsOfNormalAggregations.each { index ->
                         List<String> countAndPercentValuesForTable
-                        if (index == percentCntAggregationIndex && list[index] in String)
+                        if (index in percentCntAggregationIndexes && list[index] in String)
                         {
                             countAndPercentValuesForTable = list[index].split(' ')
                             list[index] = countAndPercentValuesForTable[1]
@@ -3725,7 +3707,7 @@
                                 list[index].toDouble().isNaN() || list[index].toDouble().isInfinite())
                                 ? DECIMAL_FORMAT.format(list[index] as Double)
                                 : DECIMAL_FORMAT.format(0)
-                            if (index == percentCntAggregationIndex && countAndPercentValuesForTable)
+                            if (index in percentCntAggregationIndexes && countAndPercentValuesForTable)
                             {
                                 list[index] = countAndPercentValuesForTable[0] + ' ' + list[index]
                             }
@@ -3739,26 +3721,25 @@
                 }
             }
         }
-    
+
         /**
-         * Метод получения индекса агрегации типа PERCENT_CNT для таблицы
+         * Метод получения индексов агрегации типа PERCENT_CNT
          * @param request - запрос
-         * @param diagramType - тип диаграммы
-         * @return - индекс агрегации типа PERCENT_CNT для таблицы
+         * @return индексы агрегации типа PERCENT_CNT
          */
-        Integer getPercentCntAggregationIndex(DiagramRequest request, DiagramType diagramType)
+        Collection<Integer> getPercentCntAggregationIndexes(DiagramRequest request)
         {
-            Integer percentCntAggregationIndex
-            percentCntAggregationIndex = request?.data?.findResult { key, value ->
-                value?.aggregations?.withIndex()?.findResult { val, index ->
+            Collection<Integer> percentCntAggregationIndexes = request?.data?.collect { key, value ->
+                value?.aggregations?.withIndex()?.collect { val, index ->
                     if (val.type == Aggregation.PERCENT_CNT)
                     {
                         return index
                     }
+                    return null
                 }
-            }
-    
-            return percentCntAggregationIndex
+            }.flatten()
+
+            return percentCntAggregationIndexes
         }
     
         /**
@@ -4729,7 +4710,7 @@
                         }
                 return new Column(
                     footer: "",
-                    accessor: accessorAndAtribut,
+                    accessor: attrValue.key ?: accessorAndAtribut,
                     header: accessorAndAtribut,
                     attribute: attrValue.attribute,
                     type: attrValue.type,
@@ -4745,14 +4726,15 @@
          * @param breakdownValues - значения разбивки
          * @param breakdownAttributeValue - значение атрибута разбивки
          * @param parentAttributeName - название атрибута агрегации
+         * @param accessor - поле для сопоставления значения и колонки
          * @return - колонки со значениями разбивки
          */
-        List<AggregationBreakdownColumn> getBreakdownColumns(List breakdownValues, def breakdownAttributeValue, def aggregationAttributeValue)
+        List<AggregationBreakdownColumn> getBreakdownColumns(List breakdownValues, def breakdownAttributeValue, def aggregationAttributeValue, String accessor = null)
         {
             return breakdownValues.collect { value ->
                 return new AggregationBreakdownColumn(
                     footer:      "",
-                    accessor:    "${aggregationAttributeValue.name}\$${value}",
+                    accessor:    "${accessor ?: aggregationAttributeValue.name}\$${value}",
                     header:      value,
                     attribute:   breakdownAttributeValue.attribute,
                     type:        breakdownAttributeValue.type,
@@ -4855,7 +4837,7 @@
          * @param isCompute - флаг на получение всех агрегаций (null), обычных агрегаций (false), агрегаций с вычислениями (true)
          * @return  список агрегаций из запроса
          */
-        List<Map<String, Object>> getSpecificAggregationsList (Widget widgetSettings, Boolean isCompute = null)
+        List<Map<String, Object>> getSpecificAggregationsList(Widget widgetSettings, Boolean isCompute = null)
         {
             def tempWidgetSettings = mapper.convertValue(widgetSettings, widgetSettings.getClass())
             def fullIndicatorsList = getFullElementListInWidgetSettings(widgetSettings, 'indicators')
@@ -4890,10 +4872,12 @@
                                     attribute?.title = "${attribute?.title} (${currentSourceName})"
                                 }
                             }
-                            return [name       : attribute?.title, attribute: attribute,
+                            return [name       : attribute?.title,
+                                    attribute  : attribute,
                                     type       : ColumnType.INDICATOR,
                                     aggregation: indicator?.aggregation,
-                                    tooltip    : indicator?.tooltip]
+                                    tooltip    : indicator?.tooltip,
+                                    key        : indicator?.key]
                         }
                         else
                         {
@@ -5118,7 +5102,7 @@
                     if(secondAttribut != null){
                         return  attribut.name + " (" + attribut?.attribute?.ref?.title+ ")"
                     }
-                    return  attribut.name
+                    return attribut.key ?:  attribut.name
                 }
     
                 if (sourceRowNames && hasBreakdown) {
@@ -5131,8 +5115,12 @@
             Integer notAggregatedAttributeSize = notAggregatedAttributeNames.size()
             List<Map<String, Object>> tempMaps = getTempMaps(resultDataSet, attributeNames, cnt)
             List data = []
-            int id = reverseRowCount ? rowCount - paginationSettings.firstElementIndex : paginationSettings.firstElementIndex
-    
+            int id
+            if (paginationSettings)
+            {
+                id = reverseRowCount ? rowCount - paginationSettings.firstElementIndex : paginationSettings.firstElementIndex
+            }
+
             if (sourceRowNames)
             {
                 aggregationCnt = 1
@@ -5201,7 +5189,7 @@
                         value = map[aggregationCnt..-1] + value
                     }
     
-                    if(showRowNum)
+                    if(showRowNum && paginationSettings)
                     {
                         return [ID: reverseRowCount ? id-- : ++id, *:value.sum()]
                     }
@@ -5437,13 +5425,13 @@
             requestData.aggregations.eachWithIndex { aggregation, aggregationIndex ->
                 if (aggregation.breakdown)
                 {
-                    String attributeName = aggregation.breakdown.attribute.title
+                    String accessor = aggregation.key
                     data.each { dataItem ->
-                        List notFormattedValues = dataItem[aggregation.attribute.title]
+                        List notFormattedValues = dataItem[accessor]
                         notFormattedValues.each {
-                            dataItem[(attributeName + '$' + it[1])] = it[0]
+                            dataItem[(accessor + '$' + it[1])] = it[0]
                         }
-                        dataItem.remove(aggregation.attribute.title)
+                        dataItem.remove(accessor)
                     }
                 }
             }
@@ -5488,7 +5476,8 @@
                     List<AggregationBreakdownColumn> breakdownColumns = getBreakdownColumns(
                         breakdownValues,
                         breakdownAttributeValue,
-                        attributeValue
+                        attributeValue,
+                        aggregation.key
                     )
 
                     Column column = columns.find {
@@ -5496,6 +5485,7 @@
                     }
 
                     column.columns = breakdownColumns
+                    column.accessor = aggregation.key
                 }
             }
         }
@@ -5879,7 +5869,7 @@
         def getFullElementListInWidgetSettings(def widgetSettings, String fieldName)
         {
             return widgetSettings.data.collectMany { value ->
-                if (!value.sourceForCompute)
+                if (!value.sourceForCompute && value[fieldName])
                 {
                     return value[fieldName]
                 }
@@ -6454,7 +6444,7 @@
                         request,
                         diagramType,
                         diagramType in DiagramType.CountTypes ? false : onlyFilled,
-                        getPercentCntAggregationIndex(request, diagramType)
+                        getPercentCntAggregationIndexes(request)
                     )
                     Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
                     def res = dashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
@@ -6477,7 +6467,7 @@
                         }
                         else
                         {
-                            percentCntAggregationIndexes = [getPercentCntAggregationIndex(request, diagramType)]
+                            percentCntAggregationIndexes = getPercentCntAggregationIndexes(request)
                         }
 
                         resWithPercentCnt = dataSetIndex in percentCntAggregationIndexes
@@ -6549,7 +6539,7 @@
                         request,
                         diagramType,
                         diagramType in DiagramType.CountTypes ? false : onlyFilled,
-                        getPercentCntAggregationIndex(request, diagramType)
+                        getPercentCntAggregationIndexes(request)
                     )]
                     return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, formatResult(total, aggregationCnt), parameter,
                                                           parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
