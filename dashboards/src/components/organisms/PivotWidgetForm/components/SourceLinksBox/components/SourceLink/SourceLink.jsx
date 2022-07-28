@@ -113,7 +113,7 @@ export class SourceLink extends Component<Props, State> {
 				<div className={styles.second} title={secondDataSetLabel}>{secondDataSetLabel}</div>
 			</div>
 		);
-	};;
+	};
 
 	render () {
 		return (

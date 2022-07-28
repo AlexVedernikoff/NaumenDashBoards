@@ -1,4 +1,5 @@
 // @flow
+import {DEFAULT_PIVOT_SETTINGS} from 'store/widgetForms/pivotForm/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import HeaderBox from 'WidgetFormPanel/components/HeaderBox';
 import PivotStyleBox from 'PivotWidgetForm/components/PivotStyleBox';
@@ -14,7 +15,11 @@ export class StyleTab extends Component<Props> {
 	};
 
 	render () {
-		const {header, pivot} = this.props.values;
+		let {header, pivot} = this.props.values;
+
+		if (!pivot) {
+			pivot = DEFAULT_PIVOT_SETTINGS;
+		}
 
 		return (
 			<div className={styles.container}>

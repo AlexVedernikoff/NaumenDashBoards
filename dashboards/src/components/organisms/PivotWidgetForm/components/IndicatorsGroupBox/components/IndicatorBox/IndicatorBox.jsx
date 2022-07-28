@@ -14,10 +14,6 @@ export class IndicatorBox extends PureComponent<Props> {
 		className: ''
 	};
 
-	handleChangeName = (...args) => {
-		console.log(args);
-	};
-
 	renderActionButton = () => (
 		<div className={styles.info}>
 			{this.renderHasBreakdown()}
@@ -62,7 +58,7 @@ export class IndicatorBox extends PureComponent<Props> {
 				{label}
 			</div>
 		);
-	};;
+	};
 
 	render () {
 		const {checked, className, hasBreakdown, onChecked, style, width = 300, ...props} = this.props;
