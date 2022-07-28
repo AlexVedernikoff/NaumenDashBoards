@@ -70,7 +70,7 @@ const DEFAULT_HEADER_CELL_SETTINGS = Object.freeze({
 	textHandler: TEXT_HANDLERS.CROP
 });
 
-const DEFAULT_TABLE_SETTINGS = {
+const DEFAULT_PIVOT_SETTINGS = {
 	body: {
 		defaultValue: {
 			label: ('TableWidgetForm::BodySettingsBox::ShowEmptyString': LangType),
@@ -93,5 +93,5 @@ export {
 	USER_MODE,
 	DEFAULT_TABLE_SORTING,
 	ROW_HEIGHT,
-	DEFAULT_TABLE_SETTINGS
+	DEFAULT_PIVOT_SETTINGS
 };

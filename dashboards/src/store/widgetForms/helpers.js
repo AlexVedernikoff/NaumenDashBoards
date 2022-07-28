@@ -44,7 +44,7 @@ const parseAttrSetConditions = (data: ?SourceData): ?AttrSetConditions => {
  * @returns {Array<Indicator>}
  */
 const fixIndicatorsAggregation = (indicators: ?Array<Indicator>): Array<Indicator> =>
-	indicators?.map(indicator => indicator.aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE
+	indicators?.map(indicator => indicator?.aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE
 		? {...indicator, aggregation: DEFAULT_AGGREGATION.COUNT}
 		: indicator) ?? [];
 
@@ -113,9 +113,9 @@ const fixLeaveOneIndicator = (dataSet: TableDataSet): TableDataSet => {
 export {
 	fixIndicatorsAggregation,
 	fixIndicatorsAggregationDataSet,
+	fixPivotIndicators,
 	fixLeaveOneIndicator,
 	fixLeaveOneParameters,
-	fixPivotIndicators,
 	fixRemoveParameters,
 	getDefaultBreakdown,
 	parseAttrSetConditions

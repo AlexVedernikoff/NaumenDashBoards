@@ -1,5 +1,6 @@
 // @flow
 import Container from 'components/atoms/Container';
+import {FIELD_TYPE} from './constants';
 import type {OnSelectEvent} from 'components/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -8,6 +9,10 @@ import styles from './styles.less';
 import T from 'components/atoms/Translation';
 
 export class SourcesAndFieldsExtended extends PureComponent<Props> {
+	static defaultProps = {
+		fieldType: FIELD_TYPE.PARAMETER
+	};
+
 	handleChangeDataSetIndex = ({value}: OnSelectEvent) => {
 		const {dataSets, onChangeDataSet} = this.props;
 
@@ -19,13 +24,16 @@ export class SourcesAndFieldsExtended extends PureComponent<Props> {
 	};
 
 	render () {
-		const {children, className, dataSetIndex, dataSets, value} = this.props;
+		const {children, className, dataSetIndex, dataSets, fieldType, value} = this.props;
 		const dataSetValue = dataSets[dataSetIndex];
+		const title = fieldType === FIELD_TYPE.PARAMETER
+			? 'SourcesAndFieldsExtended::ParameterSelection'
+			: 'SourcesAndFieldsExtended::IndicatorSelection';
 
 		return (
 			<Container className={styles.container}>
 				<div className={styles.title}>
-					<T text="SourcesAndFieldsExtended::ParameterSelection" />
+					<T text={title} />
 				</div>
 				<div className={styles.field}>
 					<div className={styles.label}>

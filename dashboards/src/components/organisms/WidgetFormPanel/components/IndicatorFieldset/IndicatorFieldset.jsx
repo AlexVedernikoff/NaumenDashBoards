@@ -24,7 +24,7 @@ import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props, State} from './types';
 import React, {createContext, PureComponent} from 'react';
 import SelectModal, {SelectItem} from 'components/molecules/SelectModal';
-import SourcesAndFieldsExtended from 'WidgetFormPanel/components/SourcesAndFieldsExtended';
+import SourcesAndFieldsExtended, {FIELD_TYPE} from 'WidgetFormPanel/components/SourcesAndFieldsExtended';
 import t from 'localization';
 import uuid from 'tiny-uuid';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -56,7 +56,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		return onChange(index, indicator, callback);
 	};
 
-	getHandleChangeDataSet = (index: number) => (dataSetIndex: number, dataSet: DiagramDataSet) => {
+	getChangeDataSetHandler = (index: number) => (dataSetIndex: number, dataSet: DiagramDataSet) => {
 		const {onChangeDataSet} = this.props;
 
 		if (onChangeDataSet) {
@@ -388,7 +388,8 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 				className={className}
 				dataSetIndex={dataSetIndex}
 				dataSets={dataSets}
-				onChangeDataSet={this.getHandleChangeDataSet(index)}
+				fieldType={FIELD_TYPE.INDICATOR}
+				onChangeDataSet={this.getChangeDataSetHandler(index)}
 				value={attribute}
 			>
 				{fieldSelectMainContainer}

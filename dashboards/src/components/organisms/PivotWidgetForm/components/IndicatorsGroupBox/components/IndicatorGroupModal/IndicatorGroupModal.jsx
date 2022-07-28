@@ -85,6 +85,7 @@ export class IndicatorGroupModal extends PureComponent<Props, State> {
 	render () {
 		return (
 			<Modal
+				blurRoot={true}
 				header={t('PivotWidgetForm::IndicatorsGroupBox::IndicatorGrouping')}
 				renderFooter={this.renderFooter}
 				size={MODAL_SIZES.FULL_WIDTH}

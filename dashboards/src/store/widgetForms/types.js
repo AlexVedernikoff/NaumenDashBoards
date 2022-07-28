@@ -102,7 +102,6 @@ export type DiagramDataSet =
 	| AxisChartDataSet
 	| CircleChartDataSet
 	| ComboChartDataSet
-	| SpeedometerDataSet
 	| SummaryDataSet
 	| TableDataSet
 	| PivotDataSet;

@@ -13,7 +13,7 @@ import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Parameter} from 'store/widgetForms/types';
 import type {Props} from './types';
 import React, {Component, createContext} from 'react';
-import SourcesAndFieldsExtended from 'WidgetFormPanel/components/SourcesAndFieldsExtended';
+import SourcesAndFieldsExtended, {FIELD_TYPE} from 'WidgetFormPanel/components/SourcesAndFieldsExtended';
 import withAttributesHelpers from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers';
 
 const Context: React$Context<Parameter> = createContext({
@@ -44,7 +44,7 @@ export class ParameterFieldset extends Component<Props> {
 		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
 	};
 
-	getHandleChangeDataSet = (index: number) => (dataSetIndex: number) => {
+	getChangeDataSetHandler = (index: number) => (dataSetIndex: number) => {
 		const {onChangeDataSet} = this.props;
 
 		if (onChangeDataSet) {
@@ -140,7 +140,8 @@ export class ParameterFieldset extends Component<Props> {
 				className={className}
 				dataSetIndex={dataSetIndex}
 				dataSets={dataSets}
-				onChangeDataSet={this.getHandleChangeDataSet(index)}
+				fieldType={FIELD_TYPE.PARAMETER}
+				onChangeDataSet={this.getChangeDataSetHandler(index)}
 				value={attribute}
 			>
 				{fieldSelectMainContainer}
