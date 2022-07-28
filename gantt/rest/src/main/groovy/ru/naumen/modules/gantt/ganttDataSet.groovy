@@ -146,8 +146,8 @@ class GanttDataSetService
      * @return данные для построения диаграммы Ганта
      */
     GanttDiagramData getGanttVersionDiagramData(String versionKey,
-                                                       IUUIDIdentifiable user,
-                                                       String timezone)
+                                                IUUIDIdentifiable user,
+                                                String timezone)
     {
         GanttSettingsService service = GanttSettingsService.instance
         GanttVersionsSettingsClass ganttVersionsSettings = service.getGanttVersionsSettings(versionKey)
@@ -535,6 +535,9 @@ class GanttDataSetService
 
             if (res)
             {
+                // Подготовка значений некоторых атрибутов
+                res = replaceStatusCodeWithTitle(res, listAttributes)
+
                 /* Из БД пришел набор данных. Необходимо задать правильное соответствие между названием
                    поля и значением, пришедшим из БД. Это необходимо, если технолог задал одинаковые атрибуты
                    в разных полях формы (в этом случае при простом сопоставлении получим сдвиг). Для этого
@@ -605,6 +608,47 @@ class GanttDataSetService
             }
         }
         return result
+    }
+
+    /**
+     * Метод замены кодов статусов на их названия
+     * @param result - результат из базы
+     * @param attributes - список атрибутов
+     * @return измененный результат
+     */
+    private List<List<String>> replaceStatusCodeWithTitle(List<List<String>> result, List<String> attributes)
+    {
+        Integer statusAttributeIndex = attributes.findIndexOf {
+            it == AttributeType.STATE_TYPE
+        }
+        if (!statusAttributeIndex)
+        {
+            return
+        }
+
+        GanttWorkHandlerService workHandlerService = GanttWorkHandlerService.instance
+
+        Map<List<Map>> statusesDataGroupedByClassCode = [:]
+
+        return result.collect {
+            String entityUUID = it.first()
+            String metaClassCode = entityUUID.split('\\$').first()
+            if (!statusesDataGroupedByClassCode[metaClassCode])
+            {
+                statusesDataGroupedByClassCode[metaClassCode] =
+                    workHandlerService.getStates(metaClassCode)
+            }
+
+            return (it as List).withIndex().collect { value, index ->
+                if (index == statusAttributeIndex)
+                {
+                    value = statusesDataGroupedByClassCode[metaClassCode]?.find {
+                        it.uuid == value
+                    }?.title
+                }
+                return value
+            }
+        }
     }
 
     /**
