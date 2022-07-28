@@ -34,7 +34,7 @@ export class PivotWidget extends PureComponent<Props, State> {
 		const {options} = this.props;
 		const {columnsWidth} = this.state;
 
-		if (prevProps.options !== options) {
+		if (prevProps.options !== options && options.type === 'PivotOptions') {
 			const {columnWidth: prevColumnWidth} = prevProps.options;
 			const {columnWidth, columnsList} = options;
 
