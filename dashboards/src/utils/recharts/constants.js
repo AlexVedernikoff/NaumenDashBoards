@@ -120,3 +120,13 @@ export const DEFAULT_CHART_SETTINGS = {
 		textHandler: TEXT_HANDLERS.CROP
 	}
 };
+
+export const PIVOT_COLUMN_MIN_WIDTH = 158;
+
+export const PIVOT_COLUMN_TYPE = {
+	EMPTY_GROUP: 'EMPTY_GROUP',
+	GROUP: 'GROUP',
+	PARAMETER: 'PARAMETER',
+	SUM: 'SUM',
+	VALUE: 'VALUE'
+};

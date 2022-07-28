@@ -1,10 +1,35 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {AxisFormatter, CircleFormatter, ComboFormatter, NumberFormatter, PercentStore} from './formater/types';
-import type {AxisSettings, BordersStyle, DataLabels, FontStyle, Group, Legend, Ranges, SpeedometerIndicatorSettings, TextHandler} from 'store/widgets/data/types';
+import type {
+	AxisFormatter,
+	CircleFormatter,
+	ComboFormatter,
+	NumberFormatter,
+	PercentStore,
+	PivotFormatter
+} from './formater/types';
+import type {
+	AxisSettings,
+	BordersStyle,
+	DataLabels,
+	FontStyle,
+	Group,
+	Legend,
+	Ranges,
+	SpeedometerIndicatorSettings,
+	TextHandler
+} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
-import {LABEL_DRAW_MODE, LEGEND_ALIGN, LEGEND_LAYOUT, LEGEND_VERTICAL_ALIGN, SUB_TOTAL_POSITION} from './constants';
+import {
+	LABEL_DRAW_MODE,
+	LEGEND_ALIGN,
+	LEGEND_LAYOUT,
+	LEGEND_VERTICAL_ALIGN,
+	PIVOT_COLUMN_TYPE,
+	SUB_TOTAL_POSITION
+} from './constants';
+import type {PivotBodySettings, PivotHeaderSettings} from 'src/store/widgets/data/types';
 import type {WidgetTooltip} from 'store/widgets/data/types.js';
 
 export type Labels = Array<Array<string>>;
@@ -213,30 +238,78 @@ export type SummaryOptions = {
 
 /** PIVOT */
 
-export type PivotDataRowStyle = {
-	backgroundColor?: string
-};
+export type PivotRawRow = {[accessor: string]: string | number | null};
+
+export type PivotDataItem = {[accessor: string]: number | [number, number] | null};
 
 export type PivotDataRow = {
-	children: ?Array<PivotDataRow>,
-	level: number,
-	style: PivotDataRowStyle,
-	values: Array<string>,
-};
-
-export type PivotColumnFlat = {
-	key: string
+	children?: Array<PivotDataRow>,
+	data: PivotDataItem,
+	key: string,
+	value: string
 };
 
 export type PivotSeriesData = Array<PivotDataRow>;
 
-export type PivotColumn = Object;
+export type PivotColumnBase = {
+	height: number,
+	isLastColumnGroup: boolean,
+	key: string,
+	title: string,
+	width: number
+};
+
+export type PivotColumnSum = {
+	...PivotColumnBase,
+	sumKeys: Array<string>,
+	type: typeof PIVOT_COLUMN_TYPE.SUM
+};
+
+export type PivotColumnValues = {
+	...PivotColumnBase,
+	type: typeof PIVOT_COLUMN_TYPE.VALUE
+};
+
+export type PivotColumnParameter = {
+	...PivotColumnBase,
+	type: typeof PIVOT_COLUMN_TYPE.PARAMETER
+};
+
+export type PivotColumnGroup = {
+	...PivotColumnBase,
+	children: Array<PivotColumnGroup | PivotColumnSum | PivotColumnValues>,
+	type: typeof PIVOT_COLUMN_TYPE.EMPTY_GROUP | typeof PIVOT_COLUMN_TYPE.GROUP
+};
+
+export type PivotColumn = PivotColumnGroup | PivotColumnSum | PivotColumnValues;
+
+export type PivotColumns = {
+	columns: Array<PivotColumn>,
+	rows: number
+};
+
+export type PivotBreakdownInfo = {
+	[accessor: string]: Array<{
+		accessor: string,
+		header: string
+	}>
+};
+
+export type PivotMetadata = {
+	breakdown: PivotBreakdownInfo,
+	dataColumns: Array<string>,
+	parameters: Array<string>
+};
 
 export type PivotOptions = {
-	columnsList: Array<PivotColumnFlat>,
+	bodyStyle: PivotBodySettings,
+	columnsList: Array<PivotColumn>,
 	columnWidth: number,
 	data: PivotSeriesData,
+	formatters: PivotFormatter,
 	headers: Array<PivotColumn>,
+	headerStyle: PivotHeaderSettings,
+	headHeight: number,
 	type: 'PivotOptions',
 };
 
@@ -298,4 +371,9 @@ export type MultilineHeightResult = {
 export type ValueFromSeriesLabelResult = {
 	percent: ?number,
 	value: ?number
+};
+
+export type ParseColumnsResult = {
+	columns: Array<PivotColumn>,
+	totalHeight: number
 };
