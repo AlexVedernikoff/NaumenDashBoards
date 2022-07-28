@@ -1,5 +1,5 @@
 import {action} from '@storybook/addon-actions';
-import {CHART_COLORS_SETTINGS_TYPES, DEFAULT_COLORS, DEFAULT_COLORS_SETTINGS} from 'store/widgets/data/constants';
+import {CHART_COLORS_SETTINGS_TYPES, DEFAULT_CHART_COLORS, DEFAULT_COLORS_SETTINGS} from 'store/widgets/data/constants';
 import ColorsBox from './ColorsBox';
 import React from 'react';
 import {useArgs} from '@storybook/client-api';
@@ -11,6 +11,7 @@ export default {
 
 const Template = args => {
 	const [{value}, updateArgs] = useArgs();
+
 	const onChange = (name, newValue) => {
 		action('onChange')(name, newValue);
 		updateArgs({
@@ -50,7 +51,7 @@ CustomLabelSettings.args = {
 			...DEFAULT_COLORS_SETTINGS.custom,
 			data: {
 				colors: [],
-				defaultColor: DEFAULT_COLORS[0]
+				defaultColor: DEFAULT_CHART_COLORS[0]
 			}
 		},
 		type: CHART_COLORS_SETTINGS_TYPES.CUSTOM

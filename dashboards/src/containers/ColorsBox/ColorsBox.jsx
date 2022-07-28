@@ -206,7 +206,7 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 	};
 
 	render () {
-		const {name, value, widget} = this.props;
+		const {name, position, value, widget} = this.props;
 		const {labels} = this.state;
 
 		return (
@@ -215,6 +215,7 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 				labels={labels}
 				name={name}
 				onChange={this.handleChange}
+				position={position}
 				usesBreakdownCustomSettings={hasBreakdown(widget)}
 				value={value}
 			/>

@@ -19,11 +19,9 @@ export default {
 	title: 'Atoms/Icon'
 };
 
-const Template = args => {
-	return (
-		<Icon {...args} />
-	);
-};
+const Template = args => (
+	<Icon {...args} />
+);
 
 export const Icons = Template.bind({});
 
@@ -35,10 +33,10 @@ Icons.args = {
 	width: 128
 };
 
-const ListTemplate = (args) => {
+const ListTemplate = args => {
 	const [{name: selectedName}, updateArgs] = useArgs();
 
-	const onClick = (name) => () => {
+	const onClick = name => () => {
 		action(name)(event);
 
 		updateArgs({

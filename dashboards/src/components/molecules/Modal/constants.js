@@ -2,8 +2,10 @@
 const LARGE: 'LARGE' = 'LARGE';
 const NORMAL: 'NORMAL' = 'NORMAL';
 const SMALL: 'SMALL' = 'SMALL';
+const FULL_WIDTH: 'FULL_WIDTH' = 'FULL_WIDTH';
 
 const SIZES = {
+	FULL_WIDTH,
 	LARGE,
 	NORMAL,
 	SMALL

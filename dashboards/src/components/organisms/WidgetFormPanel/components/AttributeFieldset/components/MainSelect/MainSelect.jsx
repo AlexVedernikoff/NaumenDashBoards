@@ -22,6 +22,12 @@ export class MainSelect extends Component<Props> {
 		};
 	});
 
+	componentDidUpdate (prevProps: Props) {
+		if (this.props.source !== prevProps.source) {
+			this.fetchAttributes();
+		}
+	}
+
 	fetchAttributes = () => {
 		const {attrSetConditions, fetchAttributes, parentClassFqn, source} = this.props;
 		const classFqn = source?.value;

@@ -11,6 +11,7 @@ import {
 	DISPLAY_MODE,
 	FONT_STYLES,
 	HEADER_POSITIONS,
+	INDICATOR_GROUPING_TYPE,
 	LABEL_FORMATS,
 	NOTATION_FORMATS,
 	RANGES_POSITION,
@@ -518,6 +519,20 @@ export type TableWidget = {
 	type: typeof WIDGET_TYPES.TABLE
 };
 
+// Pivot
+
+export type PivotHeaderSettings = TableHeaderSettings & {};
+
+export type PivotBodySettings = {
+	...TableBodySettings,
+	parameterRowColor?: string
+};
+
+export type PivotStyle = {
+	body: PivotBodySettings,
+	columnHeader: PivotHeaderSettings
+};
+
 // Text
 
 export type TextSettings = {
@@ -540,13 +555,68 @@ export type TextWidget = {
 	warningMessage?: string
 };
 
+export type PivotLink = {
+	attribute: Attribute | null,
+	dataKey1: string,
+	dataKey2: string,
+};
+
+export type PivotIndicator = {
+	...Indicator,
+	breakdown?: BreakdownItem,
+	key: string
+};
+
+export type PivotData = {
+	dataKey: string,
+	indicators: Array<PivotIndicator>,
+	parameters: Array<Parameter>,
+	source: SourceData,
+	sourceForCompute: boolean,
+	type: 'PivotDataSet'
+};
+
+export type ParameterOrder = {
+	dataKey: string,
+	parameter: Parameter
+};
+
+export type IndicatorInfo = {
+	checked?: boolean,
+	hasBreakdown: boolean,
+	key: string,
+	label: string,
+	type: typeof INDICATOR_GROUPING_TYPE.INDICATOR_INFO
+};
+
+export type GroupIndicatorInfo = {
+	checked?: boolean,
+	children?: Array<GroupIndicatorInfo | IndicatorInfo>,
+	hasSum: boolean,
+	key: string,
+	label: string,
+	type: typeof INDICATOR_GROUPING_TYPE.GROUP_INDICATOR_INFO
+};
+
+export type IndicatorGrouping = Array<GroupIndicatorInfo | IndicatorInfo>;
+
+export type PivotWidget = {
+	...BaseWidget,
+	data: Array<PivotData>,
+	indicatorGrouping: IndicatorGrouping | null,
+	links: Array<PivotLink>,
+	parametersOrder: Array<ParameterOrder>,
+	pivot: PivotStyle,
+	type: typeof WIDGET_TYPES.PIVOT_TABLE
+};
+
 export type DataSet =
 	| AxisData
 	| CircleData
 	| ComboData
 	| SummaryData
-	| SpeedometerData
-	| TableData;
+	| TableData
+	| PivotData;
 
 export type Chart =
 	| AxisWidget
@@ -559,6 +629,7 @@ export type Widget =
 	| SpeedometerWidget
 	| SummaryWidget
 	| TableWidget
+	| PivotWidget
 ;
 
 export type AnyWidget =

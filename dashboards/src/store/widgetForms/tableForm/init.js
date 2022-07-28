@@ -8,7 +8,7 @@ import {
 	DEFAULT_TOP_SETTINGS,
 	DISPLAY_MODE
 } from 'store/widgets/data/constants';
-import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from 'Table/constants';
+import {DEFAULT_TABLE_SETTINGS, DEFAULT_TABLE_SORTING} from './constants';
 import type {State} from './types';
 
 export const initialState: State = {

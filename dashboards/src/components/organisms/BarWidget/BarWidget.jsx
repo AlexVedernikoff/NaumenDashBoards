@@ -27,7 +27,7 @@ export class BarWidget extends PureComponent<Props, State> {
 		return null;
 	}
 
-	getHandleBarMouseEnter = (key: string, fill: string) => (data, idx) => {
+	getBarMouseEnterHandler = (key: string, fill: string) => (data, idx) => {
 		const {options: {formatters}} = this.state;
 
 		this.setState({
@@ -70,7 +70,7 @@ export class BarWidget extends PureComponent<Props, State> {
 				isAnimationActive={false}
 				key={key}
 				onClick={this.handleClick(key)}
-				onMouseEnter={this.getHandleBarMouseEnter(key, fill)}
+				onMouseEnter={this.getBarMouseEnterHandler(key, fill)}
 				onMouseLeave={this.handleClearTooltip}
 				stackId={stackId}
 			>

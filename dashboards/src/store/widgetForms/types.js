@@ -7,6 +7,7 @@ import type {DataSet as ComboChartDataSet, State as ComboChartFormState, Values 
 import type {DataSet as SpeedometerDataSet, State as SpeedometerFormState, Values as SpeedometerValues} from './speedometerForm/types';
 import type {DataSet as SummaryDataSet, State as SummaryFormState, Values as SummaryValues} from './summaryForm/types';
 import type {DataSet as TableDataSet, State as TableFormState, Values as TableValues} from './tableForm/types';
+import type {DataSet as PivotDataSet, State as PivotFormState, Values as PivotValues} from './pivotForm/types';
 import {EVENTS} from 'store/widgetForms/constants';
 import type {State as TextFormState, Values as TextValues} from './textForm/types';
 
@@ -15,6 +16,12 @@ export type SourceData = {
 	filterId: string | null,
 	value: Source | null,
 	widgetFilterOptions?: Array<CustomFilter>
+};
+
+export type BreakdownItem = {
+	attribute: Attribute | null,
+	dataKey: string,
+	group: Group
 };
 
 export type Indicator = {
@@ -28,10 +35,9 @@ export type Parameter = {
 	group: Group
 };
 
-export type BreakdownItem = {
-	attribute: Attribute | null,
+export type ParameterOrder = {
 	dataKey: string,
-	group: Group
+	parameter: Parameter
 };
 
 export type Breakdown = Array<BreakdownItem>;
@@ -66,6 +72,11 @@ export type ChangeTableFormValuesAction = {
 	type: typeof EVENTS.CHANGE_TABLE_FORM_VALUES
 };
 
+export type ChangePivotFormValuesAction = {
+	payload: PivotValues,
+	type: typeof EVENTS.CHANGE_PIVOT_FORM_VALUES
+};
+
 export type ChangeTextFormValuesAction = {
 	payload: TextValues,
 	type: typeof EVENTS.CHANGE_TEXT_FORM_VALUES
@@ -80,6 +91,7 @@ export type Action =
 	| ChangeAxisChartFormValuesAction
 	| ChangeCircleChartFormValuesAction
 	| ChangeComboChartFormValuesAction
+	| ChangePivotFormValuesAction
 	| ChangeSpeedometerChartFormValuesAction
 	| ChangeSummaryChartFormValuesAction
 	| ChangeTableFormValuesAction
@@ -90,9 +102,9 @@ export type DiagramDataSet =
 	| AxisChartDataSet
 	| CircleChartDataSet
 	| ComboChartDataSet
-	| SpeedometerDataSet
 	| SummaryDataSet
-	| TableDataSet;
+	| TableDataSet
+	| PivotDataSet;
 
 export type DiagramValues =
 	| AxisChartValues
@@ -108,6 +120,7 @@ export type WidgetFormsState = {
 	axisChartForm: AxisChartFormState,
 	circleChartForm: CircleChartFormState,
 	comboChartForm: ComboChartFormState,
+	pivotForm: PivotFormState,
 	speedometerForm: SpeedometerFormState,
 	summaryForm: SummaryFormState,
 	tableForm: TableFormState,

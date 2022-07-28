@@ -32,3 +32,7 @@ module.name_mapper='^GroupModal\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/orga
 module.name_mapper='^GroupModal' -> '<PROJECT_ROOT>/src/components/organisms/GroupModal/index.js'
 module.name_mapper='^WidgetFormPanel\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/organisms/WidgetFormPanel/\1'
 module.name_mapper='^WidgetFormPanel' -> '<PROJECT_ROOT>/src/components/organisms/WidgetFormPanel/index.js'
+module.name_mapper='^PivotWidget\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/organisms/PivotWidget/\1'
+module.name_mapper='^PivotWidget' -> '<PROJECT_ROOT>/src/components/organisms/PivotWidget/index.js'
+module.name_mapper='^PivotWidgetForm\/\(.*\)$' -> '<PROJECT_ROOT>/src/components/organisms/PivotWidgetForm/\1'
+module.name_mapper='^PivotWidgetForm' -> '<PROJECT_ROOT>/src/components/organisms/PivotWidgetForm/index.js'

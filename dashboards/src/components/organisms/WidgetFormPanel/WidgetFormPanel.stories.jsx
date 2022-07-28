@@ -53,3 +53,10 @@ SpeedometerForm.args = {
 	...AxisChartForm.args,
 	widget: new NewWidget(undefined, WIDGET_TYPES.SPEEDOMETER)
 };
+
+export const PivotForm = Template.bind({});
+
+PivotForm.args = {
+	...AxisChartForm.args,
+	widget: new NewWidget(undefined, WIDGET_TYPES.PIVOT)
+};

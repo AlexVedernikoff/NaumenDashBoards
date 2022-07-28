@@ -1,0 +1,75 @@
+@import '/styles/variables';
+
+:local {
+	.row {
+		border-right: solid 1px @silver;
+		border-top: solid 1px @silver;
+		box-sizing: border-box;
+		display: flex;
+		flex: 0 0 auto;
+		flex-wrap: nowrap;
+		position: relative;
+
+		&:last-child {
+			border-bottom: solid 1px @ninegrey;
+		}
+	}
+
+	.cell {
+		box-sizing: border-box;
+		height: calc(2em);
+		overflow: hidden;
+		padding: .5em 9px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.topRow {
+		border-top: solid 1px @ninegrey;
+
+		&:first-child {
+			border-top: none;
+		}
+	}
+
+	.index {
+		margin-right: .2em;
+	}
+
+	.parameter{
+		.cell;
+
+		background-color: @white;
+		border-left: solid 1px @ninegrey;
+		border-right: solid 1px @ninegrey;
+		box-sizing: border-box;
+		left: 0;
+		position: sticky;
+	}
+
+	.toggler {
+		display: inline-flex;
+		height: 1em;
+		margin: 0 8px 0 0;
+		padding: 0;
+		position: relative;
+		top: 1px;
+		transition: transform .1s linear 0s;
+
+	}
+
+	.togglerClosed {
+		transform: rotate(-90deg);
+	}
+
+	.valueCell {
+		.cell;
+
+		border-right: solid 1px @silver;
+	}
+
+	.valueCellLast {
+		border-right: solid 1px @ninegrey;
+	}
+
+}

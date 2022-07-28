@@ -1,6 +1,11 @@
 // @flow
 import type {Action} from 'store/widgetForms/types';
-import {changeValuesByAxisOrComboChart, changeValuesBySpeedometerOrSummary, changeValuesByTable} from './helpers';
+import {
+	changeValuesByAxisOrComboChart,
+	changeValuesByPivot,
+	changeValuesBySpeedometerOrSummary,
+	changeValuesByTable
+} from './helpers';
 import {EVENTS} from 'store/widgetForms/constants';
 import {initialState} from './init';
 import type {State} from './types';
@@ -18,6 +23,8 @@ const reducer = (state: State = initialState, action: Action): State => {
 			return changeValuesBySpeedometerOrSummary(state, action.payload);
 		case EVENTS.CHANGE_TABLE_FORM_VALUES:
 			return changeValuesByTable(state, action.payload);
+		case EVENTS.CHANGE_PIVOT_FORM_VALUES:
+			return changeValuesByPivot(state, action.payload);
 		case EVENTS.RESET_FORM:
 			return initialState;
 		case EVENTS.SET_USER_MODE:

@@ -57,6 +57,10 @@ export default class Dashboards implements DashboardsAPI {
 		return this.transport('dashboards', 'getDynamicAttributes', ['groupUUID'], groupCode);
 	}
 
+	getLinkedAttributes (parentClassFqn: string, classFqn: string) {
+		return this.transport('dashboards', 'getLinkedAttributes', ['parentClassFqn', 'classFqn'], parentClassFqn, classFqn);
+	}
+
 	getLinkedDataSources (payload: DTOValue) {
 		return this.transport('dashboards', 'getLinkedDataSources', ['requestContent'], payload);
 	}

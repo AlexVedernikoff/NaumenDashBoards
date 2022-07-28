@@ -9,6 +9,7 @@ import {root} from 'app.constants';
 import styles from './styles.less';
 import t from 'localization';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
+import withBlurRoot from 'src/components/organisms/Startup/withBlurRoot';
 
 export class Modal extends Component<Props> {
 	static defaultProps = {
@@ -17,6 +18,7 @@ export class Modal extends Component<Props> {
 		defaultButton: DEFAULT_BUTTONS.SUBMIT_BUTTON,
 		footerPosition: FOOTER_POSITIONS.LEFT,
 		notice: false,
+		setBlurRoot: value => {},
 		showCancelButton: true,
 		size: SIZES.NORMAL,
 		submitting: false
@@ -24,15 +26,32 @@ export class Modal extends Component<Props> {
 
 	getContainerCN = () => {
 		const {className, size} = this.props;
-		const {LARGE, SMALL} = SIZES;
+		const {FULL_WIDTH, LARGE, SMALL} = SIZES;
 
 		return cn({
 			[className]: true,
 			[styles.container]: true,
+			[styles.fullWidth]: size === FULL_WIDTH,
 			[styles.largeContainer]: size === LARGE,
 			[styles.smallContainer]: size === SMALL
 		});
 	};
+
+	componentDidMount () {
+		const {setBlurRoot} = this.props;
+
+		if (setBlurRoot) {
+			setBlurRoot(true);
+		}
+	}
+
+	componentWillUnmount () {
+		const {setBlurRoot} = this.props;
+
+		if (setBlurRoot) {
+			setBlurRoot(false);
+		}
+	}
 
 	prevent = (e: SyntheticMouseEvent<HTMLDivElement>) => e.stopPropagation();
 
@@ -114,4 +133,4 @@ export class Modal extends Component<Props> {
 	}
 }
 
-export default Modal;
+export default withBlurRoot(Modal);

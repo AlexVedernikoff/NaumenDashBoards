@@ -25,7 +25,7 @@ export class PieWidget extends PureComponent<Props, State> {
 		return null;
 	}
 
-	getHandlePieMouseEnter = (fill: string) =>
+	getPieMouseEnterHandler = (fill: string) =>
 		() => this.setState({tooltipColor: darkenColor(fill)});
 
 	handleClick = (payload, idx) => {
@@ -110,7 +110,7 @@ export class PieWidget extends PureComponent<Props, State> {
 	};
 
 	renderPieCell = (item, idx) => (
-		<Cell fill={item.color} key={`cell-${idx}`} onMouseOver={this.getHandlePieMouseEnter(item.color.toString())} />
+		<Cell fill={item.color} key={`cell-${idx}`} onMouseOver={this.getPieMouseEnterHandler(item.color.toString())} />
 	);
 
 	renderPieChart = () => {

@@ -15,6 +15,7 @@ const reducer = (state: State = initialState, action: Action): State => {
 		case EVENTS.CHANGE_COMBO_CHART_FORM_VALUES:
 		case EVENTS.CHANGE_SUMMARY_FORM_VALUES:
 		case EVENTS.CHANGE_TABLE_FORM_VALUES:
+		case EVENTS.CHANGE_PIVOT_FORM_VALUES:
 			return changeValues(state, action.payload);
 		case EVENTS.RESET_FORM:
 			return initialState;

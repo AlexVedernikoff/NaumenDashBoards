@@ -14,6 +14,7 @@ export type DefaultProps = {|
 	defaultButton: DefaultButtons,
 	footerPosition: FooterPosition,
 	notice: boolean,
+	setBlurRoot: (value: boolean) => void,
 	showCancelButton: boolean,
 	size: Size | number,
 	submitText: string,

@@ -3,13 +3,14 @@ import {compose} from 'redux';
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
-import {fixIndicatorsAggregationDataSet, fixLeaveOneIndicator, fixLeaveOneParameters, getDefaultBreakdown} from 'store/widgetForms/helpers';
+import {fixIndicatorsAggregationDataSet, fixLeaveOneIndicator, fixRemoveParameters, getDefaultBreakdown} from 'store/widgetForms/helpers';
 import {omit} from 'helpers';
 import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
 import type {Values as AxisValues} from 'src/store/widgetForms/axisChartForm/types';
 import type {Values as ComboValues} from 'src/store/widgetForms/comboChartForm/types';
 import type {Values as SpeedometerValues} from 'src/store/widgetForms/speedometerForm/types';
 import type {Values as SummaryValues} from 'src/store/widgetForms/summaryForm/types';
+import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
 
 /**
  * Создает базовый объект данных кругового графика
@@ -130,14 +131,57 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		templateName,
 		tooltip
 	} = values;
-	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAggregationDataSet);
+	const transformDataSet = compose(
+		fixLeaveOneIndicator,
+		fixIndicatorsAggregationDataSet,
+		fixRemoveParameters
+	);
 
 	return {
 		...state,
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const prevDataSet = state.data[index] ?? createCircleDataSet(dataSet.dataKey);
-			const {parameters, ...fixDataSet} = transformDataSet(dataSet);
+			const fixDataSet = transformDataSet(dataSet);
+
+			return {...prevDataSet, ...fixDataSet};
+		}),
+		displayMode,
+		header,
+		name,
+		navigation,
+		templateName,
+		tooltip
+	};
+};
+
+/**
+ * Изменяет значения формы осевых графиков относительно изменений в форме сводке
+ * @param {State} state - состояние формы осевых графиков
+ * @param {TableValues} values - значения формы сводки
+ * @returns {State}
+ */
+const changeValuesByPivot = (state: State, values: PivotValues): State => {
+	const {
+		data,
+		displayMode,
+		header,
+		name,
+		navigation,
+		templateName,
+		tooltip
+	} = values;
+	const transformDataSet = compose(
+		fixLeaveOneIndicator,
+		fixIndicatorsAggregationDataSet,
+		fixRemoveParameters
+	);
+
+	return {
+		...state,
+		data: data.map((dataSet, index) => {
+			const prevDataSet = state.data[index] ?? createCircleDataSet(dataSet.dataKey);
+			const fixDataSet = transformDataSet(dataSet);
 
 			return {...prevDataSet, ...fixDataSet};
 		}),
@@ -154,5 +198,6 @@ export {
 	createCircleDataSet,
 	changeValuesByAxisOrComboChart,
 	changeValuesBySpeedometerOrSummary,
+	changeValuesByPivot,
 	changeValuesByTable
 };

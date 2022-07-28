@@ -6,21 +6,22 @@ import type {Values} from 'components/organisms/WidgetForm/types';
 import {VALUES_CONTEXT} from './constants';
 
 export const withValues = (...fields: Array<string>) =>
-	<Props: {} & InjectedProps<Values>>(Component: React$ComponentType<Props>): React$ComponentType<Props> => {
-		return class WithValues extends React.Component<Props> {
-			isEqualValues = (newArgs: [Values], lastArgs: [Values]) => {
-				return fields.every(field => newArgs[0][field] === lastArgs[0][field]);
-			};
+	<Props: {} & InjectedProps<Values>>(Component: React$ComponentType<Props>): React$ComponentType<Props> =>
+		class WithValues extends React.Component<Props> {
+			isEqualValues = (newArgs: [Values], lastArgs: [Values]) =>
+				fields.every(field => newArgs[0][field] === lastArgs[0][field]);
 
-			getPartialValues = memoize(values => {
-				return fields.reduce((props, field) => ({...props, [field]: values[field]}), {});
-			}, this.isEqualValues);
+			getPartialValues = memoize(values =>
+				fields.reduce((props, field) => ({...props, [field]: values[field]}), {}), this.isEqualValues
+			);
 
 			renderComponent = (context: ValuesContext) => {
 				const {setFieldValue, values: allValues} = context;
 				const values = fields.length > 0 ? this.getPartialValues(allValues) : allValues;
 
-				return <Component {...this.props} setFieldValue={setFieldValue} values={values} />;
+				return (
+					<Component {...this.props} setFieldValue={setFieldValue} values={values} />
+				);
 			};
 
 			render () {
@@ -31,6 +32,5 @@ export const withValues = (...fields: Array<string>) =>
 				);
 			}
 		};
-	};
 
 export default withValues;

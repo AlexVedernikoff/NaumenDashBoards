@@ -2,7 +2,6 @@
 import {calculateStringsSize} from 'src/utils/recharts/helpers';
 import type {ChartOptions} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
-import {DIAGRAM_WIDGET_TYPES} from 'store/widgets/data/constants';
 import {EMPTY_CHART_OPTIONS} from './constants';
 import getBarOptions from './bar';
 import getBarStackedOptions from './bar.stacked';
@@ -11,10 +10,12 @@ import getColumnStackedOptions from './columns.stacked';
 import getComboOptions from './combo';
 import getLinesOptions from './lines';
 import getPieOptions from './pie';
+import getPivotOptions from './pivot';
 import getSpeedometerOptions from './speedometer';
 import getSummaryOptions from './summary';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import type {Widget} from 'store/widgets/data/types';
+import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Функция возвращает объединенный набор базовых и типовых опций
@@ -31,7 +32,7 @@ const getOptions = (
 	globalColorsSettings: GlobalCustomChartColorsSettings
 ): ChartOptions => {
 	const {type} = widget;
-	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, SPEEDOMETER, SUMMARY} = DIAGRAM_WIDGET_TYPES;
+	const {BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, COMBO, DONUT, LINE, PIE, PIVOT_TABLE, SPEEDOMETER, SUMMARY} = WIDGET_TYPES;
 	let result = EMPTY_CHART_OPTIONS;
 
 	switch (type) {
@@ -62,6 +63,9 @@ const getOptions = (
 			break;
 		case SUMMARY:
 			result = getSummaryOptions(widget, data, container, globalColorsSettings);
+			break;
+		case PIVOT_TABLE:
+			result = getPivotOptions(widget, data, container);
 			break;
 		default:
 			break;

@@ -1,0 +1,5 @@
+// @flow
+export const FIELD_TYPE = {
+	INDICATOR: 'INDICATOR',
+	PARAMETER: 'PARAMETER'
+};

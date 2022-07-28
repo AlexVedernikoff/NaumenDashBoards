@@ -3,6 +3,7 @@ import type {Action} from 'store/widgetForms/types';
 import {
 	changeValuesByCircleChart,
 	changeValuesByComboChart,
+	changeValuesByPivot,
 	changeValuesBySpeedometerOrSummary,
 	changeValuesByTable
 } from './helpers';
@@ -24,6 +25,8 @@ const reducer = (state: State = initialState, action: Action): State => {
 			return changeValuesBySpeedometerOrSummary(state, action.payload);
 		case EVENTS.CHANGE_TABLE_FORM_VALUES:
 			return changeValuesByTable(state, action.payload);
+		case EVENTS.CHANGE_PIVOT_FORM_VALUES:
+			return changeValuesByPivot(state, action.payload);
 		case EVENTS.RESET_FORM:
 			return initialState;
 		case EVENTS.SET_USER_MODE:

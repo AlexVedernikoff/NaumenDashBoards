@@ -4,7 +4,9 @@ module.exports = {
 	'stories': ['../src/**/*.stories.@(js|jsx)'],
 	'addons': [
 		'@storybook/addon-links',
-		'@storybook/addon-essentials'
+		'@storybook/addon-essentials',
+		'@storybook/addon-controls'
+
 	],
 	webpackFinal: config => ({
 		...config,

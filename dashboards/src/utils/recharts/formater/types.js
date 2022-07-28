@@ -10,6 +10,10 @@ export type StringFormatter = (value: string) => string;
 
 export type ValueFormatter = (value: string | number) => string;
 
+export type PivotValueFormatter = (value: string | number | [number, number] | null) => string;
+
+export type ValuePivotFormatter = (key: string, value: string | number | [number, number] | null) => string;
+
 export type ComboNumberFormatter = (dataKey: string) => (value: number) => string;
 
 export type ComboStringFormatter = (dataKey: string) => (value: string) => string;
@@ -50,4 +54,10 @@ export type SpeedometerFormatter = {
 	borders: NumberFormatter,
 	ranges: NumberFormatter,
 	total: NumberFormatter
+};
+
+export type PivotFormatter = {
+	indicator: StringFormatter,
+	parameter: StringFormatter,
+	value: ValuePivotFormatter
 };
