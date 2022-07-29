@@ -13,6 +13,7 @@ import withBlurRoot from 'src/components/organisms/Startup/withBlurRoot';
 
 export class Modal extends Component<Props> {
 	static defaultProps = {
+		blurRoot: false,
 		children: null,
 		className: '',
 		defaultButton: DEFAULT_BUTTONS.SUBMIT_BUTTON,
@@ -38,9 +39,9 @@ export class Modal extends Component<Props> {
 	};
 
 	componentDidMount () {
-		const {setBlurRoot} = this.props;
+		const {blurRoot, setBlurRoot} = this.props;
 
-		if (setBlurRoot) {
+		if (blurRoot && setBlurRoot) {
 			setBlurRoot(true);
 		}
 	}

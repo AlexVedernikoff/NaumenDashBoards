@@ -10,8 +10,7 @@ export const initialDashboardState: SettingsState = {
 	autoUpdate: {
 		defaultInterval: DEFAULT_INTERVAL,
 		enabled: false,
-		interval: DEFAULT_INTERVAL,
-		remainder: DEFAULT_INTERVAL * 60
+		interval: DEFAULT_INTERVAL
 	},
 	code: '',
 	dashboardUUID: '',

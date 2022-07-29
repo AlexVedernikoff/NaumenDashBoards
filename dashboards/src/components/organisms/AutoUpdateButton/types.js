@@ -18,5 +18,6 @@ export type Values = {
 export type State = {
 	errors: ErrorsMap,
 	isSubmitting: boolean,
+	remainder: number,
 	values: Values
 };

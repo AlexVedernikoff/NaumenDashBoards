@@ -12,11 +12,6 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 				...state,
 				autoUpdate: {...state.autoUpdate, ...action.payload}
 			};
-		case DASHBOARD_EVENTS.CHANGE_INTERVAL_REMINDER:
-			return {
-				...state,
-				autoUpdate: {...state.autoUpdate, remainder: action.payload}
-			};
 		case DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE:
 			return {
 				...state,

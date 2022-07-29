@@ -9,6 +9,7 @@ import {getOptions} from 'utils/recharts';
 import React, {createRef, PureComponent} from 'react';
 import styles from './styles.less';
 import T from 'components/atoms/Translation';
+import t from 'localization';
 
 export const withBaseWidget = <Config: WidgetProps>(
 	Component: React$ComponentType<Config & InjectOptionsProps>
@@ -17,7 +18,8 @@ export const withBaseWidget = <Config: WidgetProps>(
 		state = {
 			container: null,
 			hiddenSeries: [],
-			options: {}
+			options: {},
+			updateError: false
 		};
 
 		widgetRef: DivRef = createRef();
@@ -28,11 +30,15 @@ export const withBaseWidget = <Config: WidgetProps>(
 			const {data, error, loading} = buildData;
 
 			if (!error && !loading && data) {
-				const options = container
-					? getOptions(widget, data, container, globalColorsSettings)
-					: {};
+				try {
+					const options = container
+						? getOptions(widget, data, container, globalColorsSettings)
+						: {};
 
-				return {options};
+					return {options, updateError: false};
+				} catch (ex) {
+					return {updateError: true};
+				}
 			}
 
 			return null;
@@ -88,7 +94,21 @@ export const withBaseWidget = <Config: WidgetProps>(
 
 		renderError = () => {
 			const {buildData: {error}} = this.props;
-			return error ? <div className={styles.error} title={error}>{error}</div> : null;
+			const {updateError} = this.state;
+
+			if (error) {
+				return <div className={styles.error} title={error}>{error}</div>;
+			}
+
+			if (updateError) {
+				return (
+					<div className={styles.error} title={t('Widget::Error')}>
+						<T text='Widget::Error' />
+					</div>
+				);
+			}
+
+			return null;
 		};
 
 		renderLoading = () => {

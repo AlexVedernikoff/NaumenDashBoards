@@ -12,16 +12,10 @@ export type SendToEmailsAction = (name: string, type: string, file: Blob, users:
 export type AutoUpdateSettings = {
 	defaultInterval: number,
 	enabled: boolean,
-	interval: number,
-	remainder: number
+	interval: number
 };
 
 export type EditPanelPosition = $Keys<typeof EDIT_PANEL_POSITION>;
-
-type ChangeIntervalReminder = {
-	payload: number,
-	type: typeof DASHBOARD_EVENTS.CHANGE_INTERVAL_REMINDER
-};
 
 type ChangeAutoUpdateSettings = {
 	payload: $Shape<AutoUpdateSettings>,
@@ -130,7 +124,6 @@ type UnknownDashboardAction = {
 
 export type SettingsAction =
 	| ChangeAutoUpdateSettings
-	| ChangeIntervalReminder
 	| ChangeLayoutMode
 	| ChangeShowHeader
 	| CreatePersonalDashboard

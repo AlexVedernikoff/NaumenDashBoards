@@ -3,7 +3,6 @@ import {addLayouts, setMobileLayouts, setWebLayouts} from 'store/dashboard/layou
 import {addNewWidget, focusWidget, resetWidget, setWidgets} from 'store/widgets/data/actions';
 import api from 'api';
 import {ApiError, PersonalDashboardNotFound} from 'api/errors';
-import type {AutoUpdateSettings, EditPanelPosition, LayoutMode} from './types';
 import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS} from 'src/store/context/constants';
@@ -11,6 +10,7 @@ import {createToast} from 'store/toasts/actions';
 import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
 import {DASHBOARD_EVENTS, EDIT_PANEL_POSITION, MAX_AUTO_UPDATE_INTERVAL} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import type {EditPanelPosition, LayoutMode} from './types';
 import {fetchBuildData} from 'store/widgets/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
 import {
@@ -153,7 +153,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 			dispatch(setDashboardUUID(dashboardUUID));
 
 			if (autoUpdate !== null) {
-				dispatch(setAutoUpdateSettings(autoUpdate));
+				dispatch(changeAutoUpdateSettings(autoUpdate));
 			}
 
 			dispatch(setWidgets(widgets));
@@ -177,35 +177,6 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
 
 		throw exception;
 	}
-};
-
-/**
- * Устанавливает настройки автообновления
- * @param {AutoUpdateSettings} settings - настройки автообновления
- * @returns {ThunkAction}
- */
-const setAutoUpdateSettings = (settings: $Shape<AutoUpdateSettings>): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {defaultInterval} = getState().dashboard.settings.autoUpdate;
-	const {interval = defaultInterval} = settings;
-	const remainder = interval * 60;
-
-	dispatch(changeAutoUpdateSettings({...settings, remainder}));
-};
-
-/**
- * Изменяет остаток времени автообновления
- * @param {number} remainder - отстаток времени
- * @returns {ThunkAction}
- */
-const changeIntervalRemainder = (remainder: number): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	if (remainder === 0) {
-		dispatch(getSettings(true));
-	}
-
-	dispatch({
-		payload: remainder,
-		type: DASHBOARD_EVENTS.CHANGE_INTERVAL_REMINDER
-	});
 };
 
 /**
@@ -467,7 +438,7 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 
 		await api.instance.dashboardSettings.settings.saveAutoUpdate(payload);
 
-		dispatch(setAutoUpdateSettings(autoUpdateSetting));
+		dispatch(changeAutoUpdateSettings(autoUpdateSetting));
 		dispatch(createToast({
 			text: t('store::dashboard::settings::SettingsSuccessfullyChanged')
 		}));
@@ -613,7 +584,6 @@ const changeShowHeader = (payload: boolean) => async (dispatch: Dispatch) => {
 };
 
 export {
-	changeIntervalRemainder,
 	changeLayoutMode,
 	changeShowHeader,
 	createNewState,
