@@ -7,6 +7,7 @@ import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import t from 'localization';
+import {TEXT_HANDLERS} from 'store/widgets/data/constants';
 
 export class PivotRow extends PureComponent<Props, State> {
 	state = {
@@ -52,9 +53,12 @@ export class PivotRow extends PureComponent<Props, State> {
 		const {columnsWidth, formatters, level, row, style} = this.props;
 		const parameterStyle = getParameterStyle(columnsWidth[0], level, style);
 		const value = formatters.parameter(row.value);
+		const className = cn(styles.cell, styles.parameter, {
+			[styles.cellNoWrap]: style.textHandler === TEXT_HANDLERS.CROP
+		});
 
 		return (
-			<div className={styles.parameter} style={parameterStyle} title={row.value}>
+			<div className={className} style={parameterStyle} title={row.value}>
 				{this.renderToggler()}
 				{this.renderIndex()}
 				{value}

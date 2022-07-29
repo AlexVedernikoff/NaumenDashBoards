@@ -1,5 +1,6 @@
 // @flow
 import cn from 'classnames';
+import {getHeaderColumnStyle, getTitleStyle} from './helpers';
 import {PIVOT_COLUMN_MIN_WIDTH, PIVOT_COLUMN_TYPE} from 'utils/recharts/constants';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
@@ -116,9 +117,9 @@ export class HeaderColumn extends PureComponent<Props, State> {
 	};
 
 	renderTitle = () => {
-		const {column, formatter} = this.props;
-		const titleStyle = {height: `${column.height * 2}em`};
+		const {column, formatter, style} = this.props;
 		const title = column.type === PIVOT_COLUMN_TYPE.SUM ? t('PivotWidget::Sum') : formatter(column.title);
+		const titleStyle = getTitleStyle(column.height, style);
 
 		return (
 			<div className={styles.title} style={titleStyle}>
@@ -130,13 +131,13 @@ export class HeaderColumn extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {column} = this.props;
+		const {column, style} = this.props;
 		const {columnWidth} = this.state;
-		const style = {width: `${columnWidth}px`};
 		const className = cn(styles.column, {[styles.parameter]: column.type === PIVOT_COLUMN_TYPE.PARAMETER});
+		const columnStyle = getHeaderColumnStyle(columnWidth, style);
 
 		return (
-			<div className={className} style={style}>
+			<div className={className} style={columnStyle}>
 				{this.renderTitle()}
 				{this.renderSubColumn()}
 				{this.renderDivider()}

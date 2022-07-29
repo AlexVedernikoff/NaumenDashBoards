@@ -73,6 +73,7 @@ export class PivotWidget extends PureComponent<Props, State> {
 
 	renderHeaders = () => {
 		const {columnsWidth, options: {formatters, headHeight, headerStyle, headers}} = this.state;
+
 		return (
 			<Headers
 				columnsWidth={columnsWidth}
