@@ -10,7 +10,7 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	onChangeRemainder: (remainder: number) => ThunkAction,
+	getSettings: (refresh: boolean) => ThunkAction,
 	onSaveSettings: (enabled: boolean, interval: string | number) => ThunkAction
 };
 

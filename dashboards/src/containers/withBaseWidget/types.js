@@ -43,5 +43,6 @@ export type InjectOptionsProps = {
 export type ComponentState = {
 	container: HTMLDivElement | null,
 	hiddenSeries: Array<string>,
-	options: CommonOptions | null
+	options: CommonOptions | null,
+	updateError: boolean
 };

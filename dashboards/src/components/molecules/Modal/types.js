@@ -8,6 +8,7 @@ type FooterPosition = $Keys<typeof FOOTER_POSITIONS>;
 type DefaultButtons = $Keys<typeof DEFAULT_BUTTONS>;
 
 export type DefaultProps = {|
+	blurRoot: boolean,
 	cancelText: string,
 	children: ?Node,
 	className: string,

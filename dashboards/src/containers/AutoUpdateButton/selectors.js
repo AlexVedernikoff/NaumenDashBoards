@@ -1,7 +1,7 @@
 // @flow
 import type {AppState} from 'store/types';
-import {changeIntervalRemainder, saveAutoUpdateSettings} from 'store/dashboard/settings/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
+import {getSettings, saveAutoUpdateSettings} from 'store/dashboard/settings/actions';
 
 export const props = (state: AppState): ConnectedProps => ({
 	personalDashboard: state.dashboard.settings.personal,
@@ -10,6 +10,6 @@ export const props = (state: AppState): ConnectedProps => ({
 });
 
 export const functions: ConnectedFunctions = {
-	onChangeRemainder: changeIntervalRemainder,
+	getSettings,
 	onSaveSettings: saveAutoUpdateSettings
 };

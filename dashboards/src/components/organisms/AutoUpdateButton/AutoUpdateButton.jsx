@@ -2,9 +2,9 @@
 import Button from 'components/atoms/Button';
 import Checkbox from 'components/atoms/LegacyCheckbox';
 import cn from 'classnames';
+import {DEFAULT_INTERVAL, MAX_AUTO_UPDATE_INTERVAL, SECONDS_IN_MINUTE} from 'store/dashboard/settings/constants';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from 'components/organisms/DashboardHeader/components/IconButton';
-import {MAX_AUTO_UPDATE_INTERVAL} from 'store/dashboard/settings/constants';
 import {number, object} from 'yup';
 import Popover from 'components/atoms/Popover';
 import type {Props, State, Values} from './types';
@@ -19,6 +19,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	state = {
 		errors: {},
 		isSubmitting: false,
+		remainder: DEFAULT_INTERVAL * SECONDS_IN_MINUTE,
 		values: {
 			enabled: false,
 			interval: 15
@@ -45,6 +46,16 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 			isSubmitting && this.validate(values);
 			this.setState({values});
 		}
+	};
+
+	handleChangeRemainder = (remainder: number) => {
+		const {getSettings} = this.props;
+
+		if (remainder === 0) {
+			getSettings(true);
+		}
+
+		this.setState({remainder});
 	};
 
 	handleClick = async (name: string, value: boolean) => {
@@ -78,6 +89,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 		const {defaultInterval, enabled, interval} = this.props.settings;
 
 		this.setState({
+			remainder: (interval || defaultInterval) * SECONDS_IN_MINUTE,
 			values: {
 				enabled,
 				interval: interval || defaultInterval
@@ -179,13 +191,14 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	renderText = () => <span className={styles.text}> <T text="AutoUpdateButton::Minutes" /></span>;
 
 	renderTimerButton = () => {
-		const {onChangeRemainder, personalDashboard, role, settings} = this.props;
-		const {enabled, remainder} = settings;
+		const {personalDashboard, role, settings} = this.props;
+		const {remainder} = this.state;
+		const {enabled} = settings;
 		const buttonCN = enabled ? styles.enabledAutoUpdateButton : '';
 
 		if (enabled) {
 			return (
-				<TimerButton duration={remainder} onChangeDuration={onChangeRemainder} tip={t('AutoUpdateButton::AutoRefreshOn')} />
+				<TimerButton duration={remainder} onChangeDuration={this.handleChangeRemainder} tip={t('AutoUpdateButton::AutoRefreshOn')} />
 			);
 		}
 

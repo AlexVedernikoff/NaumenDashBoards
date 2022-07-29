@@ -11,11 +11,11 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import IndicatorFieldset from 'WidgetFormPanel/components/IndicatorFieldset';
 import type {IndicatorValue, Props, State} from './types';
 import memoize from 'memoize-one';
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import t from 'localization';
 
-export class IndicatorsDataBox extends Component<Props, State> {
+export class IndicatorsDataBox extends PureComponent<Props, State> {
 	state = {
 		values: []
 	};

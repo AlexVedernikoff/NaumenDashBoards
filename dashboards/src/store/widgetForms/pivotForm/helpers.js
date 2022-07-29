@@ -50,14 +50,18 @@ const parseDataForPivot = (data: NotPivotValuesDataSets): ParseDataForPivotResul
 
 		newData.push({...newDataSet, dataKey, indicators, parameters, source});
 
-		parameters.forEach(parameter => parametersOrder.push({dataKey, parameter}));
+		if (parameters) {
+			parameters.forEach(parameter => parametersOrder.push({dataKey, parameter}));
+		}
 
-		indicators.forEach(indicator => indicatorGrouping.push({
-			hasBreakdown: false,
-			key: indicator.key ?? '',
-			label: indicator.attribute?.title ?? '',
-			type: INDICATOR_GROUPING_TYPE.INDICATOR_INFO
-		}));
+		if (indicators) {
+			indicators.forEach(indicator => indicatorGrouping.push({
+				hasBreakdown: false,
+				key: indicator.key ?? '',
+				label: indicator.attribute?.title ?? '',
+				type: INDICATOR_GROUPING_TYPE.INDICATOR_INFO
+			}));
+		}
 	});
 
 	return {data: newData, indicatorGrouping, parametersOrder};
