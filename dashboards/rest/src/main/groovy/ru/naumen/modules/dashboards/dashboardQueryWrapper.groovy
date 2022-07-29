@@ -194,8 +194,8 @@ class QueryWrapper implements CriteriaWrapper
         if (sortingType)
         {
             Closure sorting = getSorting(sortingType)
-            column.with(aggregation).with(sorting).with(criteria.&addOrder)
-            criteria.add(api.whereClause.isNotNull(column))
+            column.with(sorting).with(criteria.&addOrder)
+            criteria.add(api.whereClause.isNotNull(sc.property(criteriaForColumn, attributeCodes)))
         }
 
         if(totalValueCriteria)
