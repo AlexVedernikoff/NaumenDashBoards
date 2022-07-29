@@ -3,10 +3,22 @@ import {FONT_STYLES} from 'store/widgets/data/constants';
 import type {HeaderColumnStyle, TitleColumnStyle} from './types';
 import type {PivotHeaderSettings} from 'src/store/widgets/data/types';
 
+/**
+ * Формирует стили для ячейки заголовка сводной таблицы
+ * @param {number} columnWidth - ширина ячейки
+ * @param {PivotHeaderSettings} style - стиль заголовка
+ * @returns  {HeaderColumnStyle}
+ */
 export const getHeaderColumnStyle = (columnWidth: number, style: PivotHeaderSettings): HeaderColumnStyle => ({
 	width: `${columnWidth}px`
 });
 
+/**
+ * Формирует стили для подписи ячейки заголовка сводной таблицы
+ * @param {number} height - высота подписи
+ * @param {PivotHeaderSettings} style - стиль заголовка
+ * @returns {HeaderColumnStyle}
+ */
 export const getTitleStyle = (height: number, style: PivotHeaderSettings): TitleColumnStyle => {
 	const {fontColor, fontStyle, textAlign} = style;
 
