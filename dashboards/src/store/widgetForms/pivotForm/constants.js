@@ -1,5 +1,5 @@
 // @flow
-import {DEFAULT_TABLE_VALUE, DISPLAY_MODE, SORTING_TYPES, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/constants';
+import {DEFAULT_TABLE_VALUE, DISPLAY_MODE, FONT_STYLES, SORTING_TYPES, TEXT_ALIGNS, TEXT_HANDLERS} from 'store/widgets/data/constants';
 import type {LangType} from 'localization/localize_types';
 import type {State} from './types';
 
@@ -70,6 +70,11 @@ const DEFAULT_HEADER_CELL_SETTINGS = Object.freeze({
 	textHandler: TEXT_HANDLERS.CROP
 });
 
+const DEFAULT_PARAMETER_CELL_SETTINGS = Object.freeze({
+	fontColor: 'black',
+	fontStyle: FONT_STYLES.BOLD
+});
+
 const DEFAULT_PIVOT_SETTINGS = {
 	body: {
 		defaultValue: {
@@ -77,10 +82,10 @@ const DEFAULT_PIVOT_SETTINGS = {
 			value: DEFAULT_TABLE_VALUE.EMPTY_ROW
 		},
 		indicatorSettings: DEFAULT_CELL_SETTINGS,
-		pageSize: 20,
+		pageSize: 0,
 		parameterRowColor: DEFAULT_PRESET_COLOR,
-		parameterSettings: DEFAULT_CELL_SETTINGS,
-		showRowNum: true,
+		parameterSettings: DEFAULT_PARAMETER_CELL_SETTINGS,
+		showRowNum: false,
 		textAlign: TEXT_ALIGNS.left,
 		textHandler: TEXT_HANDLERS.CROP
 	},

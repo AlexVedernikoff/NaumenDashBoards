@@ -16,3 +16,15 @@ export type State = {
 	columnWidth: number,
 	columnWidths: Array<number>,
 };
+
+export type HeaderColumnStyle = {
+	width: string
+};
+
+export type TitleColumnStyle = {
+	color: string,
+	fontStyle: string,
+	fontWeight: string,
+	height: string,
+	textDecoration: string,
+};

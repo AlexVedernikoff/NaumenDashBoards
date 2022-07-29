@@ -17,10 +17,13 @@
 
 	.cell {
 		box-sizing: border-box;
-		height: calc(2em);
 		overflow: hidden;
 		padding: .5em 9px;
 		text-overflow: ellipsis;
+	}
+
+	.cellNoWrap {
+		height: calc(2em);
 		white-space: nowrap;
 	}
 
@@ -37,8 +40,6 @@
 	}
 
 	.parameter{
-		.cell;
-
 		background-color: @white;
 		border-left: solid 1px @ninegrey;
 		border-right: solid 1px @ninegrey;
@@ -66,6 +67,10 @@
 		.cell;
 
 		border-right: solid 1px @silver;
+
+		&:last-child {
+			border-right: solid 1px @ninegrey;
+		}
 	}
 
 	.valueCellLast {
