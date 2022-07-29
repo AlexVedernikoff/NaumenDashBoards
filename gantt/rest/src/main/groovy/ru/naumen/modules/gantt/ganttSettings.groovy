@@ -334,7 +334,7 @@ class GanttSettingsService
         String contentCode = request.contentCode
 
         String diagramKey = generateDiagramKey(subjectUUID, contentCode)
-        String ganttSettingsFromKeyValue = getJsonSettings(diagramKey)
+        String ganttSettingsFromKeyValue = getJsonSettings(subjectUUID)
 
         GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
@@ -369,7 +369,7 @@ class GanttSettingsService
 
         ganttSettings.commonSettings = updateColumnsInCommonSettings(ganttSettings.commonSettings)
 
-        if (saveJsonSettings(ganttSettingsKey, Jackson.toJsonString(ganttSettings)))
+        if (saveJsonSettings(subjectUUID, Jackson.toJsonString(ganttSettings)))
         {
             return ganttSettings
         }
