@@ -437,7 +437,7 @@
                 request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters, offsetUTCMinutes)
                 DashboardUtils.log('dashboardDataSet', 429, 'request', request, true)
                 res = getDiagramData(request, diagramType, templateUUID)
-                replaceResultAttributeMetaClass(res, request)
+                replaceResultAttributeMetaClass(res.first(), request)
                 DashboardUtils.log('dashboardDataSet', 431, 'res', res, true)
                 countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings)
                 if(diagramType == DiagramType.SPEEDOMETER)
@@ -533,7 +533,7 @@
                 requestDataCopy.groups = requestDataCopy.groups.collect()
     
                 GroupParameter breakdownGroup =
-                    buildSystemGroup(aggregation.breakdown.group, aggregation.attribute)
+                    buildSystemGroup(aggregation.breakdown.group, aggregation.breakdown.attribute)
                 requestDataCopy.groups << breakdownGroup
                 List result = dashboardQueryWrapperUtils.getData(
                     requestDataCopy,
@@ -542,6 +542,9 @@
                     false,
                     DiagramType.PIVOT_TABLE
                 )
+
+                replaceResultAttributeMetaClass(result, new DiagramRequest(data: [(requestDataCopy.source.dataKey): requestDataCopy]))
+
                 aggregationBreakdownResult[aggregation] = result
             }
     
@@ -734,7 +737,7 @@
             }
             if (isTypeMetaClass)
             {
-                res.first().each { resArraysData ->
+                res.each { resArraysData ->
                     for (int i = 0; i < resArraysData.size(); i++)
                     {
                         try
@@ -5427,7 +5430,7 @@
                 {
                     String accessor = aggregation.key
                     data.each { dataItem ->
-                        List notFormattedValues = dataItem[accessor]
+                        List notFormattedValues = dataItem[accessor] != '0' ? dataItem[accessor] : []
                         notFormattedValues.each {
                             dataItem[(accessor + '$' + it[1])] = it[0]
                         }

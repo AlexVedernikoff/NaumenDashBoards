@@ -1463,7 +1463,18 @@ class DashboardQueryWrapperUtils
                 criteria = wrapper.criteria
                 totalValueCriteria = false
             }
-            wrapper.filtering(criteria, totalValueCriteria, [it])
+
+            IApiCriteria criteriaToFilter
+            if (it.attribute.metaClassFqn == requestData.source.classFqn)
+            {
+                criteriaToFilter = criteria
+            }
+            else
+            {
+                criteriaToFilter = sourceMetaClassCriteriaMap[it.attribute.metaClassFqn]
+            }
+
+            wrapper.filtering(criteriaToFilter, totalValueCriteria, [it])
         }
 
         //при таких условиях в запросе придёт массив с 1 уровнем вложенности [v1, v2, v3,..]
@@ -1879,7 +1890,12 @@ class DashboardQueryWrapperUtils
             it.attribute.code
         }
         Collection<String> listMetaClassFqn = requestData.groups.collect {
-            it?.attribute?.metaClassFqn
+            String metaClassFqn = it?.attribute?.metaClassFqn ?: ''
+            if (!metaClassFqn.grep(requestData.source.classFqn) && !requestData.source.classFqn.grep(metaClassFqn))
+            {
+                metaClassFqn = requestData.source.classFqn
+            }
+            return metaClassFqn
         }
         Source requestDataSource = requestData.source
         if (listAttributeCodes.any {
@@ -1892,7 +1908,7 @@ class DashboardQueryWrapperUtils
             if (lastSuitableSourceIdx != -1)
             {
                 String attrObjDataClassFqn = listMetaClassFqn[lastSuitableSourceIdx]
-                requestDataSource = new Source(classFqn: attrObjDataClassFqn, descriptor: "")
+                requestDataSource = new Source(classFqn: attrObjDataClassFqn, descriptor: "", dataKey: requestData.source.dataKey)
             }
         }
         return requestDataSource
