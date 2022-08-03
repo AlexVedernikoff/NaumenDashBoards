@@ -1321,7 +1321,7 @@ class DashboardsService
         IMetaClassWrapper metaClass = metainfo.getMetaClass(parentClassFqn)
 
         List<IAttributeWrapper> platformAttributes = metaClass.attributes.findAll {
-            return it.type.code in [AttributeType.OBJECT_TYPE, AttributeType.BACK_BO_LINKS_TYPE] &&
+            return it.type.code in [AttributeType.OBJECT_TYPE, AttributeType.BACK_BO_LINKS_TYPE, AttributeType.BO_LINKS_TYPE] &&
                    it.type.relatedMetaClass?.code == classFqn
         }
 
