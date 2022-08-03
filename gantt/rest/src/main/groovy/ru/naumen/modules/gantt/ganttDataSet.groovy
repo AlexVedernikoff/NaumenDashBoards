@@ -436,10 +436,10 @@ class GanttDataSetService
 
     /**
      * Метод получения данных для построения диаграммы Ганта, вызывается рекурсивно
-     * @param settings - иерархический список настроек
+     * @param settingsList - иерархический список настроек
      * @param parentUUID - уникальный идентификатор записи в БД о родителе
-     * @param versionKey - ключ версии диаграммы
-     * @return список Map<String, String> параметров для построения диаграммы
+     * @param subjectUUID - уникальный идентификатор объекта, на карточке которого расположена диаграмма
+     * @return список List<String, String> параметров для построения диаграммы
      */
     private List<Map<String, String>> buildDataListFromSettings(Collection<ResourceAndWorkSettings> settingsList,
                                                                 String parentUUID, String subjectUUID)
@@ -660,6 +660,7 @@ class GanttDataSetService
      * @param attrEq - код атрибута, по которому ведется поиск
      * @param value - значение по которому ведется поиск
      * @param attributes - список запрашиваемых атрибутов (колонок) для выборки
+     * @param subjectUUID - уникальный идентификатор объекта, на карточке которого расположена диаграмма
      * @return выборка из БД
      */
     private List<List<String>> getListResultsForParent(Source source,
@@ -691,12 +692,13 @@ class GanttDataSetService
         return api.db.query(criteria).setMaxResults(LIMIT_SIZE_QUERY_FROM_DB).list()
     }
 
-    private String substitutionCardObject(String descriptor, String cardObjectUuid) {
+    private String substitutionCardObject(String descriptor, String cardObjectUuid)
+    {
         Closure<String> closure = { String json ->
             JsonSlurper slurper = new JsonSlurper()
             Map res = slurper.parseText(json) as Map<String, Object>
             res.put('cardObjectUuid', cardObjectUuid)
-            toJson(res)
+            return toJson(res)
         }
         return descriptor && cardObjectUuid ? closure(descriptor) : descriptor
     }
