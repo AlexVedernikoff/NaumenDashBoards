@@ -491,7 +491,7 @@ class GanttSettingsService
         )
 
         List<Map<String, Object>> data = ganttDataSetService
-            .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null)
+            .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null, subjectUUID)
 
         data.each {
             DiagramEntity entity = new DiagramEntity()

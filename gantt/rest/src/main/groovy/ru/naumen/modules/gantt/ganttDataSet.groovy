@@ -17,6 +17,9 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.shared.dto.ISDtObject
+import groovy.json.JsonSlurper
+import ru.naumen.core.server.script.api.ISelectClauseApi
+import ru.naumen.core.server.script.api.criteria.IApiCriteria
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 
@@ -119,7 +122,7 @@ class GanttDataSetService
         }
         else
         {
-            data.tasks = buildDataListFromSettings(settings.resourceAndWorkSettings, null)
+            data.tasks = buildDataListFromSettings(settings.resourceAndWorkSettings, null, request.subjectUUID)
             def timezone =
                 TimeZone.getTimeZone(
                     api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
@@ -433,13 +436,13 @@ class GanttDataSetService
 
     /**
      * Метод получения данных для построения диаграммы Ганта, вызывается рекурсивно
-     * @param settings - иерархический список настроек
+     * @param settingsList - иерархический список настроек
      * @param parentUUID - уникальный идентификатор записи в БД о родителе
-     * @param versionKey - ключ версии диаграммы
-     * @return список Map<String, String> параметров для построения диаграммы
+     * @param subjectUUID - уникальный идентификатор объекта, на карточке которого расположена диаграмма
+     * @return список List<String, String> параметров для построения диаграммы
      */
     private List<Map<String, String>> buildDataListFromSettings(Collection<ResourceAndWorkSettings> settingsList,
-                                                                String parentUUID)
+                                                                String parentUUID, String subjectUUID)
     {
         /* За текущую настройку из списка настроек, берется 1-ый элемент settingsList[0]. В цикле совершается поиск таких
            настроек, для которых уровень вложенности level равен level-у текущей. Таким образом находятся по сути соседние
@@ -530,7 +533,7 @@ class GanttDataSetService
             List<List<String>> res = getListResultsForParent(
                 source, mapAttributes['parent'], parentUUID?.takeWhile {
                 it != '_'
-            }, listAttributes
+            }, listAttributes, subjectUUID
             )
 
             if (res)
@@ -596,7 +599,7 @@ class GanttDataSetService
                         result.add(it)
                         // Рекурсивный вызов для "потомков". Список с настройками передается со второго элемента.
                         result.addAll(
-                            buildDataListFromSettings(settingsList[(i + 1)..-1], it['id'])
+                            buildDataListFromSettings(settingsList[(i + 1)..-1], it['id'], subjectUUID)
                         )
                         return
                     }
@@ -657,20 +660,23 @@ class GanttDataSetService
      * @param attrEq - код атрибута, по которому ведется поиск
      * @param value - значение по которому ведется поиск
      * @param attributes - список запрашиваемых атрибутов (колонок) для выборки
+     * @param subjectUUID - уникальный идентификатор объекта, на карточке которого расположена диаграмма
      * @return выборка из БД
      */
     private List<List<String>> getListResultsForParent(Source source,
                                                        String attrEq,
                                                        String value,
-                                                       List<String> attributes)
+                                                       List<String> attributes,
+                                                       String subjectUUID)
     {
-        def sc = api.selectClause
-        def criteria
-        if (source.descriptor)
+        ISelectClauseApi sc = api.selectClause
+        String descriptor = substitutionCardObject(source.descriptor, subjectUUID)
+        IApiCriteria criteria
+        if (descriptor)
         {
             criteria =
-                source.descriptor.with(api.listdata.&createListDescriptor)
-                      .with(api.listdata.&createCriteria)
+                descriptor.with(api.listdata.&createListDescriptor)
+                          .with(api.listdata.&createCriteria)
         }
         else
         {
@@ -684,5 +690,16 @@ class GanttDataSetService
             criteria.add(api.filters.attrValueEq(attrEq, value))
         }
         return api.db.query(criteria).setMaxResults(LIMIT_SIZE_QUERY_FROM_DB).list()
+    }
+
+    private String substitutionCardObject(String descriptor, String cardObjectUuid)
+    {
+        Closure<String> closure = { String json ->
+            JsonSlurper slurper = new JsonSlurper()
+            Map res = slurper.parseText(json) as Map<String, Object>
+            res.put('cardObjectUuid', cardObjectUuid)
+            return toJson(res)
+        }
+        return descriptor && cardObjectUuid ? closure(descriptor) : descriptor
     }
 }
