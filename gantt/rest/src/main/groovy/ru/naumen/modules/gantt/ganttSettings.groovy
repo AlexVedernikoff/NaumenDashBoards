@@ -165,7 +165,7 @@ class GanttSettingsImpl implements GanttSettingsController
     @Override
     String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent)
     {
-        return Jackson.toJsonString(service.getGanttVersionTitlesAndKeys(requestContent.diagramKey))
+        return Jackson.toJsonString(service.getGanttVersionTitlesAndKeys(requestContent))
     }
 
     @Override
@@ -334,7 +334,9 @@ class GanttSettingsService
         String contentCode = request.contentCode
 
         String diagramKey = generateDiagramKey(subjectUUID, contentCode)
-        String ganttSettingsFromKeyValue = getJsonSettings(subjectUUID)
+
+        String ganttSettingsFromKeyValue = getJsonSettings(diagramKey)
+
 
         GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
@@ -356,9 +358,7 @@ class GanttSettingsService
         String contentCode = request.contentCode
         GanttSettingsClass ganttSettings = request.ganttSettings
 
-        String ganttSettingsKey =
-            ganttSettings?.diagramKey ?: generateDiagramKey(subjectUUID, contentCode)
-
+        String ganttSettingsKey = generateDiagramKey(subjectUUID, contentCode)
         String currentGanttSettingsJSON = getJsonSettings(ganttSettingsKey)
 
         GanttSettingsClass currentGanttSettings = currentGanttSettingsJSON
@@ -368,8 +368,7 @@ class GanttSettingsService
         ganttSettings.workRelations = currentGanttSettings.workRelations
 
         ganttSettings.commonSettings = updateColumnsInCommonSettings(ganttSettings.commonSettings)
-
-        if (saveJsonSettings(subjectUUID, Jackson.toJsonString(ganttSettings)))
+        if (saveJsonSettings(subjectUUID, Jackson.toJsonString(ganttSettings)) && saveJsonSettings(request?.ganttSettings?.diagramKey, Jackson.toJsonString(ganttSettings)))
         {
             return ganttSettings
         }
@@ -384,20 +383,19 @@ class GanttSettingsService
      * @param diagramKey - ключ диаграммы
      * @return список названий и ключей версий диаграммы
      */
-    Collection<Map<String, String>> getGanttVersionTitlesAndKeys(String diagramKey)
+    Collection<Map<String, String>> getGanttVersionTitlesAndKeys(Map<String, Object> requestContent)
     {
-        String ganttSettingsJsonValue = getJsonSettings(diagramKey)
+        String ganttSettingsJsonValue = getJsonSettings(requestContent.subjectUuid)
 
         GanttSettingsClass ganttSettings = ganttSettingsJsonValue
             ? Jackson.fromJsonString(ganttSettingsJsonValue, GanttSettingsClass)
             : new GanttSettingsClass()
 
         Collection<String> versionKeysToRemove = []
-
         Collection<Map<String, String>> result = ganttSettings.diagramVersionsKeys.findResults {
+            String subjectUuidInKey = it.split("_").first()
             GanttVersionsSettingsClass ganttVersionSettings = getGanttVersionsSettings(it)
-
-            if (ganttVersionSettings.title)
+            if (ganttVersionSettings?.title && subjectUuidInKey == requestContent.subjectUuid)
             {
                 return [
                     'title': ganttVersionSettings.title,
@@ -412,7 +410,7 @@ class GanttSettingsService
         }
 
         ganttSettings.diagramVersionsKeys -= versionKeysToRemove
-        saveJsonSettings(diagramKey, toJson(ganttSettings))
+        saveJsonSettings(requestContent.diagramKey, toJson(ganttSettings))
 
         return result
     }
@@ -446,18 +444,18 @@ class GanttSettingsService
         String contentCode = request.contentCode
         String diagramKey = generateDiagramKey(subjectUUID, contentCode)
 
-        String ganttSettingsFromKeyValue = getJsonSettings(diagramKey)
+        String ganttSettingsFromKeyValue = getJsonSettings(subjectUUID)
         GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
 
-        String versionKey = UUID.randomUUID().toString()
+        String versionKey = String.join("_", subjectUUID, UUID.randomUUID().toString())
         Date createdDate = Date.parse(GANTT_VERSION_DATE_PATTERN, request.createdDate)
 
         ganttSettings.diagramVersionsKeys << versionKey
         ganttSettings.diagramVersionsKeys = ganttSettings.diagramVersionsKeys.unique()
 
-        if (!saveJsonSettings(ganttSettings.diagramKey, Jackson.toJsonString(ganttSettings)))
+        if (!saveJsonSettings(subjectUUID, Jackson.toJsonString(ganttSettings)))
         {
             throw new Exception('Настройки не были сохранены!')
         }
@@ -940,6 +938,19 @@ class GetGanttSettingsRequest extends BaseGanttSettingsRequest
 }
 
 /**
+ * Тело запроса на получение настроек по отдельным версиям диаграммы Ганта
+ */
+class GetGanttSettingsRequestVersion extends BaseGanttSettingsRequest
+{
+    /**
+     * Таймзона устройства пользователя
+     */
+    String timezone
+
+    String versionKey
+}
+
+/**
  * Тело запроса на сохранение настроек диаграммы Ганта
  */
 class SaveGanttSettingsRequest extends BaseGanttSettingsRequest
@@ -1134,11 +1145,15 @@ class GanttDiagramData extends BaseGanttDiagramData
     /**
      * Данные для построения диаграммы
      */
-    def tasks
+    def tasks = []
     /**
      * Коды групп атрибутов, сгруппированные по метаклассу работ
      */
     Map<String, Collection> attributesMap = [:]
+    /**
+     * Список обязательных атрибутов матакласса
+     */
+    Map<String, Collection> mandatoryAttributes  = [:]
     /**
      * Настройки для источников - старт работ
      */
@@ -1175,6 +1190,28 @@ class CommonSettings
 }
 
 /**
+ * Настройка для обязательных атрибутов
+ */
+class MandatoryAttributesInformation{
+    /**
+     * Имя атрибута
+     */
+    String title
+    /**
+     * Тип атрибута
+     */
+    String type
+    /**
+     * Код атрибута
+     */
+    String code
+    /**
+     * Базовые настройки для выпадающих списков
+     */
+    Map<String, Collection> options
+}
+
+/**
  * Настройка текущего интревала на диаграмме
  */
 class CurrentInterval
@@ -1203,6 +1240,16 @@ class ColumnSettings extends TitleAndCode
      * Настройки для редактирования атрибута
      */
     Editor editor
+
+    /**
+     * Максимальная ширина колонки
+     */
+    String max_width
+
+    /**
+     * Минимальная ширина колонки
+     */
+    String min_width
 }
 
 /**
