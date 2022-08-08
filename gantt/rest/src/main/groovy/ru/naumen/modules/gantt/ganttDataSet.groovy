@@ -311,24 +311,16 @@ class GanttDataSetService
 
                     Collection<Long> dateInformation = entity?.attributesData.findAll { key, val ->
                         val instanceof Long
-                    }.collect { key, val -> val
-                    }
-                    if (!dateInformation.isEmpty())
+                    }.collect { key, val -> val }
+                    if (!dateInformation.isEmpty() && ['start_date', 'end_date']
+                        .contains(fieldCode))
                     {
-                        if (fieldCode == 'start_date')
-                        {
-                            value = new Date(
-                                Math.min(dateInformation?.first(), (dateInformation?.last()))
-                            )
-                        }
-                        if (fieldCode == 'end_date')
-                        {
-                            value = new Date(
-                                Math.max(dateInformation?.first(), (dateInformation?.last()))
-                            )
-                        }
+                        value = new Date(
+                            fieldCode == 'start_date' ?
+                                Math.min(dateInformation?.first(), dateInformation?.last())
+                                : Math.max(dateInformation?.first(), dateInformation?.last())
+                        )
                     }
-
                     if (value in ISDtObject)
                     {
                         value = value.UUID

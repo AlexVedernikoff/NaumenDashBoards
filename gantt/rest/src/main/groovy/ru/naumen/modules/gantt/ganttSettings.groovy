@@ -380,7 +380,7 @@ class GanttSettingsService
 
     /**
      * Метод получения названий и ключей версий диаграммы
-     * @param diagramKey - ключ диаграммы
+     * @param requestContent - тело запроса
      * @return список названий и ключей версий диаграммы
      */
     Collection<Map<String, String>> getGanttVersionTitlesAndKeys(Map<String, Object> requestContent)
@@ -393,7 +393,7 @@ class GanttSettingsService
 
         Collection<String> versionKeysToRemove = []
         Collection<Map<String, String>> result = ganttSettings.diagramVersionsKeys.findResults {
-            String subjectUuidInKey = it.split("_").first()
+            String subjectUuidInKey = it.split('_').first()
             GanttVersionsSettingsClass ganttVersionSettings = getGanttVersionsSettings(it)
             if (ganttVersionSettings?.title && subjectUuidInKey == requestContent.subjectUuid)
             {
@@ -449,7 +449,7 @@ class GanttSettingsService
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
 
-        String versionKey = String.join("_", subjectUUID, UUID.randomUUID().toString())
+        String versionKey = String.join('_', subjectUUID, UUID.randomUUID().toString())
         Date createdDate = Date.parse(GANTT_VERSION_DATE_PATTERN, request.createdDate)
 
         ganttSettings.diagramVersionsKeys << versionKey
@@ -1145,7 +1145,7 @@ class GanttDiagramData extends BaseGanttDiagramData
     /**
      * Данные для построения диаграммы
      */
-    def tasks = []
+    Collection<Map<String, Object>> tasks = []
     /**
      * Коды групп атрибутов, сгруппированные по метаклассу работ
      */
