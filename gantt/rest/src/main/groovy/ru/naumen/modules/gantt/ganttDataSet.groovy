@@ -271,7 +271,7 @@ class GanttDataSetService
                 task.type = entity.sourceType
                 mapAttributes.keySet().each { fieldCode ->
                     task[fieldCode] =
-                        getAttributeValueForVersionEntity(entity, mapAttributes[fieldCode])
+                        getAttributeValueForVersionEntity(entity, mapAttributes[fieldCode], fieldCode)
                     if (task[fieldCode] && fieldCode in ['start_date', 'end_date'] && !(task[fieldCode] in Date))
                     {
                         task[fieldCode] = new Date(task[fieldCode])
@@ -288,9 +288,12 @@ class GanttDataSetService
      * Метод получения значения атрибута объекта для версии диаграммы
      * @param entity - объект диаграммы
      * @param attributeCode - код атрибута
+     * @param fieldCode - поле атрибута
      * @return значение атрибута
      */
-    private Object getAttributeValueForVersionEntity(DiagramEntity entity, String attributeCode)
+    private Object getAttributeValueForVersionEntity(DiagramEntity entity,
+                                                     String attributeCode,
+                                                     String fieldCode)
     {
         Object value = null
         if (entity.attributesData[attributeCode])
@@ -305,6 +308,19 @@ class GanttDataSetService
                 if (api.metainfo.getMetaClass(entityInSystem).hasAttribute(attributeCode))
                 {
                     value = entityInSystem[attributeCode]
+
+                    Collection<Long> dateInformation = entity?.attributesData.findAll { key, val ->
+                        val instanceof Long
+                    }.collect { key, val -> val }
+                    if (!dateInformation.isEmpty() && ['start_date', 'end_date']
+                        .contains(fieldCode))
+                    {
+                        value = new Date(
+                            fieldCode == 'start_date' ?
+                                Math.min(dateInformation?.first(), dateInformation?.last())
+                                : Math.max(dateInformation?.first(), dateInformation?.last())
+                        )
+                    }
                     if (value in ISDtObject)
                     {
                         value = value.UUID
@@ -312,7 +328,6 @@ class GanttDataSetService
                 }
             }
         }
-
         return value
     }
 

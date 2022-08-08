@@ -507,8 +507,7 @@ class GanttWorkHandlerService
             GanttSettingsService ganttSettingsService = GanttSettingsService.instance
 
             GanttVersionsSettingsClass ganttVersionSettings =
-                ganttSettingsService.getGanttVersionsSettings(versionKey)
-
+                ganttSettingsService.getGanttVersionsSettings(request.contentCode)
             request.workDateInterval.each { workDateData ->
                 ISDtObject work = api.utils.get(workDateData.workUUID)
                 String timezoneString =
@@ -538,7 +537,7 @@ class GanttWorkHandlerService
                 DiagramEntity workToEdit = ganttVersionSettings.diagramEntities.find {
                     it.entityUUID == workDateData.workUUID
                 }
-                workToEdit.attributesData[attributeCode] = newDateToUpdate.toTimestamp().getTime()
+                //workToEdit.attributesData[attributeCode] = newDateToUpdate.toTimestamp().getTime()
             }
 
             if (
@@ -722,7 +721,7 @@ class GanttWorkHandlerService
             IAttributeWrapper attribute = attributes.find {
                 it.code == attributeCode
             }
-            if (attribute.type.code in AttributeType.DATE_TYPES)
+            if (attribute?.type?.code in AttributeType.DATE_TYPES)
             {
                 String timezoneString =
                     api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
@@ -731,7 +730,16 @@ class GanttWorkHandlerService
                 preparedWorkData[attributeCode] = attributeValue
             }
         }
-        return preparedWorkData
+        Map<String, Object> mandatoryAttributes = [:]
+        request.attr.each{ entry ->
+            entry.each{
+                mandatoryAttributes << [(it.key):(it.value)]
+            }
+        }
+        mandatoryAttributes.each {
+            newWorkData << [(it.key):(it.value)]
+        }
+        return newWorkData
     }
 
     /**
@@ -951,7 +959,9 @@ class GanttWorkHandlerService
         String workClassFqn = work.getMetainfo().fqnOfClass().toString()
         String workDeadlineAttribute = metaClassDeadlineAttributesMap[workClassFqn]
         String workStartDateAttribute = metaClassStartDateAttributesMap[workClassFqn]
-
+        if(workDeadlineAttribute == null){
+            return false
+        }
         def entityDeadline = entity[entityDeadlineAttribute]
         def workDeadline = work[workDeadlineAttribute]
 
@@ -1004,6 +1014,11 @@ class ChangeWorkProgressRequest extends BaseGanttSettingsRequest
  */
 class AddNewWorkRequest
 {
+
+    /**
+     * Информация об обязательных полях
+     */
+    Collection<Map<String, String>> attr
     /**
      * Данные работы
      */
