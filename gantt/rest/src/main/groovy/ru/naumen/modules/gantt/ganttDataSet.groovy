@@ -313,17 +313,20 @@ class GanttDataSetService
                         val instanceof Long
                     }.collect { key, val -> val
                     }
-                    if (fieldCode == 'start_date')
+                    if (!dateInformation.isEmpty())
                     {
-                        value = new Date(
-                            Math.min(dateInformation.first(), (dateInformation.last()))
-                        )
-                    }
-                    if (fieldCode == 'end_date')
-                    {
-                        value = new Date(
-                            Math.max(dateInformation.first(), (dateInformation.last()))
-                        )
+                        if (fieldCode == 'start_date')
+                        {
+                            value = new Date(
+                                Math.min(dateInformation?.first(), (dateInformation?.last()))
+                            )
+                        }
+                        if (fieldCode == 'end_date')
+                        {
+                            value = new Date(
+                                Math.max(dateInformation?.first(), (dateInformation?.last()))
+                            )
+                        }
                     }
 
                     if (value in ISDtObject)
