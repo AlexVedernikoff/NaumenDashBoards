@@ -2192,6 +2192,11 @@ class Constants {
                 (value.hasField('indicators') || value['sourceForCompute']) && !value.hasField('descriptor')
             }
         },
+        (PivotTableData) : { value ->
+            return use(JacksonUtils) {
+                (value.hasField('type') || value['type'] == 'PivotDataSet')
+            }
+        },
         (TableCurrentData): { value ->
             return use(JacksonUtils) {
                 value.hasField('parameters') && value.hasField('descriptor')

@@ -120,9 +120,10 @@ class QueryWrapper implements CriteriaWrapper
      * @param fromSevenDays
      * @param top - лимит
      * @param requestData - запрос
+     * @param sourceMetaClassCriteriaMap - маппинг метаклассов источников и критерий
      * @return объект обертки запроса
      */
-    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, IApiCriteria criteriaForColumn, boolean fromSevenDays, Integer top, RequestData requestData)
+    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, IApiCriteria criteriaForColumn, boolean fromSevenDays, Integer top, RequestData requestData, Map<String, Object> sourceMetaClassCriteriaMap)
     {
         Aggregation aggregationType = parameter.type
         def sc = api.selectClause
@@ -151,6 +152,9 @@ class QueryWrapper implements CriteriaWrapper
         {
             IApiCriteria subCriteria =
                 criteria.subquery().addSource(criteria.getCurrentMetaClass().fqn as String)
+            Map<String, Object> sourceMetaClassSubCriteriaMap =
+                getSourceMetaClassCriteriaMap(requestData, DiagramType.PIVOT_TABLE, subCriteria)
+
             subCriteria.addColumn(column)
 
             requestData.groups.each { group ->
@@ -171,17 +175,30 @@ class QueryWrapper implements CriteriaWrapper
                     attributePropertyPath += '.title'
                 }
 
+                IApiCriteria columnCriteria = criteria
+                IApiCriteria columnSubCriteria = subCriteria
+
+                if (group.attribute.metaClassFqn != requestData.source.classFqn)
+                {
+                    columnCriteria = sourceMetaClassCriteriaMap[group.attribute.metaClassFqn]
+                    columnSubCriteria = sourceMetaClassSubCriteriaMap[group.attribute.metaClassFqn]
+                }
+
                 subCriteria.add(
                     api.whereClause.eq(
-                        sc.property(attributePropertyPath),
-                        sc.property(
-                            criteriaForColumn ?: criteria,
-                            attributePropertyPath
-                        )
+                        sc.property(columnSubCriteria, attributePropertyPath),
+                        sc.property(columnCriteria, attributePropertyPath)
                     )
                 )
             }
 
+            Source sourceToMergeFilters = requestData.sources.find {
+                it.classFqn = parameter.attribute.metaClassFqn
+            }
+
+            String indicatorDescriptor = DashboardQueryWrapperUtils.getDescriptorWithMergedFilters(sourceToMergeFilters.descriptor, parameter.descriptor)
+
+            api.listdata.addFilters(subCriteria, api.listdata.createListDescriptor(indicatorDescriptor))
             criteria.addColumn(subCriteria)
         }
         else
@@ -374,6 +391,61 @@ class QueryWrapper implements CriteriaWrapper
     }
 
     /**
+     * Метод получения маппинга метаклассов источника и критерий
+     * @param requestData - запрос
+     * @param diagramType - тип диаграммы
+     * @param criteria - основная критерия
+     * @return маппинг метаклассов источника и критерий
+     */
+    private Map<String, Object> getSourceMetaClassCriteriaMap(RequestData requestData, DiagramType diagramType, IApiCriteria criteria)
+    {
+        Map<String, String> sourceDataKeyMetaClassMap = [:]
+        Map<String, Object> sourceMetaClassCriteriaMap = [:]
+        Map<String, Object> sourceDataKeyCriteriaMap = [:]
+
+        if (diagramType == DiagramType.PIVOT_TABLE)
+        {
+            sourceDataKeyMetaClassMap = requestData.sources.findResults {
+                return [(it.dataKey): it.classFqn]
+            }.collectEntries()
+
+            requestData.links.each { link ->
+                IApiCriteria criteriaToJoinFrom
+                if (link.dataKey1 == requestData.source.dataKey)
+                {
+                    criteriaToJoinFrom = criteria
+                }
+                else
+                {
+                    criteriaToJoinFrom = sourceDataKeyCriteriaMap[link.dataKey1]
+                }
+
+                IApiCriteria criteriaToJoin = criteriaToJoinFrom.addLeftJoin(link.attribute.code)
+                Source criteriaToJsonSource = requestData.sources.find {
+                    it.dataKey == link.dataKey2
+                }
+                if (criteriaToJsonSource.descriptor)
+                {
+                    api.listdata.addFilters(
+                        criteriaToJoin,
+                        api.listdata.createListDescriptor(
+                            criteriaToJsonSource.descriptor
+                        )
+                    )
+                }
+
+                sourceDataKeyCriteriaMap[link.dataKey2] = criteriaToJoin
+            }
+
+            sourceMetaClassCriteriaMap = sourceDataKeyCriteriaMap.collect { key, value ->
+                return [(sourceDataKeyMetaClassMap[key]): value]
+            }.collectEntries()
+        }
+
+        return sourceMetaClassCriteriaMap
+    }
+
+    /**
      * Метод для получения правильного кода атрибута для получения названия статуса по metaCaseId
      * @param attrChains - цепочка атрибутов
      * @return правильный код атрибута для получения названия статуса по metaCaseId
@@ -549,7 +621,7 @@ class QueryWrapper implements CriteriaWrapper
             {
                 wrappedQuery.filtering(wrappedCriteria, totalValueCriteria, [filterParameter])
             }
-            int totalCount = wrappedQuery.aggregate(wrappedCriteria, totalValueCriteria, totalParameter, wrappedCriteria, false, top, requestData)
+            int totalCount = wrappedQuery.aggregate(wrappedCriteria, totalValueCriteria, totalParameter, wrappedCriteria, false, top, requestData, sourceMetaClassCriteriaMap)
                                          .result.head().head()
 
             wrapper.percentAggregate(criteria, totalValueCriteria, parameter, totalCount, parameter.type == Aggregation.PERCENT_CNT)
@@ -560,7 +632,7 @@ class QueryWrapper implements CriteriaWrapper
         }
         else
         {
-            wrapper.aggregate(criteria, totalValueCriteria, parameter, criteriaForColumn, false, top, requestData)
+            wrapper.aggregate(criteria, totalValueCriteria, parameter, criteriaForColumn, false, top, requestData, sourceMetaClassCriteriaMap)
         }
     }
 
@@ -602,15 +674,15 @@ class QueryWrapper implements CriteriaWrapper
                 else if(lastParameterAttributeType in AttributeType.HAS_UUID_TYPES)
                 {
                     def lastColumn =  sc.property(criteriaForColumn,
-                        LinksAttributeMarshaller.marshal(
-                            attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'),
-                            DashboardQueryWrapperUtils.UUID_CODE))
+                                                  LinksAttributeMarshaller.marshal(
+                                                      attributeChains.takeWhile { it.type in AttributeType.HAS_UUID_TYPES }.code.with(this.&replaceMetaClassCode).join('.'),
+                                                      DashboardQueryWrapperUtils.UUID_CODE))
                     if(lastParameterAttributeType == AttributeType.META_CLASS_TYPE)
                     {
                         lastColumn = sc.property(criteriaForColumn,
-                            attributeChains.takeWhile {
-                                it.type in AttributeType.HAS_UUID_TYPES
-                            }.code.with(this.&replaceMetaClassCode).join('.')
+                                                 attributeChains.takeWhile {
+                                                     it.type in AttributeType.HAS_UUID_TYPES
+                                                 }.code.with(this.&replaceMetaClassCode).join('.')
                         )
                     }
                     String columnStringValue = LinksAttributeMarshaller.marshal(
@@ -622,15 +694,27 @@ class QueryWrapper implements CriteriaWrapper
 
                     Object columnFirst = sc.property(criteriaForColumn, attributeCodes)
                     Object columnSecond = sc.property(criteriaForColumn, columnStringValue)
-                    column = sc.selectCase()
-                               .when(api.whereClause.isNull(columnSecond), columnFirst)
-                               .otherwise(
-                                   sc.concat(
-                                       columnFirst,
-                                       sc.constant(LinksAttributeMarshaller.delimiter),
-                                       columnSecond
+
+                    if (diagramType == DiagramType.PIVOT_TABLE)
+                    {
+                        column = sc.concat(
+                            columnFirst,
+                            sc.constant(LinksAttributeMarshaller.delimiter),
+                            columnSecond
+                        )
+                    }
+                    else
+                    {
+                        column = sc.selectCase()
+                                   .when(api.whereClause.isNull(columnSecond), columnFirst)
+                                   .otherwise(
+                                       sc.concat(
+                                           columnFirst,
+                                           sc.constant(LinksAttributeMarshaller.delimiter),
+                                           columnSecond
+                                       )
                                    )
-                               )
+                    }
 
                     criteria.addGroupColumn(column)
                     criteria.addColumn(column)
@@ -645,21 +729,24 @@ class QueryWrapper implements CriteriaWrapper
                     }
                     else
                     {
-                        IApiCriteriaColumn attributeColumn = sc.property(criteriaForColumn, attributeCodes)
-
-                        switch (parameter.attribute.type)
+                        if (diagramType != DiagramType.PIVOT_TABLE)
                         {
-                            case 'string':
-                                column = sc.selectCase().when(api.whereClause.isNull(attributeColumn), '')
-                                           .otherwise(attributeColumn)
-                                break
-                            case 'integer':
-                            case 'double':
-                                column = sc.selectCase().when(api.whereClause.isNull(attributeColumn), 0)
-                                      .otherwise(attributeColumn)
-                                break
-                            default:
-                                column = attributeColumn
+                            IApiCriteriaColumn attributeColumn = sc.property(criteriaForColumn, attributeCodes)
+
+                            switch (parameter.attribute.type)
+                            {
+                                case 'string':
+                                    column = sc.selectCase().when(api.whereClause.isNull(attributeColumn), '')
+                                               .otherwise(attributeColumn)
+                                    break
+                                case 'integer':
+                                case 'double':
+                                    column = sc.selectCase().when(api.whereClause.isNull(attributeColumn), 0)
+                                               .otherwise(attributeColumn)
+                                    break
+                                default:
+                                    column = attributeColumn
+                            }
                         }
                         criteria.addGroupColumn(column)
                         criteria.addColumn(column)
@@ -1310,41 +1397,7 @@ class DashboardQueryWrapperUtils
         wrapper.locale = currentUserLocale
         locale = currentUserLocale
 
-        Map<String, String> sourceDataKeyMetaClassMap
-        Map<String, Object> sourceMetaClassCriteriaMap
-        Map<String, Object> sourceDataKeyCriteriaMap = [:]
-
-        if (diagramType == DiagramType.PIVOT_TABLE)
-        {
-            sourceDataKeyMetaClassMap = requestData.sources.findResults {
-                return [(it.dataKey): it.classFqn]
-            }.collectEntries()
-
-            requestData.links.each { link ->
-                IApiCriteria criteriaToJoinFrom
-                if (link.dataKey1 == requestData.source.dataKey)
-                {
-                    criteriaToJoinFrom = criteria
-                }
-                else
-                {
-                    criteriaToJoinFrom = sourceDataKeyCriteriaMap[link.dataKey1]
-                }
-
-                IApiCriteria criteriaToJoin = criteriaToJoinFrom.addLeftJoin(link.attribute.code)
-                Source criteriaToJsonSource = requestData.sources.find { it.dataKey == link.dataKey2 }
-                if (criteriaToJsonSource.descriptor)
-                {
-                    api.listdata.addFilters(criteriaToJoin, api.listdata.createListDescriptor(criteriaToJsonSource.descriptor))
-                }
-
-                sourceDataKeyCriteriaMap[link.dataKey2] = criteriaToJoin
-            }
-
-            sourceMetaClassCriteriaMap = sourceDataKeyCriteriaMap.collect { key, value ->
-                return [(sourceDataKeyMetaClassMap[key]): value]
-            }.collectEntries()
-        }
+        Map<String, Object> sourceMetaClassCriteriaMap = wrapper.getSourceMetaClassCriteriaMap(requestData, diagramType, criteria)
 
         requestData.aggregations.each { validate(it as AggregationParameter) }
         //необходимо, чтобы не кэшировать обработку у предыдущей агрегации
@@ -1490,7 +1543,7 @@ class DashboardQueryWrapperUtils
      * @param indicatorDescriptor - дескриптор показателя
      * @return дескриптор с обоими фильтрами
      */
-    String getDescriptorWithMergedFilters(String sourceDescriptor, String indicatorDescriptor)
+    static String getDescriptorWithMergedFilters(String sourceDescriptor, String indicatorDescriptor)
     {
         JsonSlurper slurper = new JsonSlurper()
         Map<String, Object> parsedSourceDescriptor = sourceDescriptor ? slurper.parseText(sourceDescriptor) : [:]

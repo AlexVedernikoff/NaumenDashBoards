@@ -535,16 +535,26 @@
                 GroupParameter breakdownGroup =
                     buildSystemGroup(aggregation.breakdown.group, aggregation.breakdown.attribute)
                 requestDataCopy.groups << breakdownGroup
+
                 List result = dashboardQueryWrapperUtils.getData(
                     requestDataCopy,
-                    100,
+                    null,
                     currentUserLocale,
                     false,
                     DiagramType.PIVOT_TABLE
                 )
 
-                replaceResultAttributeMetaClass(result, new DiagramRequest(data: [(requestDataCopy.source.dataKey): requestDataCopy]))
+                List listIdsOfNormalAggregations =
+                    requestDataCopy.aggregations?.withIndex()?.findResults { val, i ->
+                        if (val.type != Aggregation.NOT_APPLICABLE)
+                        {
+                            return i
+                        }
+                    }
+                Closure formatGroup = this.&formatGroupSet.rcurry(requestDataCopy, listIdsOfNormalAggregations, DiagramType.PIVOT_TABLE)
+                result = formatGroup(result)
 
+                replaceResultAttributeMetaClass(result, new DiagramRequest(data: [(requestDataCopy.source.dataKey): requestDataCopy]))
                 aggregationBreakdownResult[aggregation] = result
             }
     
@@ -3284,7 +3294,7 @@
                             Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                             def res = filtering?.withIndex()?.collectMany { filters, i ->
                                 newRequestData.filters = filters
-                                def res = dashboardQueryWrapperUtils.getData(newRequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
+                                List res = dashboardQueryWrapperUtils.getData(newRequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits?.parameter ?: false, templateUUID, paginationSettings)
                                                                     .with(formatGroup)
                                                                     .with(formatAggregation)
     
