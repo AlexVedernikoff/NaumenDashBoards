@@ -695,15 +695,7 @@ class QueryWrapper implements CriteriaWrapper
                     Object columnFirst = sc.property(criteriaForColumn, attributeCodes)
                     Object columnSecond = sc.property(criteriaForColumn, columnStringValue)
 
-                    if (diagramType == DiagramType.PIVOT_TABLE)
-                    {
-                        column = sc.concat(
-                            columnFirst,
-                            sc.constant(LinksAttributeMarshaller.delimiter),
-                            columnSecond
-                        )
-                    }
-                    else
+                    if (diagramType != DiagramType.PIVOT_TABLE)
                     {
                         column = sc.selectCase()
                                    .when(api.whereClause.isNull(columnSecond), columnFirst)
