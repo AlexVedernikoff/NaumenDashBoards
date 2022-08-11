@@ -17,6 +17,17 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.InheritConstructors
+import static groovy.json.JsonOutput.toJson
+import ru.naumen.core.server.script.api.ea.IAppContentInfo
+import groovy.transform.Canonical
+
+class ConstantMap
+{
+    public static final String NAME_MECHANISM_SETTINGS = 'map'
+    public static final String EMBEDDED_APPLICATION_CODE = 'testSvg'
+    public static final String ACTUAL_VERSION = 'actualVersion'
+    public static final String FIRST_PART_STRATEGY_CODE = 'mapStrategy'
+}
 
 @MechanismSettings(name = 'map-initial')
 @JsonSchemaMeta(
@@ -27,6 +38,35 @@ class MapInitialSettings
 {
     @JsonSchemaMeta(title = 'Инициирование настроек')
     PointInventoryInitialContainer container = new PointInventoryInitialContainer()
+}
+
+@Canonical
+class MetaClassObject
+{
+    String id = ''
+    String caseId = ''
+
+    @Override
+    String toString()
+    {
+        if (!id)
+        {
+            return ''
+        }
+        if (!caseId)
+        {
+            return id
+        }
+        return "$id\$$caseId"
+    }
+
+    static MetaClassObject fromString(String fqn)
+    {
+        Collection<String> fqnParts = fqn.tokenize('$')
+        String id = fqnParts[0]
+        String caseId = fqnParts.size() > 1 ? fqnParts[1] : ''
+        return new MetaClassObject(id, caseId)
+    }
 }
 
 @InheritConstructors
@@ -42,24 +82,15 @@ class PointInventoryInitialContainer
     Boolean enable
 }
 
-@MechanismSettings(name = 'map')
+@MechanismSettings(name = ConstantMap.NAME_MECHANISM_SETTINGS)
 class MapSettings
 {
     @JsonSchemaMeta(title = 'Стратегии вывода объектов')
     Collection<AbstractPointCharacteristics> abstractPointCharacteristics = [new PointSettings(), new LinesSettings()]
     @JsonSchemaMeta(title = 'Визуализация по умолчанию')
-    Collection<DefaultVisualization> defaultVisualization = [new DefaultVisualization()]
+    DefaultVisualization defVisualization = new DefaultVisualization()
     @JsonSchemaMeta(title = 'API')
     Collection<APISettings> interfaceSettings = [new APISettings()]
-    @UiSchemaMeta(hidden = 'All')
-    BugsFix commonSettings = new BugsFix()
-}
-
-@JsonSchemaMeta(title = ' ')
-class BugsFix
-{
-    @UiSchemaMeta(hidden = 'All')
-    String scheme = 'bugsfix'
 }
 
 /**
@@ -85,20 +116,27 @@ abstract class AbstractPointCharacteristics
  * Настройки для вкладки 'Точки'
  */
 @CustomProperty(name = 'typeMap', value = 'pointSettings')
-@JsonSchemaMeta(requiredFields = ['nameStrategy', 'codeStrategy', 'metaclassObjects'], title = 'Точки')
+@JsonSchemaMeta(title = 'Точки')
 class PointSettings extends AbstractPointCharacteristics
 {
     {
         typeMap = 'pointSettings'
     }
-    @JsonSchemaMeta(title = 'Название стратегии')
+    @JsonSchemaMeta(title = ' ')
+    Collection<ContentPointSettings> strategies = [new ContentPointSettings()]
+}
+
+@JsonSchemaMeta(requiredFields = ['nameStrategy', 'metaClassObject'], title = ' ')
+class ContentPointSettings
+{
+    @JsonSchemaMeta(title = 'Название стратегии', nullable = false)
     String nameStrategy = 'TP'
     @UiSchemaMeta(disabled = true)
     @JsonSchemaMeta(title = 'Код стратегии')
     String codeStrategy = ''
     @UiSchemaMeta(widget = 'metaClass-select')
-    @JsonSchemaMeta(title = 'Метакласс объектов')
-    String metaclassObjects = ''
+    @JsonSchemaMeta(title = 'Метакласс объектов', nullable = false)
+    MetaClassObject metaClassObject = new MetaClassObject('', '')
 
     @JsonSchemaMeta(title = 'Координаты')
     CoordinatesSettings coordinatesSettings = new CoordinatesSettings()
@@ -110,9 +148,9 @@ class PointSettings extends AbstractPointCharacteristics
     @UiSchemaMeta(widget = 'textarea')
     @JsonSchemaMeta(title = 'Текст скрипта', description = 'Применяется только при стратегии "Скрипт"')
     String scriptText = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'abstract-select', source = 'getContentTitleMap')
     @JsonSchemaMeta(title = 'Места использования')
-    String placesUse = ''
+    Collection<String> listStrategy = []
 }
 
 /**
@@ -121,10 +159,10 @@ class PointSettings extends AbstractPointCharacteristics
 @JsonSchemaMeta(requiredFields = ['pathCoordinatLatitude', 'pathCoordinatLongitud'])
 class CoordinatesSettings
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам широты')
     String pathCoordinatLatitude = ""
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам долготы')
     String pathCoordinatLongitud = ""
 }
@@ -135,10 +173,10 @@ class CoordinatesSettings
 @JsonSchemaMeta(requiredFields = ['pathIcon'], title = 'Характеристики точки')
 class PointCharacteristics
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к иконке')
     String pathIcon = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к тексту для всплывающей подсказки')
     String pathTextTooltip = ''
 }
@@ -146,34 +184,39 @@ class PointCharacteristics
 /**
  * Настройки для встройки 'Стратегия определения объектов для отображения на карт'
  */
-@JsonSchemaMeta(requiredFields = ['strategy'], title = 'Стратегия определения объектов для отображения на карте')
+@JsonSchemaMeta(requiredFields = ['strategyDisplayingMap'], title = 'Стратегия определения объектов для отображения на карте')
 class StrategyDeterminingObjectsMap
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Стратегия', nullable = false)
-    String strategy = ''
+    StrategyDisplayingMap strategyDisplayingMap
 }
 
 /**
  * Настройки для владки 'Линии'
  */
 @CustomProperty(name = 'typeMap', value = 'linesSettings')
-@JsonSchemaMeta(requiredFields = ['nameStrategy', 'codeStrategy', 'metaclassObjects', 'typeGraphicObject', 'metaclassObjectsLines'], title = 'Линии')
+@JsonSchemaMeta(title = 'Линии')
 class LinesSettings extends AbstractPointCharacteristics
 {
     {
         typeMap = 'linesSettings'
     }
-    @JsonSchemaMeta(title = 'Название стратегии')
+    @JsonSchemaMeta(title = ' ')
+    Collection<ContentLinesSettings> strategies = [new ContentLinesSettings()]
+}
+
+@JsonSchemaMeta(requiredFields = ['nameStrategy', 'metaClassObject'], title = ' ')
+class ContentLinesSettings
+{
+    @JsonSchemaMeta(title = 'Название стратегии', nullable = false)
     String nameStrategy = ''
     @UiSchemaMeta(disabled = true)
     @JsonSchemaMeta(title = 'Код стратегии')
     String codeStrategy = ''
     @UiSchemaMeta(widget = 'metaClass-select')
-    @JsonSchemaMeta(title = 'Метакласс объектов')
-    String metaclassObjectsLines = ''
-    @JsonSchemaMeta(title = 'Тип графического объекта')
-    String typeGraphicObject = ''
+    @JsonSchemaMeta(title = 'Метакласс объектов', nullable = false)
+    MetaClassObject metaClassObject = new MetaClassObject('', '')
 
     @JsonSchemaMeta(title = 'Характеристики линии')
     CharacteristicsLine characteristicsLine = new CharacteristicsLine()
@@ -182,13 +225,13 @@ class LinesSettings extends AbstractPointCharacteristics
 
     @JsonSchemaMeta(title = 'Отображение окончания линии точками')
     Boolean displayingEndLineDots = null
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к иконке А', description = 'Иконка для окончания линии. Если не указана, используется иконка по умолчанию для графического объекта Точка')
     String pathIconA = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к иконке Б', description = 'Иконка для окончания линии. Если не указана, используется иконка по умолчанию для графического объекта Точка')
     String pathIconB = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObject')
     @JsonSchemaMeta(title = 'Путь для всплывающей подсказки')
     String pathTooltip = ''
 
@@ -198,9 +241,9 @@ class LinesSettings extends AbstractPointCharacteristics
     @UiSchemaMeta(widget = 'textarea')
     @JsonSchemaMeta(title = 'Текст скрипта')
     String scriptText = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'abstract-select', source = 'getContentTitleMap')
     @JsonSchemaMeta(title = 'Места использования')
-    String placesUse = ''
+    Collection<String> listStrategy = []
 }
 
 /**
@@ -208,13 +251,13 @@ class LinesSettings extends AbstractPointCharacteristics
  */
 class CharacteristicsLine
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Цвет')
     String colour = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Толщина')
     String width = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Прозрачность (%)')
     String opacity = ''
 
@@ -228,16 +271,16 @@ class CharacteristicsLine
 @JsonSchemaMeta(requiredFields = ['pathCoordinatesLatitudeA', 'pathCoordinatesLongitudA', 'pathCoordinatesLatitudeB', 'pathCoordinatesLongitudB'])
 class CoordinatesLine
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам широты А')
     String pathCoordinatesLatitudeA = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам долготы А')
     String pathCoordinatesLongitudA = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам широты Б')
     String pathCoordinatesLatitudeB = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам долготы Б')
     String pathCoordinatesLongitudB = ''
 }
@@ -245,12 +288,12 @@ class CoordinatesLine
 /**
  * Настройки для встройки 'Стратегия определения объектов для отображения на карте '
  */
-@JsonSchemaMeta(requiredFields = ['strategy'], title = 'Стратегия определения обьектов для отображения на карте ')
+@JsonSchemaMeta(requiredFields = ['strategyDisplayingMap'], title = 'Стратегия определения обьектов для отображения на карте ')
 class StrategyDeterminingObjectsMapLines
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaclassObjectsLines')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Стратегия', nullable = false)
-    String strategy = ''
+    StrategyDisplayingMap strategyDisplayingMap
 }
 
 /**
@@ -269,7 +312,7 @@ class DefaultVisualization
     @JsonSchemaMeta(title = 'Стиль')
     DrawingLineStyle lineStyle
     @JsonSchemaMeta(title = 'Характеристики для вывода в списке объектов')
-    Collection<CharacteristicsDisplayListObjects> points
+    Collection<CharacteristicsDisplayListObjects> points = [new CharacteristicsDisplayListObjects()]
 }
 
 /**
@@ -284,15 +327,25 @@ enum DrawingLineStyle
 }
 
 /**
+ * Настройки для списка 'Стиль'-ей линии
+ */
+enum StrategyDisplayingMap
+{
+    @UiTitle(title = 'скрипт')
+    script
+}
+
+/**
  * Настройки для встройки 'Характеристики для вывода в списке объектов'
  */
-@JsonSchemaMeta(requiredFields = ['metaclassCharacteristicsDisplay', 'attributeGroup'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['metaClassObject', 'attributeGroup'], title = ' ')
 class CharacteristicsDisplayListObjects
 {
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс')
-    String metaclassCharacteristicsDisplay = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassCharacteristicsDisplay')
+    MetaClassObject metaClassObject = new MetaClassObject('', '')
+
+    @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaClassObject')
     @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
 }
@@ -328,17 +381,28 @@ String getListColors()
     )
 }
 
+String getContentTitleMap()
+{
+    Collection<IAppContentInfo> contentInfo =
+        api.apps.listContents(ConstantSchemes.EMBEDDED_APPLICATION_CODE)
+    Collection<LinkedHashMap> argum = []
+    contentInfo.collect {
+        argum << [selectable : true, title: it.contentTitle, uuid:
+            it.tabUuid, level: 0, extra: 'тест']
+    }
+    return Jackson.toJsonString(argum)
+}
+
 @InjectApi
 class SettingsProvider
 {
     MapSettings getSettings()
     {
-        String nameSpace = 'map'
-        String actualVersion = api.keyValue.get(nameSpace, 'actualVersion')
+        String nameSpace = ConstantMap.NAME_MECHANISM_SETTINGS
+        String actualVersion = api.keyValue.get(nameSpace, ConstantMap.ACTUAL_VERSION)
         if (actualVersion != null)
         {
             int actualVersionNumber = actualVersion as Integer
-
             if (actualVersionNumber > -1)
             {
                 String settingsJson = api.keyValue.get(nameSpace, "settings$actualVersion")
@@ -353,8 +417,8 @@ class SettingsProvider
 
 void saveSettings(MapSettings settings)
 {
-    String nameSpace = 'map'
-    Integer actualVersion = api.keyValue.get(nameSpace, 'actualVersion') as Integer ?: 0
+    String nameSpace = ConstantMap.NAME_MECHANISM_SETTINGS
+    Integer actualVersion = api.keyValue.get(nameSpace, ConstantMap.ACTUAL_VERSION) as Integer ?: 0
     String settingsJson = Jackson.toJsonString(
         new MapSettingsWithTimeStamp(
             settings: settings,
@@ -363,18 +427,46 @@ void saveSettings(MapSettings settings)
     )
     actualVersion++
     api.keyValue.put(nameSpace, "settings$actualVersion", settingsJson)
-    api.keyValue.put(nameSpace, 'actualVersion', actualVersion.toString())
+    api.keyValue.put(nameSpace, ConstantMap.ACTUAL_VERSION, actualVersion.toString())
 }
 
 void postSaveActions()
 {
     MapSettings settings = new SettingsProvider().getSettings()
-    Collection<? extends AbstractPointCharacteristics> strategies = settings?.abstractPointCharacteristics ?: [] as Collection<PointSettings>
-    strategies.each {
-        if (!it.codeStrategy)
-        {
-            it.codeStrategy = "codeStrategy"
+    installStrategyCode(settings?.abstractPointCharacteristics.first())
+    installStrategyCode(settings?.abstractPointCharacteristics.last())
+    saveSettings(settings)
+}
+
+void installStrategyCode(AbstractPointCharacteristics contentSettings)
+{
+    contentSettings.each {
+        it.strategies.each { code ->
+            String codeStrategy = code?.codeStrategy
+            String nameStrategy = code?.nameStrategy
+            if ((codeStrategy == ConstantMap.FIRST_PART_STRATEGY_CODE || codeStrategy == "") &&
+                nameStrategy != "")
+            {
+                Integer hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
+                    (nameStrategy.hashCode() * -1)
+                code?.codeStrategy = ConstantMap.FIRST_PART_STRATEGY_CODE + hashCode
+            }
+            checkingСorrectnesScript(code.scriptText)
         }
     }
-    saveSettings(settings)
+}
+
+void checkingСorrectnesScript(String scriptText)
+{
+    if (scriptText != '')
+    {
+        try
+        {
+            api.utils.executeScript(scriptText)
+        }
+        catch (Exception ex)
+        {
+            api.utils.throwReadableException("Invalid script passed: '${ scriptText }'")
+        }
+    }
 }

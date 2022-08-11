@@ -13,18 +13,15 @@
 package ru.naumen.modules.inventory
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.Field
 import groovy.transform.TupleConstructor
-import com.fasterxml.jackson.annotation.PropertyAccessor
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Canonical
-
+import static groovy.json.JsonOutput.toJson
+import ru.naumen.core.server.script.spi.ScriptDtObject
 import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.metainfo.shared.Constants.UI
@@ -37,26 +34,28 @@ import ru.naumen.metainfo.shared.Constants.UI
  * @param contentUuid - uuid карточки объекта
  * @return данные о трассах в json формате
  */
-def getMapObjects(String objectUuid, String contentUuid)
+String getMapObjects(String objectUuid, String contentUuid)
 {
-    def object = utils.get(objectUuid)
-    def params = api.apps.contentParameters(object.getMetaClass().toString(), UI.WINDOW_KEY, contentUuid)
-    return getMapInfo(user, object, params.objectsMethodName)
+    ScriptDtObject object = utils.get(objectUuid)
+    return getMapInfo(object, contentUuid)
 }
 
 //СЛУЖЕБНЫЙ БЛОК--------------------------------------------------------------
 /**
  * Метод, позволяющий получить информацию для вывода на карту
- * @param user - текущий пользователь
  * @param object - текущий объект, карточка которого открыта
- * @param objectsMethodName - название метода для вывода объектов
+ * @param contentUuid - uuid карточки объекта
  * @return данные о трассах в json формате
  */
-private def getMapInfo(def user, def object, def objectsMethodName)
+private String getMapInfo(ScriptDtObject object, def contentUuid)
 {
-    def errors = []
-    def objects = callParamsSettingsMethod(errors, 'Нет данных для отображения', [], objectsMethodName)
-    return new ObjectMapper().writeValueAsString(new Map(objects, errors))
+    MapSettings getSettingsWizardSettings = new SettingsProvider().getSettings()
+    APISettings mapApiKey = getSettingsWizardSettings?.interfaceSettings.first()
+    Collection<String> errors = []
+    Collection<LinkedHashMap> objects =
+        callParamsSettingsMethod(errors, 'Нет данных для отображения', [], contentUuid)
+    LinkedHashMap aggregations = [objects: objects, errors: errors, mapApiKey: mapApiKey]
+    return new ObjectMapper().writeValueAsString(aggregations)
 }
 
 /**
@@ -64,22 +63,24 @@ private def getMapInfo(def user, def object, def objectsMethodName)
  * @param errors - список ошибок
  * @param errorText - текст ошибки
  * @param defaultValue - значение по умолчанию на случай, если произошла ошибка
- * @param methodName - название метода для вызова
+ * @param contentUuid - uuid карточки объекта
  * @param objects - список объектов-параметров метода
  * @return результат вызова метода с названием methodName или значение по умолчанию, ошибку в списке и информацию в логе
  */
-private def callParamsSettingsMethod(Collection<String> errors, String errorText, def defaultValue, String methodName, Object... objects)
+private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> errors,
+                                                           String errorText,
+                                                           def defaultValue,
+                                                           def contentUuid)
 {
     try
     {
-        return modules.mapParamsSettings."${methodName}"(*objects) ?: defaultValue
+        return modules.mapParamsSettings.getDataDisplayMap(contentUuid) ?: defaultValue
     }
     catch (Exception ex)
     {
         errors.add(errorText)
-        logger.error("#mapRestSettings> ${ex.message}", ex)
+        logger.error("#mapRestSettings> ${ ex.message }", ex)
     }
-
     return defaultValue
 }
 
