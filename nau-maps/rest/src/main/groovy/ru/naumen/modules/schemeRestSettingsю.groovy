@@ -55,7 +55,7 @@ HierarchyCommunication createHierarchyCommunicationPoint(def scriptData, Integer
     hierarchyCommunicationBuilder.setFrom(id, 'point')
     hierarchyCommunicationBuilder.setId(id)
     hierarchyCommunicationBuilder.setTitle(scriptData.title.split(':').first())
-    hierarchyCommunicationBuilder.setType("point")
+    hierarchyCommunicationBuilder.setType('point')
     return hierarchyCommunicationBuilder
 }
 
@@ -82,7 +82,7 @@ HierarchyCommunication createHierarchyCommunicationLine(def scriptData,
 /**
  * Тип действия
  */
-enum ActionTypeSheme
+enum ActionTypeScheme
 {
     OPEN_LINK,
     CHANGE_RESPONSIBLE,
@@ -93,12 +93,12 @@ enum ActionTypeSheme
  * Класс, описывающий действие
  */
 @Canonical
-class ActionSheme
+class ActionScheme
 {
     /**
      * Тип дейстивя
      */
-    ActionTypeSheme type
+    ActionTypeScheme type
     /**
      * Название действия
      */
@@ -143,14 +143,14 @@ class HierarchyCommunication
     Long to
 
     /**
-     * тип сущности(точка или линия)
+     * Тип сущности (точка или линия)
      */
     String type
 
     /**
      * Список возможных действий с объектом (для меню справа)
      */
-    List<ActionSheme> actions = []
+    List<ActionScheme> actions = []
 
     public HierarchyCommunication setDesc(String desc)
     {
@@ -178,14 +178,7 @@ class HierarchyCommunication
             this.from = id
             return this
         }
-        if (id == 1)
-        {
-            this.from = null
-        }
-        else
-        {
-            this.from = id - 1
-        }
+        this.from = id == 1 ? null : id - 1
         return this
     }
 
@@ -210,7 +203,7 @@ class HierarchyCommunication
                 name: name,
                 link: link,
                 inPlace: inPlace,
-                type: ActionTypeSheme.OPEN_LINK
+                type: ActionTypeScheme.OPEN_LINK
             )
         )
 

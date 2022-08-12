@@ -6,7 +6,6 @@
  * Клиентский скриптовый модуль встроенного приложения "Schemes".
  * Содержит методы, определяющие данные для передачи на схему
  */
-//Версия SMP: 4.11
 package ru.naumen.modules.inventory
 
 import ru.naumen.core.server.script.spi.ScriptDtOList
@@ -52,15 +51,15 @@ Object getDataDisplayScheme(String nameContent)
 /**
  * Метод получения колекции всех стриптов
  * @param data данные из мастера настроек
- * @return колекция скриптов
+ * @return коллекция скриптов
  */
 Collection<String> getListScript(AbstractSchemesCharacteristics data)
 {
     Collection<String> dataScriptText = []
     data?.strategies?.each
         {
-            String stouk = it?.scriptText
-            dataScriptText.add(stouk)
+            String currentScript = it?.scriptText
+            dataScriptText.add(currentScript)
         }
     return dataScriptText
 }
@@ -68,13 +67,13 @@ Collection<String> getListScript(AbstractSchemesCharacteristics data)
 /**
  * Метод сохранения данных о линиях и точках для отображения на карте
  * @param dataAttribute - данные по атрибуту объекта
- * @return колекцию данных для отображения заданных на вкладе
+ * @return коллекция данных для отображения заданных на вкладке
  */
-Collection<HierarchyCommunicationBuilder> collectingData(def dataAttribute)
+Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataAttribute)
 {
     Collection<HierarchyCommunicationBuilder> pointData = []
     Collection<HierarchyCommunicationBuilder> lineData = []
-    Integer id = 0;
+    Integer id = 0
     pointData += dataAttribute.findResults {
         modules.schemeRestSettings.createHierarchyCommunicationPoint(it, ++id)
                ?.with(this.&schemeHierarchy)
