@@ -18,6 +18,8 @@ import FormField from 'WidgetFormPanel/components/FormField';
 import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
 import {getSourceAttribute} from 'store/sources/attributes/helpers';
+import IconButton from 'components/atoms/IconButton';
+import {ICON_NAMES} from 'components/atoms/Icon';
 import {isDontUseParamsForDataSet} from 'store/widgets/data/helpers';
 import type {OnSelectEvent} from 'components/types';
 import type {Props as ContainerProps} from 'components/atoms/Container/types';
@@ -121,6 +123,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 	getMainComponents = () => ({
 		Field: this.renderFieldWithContext,
+		FilterIcon: this.renderFilterIcon,
 		MenuContainer: this.renderMenuContainer(true)
 	});
 
@@ -171,6 +174,24 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			this.setState({showSelectionModal: true});
 		} else {
 			this.setState({showCreatingModal: true});
+		}
+	};
+
+	handleClickFilter = async () => {
+		const {openFilterForm, source, value: indicator} = this.props;
+		const {descriptor} = indicator;
+		const {value} = source;
+
+		if (value) {
+			const sourceData = {descriptor: descriptor ?? '', value};
+			const serializedContext = await openFilterForm(sourceData);
+
+			if (serializedContext) {
+				this.change({
+					...indicator,
+					descriptor: serializedContext
+				});
+			}
 		}
 	};
 
@@ -338,6 +359,21 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			{indicator => this.renderField(indicator)}
 		</Context.Consumer>
 	);
+
+	renderFilterIcon = () => {
+		const {hasFiltered, value} = this.props;
+
+		if (hasFiltered) {
+			const {descriptor} = value;
+			const icon = descriptor ? ICON_NAMES.FILLED_FILTER : ICON_NAMES.FILTER;
+
+			return (
+				<IconButton icon={icon} onClick={this.handleClickFilter} />
+			);
+		}
+
+		return null;
+	};
 
 	renderMenuContainer = (isMain: boolean) => (props: ContainerProps) => {
 		const {dataSets} = this.props;

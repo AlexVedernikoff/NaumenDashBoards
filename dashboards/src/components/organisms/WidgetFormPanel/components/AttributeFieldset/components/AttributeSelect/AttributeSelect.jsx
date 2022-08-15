@@ -33,6 +33,7 @@ export class AttributeSelect extends Component<Props, State> {
 
 		if (!this.components) {
 			this.components = {
+				FilterIcon: this.renderEmptyFilterIcon,
 				IndicatorsContainer: this.renderIndicators,
 				ListOption: this.renderListOption,
 				ValueContainer: this.renderValueContainer,
@@ -98,10 +99,22 @@ export class AttributeSelect extends Component<Props, State> {
 		return value && <IconButton icon={ICON_NAMES.EDIT} onClick={this.handleClickEditIcon} />;
 	};
 
+	renderEmptyFilterIcon = () => null;
+
 	renderField = () => {
 		const {Field} = this.props.components;
 
 		return <div className={styles.fieldContainer}><Field /></div>;
+	};
+
+	renderFilterIcon = () => {
+		const {FilterIcon} = this.getComponents();
+
+		if (FilterIcon) {
+			return <FilterIcon />;
+		}
+
+		return null;
 	};
 
 	renderForm = (): React$Node => {
@@ -123,6 +136,7 @@ export class AttributeSelect extends Component<Props, State> {
 
 	renderIndicators = (props: ContainerProps) => (
 		<div className={cn(props.className, styles.indicatorContainer)}>
+			{this.renderFilterIcon()}
 			{this.renderEditIcon()}
 			{this.renderDropIcon()}
 			{this.renderRemoveIcon()}
