@@ -4,6 +4,7 @@ import type {ThunkAction} from 'store/types';
 import type {UserRole} from 'store/context/types';
 
 export type ConnectedProps = {
+	editMode: boolean,
 	personalDashboard: boolean,
 	role: UserRole,
 	settings: AutoUpdateSettings,

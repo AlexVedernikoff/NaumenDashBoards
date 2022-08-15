@@ -191,14 +191,19 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	renderText = () => <span className={styles.text}> <T text="AutoUpdateButton::Minutes" /></span>;
 
 	renderTimerButton = () => {
-		const {personalDashboard, role, settings} = this.props;
+		const {editMode, personalDashboard, role, settings} = this.props;
 		const {remainder} = this.state;
 		const {enabled} = settings;
 		const buttonCN = enabled ? styles.enabledAutoUpdateButton : '';
 
 		if (enabled) {
 			return (
-				<TimerButton duration={remainder} onChangeDuration={this.handleChangeRemainder} tip={t('AutoUpdateButton::AutoRefreshOn')} />
+				<TimerButton
+					duration={remainder}
+					editMode={editMode}
+					onChangeDuration={this.handleChangeRemainder}
+					tip={t('AutoUpdateButton::AutoRefreshOn')}
+				/>
 			);
 		}
 

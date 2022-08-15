@@ -144,7 +144,7 @@ const dataSelector = memoize((widget: AnyWidget): ?DropDownParams => {
 		const availableOptions = [];
 
 		diagramWidget.data.forEach(({source, sourceForCompute}, value) => {
-			if (!sourceForCompute) {
+			if (!sourceForCompute && source.value) {
 				availableOptions.push({
 					label: source.value.label,
 					value
@@ -181,24 +181,28 @@ const getFiltersOnWidget = (widget: Widget): FiltersOnWidget => {
 	let dataSetWithFiltersCount = 0;
 
 	widget.data.forEach(({source}, dataSetIndex) => {
-		const {value: {label: sourceLabel}, widgetFilterOptions} = source;
-		const subResult = [];
+		const {value, widgetFilterOptions} = source;
 
-		if (widgetFilterOptions) {
-			widgetFilterOptions.forEach(({descriptor, label}, filterIndex) => {
-				const value = `${dataSetIndex}::${filterIndex}`;
-				const option = {label, sourceLabel, value};
+		if (value) {
+			const {label: sourceLabel} = value;
+			const subResult = [];
 
-				subResult.push(option);
+			if (widgetFilterOptions) {
+				widgetFilterOptions.forEach(({descriptor, label}, filterIndex) => {
+					const value = `${dataSetIndex}::${filterIndex}`;
+					const option = {label, sourceLabel, value};
 
-				if (descriptorContainsFilter(descriptor)) {
-					selected = value;
-				}
-			});
+					subResult.push(option);
+
+					if (descriptorContainsFilter(descriptor)) {
+						selected = value;
+					}
+				});
+			}
+
+			subResult.forEach(item => result.push(item));
+			dataSetWithFiltersCount++;
 		}
-
-		subResult.forEach(item => result.push(item));
-		dataSetWithFiltersCount++;
 	});
 
 	if (dataSetWithFiltersCount > 1) {

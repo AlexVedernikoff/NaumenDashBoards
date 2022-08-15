@@ -4,6 +4,7 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 import {getSettings, saveAutoUpdateSettings} from 'store/dashboard/settings/actions';
 
 export const props = (state: AppState): ConnectedProps => ({
+	editMode: state.dashboard.settings.editMode,
 	personalDashboard: state.dashboard.settings.personal,
 	role: state.context.user.role,
 	settings: state.dashboard.settings.autoUpdate
