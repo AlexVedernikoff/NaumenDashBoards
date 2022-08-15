@@ -7,6 +7,7 @@ import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
 import T from 'components/atoms/Translation';
+import t from 'localization';
 
 export class SourcesAndFieldsExtended extends PureComponent<Props> {
 	static defaultProps = {
@@ -60,6 +61,7 @@ export class SourcesAndFieldsExtended extends PureComponent<Props> {
 							)
 						}}
 						getOptionLabel={attr => attr.title}
+						placeholder={t('AttributeSelect::Empty')}
 						value={value}
 					/>
 				</div>

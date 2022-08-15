@@ -129,6 +129,7 @@ export class SourceLinkEditor extends Component<Props, State> {
 						loading={loading}
 						onSelect={this.handleSelectAttribute}
 						options={options}
+						placeholder={t('PivotWidgetForm::SourceLinkAttributeEmpty')}
 						value={attribute}
 					/>
 				</FormField>
