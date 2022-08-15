@@ -2847,6 +2847,8 @@ class SourceValue extends ValueWithLabel<String>
      * Ключ глобального фильтра
      */
     String filterId
+
+    Collection<WidgetFilterOption> widgetFilterOptions
 }
 
 /**
