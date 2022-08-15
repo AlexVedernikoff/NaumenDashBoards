@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Canonical
 import static groovy.json.JsonOutput.toJson
@@ -25,6 +26,7 @@ import ru.naumen.core.server.script.spi.ScriptDtObject
 import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.metainfo.shared.Constants.UI
+
 
 //БЛОК REST АПИ--------------------------------------------------------
 
@@ -47,7 +49,7 @@ String getMapObjects(String objectUuid, String contentUuid)
  * @param contentUuid - uuid карточки объекта
  * @return данные о трассах в json формате
  */
-private String getMapInfo(ScriptDtObject object, def contentUuid)
+private String getMapInfo(ScriptDtObject object, String contentUuid)
 {
     MapSettings getSettingsWizardSettings = new SettingsProvider().getSettings()
     APISettings mapApiKey = getSettingsWizardSettings?.interfaceSettings.first()
@@ -69,8 +71,8 @@ private String getMapInfo(ScriptDtObject object, def contentUuid)
  */
 private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> errors,
                                                            String errorText,
-                                                           def defaultValue,
-                                                           def contentUuid)
+																													 Collection defaultValue,
+																													 String contentUuid)
 {
     try
     {
@@ -85,164 +87,205 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
 }
 
 //БЛОК СКРИПТОВОГО АПИ--------------------------------------------------------
-
-/**
- * Метод по созданию билдер-объекта трассы
- * @param object - объект трассы из БД
- * @return билдер-объект трассы
- */
-public TrailBuilder createTrailBuilder(def object)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+class ElementsMap
 {
-    return new TrailBuilder(object)
-}
+    private final IWebApi web
+    private final logger
 
-/**
- * Метод по формированию данных о трассе
- * @param dbTrail - объект трассы из БД
- * @return объект с данными о трассе другого формата
- */
-private TrailBuilder createTrail(def dbTrail)
-{
-    return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.nestSegmVols
-        ? createTrailBuilder(dbTrail)
-        .setHeader(dbTrail.title)
-        .setColor(dbTrail.HEXcolor)
-        .setGeopositions(dbTrail)
-        .addOption('Площадка А',
-                   new Value(label: dbTrail.siteA.title, url: api.web.open(dbTrail.siteA.UUID)))
-        .addOption('Площадка Б',
-                   new Value(label: dbTrail.siteB.title, url: api.web.open(dbTrail.siteB.UUID)))
-        .setParts(dbTrail.nestSegmVols)
-        .setEquipments(dbTrail.nestSegmVols)
-        .addAction('Перейти на карточку', api.web.open(dbTrail.UUID))
-        : null
-}
-
-/**
- * Метод по созданию билдер-объекта участка трассы
- * @param object - объект участка трассы из БД
- * @return билдер-объект участка трассы
- */
-public SectionBuilder createSectionBuilder(def object)
-{
-    return new SectionBuilder(object)
-}
-
-/**
- * Метод формирования объекта - участка трассы
- * @param dbPart - участок трассы из БД
- * @param wols - трасса, которой он принадлежит
- * @return сформированный участок трассы
- */
-public SectionBuilder createPart(def dbPart, def wols)
-{
-    if(dbPart && dbPart.title && dbPart.siteA && dbPart.siteB)
+    ElementsMap(IWebApi web, def logger)
     {
-        return createSectionBuilder(dbPart)
-            .setHeader(dbPart.title)
-            .setColor(dbPart.HEXcolor)
-            .addOption('Площадка А',
-                       new Value(label: dbPart.siteA.title, url: api.web.open(dbPart.siteA.UUID)))
-            .addOption('Площадка Б',
-                       new Value(label: dbPart.siteB.title, url: api.web.open(dbPart.siteB.UUID)))
-            .setGeopositions(dbPart)
-            .addAction('Перейти на карточку', api.web.open(dbPart.UUID))
+        this.web = web
+        this.logger = logger
+    }
+
+    /**
+     * Метод по созданию билдер-объекта трассы
+     * @param object - объект трассы из БД
+     * @return билдер-объект трассы
+     */
+    public TrailBuilder createTrailBuilder(def object)
+    {
+        return new TrailBuilder(object)
+    }
+
+    /**
+     * Метод по формированию данных о трассе
+     * @param dbTrail - объект трассы из БД
+     * @return объект с данными о трассе другого формата
+     */
+    private TrailBuilder createTrail(def dbTrail)
+    {
+        return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.nestSegmVols
+            ? createTrailBuilder(dbTrail)
+            .setHeader(dbTrail.title)
+            .setColor(dbTrail.HEXcolor)
+            .setGeopositions(dbTrail)
+            .addOption(
+                'Площадка А',
+                new Value(label: dbTrail.siteA.title, url: api.web.open(dbTrail.siteA.UUID))
+            )
+            .addOption(
+                'Площадка Б',
+                new Value(label: dbTrail.siteB.title, url: api.web.open(dbTrail.siteB.UUID))
+            )
+            .setParts(dbTrail.nestSegmVols)
+            .setEquipments(dbTrail.nestSegmVols)
+            .addAction('Перейти на карточку', api.web.open(dbTrail.UUID))
+            : null
+    }
+
+    /**
+     * Метод по созданию билдер-объекта участка трассы
+     * @param object - объект участка трассы из БД
+     * @return билдер-объект участка трассы
+     */
+    public SectionBuilder createSectionBuilder(def object)
+    {
+        return new SectionBuilder(object)
+    }
+
+    /**
+     * Метод формирования объекта - участка трассы
+     * @param dbPart - участок трассы из БД
+     * @param wols - трасса, которой он принадлежит
+     * @return сформированный участок трассы
+     */
+    public SectionBuilder createPart(def dbPart, def wols)
+    {
+        if (dbPart && dbPart.title && dbPart.siteA && dbPart.siteB)
+        {
+            return createSectionBuilder(dbPart)
+                .setHeader(dbPart.title)
+                .setColor(dbPart.HEXcolor)
+                .addOption(
+                    'Площадка А',
+                    new Value(label: dbPart.siteA.title, url: api.web.open(dbPart.siteA.UUID))
+                )
+                .addOption(
+                    'Площадка Б',
+                    new Value(label: dbPart.siteB.title, url: api.web.open(dbPart.siteB.UUID))
+                )
+                .setGeopositions(dbPart)
+                .addAction('Перейти на карточку', api.web.open(dbPart.UUID))
+        }
+    }
+
+    /**
+     * Метод формирования объекта отрезка(не связанного с трассами)
+     * @param section - отрезов из БД
+     * @return сформированный объект отрезка
+     */
+    public SectionBuilder createSection(def section)
+    {
+        if (section && section.title && section.siteA && section.siteB)
+        {
+            return createSectionBuilder(section)
+                .setHeader(section.title)
+                .setColor(section.HEXcolor)
+                .addOption(
+                    'Площадка А',
+                    new Value(label: section.siteA.title, url: api.web.open(section.siteA.UUID))
+                )
+                .addOption(
+                    'Площадка Б',
+                    new Value(label: section.siteB.title, url: api.web.open(section.siteB.UUID))
+                )
+                .setGeopositions(section)
+                .addAction('Перейти на карточку', api.web.open(section.UUID))
+        }
+    }
+
+    /**
+     * Метод по созданию билдер-объекта оборудования
+     * @param type - тип оборудования
+     * @param object - объект оборудования из БД
+     * @return билдер-объект оборудования
+     */
+    public BasePointBuilder createPointObjectBuilder(MapObjectType type, def object)
+    {
+        return new BasePointBuilder(type, object)
+    }
+
+    /**
+     * Метод формирования точечного объекта оборудования
+     * @param equipment - оборудование из БД
+     * @return сформированный объект оборудования
+     */
+    BasePointBuilder createEquipmentPoint(def equipment)
+    {
+        if (equipment && equipment.title && equipment.ciModel && equipment.location)
+        {
+            Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
+            return createPointObjectBuilder(
+                equipIsActive
+                    ? MapObjectType.ACTIVE
+                    : MapObjectType.PASSIVE, equipment
+            )
+                .setHeader(equipment.title)
+                .setIcon(equipment)
+                .setEquipType(equipIsActive ? null : equipment)
+                .setGeopositions(equipment)
+                .addAction('Перейти на карточку', api.web.open(equipment.UUID))
+                .addOption(
+                    'Модель',
+                    new Value(
+                        label: equipment.ciModel.title,
+                        url: api.web.open(equipment.ciModel.UUID)
+                    )
+                )
+                .addOption(
+                    'Расположение',
+                    new Value(
+                        label: equipment.location.title,
+                        url: api.web.open(equipment.location.UUID)
+                    )
+                )
+        }
+    }
+
+    /**
+     * Метод для формирования объекта точки(не связанного с трассами)
+     * @param pointObject - точенчый объект
+     * @return сформированный объект точки
+     */
+    BasePointBuilder createPoint(def pointObject)
+    {
+        if (pointObject && pointObject.title && pointObject.cmdb)
+        {
+            return createPointObjectBuilder(MapObjectType.POINT, pointObject)
+                .setHeader(pointObject.title)
+                .setIcon(pointObject)
+                .setGeopositions(pointObject.gradLat, pointObject.gradLong)
+                .addAction('Перейти на карточку', api.web.open(pointObject.UUID))
+                .addOption(
+                    'Оборудование',
+                    new Value(
+                        label: pointObject.cmdb?.find()?.title,
+                        url: api.web.open(pointObject.cmdb?.find()?.UUID)
+                    )
+                )
+        }
+    }
+
+    /**
+     * Метод по созданию билдер-объекта типа отображения
+     * @return билдер-объект типа отображения
+     */
+    public PresentationBuilder getPresentation()
+    {
+        return new PresentationBuilder()
+    }
+
+    /**
+     * Метод по созданию билдер-объекта действия над объектом
+     * @return билдер-объект  действия над объектом
+     */
+    public ActionBuilder getAction()
+    {
+        return new ActionBuilder()
     }
 }
-
-/**
- * Метод формирования объекта отрезка(не связанного с трассами)
- * @param section - отрезов из БД
- * @return сформированный объект отрезка
- */
-public SectionBuilder createSection(def section)
-{
-    if(section && section.title && section.siteA && section.siteB)
-    {
-        return createSectionBuilder(section)
-            .setHeader(section.title)
-            .setColor(section.HEXcolor)
-            .addOption('Площадка А',
-                       new Value(label: section.siteA.title, url: api.web.open(section.siteA.UUID)))
-            .addOption('Площадка Б',
-                       new Value(label: section.siteB.title, url: api.web.open(section.siteB.UUID)))
-            .setGeopositions(section)
-            .addAction('Перейти на карточку', api.web.open(section.UUID))
-    }
-}
-
-/**
- * Метод по созданию билдер-объекта оборудования
- * @param type - тип оборудования
- * @param object - объект оборудования из БД
- * @return билдер-объект оборудования
- */
-public BasePointBuilder createPointObjectBuilder(MapObjectType type, def object)
-{
-    return new BasePointBuilder(type, object)
-}
-
-/**
- * Метод формирования точечного объекта оборудования
- * @param equipment - оборудование из БД
- * @return сформированный объект оборудования
- */
-BasePointBuilder createEquipmentPoint(def equipment)
-{
-    if(equipment && equipment.title && equipment.ciModel && equipment.location)
-    {
-        Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
-        return createPointObjectBuilder(equipIsActive
-                                            ? MapObjectType.ACTIVE
-                                            : MapObjectType.PASSIVE , equipment)
-            .setHeader(equipment.title)
-            .setIcon(equipment)
-            .setEquipType(equipIsActive ? null : equipment)
-            .setGeopositions(equipment)
-            .addAction('Перейти на карточку', api.web.open(equipment.UUID))
-            .addOption('Модель',
-                       new Value(label: equipment.ciModel.title, url: api.web.open(equipment.ciModel.UUID)))
-            .addOption('Расположение',
-                       new Value(label: equipment.location.title, url: api.web.open(equipment.location.UUID)))
-    }
-}
-
-/**
- * Метод для формирования объекта точки(не связанного с трассами)
- * @param pointObject - точенчый объект
- * @return сформированный объект точки
- */
-BasePointBuilder createPoint(def pointObject)
-{
-    if(pointObject && pointObject.title && pointObject.cmdb)
-    {
-        return createPointObjectBuilder( MapObjectType.POINT , pointObject)
-            .setHeader(pointObject.title)
-            .setIcon(pointObject)
-            .setGeopositions(pointObject.gradLat, pointObject.gradLong)
-            .addAction('Перейти на карточку', api.web.open(pointObject.UUID))
-            .addOption('Оборудование',new Value(label: pointObject.cmdb?.find()?.title, url: api.web.open(pointObject.cmdb?.find()?.UUID)))
-    }
-}
-
-/**
- * Метод по созданию билдер-объекта типа отображения
- * @return билдер-объект типа отображения
- */
-public PresentationBuilder getPresentation()
-{
-    return new PresentationBuilder()
-}
-
-/**
- * Метод по созданию билдер-объекта действия над объектом
- * @return билдер-объект  действия над объектом
- */
-public ActionBuilder getAction()
-{
-    return new ActionBuilder()
-}
-
 
 //СЛУЖЕБНЫЙ БЛОК--------------------------------------------------------
 /**
@@ -396,33 +439,35 @@ class OpenLinkAction extends Action
 /**
  * мКласс, описывающий билдер-объект действия над объектом (в меню справа)
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class ActionBuilder
 {
-    OpenLinkAction openLink(String name, String link, boolean inPlace = false)
-    {
-        return new OpenLinkAction(name: name, link: link,inPlace: inPlace, type:ActionType.OPEN_LINK)
-    }
+	OpenLinkAction openLink(String name, String link, boolean inPlace = false)
+	{
+		return new OpenLinkAction(name: name, link: link,inPlace: inPlace, type:ActionType.OPEN_LINK)
+	}
 }
 
 /**
  * Класс, описывающий билдер-объект типа отображения подписи
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class PresentationBuilder
 {
-    public PresentationType rightOfLabel()
-    {
-        return PresentationType.RIGHT_OF_LABEL
-    }
+	public PresentationType rightOfLabel()
+	{
+		return PresentationType.RIGHT_OF_LABEL
+	}
 
-    public PresentationType fullLength()
-    {
-        return PresentationType.FULL_LENGTH
-    }
+	public PresentationType fullLength()
+	{
+		return PresentationType.FULL_LENGTH
+	}
 
-    public PresentationType underLabel()
-    {
-        return PresentationType.UNDER_LABEL
-    }
+	public PresentationType underLabel()
+	{
+		return PresentationType.UNDER_LABEL
+	}
 }
 
 /**

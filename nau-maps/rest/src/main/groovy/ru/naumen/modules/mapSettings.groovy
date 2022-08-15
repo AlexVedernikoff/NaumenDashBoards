@@ -17,9 +17,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.InheritConstructors
-import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.server.script.api.ea.IAppContentInfo
 import groovy.transform.Canonical
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 
 class ConstantMap
 {
@@ -184,7 +184,7 @@ class PointCharacteristics
 /**
  * Настройки для встройки 'Стратегия определения объектов для отображения на карт'
  */
-@JsonSchemaMeta(requiredFields = ['strategyDisplayingMap'], title = 'Стратегия определения объектов для отображения на карте')
+@JsonSchemaMeta(requiredFields = ['strategyDisplayingMap'], title = 'Стратегия определения обьектов для отображения на карте')
 class StrategyDeterminingObjectsMap
 {
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
@@ -390,7 +390,7 @@ String getContentTitleMap()
         argum << [selectable : true, title: it.contentTitle, uuid:
             it.tabUuid, level: 0, extra: 'тест']
     }
-    return Jackson.toJsonString(argum)
+    return toJson(argum)
 }
 
 @InjectApi
@@ -437,26 +437,30 @@ void postSaveActions()
     installStrategyCode(settings?.abstractPointCharacteristics.last())
     saveSettings(settings)
 }
-
+/**
+ * Метод, определяющий код стратегии
+ * @param contentSettings - банные из мастера настроек
+ * @result опредяет значение для вкладки код стратегии
+ */
 void installStrategyCode(AbstractPointCharacteristics contentSettings)
 {
     contentSettings.each {
         it.strategies.each { code ->
             String codeStrategy = code?.codeStrategy
             String nameStrategy = code?.nameStrategy
-            if ((codeStrategy == ConstantMap.FIRST_PART_STRATEGY_CODE || codeStrategy == "") &&
-                nameStrategy != "")
+            if ((codeStrategy == ConstantMap.FIRST_PART_STRATEGY_CODE || !codeStrategy) &&
+							 nameStrategy)
             {
                 Integer hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
                     (nameStrategy.hashCode() * -1)
                 code?.codeStrategy = ConstantMap.FIRST_PART_STRATEGY_CODE + hashCode
             }
-            checkingСorrectnesScript(code.scriptText)
+            checkingCorrectnessScript(code.scriptText)
         }
     }
 }
 
-void checkingСorrectnesScript(String scriptText)
+void checkingCorrectnessScript(String scriptText)
 {
     if (scriptText != '')
     {
@@ -464,7 +468,7 @@ void checkingСorrectnesScript(String scriptText)
         {
             api.utils.executeScript(scriptText)
         }
-        catch (Exception ex)
+        catch (ScriptServiceException ex)
         {
             api.utils.throwReadableException("Invalid script passed: '${ scriptText }'")
         }
