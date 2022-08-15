@@ -195,21 +195,22 @@ export const parseColumns = (
 /**
  * Формирует список столбцов нижнего уровня для отображения данных
  * @param {Array<PivotColumn>} columns - дерево столбцов
+ * @param {boolean} isTopLevel - признак верхнего уровня
  * @returns {Array<PivotColumn>} - столбцы нижнего уровня
  */
-export const parseColumnsFlat = (columns: Array<PivotColumn>): Array<PivotColumn> => {
+export const parseColumnsFlat = (columns: Array<PivotColumn>, isTopLevel: boolean = true): Array<PivotColumn> => {
 	const result = [];
 
 	columns.forEach(column => {
 		if (column.type === PIVOT_COLUMN_TYPE.GROUP) {
-			const subColumns = parseColumnsFlat(column.children);
+			const subColumns = parseColumnsFlat(column.children, false);
 
 			const subColumnsLast = {...subColumns.pop(), isLastColumnGroup: true};
 
 			subColumns.push(subColumnsLast);
 			subColumns.forEach(subColumn => result.push(subColumn));
 		} else {
-			result.push(column);
+			result.push({...column, isLastColumnGroup: isTopLevel});
 		}
 	});
 
