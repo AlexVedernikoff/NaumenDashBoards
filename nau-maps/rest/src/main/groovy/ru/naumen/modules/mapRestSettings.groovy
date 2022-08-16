@@ -105,7 +105,7 @@ class ElementsMap
      * @param object - объект трассы из БД
      * @return билдер-объект трассы
      */
-    public TrailBuilder createTrailBuilder(LazyScriptDtObject object)
+    public TrailBuilder createTrailBuilder(ISDtObject object)
     {
         return new TrailBuilder(object)
     }
@@ -115,7 +115,7 @@ class ElementsMap
      * @param dbTrail - объект трассы из БД
      * @return объект с данными о трассе другого формата
      */
-    private TrailBuilder createTrail(LazyScriptDtObject dbTrail)
+    private TrailBuilder createTrail(ISDtObject dbTrail)
     {
         return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.nestSegmVols
             ? createTrailBuilder(dbTrail)
@@ -141,7 +141,7 @@ class ElementsMap
      * @param object - объект участка трассы из БД
      * @return билдер-объект участка трассы
      */
-    public SectionBuilder createSectionBuilder(ScriptDtObject object)
+    public SectionBuilder createSectionBuilder(ISDtObject object)
     {
         return new SectionBuilder(object)
     }
@@ -152,7 +152,7 @@ class ElementsMap
      * @param wols - трасса, которой он принадлежит
      * @return сформированный участок трассы
      */
-    public SectionBuilder createPart(ScriptDtObject dbPart, TrailBuilder wols)
+    public SectionBuilder createPart(ISDtObject dbPart, TrailBuilder wols)
     {
         if (dbPart && dbPart.title && dbPart.siteA && dbPart.siteB)
         {
@@ -177,7 +177,7 @@ class ElementsMap
      * @param section - отрезов из БД
      * @return сформированный объект отрезка
      */
-    public SectionBuilder createSection(ScriptDtObject section)
+    public SectionBuilder createSection(ISDtObject section)
     {
         if (section && section.title && section.siteA && section.siteB)
         {
@@ -203,7 +203,7 @@ class ElementsMap
      * @param object - объект оборудования из БД
      * @return билдер-объект оборудования
      */
-    public BasePointBuilder createPointObjectBuilder(MapObjectType type, ScriptDtObject object)
+    public BasePointBuilder createPointObjectBuilder(MapObjectType type, ISDtObject object)
     {
         return new BasePointBuilder(type, object)
     }
@@ -213,7 +213,7 @@ class ElementsMap
      * @param equipment - оборудование из БД
      * @return сформированный объект оборудования
      */
-    BasePointBuilder createEquipmentPoint(ScriptDtObject equipment)
+    BasePointBuilder createEquipmentPoint(ISDtObject equipment)
     {
         if (equipment && equipment.title && equipment.ciModel && equipment.location)
         {
@@ -250,7 +250,7 @@ class ElementsMap
      * @param pointObject - точенчый объект
      * @return сформированный объект точки
      */
-    BasePointBuilder createPoint(ScriptDtObject pointObject)
+    BasePointBuilder createPoint(ISDtObject pointObject)
     {
         if (pointObject && pointObject.title && pointObject.cmdb)
         {
