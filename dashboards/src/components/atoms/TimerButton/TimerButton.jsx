@@ -20,7 +20,17 @@ export class TimerButton extends PureComponent<Props> {
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		if (this.props.duration !== prevProps.duration) {
+		const {duration, editMode} = this.props;
+
+		if (editMode !== prevProps.editMode) {
+			if (editMode) {
+				clearInterval(this.interval);
+			} else {
+				this.interval = this.startTime();
+			}
+		}
+
+		if (duration !== prevProps.duration) {
 			clearInterval(this.interval);
 			this.interval = this.startTime();
 		}
