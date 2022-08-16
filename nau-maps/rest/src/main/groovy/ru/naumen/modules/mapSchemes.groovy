@@ -19,6 +19,7 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.ea.IAppContentInfo
 import groovy.transform.Canonical
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 
 @MechanismSettings(name = 'schemes-initial')
 @JsonSchemaMeta(
@@ -147,10 +148,10 @@ class ContentHierarchyCommunicationSettings
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
     @JsonSchemaMeta(title = 'Атрибут связи')
     String pathCoordinatLongitud = ""
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'abstract-select', source = 'getAttributesChildMetaclass')
     @JsonSchemaMeta(title = 'Точка А')
     String pointA = ""
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'abstract-select', source = 'getAttributesChildMetaclass')
     @JsonSchemaMeta(title = 'Точка Б')
     String pointB = ""
 
@@ -333,6 +334,34 @@ String getContents()
             [title: it.contentTitle, uuid: it.contentUuid, level: level++, selectable: true]
         }
     )
+}
+
+String getAttributesChildMetaclass()
+{
+    SchemesSettings settings = new SettingsProviderSchemes().getSettings()
+    HierarchyCommunicationSettings hierarchyCommunicationSettings =
+        settings?.abstractSchemesCharacteristics.first() ?:
+            [] as Collection<HierarchyCommunicationSettings>
+    Collection listAttributes = []
+    hierarchyCommunicationSettings.each {
+        it.strategies.each { code ->
+            if (code.metaclassObjects && code.pathCoordinatLongitud)
+            {
+                String nameMetaclass = "${ code.metaclassObjects.id }\$${ code.metaclassObjects.caseId }"
+                String attributeName = code.pathCoordinatLongitud
+                ClassFqn metaclass =
+                    api.metainfo.getMetaClass(nameMetaclass)
+                       .getAttribute(attributeName).type.relatedMetaClass
+                api.metainfo.getMetaClass(metaclass)?.attributes.each {
+                    listAttributes << [title     : it.title,
+                                    uuid      : it.code,
+                                    level     : 1,
+                                    selectable: true]
+                }
+            }
+        }
+    }
+    return toJson(listAttributes)
 }
 
 String getContentTitle()
