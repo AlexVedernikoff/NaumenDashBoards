@@ -19,6 +19,7 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.ea.IAppContentInfo
 import groovy.transform.Canonical
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 
 @MechanismSettings(name = 'schemes-initial')
 @JsonSchemaMeta(
@@ -360,7 +361,7 @@ String getAttributesChildMetaclass()
             }
         }
     }
-    return Jackson.toJsonString(listAttributes)
+    return toJson(listAttributes)
 }
 
 String getContentTitle()
