@@ -5,6 +5,7 @@ import type {
 	Chart,
 	ComboWidget,
 	EditWidgetChunkDataAction,
+	PivotWidget,
 	SummaryWidget,
 	TableWidget,
 	UpdateWidgetAction,
@@ -14,11 +15,12 @@ import api from 'api';
 import {ApiError} from 'api/errors';
 import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
 import {BUILD_DATA_EVENTS} from './constants';
+import {compose} from 'redux';
 import {DEFAULT_NUMBER_AXIS_FORMAT, LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
 import exporter from 'utils/export';
 import {getAllWidgets} from 'store/widgets/data/selectors';
-import {getWidgetFilterOptionsDescriptors, removeCodesFromTableData} from './helpers';
+import {getWidgetFilterOptionsDescriptors, removeCodesFromTableData, removeIDFromTableData} from './helpers';
 import {INTEGER_AGGREGATION} from 'store/widgets/constants';
 import t from 'localization';
 
@@ -108,6 +110,24 @@ const exportTableToXLSX = (widget: TableWidget): ThunkAction =>
 			const data = await getDataForTableDiagram(state, widget, 1, total);
 
 			exporter.exportWidgetAsSheet(widget, removeCodesFromTableData(data));
+		}
+	};
+
+/**
+ * Экспортируем таблицу в XLSX
+ * @param {TableWidget} widget - данные виджета
+ * @returns {ThunkAction}
+ */
+const exportPivotToXLSX = (widget: PivotWidget): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		const state = getState();
+		const data = state.widgets.buildData[widget.id]?.data;
+
+		if (data) {
+			const filters = compose(removeCodesFromTableData, removeIDFromTableData);
+			const exportData = filters(data);
+
+			exporter.exportWidgetAsSheet(widget, exportData);
 		}
 	};
 
@@ -294,5 +314,6 @@ const requestBuildData = (payload: AnyWidget) => ({
 export {
 	fetchBuildData,
 	fetchTableBuildData,
+	exportPivotToXLSX,
 	exportTableToXLSX
 };

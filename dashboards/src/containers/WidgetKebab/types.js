@@ -1,5 +1,5 @@
 // @flow
-import type {AnyWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import type {AnyWidget, PivotWidget, TableWidget, Widget} from 'store/widgets/data/types';
 import type {DrillDownAction} from 'store/widgets/links/types';
 import type {Ref} from 'components/types';
 import type {ThunkAction} from 'store/types';
@@ -43,6 +43,7 @@ export type ConnectedProps = {
 export type ConnectedFunctions = {
 	drillDown: DrillDownAction,
 	editWidgetChunkData: (widget: AnyWidget, chunkData: Object) => ThunkAction,
+	exportPivotToXLSX: (widget: PivotWidget) => ThunkAction,
 	exportTableToXLSX: (widget: TableWidget) => ThunkAction,
 	openNavigationLink: (dashboardId: string, widgetId: string) => ThunkAction,
 	removeWidgetWithConfirm: (widgetId: string) => ThunkAction,

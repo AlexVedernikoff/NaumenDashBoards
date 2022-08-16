@@ -1,11 +1,11 @@
 // @flow
 import {createContextName, getSnapshotName} from './helpers';
-import exportSheet from './xlxs';
+import exportTableSheet from './xlxs';
 import {exportPDF} from './pdf';
 import {exportPNG} from './core';
 import {FILE_VARIANTS} from './constants';
-import type {TableBuildData} from 'store/widgets/buildData/types';
-import type {TableWidget, Widget} from 'store/widgets/data/types';
+import type {PivotBuildData, TableBuildData} from 'store/widgets/buildData/types';
+import type {PivotWidget, TableWidget, Widget} from 'store/widgets/data/types';
 import type {WidgetStoreItem} from './types';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
@@ -38,10 +38,13 @@ class Exporter {
 		this.layout = layout;
 	}
 
-	async exportWidgetAsSheet (widget: TableWidget, data: TableBuildData) {
+	async exportWidgetAsSheet (
+		widget: PivotWidget | TableWidget,
+		data: PivotBuildData | TableBuildData
+	) {
 		const snapshotName = await getSnapshotName(widget.name);
-		const sheet = await exportSheet(snapshotName, data);
-		return sheet;
+
+		await exportTableSheet(snapshotName, data);
 	}
 
 	async exportWidgetAsPDF (widget: Widget, save: boolean = false) {

@@ -194,6 +194,18 @@ const removeCodesFromTableData = (tableData: DiagramBuildData): DiagramBuildData
 };
 
 /**
+ * Очищает столбец ID из заголовков таблицы.
+ * @param {DiagramBuildData} pivotData - данные для очистки
+ * @returns {DiagramBuildData} - данные без кодов
+ */
+const removeIDFromTableData = (pivotData: DiagramBuildData): DiagramBuildData => {
+	const {columns} = pivotData;
+	const newColumns = columns.filter(column => column.accessor !== 'ID');
+
+	return {...pivotData, columns: newColumns};
+};
+
+/**
  * Преобразует значение PERCENT_CNT в понятный для пользователя вид
  * @param {string} value - значение PERCENT_CNT в формате `CNT PERCENT`
  * @returns {string}
@@ -221,6 +233,7 @@ export {
 	hasIndicatorsWithAggregation,
 	isCardObjectColumn,
 	isIndicatorColumn,
+	removeIDFromTableData,
 	parsePercentCountColumnValueForTable,
 	removeCodesFromTableData,
 	setWidgetError,
