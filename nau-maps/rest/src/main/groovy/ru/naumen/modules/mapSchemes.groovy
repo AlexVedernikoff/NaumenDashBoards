@@ -341,7 +341,7 @@ String getAttributesChildMetaclass()
     HierarchyCommunicationSettings hierarchyCommunicationSettings =
         settings?.abstractSchemesCharacteristics.first() ?:
             [] as Collection<HierarchyCommunicationSettings>
-    def listAttributes = []
+    Collection listAttributes = []
     hierarchyCommunicationSettings.each {
         it.strategies.each { code ->
             if (code.metaclassObjects && code.pathCoordinatLongitud)
