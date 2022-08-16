@@ -92,6 +92,12 @@ export type TableBuildData = {
 	total: number
 };
 
+export type PivotBuildData = {
+	columns: Array<Column>,
+	data: Array<Row>,
+	total: number
+};
+
 export type FetchBuildDataAction = Widget => ThunkAction;
 
 export type FetchTableBuildDataAction = (widget: TableWidget, page?: number, update?: boolean) => ThunkAction;

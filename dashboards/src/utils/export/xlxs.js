@@ -1,5 +1,5 @@
 // @flow
-import type {BaseColumn, Row, TableBuildData} from 'store/widgets/buildData/types';
+import type {BaseColumn, PivotBuildData, Row, TableBuildData} from 'store/widgets/buildData/types';
 import {save} from './helpers';
 import type {TableData} from './types';
 import {TABLE_NAME_LENGTH_LIMIT} from './constants';
@@ -75,7 +75,7 @@ const stringToArrayBuffer = (s: string) => {
 	return buf;
 };
 
-const exportSheet = async (name: string, data: TableBuildData) => {
+const exportSheet = async (name: string, data: PivotBuildData | TableBuildData) => {
 	const columnsArray: Array<BaseColumn> = [];
 
 	data.columns.forEach(column => {

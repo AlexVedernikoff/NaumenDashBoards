@@ -117,7 +117,10 @@ const exportParamsSelector = memoize((widget: AnyWidget): ?DropDownParams => {
 		const {PDF, PNG, XLSX} = FILE_VARIANTS;
 		const availableOptions = [PDF, PNG];
 
-		if (diagramWidget.type === DIAGRAM_WIDGET_TYPES.TABLE) {
+		if (
+			diagramWidget.type === DIAGRAM_WIDGET_TYPES.TABLE
+			|| diagramWidget.type === DIAGRAM_WIDGET_TYPES.PIVOT_TABLE
+		) {
 			availableOptions.push(XLSX);
 		}
 

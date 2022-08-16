@@ -13,7 +13,6 @@ import {FILE_VARIANTS} from 'utils/export';
 import {functions, props} from './selectors';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
-import type {TableWidget} from 'store/widgets/data/types';
 import WidgetKebab from 'components/organisms/Widget/components/WidgetKebab/WidgetKebab';
 
 export class WidgetKebabContainer extends PureComponent<Props, State> {
@@ -63,15 +62,15 @@ export class WidgetKebabContainer extends PureComponent<Props, State> {
 	};
 
 	handleExport = (element: HTMLDivElement, format: $Keys<typeof FILE_VARIANTS>) => {
-		const {exportTableToXLSX} = this.props;
+		const {exportPivotToXLSX, exportTableToXLSX} = this.props;
 		const {diagramWidget} = this.state;
 
 		if (diagramWidget) {
 			if (format === FILE_VARIANTS.XLSX) {
 				if (diagramWidget.type === DIAGRAM_WIDGET_TYPES.TABLE) {
-					const tableWidget: TableWidget = diagramWidget;
-
-					exportTableToXLSX(tableWidget);
+					exportTableToXLSX(diagramWidget);
+				} else if (diagramWidget.type === DIAGRAM_WIDGET_TYPES.PIVOT_TABLE) {
+					exportPivotToXLSX(diagramWidget);
 				}
 			} else {
 				exportScreenShot(diagramWidget, format);
