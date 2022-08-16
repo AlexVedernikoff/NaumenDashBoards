@@ -126,6 +126,7 @@ export class SourceLinkEditor extends Component<Props, State> {
 					<Select
 						fetchOptions={fetchOptions}
 						getOptionLabel={option => option.title}
+						getOptionValue={option => option.code}
 						loading={loading}
 						onSelect={this.handleSelectAttribute}
 						options={options}
