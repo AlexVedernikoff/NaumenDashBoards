@@ -19,6 +19,7 @@ import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.server.script.api.DbApi$Query
 import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
+import ru.naumen.core.server.script.api.ISelectClauseApi
 
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
@@ -132,21 +133,7 @@ class QueryWrapper implements CriteriaWrapper
         Closure aggregation = getAggregation(aggregationType)
         String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode.rcurry(true))
 
-        IApiCriteriaColumn column = sc.property(criteriaForColumn, attributeCodes)
-        if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
-            aggregationType == Aggregation.AVG)
-        {
-            column = sc.property(criteriaForColumn, attributeCodes).with(sc.&cast.rcurry('float'))
-        }
-
-        if (fromSevenDays && (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
-        {
-            String linkTemplateUuid = attribute.attrChains().last().title ?: ''
-            column = castDynamicToType(attribute, column)
-            criteria.add(api.filters.attrValueEq('totalValue.linkTemplate', linkTemplateUuid))
-        }
-
-        column = column.with(aggregation)
+        IApiCriteriaColumn column = getProcessesColumn(attributeCodes, criteria, criteriaForColumn, aggregation, parameter, attribute, fromSevenDays)
 
         if (parameter.descriptor)
         {
@@ -154,6 +141,8 @@ class QueryWrapper implements CriteriaWrapper
                 criteria.subquery().addSource(criteria.getCurrentMetaClass().fqn as String)
             Map<String, Object> sourceMetaClassSubCriteriaMap =
                 getSourceMetaClassCriteriaMap(requestData, DiagramType.PIVOT_TABLE, subCriteria)
+
+            column = getProcessesColumn(attributeCodes, criteria, subCriteria, aggregation, parameter, attribute, fromSevenDays)
 
             subCriteria.addColumn(column)
 
@@ -224,6 +213,40 @@ class QueryWrapper implements CriteriaWrapper
             this.criteria = criteria
         }
         return this
+    }
+
+    /**
+     * Метод обработки колонки
+     * @param attributeCodes - коды атрибутов
+     * @param criteria - основная критерия
+     * @param criteriaForColumn - критерия для колонки
+     * @param aggregation - функция агрегации
+     * @return обработанная колонки
+     */
+    private IApiCriteriaColumn getProcessesColumn(String[] attributeCodes,
+                                                  IApiCriteria criteria,
+                                                  IApiCriteria criteriaForColumn,
+                                                  Closure aggregation,
+                                                  AggregationParameter parameter,
+                                                  BaseAttribute attribute,
+                                                  boolean fromSevenDays)
+    {
+        ISelectClauseApi sc = api.selectClause
+        IApiCriteriaColumn column = sc.property(criteriaForColumn, attributeCodes)
+        if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
+            aggregationType == Aggregation.AVG)
+        {
+            column = sc.property(criteriaForColumn, attributeCodes).with(sc.&cast.rcurry('float'))
+        }
+
+        if (fromSevenDays && (attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)))
+        {
+            String linkTemplateUuid = attribute.attrChains().last().title ?: ''
+            column = castDynamicToType(attribute, column)
+            criteria.add(api.filters.attrValueEq('totalValue.linkTemplate', linkTemplateUuid))
+        }
+
+        return column.with(aggregation)
     }
 
     //Костыльный метод. Потому что логика выходит за пределы стандартного алгоритма
