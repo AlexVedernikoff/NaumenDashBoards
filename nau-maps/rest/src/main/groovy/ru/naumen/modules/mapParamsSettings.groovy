@@ -14,8 +14,9 @@ package ru.naumen.modules.inventory
  * @param user - UUID пользователя
  * @return список данных из БД
  */
-Object getObjects(def object, def user) {
-	logger.info("ksimagina 1 ${object?.UUID} || ${user?.UUID}")
+Object getObjects(Object object, Object user)
+{
+	logger.info("ksimagina 1 ${ object?.UUID } || ${ user?.UUID }")
 
 	Collection<MapObjectBuilder> trails = api.utils.find('link$vols', [:]).findResults {
 		modules.mapRestSettings.createTrail(it)?.with(this.&mapTrail)
@@ -39,8 +40,9 @@ Object getObjects(def object, def user) {
  * @param user - UUID пользователя
  * @return список данных из БД
  */
-Object test(def object, def user) {
-	logger.info("ksimagina 2 ${object?.UUID} || ${user?.UUID}")
+Object test(Object object, Object user)
+{
+	logger.info("ksimagina 2 ${ object?.UUID } || ${ user?.UUID }")
 	Collection<MapObjectBuilder> additionalEquipment = api.utils.find('cmdb', [:]).findResults {
 		modules.mapRestSettings.createEquipmentPoint(it)?.with(this.&mapPoint)
 	}
@@ -153,8 +155,7 @@ Collection collectingData(Collection<String> listStrategy,
 
 class PointsOnMap
 {
-
-	Object getSettingsWizardSettings = new SettingsProvider().getSettings()?.defVisualization
+	Object setSettings = new SettingsProvider().getSettings()?.defVisualization
 	/**
 	 * Тип объекта
 	 */
@@ -194,16 +195,16 @@ class PointsOnMap
 		this.geopositions = basePointBuilder?.geopositions
 		this.icon = basePointBuilder?.icon
 		this.data = basePointBuilder
-		this.color = getSettingsWizardSettings?.colorLineMap
-		this.opacity = getSettingsWizardSettings?.opacity
-		this.weight = getSettingsWizardSettings?.width
-		this.lineStyle = getSettingsWizardSettings?.lineStyle
+		this.color = setSettings?.colorLineMap
+		this.opacity = setSettings?.opacity
+		this.weight = setSettings?.width
+		this.lineStyle = setSettings?.lineStyle
 	}
 }
 
 class LinkedOnMap
 {
-	Object getSettingsWizardSettings = new SettingsProvider().getSettings()?.defVisualization
+	Object setSettings = new SettingsProvider().getSettings()?.defVisualization
 	/**
 	 * Тип объекта
 	 */
@@ -252,10 +253,10 @@ class LinkedOnMap
 			mapPoint(it)
 		}
 		this.data = trailBuilder
-		this.color = getSettingsWizardSettings?.colorLineMap
-		this.opacity = getSettingsWizardSettings?.opacity
-		this.weight = getSettingsWizardSettings?.width
-		this.lineStyle = getSettingsWizardSettings?.lineStyle
+		this.color = setSettings?.colorLineMap
+		this.opacity = setSettings?.opacity
+		this.weight = setSettings?.width
+		this.lineStyle = setSettings?.lineStyle
 	}
 
 	private LinkedHashMap mapSection(SectionBuilder sectionBuilder)
@@ -263,10 +264,10 @@ class LinkedOnMap
 		return sectionBuilder ? [type        : sectionBuilder.type,
 								 geopositions: sectionBuilder.geopositions,
 								 data        : sectionBuilder,
-								 color       : getSettingsWizardSettings?.colorLineMap,
-								 opacity     : getSettingsWizardSettings?.opacity,
-								 weight      : getSettingsWizardSettings?.width,
-								 lineStyle   : getSettingsWizardSettings?.lineStyle] : [:]
+								 color       : setSettings?.colorLineMap,
+								 opacity     : setSettings?.opacity,
+								 weight      : setSettings?.width,
+								 lineStyle   : setSettings?.lineStyle] : [:]
 	}
 
 /**
@@ -280,16 +281,16 @@ class LinkedOnMap
 								   geopositions: basePointBuilder?.geopositions,
 								   icon        : basePointBuilder?.icon,
 								   data        : basePointBuilder,
-								   color       : getSettingsWizardSettings?.colorLineMap,
-								   opacity     : getSettingsWizardSettings?.opacity,
-								   weight      : getSettingsWizardSettings?.width,
-								   lineStyle   : getSettingsWizardSettings?.lineStyle] : [:]
+								   color       : setSettings?.colorLineMap,
+								   opacity     : setSettings?.opacity,
+								   weight      : setSettings?.width,
+								   lineStyle   : setSettings?.lineStyle] : [:]
 	}
 }
 
 class SectionOnMap
 {
-	Object getSettingsWizardSettings = new SettingsProvider().getSettings()?.defVisualization
+	Object setSettings = new SettingsProvider().getSettings()?.defVisualization
 	/**
 	 * Тип объекта
 	 */
@@ -324,9 +325,9 @@ class SectionOnMap
 		this.type = sectionBuilder.type
 		this.geopositions = sectionBuilder.geopositions
 		this.data = sectionBuilder
-		this.color = getSettingsWizardSettings?.colorLineMap
-		this.opacity = getSettingsWizardSettings?.opacity
-		this.weight = getSettingsWizardSettings?.width
-		this.lineStyle = getSettingsWizardSettings?.lineStyle
+		this.color = setSettings?.colorLineMap
+		this.opacity = setSettings?.opacity
+		this.weight = setSettings?.width
+		this.lineStyle = setSettings?.lineStyle
 	}
 }

@@ -439,7 +439,7 @@ void postSaveActions()
 }
 /**
  * Метод, определяющий код стратегии
- * @param contentSettings - банные из мастера настроек
+ * @param contentSettings - данные из мастера настроек
  * @result опредяет значение для вкладки код стратегии
  */
 void installStrategyCode(AbstractPointCharacteristics contentSettings)

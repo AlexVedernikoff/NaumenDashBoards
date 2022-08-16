@@ -26,6 +26,7 @@ import ru.naumen.core.server.script.spi.ScriptDtObject
 import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.metainfo.shared.Constants.UI
+import ru.naumen.core.server.script.spi.LazyScriptDtObject
 
 
 //БЛОК REST АПИ--------------------------------------------------------
@@ -71,8 +72,8 @@ private String getMapInfo(ScriptDtObject object, String contentUuid)
  */
 private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> errors,
                                                            String errorText,
-																													 Collection defaultValue,
-																													 String contentUuid)
+                                                           Collection defaultValue,
+                                                           String contentUuid)
 {
     try
     {
@@ -91,7 +92,7 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
 class ElementsMap
 {
     private final IWebApi web
-    private final logger
+    private final Object logger
 
     ElementsMap(IWebApi web, def logger)
     {
@@ -104,7 +105,7 @@ class ElementsMap
      * @param object - объект трассы из БД
      * @return билдер-объект трассы
      */
-    public TrailBuilder createTrailBuilder(def object)
+    public TrailBuilder createTrailBuilder(LazyScriptDtObject object)
     {
         return new TrailBuilder(object)
     }
@@ -114,7 +115,7 @@ class ElementsMap
      * @param dbTrail - объект трассы из БД
      * @return объект с данными о трассе другого формата
      */
-    private TrailBuilder createTrail(def dbTrail)
+    private TrailBuilder createTrail(LazyScriptDtObject dbTrail)
     {
         return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.nestSegmVols
             ? createTrailBuilder(dbTrail)
@@ -140,7 +141,7 @@ class ElementsMap
      * @param object - объект участка трассы из БД
      * @return билдер-объект участка трассы
      */
-    public SectionBuilder createSectionBuilder(def object)
+    public SectionBuilder createSectionBuilder(ScriptDtObject object)
     {
         return new SectionBuilder(object)
     }
@@ -151,7 +152,7 @@ class ElementsMap
      * @param wols - трасса, которой он принадлежит
      * @return сформированный участок трассы
      */
-    public SectionBuilder createPart(def dbPart, def wols)
+    public SectionBuilder createPart(ScriptDtObject dbPart, TrailBuilder wols)
     {
         if (dbPart && dbPart.title && dbPart.siteA && dbPart.siteB)
         {
@@ -176,7 +177,7 @@ class ElementsMap
      * @param section - отрезов из БД
      * @return сформированный объект отрезка
      */
-    public SectionBuilder createSection(def section)
+    public SectionBuilder createSection(ScriptDtObject section)
     {
         if (section && section.title && section.siteA && section.siteB)
         {
@@ -202,7 +203,7 @@ class ElementsMap
      * @param object - объект оборудования из БД
      * @return билдер-объект оборудования
      */
-    public BasePointBuilder createPointObjectBuilder(MapObjectType type, def object)
+    public BasePointBuilder createPointObjectBuilder(MapObjectType type, ScriptDtObject object)
     {
         return new BasePointBuilder(type, object)
     }
@@ -212,7 +213,7 @@ class ElementsMap
      * @param equipment - оборудование из БД
      * @return сформированный объект оборудования
      */
-    BasePointBuilder createEquipmentPoint(def equipment)
+    BasePointBuilder createEquipmentPoint(ScriptDtObject equipment)
     {
         if (equipment && equipment.title && equipment.ciModel && equipment.location)
         {
@@ -249,7 +250,7 @@ class ElementsMap
      * @param pointObject - точенчый объект
      * @return сформированный объект точки
      */
-    BasePointBuilder createPoint(def pointObject)
+    BasePointBuilder createPoint(ScriptDtObject pointObject)
     {
         if (pointObject && pointObject.title && pointObject.cmdb)
         {
@@ -442,10 +443,15 @@ class OpenLinkAction extends Action
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class ActionBuilder
 {
-	OpenLinkAction openLink(String name, String link, boolean inPlace = false)
-	{
-		return new OpenLinkAction(name: name, link: link,inPlace: inPlace, type:ActionType.OPEN_LINK)
-	}
+    OpenLinkAction openLink(String name, String link, boolean inPlace = false)
+    {
+        return new OpenLinkAction(
+            name: name,
+            link: link,
+            inPlace: inPlace,
+            type: ActionType.OPEN_LINK
+        )
+    }
 }
 
 /**
@@ -498,6 +504,8 @@ class TrailBuilder extends MapObjectBuilder
     @JsonIgnore
     Collection<BasePointBuilder> equipments
     @JsonInclude(Include.NON_NULL)
+    ElementsMap elementsMap = new ElementsMap(api.web, logger)
+    @JsonInclude(Include.NON_NULL)
     String color
 
     protected TrailBuilder()
@@ -534,7 +542,7 @@ class TrailBuilder extends MapObjectBuilder
         this.parts = dbParts?.findResults {
             if(it && it.title && it.siteA && it.siteB)
             {
-                return modules.mapRestSettings.createPart(it, this)
+                return elementsMap.createPart(it, this)
             }
         }
         return this
@@ -549,7 +557,7 @@ class TrailBuilder extends MapObjectBuilder
                 dbEquipmetnts = dbEquipmetnts + dbPart.siteA.cmdb + dbPart.siteB.cmdb
 
                 return dbEquipmetnts?.findResults { equipment ->
-                    return modules.mapRestSettings.createEquipmentPoint(equipment)
+                    return elementsMap.createEquipmentPoint(equipment)
                 } ?: []
             }
             return []
