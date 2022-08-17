@@ -83,6 +83,7 @@ export type State = {
 	fixedPositions: FixedPositions,
 	page: number,
 	scrollBarWidth: number,
+	showPadding: boolean,
 	sorting: TableSorting,
 	width: number
 };
