@@ -37,25 +37,37 @@ private String getSchemeData(String contentUuid = "schemesName")
     return new ObjectMapper().writeValueAsString(aggregations)
 }
 
-public HierarchyCommunication createPointObjectBuilder()
+public HierarchyCommunicationBuilder createPointObjectBuilder()
 {
-    return new HierarchyCommunication()
+    return new HierarchyCommunicationBuilder()
 }
 
 /**
  * Метод для получения данных о точках на схеме
  * @param scriptData - данные из скрипта
  * @param id - уникальный номер сущности
+ * @param from - точка к которой привязываеться текущий элемент
  * @return сформированный объект оборудования
  */
-HierarchyCommunication createHierarchyCommunicationPoint(def scriptData, Integer id)
+HierarchyCommunicationBuilder createHierarchyCommunicationPoint(def scriptData,
+                                                                Integer id,
+                                                                Long from = id)
 {
-    HierarchyCommunication hierarchyCommunicationBuilder = createPointObjectBuilder()
-    hierarchyCommunicationBuilder.setDesc(scriptData.title)
-    hierarchyCommunicationBuilder.setFrom(id, 'point')
+    Collection settings = new SettingsProviderSchemes()
+        .getSettings()
+        ?.abstractSchemesCharacteristics?.first()?.strategies?.characteristicsOutputDiagram?.first()
+
+    String descData =
+        settings?.mainText?.first() ? scriptData."${ settings?.mainText?.first() }" : ''
+    String titleData =
+        settings?.additionalText?.first() ? scriptData."${ settings?.additionalText?.first() }" : ''
+
+    HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
+    hierarchyCommunicationBuilder.setDesc(descData)
+    id == 1 ? hierarchyCommunicationBuilder.setFrom(1) : hierarchyCommunicationBuilder.setFrom(from)
     hierarchyCommunicationBuilder.setId(id)
-    hierarchyCommunicationBuilder.setTitle(scriptData.title.split(':').first())
-    hierarchyCommunicationBuilder.setType('point')
+    hierarchyCommunicationBuilder.setTitle(titleData)
+    hierarchyCommunicationBuilder.setType("point")
     return hierarchyCommunicationBuilder
 }
 
@@ -63,18 +75,19 @@ HierarchyCommunication createHierarchyCommunicationPoint(def scriptData, Integer
  * Метод для получения данных о связях между точками
  * @param equipment - оборудование из БД
  * @param id -Уникальный номер сущности
+ * @param from - точка к которой привязываеться текущий элемент
  * @return данные по линиям между точками
  */
-HierarchyCommunication createHierarchyCommunicationLine(def scriptData,
-                                                        Integer id,
-                                                        Long idPoint)
+HierarchyCommunicationBuilder createHierarchyCommunicationLine(def scriptData,
+                                                               Integer id,
+                                                               Long from = id)
 {
-    HierarchyCommunication hierarchyCommunicationBuilder = createPointObjectBuilder()
+    HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
     hierarchyCommunicationBuilder.setDesc(scriptData.title)
-    hierarchyCommunicationBuilder.setFrom(idPoint, 'line')
-    hierarchyCommunicationBuilder.setTo(idPoint + 1)
+    hierarchyCommunicationBuilder.setFrom(from)
+    hierarchyCommunicationBuilder.setTo(id + 1)
     hierarchyCommunicationBuilder.setId(id)
-    hierarchyCommunicationBuilder.setTitle(scriptData.title.split(':').first())
+    hierarchyCommunicationBuilder.setTitle(scriptData.title)
     hierarchyCommunicationBuilder.setType("line")
     return hierarchyCommunicationBuilder
 }
@@ -115,7 +128,7 @@ class ActionScheme
     }
 }
 
-class HierarchyCommunication
+class HierarchyCommunicationBuilder
 {
     /**
      * Описание элемента
@@ -143,7 +156,7 @@ class HierarchyCommunication
     Long to
 
     /**
-     * Тип сущности (точка или линия)
+     * тип сущности(точка или линия)
      */
     String type
 
@@ -152,51 +165,46 @@ class HierarchyCommunication
      */
     List<ActionScheme> actions = []
 
-    public HierarchyCommunication setDesc(String desc)
+    public HierarchyCommunicationBuilder setDesc(String desc)
     {
         this.desc = desc
 
         return this
     }
 
-    public HierarchyCommunication setTitle(String title)
+    public HierarchyCommunicationBuilder setTitle(String title)
     {
         this.title = title
         return this
     }
 
-    public HierarchyCommunication setType(String type)
+    public HierarchyCommunicationBuilder setType(String type)
     {
         this.type = type
         return this
     }
 
-    public HierarchyCommunication setFrom(Long id, String type)
+    public HierarchyCommunicationBuilder setFrom(Long from)
     {
-        if (type == 'line')
-        {
-            this.from = id
-            return this
-        }
-        this.from = id == 1 ? null : id - 1
+        this.from = from
         return this
     }
 
-    public HierarchyCommunication setId(id)
+    public HierarchyCommunicationBuilder setId(id)
     {
         this.id = id
         return this
     }
 
-    public HierarchyCommunication setTo(to)
+    public HierarchyCommunicationBuilder setTo(to)
     {
         this.to = to
         return this
     }
 
-    public HierarchyCommunication addAction(String name,
-                                            String link,
-                                            boolean inPlace = false)
+    public HierarchyCommunicationBuilder addAction(String name,
+                                                   String link,
+                                                   boolean inPlace = false)
     {
         this.actions.add(
             new OpenLinkAction(
@@ -206,7 +214,7 @@ class HierarchyCommunication
                 type: ActionTypeScheme.OPEN_LINK
             )
         )
-
         return this
     }
+
 }
