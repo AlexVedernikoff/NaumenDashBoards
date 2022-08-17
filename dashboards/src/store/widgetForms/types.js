@@ -4,11 +4,11 @@ import type {CustomFilter, Group, MixedAttribute, Source, WidgetTooltip} from 's
 import type {DataSet as AxisChartDataSet, State as AxisChartFormState, Values as AxisChartValues} from './axisChartForm/types';
 import type {DataSet as CircleChartDataSet, State as CircleChartFormState, Values as CircleChartValues} from './circleChartForm/types';
 import type {DataSet as ComboChartDataSet, State as ComboChartFormState, Values as ComboChartValues} from './comboChartForm/types';
-import type {DataSet as SpeedometerDataSet, State as SpeedometerFormState, Values as SpeedometerValues} from './speedometerForm/types';
 import type {DataSet as SummaryDataSet, State as SummaryFormState, Values as SummaryValues} from './summaryForm/types';
 import type {DataSet as TableDataSet, State as TableFormState, Values as TableValues} from './tableForm/types';
 import type {DataSet as PivotDataSet, State as PivotFormState, Values as PivotValues} from './pivotForm/types';
 import {EVENTS} from 'store/widgetForms/constants';
+import type {State as SpeedometerFormState, Values as SpeedometerValues} from './speedometerForm/types';
 import type {State as TextFormState, Values as TextValues} from './textForm/types';
 
 export type SourceData = {
@@ -27,6 +27,7 @@ export type BreakdownItem = {
 export type Indicator = {
 	aggregation: string,
 	attribute: MixedAttribute | null,
+	descriptor?: string | null,
 	tooltip?: WidgetTooltip
 };
 

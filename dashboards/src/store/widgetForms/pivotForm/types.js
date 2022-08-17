@@ -21,6 +21,7 @@ import type {Values as SpeedometerValues} from 'src/store/widgetForms/speedomete
 export type PivotIndicator = {
 	...Indicator,
 	breakdown?: BreakdownItem,
+	descriptor: ?string,
 	key: string
 };
 

@@ -2,7 +2,8 @@
 import type {Components as SelectComponents, Props as SelectProps} from 'components/molecules/Select/types';
 
 export type Components = {|
-	Field: React$ComponentType<{}>
+	Field: React$ComponentType<{}>,
+	FilterIcon: React$ComponentType<{}>,
 |} & $Shape<SelectComponents>;
 
 export type OwnProps = {
