@@ -50,15 +50,15 @@ Object getDataDisplayScheme(String nameContent)
 /**
  * Метод получения колекции всех стриптов
  * @param data данные из мастера настроек
- * @return колекция скриптов
+ * @return коллекция скриптов
  */
 Collection<String> getListScript(AbstractSchemesCharacteristics data)
 {
     Collection<String> dataScriptText = []
     data?.strategies?.each
         {
-            String stouk = it?.scriptText
-            dataScriptText.add(stouk)
+            String currentScript = it?.scriptText
+            dataScriptText.add(currentScript)
         }
     return dataScriptText
 }
@@ -78,99 +78,57 @@ Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataLine,
     Collection settings = new SettingsProviderSchemes()
         .getSettings()
         ?.abstractSchemesCharacteristics?.first()?.strategies?.characteristicsOutputDiagram?.first()
-    Integer id = 0;
-
-    for (int i = 0; i < dataLine.size(); i++)
-    {
-        if (dataPointB[i] != null)
+    ElementsScheme elementsScheme = new ElementsScheme(logger)
+    Integer id = 0
+    dataLine.eachWithIndex { num, idx ->
+        if (dataPointA[idx] && dataPointB[idx])
         {
-            if (i == 0)
+            if (idx == 0)
             {
-                pointData +=
-                    modules.schemeRestSettings.createHierarchyCommunicationPoint(
-                        dataPointA[i],
-                        ++id
-                    )
-                           ?.with(this.&schemeHierarchy)
-                pointData += modules.schemeRestSettings.createHierarchyCommunicationLine(
-                    dataLine[i],
-                    ++id,
-                    id - 1
-                )?.with(this.&schemeHierarchy)
-                pointData += modules.schemeRestSettings.createHierarchyCommunicationPoint(
-                    dataPointB[i],
-                    ++id,
-                    id - 2
-                )?.with(this.&schemeHierarchy)
-                if (dataLine.size() > 1)
+                pointData += elementsScheme.createHierarchyCommunicationPoint(dataPointA[idx], ++id)
+            }
+            if (!(pointData?.any {
+                it.UUID == dataPointA[idx].UUID
+            }))
+            {
+                pointData += elementsScheme.createHierarchyCommunicationPoint(dataPointA[idx], ++id)
+                if (!(pointData?.any {
+                    it.UUID == dataPointB[idx].UUID
+                }))
                 {
-                    pointData += modules.schemeRestSettings.createHierarchyCommunicationLine(
-                        dataLine[i],
-                        ++id,
-                        id - 1
-                    )?.with(this.&schemeHierarchy)
+                    pointData +=
+                        elementsScheme.createHierarchyCommunicationLine(dataLine[idx], ++id, id - 1)
+                    pointData +=
+                        elementsScheme
+                            .createHierarchyCommunicationPoint(dataPointB[idx], ++id, id - 2)
                 }
             }
             else
             {
-                if (dataPointA[i].UUID == dataPointB[i - 1].UUID)
+                if (!(pointData?.any {
+                    it.UUID == dataPointB[idx].UUID
+                }))
                 {
-                    pointData += modules.schemeRestSettings.createHierarchyCommunicationPoint(
-                        dataPointB[i],
-                        ++id,
-                        id - 2
-                    )?.with(this.&schemeHierarchy)
-                    if ((i + 1) != dataLine.size())
-                    {
-                        if (dataPointB[i].UUID == dataPointA[i + 1].UUID)
-                        {
-                            pointData +=
-                                modules.schemeRestSettings.createHierarchyCommunicationLine(
-                                    dataLine[i],
-                                    ++id,
-                                    id - 1
-                                )?.with(this.&schemeHierarchy)
-                        }
-                        else
-                        {
-                            pointData.each {
-                                String descData = settings?.mainText?.first() ?
-                                    dataPointA[i + 1]."${ settings?.mainText?.first() }" : ''
-                                if ((it.desc == descData))
-                                {
-                                    pointData +=
-                                        modules.schemeRestSettings.createHierarchyCommunicationLine(
-                                            dataLine[i],
-                                            ++id,
-                                            it.id
-                                        )?.with(this.&schemeHierarchy)
-                                    pointData +=
-                                        modules
-                                            .schemeRestSettings.createHierarchyCommunicationPoint(
-                                            dataPointB[i + 1],
-                                            ++id,
-                                            it.id
-                                        )?.with(this.&schemeHierarchy)
-                                    if ((i + 2) != dataLine.size())
-                                    {
-                                        pointData +=
-                                            modules
-                                                .schemeRestSettings
-                                                .createHierarchyCommunicationLine(
-                                                    dataLine[i],
-                                                    ++id,
-                                                    id - 1
-                                                )?.with(this.&schemeHierarchy)
-                                    }
-                                }
-                            }
-                        }
+                    HierarchyCommunicationBuilder pointAInformation = pointData.find {
+                        it.UUID == dataPointA[idx].UUID
                     }
+                    pointData += elementsScheme.createHierarchyCommunicationLine(
+                        dataLine[idx],
+                        ++id,
+                        pointAInformation?.id
+                    )
+                    pointData += elementsScheme.createHierarchyCommunicationPoint(
+                        dataPointB[idx],
+                        ++id,
+                        pointAInformation?.id
+                    )
                 }
             }
         }
     }
-    return pointData
+    return pointData.collect {
+        return schemeHierarchy(it)
+    }
 }
 
 /**
@@ -180,10 +138,10 @@ Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataLine,
  */
 private def schemeHierarchy(HierarchyCommunicationBuilder hierarchyCommunicationBuilder)
 {
-    return hierarchyCommunicationBuilder ? [desc: hierarchyCommunicationBuilder.desc,
-                                            from: hierarchyCommunicationBuilder.from,
-                                            id: hierarchyCommunicationBuilder.id,
+    return hierarchyCommunicationBuilder ? [desc : hierarchyCommunicationBuilder.desc,
+                                            from : hierarchyCommunicationBuilder.from,
+                                            id   : hierarchyCommunicationBuilder.id,
                                             title: hierarchyCommunicationBuilder.title,
-                                            to: hierarchyCommunicationBuilder.to,
-                                            type: hierarchyCommunicationBuilder.type] : [:]
+                                            to   : hierarchyCommunicationBuilder.to,
+                                            type : hierarchyCommunicationBuilder.type] : [:]
 }
