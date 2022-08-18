@@ -57,6 +57,7 @@ export class Table extends PureComponent<Props, State> {
 		fixedPositions: {},
 		page: 1,
 		scrollBarWidth: 0,
+		showPadding: true,
 		sorting: this.props.sorting,
 		width: 0
 	};
@@ -281,13 +282,15 @@ export class Table extends PureComponent<Props, State> {
 
 	handlePrevClick = () => this.setState({page: this.state.page - 1}, this.fetch);
 
-	handleResize = (newWidth: number) => {
-		const {containerWidth, scrollBarWidth} = this.state;
-		const calcWidth = newWidth - scrollBarWidth;
+	handleResize = (newWidth: number, newHeight: number) => {
+		this.setState({showPadding: newHeight > 50}, () => {
+			const {containerWidth, scrollBarWidth} = this.state;
+			const calcWidth = newWidth - scrollBarWidth;
 
-		if (calcWidth !== containerWidth) {
-			this.setState({containerWidth: calcWidth}, this.recalculateColumnsWidth);
-		}
+			if (calcWidth !== containerWidth) {
+				this.setState({containerWidth: calcWidth}, this.recalculateColumnsWidth);
+			}
+		});
 	};
 
 	recalculateColumnsWidth = () => {
@@ -381,20 +384,23 @@ export class Table extends PureComponent<Props, State> {
 
 	renderPagination = () => {
 		const {data, pageSize, total} = this.props;
-		const {page, width} = this.state;
-		const pages = Math.max(Math.ceil(total / pageSize), 1);
-		const {current} = this.tableRef;
+		const {page, showPadding, width} = this.state;
 
-		if (data.length > 0 && width > 0 && current) {
-			return (
-				<Pagination
-					onNextClick={this.handleNextClick}
-					onPrevClick={this.handlePrevClick}
-					page={page}
-					total={pages}
-					width={current.clientWidth}
-				/>
-			);
+		if (showPadding) {
+			const pages = Math.max(Math.ceil(total / pageSize), 1);
+			const {current} = this.tableRef;
+
+			if (data.length > 0 && width > 0 && current) {
+				return (
+					<Pagination
+						onNextClick={this.handleNextClick}
+						onPrevClick={this.handlePrevClick}
+						page={page}
+						total={pages}
+						width={current.clientWidth}
+					/>
+				);
+			}
 		}
 
 		return null;
