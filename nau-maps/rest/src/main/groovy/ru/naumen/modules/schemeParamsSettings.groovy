@@ -9,6 +9,7 @@
 package ru.naumen.modules.inventory
 
 import ru.naumen.core.server.script.spi.ScriptDtOList
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 
 /**
  * Метод по получению данных из БД через Мастер настроек
@@ -23,23 +24,21 @@ Object getDataDisplayScheme(String nameContent)
     Collection<String> pointScriptText = getListScript(abstractCharacteristicsData.first())
     String linkAttribute =
         abstractCharacteristicsData.first()?.strategies?.pathCoordinatLongitud.first()
+    String pointA = abstractCharacteristicsData.first()?.strategies?.pointA.first()
+    String pointB = abstractCharacteristicsData.first()?.strategies?.pointB.first()
 
     Collection<MapObjectBuilder> pointData = []
 
-    String scriptAttributeData = "${ pointScriptText.first() }.${ linkAttribute }"
+    String scriptLineAttributeData = "${ pointScriptText.first() }.${ linkAttribute }"
+    String scriptPointAAttributeData = "${ pointScriptText.first() }.${ linkAttribute }.${ pointA }"
+    String scriptPointBAttributeData = "${ pointScriptText.first() }.${ linkAttribute }.${ pointB }"
     try
     {
-        ScriptDtOList dataAttribute = api.utils.executeScript(scriptAttributeData)
-        if (dataAttribute instanceof ArrayList)
-        {
-            pointData += dataAttribute.findResults {
-                collectingData(it)
-            }
-        }
-        else
-        {
-            pointData += collectingData(dataAttribute)
-        }
+        ScriptDtOList dataLine = api.utils.executeScript(scriptLineAttributeData)
+        Collection dataPointA = api.utils.executeScript(scriptPointAAttributeData)
+        Collection dataPointB = api.utils.executeScript(scriptPointBAttributeData)
+
+        pointData += collectingData(dataLine, dataPointA, dataPointB)
     }
     catch (Exception ex)
     {
@@ -66,25 +65,70 @@ Collection<String> getListScript(AbstractSchemesCharacteristics data)
 
 /**
  * Метод сохранения данных о линиях и точках для отображения на карте
- * @param dataAttribute - данные по атрибуту объекта
- * @return коллекция данных для отображения заданных на вкладке
+ * @param dataLine - данные по атрибуту объекта
+ * @param dataPointA - данные по связанному атрибуту по точке А
+ * @param dataPointB - данные по связанному атрибуту по точке B
+ * @return колекцию данных для отображения заданных на вкладе
  */
-Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataAttribute)
+Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataLine,
+                                                         Collection dataPointA,
+                                                         Collection dataPointB)
 {
-    Collection<HierarchyCommunicationBuilder> pointData = []
-    Collection<HierarchyCommunicationBuilder> lineData = []
+    Set<HierarchyCommunicationBuilder> pointData = []
+    Collection settings = new SettingsProviderSchemes()
+        .getSettings()
+        ?.abstractSchemesCharacteristics?.first()?.strategies?.characteristicsOutputDiagram?.first()
+    ElementsScheme elementsScheme = new ElementsScheme(logger)
     Integer id = 0
-    pointData += dataAttribute.findResults {
-        modules.schemeRestSettings.createHierarchyCommunicationPoint(it, ++id)
-               ?.with(this.&schemeHierarchy)
+    dataLine.eachWithIndex { num, idx ->
+        if (dataPointA[idx] && dataPointB[idx])
+        {
+            if (idx == 0)
+            {
+                pointData += elementsScheme.createHierarchyCommunicationPoint(dataPointA[idx], ++id)
+            }
+            if (!(pointData?.any {
+                it.UUID == dataPointA[idx].UUID
+            }))
+            {
+                pointData += elementsScheme.createHierarchyCommunicationPoint(dataPointA[idx], ++id)
+                if (!(pointData?.any {
+                    it.UUID == dataPointB[idx].UUID
+                }))
+                {
+                    pointData +=
+                        elementsScheme.createHierarchyCommunicationLine(dataLine[idx], ++id, id - 1)
+                    pointData +=
+                        elementsScheme
+                            .createHierarchyCommunicationPoint(dataPointB[idx], ++id, id - 2)
+                }
+            }
+            else
+            {
+                if (!(pointData?.any {
+                    it.UUID == dataPointB[idx].UUID
+                }))
+                {
+                    HierarchyCommunicationBuilder pointAInformation = pointData.find {
+                        it.UUID == dataPointA[idx].UUID
+                    }
+                    pointData += elementsScheme.createHierarchyCommunicationLine(
+                        dataLine[idx],
+                        ++id,
+                        pointAInformation?.id
+                    )
+                    pointData += elementsScheme.createHierarchyCommunicationPoint(
+                        dataPointB[idx],
+                        ++id,
+                        pointAInformation?.id
+                    )
+                }
+            }
+        }
     }
-    for (int i = 1; i < pointData.size(); i++)
-    {
-        lineData +=
-            modules.schemeRestSettings.createHierarchyCommunicationLine(pointData[i], ++id, i)
-                   ?.with(this.&schemeHierarchy)
+    return pointData.collect {
+        return schemeHierarchy(it)
     }
-    return pointData + lineData
 }
 
 /**
@@ -92,7 +136,7 @@ Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataAttri
  * @param trailBuilder - объект трассы собственного формата
  * @return "обрамленный" объект трассы
  */
-private def schemeHierarchy(def hierarchyCommunicationBuilder)
+private LinkedHashMap<String, Object> schemeHierarchy(HierarchyCommunicationBuilder hierarchyCommunicationBuilder)
 {
     return hierarchyCommunicationBuilder ? [desc : hierarchyCommunicationBuilder.desc,
                                             from : hierarchyCommunicationBuilder.from,
@@ -101,6 +145,3 @@ private def schemeHierarchy(def hierarchyCommunicationBuilder)
                                             to   : hierarchyCommunicationBuilder.to,
                                             type : hierarchyCommunicationBuilder.type] : [:]
 }
-
-
-
