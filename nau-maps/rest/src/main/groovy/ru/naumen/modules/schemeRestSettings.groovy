@@ -14,6 +14,7 @@ package ru.naumen.modules.inventory
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Canonical
 import com.fasterxml.jackson.annotation.JsonAutoDetect
+import ru.naumen.core.server.script.spi.ScriptDtObject
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 
 /**
@@ -23,31 +24,31 @@ import static com.amazonaws.util.json.Jackson.toJsonString as toJson
  */
 private String getSchemeData(String contentUuid = "schemesName")
 {
-    Collection <LinkedHashMap> defaultValue = []
+    Collection<LinkedHashMap> defaultValue = []
     LinkedHashMap aggregations = []
     try
     {
-        Collection <LinkedHashMap>  getData = modules.schemeParamsSettings.getDataDisplayScheme(contentUuid) ?: defaultValue
-        aggregations = [entities:getData]
+        Collection<LinkedHashMap> getData =
+            modules.schemeParamsSettings.getDataDisplayScheme(contentUuid) ?: defaultValue
+        aggregations = [entities: getData]
 
     }
     catch (Exception ex)
     {
-        logger.error("#schemeRestSettings> ${ex.message}", ex)
+        logger.error("#schemeRestSettings> ${ ex.message }", ex)
     }
     return new ObjectMapper().writeValueAsString(aggregations)
 }
 
-
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-class ElementsScheme {
+class ElementsScheme
+{
     private final Object logger
 
     ElementsScheme(Object logger)
     {
         this.logger = logger
     }
-
 
     public HierarchyCommunicationBuilder createPointObjectBuilder()
     {
@@ -57,21 +58,37 @@ class ElementsScheme {
      * Метод для получения данных о точках на схеме
      * @param scriptData - данные из скрипта
      * @param id - уникальный номер сущности
+     * @param from - точка, к которой привязывается текущий элемент
      * @return сформированный объект оборудования
      */
-    HierarchyCommunicationBuilder createHierarchyCommunicationPoint(def scriptData, Integer id, Long from = id)
+    HierarchyCommunicationBuilder createHierarchyCommunicationPoint(ScriptDtObject scriptData,
+                                                                    Integer id,
+                                                                    Long from = id)
     {
-        Collection settings = new SettingsProviderSchemes().getSettings()?.abstractSchemesCharacteristics?.first()?.strategies?.characteristicsOutputDiagram?.first()
 
-        String descData = settings?.mainText?.first() ? scriptData."${settings?.mainText?.first()}": ''
-        String titleData = settings?.additionalText?.first() ? scriptData."${settings?.additionalText?.first()}": ''
+        Collection settings = new SettingsProviderSchemes()
+            .getSettings()
+            ?.abstractSchemesCharacteristics
+            ?.first()?.strategies?.characteristicsOutputDiagram?.first()
+
+        String mainText = settings?.mainText?.first()
+        String additionalText = settings?.additionalText?.first()
+        String descData = mainText ? scriptData."${ mainText }" : ''
+        String titleData = additionalText ? scriptData."${ additionalText }" : ''
 
         HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
         hierarchyCommunicationBuilder.setDesc(descData)
-        id == 1 ? hierarchyCommunicationBuilder.setFrom(1) : hierarchyCommunicationBuilder.setFrom(from)
+        if (id == 1)
+        {
+            hierarchyCommunicationBuilder.setFrom(1)
+        }
+        else
+        {
+            hierarchyCommunicationBuilder.setFrom(from)
+        }
         hierarchyCommunicationBuilder.setId(id)
         hierarchyCommunicationBuilder.setTitle(titleData)
-        hierarchyCommunicationBuilder.setType("point")
+        hierarchyCommunicationBuilder.setType('point')
         hierarchyCommunicationBuilder.setUUID(scriptData.UUID)
         return hierarchyCommunicationBuilder
     }
@@ -80,17 +97,20 @@ class ElementsScheme {
      * Метод для получения данных о связях между точками
      * @param equipment - оборудование из БД
      * @param id -Уникальный номер сущности
+     * @param from - точка, к которой привязывается текущий элемент
      * @return данные по линиям между точками
      */
-    HierarchyCommunicationBuilder createHierarchyCommunicationLine(def scriptData, Integer id, Long from = id)
+    HierarchyCommunicationBuilder createHierarchyCommunicationLine(ScriptDtObject scriptData,
+                                                                   Integer id,
+                                                                   Long from = id)
     {
         HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
         hierarchyCommunicationBuilder.setDesc(scriptData.title)
         hierarchyCommunicationBuilder.setFrom(from)
-        hierarchyCommunicationBuilder.setTo(id+1)
+        hierarchyCommunicationBuilder.setTo(id + 1)
         hierarchyCommunicationBuilder.setId(id)
         hierarchyCommunicationBuilder.setTitle(scriptData.title)
-        hierarchyCommunicationBuilder.setType("line")
+        hierarchyCommunicationBuilder.setType('line')
         return hierarchyCommunicationBuilder
     }
 }
@@ -130,7 +150,6 @@ class ActionScheme
         return name
     }
 }
-
 
 class HierarchyCommunicationBuilder
 {
@@ -180,33 +199,40 @@ class HierarchyCommunicationBuilder
 
         return this
     }
+
     public HierarchyCommunicationBuilder setTitle(String title)
     {
         this.title = title
         return this
     }
+
     public HierarchyCommunicationBuilder setType(String type)
     {
         this.type = type
         return this
     }
+
     public HierarchyCommunicationBuilder setFrom(Long from)
     {
         this.from = from
         return this
     }
+
     public HierarchyCommunicationBuilder setId(id)
     {
         this.id = id
         return this
     }
+
     public HierarchyCommunicationBuilder setTo(to)
     {
         this.to = to
         return this
     }
 
-    public HierarchyCommunicationBuilder addAction(String name, String link, boolean inPlace = false)
+    public HierarchyCommunicationBuilder addAction(String name,
+                                                   String link,
+                                                   boolean inPlace = false)
     {
         this.actions.add(
             new OpenLinkAction(

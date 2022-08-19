@@ -9,7 +9,7 @@
 package ru.naumen.modules.inventory
 
 import ru.naumen.core.server.script.spi.ScriptDtOList
-import static groovy.json.JsonOutput.toJson
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 
 /**
  * Метод по получению данных из БД через Мастер настроек
@@ -136,7 +136,7 @@ Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataLine,
  * @param trailBuilder - объект трассы собственного формата
  * @return "обрамленный" объект трассы
  */
-private def schemeHierarchy(HierarchyCommunicationBuilder hierarchyCommunicationBuilder)
+private LinkedHashMap<String, Object> schemeHierarchy(HierarchyCommunicationBuilder hierarchyCommunicationBuilder)
 {
     return hierarchyCommunicationBuilder ? [desc : hierarchyCommunicationBuilder.desc,
                                             from : hierarchyCommunicationBuilder.from,
