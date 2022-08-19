@@ -10,6 +10,7 @@
 package ru.naumen.modules.inventory
 
 import ru.naumen.core.shared.dto.ISDtObject
+import ru.naumen.core.server.script.spi.ScriptDtOList
 /**
  * Метод по получению данных из БД о трассах и точках(их участках и оборудовании на учасках)
  * @param object - UUID объекта
@@ -66,7 +67,6 @@ Object getDataDisplayMap(String nameContent)
 
 	Collection<AbstractPointCharacteristics> abstractCharacteristicsData =
 		settings?.abstractPointCharacteristics
-
 	Collection<String> pointScriptText = getListScript(abstractCharacteristicsData.first())
 	Collection<String> linesScriptText = getListScript(abstractCharacteristicsData.last())
 
@@ -107,47 +107,45 @@ Collection<String> getListScript(AbstractPointCharacteristics data)
  * @return коллекцию данных для отображения данных на вкладке
  */
 Collection collectingData(Collection<String> listStrategy,
-				   String nameContent,
-				   Collection<String> scriptText,
-				   Boolean isDataAboutPointsOrLines)
+						  String nameContent,
+						  Collection<String> scriptText,
+						  Boolean isDataAboutPointsOrLines)
 {
 	ElementsMap elementsMap = new ElementsMap(api.web, logger)
+	Collection<MapObjectBuilder> pointData = []
 	Collection dataToDisplay = []
 	listStrategy.each { strategy ->
-		Collection<IAppContentInfo> contentInfo = api.apps.listContents(strategy).contentUuid
-		contentInfo.each { contentMasters ->
-			if (contentMasters == nameContent)
-			{
-				scriptText.each { script ->
-					String executeScriptText = script
-					try
+		if (strategy == nameContent.toLowerCase())
+		{
+			scriptText.each { script ->
+				String executeScriptText = script
+				try
+				{
+					ScriptDtOList executeScript = api.utils.executeScript(executeScriptText)
+					if (isDataAboutPointsOrLines)
 					{
-						Object executeScript = api.utils.executeScript(executeScriptText)
-						if (isDataAboutPointsOrLines)
-						{
-							pointData += executeScript.findResults {
-								elementsMap.createEquipmentPoint(it) {
-									dataToDisplay += new PointsOnMap(
-										elementsMap.createEquipmentPoint(it)
-									)
-								}
-							}
-
-						}
-						else
-						{
-							pointData += executeScript.findResults {
-								if (elementsMap.createTrail(it))
-								{
-									dataToDisplay += new LinkedOnMap(elementsMap.createTrail(it))
-								}
+						pointData += executeScript.findResults {
+							if (elementsMap.createEquipmentPoint(it))
+							{
+								dataToDisplay += new PointsOnMap(
+									elementsMap.createEquipmentPoint(it)
+								)
 							}
 						}
 					}
-					catch (Exception ex)
+					else
 					{
-						logger.info("Передан неверный скрипт")
+						pointData += executeScript.findResults {
+							if (elementsMap.createTrail(it))
+							{
+								dataToDisplay += new LinkedOnMap(elementsMap.createTrail(it))
+							}
+						}
 					}
+				}
+				catch (Exception ex)
+				{
+					logger.info("Передан неверный скрипт")
 				}
 			}
 		}
