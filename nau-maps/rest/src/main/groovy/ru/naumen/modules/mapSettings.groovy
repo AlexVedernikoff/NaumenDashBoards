@@ -387,8 +387,10 @@ String getContentTitleMap()
         api.apps.listContents(ConstantSchemes.EMBEDDED_APPLICATION_CODE)
     Collection<LinkedHashMap> argum = []
     contentInfo.collect {
-        argum << [selectable : true, title: it.contentTitle, uuid:
-            it.tabUuid, level: 0, extra: 'тест']
+        String dataForUuid =
+            StringUtilities.transliterate(it.contentTitle.replaceAll("\\s+", "").toLowerCase())
+        argum << [selectable  : true, title: it.contentTitle, uuid:
+            dataForUuid, level: 0, extra: 'тест']
     }
     return toJson(argum)
 }
