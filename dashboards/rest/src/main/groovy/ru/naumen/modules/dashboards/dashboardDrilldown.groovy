@@ -311,7 +311,7 @@ class DashboardDrilldownService
         }
         link.template?.with(builder.&setTemplate)
         def filterBuilder = builder.filter()
-        addDescriptorInFilter(filterBuilder, link.descriptor)
+        addDescriptorInFilter(filterBuilder, link.descriptor, builder)
         formatFilter(filterBuilder, link.filters, link.classFqn, link.cases, link.descriptor, offsetMinutes, link.diagramType)
         return builder
     }
@@ -333,8 +333,9 @@ class DashboardDrilldownService
      * Применеине дескриптора в фильтре
      * @param filterBuilder - билдер для фильтра
      * @param descriptor - объект фильтрации
+     * @param linkBuilder - билдер для ссылки
      */
-    private void addDescriptorInFilter(def filterBuilder, String descriptor)
+    private void addDescriptorInFilter(Object filterBuilder, String descriptor, IListLinkDefinition linkBuilder)
     {
         if (descriptor)
         {
@@ -383,70 +384,29 @@ class DashboardDrilldownService
                     }
                 }
             }.inject(filterBuilder) { first, second -> first.AND(*second) }
-            filterBuilder = addChainFilters(iDescriptor, filterBuilder)
+            addChainFilters(iDescriptor, linkBuilder)
         }
     }
 
     /**
      * Метод формирования фильтров на цепочку атрибутов
      * @param iDescriptor - настройки дескриптора
-     * @param filterBuilder - текущие настройки фильтрации
+     * @param linkBuilder - билдер для ссылки
      * @return измененные настройки фильтрации
      */
-    private def addChainFilters(def iDescriptor, def filterBuilder)
+    private void addChainFilters(Object iDescriptor, IListLinkDefinition linkBuilder)
     {
-        if(iDescriptor?.content?.getProperties()?.keySet()?.any {it.toString() == 'attrsChain'})
+        if (iDescriptor?.content?.getProperties()?.keySet()?.any {
+            it.toString() == 'attrsChain'
+        })
         {
-            def startValue = utils.get(iDescriptor.clientSettings.formObjectUuid)
-            def descriptorAttrs = iDescriptor?.content?.attrsChain
-            def attrsForChain = iDescriptor?.content?.attrsChain?.findResults { descriptorAttr ->
-                def attrCode = descriptorAttr.attrCode
-                def clazz = descriptorAttr.classFqn
-                def systemAttr = metainfo.getMetaClass(clazz).getAttribute(attrCode)
-                return getAttributeForAttrChain(systemAttr)
-            }
-
-            if(descriptorAttrs.size() == attrsForChain.size())
-            {
-                def dataAttrs = attrsForChain.findAll {it.attrForData}
-                def baseAttrs = attrsForChain.findAll { it.attrForData == null }
-                if(dataAttrs)
-                {
-                    List values = getDataForAttrs(dataAttrs, startValue)
-
-                    def filters = values.collectMany { value ->
-                        return baseAttrs.findResults { totalAttributeMap ->
-                            if (totalAttributeMap.attribute.type.code in AttributeType.LINK_SET_TYPES)
-                            {
-                                value = [value]
-                            }
-                            return filterBuilder.OR(totalAttributeMap.fqn, 'contains', value)
-                        } ?: []
-                    }
-
-                    filterBuilder.AND(*filters)
-                }
-                else
-                {
-                    baseAttrs.findResults { totalAttributeMap ->
-                        if (totalAttributeMap)
-                        {
-                            if (totalAttributeMap.attribute.type.code in AttributeType.LINK_SET_TYPES)
-                            {
-                                startValue = [startValue]
-                            }
-                            return [filterBuilder.OR(totalAttributeMap.fqn, 'contains', startValue)]
-                        }
-                    }?.inject(filterBuilder) { first, second -> first.AND(*second) }
-                }
-            }
-            else
-            {
-                String message = messageProvider.getConstant(NO_DETAIL_DATA_ERROR, currentUserLocale)
-                utils.throwReadableException("${message}#${NO_DETAIL_DATA_ERROR}")
-            }
+            def attrsChain = iDescriptor?.content?.attrsChain
+            linkBuilder.attrChain()
+                       .attributesChain(*attrsChain.collect { it.toString() })
+                       .attrLinkCode(iDescriptor?.content?.attrLinkCode)
+                       .nestedHierarchyAttrFqn(iDescriptor?.content?.nestedHierarchyAttrFqn)
+                       .nestedAttrLinkFqn(iDescriptor?.content?.nestedAttrLinkFqn.toString())
         }
-        return filterBuilder
     }
 
     /**

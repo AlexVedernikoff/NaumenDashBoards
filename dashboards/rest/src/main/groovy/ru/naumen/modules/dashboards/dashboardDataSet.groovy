@@ -4388,10 +4388,10 @@
                     def (groupResult, breakdownResult) = transposeDataSet.tail()
                     checkAggregationAndBreakdownListSize(groupResult as Set, breakdownResult as Set)
                     def labels = groupResult?.findAll() as Set
-                    StandardDiagram standardDiagram = new StandardDiagram()
                     if (reverseGroups)
                     {
                         def series = (breakdownResult?.findAll() as Set)
+                        series = getLabelsInCorrectOrder(series, groupFormat, format, reverseLabels)
                         def labelsForDiagram = breakdownResult?.findAll() as Set
                         def seriesForDiagram = labels.collect { labelsValue ->
                             def data = series.collect {
@@ -4403,7 +4403,7 @@
                             new Series(name: labelsValue, data: data)
                         }
                         labelsForDiagram = getTotalLabelsForDiagram(labelsForDiagram, groupFormat, format, changeLabels, reverseLabels)
-                        standardDiagram = new StandardDiagram(
+                        StandardDiagram standardDiagram = new StandardDiagram(
                             labels: labelsForDiagram,
                             series: seriesForDiagram
                         )
