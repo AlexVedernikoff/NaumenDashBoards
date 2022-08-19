@@ -388,7 +388,7 @@ String getContentTitleMap()
     Collection<LinkedHashMap> argum = []
     contentInfo.collect {
         String dataForUuid =
-            StringUtilities.transliterate(it.contentTitle.replaceAll("\\s+", "").toLowerCase())
+            StringUtilities.transliterate(it.contentTitle.replaceAll('\\s+', '').toLowerCase())
         argum << [selectable  : true, title: it.contentTitle, uuid:
             dataForUuid, level: 0, extra: 'тест']
     }
