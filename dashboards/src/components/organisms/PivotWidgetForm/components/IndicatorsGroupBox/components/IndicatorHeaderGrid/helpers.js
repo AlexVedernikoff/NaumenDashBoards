@@ -296,6 +296,27 @@ const findIndicatorByKey = (value: IndicatorGrouping, key: string): GroupIndicat
 };
 
 /**
+ * Проверяет, что родитель содержит дочерний объект или совпадает с ним
+ * @param {GroupIndicatorInfo | IndicatorInfo} parent - родитель
+ * @param {GroupIndicatorInfo | IndicatorInfo} child - дочерний элемент
+ * @returns {boolean} - признак, что родитель содержит дочерний объект или совпадает с ним
+ */
+const isParentFor = (
+	parent: GroupIndicatorInfo | IndicatorInfo,
+	child: GroupIndicatorInfo | IndicatorInfo
+): boolean => {
+	let result = false;
+
+	if (parent.key === child.key) {
+		result = true;
+	} else if (parent.type === INDICATOR_GROUPING_TYPE.GROUP_INDICATOR_INFO && parent.children) {
+		result = parent.children.some(item => isParentFor(item, child));
+	}
+
+	return result;
+};
+
+/**
  * Изменяет родителя у item на target
  * @param {IndicatorGrouping} value - дерево индикаторов
  * @param {FlatIndicatorInfo | FlatIndicatorGrouping} flatItem - перемещаемый элемент
@@ -307,35 +328,39 @@ const changeParentForFlatIndicator = (
 	flatItem: FlatIndicatorInfo | FlatIndicatorGrouping,
 	target: FlatIndicatorGrouping
 ): IndicatorGrouping => {
-	let newValue = [...value];
-	const {item, parent} = flatItem;
+	if (!isParentFor(flatItem.item, target.item)) {
+		let newValue = [...value];
+		const {item, parent} = flatItem;
 
-	// Очищаем родителя от элемента
-	if (parent) {
-		const clearItems = (parent.children?.filter(el => el.key !== item.key)) ?? [];
-		const newParent = {...parent, children: clearItems};
+		// Очищаем родителя от элемента
+		if (parent) {
+			const clearItems = (parent.children?.filter(el => el.key !== item.key)) ?? [];
+			const newParent = {...parent, children: clearItems};
 
-		newValue = updateValueItem(newValue, parent, newParent);
-	} else {
+			newValue = updateValueItem(newValue, parent, newParent);
+		} else {
 		// родителя нет
-		const clearItems = newValue.filter(el => el !== item);
+			const clearItems = newValue.filter(el => el !== item);
 
-		newValue = clearItems;
+			newValue = clearItems;
+		}
+
+		// Добавляем элемент в target
+		const targetItem = findIndicatorByKey(newValue, target.item.key);
+
+		if (targetItem && targetItem.type === INDICATOR_GROUPING_TYPE.GROUP_INDICATOR_INFO) {
+			const newTargetItem = {
+				...targetItem,
+				children: [...(targetItem.children ?? []), item]
+			};
+
+			newValue = updateValueItem(newValue, targetItem, newTargetItem);
+		}
+
+		return newValue;
 	}
 
-	// Добавляем элемент в target
-	const targetItem = findIndicatorByKey(newValue, target.item.key);
-
-	if (targetItem && targetItem.type === INDICATOR_GROUPING_TYPE.GROUP_INDICATOR_INFO) {
-		const newTargetItem = {
-			...targetItem,
-			children: [...(targetItem.children ?? []), item]
-		};
-
-		newValue = updateValueItem(newValue, targetItem, newTargetItem);
-	}
-
-	return newValue;
+	return value;
 };
 
 /**

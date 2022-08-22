@@ -2,6 +2,8 @@
 import Button from 'components/atoms/Button';
 import cn from 'classnames';
 import FormField from 'components/molecules/FormField';
+import {getLinkedAttributesKey} from 'store/sources/linkedAttributes/helpers';
+import type {MapData as LinkedAttributesMapData} from 'store/sources/linkedAttributes/types';
 import type {OnSelectEvent} from 'components/types';
 import type {Props} from 'containers/SourceLinkEditor/types';
 import React, {Component} from 'react';
@@ -31,6 +33,26 @@ export class SourceLinkEditor extends Component<Props, State> {
 		}
 	}
 
+	fetchLinkedOptions = () => {
+		const {data, fetchLinkedAttributes} = this.props;
+		const {value} = this.state;
+
+		if (data && value) {
+			const {dataKey1, dataKey2} = value;
+			const source1 = data.find(({dataKey}) => dataKey === dataKey1);
+			const source2 = data.find(({dataKey}) => dataKey === dataKey2);
+
+			if (source1 && source2) {
+				const value1 = source1.source?.value?.value;
+				const value2 = source2.source?.value?.value;
+
+				if (value1 && value2) {
+					fetchLinkedAttributes(value1, value2);
+				}
+			}
+		}
+	};
+
 	getDataOptions = () => {
 		const {data} = this.props;
 		const options = data.map(({dataKey: id, source}) => (
@@ -38,6 +60,25 @@ export class SourceLinkEditor extends Component<Props, State> {
 		));
 
 		return options;
+	};
+
+	getLinkedAttributes = (): $Shape<LinkedAttributesMapData> => {
+		let result = {loading: false, options: []};
+		const {data, linkedAttributes} = this.props;
+		const {value} = this.state;
+
+		if (value && linkedAttributes) {
+			const {dataKey1, dataKey2} = value;
+			const classFqn1 = data.find(({dataKey}) => dataKey === dataKey1)?.source?.value?.value ?? '';
+			const classFqn2 = data.find(({dataKey}) => dataKey === dataKey2)?.source?.value?.value ?? '';
+			const key = getLinkedAttributesKey(classFqn1, classFqn2);
+
+			if (linkedAttributes[key]) {
+				result = linkedAttributes[key];
+			}
+		}
+
+		return result;
 	};
 
 	handleCancel = () => this.props.onCancel();
@@ -63,7 +104,7 @@ export class SourceLinkEditor extends Component<Props, State> {
 		const {value} = this.state;
 
 		if (value) {
-			this.setState({value: {...value, dataKey1: id}});
+			this.setState({value: {...value, attribute: null, dataKey1: id}});
 		}
 	};
 
@@ -71,7 +112,7 @@ export class SourceLinkEditor extends Component<Props, State> {
 		const {value} = this.state;
 
 		if (value) {
-			this.setState({value: {...value, dataKey2: id}});
+			this.setState({value: {...value, attribute: null, dataKey2: id}});
 		}
 	};
 
@@ -108,23 +149,13 @@ export class SourceLinkEditor extends Component<Props, State> {
 		const {value} = this.state;
 
 		if (value) {
-			const {attribute, dataKey1, dataKey2} = value;
-			const {attributes, fetchLinkedAttributes} = this.props;
-			const {loading = false, options = []} = attributes ?? {};
-
-			const fetchOptions = () => {
-				const value1 = dataOptions.find(({id}) => id === dataKey1);
-				const value2 = dataOptions.find(({id}) => id === dataKey2);
-
-				if (value1 && value2) {
-					fetchLinkedAttributes(value1.classFqn, value2.classFqn);
-				}
-			};
+			const {attribute} = value;
+			const {loading = false, options = []} = this.getLinkedAttributes();
 
 			return (
 				<FormField label={t('PivotWidgetForm::SourceLinkEditor::LinkAttribute')}>
 					<Select
-						fetchOptions={fetchOptions}
+						fetchOptions={this.fetchLinkedOptions}
 						getOptionLabel={option => option.title}
 						getOptionValue={option => option.code}
 						loading={loading}

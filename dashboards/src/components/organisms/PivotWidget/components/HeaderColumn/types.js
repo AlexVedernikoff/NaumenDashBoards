@@ -18,7 +18,7 @@ export type State = {
 };
 
 export type HeaderColumnStyle = {
-	width: string
+	flex: string
 };
 
 export type TitleColumnStyle = {

@@ -1,11 +1,11 @@
 // @flow
 import type {DataSet} from 'store/widgetForms/pivotForm/types';
-import type {MapData as LinkedAttributesMapData} from 'store/sources/linkedAttributes/types';
+import type {LinkedAttributesMap} from 'store/sources/linkedAttributes/types';
 import type {PivotLink} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {
-	attributes: ?LinkedAttributesMapData
+	linkedAttributes: ?LinkedAttributesMap
 };
 
 export type ConnectedFunctions = {

@@ -225,7 +225,7 @@ export const parseColumnsFlat = (columns: Array<PivotColumn>, isTopLevel: boolea
  */
 export const getColumnWidth = (columns: Array<PivotColumn>, container: HTMLDivElement): number => {
 	const {width: containerWidth} = container.getBoundingClientRect();
-	return Math.max((containerWidth - 9) / (columns.length + 1), PIVOT_COLUMN_MIN_WIDTH);
+	return Math.trunc(Math.max((containerWidth - 9) / (columns.length + 1), PIVOT_COLUMN_MIN_WIDTH));
 };
 
 /**
