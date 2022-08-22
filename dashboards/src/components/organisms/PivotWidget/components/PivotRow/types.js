@@ -22,11 +22,11 @@ export type State = {
 
 export type ParameterStyle = {
 	backgroundColor: string,
-	paddingLeft: string,
-	width: number
+	flex: string,
+	paddingLeft: string
 };
 
 export type CellStyle = {
 	backgroundColor: string,
-	width: number
+	flex: string
 };

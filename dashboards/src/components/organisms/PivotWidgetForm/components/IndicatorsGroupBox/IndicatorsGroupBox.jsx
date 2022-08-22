@@ -10,10 +10,13 @@ import React, {Fragment, PureComponent} from 'react';
 import t from 'localization';
 
 export class IndicatorsGroupBox extends PureComponent<Props, State> {
-	state = {
-		showModal: false,
-		value: null
-	};
+	constructor (props: Props) {
+		super(props);
+		this.state = {
+			showModal: false,
+			value: props.value
+		};
+	}
 
 	handleChange = (value: IndicatorGrouping) => {
 		this.setState({value});
@@ -28,7 +31,8 @@ export class IndicatorsGroupBox extends PureComponent<Props, State> {
 	};
 
 	handleClose = () => {
-		this.setState({showModal: false});
+		const {value} = this.props;
+		return this.setState({showModal: false, value});
 	};
 
 	handleCreateValue = () => {
@@ -52,20 +56,19 @@ export class IndicatorsGroupBox extends PureComponent<Props, State> {
 		}
 	};
 
-	handleSave = (value: IndicatorGrouping | null) => {
+	handleSave = () => {
 		const {onChange} = this.props;
+		const {value} = this.state;
 
 		if (onChange) {
 			onChange(value);
-			this.handleClose();
+			return this.setState({showModal: false});
 		}
 	};
 
 	showEditModal = () => {
 		const {value: propsValue} = this.props;
-		const {value: stateValue} = this.state;
-
-		return this.setState({showModal: true, value: stateValue ?? propsValue});
+		return this.setState({showModal: true, value: propsValue});
 	};
 
 	renderControl = () => {

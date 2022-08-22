@@ -60,11 +60,11 @@ export const getParameterStyle = (width: number, level: number, style: PivotBody
 	return {
 		backgroundColor,
 		color: fontColor,
+		flex: `0 0 ${Math.max(width, 0)}px`,
 		fontStyle: fontStyle === FONT_STYLES.ITALIC ? 'italic' : '',
 		fontWeight: fontStyle === FONT_STYLES.BOLD ? '500' : 'normal',
 		paddingLeft: `${padding}px`,
-		textDecoration: fontStyle === FONT_STYLES.UNDERLINE ? 'underline' : '',
-		width: Math.max(width - 1, 0)
+		textDecoration: fontStyle === FONT_STYLES.UNDERLINE ? 'underline' : ''
 	};
 };
 
@@ -83,10 +83,10 @@ export const getCellStyle = (width: number, level: number, style: PivotBodySetti
 	return {
 		backgroundColor,
 		color: fontColor,
+		flex: `0 0 ${Math.max(width, 0)}px`,
 		fontStyle: fontStyle === FONT_STYLES.ITALIC ? 'italic' : '',
 		fontWeight: fontStyle === FONT_STYLES.BOLD ? '500' : 'normal',
 		textAlign,
-		textDecoration: fontStyle === FONT_STYLES.UNDERLINE ? 'underline' : '',
-		width: Math.max(width, 0)
+		textDecoration: fontStyle === FONT_STYLES.UNDERLINE ? 'underline' : ''
 	};
 };

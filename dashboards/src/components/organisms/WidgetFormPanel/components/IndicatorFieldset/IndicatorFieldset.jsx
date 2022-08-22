@@ -11,6 +11,7 @@ import Container from 'components/atoms/Container';
 import CreationPanel from 'components/atoms/CreationPanel';
 import {deepClone} from 'helpers';
 import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
+import {descriptorContainsFilter} from 'utils/descriptorUtils';
 import type {DiagramDataSet, Indicator} from 'store/widgetForms/types';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FieldButton from 'components/atoms/FieldButton';
@@ -365,7 +366,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 		if (hasFiltered) {
 			const {descriptor} = value;
-			const icon = descriptor ? ICON_NAMES.FILLED_FILTER : ICON_NAMES.FILTER;
+			const icon = descriptorContainsFilter(descriptor) ? ICON_NAMES.FILLED_FILTER : ICON_NAMES.FILTER;
 
 			return (
 				<IconButton icon={icon} onClick={this.handleClickFilter} />

@@ -10,7 +10,7 @@ import type {PivotHeaderSettings} from 'src/store/widgets/data/types';
  * @returns  {HeaderColumnStyle}
  */
 export const getHeaderColumnStyle = (columnWidth: number, style: PivotHeaderSettings): HeaderColumnStyle => ({
-	width: `${columnWidth}px`
+	flex: `0 0 ${columnWidth}px`
 });
 
 /**

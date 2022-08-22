@@ -6,7 +6,7 @@ import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {IndicatorGrouping} from 'store/widgets/data/types';
 import IndicatorHeaderGrid from 'PivotWidgetForm/components/IndicatorsGroupBox/components/IndicatorHeaderGrid';
 import Modal from 'components/molecules/Modal';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import {SIZES as MODAL_SIZES} from 'components/molecules/Modal/constants';
 import styles from './styles.less';
@@ -14,7 +14,7 @@ import T from 'components/atoms/Translation';
 import t from 'localization';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
-export class IndicatorGroupModal extends PureComponent<Props, State> {
+export class IndicatorGroupModal extends PureComponent<Props> {
 	handleChange = (value: IndicatorGrouping) => {
 		this.props.onChange(value);
 	};
@@ -27,8 +27,8 @@ export class IndicatorGroupModal extends PureComponent<Props, State> {
 	};
 
 	handleSave = () => {
-		const {onSave, value} = this.props;
-		return onSave(value);
+		const {onSave} = this.props;
+		return onSave();
 	};
 
 	renderCreateGroup = () => {
