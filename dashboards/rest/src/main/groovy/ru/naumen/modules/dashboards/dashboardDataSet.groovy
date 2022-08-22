@@ -5239,7 +5239,7 @@
                 List takenAggregationColumns = []
                 aggregationColumns = allAggregationAttributes.findResults { name ->
                     columns.find {
-                        Boolean match = it.header == name && !takenAggregationColumns.contains(it)
+                        Boolean match = it.attribute.title == name && !takenAggregationColumns.contains(it)
                         if (match)
                         {
                             takenAggregationColumns << it
