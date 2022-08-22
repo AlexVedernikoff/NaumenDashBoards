@@ -95,6 +95,10 @@ class GanttDataSetService
         data.workRelations = settings.workRelations
         data.workRelationCheckbox = settings.workRelationCheckbox
         data.progressCheckbox = settings.progressCheckbox
+        data.stateMilestonesCheckbox = false
+        data.milestonesCheckbox = false
+        data.worksWithoutStartOrEndDateCheckbox = false
+
         data.currentInterval = settings.currentInterval
 
         if (settings.startDate && settings.endDate)

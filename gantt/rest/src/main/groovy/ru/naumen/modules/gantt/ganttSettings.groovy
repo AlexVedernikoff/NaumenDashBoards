@@ -1010,6 +1010,21 @@ class BaseGanttDiagramData
      * Отображение связи работ на диаграмме
      */
     Boolean workRelationCheckbox
+
+    /**
+     * Отображение контрольных точек
+     */
+    Boolean milestonesCheckbox
+
+    /**
+     * Отображение состояния контрольных точек
+     */
+    Boolean stateMilestonesCheckbox
+
+    /**
+     * Отображение работы с открытыми датами
+     */
+    Boolean worksWithoutStartOrEndDateCheckbox
 }
 
 /**
