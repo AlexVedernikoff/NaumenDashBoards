@@ -111,7 +111,7 @@ Collection collectingData(Collection<String> listStrategy,
 						  Collection<String> scriptText,
 						  Boolean isDataAboutPointsOrLines)
 {
-	ElementsMap elementsMap = new ElementsMap(api.web, logger)
+	ElementsMap elementsMap = new ElementsMap()
 	Collection<MapObjectBuilder> pointData = []
 	Collection dataToDisplay = []
 	listStrategy.each { strategy ->

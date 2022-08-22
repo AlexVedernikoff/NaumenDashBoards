@@ -21,12 +21,9 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Canonical
-import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.server.script.spi.ScriptDtObject
-import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.IUUIDIdentifiable
-import ru.naumen.metainfo.shared.Constants.UI
-import ru.naumen.core.server.script.spi.LazyScriptDtObject
+import ru.naumen.core.server.script.api.injection.InjectApi
 
 
 //БЛОК REST АПИ--------------------------------------------------------
@@ -88,18 +85,10 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
 }
 
 //БЛОК СКРИПТОВОГО АПИ--------------------------------------------------------
+@InjectApi
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class ElementsMap
 {
-    private final IWebApi web
-    private final Object logger
-
-    ElementsMap(IWebApi web, def logger)
-    {
-        this.web = web
-        this.logger = logger
-    }
-
     /**
      * Метод по созданию билдер-объекта трассы
      * @param object - объект трассы из БД
@@ -215,10 +204,16 @@ class ElementsMap
      */
     BasePointBuilder createEquipmentPoint(ISDtObject equipment)
     {
+        MapSettings settings = new SettingsProvider().getSettings()
+        String codeAttributeGroup = settings?.defVisualization?.points?.first()?.attributeGroup
+        String codeMetaClass = settings?.defVisualization?.points?.first()?.metaClassObject.id
+
+        Collection attributesFromGroup =
+            api.metainfo.getMetaClass(codeMetaClass).getAttributeGroup(codeAttributeGroup).attributes
         if (equipment && equipment.title && equipment.ciModel && equipment.location)
         {
             Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
-            return createPointObjectBuilder(
+            BasePointBuilder formedEquipmentObject = createPointObjectBuilder(
                 equipIsActive
                     ? MapObjectType.ACTIVE
                     : MapObjectType.PASSIVE, equipment
@@ -227,21 +222,14 @@ class ElementsMap
                 .setIcon(equipment)
                 .setEquipType(equipIsActive ? null : equipment)
                 .setGeopositions(equipment)
-                .addAction('Перейти на карточку', api.web.open(equipment.UUID))
-                .addOption(
-                    'Модель',
-                    new Value(
-                        label: equipment.ciModel.title,
-                        url: api.web.open(equipment.ciModel.UUID)
-                    )
+            attributesFromGroup.each {
+                String valueLabel = equipment[it.code] ?: 'не указано'
+                formedEquipmentObject.addOption(
+                    it.title,
+                    new Value(label: valueLabel, url: api.web.open(equipment.ciModel.UUID))
                 )
-                .addOption(
-                    'Расположение',
-                    new Value(
-                        label: equipment.location.title,
-                        url: api.web.open(equipment.location.UUID)
-                    )
-                )
+            }
+            return formedEquipmentObject
         }
     }
 
@@ -504,7 +492,7 @@ class TrailBuilder extends MapObjectBuilder
     @JsonIgnore
     Collection<BasePointBuilder> equipments
     @JsonInclude(Include.NON_NULL)
-    ElementsMap elementsMap = new ElementsMap(api.web, logger)
+    ElementsMap elementsMap = new ElementsMap()
     @JsonInclude(Include.NON_NULL)
     String color
 
