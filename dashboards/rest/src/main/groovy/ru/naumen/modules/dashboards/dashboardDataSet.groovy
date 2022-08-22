@@ -3254,13 +3254,25 @@
                             DefaultRequisiteNode requisiteNode = node as DefaultRequisiteNode
                             RequestData requestData = request.data[requisiteNode.dataKey] as RequestData
                             String aggregationSortingType = requestData.aggregations.find()?.sortingType
-                            def listIdsOfNormalAggregations = diagramType == DiagramType.TABLE
-                                ? request?.data?.findResult { key, value ->
-                                value?.aggregations?.withIndex()?.findResults { val, i ->
-                                    if (val.type != Aggregation.NOT_APPLICABLE)
-                                        return i
-                                }
-                            } : [0]
+
+                            def listIdsOfNormalAggregations = [0]
+
+                            if (diagramType == DiagramType.TABLE)
+                            {
+                                listIdsOfNormalAggregations =
+                                    request?.data?.findResult { key, value ->
+                                        value?.aggregations?.withIndex()?.findResults { val, i ->
+                                            if (val.type != Aggregation.NOT_APPLICABLE)
+                                            {
+                                                return i
+                                            }
+                                        }
+                                    }
+                            }
+                            else if (diagramType == DiagramType.PIVOT_TABLE)
+                            {
+                                listIdsOfNormalAggregations = [0..(requestData.aggregations.size() - 1)].first()
+                            }
                             Map<String, Object> filterMap = getInfoAboutFilters(requisiteNode.dataKey, request)
                             String parameterSortingType = diagramType == DiagramType.TABLE ? null : filterMap.parameterSortingType
                             def parameterFilters = filterMap.parameterFilters
