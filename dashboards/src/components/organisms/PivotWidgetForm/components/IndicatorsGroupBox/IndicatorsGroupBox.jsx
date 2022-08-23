@@ -50,7 +50,7 @@ export class IndicatorsGroupBox extends PureComponent<Props, State> {
 					: null
 			)).filter(Boolean));
 
-			this.setState({value: newValue}, this.showEditModal);
+			this.setState({showModal: true, value: newValue});
 		} else {
 			this.showEditModal();
 		}
