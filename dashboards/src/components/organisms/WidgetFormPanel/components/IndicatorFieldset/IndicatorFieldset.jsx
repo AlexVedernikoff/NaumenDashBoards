@@ -380,7 +380,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		const {dataSets} = this.props;
 		const {children, className} = props;
 
-		if (dataSets) {
+		if (isMain && dataSets) {
 			return this.renderSourcesAndFields(className, children);
 		}
 
