@@ -1,4 +1,5 @@
 // @flow
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {checkNumber, getLabelFormatter, makeFormatterByNumberFormat} from './helpers';
 import {DEFAULT_AGGREGATION, INTEGER_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_NUMBER_AXIS_FORMAT, DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
@@ -49,7 +50,10 @@ const getPivotFormatterForAttribute = (attribute: MixedAttribute | null, aggrega
 	if (usesPercent) {
 		numberFormat = {...DEFAULT_NUMBER_AXIS_FORMAT, additional: '%', symbolCount: 2};
 	} else {
-		const defaultSymbolCount = aggregation === INTEGER_AGGREGATION.AVG ? 2 : 0;
+		const isAVG = aggregation === INTEGER_AGGREGATION.AVG;
+		const floatTypes = [ATTRIBUTE_TYPES.COMPUTED_ATTR, ATTRIBUTE_TYPES.double];
+		const isFloatType = floatTypes.includes(attribute?.type);
+		const defaultSymbolCount = isAVG || isFloatType ? 2 : 0;
 
 		numberFormat = {...DEFAULT_NUMBER_AXIS_FORMAT, symbolCount: defaultSymbolCount};
 	}
