@@ -113,7 +113,7 @@ interface GanttSettingsController
     String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
-     * Метод последовательности в работе
+     * Метод редактирования последовательности в работе
      * @param tasks - ссписок работы
      * @param versionKey - ключ версии диаграммы
      * @return измененные настройки версии диаграммы
@@ -852,7 +852,7 @@ class GanttSettingsService
     }
 
     /**
-     * Метод последовательности в работе
+     * Метод редактирования последовательности в работе
      * @param tasks - ссписок работы
      * @param versionKey - ключ версии диаграммы
      * @return измененные настройки версии диаграммы
@@ -867,12 +867,12 @@ class GanttSettingsService
             : new GanttVersionsSettingsClass()
 
         ganttVersionSettings.tasks = tasks
-
-        if (saveJsonSettings(
+        Boolean saveSettings = saveJsonSettings(
             versionKey,
             Jackson.toJsonString(ganttVersionSettings),
             GANTT_VERSION_NAMESPACE
-        ))
+        )
+        if (saveSettings)
         {
             return ganttVersionSettings.tasks
         }
