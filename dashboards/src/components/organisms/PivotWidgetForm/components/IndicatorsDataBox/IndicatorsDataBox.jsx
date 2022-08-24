@@ -150,8 +150,8 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 		const {values} = this.state;
 
 		if (data.length > 0) {
-			const {dataKey, indicators = []} = data[0];
-			const index = indicators.length ?? 0;
+			const {dataKey} = data[0];
+			const index = values.filter(item => item.dataKey === dataKey).length;
 			const newValues = [
 				...values,
 				{dataKey, dataSetIndex: 0, index, indicator: createPivotIndicator()}
