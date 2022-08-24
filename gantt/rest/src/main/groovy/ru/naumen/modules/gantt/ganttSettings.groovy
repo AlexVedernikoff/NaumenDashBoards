@@ -111,6 +111,14 @@ interface GanttSettingsController
      * @return параметры пользователя
      */
     String getUserData(Map<String, Object> requestContent, IUUIDIdentifiable user)
+
+    /**
+     * Метод редактирования последовательности в работе
+     * @param tasks - ссписок работы
+     * @param versionKey - ключ версии диаграммы
+     * @return измененные настройки версии диаграммы
+     */
+    String updateTasks(Collection<Map<String, String>> tasks,  String versionKey)
 }
 
 @InheritConstructors
@@ -201,6 +209,12 @@ class GanttSettingsImpl implements GanttSettingsController
     String deleteGanttVersionSettings(String versionKey)
     {
         return Jackson.toJsonString(service.deleteGanttVersionSettings(versionKey))
+    }
+
+    @Override
+    String updateTasks(Collection<Map<String, String>> tasks,  String versionKey)
+    {
+        return Jackson.toJsonString(service.updateTasks(tasks, versionKey))
     }
 }
 
@@ -836,6 +850,37 @@ class GanttSettingsService
             it.title
         }
     }
+
+    /**
+     * Метод редактирования последовательности в работе
+     * @param tasks - ссписок работы
+     * @param versionKey - ключ версии диаграммы
+     * @return измененные настройки версии диаграммы
+     */
+    Collection<Map<String, String>> updateTasks(Collection<Map<String, String>> tasks,
+                                                String versionKey)
+    {
+        String ganttVersionSettingsJsonValue = getJsonSettings(versionKey, GANTT_VERSION_NAMESPACE)
+
+        GanttVersionsSettingsClass ganttVersionSettings = ganttVersionSettingsJsonValue
+            ? Jackson.fromJsonString(ganttVersionSettingsJsonValue, GanttVersionsSettingsClass)
+            : new GanttVersionsSettingsClass()
+
+        ganttVersionSettings.tasks = tasks
+        Boolean saveSettings = saveJsonSettings(
+            versionKey,
+            Jackson.toJsonString(ganttVersionSettings),
+            GANTT_VERSION_NAMESPACE
+        )
+        if (saveSettings)
+        {
+            return ganttVersionSettings.tasks
+        }
+        else
+        {
+            throw new Exception('Настройки не были сохранены!')
+        }
+    }
 }
 
 /**
@@ -867,7 +912,8 @@ enum StatusWork
 enum SourceType
 {
     WORK,
-    RESOURCE
+    RESOURCE,
+    MILESTONE
 }
 
 /**
