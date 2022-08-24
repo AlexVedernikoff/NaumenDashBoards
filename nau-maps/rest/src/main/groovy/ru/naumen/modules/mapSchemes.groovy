@@ -226,8 +226,8 @@ class DefaultVisualizationSchemes
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
     @JsonSchemaMeta(title = 'Дополнительный текст')
     String additionalText = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
-    @JsonSchemaMeta(title = 'Група атрибутов')
+    @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaclassObjects')
+    @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
     @JsonSchemaMeta(title = 'Иконка')
@@ -262,8 +262,8 @@ class CharacteristicsOutputDiagram
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
     @JsonSchemaMeta(title = 'Дополнительный текст')
     String additionalText = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
-    @JsonSchemaMeta(title = 'Група атрибутов')
+    @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaclassObjects')
+    @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
     @JsonSchemaMeta(title = 'Иконка')
