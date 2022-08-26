@@ -345,6 +345,7 @@
                 {
                     String requestDataKey = request.data.keySet().first()
                     RequestData requestData = request.data[requestDataKey]
+                    res = applyIndicatorsFiltration(requestData, res)
                     res = applyIndicatorsBreakdown(requestData, res)
                 }
     
@@ -510,7 +511,56 @@
                     return utils.throwReadableException("${message}#${NOT_SUPPORTED_DIAGRAM_TYPE_ERROR}")
             }
         }
-    
+
+        /**
+         * Метод применения фильтрации на показателях
+         * @param requestData - данные запроса
+         * @param res - результат первоначального запроса
+         * @return резульат с фильтрацией на показателях
+         */
+        private List applyIndicatorsFiltration(RequestData requestData, List res)
+        {
+            Collection<AggregationParameter> allAggregations = requestData.aggregations
+            Collection<AggregationParameter> aggregationsWithFiltration =
+                allAggregations.findAll {
+                    !it.breakdown && it.descriptor
+                }
+            Map<AggregationParameter, List> aggregationFiltrationResult = [:]
+
+            aggregationsWithFiltration.each { aggregation ->
+                RequestData requestDataCopy = requestData.clone()
+                requestDataCopy.aggregations = [aggregation]
+                requestDataCopy.source.descriptor =
+                    dashboardQueryWrapperUtils.getDescriptorWithMergedFilters(
+                        requestDataCopy.source.descriptor,
+                        aggregation.descriptor
+                    )
+
+                List result = dashboardQueryWrapperUtils.getData(
+                    requestDataCopy,
+                    null,
+                    currentUserLocale,
+                    false,
+                    DiagramType.PIVOT_TABLE
+                )
+                aggregationFiltrationResult[aggregation] = result
+            }
+
+            aggregationFiltrationResult.eachWithIndex { aggregation, filtrationResult, index ->
+                Integer aggregationIndex = allAggregations.findIndexOf { it == aggregation }
+                res[0].eachWithIndex { resultItem, i ->
+                    Object value = 0
+                    if (filtrationResult[i] != null)
+                    {
+                        value = filtrationResult[i][0]
+                    }
+                    resultItem[aggregationIndex] = value
+                }
+            }
+
+            return res
+        }
+
         /**
          * Метод применения разбивки на показателях
          * @param requestData - данные запроса
@@ -531,7 +581,16 @@
                 RequestData requestDataCopy = requestData.clone()
                 requestDataCopy.aggregations = [aggregation]
                 requestDataCopy.groups = requestDataCopy.groups.collect()
-    
+
+                if (aggregation.descriptor)
+                {
+                    requestDataCopy.source.descriptor =
+                        dashboardQueryWrapperUtils.getDescriptorWithMergedFilters(
+                            requestDataCopy.source.descriptor,
+                            aggregation.descriptor
+                        )
+                }
+
                 GroupParameter breakdownGroup =
                     buildSystemGroup(aggregation.breakdown.group, aggregation.breakdown.attribute)
                 requestDataCopy.groups << breakdownGroup

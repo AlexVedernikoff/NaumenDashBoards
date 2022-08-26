@@ -133,68 +133,8 @@ class QueryWrapper implements CriteriaWrapper
         Closure aggregation = getAggregation(aggregationType)
         String[] attributeCodes = parameter.attribute.attrChains()*.code.with(this.&replaceMetaClassCode.rcurry(true))
 
-        IApiCriteriaColumn column = getProcessesColumn(attributeCodes, criteria, criteriaForColumn, aggregation, parameter, attribute, fromSevenDays)
-
-        if (parameter.descriptor)
-        {
-            IApiCriteria subCriteria =
-                criteria.subquery().addSource(criteria.getCurrentMetaClass().fqn as String)
-            Map<String, Object> sourceMetaClassSubCriteriaMap =
-                getSourceMetaClassCriteriaMap(requestData, DiagramType.PIVOT_TABLE, subCriteria)
-
-            column = getProcessesColumn(attributeCodes, criteria, subCriteria, aggregation, parameter, attribute, fromSevenDays)
-
-            subCriteria.addColumn(column)
-
-            requestData.groups.each { group ->
-                String attributePropertyPath = group.attribute.code
-                Boolean titleMustBeAddedToPath = false
-
-                if (group.attribute.ref)
-                {
-                    attributePropertyPath += '.' + group.attribute.ref.code
-                    titleMustBeAddedToPath = group.attribute.ref.type in AttributeType.LINK_TYPES
-                }
-                else
-                {
-                    titleMustBeAddedToPath = group.attribute.type in AttributeType.LINK_TYPES
-                }
-                if (titleMustBeAddedToPath)
-                {
-                    attributePropertyPath += '.title'
-                }
-
-                IApiCriteria columnCriteria = criteria
-                IApiCriteria columnSubCriteria = subCriteria
-
-                if (group.attribute.metaClassFqn != requestData.source.classFqn)
-                {
-                    columnCriteria = sourceMetaClassCriteriaMap[group.attribute.metaClassFqn]
-                    columnSubCriteria = sourceMetaClassSubCriteriaMap[group.attribute.metaClassFqn]
-                }
-
-                subCriteria.add(
-                    api.whereClause.eq(
-                        sc.property(columnSubCriteria, attributePropertyPath),
-                        sc.property(columnCriteria, attributePropertyPath)
-                    )
-                )
-            }
-
-            Source sourceToMergeFilters = requestData.sources.find {
-                it.classFqn = parameter.attribute.metaClassFqn
-            }
-
-            String indicatorDescriptor = DashboardQueryWrapperUtils.getDescriptorWithMergedFilters(sourceToMergeFilters.descriptor, parameter.descriptor)
-
-            api.listdata.addFilters(subCriteria, api.listdata.createListDescriptor(indicatorDescriptor))
-            criteria.addColumn(subCriteria)
-        }
-        else
-        {
-            criteria.addColumn(column)
-        }
-
+        IApiCriteriaColumn column = getProcessedColumn(attributeCodes, criteria, criteriaForColumn, aggregation, parameter, attribute, fromSevenDays)
+        criteria.addColumn(column)
 
         String sortingType = parameter.sortingType
         if (sortingType)
@@ -223,7 +163,7 @@ class QueryWrapper implements CriteriaWrapper
      * @param aggregation - функция агрегации
      * @return обработанная колонки
      */
-    private IApiCriteriaColumn getProcessesColumn(String[] attributeCodes,
+    private IApiCriteriaColumn getProcessedColumn(String[] attributeCodes,
                                                   IApiCriteria criteria,
                                                   IApiCriteria criteriaForColumn,
                                                   Closure aggregation,
@@ -718,18 +658,15 @@ class QueryWrapper implements CriteriaWrapper
                     Object columnFirst = sc.property(criteriaForColumn, attributeCodes)
                     Object columnSecond = sc.property(criteriaForColumn, columnStringValue)
 
-                    if (diagramType != DiagramType.PIVOT_TABLE)
-                    {
-                        column = sc.selectCase()
-                                   .when(api.whereClause.isNull(columnSecond), columnFirst)
-                                   .otherwise(
-                                       sc.concat(
-                                           columnFirst,
-                                           sc.constant(LinksAttributeMarshaller.delimiter),
-                                           columnSecond
-                                       )
+                    column = sc.selectCase()
+                               .when(api.whereClause.isNull(columnSecond), columnFirst)
+                               .otherwise(
+                                   sc.concat(
+                                       columnFirst,
+                                       sc.constant(LinksAttributeMarshaller.delimiter),
+                                       columnSecond
                                    )
-                    }
+                               )
 
                     criteria.addGroupColumn(column)
                     criteria.addColumn(column)
@@ -744,24 +681,21 @@ class QueryWrapper implements CriteriaWrapper
                     }
                     else
                     {
-                        if (diagramType != DiagramType.PIVOT_TABLE)
-                        {
-                            IApiCriteriaColumn attributeColumn = sc.property(criteriaForColumn, attributeCodes)
+                        IApiCriteriaColumn attributeColumn = sc.property(criteriaForColumn, attributeCodes)
 
-                            switch (parameter.attribute.type)
-                            {
-                                case 'string':
-                                    column = sc.selectCase().when(api.whereClause.isNull(attributeColumn), '')
-                                               .otherwise(attributeColumn)
-                                    break
-                                case 'integer':
-                                case 'double':
-                                    column = sc.selectCase().when(api.whereClause.isNull(attributeColumn), 0)
-                                               .otherwise(attributeColumn)
-                                    break
-                                default:
-                                    column = attributeColumn
-                            }
+                        switch (parameter.attribute.type)
+                        {
+                            case 'string':
+                                column = sc.selectCase().when(api.whereClause.isNull(attributeColumn), '')
+                                           .otherwise(attributeColumn)
+                                break
+                            case 'integer':
+                            case 'double':
+                                column = sc.selectCase().when(api.whereClause.isNull(attributeColumn), 0)
+                                           .otherwise(attributeColumn)
+                                break
+                            default:
+                                column = attributeColumn
                         }
                         criteria.addGroupColumn(column)
                         criteria.addColumn(column)
