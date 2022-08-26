@@ -85,6 +85,7 @@ const sourceRowName = 'sourceRowName';
 const style = 'style';
 const template = 'template';
 const templateName = 'templateName';
+const text = 'text';
 const tip = 'tip';
 const title = 'title';
 const to = 'to';
@@ -167,6 +168,7 @@ const DIAGRAM_FIELDS = {
 	style,
 	template,
 	templateName,
+	text,
 	tip,
 	title,
 	to,

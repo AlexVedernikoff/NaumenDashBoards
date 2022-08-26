@@ -139,7 +139,7 @@ export type WidgetTooltip = {
 	header?: string,
 	show: boolean,
 	text?: string,
-	title?: string
+	title?: string /* deprecated */
 };
 
 export type Indicator = {

@@ -44,10 +44,10 @@ class SimpleWidgetTooltipForm extends PureComponent<Props> {
 	};
 
 	renderTitleEditor = () => {
-		const {title} = this.props.value;
+		const {text} = this.props.value;
 		return (
 			<FormField label={t('WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle')}>
-				<TextArea focusOnMount={true} maxLength={1000} name={DIAGRAM_FIELDS.title} onChange={this.handleChange} value={title} />
+				<TextArea focusOnMount={true} maxLength={1000} name={DIAGRAM_FIELDS.text} onChange={this.handleChange} value={text} />
 			</FormField>
 
 		);
