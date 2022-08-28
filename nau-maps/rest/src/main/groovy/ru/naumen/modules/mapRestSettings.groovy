@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Canonical
 import ru.naumen.core.server.script.spi.ScriptDtObject
 import ru.naumen.core.shared.IUUIDIdentifiable
+import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.core.server.script.api.injection.InjectApi
-
 
 //БЛОК REST АПИ--------------------------------------------------------
 
@@ -74,7 +74,7 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
 {
     try
     {
-        return modules.mapParamsSettings.getDataDisplayMap(contentUuid) ?: defaultValue
+        return new DataGeneration().getDataDisplayMap(contentUuid) ?: defaultValue
     }
     catch (Exception ex)
     {
@@ -86,7 +86,6 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
 
 //БЛОК СКРИПТОВОГО АПИ--------------------------------------------------------
 @InjectApi
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class ElementsMap
 {
     /**
@@ -102,14 +101,29 @@ class ElementsMap
     /**
      * Метод по формированию данных о трассе
      * @param dbTrail - объект трассы из БД
+     * @para strategie - список настроек из мастера для линий
      * @return объект с данными о трассе другого формата
      */
-    private TrailBuilder createTrail(ISDtObject dbTrail)
+    private TrailBuilder createTrail(ISDtObject dbTrail, OutputObjectStrategies strategie)
     {
-        return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.nestSegmVols
+        Object defaultSettingsWizardSettings = new SettingsProvider()
+            .getSettings()?.defVisualization
+
+        String color = strategie?.color ? dbTrail[strategie?.color] :
+            defaultSettingsWizardSettings?.colorLineMap
+        String opacity = strategie?.opacity ? dbTrail[strategie?.opacity] :
+            defaultSettingsWizardSettings?.opacity
+        String width =
+            strategie?.weight ? dbTrail[strategie?.weight] : defaultSettingsWizardSettings?.width
+        String lineStyle = strategie.lineStyle ?: defaultSettingsWizardSettings.lineStyle
+
+        return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title
             ? createTrailBuilder(dbTrail)
             .setHeader(dbTrail.title)
-            .setColor(dbTrail.HEXcolor)
+            .setColor(color)
+            .setOpacity(opacity)
+            .setWidth(width)
+            .setLineStyle(lineStyle)
             .setGeopositions(dbTrail)
             .addOption(
                 'Площадка А',
@@ -119,8 +133,8 @@ class ElementsMap
                 'Площадка Б',
                 new Value(label: dbTrail.siteB.title, url: api.web.open(dbTrail.siteB.UUID))
             )
-            .setParts(dbTrail.nestSegmVols)
-            .setEquipments(dbTrail.nestSegmVols)
+            .setParts(dbTrail)
+            .setEquipments(dbTrail)
             .addAction('Перейти на карточку', api.web.open(dbTrail.UUID))
             : null
     }
@@ -138,10 +152,9 @@ class ElementsMap
     /**
      * Метод формирования объекта - участка трассы
      * @param dbPart - участок трассы из БД
-     * @param wols - трасса, которой он принадлежит
      * @return сформированный участок трассы
      */
-    public SectionBuilder createPart(ISDtObject dbPart, TrailBuilder wols)
+    public SectionBuilder createPart(ISDtObject dbPart)
     {
         if (dbPart && dbPart.title && dbPart.siteA && dbPart.siteB)
         {
@@ -156,7 +169,12 @@ class ElementsMap
                     'Площадка Б',
                     new Value(label: dbPart.siteB.title, url: api.web.open(dbPart.siteB.UUID))
                 )
-                .setGeopositions(dbPart)
+                .setGeopositions(
+                    dbPart.gradLatA,
+                    dbPart.gradLongA,
+                    dbPart.gradLatB,
+                    dbPart.gradLongB
+                )
                 .addAction('Перейти на карточку', api.web.open(dbPart.UUID))
         }
     }
@@ -200,16 +218,23 @@ class ElementsMap
     /**
      * Метод формирования точечного объекта оборудования
      * @param equipment - оборудование из БД
+     * @para strategie - список настроек из мастера
+     * @param indexElement - индекс текущего эллемента
      * @return сформированный объект оборудования
      */
-    BasePointBuilder createEquipmentPoint(ISDtObject equipment)
+    BasePointBuilder createEquipmentPoint(ISDtObject equipment,
+                                          OutputObjectStrategies strategie,
+                                          Integer indexElement = 0)
     {
-        MapSettings settings = new SettingsProvider().getSettings()
-        String codeAttributeGroup = settings?.defVisualization?.points?.first()?.attributeGroup
-        String codeMetaClass = settings?.defVisualization?.points?.first()?.metaClassObject.id
+        CharacteristicsDisplayListObjects settings = new SettingsProvider()
+            .getSettings()?.defVisualization?.points?.first()
+        String codeAttributeGroup = settings?.attributeGroup
+        String codeMetaClass = settings?.metaClassObject.id
 
         Collection attributesFromGroup =
-            api.metainfo.getMetaClass(codeMetaClass).getAttributeGroup(codeAttributeGroup).attributes
+            api.metainfo.getMetaClass(codeMetaClass)
+               .getAttributeGroup(codeAttributeGroup).attributes
+
         if (equipment && equipment.title && equipment.ciModel && equipment.location)
         {
             Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
@@ -221,13 +246,35 @@ class ElementsMap
                 .setHeader(equipment.title)
                 .setIcon(equipment)
                 .setEquipType(equipIsActive ? null : equipment)
-                .setGeopositions(equipment)
+                .setGeopositions(equipment, strategie)
+                .addAction('Перейти на карточку', api.web.open(equipment.UUID))
             attributesFromGroup.each {
-                String valueLabel = equipment[it.code] ?: 'не указано'
-                formedEquipmentObject.addOption(
-                    it.title,
-                    new Value(label: valueLabel, url: api.web.open(equipment.ciModel.UUID))
-                )
+                String valueLabel
+                String linkElement
+                try
+                {
+                    valueLabel = equipment[it.code] ?: 'не указано'
+                    linkElement = api.web.open(equipment[it.code].UUID)
+                }
+                catch (Exception ex)
+                {
+                    valueLabel =
+                        api.utils.find(codeMetaClass, [:])[indexElement][it.code] ?: 'не указано'
+
+                    try
+                    {
+                        linkElement = api.web.open(
+                            api.utils.find(codeMetaClass, [:])[indexElement][it.code]?.UUID
+                        )
+                    }
+                    catch (Exception exep)
+                    {
+                        linkElement =
+                            api.web.open(api.utils.find(codeMetaClass, [:])[indexElement].UUID)
+                    }
+                }
+                formedEquipmentObject
+                    .addOption(it.title, new Value(label: valueLabel, url: linkElement))
             }
             return formedEquipmentObject
         }
@@ -240,20 +287,14 @@ class ElementsMap
      */
     BasePointBuilder createPoint(ISDtObject pointObject)
     {
-        if (pointObject && pointObject.title && pointObject.cmdb)
+        if (pointObject && pointObject.title)
         {
             return createPointObjectBuilder(MapObjectType.POINT, pointObject)
                 .setHeader(pointObject.title)
                 .setIcon(pointObject)
                 .setGeopositions(pointObject.gradLat, pointObject.gradLong)
                 .addAction('Перейти на карточку', api.web.open(pointObject.UUID))
-                .addOption(
-                    'Оборудование',
-                    new Value(
-                        label: pointObject.cmdb?.find()?.title,
-                        url: api.web.open(pointObject.cmdb?.find()?.UUID)
-                    )
-                )
+                .addOption('Адрес', new Value(label: pointObject?.addressStr ?: 'нет уточнений'))
         }
     }
 
@@ -448,20 +489,20 @@ class ActionBuilder
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class PresentationBuilder
 {
-	public PresentationType rightOfLabel()
-	{
-		return PresentationType.RIGHT_OF_LABEL
-	}
+    public PresentationType rightOfLabel()
+    {
+        return PresentationType.RIGHT_OF_LABEL
+    }
 
-	public PresentationType fullLength()
-	{
-		return PresentationType.FULL_LENGTH
-	}
+    public PresentationType fullLength()
+    {
+        return PresentationType.FULL_LENGTH
+    }
 
-	public PresentationType underLabel()
-	{
-		return PresentationType.UNDER_LABEL
-	}
+    public PresentationType underLabel()
+    {
+        return PresentationType.UNDER_LABEL
+    }
 }
 
 /**
@@ -496,6 +537,21 @@ class TrailBuilder extends MapObjectBuilder
     @JsonInclude(Include.NON_NULL)
     String color
 
+    /**
+     * Прозрачность элемента
+     */
+    String opacity
+
+    /**
+     * Толщина линии
+     */
+    String width
+
+    /**
+     * Тип линии
+     */
+    String lineStyle
+
     protected TrailBuilder()
     {
         super(MapObjectType.WOLS, null)
@@ -512,46 +568,62 @@ class TrailBuilder extends MapObjectBuilder
         return this
     }
 
+    TrailBuilder setOpacity(String opacity)
+    {
+        this.opacity = opacity
+        return this
+    }
+
+    TrailBuilder setWidth(String width)
+    {
+        this.width = width
+        return this
+    }
+
+    TrailBuilder setLineStyle(String lineStyle)
+    {
+        this.lineStyle = lineStyle
+        return this
+    }
+
     TrailBuilder setGeopositions(def dbTrail)
     {
         Collection<Geoposition> geopositions = []
-        if(dbTrail && dbTrail.siteA && dbTrail.siteB)
+        if (dbTrail && dbTrail.siteA && dbTrail.siteB)
         {
-            geopositions.add(new Geoposition(latitude: dbTrail.siteA.gradLat, longitude: dbTrail.siteA.gradLong))
-            geopositions.add(new Geoposition(latitude: dbTrail.siteB.gradLat, longitude: dbTrail.siteB.gradLong))
+            geopositions.add(
+                new Geoposition(
+                    latitude: dbTrail.siteA.gradLat,
+                    longitude: dbTrail.siteA.gradLong
+                )
+            )
+            geopositions.add(
+                new Geoposition(
+                    latitude: dbTrail.siteB.gradLat,
+                    longitude: dbTrail.siteB.gradLong
+                )
+            )
         }
 
         this.geopositions = geopositions
         return this
     }
 
-    TrailBuilder setParts(Collection<IUUIDIdentifiable> dbParts)
+    TrailBuilder setParts(ISDtObject dbParts)
     {
-        this.parts = dbParts?.findResults {
-            if(it && it.title && it.siteA && it.siteB)
-            {
-                return elementsMap.createPart(it, this)
-            }
+        if (dbParts && dbParts.title && dbParts.siteA && dbParts.siteB)
+        {
+            this.parts = [elementsMap.createPart(dbParts)]
         }
         return this
     }
 
-    TrailBuilder setEquipments(Collection dbParts)
+    TrailBuilder setEquipments(ISDtObject dbParts)
     {
-        this.equipments = dbParts?.collectMany { dbPart ->
-            if(dbPart && dbPart.title && dbPart.siteA && dbPart.siteB)
-            {
-                def dbEquipmetnts = []
-                dbEquipmetnts = dbEquipmetnts + dbPart.siteA.cmdb + dbPart.siteB.cmdb
-
-                return dbEquipmetnts?.findResults { equipment ->
-                    return elementsMap.createEquipmentPoint(equipment)
-                } ?: []
-            }
-            return []
-        }.unique{ it.uuid }
+        this.equipments = []
         return this
     }
+
 }
 
 /**
@@ -636,10 +708,13 @@ class BasePointBuilder extends MapObjectBuilder
     @JsonIgnore
     String icon
 
-    BasePointBuilder setGeopositions(def dbEquip)
+    BasePointBuilder setGeopositions(def dbEquip, OutputObjectStrategies strategie)
     {
         def geoposition = dbEquip && dbEquip.location
-            ? new Geoposition(latitude: dbEquip.location.gradLat, longitude: dbEquip.location.gradLong)
+            ? new Geoposition(
+            latitude: dbEquip.location[strategie.pathLatitudeCoordinates],
+            longitude: dbEquip.location[strategie.pathLongitudeCoordinates]
+        )
             : null
         if(geoposition)
         {
@@ -672,11 +747,11 @@ class BasePointBuilder extends MapObjectBuilder
         EquipmentType equipType = null
         if(dbEquip)
         {
-            if(dbEquip.classification.UUID == 'classification$3605')
+            if (dbEquip.classification?.UUID == 'classification$3605')
             {
                 equipType = EquipmentType.CLUTCH
             }
-            else if(dbEquip.classification.UUID == 'classification$3604')
+            else if (dbEquip.classification?.UUID == 'classification$3604')
             {
                 equipType = EquipmentType.CROSS
             }
