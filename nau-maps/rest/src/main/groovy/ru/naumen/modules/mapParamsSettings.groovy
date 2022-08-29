@@ -92,11 +92,10 @@ class DataGeneration
     Collection<String> getListScript(AbstractPointCharacteristics data)
     {
         Collection<String> dataScriptText = []
-        data?.strategies?.each
-            {
-                String currentScript = it?.scriptText
-                dataScriptText.add(currentScript)
-            }
+        data?.strategies?.each {
+            String currentScript = it?.scriptText
+            dataScriptText.add(currentScript)
+        }
         return dataScriptText
     }
 
@@ -109,15 +108,14 @@ class DataGeneration
         AbstractPointCharacteristics data)
     {
         Collection<OutputObjectStrategies> dataWizardSettings = []
-        data?.strategies?.each
-            {
-                OutputObjectStrategies strategies = new StrategiesPoint()
-                    .setScriptText(it?.scriptText)
-                    .setPlacesOfUse(it?.placesOfUse)
-                    .setPathLatitudeCoordinates(it?.coordinatesSettings?.pathCoordinatLongitud)
-                    .setPathLongitudeCoordinates(it?.coordinatesSettings?.pathCoordinatLatitude)
-                dataWizardSettings.add(strategies)
-            }
+        data?.strategies?.each {
+            OutputObjectStrategies strategies = new StrategiesPoint()
+                .setScriptText(it?.scriptText)
+                .setPlacesOfUse(it?.placesOfUse)
+                .setPathLatitudeCoordinates(it?.coordinatesSettings?.pathCoordinatLongitud)
+                .setPathLongitudeCoordinates(it?.coordinatesSettings?.pathCoordinatLatitude)
+            dataWizardSettings.add(strategies)
+        }
         return dataWizardSettings
     }
 
@@ -130,21 +128,20 @@ class DataGeneration
         AbstractPointCharacteristics data)
     {
         Collection<OutputObjectStrategies> dataWizardSettings = []
-        data?.strategies?.each
-            {
-                OutputObjectStrategies strategies = new StrategiesLine()
-                    .setScriptText(it?.scriptText)
-                    .setPlacesOfUse(it?.placesOfUse)
-                    .setColor(it?.characteristicsLine?.colour)
-                    .setOpacity(it?.characteristicsLine?.opacity)
-                    .setWeight(it?.characteristicsLine?.width)
-                    .setLineStyle(it?.characteristicsLine?.drawingLineStyle.toString())
-                    .setPathCoordinatesLatitudeA(it?.coordinatesLine?.pathCoordinatesLatitudeA)
-                    .setPathCoordinatesLongitudA(it?.coordinatesLine?.pathCoordinatesLongitudA)
-                    .setPathCoordinatesLatitudeB(it?.coordinatesLine?.pathCoordinatesLatitudeB)
-                    .setPathCoordinatesLongitudB(it?.coordinatesLine?.pathCoordinatesLongitudB)
-                dataWizardSettings.add(strategies)
-            }
+        data?.strategies?.each {
+            OutputObjectStrategies strategies = new StrategiesLine()
+                .setScriptText(it?.scriptText)
+                .setPlacesOfUse(it?.placesOfUse)
+                .setColor(it?.characteristicsLine?.colour)
+                .setOpacity(it?.characteristicsLine?.opacity)
+                .setWeight(it?.characteristicsLine?.width)
+                .setLineStyle(it?.characteristicsLine?.drawingLineStyle.toString())
+                .setPathCoordinatesLatitudeA(it?.coordinatesLine?.pathCoordinatesLatitudeA)
+                .setPathCoordinatesLongitudA(it?.coordinatesLine?.pathCoordinatesLongitudA)
+                .setPathCoordinatesLatitudeB(it?.coordinatesLine?.pathCoordinatesLatitudeB)
+                .setPathCoordinatesLongitudB(it?.coordinatesLine?.pathCoordinatesLongitudB)
+            dataWizardSettings.add(strategies)
+        }
         return dataWizardSettings
     }
 
@@ -154,7 +151,7 @@ class DataGeneration
      * @param nameContent - имя контента
      * @param scriptText - список всех скриптов вкладки
      * @param isDataAboutPointsOrLines - данные о точках или линиях
-     * @return коллекцию данных для отображения данных на вкладке
+     * @return коллекция данных для отображения данных на вкладке
      */
     Collection collectingData(Collection<OutputObjectStrategies> strategies,
                               String nameContent,
@@ -500,12 +497,12 @@ class StrategiesLine extends OutputObjectStrategies
 class StrategiesPoint extends OutputObjectStrategies
 {
     /**
-     * Путь к координатам широты Путь к координатам широты
+     * Путь к координатам широты
      */
     String pathLatitudeCoordinates
 
     /**
-     * Путь к координатам широты Путь к координатам долготы
+     * Путь к координатам долготы
      */
     String pathLongitudeCoordinates
 

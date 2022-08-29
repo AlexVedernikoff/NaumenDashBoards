@@ -101,7 +101,7 @@ class ElementsMap
     /**
      * Метод по формированию данных о трассе
      * @param dbTrail - объект трассы из БД
-     * @para strategie - список настроек из мастера для линий
+     * @param strategie - список настроек из мастера для линий
      * @return объект с данными о трассе другого формата
      */
     private TrailBuilder createTrail(ISDtObject dbTrail, OutputObjectStrategies strategie)
@@ -218,8 +218,8 @@ class ElementsMap
     /**
      * Метод формирования точечного объекта оборудования
      * @param equipment - оборудование из БД
-     * @para strategie - список настроек из мастера
-     * @param indexElement - индекс текущего эллемента
+     * @param strategie - список настроек из мастера
+     * @param indexElement - индекс текущего элемента
      * @return сформированный объект оборудования
      */
     BasePointBuilder createEquipmentPoint(ISDtObject equipment,
@@ -245,7 +245,6 @@ class ElementsMap
             )
                 .setHeader(equipment.title)
                 .setIcon(equipment)
-                .setEquipType(equipIsActive ? null : equipment)
                 .setGeopositions(equipment, strategie)
                 .addAction('Перейти на карточку', api.web.open(equipment.UUID))
             attributesFromGroup.each {
@@ -260,17 +259,13 @@ class ElementsMap
                 {
                     valueLabel =
                         api.utils.find(codeMetaClass, [:])[indexElement][it.code] ?: 'не указано'
-
-                    try
-                    {
-                        linkElement = api.web.open(
-                            api.utils.find(codeMetaClass, [:])[indexElement][it.code]?.UUID
-                        )
-                    }
-                    catch (Exception exep)
-                    {
-                        linkElement =
-                            api.web.open(api.utils.find(codeMetaClass, [:])[indexElement].UUID)
+                    api.metainfo.getMetaClass(codeMetaClass).attributes.each { currentAttribute ->
+                        if (currentAttribute.code == it.code && currentAttribute.type == 'object')
+                        {
+                            linkElement = api.web.open(
+                                api.utils.find(codeMetaClass, [:])[indexElement][it.code]?.UUID
+                            )
+                        }
                     }
                 }
                 formedEquipmentObject
@@ -647,7 +642,7 @@ class SectionBuilder extends MapObjectBuilder
     @JsonInclude(Include.NON_NULL)
     String color
 
-    SectionBuilder setGeopositions(def dbPart)
+    SectionBuilder setGeopositions(ISDtObject dbPart)
     {
         Collection<Geoposition> geopositions = []
         if(dbPart && dbPart.siteA && dbPart.siteB)
@@ -708,7 +703,7 @@ class BasePointBuilder extends MapObjectBuilder
     @JsonIgnore
     String icon
 
-    BasePointBuilder setGeopositions(def dbEquip, OutputObjectStrategies strategie)
+    BasePointBuilder setGeopositions(ISDtObject dbEquip, OutputObjectStrategies strategie)
     {
         def geoposition = dbEquip && dbEquip.location
             ? new Geoposition(
@@ -739,28 +734,6 @@ class BasePointBuilder extends MapObjectBuilder
     {
         String fileUuid = dbEquip?.classification?.icon?.find()?.UUID ?: ''
         this.icon = fileUuid ? "/sd/operator/download?uuid=${fileUuid}" : ''
-        return this
-    }
-
-    BasePointBuilder setEquipType(def dbEquip = null)
-    {
-        EquipmentType equipType = null
-        if(dbEquip)
-        {
-            if (dbEquip.classification?.UUID == 'classification$3605')
-            {
-                equipType = EquipmentType.CLUTCH
-            }
-            else if (dbEquip.classification?.UUID == 'classification$3604')
-            {
-                equipType = EquipmentType.CROSS
-            }
-            else
-            {
-                equipType = EquipmentType.OTHER
-            }
-        }
-        this.equipType = equipType
         return this
     }
 }
