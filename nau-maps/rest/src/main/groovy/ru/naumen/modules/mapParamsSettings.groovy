@@ -13,6 +13,7 @@ package ru.naumen.modules.inventory
 import ru.naumen.core.server.script.spi.ScriptDtOList
 import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.annotation.JsonIgnore
+import ru.naumen.core.shared.dto.ISDtObject
 
 /**
  * Метод по получению данных из БД о трассах и точках(их участках и оборудовании на учасках)
