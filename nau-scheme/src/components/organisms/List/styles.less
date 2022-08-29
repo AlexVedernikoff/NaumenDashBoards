@@ -1,0 +1,72 @@
+:local {
+	.wrapList {
+		background-color: #FFFFFF;
+		bottom: 2px;
+		box-shadow: 0 2px 8px rgba(95, 95, 95, 0.24);
+		display: flex;
+		flex-direction: column;
+		left: 2px;
+		overflow: auto;
+		position: fixed;
+		top: 2px;
+		width: 320px;
+	}
+
+	.wrapListHide {
+		width: 0;
+
+		.buttonChangeView {
+			left: 6px;
+		}
+	}
+
+	.buttonChangeView {
+		align-items: center;
+		background: #FFFFFF;
+		box-shadow: 0 2px 8px rgba(95, 95, 95, 0.24);
+		border-radius: 4px;
+		display: flex;
+		height: 20px;
+		justify-content: center;
+		left: 330px;
+		padding: 0;
+		position: fixed;
+		top: 2px;
+		width: 20px;
+		z-index: 11;
+	}
+
+	.itemList {
+		border-bottom: 1px solid #D9D9D9;
+		padding: 16px 20px 20px;
+
+		> .itemContainer {
+			margin-top: 15px;
+		}
+
+		> .itemContainer ~ .itemContainer {
+			margin-top: 5px;
+		}
+	}
+
+	.itemTitleContainer {
+		display: flex;
+		flex-direction: row;
+
+		.itemTitle {
+			flex: 1;
+		}
+
+		.itemEditButton {
+			cursor: pointer;
+		}
+	}
+
+	.itemTitle {
+		color: #999999;
+	}
+
+	.itemDesc {
+		color: #323232;
+	}
+}

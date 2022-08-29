@@ -6,7 +6,6 @@ import React, {useEffect} from 'react';
 import styles from './styles.less';
 
 const Startup = ({children, error, getDataEntity, loading}: Props) => {
-
 	useEffect(() => {
 		getDataEntity();
 	}, []);
@@ -16,14 +15,10 @@ const Startup = ({children, error, getDataEntity, loading}: Props) => {
 	}
 
 	if (error) {
-		return <div className={styles.center}>Ошибка загрузки данных</div>;
+		return <div className={styles.center}>Ошибка загрузки данных!</div>;
 	}
 
-	return (
-		<div className={styles.container}>
-			{children}
-		</div>
-	);
+	return children;
 };
 
 export default connect(props, functions)(Startup);

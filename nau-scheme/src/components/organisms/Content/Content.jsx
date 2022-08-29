@@ -1,126 +1,155 @@
 // @flow
 import {connect} from 'react-redux';
-import Element from 'components/organisms/Element';
+import {
+	conversionSearchPosition,
+	downloadPdf,
+	downloadUri,
+	getBigConnectAngle,
+	getSmallConnectAngle,
+	sortPointCorrect
+} from './helpers';
+import type {Entity} from 'store/entity/types';
 import {functions, props} from './selectors';
 import {Layer, Stage} from 'react-konva';
-import type {Props} from 'components/organisms/Content/types';
-import React, {useEffect, useState} from 'react';
+import Lines from 'components/organisms/Element/Lines';
+import Points from 'components/organisms/Element/Points';
+import type {Props} from './types';
+import React, {useEffect, useRef, useState} from 'react';
+import styles from './styles.less';
 
-const Content = ({data}: Props) => {
+const Content = ({data, exportTo, openContextMenu, scale, setActiveElement}: Props) => {
+	const stageRef = useRef(null);
 	const [option, setOption] = useState({maxX: 0, maxY: 0, minY: 0});
-	const [points, setPoint] = useState([]);
-	const [lines, setLine] = useState([]);
+	const [points, setPoints] = useState([]);
+	const [lines, setLines] = useState([]);
 	const [connectors, setConnectors] = useState([]);
+	const [hoverElement, setHoverElement] = useState(null);
 
 	useEffect(() => {
-		const filterPoint = data.filter(e => e.type === 'point');
-		let minY = 0;
-		let maxY = 0;
-		let maxX = 0;
+		if (stageRef.current) {
+			if (exportTo === 'jpg' || exportTo === 'png') {
+				downloadUri(stageRef.current, `scheme.${exportTo}`);
+			} else if (exportTo === 'pdf') {
+				downloadPdf(stageRef.current, 'scheme.pdf');
+			}
+		}
+	}, [exportTo]);
 
-		const filterLine = data.filter(e => e.type === 'line');
+	useEffect(() => {
+		const options = {
+			maxX: 0,
+			maxY: 0,
+			minY: 0
+		};
+		const bufferConnectors = [];
 
-		setLine(filterLine);
+		const filterPoints = data.filter(e => e.type === 'point');
 
-		let bufferConnectors = [];
+		const filterLines = data.filter(e => e.type === 'line');
 
-		filterPoint.map((entity, index, origins) => {
-			let x = 0;
-			let y = 0;
-			const shift = 300;
-			const from = bufferConnectors.find(s => s.id === entity.from);
-			const connects = origins.filter(s => s.from === entity.from);
-			const isEven = !!(connects.length % 2);
-			const evenConnect = connects.length; // число отвлетвлений
-			const countSectors = evenConnect + (isEven ? 1 : 2); // число секторов кол-во линий + 2 боковых сектора
-			const angleStep = 180 / countSectors; // узнаем шаг угла для каждого ответвления
-			const connectIndex = bufferConnectors.filter(s => s.from === entity.from).length + 1; // текущий индекc отвлетвления
+		sortPointCorrect(filterPoints);
 
-			if (!from) { // если первый элемент то на стартовую позицию
+		filterPoints.map((entity: Entity, index: string, origins: Entity[]) => {
+			let x;
+			let y;
+			let angle;
+
+			const parent = bufferConnectors.find(s => s.id === entity.from);
+
+			if (!parent) { // если первый элемент то на стартовую позицию
 				x = 60;
 				y = 0;
 			} else {
-				x = from.x + shift;
+				const shift = 300;
+				const children = origins.filter(s => s.from === entity.id);
+				const connects = origins.filter(s => s.from === entity.from);
+				const connectsLength = connects.length; // число отвлетвлений
+				const connectsCountSmall = connectsLength < 5; // градация уменьшения угла развертки
+				const angleStep = connectsCountSmall ? 180 / (connectsLength + 1) : 30;
 
-				maxX = x;
+				const connectIndex = bufferConnectors.filter(s => s.from === entity.from).length; // текущий индекc отвлетвления
 
-				if (connects.length === 1 || (connectIndex === evenConnect / 2 + 0.5 && isEven)) { // если соединение одно или в середине списка, сдвигаем по горизонту
-					y = from.y;
+				if (connects.length === 1) { // если соединение одно, сдвигаем по горизонту
+					y = parent.y;
+					x = parent.x + shift;
+					angle = 0;
 				} else { // если соединений несколько, вычесляем угол и координаты сдвига
-					if (connectIndex < evenConnect) { // верхняя область
-						const yShift = shift * Math.tan((angleStep * connectIndex) * Math.PI / 180); // длина гор. катера на тан. угла
-						y = from.y - yShift; // - (1000 / angleStep * connectIndex);
-						// x = x - (1000 / angleStep * connectIndex);
+					let shiftRatioAngle = shift + 50;
 
-						if (minY > y) minY = y;
-					} else { // нижняя область
-						const yShift = shift * Math.tan((angleStep * +(connectIndex - connects.length + 1)) * Math.PI / 180); // индекс считаем с начала для второй половины
-						y = from.y + yShift;
+					const initialAngle = -(angleStep * connectIndex);
+					const finishAngle = connectsCountSmall ? getSmallConnectAngle(initialAngle, parent.angle, connectsLength, angleStep) : getBigConnectAngle(initialAngle, parent.angle);
 
-						if (maxY < y) maxY = y;
+					if (finishAngle === 0 && children && children.length > 1) { // удлиняем горизонтальный луч если есть дети
+						shiftRatioAngle += 200;
 					}
+
+					const a = shiftRatioAngle * Math.sin(finishAngle * Math.PI / 180); // катет а
+					const b = shiftRatioAngle * -Math.cos(finishAngle * Math.PI / 180); // катет б
+
+					y = parent.y - a;
+					x = parent.x - b;
+					angle = finishAngle;
 				}
+
+				if (options.minY > y) options.minY = y;
+
+				if (options.maxY < y) options.maxY = y;
+
+				if (options.maxX < x) options.maxX = x;
 			}
 
-			const connector = {x, y, ...entity};
-			bufferConnectors = [...bufferConnectors, connector];
+			const connector = {angle, x, y, ...entity};
+
+			bufferConnectors.push(connector);
 
 			return connector;
 		});
 
-		const conversionTreePosition = (point, parent, y = 200) => { // сдвиг дерева на заданный шаг
-			for (const entity of point) {
-				if (entity.from === parent.id) {
-					entity.y -= y;
+		const {connectors, customOptions} = conversionSearchPosition(bufferConnectors, options);
 
-					if (minY > entity.y) minY = entity.y;
-
-					conversionTreePosition(point, entity, y);
-				}
-			}
-			return point;
-		};
-
-		const conversionSearchPosition = connectors => {
-			for (const entity of connectors) {
-				const shiftPoint = 50;
-				const [search] = connectors.filter(s => {
-					return s.id !== entity.id
-					&& s.x + shiftPoint > entity.x && entity.x > s.x - shiftPoint
-					&& s.y + shiftPoint > entity.y && entity.y > s.y - shiftPoint;
-				});
-
-				if (search) { // найдено соприкосновение позиций точек
-					const parent = connectors.find(s => s.id === search.from);
-					const connects = connectors.filter(s => s.from === parent.id);
-
-					if (connects.length > 1) { // несколько соединений  TODO луч не центральный
-						conversionTreePosition(connectors, parent); // TODO: определение сектора и установка сдвига по y
-						break;
-					}
-				}
-			}
-			return connectors;
-		};
-
-		setConnectors(conversionSearchPosition(bufferConnectors));
-
-		setPoint(filterPoint);
-
-		setOption({maxX: maxX + 50 * 2, maxY: maxY + 50 * 2, minY: minY - 50 * 2});
+		setConnectors(connectors);
+		setLines(filterLines);
+		setPoints(filterPoints);
+		setOption({maxX: customOptions.maxX + 50 * 2, maxY: customOptions.maxY + 50 * 2, minY: customOptions.minY - 50 * 2});
 	}, []);
 
+	const handleCloseContextMenu = () => {
+		openContextMenu(null);
+	};
+
 	return (
-		<Stage height={-option.minY + option.maxY} width={option.maxX + 300}>
+		<Stage
+			className={(hoverElement ? styles.hover : '')}
+			height={-option.minY + option.maxY}
+			onClick={handleCloseContextMenu}
+			ref={stageRef}
+			scaleX={scale}
+			scaleY={scale}
+			width={option.maxX + 300}
+		>
 			<Layer>
 				{lines.map(line => {
 					const from = connectors.find(s => s.id === line.from);
 					const to = connectors.find(s => s.id === line.to);
-					return <Element entity={line} key={line.id} points={{fromX: from.x, fromY: from.y + -option.minY, toX: to.x, toY: to.y + -option.minY}} />;
+					return <Lines
+						entity={line}
+						handleContextMenu={openContextMenu}
+						key={line.id}
+						onClick={setActiveElement}
+						onHover={setHoverElement}
+						points={{fromX: from.x, fromY: from.y + -option.minY, toX: to.x, toY: to.y + -option.minY}} />;
 				})}
 				{points.map(point => {
 					const connector = connectors.find(s => s.id === point.id);
-					return <Element entity={point} key={point.id} x={connector.x} y={connector.y + -option.minY} />;
+					return <Points
+						className={styles.hover}
+						entity={point}
+						handleContextMenu={openContextMenu}
+						key={point.id}
+						onClick={setActiveElement}
+						onHover={setHoverElement}
+						x={connector.x}
+						y={connector.y + -option.minY} />;
 				})}
 			</Layer>
 		</Stage>

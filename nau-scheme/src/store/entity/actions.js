@@ -1,6 +1,6 @@
 // @flow
-import type {Dispatch, ThunkAction} from 'store/types';
-import {getEntity} from 'utils/api';
+import type {Dispatch, Entity, ThunkAction} from 'store/types';
+import {getScheme} from 'utils/api';
 import {VERIFY_EVENTS} from './constants';
 
 /**
@@ -8,13 +8,11 @@ import {VERIFY_EVENTS} from './constants';
  * @returns {ThunkAction}
  */
 const getDataEntity = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-
 	try {
 		dispatch(showLoaderData());
 
-		const entity = await getEntity();
-
-		dispatch(setEntityData([...entity]));
+		const response = await getScheme();
+		dispatch(setEntityData([...response.entities]));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -54,6 +52,36 @@ const setEntityData = (payload: string) => ({
 	type: VERIFY_EVENTS.SET_DATA
 });
 
+/**
+ * Установка выбранного едемента
+ * @param {string} payload - елемент
+ */
+const setActiveElement = (payload: Entity) => ({
+	payload,
+	type: VERIFY_EVENTS.SET_ACTIVE_ELEMENT
+});
+
+/**
+ * Установка зума
+ * @param {number} payload - зум
+ */
+const setScale = (payload: string) => ({
+	payload,
+	type: VERIFY_EVENTS.SET_SCALE
+});
+
+/**
+ * Установка экспорта
+ * @param {string} payload - формат
+ */
+const setExportTo = (payload: string) => ({
+	payload,
+	type: VERIFY_EVENTS.SET_EXPORT_TO
+});
+
 export {
+	setActiveElement,
+	setScale,
+	setExportTo,
 	getDataEntity
 };
