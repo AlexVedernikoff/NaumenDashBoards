@@ -69,7 +69,13 @@ const extractCheckedToNewGroup = (value: IndicatorGrouping): IndicatorGrouping =
 
 	checkedElements.forEach(element => {
 		if (element.type === INDICATOR_GROUPING_TYPE.GROUP_INDICATOR_INFO) {
-			children.push({...element, checked: false});
+			const newGroup = {...element, checked: false};
+
+			if (newGroup.children) {
+				newGroup.children = removeElementsFromIndicatorGrouping(newGroup.children, checkedElements);
+			}
+
+			children.push(newGroup);
 		} else if (element.type === INDICATOR_GROUPING_TYPE.INDICATOR_INFO) {
 			children.push({...element, checked: false});
 		}
