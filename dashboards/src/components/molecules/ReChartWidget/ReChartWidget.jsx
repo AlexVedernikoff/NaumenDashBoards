@@ -2,16 +2,19 @@
 import cn from 'classnames';
 import type {DivRef} from 'components/types';
 import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/recharts/constants';
-import type {Props} from './types';
+import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
 import T from 'components/atoms/Translation';
 import {WIDGET_SETS} from 'store/widgets/data/constants';
 
-export class ReChartWidget extends PureComponent<Props> {
+export class ReChartWidget extends PureComponent<Props, State> {
 	containerRef: DivRef = createRef();
 	chart = null;
+	state = {
+		showTotal: true
+	};
 
 	getClassName = () => {
 		const {legend} = this.props.widget;
@@ -25,21 +28,24 @@ export class ReChartWidget extends PureComponent<Props> {
 		});
 	};
 
-	handleResize = (...props) => {
-		const {updateOptions} = this.props;
-		const {current: container} = this.containerRef;
+	handleResize = (newWidth: number, newHeight: number) => {
+		this.setState({showTotal: newHeight > 50}, () => {
+			const {updateOptions} = this.props;
+			const {current: container} = this.containerRef;
 
-		if (container) {
-			updateOptions(container);
-		}
+			if (container) {
+				updateOptions(container);
+			}
+		});
 	};
 
 	renderTotal = () => {
 		const {data, widget} = this.props;
+		const {showTotal} = this.state;
 		const {dataLabels, showTotalAmount} = widget;
 		const {fontFamily, fontSize} = dataLabels;
 
-		if (showTotalAmount) {
+		if (showTotalAmount && showTotal) {
 			const style = {fontFamily, fontSize, height: fontSize};
 			const {countTotals} = data ?? {};
 
