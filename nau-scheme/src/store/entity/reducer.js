@@ -24,12 +24,22 @@ const reducer = (state: EntityState = initialVerifyState, action: defaultVerifyA
 		case VERIFY_EVENTS.SET_ERROR_DATA:
 			return {
 				...state,
-				error: true
+				error: action.payload
 			};
-		case VERIFY_EVENTS.SET_NOTIFICATION_SHOW:
+		case VERIFY_EVENTS.SET_ACTIVE_ELEMENT:
 			return {
 				...state,
-				notification: action.payload
+				activeElement: action.payload
+			};
+		case VERIFY_EVENTS.SET_SCALE:
+			return {
+				...state,
+				scale: action.payload
+			};
+		case VERIFY_EVENTS.SET_EXPORT_TO:
+			return {
+				...state,
+				exportTo: action.payload
 			};
 		default:
 			return state;

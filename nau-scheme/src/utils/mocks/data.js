@@ -1,9 +1,35 @@
 export default {
 	entities: [
 		{
+			actions: [
+				{
+					inPlace: false,
+					link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+					name: 'Перейти на карточку',
+					type: 'open_link'
+				}
+			],
 			desc: '222222',
 			from: null,
 			id: 0,
+			options: [
+				{
+					label: 'Модель',
+					presentation: 'right_of_label',
+					value: {
+						label: 'TT 120',
+						url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4402'
+					}
+				},
+				{
+					label: 'Расположение',
+					presentation: 'right_of_label',
+					value: {
+						label: 'Подвал Южная',
+						url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+					}
+				}
+			],
 			title: '1111',
 			to: null,
 			type: 'point'
@@ -276,6 +302,294 @@ export default {
 			desc: '222222',
 			from: 26,
 			id: 34,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 35,
+			title: '1111',
+			to: 36,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 36,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 16,
+			id: 37,
+			title: '1111',
+			to: 38,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 16,
+			id: 38,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 16,
+			id: 39,
+			title: '1111',
+			to: 40,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 16,
+			id: 40,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 16,
+			id: 41,
+			title: '1111',
+			to: 42,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 16,
+			id: 42,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 43,
+			title: '1111',
+			to: 44,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 44,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 45,
+			title: '1111',
+			to: 46,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 46,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 47,
+			title: '1111',
+			to: 48,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 48,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 49,
+			title: '1111',
+			to: 50,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 50,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 51,
+			title: '1111',
+			to: 52,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 8,
+			id: 52,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 10,
+			id: 53,
+			title: '1111',
+			to: 54,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 10,
+			id: 54,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 10,
+			id: 55,
+			title: '1111',
+			to: 56,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 10,
+			id: 56,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 10,
+			id: 57,
+			title: '1111',
+			to: 58,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 10,
+			id: 58,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 52,
+			id: 59,
+			title: '1111',
+			to: 60,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 52,
+			id: 60,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 52,
+			id: 61,
+			title: '1111',
+			to: 62,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 52,
+			id: 62,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 14,
+			id: 63,
+			title: '1111',
+			to: 64,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 14,
+			id: 64,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 44,
+			id: 65,
+			title: '1111',
+			to: 66,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 44,
+			id: 66,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 6,
+			id: 67,
+			title: '1111',
+			to: 68,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 6,
+			id: 68,
+			title: '1111',
+			to: null,
+			type: 'point'
+		},
+		{
+			desc: '222222',
+			from: 16,
+			id: 69,
+			title: '1111',
+			to: 70,
+			type: 'line'
+		},
+		{
+			desc: '222222',
+			from: 16,
+			id: 70,
 			title: '1111',
 			to: null,
 			type: 'point'
