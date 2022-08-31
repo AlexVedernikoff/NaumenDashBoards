@@ -800,7 +800,7 @@
         void replaceResultAttributeMetaClass(Collection res, DiagramRequest request)
         {
             Boolean isTypeMetaClass = request?.data?.every { key, value ->
-                value?.groups.size() != 0 && value?.groups?.any {
+                value?.groups?.size() != 0 && value?.groups?.any {
                     it?.attribute?.type == 'metaClass'
                 }
             }
