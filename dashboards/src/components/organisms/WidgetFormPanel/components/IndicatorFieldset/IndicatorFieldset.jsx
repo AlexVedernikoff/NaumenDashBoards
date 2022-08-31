@@ -45,6 +45,7 @@ Context.displayName = 'INDICATOR_FIELDSET_CONTEXT';
 
 export class IndicatorFieldset extends PureComponent<Props, State> {
 	static defaultProps = {
+		filteredSource: null,
 		hasInterestRelative: false,
 		usesNotApplicableAggregation: false
 	};
@@ -179,19 +180,22 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	};
 
 	handleClickFilter = async () => {
-		const {openFilterForm, source, value: indicator} = this.props;
-		const {descriptor} = indicator;
-		const {value} = source;
+		const {filteredSource, openFilterForm, value: indicator} = this.props;
 
-		if (value) {
-			const sourceData = {descriptor: descriptor ?? '', value};
-			const serializedContext = await openFilterForm(sourceData);
+		if (filteredSource) {
+			const {descriptor} = indicator;
+			const {value} = filteredSource;
 
-			if (serializedContext) {
-				this.change({
-					...indicator,
-					descriptor: serializedContext
-				});
+			if (value) {
+				const sourceData = {descriptor: descriptor ?? '', value};
+				const serializedContext = await openFilterForm(sourceData);
+
+				if (serializedContext) {
+					this.change({
+						...indicator,
+						descriptor: serializedContext
+					});
+				}
 			}
 		}
 	};
@@ -362,9 +366,9 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	);
 
 	renderFilterIcon = () => {
-		const {hasFiltered, value} = this.props;
+		const {filteredSource, value} = this.props;
 
-		if (hasFiltered) {
+		if (filteredSource) {
 			const {descriptor} = value;
 			const icon = descriptorContainsFilter(descriptor) ? ICON_NAMES.FILLED_FILTER : ICON_NAMES.FILTER;
 

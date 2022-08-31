@@ -17,7 +17,7 @@ export type Props = TypeProps & ValuesProps<ValuesPropsParams> & HelpersProps & 
 	dataKey: string,
 	dataSetIndex: number,
 	dataSets: Array<DiagramDataSet>,
-	hasFiltered: boolean,
+	filteredSource: ?SourceData,
 	hasInterestRelative: boolean,
 	index: number,
 	onChange: (index: number, indicator: Indicator, callback?: Function) => void,

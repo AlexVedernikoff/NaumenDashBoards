@@ -58,7 +58,7 @@ export class PivotRow extends PureComponent<Props, State> {
 		});
 
 		return (
-			<div className={className} style={parameterStyle} title={row.value}>
+			<div className={className} style={parameterStyle} title={value}>
 				{this.renderToggler()}
 				{this.renderIndex()}
 				{value}
