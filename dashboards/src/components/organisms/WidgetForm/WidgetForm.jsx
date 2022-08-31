@@ -1,5 +1,6 @@
 // @flow
 import {deepClone} from 'helpers';
+import {DEFAULT_TOOLTIP_SETTINGS} from 'store/widgets/data/constants';
 import {ERRORS_CONTEXT} from './HOCs/withErrors/constants';
 import memoize from 'memoize-one';
 import type {Props, State} from './types';
@@ -74,11 +75,8 @@ class WidgetForm extends Component<Props, State> {
 		const {data, tooltip} = newValues;
 		let changed = false;
 
-		if (tooltip && tooltip.show && tooltip.title === '') {
-			newValues.tooltip = {
-				show: false,
-				title: ''
-			};
+		if (tooltip && tooltip.show && tooltip.text === '' && tooltip.title === '') {
+			newValues.tooltip = {...DEFAULT_TOOLTIP_SETTINGS};
 			changed = true;
 		}
 
@@ -88,7 +86,7 @@ class WidgetForm extends Component<Props, State> {
 					const {tooltip} = indicator;
 
 					if (tooltip && tooltip.show && tooltip.title === '') {
-						indicator.tooltip = {show: false, title: ''};
+						indicator.tooltip = {...DEFAULT_TOOLTIP_SETTINGS};
 						changed = true;
 					}
 				});
