@@ -7,3 +7,7 @@ export type Props = InjectLoadingProps & {
 	updateOptions: (container: HTMLDivElement) => void,
 	widget: Chart
 };
+
+export type State = {
+	showTotal: boolean,
+};
