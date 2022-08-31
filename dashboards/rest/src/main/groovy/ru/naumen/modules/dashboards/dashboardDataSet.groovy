@@ -807,25 +807,28 @@
             if (isTypeMetaClass)
             {
                 res.each { resArraysData ->
-                    for (int i = 0; i < resArraysData.size(); i++)
+                    if (resArraysData)
                     {
-                        try
+                        for (int i = 0; i < resArraysData.size(); i++)
                         {
-                            String secondDataElement =
-                                MetaClassMarshaller.unmarshal(resArraysData[i]).last()
-                            if (metainfo.getMetaClass(secondDataElement))
+                            try
                             {
-                                String firstDataElement =
-                                    metainfo.getMetaClass(secondDataElement) ?
-                                        metainfo.getMetaClass(secondDataElement).title :
-                                        MetaClassMarshaller.unmarshal(resArraysData[i]).first()
-                                resArraysData[i] =
-                                    MetaClassMarshaller.marshal(firstDataElement, secondDataElement)
+                                String secondDataElement =
+                                    MetaClassMarshaller.unmarshal(resArraysData[i]).last()
+                                if (metainfo.getMetaClass(secondDataElement))
+                                {
+                                    String firstDataElement =
+                                        metainfo.getMetaClass(secondDataElement) ?
+                                            metainfo.getMetaClass(secondDataElement).title :
+                                            MetaClassMarshaller.unmarshal(resArraysData[i]).first()
+                                    resArraysData[i] =
+                                        MetaClassMarshaller.marshal(firstDataElement, secondDataElement)
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            //результат не требует замены элементов
+                            catch (Exception ex)
+                            {
+                                //результат не требует замены элементов
+                            }
                         }
                     }
                 }
