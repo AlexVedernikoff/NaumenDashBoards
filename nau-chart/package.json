@@ -169,7 +169,7 @@
     "react"
   ],
   "license": "ISC",
-  "name": "nau-scheme",
+  "name": "nau-chart",
   "repository": {
     "type": "git",
     "url": "git@gitsd.naumen.ru:nordclan/nordclan.git"
