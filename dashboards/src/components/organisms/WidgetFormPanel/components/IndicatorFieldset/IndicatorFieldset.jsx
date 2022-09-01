@@ -9,7 +9,7 @@ import type {ComputedAttr, PercentageRelativeAttr} from 'store/widgets/data/type
 import ComputedAttributeEditor from 'WidgetFormPanel/components/ComputedAttributeEditor';
 import Container from 'components/atoms/Container';
 import CreationPanel from 'components/atoms/CreationPanel';
-import {deepClone} from 'helpers';
+import {deepClone, omit} from 'helpers';
 import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
 import {descriptorContainsFilter} from 'utils/descriptorUtils';
 import type {DiagramDataSet, Indicator} from 'store/widgetForms/types';
@@ -191,10 +191,14 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 				const serializedContext = await openFilterForm(sourceData);
 
 				if (serializedContext) {
-					this.change({
-						...indicator,
-						descriptor: serializedContext
-					});
+					if (descriptorContainsFilter(serializedContext)) {
+						this.change({
+							...indicator,
+							descriptor: serializedContext
+						});
+					} else {
+						this.change(omit(indicator, 'descriptor'));
+					}
 				}
 			}
 		}
