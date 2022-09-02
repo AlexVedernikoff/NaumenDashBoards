@@ -17,21 +17,17 @@ export class PanelPointContent extends Component<Props> {
 	};
 
 	truncate = (str, n) => {
-		return str.length > n && this.state.viewTextFull ? str.substr(0, n - 1) : str;
+		return str.length > n && !this.state.viewTextFull ? str.substr(0, n - 1) : str;
 	};
 
 	renderTextFull () {
-		return <div onClick={this.changeViewText}>{this.state.viewTextFull ? 'Показать подробнее' : 'Скрыть' }</div>;
+		return <div onClick={this.changeViewText}>{!this.state.viewTextFull ? 'Показать подробнее...' : 'Скрыть' }</div>;
 	}
 
 	renderText () {
 		const {option: {label}} = this.props;
-
 		return (
-			<div className={styles.text}>
-				{this.truncate(label, 255)}
-				{label.length > 255 && this.renderTextFull()}
-			</div>
+			<div className={styles.text}>{label}</div>
 		);
 	}
 
@@ -41,7 +37,10 @@ export class PanelPointContent extends Component<Props> {
 		if (value.url) {
 			return <a className={styles.link} href={value.url} rel="noreferrer" target="_blank">{value.label}</a>;
 		} else {
-			return <div className={styles.link}>{value.label}</div>;
+			return <div className={styles.link}>
+				{this.truncate(value.label, 255)}
+				{value.label.length > 255 && this.renderTextFull()}
+			</div>;
 		}
 	}
 

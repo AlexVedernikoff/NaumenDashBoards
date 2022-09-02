@@ -1,8 +1,8 @@
 // @flow
 import type {TimeInterval} from 'types/helper';
 
-export const getTimeInSeconds = (timeIntervalInactivity: {length: number, interval: TimeInterval}) => {
-	const {length, interval} = timeIntervalInactivity;
+export const getTimeInSeconds = (timeIntervalInactivity: {interval: TimeInterval, length: number}) => {
+	const {interval, length} = timeIntervalInactivity;
 	let coef = 0;
 
 	switch (interval) {

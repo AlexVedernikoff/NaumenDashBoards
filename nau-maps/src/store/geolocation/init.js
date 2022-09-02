@@ -18,7 +18,8 @@ export const initialGeolocationState: GeolocationState = {
 	error: false,
 	loading: true,
 	mapObjects: [],
-	mapSelect: 'Yandex',
+	mapSelect: 'openStreetMap',
+	mapsKeyList: {'openStreetMap': true},
 	panelShow: 'static',
 	params: {
 		autoUpdateLocation: true,
@@ -26,7 +27,6 @@ export const initialGeolocationState: GeolocationState = {
 		groupingMethodName: '',
 		listName: 'Объекты ВОЛС',
 		locationUpdateFrequency: {interval: 'SECOND', length: 60},
-		mapsList: ['Yandex', 'OpenMap'],
 		requestCurrentLocation: false,
 		trailsMethodName: 'trailsMethodName',
 		updatePointsMode: 'getMapObjects'

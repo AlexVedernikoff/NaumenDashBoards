@@ -1,8 +1,9 @@
 // @flow
-import {Tooltip} from 'react-leaflet';
+
+import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './TooltipPoint.less';
-import type {Props} from './types';
+import {Tooltip} from 'react-leaflet';
 
 export class TooltipPoint extends Component<Props> {
 	static defaultProps = {
@@ -10,11 +11,11 @@ export class TooltipPoint extends Component<Props> {
 	};
 
 	render () {
-		const {title, sticky} = this.props;
+		const {sticky, title} = this.props;
 		const offset = [0, 30];
 
 		return (
-			<Tooltip className={styles.tolltipLabel} offset={offset} opacity={1} sticky={sticky} interactive={true}>
+			<Tooltip className={styles.tolltipLabel} interactive={true} offset={offset} opacity={1} sticky={sticky}>
 				{title}
 			</Tooltip>
 		);

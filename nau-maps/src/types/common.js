@@ -1,6 +1,6 @@
 // @flow
 import type {Action} from './action';
-import {Equipment, EquipmentType, EquipType} from './equipment';
+import {EquipType, Equipment, EquipmentType} from './equipment';
 import type {Geoposition} from './geoposition';
 import type {Option} from './option';
 import type {Part, PartType} from './part';

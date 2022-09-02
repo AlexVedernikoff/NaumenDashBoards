@@ -107,6 +107,7 @@ export type GeolocationState = {
 	loading: boolean,
 	mapObjects: Array<Common>,
 	mapSelect: string,
+	mapsKeyList: {[k: string]: string | boolean},
 	panelShow: PointType,
 	params: Params,
 	showSingleObject: boolean,

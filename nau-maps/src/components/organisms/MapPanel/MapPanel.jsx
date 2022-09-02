@@ -1,5 +1,4 @@
 // @flow
-import cn from 'classnames';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import type {Props} from './types';
@@ -19,16 +18,19 @@ export class MapPanel extends Component<Props> {
 	};
 
 	renderList () {
-		const {mapsList} = this.props;
+		const {mapsKeyList} = this.props;
 
 		return (
 			<ul className={styles.panelMapList}>
-				{mapsList.map(this.renderListItem)}
+				{Object.keys(mapsKeyList).map(this.renderListItem)}
 			</ul>
 		);
 	}
 
 	renderListItem = name => {
+		/* Временная мера из за не возможности работы с google maps */
+		if (name === 'google') return null;
+
 		return (
 			<li className={styles.panelMapItem} key={name} onClick={this.handleClick(name)}>{name}</li>
 		);

@@ -43,7 +43,7 @@ export class PointsList extends Component<Props> {
 		const {points = [], sections = [], trails = [], typeMap} = this.props;
 
 		switch (typeMap) {
-			case 'Yandex':
+			case 'yandex':
 				return (
 					<div>
 						{trails.map(this.renderYandexTrails)}

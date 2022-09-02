@@ -28,22 +28,22 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any>
 
 const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
-		let markers = testData;
-		const {context} = getState().geolocation;
-		const {contentCode, subjectUuid} = context;
+		let data = testData;
+		const {context: {contentCode, subjectUuid}} = getState().geolocation;
 
 		if (environment !== 'development') {
-			markers = await getMapObjects(contentCode, subjectUuid);
+			data = await getMapObjects(contentCode, subjectUuid);
 		}
 
-		const {errors} = markers;
+		const {errors, mapApiKey, objects} = data;
 
 		if (errors && errors.length > 0) {
 			const label = errors.join(', ') + '.';
 			notify('common', 'info', label);
 		}
 
-		dispatch(setData(markers, firstCall));
+		dispatch(setMapArray(mapApiKey));
+		dispatch(setData(objects));
 	} catch (error) {
 		notify('error', 'error');
 		dispatch(recordGeolocationdError(error));
@@ -83,11 +83,8 @@ const setParams = (payload: Object) => dispatch => {
 	return Promise.resolve();
 };
 
-const setData = (payload: Object, firstCall) => ({
-	payload: {
-		...payload,
-		firstCall
-	},
+const setData = (payload: Object) => ({
+	payload,
 	type: GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION
 });
 
@@ -109,6 +106,11 @@ const setSingleObject = (data: Point) => ({
 const setMapPanel = (map: string) => ({
 	payload: map,
 	type: GEOLOCATION_EVENTS.SET_MAP_PANEL
+});
+
+const setMapArray = (map: string) => ({
+	payload: map,
+	type: GEOLOCATION_EVENTS.SET_MAP_ARRAY
 });
 
 const resetSingleObject = () => ({

@@ -1,8 +1,9 @@
 // @flow
+
+import {cssTransition, toast} from 'react-toastify';
 import type {MessageStyleType, NotifyTemplateType} from 'types/helper';
 import React from 'react';
 import styles from './Notify.less';
-import {toast, cssTransition} from 'react-toastify';
 
 const transitionToast = cssTransition({
 	duration: 10
