@@ -1,8 +1,8 @@
 // @flow
 import cn from 'classnames';
 import React, {Component} from 'react';
-import type {TrackProps as Props} from './types';
 import styles from './Scrollable.less';
+import type {TrackProps as Props} from './types';
 
 export class Slider extends Component<Props> {
 	props: Props;
@@ -10,8 +10,8 @@ export class Slider extends Component<Props> {
 	static defaultProps = {
 		axis: 'y',
 		pressed: false,
-		scrollbarColors: 'grey',
 		scrollPosition: 0,
+		scrollbarColors: 'grey',
 		sliderSize: 0
 	};
 
@@ -53,7 +53,7 @@ export class Slider extends Component<Props> {
 	};
 
 	render () {
-		const {axis, pressed, scrollbarColors, scrollPosition, sliderSize} = this.props;
+		const {axis, pressed, scrollPosition, scrollbarColors, sliderSize} = this.props;
 		const style = {};
 
 		if (axis === 'x') {
@@ -74,9 +74,9 @@ export class Slider extends Component<Props> {
 				[styles.x]: axis === 'x',
 				[styles.y]: axis === 'y'
 			}),
-			ref: this.setSliderRef,
 			onMouseDown: this.handleMouseDown,
 			onTouchStart: this.handleTouch,
+			ref: this.setSliderRef,
 			style
 		};
 

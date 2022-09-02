@@ -21,7 +21,7 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 		case GEOLOCATION_EVENTS.SET_DATA_GEOLOCATION:
 			return {
 				...state,
-				mapObjects: action.payload.objects,
+				mapObjects: action.payload,
 				showSingleObject: false,
 				success: true,
 				timeUpdate: new Date().getTime()
@@ -31,6 +31,11 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				...state,
 				mapSelect: action.payload,
 				timeUpdate: new Date().getTime()
+			};
+		case GEOLOCATION_EVENTS.SET_MAP_ARRAY:
+			return {
+				...state,
+				mapsKeyList: {'openStreetMap': true, ...action.payload}
 			};
 		case GEOLOCATION_EVENTS.RELOAD_ACTIVE_POINT:
 			return {

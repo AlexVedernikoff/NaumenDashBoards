@@ -1,7 +1,7 @@
 // @flow
 import cn from 'classnames';
-import type {SliderProps as Props} from './types';
 import React, {Component} from 'react';
+import type {SliderProps as Props} from './types';
 import styles from './Scrollable.less';
 
 export class Track extends Component<Props> {

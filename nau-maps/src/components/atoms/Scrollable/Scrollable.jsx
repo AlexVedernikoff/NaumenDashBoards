@@ -1,5 +1,5 @@
 // @flow
-import type {Axis, State, ScrollableProps as Props} from './types';
+import type {Axis, ScrollableProps as Props, State} from './types';
 import cn from 'classnames';
 import {MIN_SLIDER_SIZE, WHEEL_DELTA} from './constants';
 import React, {Component} from 'react';
@@ -26,8 +26,8 @@ export class Scrollable extends Component<Props, State> {
 			mouseDownOnSliderX: false,
 			mouseDownOnSliderY: false,
 			scrollXIsActive: false,
-			scrollYIsActive: false,
 			scrollXPosition: 0,
+			scrollYIsActive: false,
 			scrollYPosition: 0,
 			shiftIsPressed: false,
 			sliderXWidth: 0,
@@ -194,6 +194,7 @@ export class Scrollable extends Component<Props, State> {
 		if (!this.inner) {
 			return;
 		}
+
 		const {
 			containerHeight,
 			containerWidth,
@@ -299,10 +300,10 @@ export class Scrollable extends Component<Props, State> {
 				|| this.state.containerHeight !== this.inner.offsetHeight
 				|| this.state.containerWidth !== this.inner.offsetWidth
 			) {
-				let containerHeight = this.inner.offsetHeight;
-				let containerWidth = this.inner.offsetWidth;
-				let contentHeight = this.inner.scrollHeight;
-				let contentWidth = this.inner.scrollWidth;
+				const containerHeight = this.inner.offsetHeight;
+				const containerWidth = this.inner.offsetWidth;
+				const contentHeight = this.inner.scrollHeight;
+				const contentWidth = this.inner.scrollWidth;
 				const scrollXIsActive = containerWidth < contentWidth;
 				const scrollYIsActive = containerHeight < contentHeight;
 
@@ -416,8 +417,8 @@ export class Scrollable extends Component<Props, State> {
 			mouseDownOnSliderX,
 			mouseDownOnSliderY,
 			scrollXIsActive,
-			scrollYIsActive,
 			scrollXPosition,
+			scrollYIsActive,
 			scrollYPosition,
 			sliderXWidth,
 			sliderYHeight
@@ -425,24 +426,24 @@ export class Scrollable extends Component<Props, State> {
 		const {scrollbarColors} = this.props;
 
 		const props = {
-			scrollbarColors,
 			onMouseDown: this.handleMouseDownScroll,
 			onTouch: this.handleTouchScroll,
-			onWheelScroll: this.handleWheelScroll
+			onWheelScroll: this.handleWheelScroll,
+			scrollbarColors
 		};
 
 		const sliderXProps = {
 			axis: 'x',
+			pressed: mouseDownOnSliderX,
 			scrollPosition: scrollXPosition,
-			sliderSize: sliderXWidth,
-			pressed: mouseDownOnSliderX
+			sliderSize: sliderXWidth
 		};
 
 		const sliderYProps = {
 			axis: 'y',
+			pressed: mouseDownOnSliderY,
 			scrollPosition: scrollYPosition,
-			sliderSize: sliderYHeight,
-			pressed: mouseDownOnSliderY
+			sliderSize: sliderYHeight
 		};
 
 		const scrollbarX = scrollXIsActive && (

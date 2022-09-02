@@ -1,6 +1,7 @@
 // @flow
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
+import Mark from 'components/molecules/Yandex/Mark';
 import {Polyline} from 'react-yandex-maps';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
@@ -16,29 +17,47 @@ class Line extends Component<Props, State> {
 		setSingleObject(part);
 	};
 
-	render () {
-		const {color, opacity = 1, part, weight = 6} = this.props;
-		const {data: {header = ''}, geopositions} = part;
-
+	renderLine = () => {
+		const {part} = this.props;
+		const {color, data: {header = ''}, geopositions, lineStyle = 'solidLine', opacity = 100, weight = 6} = part;
+		const opacityFloat = +opacity / 100;
+		const strokeStyleArray = lineStyle === 'dashedLine' ? [1, 2] : [0, 0];
 		const positions = geopositions.map(geoposition => [geoposition.latitude, geoposition.longitude]);
 
-		return (
-			<Polyline
-				geometry={positions}
-				key={part.data.uuid}
-				onClick={this.showSingle}
-				onContextMenu={this.showContentMenu}
-				options={{
-					balloonCloseButton: false,
-					opacity: opacity,
-					strokeColor: color,
-					strokeStyle: [1, 2],
-					strokeWidth: weight
-				}}
-				properties={{
-					hintContent: header
-				}}>
-			</Polyline>
+		return <Polyline
+			geometry={positions}
+			key={part.data.uuid}
+			onClick={this.showSingle}
+			onContextMenu={this.showContentMenu}
+			options={{
+				balloonCloseButton: false,
+				opacity: opacityFloat,
+				strokeColor: color,
+				strokeStyle: strokeStyleArray,
+				strokeWidth: weight
+			}}
+			properties={{
+				hintContent: header
+			}}>
+		</Polyline>;
+	};
+
+	renderMarks = () => {
+		const {active, part} = this.props;
+		const {geopositions: [positionsStart, positionsFinish], iconFirst, iconSecond} = part;
+
+		return (<div>
+			{iconFirst && <Mark active={active} point={{...part, geopositions: [positionsStart], icon: iconFirst}} />}
+			{iconSecond && <Mark active={active} point={{...part, geopositions: [positionsFinish], icon: iconSecond}} />}
+		</div>
+		);
+	};
+
+	render () {
+		return (<div>
+			{this.renderMarks()}
+			{this.renderLine()}
+		</div>
 
 		);
 	}

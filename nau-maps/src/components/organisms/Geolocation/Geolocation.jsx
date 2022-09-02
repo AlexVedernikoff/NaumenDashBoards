@@ -39,10 +39,10 @@ export class Geolocation extends Component<Props> {
 				const {geopositions: [position]} = singleObject;
 				const {latitude, longitude} = position;
 				switch (mapSelect) {
-					case 'Yandex':
+					case 'yandex':
 						this.mapRef.current.setCenter([latitude, longitude]);
 						break;
-					case 'Google':
+					case 'google':
 						break;
 					default:
 						this.mapRef.current.leafletElement.panTo([latitude, longitude]);
@@ -51,10 +51,10 @@ export class Geolocation extends Component<Props> {
 
 			if (prevProps.zoom !== zoom) {
 				switch (mapSelect) {
-					case 'Yandex':
+					case 'yandex':
 						this.mapRef.current.setZoom(zoom, { duration: 600 });
 						break;
-					case 'Google':
+					case 'google':
 						this.mapRef.current.setZoom(zoom);
 						break;
 					default:
@@ -64,10 +64,10 @@ export class Geolocation extends Component<Props> {
 
 			if (prevProps.timeUpdate !== timeUpdate) {
 				switch (mapSelect) {
-					case 'Yandex':
+					case 'yandex':
 						this.mapRef.current.setBounds(bounds);
 						break;
-					case 'Google':
+					case 'google':
 						this.mapRef.current.fitBounds(bounds);
 						break;
 					default:
@@ -92,11 +92,11 @@ export class Geolocation extends Component<Props> {
 	}
 
 	renderYandexMap () {
-		const {mapSelect, resetSingleObject, zoom} = this.props;
+		const {mapSelect, mapsKeyList: {yandex}, resetSingleObject, zoom} = this.props;
 
 		return (
 			<YMaps
-				query={{apikey: '9e8e2fc4-5970-4ca6-95c5-3e620095e8e3'}}
+				query={{apikey: yandex}}
 			>
 				<YandexMap
 					className={styles.mapContainer}
@@ -145,9 +145,9 @@ export class Geolocation extends Component<Props> {
 		const {mapSelect} = this.props;
 
 		switch (mapSelect) {
-			case 'Yandex':
+			case 'yandex':
 				return this.renderYandexMap();
-			case 'Google':
+			case 'google':
 				return this.renderGoogleMap();
 			default:
 				return this.renderOpenMap();

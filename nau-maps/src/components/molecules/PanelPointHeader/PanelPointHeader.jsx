@@ -14,9 +14,8 @@ export class PanelPointHeader extends Component<Props, State> {
 		window.open(link, '_blank', 'noopener,noreferrer');
 	};
 
-	showSingle = () => () => {
+	showSingle = () => {
 		const {point, setSingleObject} = this.props;
-
 		setSingleObject(point);
 	};
 

@@ -5,7 +5,7 @@ import {setMapPanel, toggleMapPanel} from 'store/geolocation/actions';
 
 const props = (state: AppState): ConnectedProps => ({
 	mapSelect: state.geolocation.mapSelect,
-	mapsList: state.geolocation.params.mapsList,
+	mapsKeyList: state.geolocation.mapsKeyList,
 	panelMapOpen: state.geolocation.controls.panelMapOpen
 });
 

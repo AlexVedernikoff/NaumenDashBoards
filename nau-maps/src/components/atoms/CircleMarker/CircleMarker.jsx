@@ -1,7 +1,7 @@
 // @flow
 import {Circle} from 'react-leaflet';
-import React, {Component} from 'react';
 import type {Props, State} from './types';
+import React, {Component} from 'react';
 
 export class CircleMarker extends Component<Props, State> {
 	render () {
@@ -12,8 +12,8 @@ export class CircleMarker extends Component<Props, State> {
 			<Circle
 				center={[latitude, longitude]}
 				fillColor={color}
-				stroke={false}
 				radius={accuracy || 20}
+				stroke={false}
 			/>
 		);
 	}

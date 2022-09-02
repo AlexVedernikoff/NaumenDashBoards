@@ -1,6 +1,7 @@
 export default {
-	'errors': [],
-	'objects': [
+	errors: [],
+	mapApiKey: {google: '9e8e2fc4-5970-4ca6-95c5-3e620095e8e3', yandex: '9e8e2fc4-5970-4ca6-95c5-3e620095e8e3'},
+	objects: [
 		{
 			'data': {
 				'actions': [

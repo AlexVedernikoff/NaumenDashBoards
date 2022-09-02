@@ -53,7 +53,7 @@ const customIconMarker = (iconName: string, isActive: boolean) => {
 export const getCustomOrDefaultIconMarker = (type: string, isActive: boolean, iconName?: string) => {
 	let iconMarker = defaultIconMarker(type, isActive);
 
-	if (iconName && (environment !== 'development')) {
+	if (iconName && typeof iconName !== 'boolean' && (environment !== 'development')) {
 		iconMarker = customIconMarker(iconName, isActive);
 	}
 

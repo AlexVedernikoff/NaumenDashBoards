@@ -7,7 +7,6 @@ export type Params = {
 	groupingMethodName: string,
 	listName: string,
 	locationUpdateFrequency: {interval: TimeInterval, length: number},
-	mapsList: [string],
 	requestCurrentLocation: boolean,
 	trailsMethodName: string,
 	updatePointsMode: string

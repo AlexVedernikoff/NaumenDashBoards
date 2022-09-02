@@ -19,8 +19,6 @@ export class Filter extends Component<Props> {
 		);
 	};
 
-	renderFilterItem = (filterItem: StaticGroup, key: number) => <FilterItem filterItem={filterItem} key={key} />;
-
 	renderFilter = () => {
 		const {staticGroups} = this.props;
 
@@ -30,6 +28,8 @@ export class Filter extends Component<Props> {
 			</div>
 		);
 	};
+
+	renderFilterItem = (filterItem: StaticGroup, key: number) => <FilterItem filterItem={filterItem} key={key} />;
 
 	renderHead = () =>
 		<div className={styles.filterHead}>
