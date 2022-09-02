@@ -44,7 +44,7 @@ export class WidgetTooltip extends PureComponent<Props, State> {
 			}
 		} = this.props;
 
-		return {fontFamily, fontSize};
+		return {fontFamily, fontSize: `${fontSize}px`};
 	};
 
 	handleHideModal = e => {

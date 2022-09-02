@@ -161,9 +161,9 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		return onChange(DIAGRAM_FIELDS.tooltip, {...tooltip, show: !change});
 	};
 
-	handleChangeTooltipText = ({value: title}: OnChangeEvent<string>) => {
+	handleChangeTooltipText = ({value: text}: OnChangeEvent<string>) => {
 		const {onChange, value: {tooltip}} = this.props;
-		return onChange(DIAGRAM_FIELDS.tooltip, {...tooltip, title});
+		return onChange(DIAGRAM_FIELDS.tooltip, {...tooltip, text});
 	};
 
 	handleClickIndicatorAdd = () => {
@@ -310,12 +310,12 @@ class TableTooltipForm extends PureComponent<Props, State> {
 	);
 
 	renderTitle = () => {
-		const {show, title} = this.state.tooltip;
+		const {show, text} = this.state.tooltip;
 
 		if (show) {
 			return (
 				<FormField>
-					<TextArea maxLength={1000} name={DIAGRAM_FIELDS.title} onChange={this.handleChangeTooltipText} value={title} />
+					<TextArea maxLength={1000} name={DIAGRAM_FIELDS.text} onChange={this.handleChangeTooltipText} value={text} />
 				</FormField>
 			);
 		}
