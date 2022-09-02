@@ -106,3 +106,18 @@ export type WorkProgress = {[UUID: string]: number};
 export type ListOfAttributes = Array<{code: string, title: string}>;
 export type workDateInterval = Array<{dateType: string, value: string, workUUID: string}>;
 export type CurrentInterval = {label: string, value: string};
+
+export type TaskItem = {
+	code1: string,
+	editor: {map_to: string, type: string},
+	end_date: string,
+	id: string,
+	level: number,
+	progress: number,
+	start_date: string,
+	text: string,
+	type: string,
+	workOfLink: string
+};
+
+export type Tasks = TaskItem[];

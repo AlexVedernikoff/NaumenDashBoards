@@ -39,7 +39,7 @@ export class TextInput extends PureComponent<Props> {
 	// };
 
 	renderInput = () => {
-		const {forwardedRef, id, label, maxLength, onBlur, onFocus, placeholder, value} = this.props;
+		const {forwardedRef, id, label, maxLength, name, onBlur, onFocus, placeholder, value} = this.props;
 
 		return (
 			<div className={styles.wrapperInput}>
@@ -50,6 +50,7 @@ export class TextInput extends PureComponent<Props> {
 					className={styles.input}
 					id={id}
 					maxLength={maxLength}
+					name={name}
 					onBlur={onBlur}
 					onChange={this.handleChange}
 					onFocus={onFocus}

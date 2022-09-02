@@ -8,7 +8,7 @@ import {deepClone, shiftTimeZone} from 'helpers';
 import {gantt} from 'naumen-gantt';
 import ModalTask from 'components/atoms/ModalTask';
 import {postEditedWorkData, setColumnSettings, setColumnTask} from 'store/App/actions';
-import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
 const HEIGHT_HEADER = 70;
@@ -174,20 +174,10 @@ const Gantt = (props: Props) => {
 		gantt.config.scroll_size = 6;
 		gantt.config.round_dnd_dates = false;
 		gantt.config.order_branch = true;
+		gantt.config.readonly = true;
 
-
-		gantt.templates.progress_text = (start, end, task) => {
-			gantt.getState().drag_id === task.id ? Math.round(task.progress * 100) + '%' : '';
-		};
-
-		gantt.templates.rightside_text = (start, end, task) => {
-			task.type === gantt.config.types.milestone ? task.text : '';
-		};
-
-		if (gantt.config.start_date && gantt.config.end_date) {
-			gantt.config.start_date = store.APP.startDate;
-			gantt.config.end_date = store.APP.endDate;
-		}
+		gantt.templates.progress_text = (start, end, task) => gantt.getState().drag_id === task.id ? Math.round(task.progress * 100) + '%' : '';
+		gantt.templates.rightside_text = (start, end, task) => task.type === gantt.config.types.milestone ? task.text : '';
 
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
@@ -204,7 +194,16 @@ const Gantt = (props: Props) => {
 			tooltip: true
 		});
 
-		gantt.templates.tooltip_text = (start, end, task) => '<b>Текущий прогресс:</b> ' + Math.round(task.progress * 100) + '%';
+		gantt.plugins({
+			tooltip: true
+		});
+
+		setTimeout(() => {
+			gantt.ext.tooltips.tooltipFor({
+				html: (event) => event.target.innerHTML,
+				selector: '.gantt_cell'
+			});
+		}, 500);
 
 		gantt.templates.parse_date = (dateStr) => {
 			const timezone = /(GMT.*\))/.exec(new Date(dateStr));
@@ -245,6 +244,15 @@ const Gantt = (props: Props) => {
 			props.saveChangedWorkRelations(links);
 			editWorkInterval();
 		});
+
+		//Переход на карточку работы по клику на иконку
+		gantt.templates.grid_file = item => {
+			const task = tasks.find(task => task.id === item.id);
+
+			if (task?.workOfLink) {
+				return `<a href=${task.workOfLink} class='gantt_tree_icon gantt_file'></a>`;
+			}
+		};
 
 		gantt.config.auto_scheduling_compatibility = true;
 
@@ -306,7 +314,7 @@ const Gantt = (props: Props) => {
 	const [firstUpdate, setFirstUpdate] = useState(true);
 
 	// Изменяет время и дату настроек диаграммы гантта при изменении [store.APP.startDate, store.APP.endDate]
-	useLayoutEffect(() => {
+	useEffect(() => {
 		if (!firstUpdate) {
 			gantt.config.start_date = store.APP.startDate;
 			gantt.config.end_date = store.APP.endDate;
@@ -344,6 +352,8 @@ const Gantt = (props: Props) => {
 					task[key] = 'да';
 				} else if (task[key] === false) {
 					task[key] = 'нет';
+				} else if (typeof task[key] === 'object') {
+					task[key] = '';
 				}
 			}
 		});
@@ -562,6 +572,7 @@ const Gantt = (props: Props) => {
 			<ModalTask
 				attributesMap={attributesMap}
 				getListOfWorkAttributes={getListOfWorkAttributes}
+				mandatoryAttributes={props.mandatoryAttributes}
 				newTask={props.newTask}
 				postEditedWorkData={props.postEditedWorkData}
 				postNewWorkData={props.postNewWorkData}

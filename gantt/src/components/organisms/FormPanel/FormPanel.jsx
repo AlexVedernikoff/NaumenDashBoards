@@ -225,7 +225,17 @@ const FormPanel = (props: Props) => {
 
 	const handleSave = () => {
 		sibmitRange();
-		const {diagramKey, progressCheckbox, saveSettings, settings, workProgresses, workRelationCheckbox} = props;
+		const {
+			diagramKey,
+			milestonesCheckbox,
+			progressCheckbox,
+			saveSettings,
+			settings,
+			stateMilestonesCheckbox,
+			workProgresses,
+			workRelationCheckbox,
+			worksWithoutStartOrEndDateCheckbox
+		} = props;
 		const newError = checkingSettings();
 		const deleteDeviationForEndDate = shiftTimeZone(endDate);
 		const deleteDeviationForStartDate = shiftTimeZone(startDate);
@@ -236,7 +246,22 @@ const FormPanel = (props: Props) => {
 			setEndDate(gantt.date.add(new Date(endDate), deleteDeviationForEndDate, 'hour'));
 			setStartDate(gantt.date.add(new Date(startDate), deleteDeviationForStartDate, 'hour'));
 
-			saveSettings({commonSettings: settings, currentInterval, diagramKey, endDate, progressCheckbox, resourceAndWorkSettings: resources, startDate, workProgresses, workRelationCheckbox});
+			saveSettings(
+				{
+					commonSettings: settings,
+					currentInterval,
+					diagramKey,
+					endDate,
+					milestonesCheckbox,
+					progressCheckbox,
+					resourceAndWorkSettings: resources,
+					startDate,
+					stateMilestonesCheckbox,
+					workProgresses,
+					workRelationCheckbox,
+					worksWithoutStartOrEndDateCheckbox
+				}
+			);
 		}
 	};
 
@@ -527,31 +552,27 @@ const FormPanel = (props: Props) => {
 		return (
 			<div onClick={props.handleToggleMilestoneBlock}>
 				<FormControl className={cn(styles.checkbox)} label="Отображать контрольные точки" small={true}>
-					<Checkbox checked={props.milestones} name="Checkbox" onChange={props.handleToggleMilestoneBlock} value={props.milestones} />
+					<Checkbox checked={props.milestonesCheckbox} name="Checkbox" onChange={props.handleToggleMilestoneBlock} value={props.milestonesCheckbox} />
 				</FormControl>
 			</div>
 		);
 	};
 
 	const renderCheckboxStateMilestoneBlock = () => {
-		const {settings} = props;
-
 		return (
-			<div onClick={handleToggleStateMilestoneBlock}>
+			<div onClick={props.handleToggleStateMilestoneBlock}>
 				<FormControl className={cn(styles.checkbox)} label="Отображать состояние контрольных точек" small={true}>
-					<Checkbox checked={settings.rollUp} name="Checkbox" onChange={handleToggleStateMilestoneBlock} value={settings.rollUp} />
+					<Checkbox checked={props.stateMilestonesCheckbox} name="Checkbox" onChange={props.handleToggleStateMilestoneBlock} value={props.stateMilestonesCheckbox} />
 				</FormControl>
 			</div>
 		);
 	};
 
 	const renderCheckboxWorksWithoutDates = () => {
-		const {settings} = props;
-
 		return (
-			<div onClick={handleToggleWorksWithoutDates}>
+			<div onClick={props.handleToggleWorksWithoutDates}>
 				<FormControl className={cn(styles.checkbox)} label="Отображать работы без даты начала и даты завершения" small={true}>
-					<Checkbox checked={settings.rollUp} name="Checkbox" onChange={handleToggleWorksWithoutDates} value={settings.rollUp} />
+					<Checkbox checked={props.worksWithoutStartOrEndDateCheckbox} name="Checkbox" onChange={props.handleToggleWorksWithoutDates} value={props.worksWithoutStartOrEndDateCheckbox} />
 				</FormControl>
 			</div>
 		);
@@ -665,7 +686,7 @@ const FormPanel = (props: Props) => {
 	const lastIndex = columnSettingsModal.length - 1;
 
 	const editColumn = (index, method) => () => {
-		return (index !== lastIndex && index !== 0) ? method(index) : false;
+		return (index !== 0) ? method(index) : false;
 	};
 
 	const getContentModal = () => {
@@ -674,9 +695,9 @@ const FormPanel = (props: Props) => {
 				{columnSettingsModal.map((item, index) => (
 					<div className={styles.item} data-grid={{h: 1, static: !index, w: 1, x: 0, y: index}} key={item.code}>
 						<Icon className={styles.kebab} name="KEBAB" />
-						<ShowBox checked={item.show} className={(index === lastIndex || index === 0) && styles.disabled} name={item.code} onChange={() => editColumn(index, handleColumnShowChange)} value={item.show} />
+						<ShowBox checked={item.show} className={index === 0 && styles.disabled} name={item.code} onChange={() => editColumn(index, handleColumnShowChange)} value={item.show} />
 						<TextInput className={styles.input} maxLength={30} name={item.code} onChange={target => handleColumnNameChange(target, index)} onlyNumber={false} placeholder="Введите название столбца" value={item.title} />
-						<IconButton className={(index === lastIndex || index === 0) ? styles.disabled : styles.basket} icon="BASKET"onClick={editColumn(index, handleDeleteColumn)} />
+						<IconButton className={index === 0 ? styles.disabled : styles.basket} icon="BASKET"onClick={editColumn(index, handleDeleteColumn)} />
 					</div>
 				))}
 			</GridLayout>

@@ -24,15 +24,19 @@ const props = (state: AppState) => {
 		endDate,
 		errorSettings,
 		loadingSettings,
+		mandatoryAttributes,
+		milestonesCheckbox,
 		progressCheckbox,
 		resources,
 		settings,
 		sources,
 		startDate,
+		stateMilestonesCheckbox,
 		versionKey,
 		versions,
 		workProgresses,
-		workRelationCheckbox
+		workRelationCheckbox,
+		worksWithoutStartOrEndDateCheckbox
 	} = state.APP;
 
 	return {
@@ -41,15 +45,19 @@ const props = (state: AppState) => {
 		endDate,
 		errorSettings,
 		loading: loadingSettings,
+		mandatoryAttributes,
+		milestonesCheckbox,
 		progressCheckbox,
 		resources,
 		settings,
 		sources,
 		startDate,
+		stateMilestonesCheckbox,
 		versionKey,
 		versions,
 		workProgresses,
-		workRelationCheckbox
+		workRelationCheckbox,
+		worksWithoutStartOrEndDateCheckbox
 	};
 };
 

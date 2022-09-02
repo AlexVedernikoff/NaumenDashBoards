@@ -26,7 +26,7 @@ import {
 	postChangedWorkRelations,
 	getGanttVersionTitlesAndKeys,
 	saveData,
-	saveGanttVersionSettingsRequest
+	saveGanttVersionSettingsRequest,
 } from './context';
 
 export {
@@ -54,7 +54,7 @@ export {
 	getGanttVersionTitlesAndKeys,
 	saveData,
 	saveGanttVersionSettingsRequest,
-	editWorkDateRangesFromVersionRequest
+	editWorkDateRangesFromVersionRequest,
 };
 
 export const api = process.env.NODE_ENV === 'development' ? new FakeApi() : new Api();

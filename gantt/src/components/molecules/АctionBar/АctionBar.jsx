@@ -12,13 +12,39 @@ import {ScaleNames} from 'components/organisms/FormPanel/consts';
 import styles from './styles.less';
 import Modal from 'components/atoms/Modal/Modal';
 import {TextInput} from 'components/atoms/TextInput/TextInput';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 
 const АctionBar = props => {
 	const [active, setActive] = useState(true);
 
 	const [inputStartDate, setInputStartDate] = useState(props.startDate ? new Date(props.startDate).toLocaleString() : undefined);
 	const [inputEndDate, setInputEndDate] = useState(props.endDate ? new Date(props.endDate).toLocaleString() : undefined);
+
+	const [flag, setFlag] = useState(true);
+
+	const store = useSelector(state => state);
+
+	useEffect(() => {
+		const {endDate, startDate} = props;
+		const conditionEndDate = endDate && endDate === 'string';
+		const conditionStartDate = endDate && endDate === 'string';
+
+		if (conditionEndDate && conditionStartDate && flag) {
+			const startDateForPanel = startDate;
+			const endDateForPanel = endDate;
+			const replaceStartDateForPanel = startDateForPanel.replace(/\-/g, " ");
+			const replaceEndDateForPanel = endDateForPanel.replace(/\-/g, " ");
+			const parceStartDateForPanel = Date.parse(replaceStartDateForPanel);
+			const parceEndDateForPanel = Date.parse(replaceEndDateForPanel);
+			const newStartDateForPanel = new Date(parceStartDateForPanel);
+			const newEndDateForPanel = new Date(parceEndDateForPanel);
+
+			gantt.config.start_date = newStartDateForPanel;
+			gantt.config.end_date = newEndDateForPanel;
+			gantt.render();
+			setFlag(false);
+		}
+	}, [props.endDate, props.startDate]);
 
 	const [nameValue, setNameValue] = useState('');
 	const [showModal, setShowModal] = useState(false);
@@ -248,8 +274,9 @@ const АctionBar = props => {
 
 	const submitSaveVersion = () => {
 		const title = deepClone(nameValue);
+		const tasks = store.APP.tasks;
 
-		props.savedGanttVersionSettings(title, new Date().toLocaleString());
+		props.savedGanttVersionSettings(title, new Date().toLocaleString(), tasks);
 		dispatch(props.setCurrentVersion(''));
 
 		setShowModalSave(!showModalSave);
@@ -384,7 +411,8 @@ const АctionBar = props => {
 					{renderButtonSettings()}
 					<IconButton className={styles.icon} icon={ICON_NAMES.CLOCK} onClick={openClockModal} tip="Интервал" />
 					{iconButtonGroup}
-					<IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={addNewTask} tip="Добавить работу" />
+					{/* следующая итерация */}
+					{/* <IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={addNewTask} tip="Добавить работу" /> */}
 					<IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={refresh} tip="Обновить" />
 					<Button className={styles.btn} onClick={openConfirmationModal}>Применить</Button>
 					<Button className={styles.btn} onClick={openSaveModal}>Сохранить</Button>

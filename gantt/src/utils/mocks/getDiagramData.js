@@ -47,16 +47,27 @@ const data = {
 				"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb3",
 				"show":false
 			},
-			{
-				"title":"Добавить работу",
-				"code":"add",
-				"show":true
-			},
+			// Необходимо для следующей итерации
+			// {
+			// 	"title":"Добавить работу",
+			// 	"code":"add",
+			// 	"show":true
+			// },
 		],
 		"rollUp":false,
 		"scale":"MONTH"
 	},
 	"diagramKey":"root_gant2",
+	"mandatoryAttributes" : {
+		"employee": [
+			{code: "parent", title: "Отдел"},
+			{code: "creationDate", title: "Дата создания"}
+		],
+		"serviceCall": [
+			{code: "metaClass", title: "Тип объекта"},
+			{code: "creationDate", title: "Дата создания"}
+		]
+	},
 	'tasks': [
 		{
 			"id":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a",
@@ -68,7 +79,8 @@ const data = {
 			"level":0,
 			"editor": {"map_to": "text", "type": "text"},
 			"progress":0.8,
-			"type":"RESOURCE"
+			"type":"RESOURCE",
+			"workOfLink":"1",
 		},
 		{
 			"id":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
@@ -77,8 +89,10 @@ const data = {
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e": false,
 			"start_date":"2021-11-11T11:55:26",
 			"end_date": "2021-11-13T11:55:26",
-			"level":0,
-			"type":"project"
+			"level": 0,
+			"type":"project",
+			"workOfLink":"1",
+			"editable": true
 		},
 		{
 			"id":"employee$752501_d63f121f-0c59-43a9-8b6a-145a0927041c",
@@ -89,7 +103,9 @@ const data = {
 			"start_date":"2021-11-11T11:55:26",
 			"end_date": "2021-11-13T11:55:26",
 			"level":1,
-			"type":"WORK"
+			"type":"WORK",
+			"workOfLink":"1",
+			"editable": true
 		},
 		{
 			"id":"serviceCall$2419102_0c0310d7-f454-4baf-8eea-7f38066a317c",
@@ -140,7 +156,7 @@ const data = {
 	"progressCheckbox": false,
 	"workRelationCheckbox": false,
 	"startDate": "10.01.2021, 15:17:45",
-	"endDate": "11.01.2021, 15:17:45",
+	"endDate": "11.12.2021, 15:17:45",
 	"currentInterval": {"label": "сегодня", "value": "NEXTDAYS"}
 };
 
