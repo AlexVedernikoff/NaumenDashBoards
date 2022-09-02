@@ -24,7 +24,7 @@ import {
 	postChangedWorkRelations,
 	saveData,
 	saveGanttVersionSettingsRequest,
-	updateGanttVersionSettingsRequest
+	updateGanttVersionSettingsRequest,
 } from 'utils/api';
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
 import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, UserData} from './types';
@@ -68,7 +68,8 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 */
 const getVersionSettingsAll = (diagramKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const versions = await getGanttVersionTitlesAndKeys(diagramKey);
+		const {subjectUuid} = getContext();
+		const versions = await getGanttVersionTitlesAndKeys(diagramKey, subjectUuid);
 
 		dispatch(setListVersions(versions));
 	} catch (error) {
@@ -107,12 +108,13 @@ const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch:
 * Сохраняет настройки версий диаграммы в хранилище
 * @param {string} title - название версии
 * @param {string} createdDate - дата создания
+* @param {Tasks} tasks - задачи на диаграмме
 */
-const savedGanttVersionSettings = (title: string, createdDate: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const savedGanttVersionSettings = (title: string, createdDate: string, tasks: Tasks): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const {contentCode, subjectUuid} = getContext();
 
-		await saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUuid, title);
+		await saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUuid, title, tasks);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -265,22 +267,23 @@ const deleteWork = (workUUID: string): ThunkAction => async (dispatch: Dispatch)
 	}
 };
 
-/**
-* Отправляет новый объект работы
-* @param {WorkData} workData - данные работы
-* @param {string} classFqn - метакласс работы
-*/
-const postNewWorkData = (workData: WorkData, classFqn: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	try {
-		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+// На следующую итерацию
+// /**
+// * Отправляет новый объект работы
+// * @param {WorkData} workData - данные работы
+// * @param {string} classFqn - метакласс работы
+// */
+// const postNewWorkData = (workData: WorkData, classFqn: string, attr): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+// 	try {
+// 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-		await addNewWork(workData, classFqn, timezone);
-	} catch (error) {
-		dispatch(setErrorCommon(error));
-	} finally {
-		dispatch(hideLoaderSettings());
-	}
-};
+// 		await addNewWork(workData, classFqn, timezone, attr);
+// 	} catch (error) {
+// 		dispatch(setErrorCommon(error));
+// 	} finally {
+// 		dispatch(hideLoaderSettings());
+// 	}
+// };
 
 /**
 * Отправляет измененный объект работы
@@ -408,8 +411,26 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 
 		const {contentCode, subjectUuid} = getContext();
 		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const {attributesMap, commonSettings, currentInterval, diagramKey, endDate, progressCheckbox, startDate, tasks, workRelationCheckbox, workRelations} = await getDiagramData(contentCode, subjectUuid, timeZone);
+		const {
+			attributesMap,
+			commonSettings,
+			currentInterval,
+			diagramKey,
+			endDate,
+			mandatoryAttributes,
+			milestonesCheckbox,
+			progressCheckbox,
+			startDate,
+			stateMilestonesCheckbox,
+			tasks,
+			workRelationCheckbox,
+			workRelations,
+			worksWithoutStartOrEndDateCheckbox
+		} = await getDiagramData(contentCode, subjectUuid, timeZone);
 
+		dispatch(switchMilestonesCheckbox(milestonesCheckbox));
+		dispatch(switchStateMilestonesCheckbox(stateMilestonesCheckbox));
+		dispatch(switchWorksWithoutStartOrEndDateCheckbox(worksWithoutStartOrEndDateCheckbox));
 		dispatch(setCurrentValueForInterval(currentInterval));
 		dispatch(setRangeTime({endDate, startDate}));
 		dispatch(switchProgressCheckbox(progressCheckbox));
@@ -421,6 +442,7 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
 		dispatch(setDiagramData(tasks || []));
 		dispatch(setDiagramLinksData(workRelations || []));
+		dispatch(setMandatoryAttributes(mandatoryAttributes));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -449,6 +471,42 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
 		dispatch(hideLoaderSettings());
 	}
 };
+
+/**
+ * Переключает чекбокс вех
+ * @param {string} payload - состояние чекбокса, показывает/скрывает вехи на диаграмме
+ */
+ const switchMilestonesCheckbox = (payload: Boolean) => ({
+	payload,
+	type: APP_EVENTS.SWITCH_MILESTONES_CHECKBOX
+});
+
+/**
+ * Переключает чекбокс состояния вех
+ * @param {string} payload - состояние чекбокса, показывает/скрывает состояние вех на диаграмме
+ */
+ const switchStateMilestonesCheckbox = (payload: Boolean) => ({
+	payload,
+	type: APP_EVENTS.SWITCH_STATE_MILESTONES_CHECKBOX
+});
+
+/**
+ * Переключает чекбокс работ без начальной или конечной даты
+ * @param {string} payload - состояние чекбокса, показывает/скрывает работы без начала или конца дат
+ */
+ const switchWorksWithoutStartOrEndDateCheckbox = (payload: Boolean) => ({
+	payload,
+	type: APP_EVENTS.SWITCH_WORKS_WITHOUT_START_OR_END_DATE_CHECKBOX
+});
+
+// 3итерация
+/**
+//  * Устанавливает список обязательных аттрибутов
+//  */
+//  const setMandatoryAttributes = payload => ({
+// 	payload,
+// 	type: APP_EVENTS.SET_MANDATORY_ATTRIBUTES
+// });
 
 /**
  * Устанавливает текущую версию
@@ -730,7 +788,7 @@ export {
 	hideLoaderData,
 	hideLoaderSettings,
 	postEditedWorkData,
-	postNewWorkData,
+	// postNewWorkData,
 	deleteWorkFromVersionDiagram,
 	changeWorkProgressFromVersion,
 	deleteGanttVersionSettings,
@@ -756,6 +814,9 @@ export {
 	setRangeTime,
 	setResourceSettings,
 	showLoaderSettings,
+	switchMilestonesCheckbox,
 	switchProgressCheckbox,
-	switchWorkRelationCheckbox
+	switchStateMilestonesCheckbox,
+	switchWorkRelationCheckbox,
+	switchWorksWithoutStartOrEndDateCheckbox,
 };

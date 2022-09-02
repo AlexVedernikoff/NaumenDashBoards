@@ -12,6 +12,7 @@ import Modal from 'components/atoms/Modal/Modal';
 import React, {useEffect, useState} from 'react';
 import styles from './styles.less';
 import {useDispatch, useSelector} from 'react-redux';
+import MandatoryAttributes from 'components/atoms/MandatoryAttributes';
 
 const ModalTask = (props: Props) => {
 	const [currentValue, setCurrentValue] = useState(false);
@@ -24,9 +25,11 @@ const ModalTask = (props: Props) => {
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
 	const [valueError, setValueError] = useState('');
 	const [initPage, setInitPage] = useState(false);
+	const [attr, setAttr] = useState([]);
 	const [options, setOptions] = useState([]);
 	const [currentMetaClassFqn, setCurrentMetaClassFqn] = useState('');
-	const {attributesMap, getListOfWorkAttributes, resources} = props;
+	const [currentMandatoryAttributes, setCurrentMandatoryAttributes] = useState([]);
+	const {attributesMap, getListOfWorkAttributes, mandatoryAttributes, resources} = props;
 	const dispatch = useDispatch();
 	const store = useSelector(state => state);
 
@@ -49,6 +52,7 @@ const ModalTask = (props: Props) => {
 	};
 
 	const [currentTask, setCurrentTask] = useState({});
+
 	gantt.showLightbox = id => {
 		setTaskId(id);
 
@@ -57,25 +61,32 @@ const ModalTask = (props: Props) => {
 
 		dispatch(getWorlLink(task.id));
 
-		const currentMetaClass = listMetaClass.find(metaclass => toString(task.id).includes(metaclass) ? metaclass : 'serviceCall');
+		let defaultCurrentMetaClass = 'serviceCall$PMTask';
 
-		setCurrentMetaClassFqn(currentMetaClass);
+		setCurrentMetaClassFqn(defaultCurrentMetaClass);
 
 		let attributeKey = '';
 
 		for (let key in attributesMap) {
-			if (currentMetaClass === key) {
+			const taskId = task.id;
+			const metaClass = taskId.split('$')[0];
+
+			if (key.includes(metaClass)) {
+				defaultCurrentMetaClass = key;
+			}
+
+			if (defaultCurrentMetaClass === key) {
 				attributeKey = attributesMap[key];
 			}
 		}
 
-		if (currentMetaClass) {
+		if (defaultCurrentMetaClass) {
 			const listEmployeeAtrributes = attributeKey?.map(i => {
 				return i.title;
 			});
 
 			setOptions(listEmployeeAtrributes);
-			setCurrentMetaClassFqn(currentMetaClass);
+			setCurrentMetaClassFqn(defaultCurrentMetaClass);
 		}
 
 		setShowModal(true);
@@ -83,6 +94,15 @@ const ModalTask = (props: Props) => {
 		setCurrentValue(task.text);
 		setInputStartDate(new Date((task.start_date)).toLocaleString());
 		setInputEndDate(new Date((task.end_date)).toLocaleString());
+		// изменения нужны для селдующего мр по 3 итерации
+
+		// const cloneMandatoryAttributes = deepClone(mandatoryAttributes);
+
+		// for (let key in cloneMandatoryAttributes) {
+		// 	if (key === currentMetaClass) {
+		// 		setCurrentMandatoryAttributes(cloneMandatoryAttributes[key]);
+		// 	}
+		// }
 	};
 
 	gantt.hideLightbox = () => {
@@ -94,7 +114,18 @@ const ModalTask = (props: Props) => {
 		ID = 'serviceCall$' + Math.random().toString(36).substr(2, 9) + '_' + Math.random().toString(36).substr(2, 9);
 	};
 
-	const save = () => {
+	const save = (e) => {
+		// const formik = formref.current.elements;
+		// const arr = [];
+
+		// for (let key of formik) {
+		// 	let b = key.name;
+		// 	let a = {[b]: key.value}
+
+		// 	arr.push(a);
+		// }
+		// setAttr(arr);
+
 		const newStartDate = new Date(convertDateToNormal(inputStartDate));
 		const newEndDate = new Date(convertDateToNormal(inputEndDate));
 		const tasks = deepClone(store.APP.tasks);
@@ -130,6 +161,8 @@ const ModalTask = (props: Props) => {
 
 				tasks.push(tasksTwo[tasksTwo.length - 1]);
 				dispatch(postNewWorkData(workDate, currentMetaClassFqn));
+				// следующая итерация
+				// dispatch(postNewWorkData(workDate, currentMetaClassFqn, attr));
 				dispatch(setColumnTask(tasks));
 				gantt.render();
 			} else {
@@ -342,21 +375,24 @@ const ModalTask = (props: Props) => {
 		);
 	});
 
-	const [active, setActive] = useState(false);
+	// нужно для следующего мр
+	// const [active, setActive] = useState(false);
 
-	const handleCheckboxChange = () => {
-		setActive(!active);
+	// setActive(false);
 
-		if (currentTask.type === 'milestone') {
-			const gantt_selected = document.querySelector('.gantt_milestone.gantt_selected');
+	// const handleCheckboxChange = () => {
+	// 	setActive(!active);
 
-			if (active) {
-				gantt_selected.classList.remove('completed');
-			} else {
-				gantt_selected.classList.add('completed');
-			}
-		}
-	};
+	// 	if (currentTask.type === 'milestone') {
+	// 		const gantt_selected = document.querySelector('.gantt_milestone.gantt_selected');
+
+	// 		if (active) {
+	// 			gantt_selected.classList.remove('completed');
+	// 		} else {
+	// 			gantt_selected.classList.add('completed');
+	// 		}
+	// 	}
+	// };
 
 	const renderModalTask = () => {
 		if (showModal) {
@@ -367,13 +403,17 @@ const ModalTask = (props: Props) => {
 						<label htmlFor="description">Название:
 							<TextInput label="Название" maxLength={30} onChange={onChange} value={currentValue} />
 						</label>
-						<div className={styles.select}>
+						{/* // следующая итерация */}
+						{/* <div className={styles.select}>
 							<label>Группа аттрибутов:</label>
 							<Select className={cn(styles.selectIcon, styles.top)} icon={'CHEVRON'} onSelect={handleIntervalChange} options={options} placeholder='Критерий' value={valueInterval} />
-						</div>
+						</div> */}
+						{/* <form ref={formref} id="form" onSubmit={save}>
+						{currentMandatoryAttributes.map((item, index) => <MandatoryAttributes code={item.code} key={index} title={item.title} value='' />)}
+						</form> */}
 						<div className={styles.interval}>
 							{listDataInterval}
-							<Checkbox checked={active} name="Checkbox" onChange={handleCheckboxChange} value={active} />
+							{/* <Checkbox checked={active} name="Checkbox" onChange={handleCheckboxChange} value={active} /> */}
 						</div>
 						{props.workAttributes.map(i => <div key={i.code}><label>{i.title}</label> <TextInput className={styles.input} maxLength={30}></TextInput></div>)}
 					</div>

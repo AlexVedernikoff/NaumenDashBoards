@@ -18,11 +18,12 @@ export default class Api {
 	/**
 	* Получает названия и ключи версий
 	* @param {string} diagramKey - ключ диаграммы
+	* @param {string} subjectUuid - ключ текущей карточки объекта
 	* @return {ThunkAction}
 	*/
-	async getGanttVersionTitlesAndKeys (diagramKey: string) {
+	async getGanttVersionTitlesAndKeys (diagramKey: string, subjectUuid: string) {
 		const url = `exec-post?func=modules.ganttSettings.getGanttVersionTitlesAndKeys&params=requestContent`;
-		const body = {diagramKey};
+		const body = {diagramKey, subjectUuid};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -54,10 +55,11 @@ export default class Api {
 	* @param {string} createdDate - дата создания
 	* @param {string} subjectUUID - UUID объекта
 	* @param {string} title - название версии
+	* @param {Tasks} tasks - задачи на диаграмме
 	*/
-	async saveGanttVersionSettingsRequest (contentCode: string, createdDate: string, subjectUUID: string, title: string) {
+	async saveGanttVersionSettingsRequest (contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks) {
 		const url = `exec-post?func=modules.ganttSettings.saveGanttVersionSettings&params=requestContent`;
-		const body = {contentCode, createdDate, subjectUUID, title};
+		const body = {contentCode, createdDate, subjectUUID, tasks, title};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -259,23 +261,24 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
-	/**
-	* Добавляет новую работу
-	* @param {WorkData} workData - данные работы
-	* @param {string} classFqn - метакласс работы
-	* @param {string} workUUID - идентификатор работы
-	* @param {string} timezone - таймзона
-	*/
-	async addNewWork (workData: WorkData, classFqn: string, timezone: string) {
-		const url = `exec-post?func=modules.ganttWorkHandler.addNewWork&params=requestContent,user`;
-		const body = {classFqn, timezone, workData};
-		const options = {
-			body: JSON.stringify(body),
-			method: 'POST'
-		};
+	// На следующую итерацию
+	// /**
+	// * Добавляет новую работу
+	// * @param {WorkData} workData - данные работы
+	// * @param {string} classFqn - метакласс работы
+	// * @param {string} workUUID - идентификатор работы
+	// * @param {string} timezone - таймзона
+	// */
+	// async addNewWork (workData: WorkData, classFqn: string, timezone: string, attr) {
+	// 	const url = `exec-post?func=modules.ganttWorkHandler.addNewWork&params=requestContent,user`;
+	// 	const body = {classFqn, timezone, workData, attr};
+	// 	const options = {
+	// 		body: JSON.stringify(body),
+	// 		method: 'POST'
+	// 	};
 
-		this.jsApi.restCallAsJson(url, options);
-	}
+	// 	this.jsApi.restCallAsJson(url, options);
+	// }
 
 	/**
 	* Удаляет работу

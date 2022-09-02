@@ -13,10 +13,11 @@ const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
 /**
 * Получает названия и ключи версий
 * @param {string} diagramKey - ключ диаграммы
+* @param {string} subjectUuid - ключ текущей карточки объекта
 * @return {Promise<Params>}
 */
-const getGanttVersionTitlesAndKeys = async (diagramKey: string): Promise<Params> => {
-	return api.getGanttVersionTitlesAndKeys(diagramKey);
+const getGanttVersionTitlesAndKeys = async (diagramKey: string, subjectUuid: string): Promise<Params> => {
+	return api.getGanttVersionTitlesAndKeys(diagramKey, subjectUuid);
 };
 
 /**
@@ -35,9 +36,10 @@ const getGanttVersionsSettings = async (versionKey: string, timezone: string): P
 * @param {string} createdDate - дата создания
 * @param {string} contentCode - ключ контента, на котором расположена диаграмма
 * @param {string} subjectUUID - UUID объекта
+* @param {Tasks} tasks - задачи на диаграмме
 */
-const saveGanttVersionSettingsRequest = async (contentCode: string, createdDate: string, subjectUUID: string, title: string): Promise<Params> => {
-	api.saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUUID, title);
+const saveGanttVersionSettingsRequest = async (contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks): Promise<Params> => {
+	api.saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUUID, title, tasks);
 };
 
 /**
@@ -204,8 +206,8 @@ const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string 
 * @param {string} workUUID - идентификатор работы
 * @param {string} timezone - таймзона
 */
-const addNewWork = async (workData: WorkData, classFqn: string, timezone: string): Promise<Source> => {
-	await api.addNewWork(workData, classFqn, timezone);
+const addNewWork = async (workData: WorkData, classFqn: string, timezone: string, attr): Promise<Source> => {
+	await api.addNewWork(workData, classFqn, timezone, attr);
 };
 
 /**

@@ -20,15 +20,18 @@ export const initialAppState: AppState = {
 	loadingCommon: true,
 	loadingData: true,
 	loadingSettings: true,
+	mandatoryAttributes: {},
 	masterResources: [],
 	masterSettings: {},
 	metaClass: '',
+	milestonesCheckbox: false,
 	progressCheckbox: false,
 	resourceAndWorkSettings: [],
 	resources: [],
 	settings: {columnSettings: []},
 	sources: {},
 	startDate: new Date(),
+	stateMilestonesCheckbox: false,
 	subjectUuid: '',
 	tasks: [],
 	user: {
@@ -41,7 +44,8 @@ export const initialAppState: AppState = {
 	workLink: 'link',
 	workProgresses: {},
 	workRelationCheckbox: false,
-	workRelations: []
+	workRelations: [],
+	worksWithoutStartOrEndDateCheckbox: false
 };
 
 export const defaultAppAction: AppAction = {

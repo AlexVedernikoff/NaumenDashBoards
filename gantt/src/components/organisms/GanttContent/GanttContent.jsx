@@ -18,6 +18,8 @@ export class GanttContent extends PureComponent<Props> {
 		this.handleToggleProgress = this.handleToggleProgress.bind(this);
 		this.handleToggleLinks = this.handleToggleLinks.bind(this);
 		this.handleToggleMilestoneBlock = this.handleToggleMilestoneBlock.bind(this);
+		this.handleToggleStateMilestoneBlock = this.handleToggleStateMilestoneBlock.bind(this);
+		this.handleToggleWorksWithoutDates = this.handleToggleWorksWithoutDates.bind(this);
 		this.addNewTask = this.addNewTask.bind(this);
 		this.state = {
 			flag: false,
@@ -43,11 +45,19 @@ export class GanttContent extends PureComponent<Props> {
 	};
 
 	handleToggleMilestoneBlock = () => {
-		this.setState({ milestones: !this.state.milestones });
+		this.props.switchMilestonesCheckbox(!this.props.milestonesCheckbox);
 	};
 
 	handleToggleProgress = () => {
 		this.props.switchProgressCheckbox(!this.props.progressCheckbox);
+	};
+
+	handleToggleStateMilestoneBlock = () => {
+		this.props.switchStateMilestonesCheckbox(!this.props.stateMilestonesCheckbox);
+	};
+
+	handleToggleWorksWithoutDates = () => {
+		this.props.switchWorksWithoutStartOrEndDateCheckbox(!this.props.worksWithoutStartOrEndDateCheckbox);
 	};
 
 	onRefresh () {
@@ -87,6 +97,8 @@ export class GanttContent extends PureComponent<Props> {
 				handleToggleLinks={this.handleToggleLinks}
 				handleToggleMilestoneBlock={this.handleToggleMilestoneBlock}
 				handleToggleProgress={this.handleToggleProgress}
+				handleToggleStateMilestoneBlock={this.handleToggleStateMilestoneBlock}
+				handleToggleWorksWithoutDates={this.handleToggleWorksWithoutDates}
 				milestones={this.state.milestones}
 				progress={this.state.progress}
 				swiped={this.state.swiped}

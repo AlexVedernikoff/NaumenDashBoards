@@ -6,10 +6,30 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SWITCH_STATE_MILESTONES_CHECKBOX:
+			return {
+				...state,
+				stateMilestonesCheckbox: action.payload
+			};
+		case APP_EVENTS.SWITCH_WORKS_WITHOUT_START_OR_END_DATE_CHECKBOX:
+			return {
+				...state,
+				worksWithoutStartOrEndDateCheckbox: action.payload
+			};
+		case APP_EVENTS.SWITCH_MILESTONES_CHECKBOX:
+			return {
+				...state,
+				milestonesCheckbox: action.payload
+			};
 		case APP_EVENTS.SET_CURRENT_VERSION:
 			return {
 				...state,
 				currentVersion: action.payload
+			};
+		case APP_EVENTS.SET_MANDATORY_ATTRIBUTES:
+			return {
+				...state,
+				mandatoryAttributes: action.payload
 			};
 		case APP_EVENTS.SET_LIST_VERSIONS:
 			return {
