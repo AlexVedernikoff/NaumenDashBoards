@@ -5,6 +5,10 @@ import React from 'react';
 import useImage from 'use-image';
 
 const Points = ({entity, handleContextMenu, onClick, onHover, x, y}: Props) => {
+	const tileW = 108;
+	const tileH = 58;
+	const paddingText = 4;
+
 	const [image] = useImage('image/point.svg');
 
 	const handleOnClick = () => {
@@ -28,18 +32,26 @@ const Points = ({entity, handleContextMenu, onClick, onHover, x, y}: Props) => {
 				image={image}
 
 				x={x - 22}
-				y={y - 20}
+				y={y - 22}
 			/>
 			<Group
-				x={x - 54}
+				x={x - tileW / 2}
 				y={y + 22}
 			>
 				<Rect
-					cornerRadius={4}
+					cornerRadius={[paddingText, paddingText, 0, 0]}
 					fill="#fff"
-					height={58}
-					opacity={0.9}
-					width={108}
+					height={tileH / 2}
+					opacity={entity.title ? 0.9 : 0}
+					width={tileW}
+				/>
+				<Rect
+					cornerRadius={[0, 0, paddingText, paddingText]}
+					fill="#fff"
+					height={tileH / 2}
+					opacity={entity.desc ? 0.9 : 0}
+					width={tileW}
+					y={entity.title ? tileH / 2 : 0}
 				/>
 				<Text
 					align="center"
@@ -47,13 +59,13 @@ const Points = ({entity, handleContextMenu, onClick, onHover, x, y}: Props) => {
 					fontFamily="Roboto"
 					fontSize={10}
 					fontStyle="bold"
-					height={22}
-					padding={4}
-					text={`id: ${entity.id} ${entity.title}`}
-					verticalAlign="middle"
-					width={100}
-					x={4}
-					y={4}
+					height={tileH / 2 - paddingText * 3}
+					opacity={entity.title ? 1 : 0}
+					text={entity.title}
+					verticalAlign="top"
+					width={tileW - paddingText * 2}
+					x={paddingText}
+					y={paddingText}
 				/>
 				<Text
 					align="center"
@@ -61,12 +73,13 @@ const Points = ({entity, handleContextMenu, onClick, onHover, x, y}: Props) => {
 					fontFamily="Roboto"
 					fontSize={10}
 					fontStyle="bold"
-					height={22}
-					text={`id: ${entity.id} ${entity.desc}`}
-					verticalAlign="middle"
-					width={100}
-					x={4}
-					y={34}
+					height={tileH / 2 - paddingText * 3}
+					opacity={entity.desc ? 1 : 0}
+					text={entity.desc}
+					verticalAlign="top"
+					width={tileW - paddingText * 2}
+					x={paddingText}
+					y={entity.title ? tileH / 2 + paddingText * 2 : paddingText}
 				/>
 			</Group>
 		</Group>

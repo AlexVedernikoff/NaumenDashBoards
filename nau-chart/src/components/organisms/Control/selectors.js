@@ -1,6 +1,6 @@
 // @flow
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {getDataEntity, setExportTo, setScale} from 'store/entity/actions';
+import {getDataEntity, setExportTo, setPosition, setScale} from 'store/entity/actions';
 import type {State} from 'store/types';
 
 /**
@@ -15,5 +15,6 @@ export const props = (state: State): ConnectedProps => ({
 export const functions: ConnectedFunctions = {
 	getDataEntity,
 	setExportTo,
+	setPosition,
 	setScale
 };

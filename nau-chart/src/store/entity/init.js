@@ -8,6 +8,7 @@ export const initialVerifyState: EntityState = {
 	error: false,
 	exportTo: null,
 	loading: false,
+	position: {x: 0, y: 0},
 	scale: 1
 };
 

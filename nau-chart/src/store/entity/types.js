@@ -39,5 +39,6 @@ export type EntityState = {
 	error: boolean,
 	exportTo: string,
 	loading: boolean,
+	position: {x: number, y: number},
 	scale: number
 };

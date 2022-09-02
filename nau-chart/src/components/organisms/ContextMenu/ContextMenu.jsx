@@ -30,7 +30,6 @@ const ContextMenu = ({activeElement, contextMenu}: Props) => {
 			}}
 		>
 			<ul className={styles.wrapMenuList}>
-				<li className={styles.wrapMenuListItem} onClick={handleOpenPage}>Редактировать</li>
 				<li className={styles.wrapMenuListItem} onClick={handleOpenPage}>Перейти на карточку обьекта</li>
 			</ul>
 		</div>

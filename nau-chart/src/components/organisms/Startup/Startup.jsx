@@ -18,7 +18,7 @@ const Startup = ({children, error, getDataEntity, loading}: Props) => {
 		return <div className={styles.center}>Ошибка загрузки данных!</div>;
 	}
 
-	return children;
+	return <div className={styles.content}>{children}</div>;
 };
 
 export default connect(props, functions)(Startup);

@@ -41,6 +41,11 @@ const reducer = (state: EntityState = initialVerifyState, action: defaultVerifyA
 				...state,
 				exportTo: action.payload
 			};
+		case VERIFY_EVENTS.SET_POSITION:
+			return {
+				...state,
+				position: action.payload
+			};
 		default:
 			return state;
 	}
