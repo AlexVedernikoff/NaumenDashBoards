@@ -4,7 +4,6 @@ import type {Props} from 'components/organisms/Element/types';
 import React from 'react';
 
 const Lines = ({entity, handleContextMenu, onClick, onHover, points}: Props) => {
-	const text = `id: ${entity.id} from ${entity.from} to ${entity.to}`;
 	const {fromX, fromY, toX, toY} = points;
 	const catetX = toX - fromX;
 	const catetY = toY - fromY;
@@ -49,14 +48,14 @@ const Lines = ({entity, handleContextMenu, onClick, onHover, points}: Props) => 
 					cornerRadius={[paddingText, paddingText, 0, 0]}
 					fill="#fff"
 					height={tileH / 2}
-					opacity={0.9}
+					opacity={entity.title ? 0.9 : 0}
 					width={tileW}
 				/>
 				<Rect
 					cornerRadius={[0, 0, paddingText, paddingText]}
 					fill="#fff"
 					height={tileH / 2}
-					opacity={0.9}
+					opacity={entity.desc ? 0.9 : 0}
 					width={tileW}
 					y={tileH / 2}
 				/>
@@ -67,7 +66,8 @@ const Lines = ({entity, handleContextMenu, onClick, onHover, points}: Props) => 
 					fontSize={10}
 					fontStyle="bold"
 					height={tileH / 2 - paddingText * 3}
-					text={text + ' ' + text}
+					opacity={entity.title ? 1 : 0}
+					text={entity.title}
 					verticalAlign="middle"
 					width={tileW - paddingText * 2}
 					x={paddingText}
@@ -80,8 +80,8 @@ const Lines = ({entity, handleContextMenu, onClick, onHover, points}: Props) => 
 					fontSize={10}
 					fontStyle="bold"
 					height={tileH / 2 - paddingText * 3}
-					opacity={1}
-					text={text + ' ' + text}
+					opacity={entity.desc ? 1 : 0}
+					text={entity.desc}
 					verticalAlign="middle"
 					width={tileW - paddingText * 2}
 					x={paddingText}

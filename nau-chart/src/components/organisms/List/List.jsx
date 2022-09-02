@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import Edit from 'icons/edit.svg';
 import {functions, props} from './selectors';
 import ListHide from 'icons/listHide.svg';
+import ListItem from 'components/organisms/ListItem';
 import type {Props} from 'components/organisms/Content/types';
 import React, { useState } from 'react';
 import styles from './styles.less';
@@ -29,31 +30,19 @@ const List = ({activeElement, data}: Props) => {
 		return (
 			<div className={styles.itemList} key={item.id}>
 				{renderTitle(item)}
-				{(item.options || []).map(option => renderChildren(option))}
-			</div>
-		);
-	};
-
-	const renderLink = value => {
-		if (value.url) {
-			return <a className={styles.itemDesc} href={value.url} rel="noreferrer" target="_blank">{value.label}</a>;
-		} else {
-			return <div className={styles.itemDesc}>{value.label}</div>;
-		}
-	};
-
-	const renderChildren = ({label, value}) => {
-		return (
-			<div className={styles.itemContainer} key={label}>
-				<div className={styles.itemTitle}>{label}</div>
-				{renderLink(value)}
+				{(item.options || []).map(option => <ListItem key={option.label} label={option.label} value={option.value} />)}
 			</div>
 		);
 	};
 
 	const renderChangeView = () => {
+		const classNames = cn({
+			[styles.buttonChangeView]: true,
+			[styles.buttonChangeViewActive]: !viewList
+		});
+
 		return (
-			<button className={styles.buttonChangeView} onClick={handleChangeView}>
+			<button className={classNames} onClick={handleChangeView}>
 				<ListHide />
 			</button>
 		);
@@ -61,9 +50,9 @@ const List = ({activeElement, data}: Props) => {
 
 	const renderTitle = ({actions, title}) => {
 		return (
-			<div className={styles.itemTitleContainer}>
+			<div className={styles.itemTitleContainer} onClick={handleOpenEdit(actions)}>
 				<div className={styles.itemTitle}>{title}</div>
-				<Edit className={styles.itemEditButton} onClick={handleOpenEdit(actions)} />
+				<Edit className={styles.itemEditButton} />
 			</div>
 		);
 	};

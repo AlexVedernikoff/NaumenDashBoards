@@ -1,5 +1,6 @@
 // @flow
 import type {Connector, OptionsSizeCanvas} from './types';
+import type {Entity} from 'store/entity/types';
 import {jsPDF} from 'jspdf';
 /**
  * Сохранение графического файла.
@@ -53,6 +54,80 @@ function sortPointCorrect (points: Connector[]) {
 		const countChildrenB = points.filter(s => s.from === b.id).length;
 		return countChildrenB - countChildrenA;
 	});
+}
+
+/**
+ * Присвоение точкам первичных позиций и угла.
+ * @param {Entity[]} points - массив точек
+ * @returns {{bufferPoints: Connector[], options: OptionsSizeCanvas}} - обьект с точками и параметрами сдвига на холсте
+ */
+function pointsCreateCoordinate (points: Entity[]): {bufferPoints: Connector[], options: OptionsSizeCanvas} {
+	const options = {
+		maxX: 0,
+		maxY: 0,
+		minY: 0
+	};
+	const bufferPoints = [];
+
+	points.forEach((entity: Entity, index: string, origins: Entity[]) => {
+		let x;
+		let y;
+		let angle;
+
+		const parent = bufferPoints.find(s => s.id === entity.from);
+
+		if (parent) { // если элемент не первый то расчитываем позицию и угол
+			const shift = 300;
+			const children = origins.filter(s => s.from === entity.id);
+			const connects = origins.filter(s => s.from === entity.from);
+			const connectsLength = connects.length; // число отвлетвлений
+			const connectsCountSmall = connectsLength < 5; // градация уменьшения угла развертки
+			const angleStep = connectsCountSmall ? 180 / (connectsLength + 1) : 30;
+
+			const connectIndex = bufferPoints.filter(s => s.from === entity.from).length; // текущий индекc отвлетвления
+
+			if (connects.length === 1) { // если соединение одно, сдвигаем по горизонту
+				y = parent.y;
+				x = parent.x + shift;
+				angle = 0;
+			} else { // если соединений несколько, вычесляем угол и координаты сдвига
+				let shiftRatioAngle = shift + 50;
+
+				const initialAngle = -(angleStep * connectIndex);
+				const finishAngle = connectsCountSmall ? getSmallConnectAngle(initialAngle, parent.angle, connectsLength, angleStep) : getBigConnectAngle(initialAngle, parent.angle);
+
+				if (finishAngle === 0 && children && children.length > 1) { // удлиняем горизонтальный луч если есть дети
+					shiftRatioAngle += 200;
+				}
+
+				const a = shiftRatioAngle * Math.sin(finishAngle * Math.PI / 180); // катет а
+				const b = shiftRatioAngle * -Math.cos(finishAngle * Math.PI / 180); // катет б
+
+				y = parent.y - a;
+				x = parent.x - b;
+				angle = finishAngle;
+			}
+
+			if (options.minY > y) {
+				options.minY = y;
+			}
+
+			if (options.maxY < y) {
+				options.maxY = y;
+			}
+
+			if (options.maxX < x) {
+				options.maxX = x;
+			}
+		} else { // если первый сдвигаем горизонтально
+			x = 60;
+			y = 0;
+		}
+
+		bufferPoints.push({angle, x, y, ...entity});
+	});
+
+	return {bufferPoints, options};
 }
 
 /**
@@ -347,5 +422,6 @@ export {
 	getSmallConnectAngle,
 	getBigConnectAngle,
 	sortPointCorrect,
-	searchCross
+	searchCross,
+	pointsCreateCoordinate
 };

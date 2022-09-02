@@ -11,7 +11,7 @@ import Reset from 'icons/reset.svg';
 
 import styles from './styles.less';
 
-const Control = ({getDataEntity, scale, setExportTo, setScale}: Props) => {
+const Control = ({getDataEntity, scale, setExportTo, setPosition, setScale}: Props) => {
 	const exportFormatList = [
 		{format: 'jpg', title: 'JPG'},
 		{format: 'png', title: 'PNG'},
@@ -19,11 +19,15 @@ const Control = ({getDataEntity, scale, setExportTo, setScale}: Props) => {
 	];
 
 	const addScale = () => {
-		setScale(scale + 0.1);
+		if (scale <= 1) {
+			setScale(scale * 2);
+		}
 	};
 
 	const decreaseScale = () => {
-		setScale(scale - 0.1);
+		if (scale >= 0.5) {
+			setScale(scale / 2);
+		}
 	};
 
 	const reloadSchema = () => {
@@ -36,6 +40,7 @@ const Control = ({getDataEntity, scale, setExportTo, setScale}: Props) => {
 
 	const resetSchemaSetting = () => {
 		setScale(1);
+		setPosition({x: 0, y: 0});
 	};
 
 	const renderReloadSchema = () => {
@@ -78,8 +83,8 @@ const Control = ({getDataEntity, scale, setExportTo, setScale}: Props) => {
 				<Reset />
 			</button>
 			<div className={styles.containerHoverWrap}>
-				<ul>
-					<li onClick={resetSchemaSetting}>Сбросить настройки вида</li>
+				<ul className={styles.containerHoverList}>
+					<li className={styles.containerHoverListItem} onClick={resetSchemaSetting}>Сбросить настройки вида</li>
 				</ul>
 			</div>
 		</div>;

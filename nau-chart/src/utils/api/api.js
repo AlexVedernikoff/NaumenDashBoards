@@ -11,6 +11,6 @@ export default class Api {
 	}
 
 	async getScheme () {
-		return this.jsApi.restCallModule('schemeRestSettings', 'getScheme');
+		return this.jsApi.restCallModule('schemeRestSettings', 'getSchemeData');
 	}
 }

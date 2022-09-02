@@ -79,9 +79,19 @@ const setExportTo = (payload: string) => ({
 	type: VERIFY_EVENTS.SET_EXPORT_TO
 });
 
+/**
+ * Установка позиции холста
+ * @param {{x: number, y: number}} payload - координаты
+ */
+const setPosition = (payload: {x: number, y: number}) => ({
+	payload,
+	type: VERIFY_EVENTS.SET_POSITION
+});
+
 export {
 	setActiveElement,
 	setScale,
 	setExportTo,
+	setPosition,
 	getDataEntity
 };
