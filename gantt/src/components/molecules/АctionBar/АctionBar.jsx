@@ -379,10 +379,12 @@ const АctionBar = props => {
 	const renderVersions = () => props.versions.map(renderVersion);
 
 	const renderModalListVersions = () => {
+		const classes = styles.modal + ' ' + styles.modalVarsions;
+
 		if (showListVersions) {
 			return (
 				<Modal
-					className={styles.modal}
+					className={classes}
 					notice={true}
 					onClose={handleModalClose}
 					onSubmit={handleModalClose}
