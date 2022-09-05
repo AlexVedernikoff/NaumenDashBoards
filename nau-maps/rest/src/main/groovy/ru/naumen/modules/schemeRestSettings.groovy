@@ -16,6 +16,8 @@ import groovy.transform.Canonical
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import ru.naumen.core.server.script.spi.ScriptDtObject
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
+import ru.naumen.core.server.script.api.injection.InjectApi
+import groovy.transform.TupleConstructor
 
 /**
  * Метод для получения данных об объектах для вывода на cхему
@@ -40,20 +42,22 @@ private String getSchemeData(String contentUuid = "schemesName")
     return new ObjectMapper().writeValueAsString(aggregations)
 }
 
+@InjectApi
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class ElementsScheme
 {
-    private final Object logger
-
-    ElementsScheme(Object logger)
-    {
-        this.logger = logger
-    }
-
     public HierarchyCommunicationBuilder createPointObjectBuilder()
     {
         return new HierarchyCommunicationBuilder()
     }
+    Collection settings = new SettingsProviderSchemes()
+        .getSettings()
+        ?.abstractSchemesCharacteristics
+        ?.first()?.strategies?.characteristicsOutputDiagram?.first()
+    String metaСlassSettingsWizard = settings?.metaclassObjects?.id.first()
+    Collection attributesFromGroup =
+        api.metainfo.getMetaClass(metaСlassSettingsWizard)
+           .getAttributeGroup(settings?.attributeGroup.first()).attributes
     /**
      * Метод для получения данных о точках на схеме
      * @param scriptData - данные из скрипта
@@ -65,31 +69,37 @@ class ElementsScheme
                                                                     Integer id,
                                                                     Long from = id)
     {
-
-        Collection settings = new SettingsProviderSchemes()
-            .getSettings()
-            ?.abstractSchemesCharacteristics
-            ?.first()?.strategies?.characteristicsOutputDiagram?.first()
-
         String mainText = settings?.mainText?.first()
         String additionalText = settings?.additionalText?.first()
-        String descData = mainText ? scriptData."${ mainText }" : ''
-        String titleData = additionalText ? scriptData."${ additionalText }" : ''
+
+        String descData = mainText ? scriptData[mainText] : 'Не заполнено'
+        String titleData =  additionalText ? scriptData[additionalText] : 'Не заполнено'
 
         HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
-        hierarchyCommunicationBuilder.setDesc(descData)
+        hierarchyCommunicationBuilder.setDesc(titleData)
         if (id == 1)
         {
-            hierarchyCommunicationBuilder.setFrom(1)
+            hierarchyCommunicationBuilder.setFrom(null)
         }
         else
         {
             hierarchyCommunicationBuilder.setFrom(from)
         }
         hierarchyCommunicationBuilder.setId(id)
-        hierarchyCommunicationBuilder.setTitle(titleData)
+        hierarchyCommunicationBuilder.setTitle(descData)
         hierarchyCommunicationBuilder.setType('point')
         hierarchyCommunicationBuilder.setUUID(scriptData.UUID)
+        hierarchyCommunicationBuilder.setHeader(scriptData.title)
+        hierarchyCommunicationBuilder
+            .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
+        attributesFromGroup.each {
+            HashMap valueAndLink =
+                gettingDataForValueAndLinkElement(it, scriptData, metaСlassSettingsWizard, id)
+            hierarchyCommunicationBuilder.addOption(
+                it.title,
+                new ValueSchemes(label: valueAndLink['value'], url: valueAndLink['link'])
+            )
+        }
         return hierarchyCommunicationBuilder
     }
 
@@ -111,7 +121,59 @@ class ElementsScheme
         hierarchyCommunicationBuilder.setId(id)
         hierarchyCommunicationBuilder.setTitle(scriptData.title)
         hierarchyCommunicationBuilder.setType('line')
+        hierarchyCommunicationBuilder.setUUID(scriptData.UUID)
+        hierarchyCommunicationBuilder.setHeader(scriptData.title)
+        attributesFromGroup.each {
+            HashMap valueAndLink =
+                gettingDataForValueAndLinkElement(it, scriptData, metaСlassSettingsWizard, id)
+            hierarchyCommunicationBuilder.addOption(
+                it.title,
+                new ValueSchemes(label: valueAndLink['value'], url: valueAndLink['link'])
+            )
+        }
+        hierarchyCommunicationBuilder
+            .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
         return hierarchyCommunicationBuilder
+    }
+    /**
+     * Метод для получения данных о значении и ссылке на атрибут
+     * @param currentAttribute - текущий атрибут в списке
+     * @param scriptData - данные из скрипта
+     * @param metaСlassSettingsWizard - данные о метаклассе из масте настроек
+     * @param id - id текущего элемента
+     * @return значение и ссылка на атрибут
+     */
+    HashMap gettingDataForValueAndLinkElement(Object currentAttribute,
+                                              ScriptDtObject scriptData,
+                                              String metaСlassSettingsWizard,
+                                              Integer id)
+    {
+        HashMap valueAndLink
+        String valueLabel
+        String linkElement
+        try
+        {
+            valueLabel = scriptData[currentAttribute.code] ?: 'не указано'
+            linkElement = api.web.open(scriptData[currentAttribute.code].UUID)
+        }
+        catch (Exception ex)
+        {
+            if (api.utils.find(metaСlassSettingsWizard, [:])[id])
+            {
+                valueLabel =
+                    api.utils.find(metaСlassSettingsWizard, [:])[id][currentAttribute.code] ?:
+                        'не указано'
+                api.metainfo.getMetaClass(metaСlassSettingsWizard).attributes.each { attribute ->
+                    if (attribute.code == currentAttribute.code && attribute.type == 'object')
+                    {
+                        linkElement = api.web.open(
+                            api.utils.find(metaСlassSettingsWizard, [:])[id][attribute.code]?.UUID
+                        )
+                    }
+                }
+            }
+        }
+        return valueAndLink = ['value': valueLabel, 'link': linkElement]
     }
 }
 
@@ -123,6 +185,41 @@ enum ActionTypeScheme
     OPEN_LINK,
     CHANGE_RESPONSIBLE,
     CHANGE_STATE
+}
+
+/**
+ * Класс, описывающий "опции"(выводимые атрибуты) для объекта (для меню справа)
+ */
+@TupleConstructor()
+class OptionSchemes
+{
+    /**
+     * Название опции
+     */
+    String label
+    /**
+     * Значение
+     */
+    ValueSchemes value
+    /**
+     * Формат отображения
+     */
+    String presentation
+}
+
+/**
+ * Класс, описывающий значение атрибута (для меню справа)
+ */
+class ValueSchemes
+{
+    /**
+     * Название объекта
+     */
+    String label = ''
+    /**
+     * Ссылка на карточку объекта
+     */
+    String url = ''
 }
 
 /**
@@ -184,14 +281,24 @@ class HierarchyCommunicationBuilder
     String type
 
     /**
-     * Все данные
+     * Уникальный идентификатор объекта
      */
     String UUID
+
+    /**
+     *  Название
+     */
+    String header
 
     /**
      * Список возможных действий с объектом (для меню справа)
      */
     List<ActionScheme> actions = []
+
+    /**
+     * Список возможных данных об объекте (для меню справа)
+     */
+    List<OptionSchemes> options = []
 
     public HierarchyCommunicationBuilder setDesc(String desc)
     {
@@ -239,7 +346,7 @@ class HierarchyCommunicationBuilder
                 name: name,
                 link: link,
                 inPlace: inPlace,
-                type: ActionTypeScheme.OPEN_LINK
+                type: 'OPEN_LINK'
             )
         )
         return this
@@ -251,4 +358,22 @@ class HierarchyCommunicationBuilder
         return this
     }
 
+    public HierarchyCommunicationBuilder setHeader(String header)
+    {
+        this.header = header
+        return this
+    }
+
+    public HierarchyCommunicationBuilder addOption(String label, ValueSchemes value)
+    {
+        this.options.add(
+            new OptionSchemes(
+                label: label,
+                value: value,
+                presentation: 'RIGHT_OF_LABEL'
+            )
+        )
+
+        return this
+    }
 }
