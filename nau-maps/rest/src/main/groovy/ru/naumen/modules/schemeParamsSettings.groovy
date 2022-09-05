@@ -78,7 +78,7 @@ Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataLine,
     Collection settings = new SettingsProviderSchemes()
         .getSettings()
         ?.abstractSchemesCharacteristics?.first()?.strategies?.characteristicsOutputDiagram?.first()
-    ElementsScheme elementsScheme = new ElementsScheme(logger)
+    ElementsScheme elementsScheme = new ElementsScheme()
     Integer id = 0
     dataLine.eachWithIndex { num, idx ->
         if (dataPointA[idx] && dataPointB[idx])
@@ -138,10 +138,15 @@ Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataLine,
  */
 private LinkedHashMap<String, Object> schemeHierarchy(HierarchyCommunicationBuilder hierarchyCommunicationBuilder)
 {
-    return hierarchyCommunicationBuilder ? [desc : hierarchyCommunicationBuilder.desc,
-                                            from : hierarchyCommunicationBuilder.from,
-                                            id   : hierarchyCommunicationBuilder.id,
-                                            title: hierarchyCommunicationBuilder.title,
-                                            to   : hierarchyCommunicationBuilder.to,
-                                            type : hierarchyCommunicationBuilder.type] : [:]
+    return hierarchyCommunicationBuilder ? [desc   : hierarchyCommunicationBuilder.desc,
+                                            from   : hierarchyCommunicationBuilder.from,
+                                            id     : hierarchyCommunicationBuilder.id,
+                                            title  : hierarchyCommunicationBuilder.title,
+                                            to     : hierarchyCommunicationBuilder.to,
+                                            type   : hierarchyCommunicationBuilder.type,
+                                            actions: hierarchyCommunicationBuilder.actions,
+                                            header : hierarchyCommunicationBuilder.header,
+                                            options: hierarchyCommunicationBuilder.options,
+                                            uuid   : hierarchyCommunicationBuilder.UUID
+    ] : [:]
 }
