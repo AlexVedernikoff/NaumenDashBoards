@@ -20,7 +20,7 @@ class Line extends Component<Props, State> {
 	renderLine = () => {
 		const {part} = this.props;
 		const {color, data: {header = ''}, geopositions, lineStyle = 'solidLine', opacity = 100, weight = 6} = part;
-		const opacityFloat = +opacity / 100;
+		const opacityFloat = Number(opacity) / 100;
 		const strokeStyleArray = lineStyle === 'dashedLine' ? [1, 2] : [0, 0];
 		const positions = geopositions.map(geoposition => [geoposition.latitude, geoposition.longitude]);
 
@@ -44,13 +44,12 @@ class Line extends Component<Props, State> {
 
 	renderMarks = () => {
 		const {active, part} = this.props;
-		const {geopositions: [positionsStart, positionsFinish], iconFirst, iconSecond} = part;
+		const {geopositions: [positionsStart, positionsFinish], isIcon, iconFirst, iconSecond} = part;
 
-		return (<div>
-			{iconFirst && <Mark active={active} point={{...part, geopositions: [positionsStart], icon: iconFirst}} />}
-			{iconSecond && <Mark active={active} point={{...part, geopositions: [positionsFinish], icon: iconSecond}} />}
-		</div>
-		);
+		return (isIcon && <div>
+			{<Mark active={active} point={{...part, geopositions: [positionsStart], icon: iconFirst}} />}
+			{<Mark active={active} point={{...part, geopositions: [positionsFinish], icon: iconSecond}} />}
+		</div>);
 	};
 
 	render () {

@@ -26,7 +26,7 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any>
 	}
 };
 
-const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		let data = testData;
 		const {context: {contentCode, subjectUuid}} = getState().geolocation;
@@ -35,7 +35,7 @@ const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dis
 			data = await getMapObjects(contentCode, subjectUuid);
 		}
 
-		const {errors, mapApiKey, objects} = data;
+		const {errors, mapApiKey = {}, objects} = data;
 
 		if (errors && errors.length > 0) {
 			const label = errors.join(', ') + '.';
@@ -44,6 +44,12 @@ const fetchGeolocation = (firstCall: boolean = false): ThunkAction => async (dis
 
 		dispatch(setMapArray(mapApiKey));
 		dispatch(setData(objects));
+
+		const {nauMapsMapLastSelect} = localStorage;
+
+		if (nauMapsMapLastSelect && mapApiKey.hasOwnProperty(nauMapsMapLastSelect)) {
+			dispatch(setMapPanel(nauMapsMapLastSelect));
+		}
 	} catch (error) {
 		notify('error', 'error');
 		dispatch(recordGeolocationdError(error));
