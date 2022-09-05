@@ -140,10 +140,12 @@ class ElementsMap
         {
             dataDisplayPointA =
                 dbTrail.hasProperty(strategie?.pathToIconA) && dbTrail[strategie?.pathToIconA] ?
-                    api.web.open(attributepointA.first().UUID) : null
+                    "${api.web.getBaseUrl()}${'download?uuid='}${dbTrail[strategie?.pathToIconA].UUID.first()}" :
+                    null
             dataDisplayPointB =
                 dbTrail.hasProperty(strategie?.pathToIconB) && dbTrail[strategie?.pathToIconB] ?
-                    api.web.open(attributepointB.first().UUID) : null
+                    "$api.web.getBaseUrl()}${'download?uuid='}${dbTrail[strategie?.pathToIconB].UUID.first()}" :
+                    null
         }
 
         return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.gradLongA
