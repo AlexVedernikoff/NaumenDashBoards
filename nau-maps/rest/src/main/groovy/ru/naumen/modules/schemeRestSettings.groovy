@@ -54,9 +54,9 @@ class ElementsScheme
         .getSettings()
         ?.abstractSchemesCharacteristics
         ?.first()?.strategies?.characteristicsOutputDiagram?.first()
-    String metaСlassSettingsWizard = settings?.metaclassObjects?.id.first()
+    String metaClassSettingsWizard = settings?.metaclassObjects?.id.first()
     Collection attributesFromGroup =
-        api.metainfo.getMetaClass(metaСlassSettingsWizard)
+        api.metainfo.getMetaClass(metaClassSettingsWizard)
            .getAttributeGroup(settings?.attributeGroup.first()).attributes
     /**
      * Метод для получения данных о точках на схеме
@@ -94,7 +94,7 @@ class ElementsScheme
             .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
         attributesFromGroup.each {
             HashMap valueAndLink =
-                gettingDataForValueAndLinkElement(it, scriptData, metaСlassSettingsWizard, id)
+                gettingDataForValueAndLinkElement(it, scriptData, metaClassSettingsWizard, id)
             hierarchyCommunicationBuilder.addOption(
                 it.title,
                 new ValueSchemes(label: valueAndLink['value'], url: valueAndLink['link'])
@@ -125,7 +125,7 @@ class ElementsScheme
         hierarchyCommunicationBuilder.setHeader(scriptData.title)
         attributesFromGroup.each {
             HashMap valueAndLink =
-                gettingDataForValueAndLinkElement(it, scriptData, metaСlassSettingsWizard, id)
+                gettingDataForValueAndLinkElement(it, scriptData, metaClassSettingsWizard, id)
             hierarchyCommunicationBuilder.addOption(
                 it.title,
                 new ValueSchemes(label: valueAndLink['value'], url: valueAndLink['link'])
@@ -139,13 +139,13 @@ class ElementsScheme
      * Метод для получения данных о значении и ссылке на атрибут
      * @param currentAttribute - текущий атрибут в списке
      * @param scriptData - данные из скрипта
-     * @param metaСlassSettingsWizard - данные о метаклассе из масте настроек
+     * @param metaClassSettingsWizard - данные о метаклассе из мастера настроек
      * @param id - id текущего элемента
      * @return значение и ссылка на атрибут
      */
     HashMap gettingDataForValueAndLinkElement(Object currentAttribute,
                                               ScriptDtObject scriptData,
-                                              String metaСlassSettingsWizard,
+                                              String metaClassSettingsWizard,
                                               Integer id)
     {
         HashMap valueAndLink
@@ -163,14 +163,15 @@ class ElementsScheme
                 valueLabel =
                     api.utils.find(metaСlassSettingsWizard, [:])[id][currentAttribute.code] ?:
                         'не указано'
-                api.metainfo.getMetaClass(metaСlassSettingsWizard).attributes.each { attribute ->
-                    if (attribute.code == currentAttribute.code && attribute.type == 'object')
-                    {
-                        linkElement = api.web.open(
-                            api.utils.find(metaСlassSettingsWizard, [:])[id][attribute.code]?.UUID
-                        )
-                    }
+                Object resul = api.metainfo.getMetaClass(metaСlassSettingsWizard).attributes.find {
+                    attribute
+                        ->
+                        attribute.code == currentAttribute.code && attribute.type == 'object'
                 }
+
+                linkElement = resul ? api.web.open(
+                    api.utils.find(metaСlassSettingsWizard, [:])[id][resul.code]?.UUID
+                ) : null
             }
         }
         return valueAndLink = ['value': valueLabel, 'link': linkElement]
