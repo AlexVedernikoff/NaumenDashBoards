@@ -360,7 +360,6 @@ const Gantt = (props: Props) => {
 
 		gantt.clearAll();
 		gantt.parse((JSON.stringify({data: tasks, links: workRelations})));
-		gantt.showDate(new Date());
 		gantt.render();
 
 		tasks
@@ -368,10 +367,6 @@ const Gantt = (props: Props) => {
 			.map(task => task.id)
 			.forEach(taskId => rollUp ? gantt.close(taskId) : gantt.open(taskId));
 
-		const dateX = gantt.posFromDate(new Date());
-		const scrollTo = Math.max(dateX - gantt.config.task_scroll_offset, 0);
-
-		gantt.scrollTo(scrollTo);
 		gantt.addMarker({
 			css: 'today',
 			start_date: new Date(),

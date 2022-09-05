@@ -188,14 +188,7 @@ const FormPanel = (props: Props) => {
 	const handleAddNewColumn = () => {
 		const newColumnSettings = deepClone(columnSettingsModal);
 
-		newColumnSettings.push({ ...defaultColumn, code: uuidv4(), editor: {map_to: 'text', type: 'text'} });
-
-		const penultIndex = newColumnSettings.length - 2;
-		const lastIndex = newColumnSettings.length - 1;
-
-		newColumnSettings.splice(penultIndex, lastIndex, newColumnSettings[lastIndex], newColumnSettings[penultIndex]);
-
-		setColumnSettingsModal([...newColumnSettings]);
+		setColumnSettingsModal([...newColumnSettings, { ...defaultColumn, code: uuidv4() }]);
 	};
 
 	const handleDeleteColumn = (index: number) => {

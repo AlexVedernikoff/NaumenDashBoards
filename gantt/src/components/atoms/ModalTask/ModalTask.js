@@ -4,7 +4,7 @@ import cn from 'classnames';
 import {
 	Checkbox, Datepicker, IconButton, Select, TextInput
 } from 'naumen-common-components';
-import {deepClone} from 'helpers';
+import {deepClone, shiftTimeZone} from 'helpers';
 import {deleteWork, getWorlLink, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
 import {gantt} from 'naumen-gantt';
 import {listMetaClass} from './consts';
@@ -92,8 +92,15 @@ const ModalTask = (props: Props) => {
 		setShowModal(true);
 
 		setCurrentValue(task.text);
-		setInputStartDate(new Date((task.start_date)).toLocaleString());
-		setInputEndDate(new Date((task.end_date)).toLocaleString());
+
+		const deleteDeviationForEndDate = shiftTimeZone(task.end_date);
+		const deleteDeviationForStartDate = shiftTimeZone(task.start_date);
+
+		const startDate = gantt.date.add(new Date(task.start_date), -deleteDeviationForStartDate, 'hour');
+		const endDate = gantt.date.add(new Date(task.end_date), -deleteDeviationForEndDate, 'hour');
+
+		setInputStartDate(startDate.toLocaleString());
+		setInputEndDate(endDate.toLocaleString());
 		// изменения нужны для селдующего мр по 3 итерации
 
 		// const cloneMandatoryAttributes = deepClone(mandatoryAttributes);
@@ -202,18 +209,7 @@ const ModalTask = (props: Props) => {
 	};
 
 	const cancel = () => {
-		const tasks = deepClone(store.APP.tasks);
-		const task = gantt.getTask(taskId);
-
-		if (task.$new) {
-			gantt.deleteTask(task.id);
-			gantt.hideLightbox();
-		}
-
 		setShowModal(false);
-		dispatch(setColumnTask(tasks));
-		setOptions([]);
-		gantt.render();
 	};
 
 	const remove = () => {
@@ -368,7 +364,7 @@ const ModalTask = (props: Props) => {
 				<span className={styles.interval__label}>{item.text}</span>
 				<div className={styles.wrapper_input}>
 					<TextInput className={styles.input} maxLength={30} onChange={item.changeDate} placeholder="дд.мм.гггг, чч:мм:сс" value={item.inputDate} />
-					<IconButton className={styles.basket} icon="CALENDAR" onClick={() => item.setShowDatePickerDate(!item.showDatePickerDate)} />
+					<IconButton className={styles.basket} icon="TOUCH_CALENDAR" onClick={() => item.setShowDatePickerDate(!item.showDatePickerDate)} />
 				</div>
 				{item.renderDatePickerDate()}
 			</div>
