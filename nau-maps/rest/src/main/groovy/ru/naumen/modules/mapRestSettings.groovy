@@ -25,6 +25,10 @@ import ru.naumen.core.server.script.spi.ScriptDtObject
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.core.server.script.api.injection.InjectApi
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
+import org.jsoup.Jsoup
+import org.jsoup.select.Elements
+import org.jsoup.nodes.Document
 
 //БЛОК REST АПИ--------------------------------------------------------
 
@@ -37,7 +41,7 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 String getMapObjects(String objectUuid, String contentUuid)
 {
     ScriptDtObject object = utils.get(objectUuid)
-    return getMapInfo(object, contentUuid)
+    return getMapInfo(object, contentUuid, objectUuid)
 }
 
 //СЛУЖЕБНЫЙ БЛОК--------------------------------------------------------------
@@ -45,15 +49,16 @@ String getMapObjects(String objectUuid, String contentUuid)
  * Метод, позволяющий получить информацию для вывода на карту
  * @param object - текущий объект, карточка которого открыта
  * @param contentUuid - uuid карточки объекта
+ * @param objectUuid - данные о точках или линиях
  * @return данные о трассах в json формате
  */
-private String getMapInfo(ScriptDtObject object, String contentUuid)
+private String getMapInfo(ScriptDtObject object, String contentUuid, String objectUuid)
 {
     MapSettings getSettingsWizardSettings = new SettingsProvider().getSettings()
     APISettings mapApiKey = getSettingsWizardSettings?.interfaceSettings.first()
     Collection<String> errors = []
     Collection<LinkedHashMap> objects =
-        callParamsSettingsMethod(errors, 'Нет данных для отображения', [], contentUuid)
+        callParamsSettingsMethod(errors, 'Нет данных для отображения', [], contentUuid, objectUuid)
     LinkedHashMap aggregations = [objects: objects, errors: errors, mapApiKey: mapApiKey]
     return new ObjectMapper().writeValueAsString(aggregations)
 }
@@ -64,17 +69,18 @@ private String getMapInfo(ScriptDtObject object, String contentUuid)
  * @param errorText - текст ошибки
  * @param defaultValue - значение по умолчанию на случай, если произошла ошибка
  * @param contentUuid - uuid карточки объекта
- * @param objects - список объектов-параметров метода
+ * @param objectUuid - UUID объекта
  * @return результат вызова метода с названием methodName или значение по умолчанию, ошибку в списке и информацию в логе
  */
 private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> errors,
                                                            String errorText,
                                                            Collection defaultValue,
-                                                           String contentUuid)
+                                                           String contentUuid,
+                                                           String objectUuid)
 {
     try
     {
-        return new DataGeneration().getDataDisplayMap(contentUuid) ?: defaultValue
+        return new DataGeneration().getDataDisplayMap(contentUuid, objectUuid) ?: defaultValue
     }
     catch (Exception ex)
     {
@@ -88,6 +94,17 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
 @InjectApi
 class ElementsMap
 {
+    public static final String AREA_A = 'Площадка А'
+    public static final String AREA_B = 'Площадка Б'
+    public static final String GO_TO_CARD = 'Перейти на карточку'
+    public static final String NOT_SPECIFIED = 'не указано'
+    public static final String DATA_TYPE_HYPERLINK = 'hyperlink'
+    public static final String DATA_TYPE_BO_LINKS = 'boLinks'
+    public static final String DATA_TYPE_CATALOGITEMSET = 'catalogItemSet'
+    public static final String DATA_TYPE_BOOLEAN = 'bool'
+    public static final String DATA_TYPE_DT_INTERVAL = 'dtInterval'
+    public static final String DATA_TYPE_RICHTEXT = 'richtext'
+
     /**
      * Метод по созданию билдер-объекта трассы
      * @param object - объект трассы из БД
@@ -109,15 +126,27 @@ class ElementsMap
         Object defaultSettingsWizardSettings = new SettingsProvider()
             .getSettings()?.defVisualization
 
-        String color = strategie?.color ? dbTrail[strategie?.color] :
-            defaultSettingsWizardSettings?.colorLineMap
-        String opacity = strategie?.opacity ? dbTrail[strategie?.opacity] :
-            defaultSettingsWizardSettings?.opacity
-        String width =
-            strategie?.weight ? dbTrail[strategie?.weight] : defaultSettingsWizardSettings?.width
+        String color = dbTrail.hasProperty(strategie?.color) && dbTrail[strategie?.color] ?
+            dbTrail[strategie?.color] : defaultSettingsWizardSettings?.colorLineMap
+        String width = dbTrail.hasProperty(strategie?.weight) && dbTrail[strategie?.weight] ?
+            dbTrail[strategie?.weight] : defaultSettingsWizardSettings?.width
+        String opacity = dbTrail.hasProperty(strategie?.opacity) && dbTrail[strategie?.opacity] ?
+            dbTrail[strategie?.opacity] : defaultSettingsWizardSettings?.opacity
         String lineStyle = strategie.lineStyle ?: defaultSettingsWizardSettings.lineStyle
 
-        return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title
+        String dataDisplayPointA
+        String dataDisplayPointB
+        if (strategie.displayingLinesDots)
+        {
+            dataDisplayPointA =
+                dbTrail.hasProperty(strategie?.pathToIconA) && dbTrail[strategie?.pathToIconA] ?
+                    api.web.open(attributepointA.first().UUID) : null
+            dataDisplayPointB =
+                dbTrail.hasProperty(strategie?.pathToIconB) && dbTrail[strategie?.pathToIconB] ?
+                    api.web.open(attributepointB.first().UUID) : null
+        }
+
+        return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.gradLongA
             ? createTrailBuilder(dbTrail)
             .setHeader(dbTrail.title)
             .setColor(color)
@@ -125,17 +154,20 @@ class ElementsMap
             .setWidth(width)
             .setLineStyle(lineStyle)
             .setGeopositions(dbTrail)
+            .setDisplayingLinesDots(strategie.displayingLinesDots)
+            .setIconFirst(dataDisplayPointA)
+            .setIconSecond(dataDisplayPointB)
             .addOption(
-                'Площадка А',
+                AREA_A,
                 new Value(label: dbTrail.siteA.title, url: api.web.open(dbTrail.siteA.UUID))
             )
             .addOption(
-                'Площадка Б',
+                AREA_B,
                 new Value(label: dbTrail.siteB.title, url: api.web.open(dbTrail.siteB.UUID))
             )
             .setParts(dbTrail)
             .setEquipments(dbTrail)
-            .addAction('Перейти на карточку', api.web.open(dbTrail.UUID))
+            .addAction(GO_TO_CARD, api.web.open(dbTrail.UUID))
             : null
     }
 
@@ -162,11 +194,11 @@ class ElementsMap
                 .setHeader(dbPart.title)
                 .setColor(dbPart.HEXcolor)
                 .addOption(
-                    'Площадка А',
+                    AREA_A,
                     new Value(label: dbPart.siteA.title, url: api.web.open(dbPart.siteA.UUID))
                 )
                 .addOption(
-                    'Площадка Б',
+                    AREA_B,
                     new Value(label: dbPart.siteB.title, url: api.web.open(dbPart.siteB.UUID))
                 )
                 .setGeopositions(
@@ -175,7 +207,7 @@ class ElementsMap
                     dbPart.gradLatB,
                     dbPart.gradLongB
                 )
-                .addAction('Перейти на карточку', api.web.open(dbPart.UUID))
+                .addAction(GO_TO_CARD, api.web.open(dbPart.UUID))
         }
     }
 
@@ -192,15 +224,15 @@ class ElementsMap
                 .setHeader(section.title)
                 .setColor(section.HEXcolor)
                 .addOption(
-                    'Площадка А',
+                    AREA_A,
                     new Value(label: section.siteA.title, url: api.web.open(section.siteA.UUID))
                 )
                 .addOption(
-                    'Площадка Б',
+                    AREA_B,
                     new Value(label: section.siteB.title, url: api.web.open(section.siteB.UUID))
                 )
                 .setGeopositions(section)
-                .addAction('Перейти на карточку', api.web.open(section.UUID))
+                .addAction(GO_TO_CARD, api.web.open(section.UUID))
         }
     }
 
@@ -246,19 +278,19 @@ class ElementsMap
                 .setHeader(equipment.title)
                 .setIcon(equipment)
                 .setGeopositions(equipment, strategie)
-                .addAction('Перейти на карточку', api.web.open(equipment.UUID))
+                .addAction(GO_TO_CARD, api.web.open(equipment.UUID))
             attributesFromGroup.each {
                 String valueLabel
                 String linkElement
                 try
                 {
-                    valueLabel = equipment[it.code] ?: 'не указано'
+                    valueLabel = equipment[it.code] ?: NOT_SPECIFIED
                     linkElement = api.web.open(equipment[it.code].UUID)
                 }
                 catch (Exception ex)
                 {
                     valueLabel =
-                        api.utils.find(codeMetaClass, [:])[indexElement][it.code] ?: 'не указано'
+                        api.utils.find(codeMetaClass, [:])[indexElement][it.code] ?: NOT_SPECIFIED
                     api.metainfo.getMetaClass(codeMetaClass).attributes.each { currentAttribute ->
                         if (currentAttribute.code == it.code && currentAttribute.type == 'object')
                         {
@@ -268,9 +300,26 @@ class ElementsMap
                         }
                     }
                 }
-                formedEquipmentObject
-                    .addOption(it.title, new Value(label: valueLabel, url: linkElement))
+                if (it.type.code == DATA_TYPE_HYPERLINK && valueLabel != NOT_SPECIFIED)
+                {
+                    Document doc = Jsoup.parse(valueLabel)
+                    Elements links = doc.select("a[href]")
+                    formedEquipmentObject
+                        .addOption(it.title, new Value(label: doc.text(), url: links.attr("href")))
+                }
+                else
+                {
+                    formedEquipmentObject
+                        .addOption(
+                            it.title,
+                            new Value(
+                                label: formattedValueLabel(valueLabel, it.type.code),
+                                url: linkElement
+                            )
+                        )
+                }
             }
+
             return formedEquipmentObject
         }
     }
@@ -288,7 +337,7 @@ class ElementsMap
                 .setHeader(pointObject.title)
                 .setIcon(pointObject)
                 .setGeopositions(pointObject.gradLat, pointObject.gradLong)
-                .addAction('Перейти на карточку', api.web.open(pointObject.UUID))
+                .addAction(GO_TO_CARD, api.web.open(pointObject.UUID))
                 .addOption('Адрес', new Value(label: pointObject?.addressStr ?: 'нет уточнений'))
         }
     }
@@ -310,6 +359,76 @@ class ElementsMap
     {
         return new ActionBuilder()
     }
+
+    /**
+     * Метод по проверке и форматированию данных перед отправкой на фронт
+     * @param valueLabel - значение атрибута
+     * @param dataType - тип данных
+     * @return правильно отформатированная строка
+     */
+    String formattedValueLabel(String valueLabel, String dataType)
+    {
+        if ((dataType == DATA_TYPE_CATALOGITEMSET || dataType == DATA_TYPE_BO_LINKS) &&
+            valueLabel != NOT_SPECIFIED)
+        {
+            valueLabel = valueLabel.substring(1, valueLabel.length() - 1)
+        }
+        else if (valueLabel instanceof ScriptDtObject)
+        {
+            valueLabel = valueLabel.title
+        }
+        else if (dataType == DATA_TYPE_BOOLEAN)
+        {
+            valueLabel = valueLabel == 'true' ? 'да' : 'нет'
+        }
+        else if (dataType == DATA_TYPE_DT_INTERVAL)
+        {
+            if (valueLabel.contains('HOUR'))
+            {
+                valueLabel =
+                    fixNumerical(valueLabel.split(' ')[0].toInteger(), 'час', 'часа', 'часов')
+            }
+        }
+        else if (dataType == DATA_TYPE_RICHTEXT)
+        {
+            valueLabel = Jsoup.parse(valueLabel).text()
+        }
+        return valueLabel
+    }
+
+    /**
+     * Метод подбора правильного окончания для Русских числительных
+     * @param numberHours - числительное для подбора окончания
+     * @param arr - набор варинатов для заполнения строки
+     * @return правильно отформатированная строка
+     */
+    String fixNumerical(Integer numberHours, String... arr)
+    {
+        String result
+        Integer num100 = numberHours % 100
+        if (num100 > 4 && num100 < 21)
+        {
+            result = arr[2]
+        }
+        else
+        {
+            Integer num10 = num100 % 10
+            if (num10 == 1)
+            {
+                result = arr[0]
+            }
+            else if (num10 > 1 && num10 < 5)
+            {
+                result = arr[1]
+            }
+            else
+            {
+                result = arr[2]
+            }
+        }
+        return "${ numberHours } ${ result }"
+    }
+
 }
 
 //СЛУЖЕБНЫЙ БЛОК--------------------------------------------------------
@@ -547,6 +666,19 @@ class TrailBuilder extends MapObjectBuilder
      */
     String lineStyle
 
+    /**
+     * Информация по отображению иконки
+     */
+    Boolean displayingLinesDots
+    /**
+     * Ссылка на иконку А
+     */
+    String iconFirst
+    /**
+     * Ссылка на иконку B
+     */
+    String iconSecond
+
     protected TrailBuilder()
     {
         super(MapObjectType.WOLS, null)
@@ -578,6 +710,24 @@ class TrailBuilder extends MapObjectBuilder
     TrailBuilder setLineStyle(String lineStyle)
     {
         this.lineStyle = lineStyle
+        return this
+    }
+
+    TrailBuilder setDisplayingLinesDots(Boolean displayingLinesDots)
+    {
+        this.displayingLinesDots = displayingLinesDots
+        return this
+    }
+
+    TrailBuilder setIconFirst(String iconFirst)
+    {
+        this.iconFirst = iconFirst
+        return this
+    }
+
+    TrailBuilder setIconSecond(String iconSecond)
+    {
+        this.iconSecond = iconSecond
         return this
     }
 
@@ -707,11 +857,11 @@ class BasePointBuilder extends MapObjectBuilder
     {
         def geoposition = dbEquip && dbEquip.location
             ? new Geoposition(
-            latitude: dbEquip.location[strategie.pathLatitudeCoordinates],
-            longitude: dbEquip.location[strategie.pathLongitudeCoordinates]
+            latitude: dbEquip[strategie.pathLatitudeCoordinates],
+            longitude: dbEquip[strategie.pathLongitudeCoordinates]
         )
             : null
-        if(geoposition)
+        if (geoposition)
         {
             this.geopositions = [geoposition]
         }

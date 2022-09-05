@@ -6,7 +6,6 @@
  * Клиентский скриптовый модуль встроенного приложения "Inventory".
  * Содержит методы, определяющие список трасс, участков и оборудования
  */
-//Версия SMP: 4.11
 package ru.naumen.modules.inventory
 
 
@@ -66,9 +65,10 @@ class DataGeneration
     /**
      * Метод по получению данных из БД через Мастер настроек
      * @param nameContent - имя контента
+     * @param objectUuid - UUID объекта
      * @return список данных из БД
      */
-    Object getDataDisplayMap(String nameContent)
+    Object getDataDisplayMap(String nameContent, String objectUuid)
     {
         Collection<AbstractPointCharacteristics> abstractCharacteristicsData = new SettingsProvider()
             .getSettings()?.abstractPointCharacteristics
@@ -79,9 +79,8 @@ class DataGeneration
             getSettingsFromWizardSettingsLine(abstractCharacteristicsData.last())
 
         Collection<MapObjectBuilder> pointData = []
-        pointData += collectingData(strategiesPoint, nameContent, true)
-        pointData += collectingData(strategiesLine, nameContent, false)
-
+        pointData += collectingData(strategiesPoint, nameContent, true, objectUuid)
+        pointData += collectingData(strategiesLine, nameContent, false, objectUuid)
         return pointData
     }
 
@@ -141,6 +140,9 @@ class DataGeneration
                 .setPathCoordinatesLongitudA(it?.coordinatesLine?.pathCoordinatesLongitudA)
                 .setPathCoordinatesLatitudeB(it?.coordinatesLine?.pathCoordinatesLatitudeB)
                 .setPathCoordinatesLongitudB(it?.coordinatesLine?.pathCoordinatesLongitudB)
+                .setDisplayingLinesDots(it?.displayingEndLineDots)
+                .setPathToIconA(it?.pathIconA)
+                .setPathToIconB(it?.pathIconB)
             dataWizardSettings.add(strategies)
         }
         return dataWizardSettings
@@ -148,15 +150,16 @@ class DataGeneration
 
     /**
      * Метод сохранения данных о линиях и точках для отображения на карте
-     * @param placesOfUse - места использования настроек из мастера
+     * @param strategies - набор настроек из мастера
      * @param nameContent - имя контента
-     * @param scriptText - список всех скриптов вкладки
      * @param isDataAboutPointsOrLines - данные о точках или линиях
+     * @param objectUuid - - UUID объекта
      * @return коллекция данных для отображения данных на вкладке
      */
     Collection collectingData(Collection<OutputObjectStrategies> strategies,
                               String nameContent,
-                              Boolean isDataAboutPointsOrLines)
+                              Boolean isDataAboutPointsOrLines,
+                              String objectUuid)
     {
         ElementsMap elementsMap = new ElementsMap()
         Collection dataToDisplay = []
@@ -164,7 +167,8 @@ class DataGeneration
             strategie?.placesOfUse?.each { place ->
                 if (place == nameContent.toLowerCase())
                 {
-                    String executeScriptText = strategie.scriptText
+                    String textScriptReceiptSubject = "subject = utils.get('${ objectUuid }'); "
+                    String executeScriptText = textScriptReceiptSubject + strategie.scriptText
                     ScriptDtOList executeScript = api.utils.executeScript(executeScriptText)
                     if (isDataAboutPointsOrLines)
                     {
@@ -287,6 +291,18 @@ class LinkedOnMap
      * Тип линии
      */
     String lineStyle
+    /**
+     * Признак отображения иконки
+     */
+    Boolean displayingLinesDots
+    /**
+     * Ссылка на иконку А
+     */
+    String iconFirst
+    /**
+     * Ссылка на иконку B
+     */
+    String iconSecond
 
     LinkedOnMap(TrailBuilder trailBuilder)
     {
@@ -296,6 +312,8 @@ class LinkedOnMap
         this.lineStyle = trailBuilder.lineStyle
         this.type = trailBuilder.type
         this.geopositions = trailBuilder.geopositions
+        this.iconFirst = trailBuilder.iconFirst
+        this.iconSecond = trailBuilder.iconSecond
         this.parts = trailBuilder.parts.findResults {
             mapSection(it)
         }
@@ -313,7 +331,10 @@ class LinkedOnMap
                                  color       : this.color,
                                  opacity     : this.opacity,
                                  weight      : this.weight,
-                                 lineStyle   : this.lineStyle] : [:]
+                                 lineStyle   : this.lineStyle,
+                                 iconFirst   : this.iconFirst,
+                                 iconSecond  : this.iconSecond,
+                                 isIcon      : this.displayingLinesDots] : [:]
     }
 
     private LinkedHashMap mapPoint(BasePointBuilder basePointBuilder)
@@ -325,7 +346,10 @@ class LinkedOnMap
                                    color       : this.color,
                                    opacity     : this.opacity,
                                    weight      : this.weight,
-                                   lineStyle   : this.lineStyle] : [:]
+                                   lineStyle   : this.lineStyle,
+                                   iconFirst   : this.iconFirst,
+                                   iconSecond  : this.iconSecond,
+                                   isIcon      : this.displayingLinesDots] : [:]
     }
 }
 
@@ -442,9 +466,19 @@ class StrategiesLine extends OutputObjectStrategies
     String pathCoordinatesLongitudB
 
     /**
-     * Отображение окончаний линий точками
+     * Признак отображения иконки
      */
-    Boolean displayingLineEndingsWithDots
+    Boolean displayingLinesDots
+
+    /**
+     * Путь к иконке для точки А
+     */
+    String pathToIconA
+
+    /**
+     * Путь к иконке для точки B
+     */
+    String pathToIconB
 
     StrategiesLine setColor(String color)
     {
@@ -493,6 +527,25 @@ class StrategiesLine extends OutputObjectStrategies
         this.pathCoordinatesLongitudB = pathCoordinatesLongitudB
         return this
     }
+
+    StrategiesLine setDisplayingLinesDots(Boolean displayingLinesDots)
+    {
+        this.displayingLinesDots = displayingLinesDots
+        return this
+    }
+
+    StrategiesLine setPathToIconA(String pathToIconA)
+    {
+        this.pathToIconA = pathToIconA
+        return this
+    }
+
+    StrategiesLine setPathToIconB(String pathToIconB)
+    {
+        this.pathToIconB = pathToIconB
+        return this
+    }
+
 }
 
 class StrategiesPoint extends OutputObjectStrategies
