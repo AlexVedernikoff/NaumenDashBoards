@@ -8,9 +8,9 @@
      */
     //Версия: 4.10.0.15
     //Категория: скриптовый модуль
-    
+
     package ru.naumen.modules.dashboards
-    
+
     import com.fasterxml.jackson.annotation.JsonInclude
     import com.fasterxml.jackson.databind.ObjectMapper
     import groovy.json.JsonOutput
@@ -26,7 +26,7 @@
     import ru.naumen.core.server.script.api.ITypesApi
     import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
     import ru.naumen.core.server.script.spi.IScriptUtils
-    
+
     import java.text.DecimalFormat
     import java.text.DecimalFormatSymbols
     import java.text.SimpleDateFormat
@@ -35,13 +35,13 @@
     import groovy.transform.InheritConstructors
     import ru.naumen.core.shared.IUUIDIdentifiable
     import org.apache.commons.lang3.time.DateUtils
-    
-    
+
+
     import static DiagramType.*
     import static MessageProvider.*
     import static DashboardMarshallerClass.*
     import static groovy.json.JsonOutput.toJson
-    
+
     @Field @Lazy @Delegate DashboardDataSet dashboardDataSet = new DashboardDataSetImpl(binding, new DashboardDataSetService(api.utils,
                                                                                                                              api.metainfo,
                                                                                                                              api.listdata,
@@ -59,7 +59,7 @@
                                                                                                                                                           new DashboardUtils(),
                                                                                                                                                           logger),
                                                                                                                              logger))
-    
+
     interface DashboardDataSet
     {
         /**
@@ -69,7 +69,7 @@
          * @return данные для построения диаграммы
          */
         String getDataForCompositeDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
-    
+
         /**
          * Получение данных для таблиц. Нужен для обратной совместимости.
          * @param requestContent - ключ дашборда для построения виджета
@@ -78,22 +78,22 @@
          */
         String getDataForTableDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
     }
-    
+
     class DashboardDataSetImpl extends BaseController implements DashboardDataSet
     {
         private final DashboardDataSetService service
-    
+
         DashboardDataSetImpl(Binding binding, DashboardDataSetService service)
         {
             super(binding)
             this.service = service
         }
-    
+
         Object run()
         {
             return null
         }
-    
+
         @Override
         String getDataForCompositeDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
         {
@@ -111,7 +111,7 @@
                 ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user).with(JsonOutput.&toJson) }
                 : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user).with(JsonOutput.&toJson)
         }
-    
+
         @Override
         String getDataForTableDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
         {
@@ -130,7 +130,7 @@
                 : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.tableRequestSettings).with(JsonOutput.&toJson)
         }
     }
-    
+
     class DashboardDataSetService
     {
         private final IScriptUtils utils
@@ -144,7 +144,7 @@
         private final DashboardUtils dashboardUtils
         private final DashboardQueryWrapperUtils dashboardQueryWrapperUtils
         private final def logger
-    
+
         DashboardDataSetService(IScriptUtils utils,
                                 IMetainfoApi metainfo,
                                 IListDataApi listdata,
@@ -169,25 +169,25 @@
             this.dashboardUtils = dashboardUtils
             this.logger = logger
         }
-    
+
         MessageProvider messageProvider = new MessageProvider(utils)
-    
+
         private static final List<String> NOMINATIVE_RUSSIAN_MONTH = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь',
                                                                       'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
         private static final List<String> GENITIVE_RUSSIAN_MONTH = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
                                                                     'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
-    
+
         private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormatSymbols().with {
             setDecimalSeparator('.' as char)
             new DecimalFormat("#.####", it)
         }
-    
+
         private static final String blankData = 'Не заполнено'
-    
+
         private String currentUserLocale = 'ru'
-    
+
         private static final Integer maxDiagramDataSize = 5000
-    
+
         /**
          * Метод по получению тела запроса по метаданным из хранилища по ключу дашборда и виджета
          * @param dbSettings - настройки дашборда
@@ -219,7 +219,7 @@
                 utils.throwReadableException("${message}#${WIDGET_NOT_FOUND_ERROR}")
             }
         }
-    
+
         /**
          * Метод получения uuid-а текущего пользователя или uuid-а пользователя, сохраненного в экземпляре дашборда,
          * если предусмотрен "пользовательский" режим работы
@@ -240,11 +240,11 @@
                 {
                     cardObjectUUID = utils.get(dbSettings.dashboardUUID).userReports?.UUID
                 }
-    
+
             }
             return cardObjectUUID
         }
-    
+
         /**
          * Метод построения диаграмм.
          * @param dashboardKey - ключ дашборда
@@ -282,7 +282,7 @@
             String minValue
             String maxValue
             Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll() && diagramType == DiagramType.TABLE
-    
+
             if (diagramType in [DiagramType.TABLE, DiagramType.PIVOT_TABLE])
             {
                 widgetSettings.showEmptyData = true
@@ -297,7 +297,7 @@
                 Boolean showTableBlanks = widgetSettings.showBlankData
                 Integer pageSize
                 Integer firstElementIndex
-    
+
                 if(tableRequestSettings)
                 {
                     pageSize = tableRequestSettings.pageSize
@@ -320,9 +320,9 @@
                 request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType,
                                                 widgetFilters, offsetUTCMinutes, showTableNulls, showTableBlanks,
                                                 computationInTableRequest, tableTop, tableSorting)
-    
+
                 DashboardUtils.log('dashboardDataSet', 323, 'request', request, true)
-    
+
                 Integer aggregationCnt = request?.data?.findResult { key, value ->
                     value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
                 }
@@ -335,12 +335,12 @@
                     def attrValue = attributes.find {it?.name?.trim() == tableSorting.accessor.trim()}
                     sortingValueIsComputationAttribute = attrValue?.attribute instanceof ComputedAttr
                 }
-    
+
                 Boolean noPaginationInSQL = requestHasBreakdown || innerCustomGroupNames || sortingValueIsComputationAttribute || tableTop
                 res = getDiagramData(request, diagramType, templateUUID, aggregationCnt, widgetSettings,
                                      tableRequestSettings?.ignoreLimits, noPaginationInSQL ? null : paginationSettings)
-    
-    
+
+
                 if (diagramType == DiagramType.PIVOT_TABLE)
                 {
                     String requestDataKey = request.data.keySet().first()
@@ -348,14 +348,14 @@
                     res = applyIndicatorsFiltration(requestData, res)
                     res = applyIndicatorsBreakdown(requestData, res)
                 }
-    
+
                 DashboardUtils.log('dashboardDataSet', 342, 'res', res, true)
-    
+
                 if (computationInTableRequest)
                 {
                     //а здесь уже важно знать, выводить пустые значения или нет
                     showTableNulls = widgetSettings.showEmptyData
-    
+
                     if (!isSourceForEachRow)
                     {
                         res = prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
@@ -400,7 +400,7 @@
                             Integer finalIndex = aggregationsSize > tempTransponseRes.size() ? tempTransponseRes.size() : aggregationsSize
                             transposeRes = tempTransponseRes[0..finalIndex - 1]
                         }
-    
+
                         Collection<Integer> percentCntAggregationIndexes
                         if (isSourceForEachRow)
                         {
@@ -410,8 +410,8 @@
                         {
                             percentCntAggregationIndexes = getPercentCntAggregationIndexes(request)
                         }
-    
-    
+
+
                         tableTotals = transposeRes?.withIndex()?.collect { val, i ->
                             if (i in listIdsOfNormalAggregations || isSourceForEachRow)
                             {
@@ -447,7 +447,7 @@
                     maxValue = getValueForBorder(widgetSettings, subjectUUID, diagramType, widgetFilters, templateUUID,request, 'max')
                 }
             }
-    
+
             switch (diagramType)
             {
                 case [*DiagramType.StandardTypes]:
@@ -455,10 +455,10 @@
                     Boolean reverseGroups = isCustomGroupFromBreakdown(widgetSettings)
                     Boolean changeLabels = widgetSettings?.sorting?.value == SortingValue.PARAMETER
                     Boolean reverseLabels = widgetSettings?.sorting?.type == SortingType.DESC && changeLabels
-    
+
                     String format = getValueFromParameter(widgetSettings, 'format')
                     String groupFormat =  getValueFromParameter(widgetSettings, 'data')
-    
+
                     return mappingStandardDiagram(res, legend, reverseGroups, changeLabels, reverseLabels, format, groupFormat, countTotals)
                 case DiagramType.RoundTypes:
                     Collection<Integer> percentCntAggregationIndexes = getPercentCntAggregationIndexes(request)
@@ -474,7 +474,7 @@
                 case [TABLE, PIVOT_TABLE]:
                     def (totalColumn, showRowNum) = [widgetSettings.calcTotalColumn,
                                                      widgetSettings.table.body.showRowNum]
-    
+
                     return mappingTableDiagram(res, totalColumn as boolean,
                                                showRowNum as boolean, rowCount, tableTop,
                                                paginationSettings, tableSorting, reverseRowCount,
@@ -499,7 +499,7 @@
                     additionals = sortListsForCombo(additionals, sortingDataIndex)
                     String format = getValueFromParameter(widgetSettings, 'format')
                     String groupFormat =  getValueFromParameter(widgetSettings, 'data')
-    
+
                     Boolean changeLabels = widgetSettings?.sorting?.value == SortingValue.PARAMETER
                     Boolean reverseLabels = widgetSettings?.sorting?.type == SortingType.DESC && changeLabels
                     List<Boolean> customsInBreakdown = isCustomGroupFromBreakdown(widgetSettings, diagramType)
@@ -574,9 +574,9 @@
                 allAggregations.findAll {
                     it.breakdown != null
                 }
-    
+
             Map<AggregationParameter, List> aggregationBreakdownResult = [:]
-    
+
             aggregationsWithBreakdown.each { aggregation ->
                 RequestData requestDataCopy = requestData.clone()
                 requestDataCopy.aggregations = [aggregation]
@@ -616,7 +616,7 @@
                 replaceResultAttributeMetaClass(result, new DiagramRequest(data: [(requestDataCopy.source.dataKey): requestDataCopy]))
                 aggregationBreakdownResult[aggregation] = result
             }
-    
+
             Integer groupsCount = requestData.groups.size()
             Integer aggregationsCount = allAggregations.size()
             aggregationBreakdownResult.eachWithIndex { aggregation, breakdownResult, index ->
@@ -630,7 +630,7 @@
                             breakdownResultItemMatch =
                                 breakdownResultItemMatch && resultItem[i - 1 + (aggregationsCount - 1)] == breakdownResultItem[i - 1]
                         }
-    
+
                         if (breakdownResultItemMatch)
                         {
                             matchBreakdownResultItems << breakdownResultItem
@@ -643,10 +643,10 @@
                     resultItem[aggregationIndex] = matchBreakdownResultItems
                 }
             }
-    
+
             return res
         }
-    
+
         /**
          * Метод получения данных о границах для спидометра
          * @param widgetSettings - настройки виджета
@@ -666,20 +666,20 @@
                                          DiagramRequest request,
                                          String fieldName)
         {
-    
+
             MinMaxBorder field = widgetSettings.borders[fieldName]
             if (!(field.isNumber))
             {
                 def fieldAggregation = field.indicator
                 widgetSettings?.data?.find { !it.sourceForCompute }?.indicators = [fieldAggregation]
-    
+
                 request =  mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters)
                 Double result = getDiagramData(request, diagramType, templateUUID).find().find().find() as Double ?: 0
                 return DECIMAL_FORMAT.format(result)
             }
             return field.value
         }
-    
+
         /**
          * Метод получения итогов по виджету
          * @param request - запрос на построение
@@ -745,7 +745,7 @@
                                 it.type == 'DEFAULT'
                             }
                         }
-    
+
                     //иначе датасет получается по-новому
                     if(!dataAndResultAlreadyOk)
                     {
@@ -759,7 +759,7 @@
                                              aggregationCnt, widgetSettings,
                                              ignoreLimits)
                     }
-    
+
                     //проверка на наличии агрегации N/A в таблице
                     Boolean tableWithNA = diagramType == DiagramType.TABLE &&
                                           request?.data?.any { key, value ->
@@ -791,7 +791,7 @@
             }
             return total
         }
-    
+
         /**
          * Метод замены итоговых данных, в том случае когда атрибут metaClass
          * @param res - датасет по запросу
@@ -834,7 +834,7 @@
                 }
             }
         }
-    
+
         /**
          * Метод преобразования настроек агрегаций в запросе для получения нужного датасета на подсчет итогов
          * @param request - текущий запрос на построение
@@ -861,7 +861,7 @@
             }
             return request
         }
-    
+
         /**
          * Метод преобразования настроек агрегаций в запросе для таблицы, где есть вычисления
          * @param request - текущий запрос на построение
@@ -876,19 +876,19 @@
                 Requisite defaultRequisite = createBaseRequisite(tempData.key, originalRequisite)
                 request.requisite = [defaultRequisite]
             }
-    
+
             if (tempData.value.aggregations.any { it.type != Aggregation.NOT_APPLICABLE })
             {
                 AggregationParameter aggregationParameter = new AggregationParameter(
                     type: Aggregation.COUNT_CNT, attribute: new Attribute(code: 'id', type: 'string')
                 )
                 tempData.value.aggregations = [aggregationParameter]
-    
+
             }
             request.data = [(tempData.key): tempData.value]
             return request
         }
-    
+
         /**
          * Метод преобразования настроек агрегаций в запросе для диаграмм, где есть вычисления
          * @param request - текущий запрос на построение
@@ -902,22 +902,22 @@
                 def requisites = request.requisite
                 def normalRequisites = requisites.findAll {it.nodes.every {it.type == 'DEFAULT'}}
                 def compRequisites = requisites - normalRequisites
-    
+
                 def totalData = [:]
                 def totalRequisites = normalRequisites
-    
+
                 normalRequisites.each { requisite ->
                     requisite.nodes.each { node ->
                         totalData << request.data.find {it.key == node.dataKey }
                     }
                 }
-    
+
                 compRequisites.each { requisite ->
                     requisite.nodes.each { node ->
                         def calculator = new FormulaCalculator(node.formula)
                         def dataKeys = calculator.variableNames
                         dataKeys -= dataKeys.findAll {it in totalData.keySet() }
-    
+
                         def additionalData = dataKeys.collect { key -> request.data.find {it.key == key } }
                         additionalData.each { tempData ->
                             if (tempData.value.aggregations)
@@ -929,13 +929,13 @@
                             }
                             totalData << [(tempData.key): tempData.value]
                         }
-    
+
                         dataKeys.each { key ->
                             totalRequisites += createBaseRequisite(key, requisite)
                         }
                     }
                 }
-    
+
                 request.data = totalData
                 request.requisite = totalRequisites
             }
@@ -945,9 +945,9 @@
                 def originalRequisite = request.requisite.find()
                 Requisite defaultRequisite = createBaseRequisite(tempData.key, originalRequisite)
                 request.requisite = [defaultRequisite]
-    
+
                 def value = tempData.value
-    
+
                 if (value.aggregations)
                 {
                     value.aggregations.each {
@@ -959,7 +959,7 @@
             }
             return request
         }
-    
+
         /**
          * Метод формирования базового реквизита на основе изначального
          * @param key - ключ для датасета
@@ -972,7 +972,7 @@
                 title: null,
                 type: 'DEFAULT',
                 dataKey: key)
-    
+
             return new Requisite(
                 title: 'DEFAULT',
                 nodes: [defaultRequisiteNode],
@@ -980,7 +980,7 @@
                 showBlank: originalRequisite.showBlank,
                 top: originalRequisite.top)
         }
-    
+
         /**
          * Метод преобразования настроек агрегаций в запросе для диаграмм, где нет вычислений
          * @param request - текущий запрос на построение
@@ -1001,7 +1001,7 @@
             request.data = tempData
             return request
         }
-    
+
         /**
          * Метод получения значений в параметре диаграммы по его полю
          * @param widgetSettings - настройки виджета
@@ -1018,7 +1018,7 @@
                 }
             }
         }
-    
+
         /**
          * Метод подсчёта кастомных группировок в запросе
          * @param requestContent - тело запроса
@@ -1044,7 +1044,7 @@
                 }?.unique()?.size()
             }
         }
-    
+
         /**
          * Метод, возвращающий датасет с "ручной" пагинацией
          * @param groups - список объектов
@@ -1068,7 +1068,7 @@
             }
             else return groups
         }
-    
+
         /**
          * Метод, возвращающий элементы между индексами
          * @param elements - элементы
@@ -1083,7 +1083,7 @@
             def to = (limit ? Math.min(offset + limit, list?.size()) : list?.size()) as int
             return list.subList(from, to)
         }
-    
+
         /**
          * Метод получения реального количества списков фильтров для таблицы
          * @param filterListSize - текущий список фильтров
@@ -1096,14 +1096,14 @@
             Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(requestContent)
             Integer countOfCustomsInFullRequest = countDataForManyCustomGroupsInParameters(requestContent, false)
             Boolean requestHasDynamicAndCustom = (countOfCustomsInFirstSource > 0  || countOfCustomsInFullRequest > 0) && templateUUID
-    
+
             if  (countOfCustomsInFirstSource > 1 || countOfCustomsInFullRequest > 1 || requestHasDynamicAndCustom)
             {
                 filterListSize = 2
             }
             return filterListSize
         }
-    
+
         /**
          * Метод получения uuid-а шаблона динамического атрибута в данных на запрос в БД
          * @param widgetSettings - настройки виджета
@@ -1119,7 +1119,7 @@
             }
             return attrCode ? TotalValueMarshaller.unmarshal(attrCode).last() : ''
         }
-    
+
         /**
          * Метод преобразования промежуточных данных от нескольких источников к промежуточным данным от одного источника
          * @param intermediateData - промежуточные данные от нескольких источников
@@ -1139,7 +1139,7 @@
                     return [(key):value]
                 }
             }
-    
+
             Requisite originalRequisite = intermediateData.findResult { key, value ->
                 if (computationInRequest && value?.requisite?.nodes?.findAll {it.type == 'COMPUTATION'})
                 {
@@ -1217,20 +1217,20 @@
                 }
                 return groups ? groups : []
             }
-    
+
             List fullAggregations = requestData?.aggregations?.collectMany {
                 it?.any {it?.attribute instanceof ComputedAttr } ? it : it?.collect { aggr -> return prepareAggregation(aggr, mainSource.classFqn)}
             }
-    
+
             def breakdowns = fullGroups.findAll { it.title == 'breakdown' }
             fullGroups = fullGroups - breakdowns
             fullGroups = fullGroups + breakdowns
-    
+
             RequestData totalRequestData = new RequestData(source: mainSource, aggregations: fullAggregations, groups: fullGroups, filters: null)
             return [(totalKey): [requestData: totalRequestData, computeData: computationData, customGroup:
                 null, requisite: originalRequisite]]
         }
-    
+
         /**
          * Метод по переподготовке промежуточных данных для формирования запроса
          * @param intermediateData - текущие промежуточные данные для формирования запроса
@@ -1241,7 +1241,7 @@
             RequestData requestData = intermediateData.findResult { key, value -> value.requestData }
             List computationData = intermediateData.findResult { key, value -> value.computeData }
             Requisite originalRequisite = intermediateData.findResult { key, value -> value.requisite }
-    
+
             RequestData defaultRequestData = requestData.clone()
             def computeAggregations = defaultRequestData.aggregations.findAll { it.attribute.type == 'COMPUTED_ATTR'}
             defaultRequestData.aggregations -= computeAggregations
@@ -1255,11 +1255,11 @@
                     nodes: [defaultRequisiteNode],
                     showNulls: originalRequisite.showNulls
                 )
-    
+
                 dataMap = [(keyForData): [requestData: defaultRequestData, computeData: null, customGroup:
                     null, requisite: defaultRequisite]]
             }
-    
+
             //поставим агрегацию N/A второй после исходной агрегации на подсчёт
             List aggregationsNoneAggr = defaultRequestData?.aggregations?.findAll { it.type == Aggregation.NOT_APPLICABLE }
             Map dataMaps = computeAggregations.withIndex().collect { aggregation, i ->
@@ -1283,7 +1283,7 @@
             }
             return intermediateData
         }
-    
+
         /**
          * Метод по переподготовке промежуточных данных для формирования запроса для таблиц без параметра
          * @param intermediateData - текущие промежуточные данные для формирования запроса
@@ -1297,13 +1297,13 @@
                 RequestData requestData = data.value.requestData
                 List computationData = data.value.computeData
                 Requisite originalRequisite = data.value.requisite
-    
+
                 RequestData defaultRequestData = requestData.clone()
                 List computeAggregations = defaultRequestData.aggregations.findAll {
                     it.attribute.type == 'COMPUTED_ATTR'
                 }
                 defaultRequestData.aggregations -= computeAggregations
-    
+
                 // Выделение обычных аггрегаций (не вычислений) для каждого из источников - начало
                 if (defaultRequestData.aggregations.any())
                 {
@@ -1326,12 +1326,12 @@
                     ]
                 }
                 // Выделение обычных аггрегаций (не вычислений) для каждого из источников - конец
-    
+
                 // Выделение вычислений для каждого из источников - начало
                 List aggregationsNoneAggr = defaultRequestData?.aggregations?.findAll {
                     it.type == Aggregation.NOT_APPLICABLE
                 }
-    
+
                 if (computeAggregations)
                 {
                     Map dataMaps = computeAggregations.withIndex().collect { aggregation, i ->
@@ -1342,7 +1342,7 @@
                             type: 'COMPUTATION',
                             formula: "[${ aggregation.attribute.stringForCompute }]"
                         )
-    
+
                         Map newComputationData = computationData[i].clone()
                         newComputationData = newComputationData.collectEntries {
                             String key = it.key
@@ -1353,21 +1353,21 @@
                             }
                             return [key, it.value]
                         }
-    
+
                         Requisite tempRequisite = new Requisite(
                             title: 'DEFAULT',
                             nodes: [compositeRequisiteNode],
                             showNulls: originalRequisite.showNulls,
                             top: originalRequisite.top
                         )
-    
+
                         String dataKey = "сompute-data_${ sourceIndex }_${ i }"
                         newComputationData.each {
                             it.value = it.value.clone()
                             it.value.dataKey = dataKey
                             usedComputeDataKeys << it.key
                         }
-    
+
                         return [(dataKey): [
                             requestData: tempRequestData,
                             computeData: newComputationData,
@@ -1377,18 +1377,18 @@
                     }.inject { first, second ->
                         first + second
                     }
-    
+
                     if (dataMaps.any())
                     {
                         preparedIntermediateData = preparedIntermediateData + [*:dataMaps]
                     }
                 }
                 // Выделение вычислений для каждого из источников - конец
-    
+
             }
             return preparedIntermediateData
         }
-    
+
         /**
          * Метод подготовки агрегации
          * @param aggregationParameter - параметр агрегации
@@ -1409,13 +1409,13 @@
                     title: "${aggregationParameter?.attribute?.title} (${aggregationParameter?.attribute?.sourceName})",
                     type: 'object'
                 )
-    
+
                 sourceAttribute.addLast(aggregationParameter.attribute)
                 aggregationParameter.attribute = sourceAttribute
                 return aggregationParameter
             }
         }
-    
+
         /**
          Метод приведения запроса на построение диаграмм к единому формату
          * @param widgetSettings - настройки виджета на построение диаграммы
@@ -1457,7 +1457,7 @@
                 def source = getCorrectSource(data.dataKey, data.source, descriptor, widgetFilters)
                 def sourceForCompute = data.sourceForCompute
                 def dynamicGroup = null
-    
+
                 List<BaseAttribute> indicators = data.indicators
                 List<AggregationParameter> aggregationParameters = !(sourceForCompute) ? indicators.collect { indicator ->
                     def sortingType
@@ -1488,7 +1488,7 @@
                         dynamicGroup = mappingDynamicAttributeCustomGroup(attrClone)
                     }
                 }
-    
+
                 Collection<NewParameter> parameters = data.parameters
                 List groupParameters = []
                 List parameterFilters = []
@@ -1510,7 +1510,7 @@
                         {
                             sortingType = sorting && sorting.value == SortingValue.PARAMETER ? sorting.type : null
                         }
-    
+
                         if (group.way == Way.SYSTEM)
                         {
                             def groupParameter = buildSystemGroup(group, attribute, 'parameter')
@@ -1548,7 +1548,7 @@
                         }
                     }
                 }
-    
+
                 boolean dynamicInParameter
                 groupParameters.each {groupParameter ->
                     dynamicInParameter = groupParameter?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
@@ -1558,14 +1558,14 @@
                         dynamicGroup = mappingDynamicAttributeCustomGroup(attrClone)
                     }
                 }
-    
+
                 def mayBeBreakdown = data.breakdown
                 def breakdownMap = [:]
                 breakdownMap = isDiagramTypeTable && !hasTableNotOnlyBaseSources && !mayBeBreakdown && computationInTableRequest && commonBreakdown
                     ? [(data.dataKey): commonBreakdown.values().find()]
                     : breakdownMap
                 boolean dynamicInBreakdown = false
-    
+
                 if(isDiagramTypeNotCount)
                 {
                     if (mayBeBreakdown instanceof Collection && mayBeBreakdown?.any())
@@ -1591,7 +1591,7 @@
                         }
                     }
                 }
-    
+
                 int compIndicatorId = 0
                 //ведём подсчёт только показателей с вычислениями; не все показатели могут быть с вычислениями
                 def comp = !(sourceForCompute) ? indicators?.findResults { indicator ->
@@ -1616,15 +1616,15 @@
                         ]
                     }
                 } : []
-    
+
                 boolean isBreakdownGroupCustom = false
                 if(isDiagramTypeNotCount)
                 {
                     isBreakdownGroupCustom = mayBeBreakdown?.group?.way.find() == Way.CUSTOM
                 }
-    
+
                 def breakdownAttribute = mayBeBreakdown?.find() //м.б. нужно будет убрать find() и пойти в цикле
-    
+
                 def breakdownCustomGroup =  isBreakdownGroupCustom
                     ? new NewParameter(group: breakdownAttribute?.group, attribute: breakdownAttribute?.attribute)
                     : null
@@ -1642,7 +1642,7 @@
                                                       offsetUTCMinutes,
                                                       sorting?.value == SortingValue.PARAMETER ? sorting?.type : null)
                 }
-    
+
                 def requisite
                 if (sourceForCompute)
                 {
@@ -1721,9 +1721,9 @@
                 {
                     intermediateData = updateIntermediateData(intermediateData)
                 }
-    
+
                 DiagramRequest request = buildDiagramRequest(intermediateData, subjectUUID, diagramType, widgetSettings)
-    
+
                 List<RequestData> requestData = prevData.findResults { key, value -> value?.requestData?.aggregations ? value?.requestData : null }
                 def computeData = requestData?.aggregations?.attribute?.flatten()?.collectMany {
                     if(it instanceof ComputedAttr)
@@ -1748,7 +1748,7 @@
             }
             return buildDiagramRequest(intermediateData, subjectUUID, diagramType, widgetSettings)
         }
-    
+
         /**
          * Метод объединения данных у всех источников
          * @param intermediateData - данные для формирования запроса
@@ -1756,7 +1756,7 @@
         private void mergeDataAmongSources(Map intermediateData)
         {
             List<GroupParameter> allGroups = []
-    
+
             intermediateData.each { key, request ->
                 request.requestData.groups.each { group ->
                     if (!checkDuplicateGroup(allGroups, group))
@@ -1765,12 +1765,12 @@
                     }
                 }
             }
-    
+
             if (!allGroups)
             {
                 return
             }
-    
+
             if (allGroups.size() == 1) // Если группировка общая
             {
                 intermediateData.each { key, request ->
@@ -1781,7 +1781,7 @@
                         group.attribute.metaClassFqn = sourceClassFqn
                         return group
                     }
-    
+
                     request.requestData.groups = groups
                 }
             }
@@ -1792,18 +1792,18 @@
                 intermediateData.eachWithIndex { it, index ->
                     Object request = it.value
                     String sourceClassFqn = request.requestData.source.classFqn
-    
+
                     GroupParameter group = allGroups[index].deepClone()
                     group.attribute.sourceCode = sourceClassFqn
                     group.attribute.metaClassFqn = sourceClassFqn
                     group.format = firstGroupFormat
                     group.type = firstGroupType
-    
+
                     request.requestData.groups = [group]
                 }
             }
         }
-    
+
         /**
          * Метод проверки дупликатов группировки
          * @param groups - список группировок
@@ -1824,7 +1824,7 @@
             }
             return isGroupDuplicate
         }
-    
+
         /**
          * Метод получения корректного источника для виджета
          * @param dataKey - ключ датасета, где использован источник
@@ -1843,7 +1843,7 @@
             }
             return new Source(classFqn: source.value.value, descriptor: baseDescriptor)
         }
-    
+
         /**
          * Метод подготовки фильтра источника в правильному виду
          * @param baseDescriptor - базовый фильтр источника
@@ -1855,11 +1855,11 @@
             List baseDescriptorAttributes = baseDescriptor ? getAttributesFqnFromDescriptor(baseDescriptor) : []
             List userDescriptorAttributes = userDescriptor ? getAttributesFqnFromDescriptor(userDescriptor) : []
             Boolean descriptorsHaveSameAttrs = baseDescriptorAttributes.any { it in userDescriptorAttributes }
-    
+
             def slurper = new groovy.json.JsonSlurper()
             def descriptorMap = baseDescriptor ? slurper.parseText(baseDescriptor) : [:]
             def userDescriptorMap = userDescriptor ? slurper.parseText(userDescriptor) : [:]
-    
+
             if(descriptorsHaveSameAttrs)
             {
                 descriptorMap = updateDescriptorWithTheSameAttrs(descriptorMap, userDescriptorMap, baseDescriptorAttributes, userDescriptorAttributes)
@@ -1870,7 +1870,7 @@
                 {
                     def filters = descriptorMap.filters
                     def userFilters = userDescriptorMap ? userDescriptorMap.filters : []
-    
+
                     filters = filters ? filters + userFilters : userFilters
                     descriptorMap.filters = filters
                 }
@@ -1881,7 +1881,7 @@
             }
             return JsonOutput.toJson(descriptorMap)
         }
-    
+
         /**
          * Метод по преобразованию двух фильтров источника в один, если у них есть одинаковые атрибуты в составе
          * @param descriptorMap - словарь с настройками базового фильтра
@@ -1917,7 +1917,7 @@
             }
             return descriptorMap
         }
-    
+
         /**
          * Метод по смешению атрибутов базового и пользовательского фильтра
          * @param userFilters - словарь с настройками базового фильтра
@@ -1935,7 +1935,7 @@
             }
             return result.findAll() + userFilters
         }
-    
+
         /**
          * Метод по получению fqn-кодов атрибутов из фильтра источника
          * @param descriptor - фильтр источника
@@ -1945,7 +1945,7 @@
         {
             List descriptorAttributes = []
             def iDesciptor = listdata.createListDescriptor(descriptor).wrapped
-    
+
             iDesciptor.listFilter.elements.each { orFilter ->
                 orFilter.elements.each { filter ->
                     descriptorAttributes << filter.getAttributeFqn() as String
@@ -1953,7 +1953,7 @@
             }
             return descriptorAttributes
         }
-    
+
         /**
          * Метод создания параметра группировки основанного только на системных группировках
          * @param groupType - объект описывающий группировку
@@ -1972,7 +1972,7 @@
                 format: groupType.format
             ) : null
         }
-    
+
         /**
          * Метод определения типа группировки для атрибута типа "временной интервал"
          * @param groupType - декларируемая группировка временного интервала
@@ -2003,7 +2003,7 @@
                     utils.throwReadableException("$message#${NOT_SUPPORTED_DTINTERVAL_GROUP_TYPE_ERROR}")
             }
         }
-    
+
         /**
          * Метод создания запроса для QueryWrapper
          * @param intermediateData - промежуточные данные сгруппированые по первичному признаку
@@ -2018,29 +2018,29 @@
             {
                 intermediateData = mergeSourceDataForPivotTable(intermediateData, widgetSettings)
             }
-    
+
             // доводим запрос до совершенства/ шлифуем вычисления
             Closure getRequestData = { String key -> intermediateData[key].requestData }
             def computationDataRequest = intermediateData
                 .findResults { key, value -> value.computeData ? value : null }
                 ?.collectEntries(this.&produceComputationData.curry(getRequestData, diagramType)) ?: [:]
-    
+
             def defaultDataRequest = intermediateData.findResults { key, map ->
                 map.requisite && !(map.computeData) ? [(key): map.requestData] : null
             }?.collectEntries() ?: [:]
-    
+
             def resultRequestData = (defaultDataRequest + computationDataRequest) as Map<String, RequestData>
-    
+
             // Реквизиты
             Collection<Requisite> requisite = intermediateData.findResults { key, value ->
                 value.requisite as Requisite
             }
-    
+
             resultRequestData = updateDiagramRequestDataForPercentCalculation(requisite, resultRequestData)
-    
+
             return new DiagramRequest(requisite: requisite, data: resultRequestData)
         }
-    
+
         /**
          * Приведение данных к одному источнику для сводной таблицы
          * @param intermediateData - промежуточные данные запроса
@@ -2050,34 +2050,34 @@
         private Map<String, Map> mergeSourceDataForPivotTable(Map<String, Map> intermediateData, Object widgetSettings)
         {
             String firstDataKey
-    
+
             Collection<AggregationParameter> aggregations = []
             Collection<GroupParameter> groups = []
             Collection<Collection<FilterParameter>> filters = []
             Collection<Source> sources = []
-    
+
             intermediateData.each { key, value ->
                 if (!firstDataKey)
                 {
                     firstDataKey = key
                 }
-    
+
                 aggregations += value.requestData.aggregations
                 groups += value.requestData.groups
                 filters += value.requestData.filters
                 value.requestData.source.dataKey = key
                 sources << value.requestData.source
             }
-    
+
             intermediateData = [(firstDataKey): intermediateData[firstDataKey]] as Map<String, Map>
             intermediateData[firstDataKey].requestData.aggregations = aggregations
             intermediateData[firstDataKey].requestData.groups = groups
             intermediateData[firstDataKey].requestData.sources = sources
             intermediateData[firstDataKey].requestData.links = widgetSettings.links
-    
+
             return intermediateData
         }
-    
+
         /**
          * Метод обработки данных запроса для расчета процента для показателя относительно источника
          * @param requisites - реквизиты
@@ -2088,33 +2088,33 @@
                                                                    Map<String, RequestData> resultRequestData)
         {
             Map<String, RequestData> updatedRequestData = [:]
-    
+
             resultRequestData.each {
                 RequestData requestData = it.value
                 String dataKey = it.key
                 Collection<AggregationParameter> aggregations = requestData.aggregations
                 updatedRequestData[dataKey] = requestData
-    
+
                 if (aggregations.head().attribute.type != 'PERCENTAGE_RELATIVE_ATTR')
                 {
                     return
                 }
-    
+
                 String sourceCode = requestData.source.classFqn
                 String mergedDescriptor = dashboardQueryWrapperUtils.getDescriptorWithMergedFilters(
                     requestData.source.descriptor,
                     aggregations.head().attribute.descriptor
                 )
                 Attribute attributeForPercentCalculation = getAttributeForPercentCalculation(sourceCode)
-    
+
                 aggregations.head().attribute = attributeForPercentCalculation
-    
+
                 RequestData requestDataWithMergedDescriptor = requestData.clone()
                 requestDataWithMergedDescriptor.source = requestDataWithMergedDescriptor.source.clone()
                 String newDataKey = UUID.randomUUID()
                 requestDataWithMergedDescriptor.source.descriptor = mergedDescriptor
                 updatedRequestData[newDataKey] = requestDataWithMergedDescriptor
-    
+
                 RequisiteNode requisiteNode = new ComputationRequisiteNode(
                     title: null,
                     type: 'COMPUTATION',
@@ -2131,10 +2131,10 @@
                     }
                 ] = requisite
             }
-    
+
             return updatedRequestData
         }
-    
+
         /**
          * Метод получения атрибута, относительно которого будет производится расчет процента для показателя относительно источника
          * @param sourceCode - код источнка
@@ -2149,7 +2149,7 @@
                 code: 'UUID'
             )
         }
-    
+
         /**
          * Метод обработки вычислений
          * @param getData - функция получения источника данных по ключю
@@ -2171,17 +2171,17 @@
                 //по идее на этом этапе у нас только один реквизит и у него одна запись
                 def formula = (node as ComputationRequisiteNode).formula
                 def variableNames = new FormulaCalculator(formula).variableNames
-    
+
                 return variableNames.collectEntries { variableName ->
                     def comp = computeData[variableName].find() as Map<String, Object>
-    
+
                     def attribute = comp?.aggregation?.attribute
                     def attributeType = Attribute.getAttributeType(attribute)
                     if (attributeType in AttributeType.LINK_TYPES && attributeType != AttributeType.CATALOG_ITEM_TYPE)
                     {
                         attribute.attrChains().last().ref = new Attribute(title: 'Название', code: 'title', type: 'string')
                     }
-    
+
                     def dataKey = comp.dataKey as String
                     // этот ключ указывает на источник вместе с группировками
                     def requestData = getData(dataKey) as RequestData
@@ -2220,10 +2220,10 @@
                 //по идее на этом этапе у нас только один реквизит и у него одна запись
                 def formula = (node as ComputationRequisiteNode).formula
                 def variableNames = new FormulaCalculator(formula).variableNames
-    
+
                 return variableNames.collectEntries { variableName ->
                     def comp = computeData[variableName] as Map<String, Object>
-    
+
                     def attribute = comp?.aggregation?.attribute
                     def attributeType = Attribute.getAttributeType(attribute)
                     if (attributeType in AttributeType.LINK_TYPES && attributeType != AttributeType.CATALOG_ITEM_TYPE)
@@ -2234,13 +2234,13 @@
                     // этот ключ указывает на источник вместе с группировками
                     def requestData = getData(dataKey) as RequestData
                     def newRequestData = requestData.clone()
-    
+
                     def group = null
                     if (!checkDuplicateGroup(newRequestData.groups, comp.group as GroupParameter))
                     {
                         group = comp.group as GroupParameter
                     }
-    
+
                     def aggregation = comp.aggregation as AggregationParameter
                     if (diagramType == DiagramType.TABLE)
                     {
@@ -2265,7 +2265,7 @@
                 }
             }
         }
-    
+
         /**
          * Метод построения атрибута
          * @param data - данные для атрибута
@@ -2275,7 +2275,7 @@
         {
             return Attribute.fromMap(data)
         }
-    
+
         /**
          * Метод получения функции преобразования пользовательской группировки в удобный формат
          * @param type - тип пользовательской группировки
@@ -2314,7 +2314,7 @@
                     utils.throwReadableException("$message#${NOT_SUPPORTED_ATTRIBUTE_TYPE_FOR_CUSTOM_GROUP_ERROR}")
             }
         }
-    
+
         /**
          * Метод преодбразований настроек группировки для динамических атрибутов
          * @param subjectUUID - идентификатор "текущего объекта"
@@ -2337,7 +2337,7 @@
                 )
             }
         }
-    
+
         /**
          * Метод преодбразований настроек группировки для каталогов
          * @param subjectUUID - идентификатор "текущего объекта"
@@ -2474,7 +2474,7 @@
             }
             return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
         }
-    
+
         /**
          * Метод преодбразований настроек группировки для ссылочных типов
          * @param subjectUUID - идентификатор "текущего объекта"
@@ -2667,7 +2667,7 @@
             }
             return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
         }
-    
+
         /**
          * Метод преодбразований настроек группировки для временных интервалов
          * @param data - настройки группировки
@@ -2718,7 +2718,7 @@
             }
             return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
         }
-    
+
         /**
          * Метод преодбразований настроек группировки для строковых типов
          * @param data - настройки группировки
@@ -2766,7 +2766,7 @@
             }
             return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
         }
-    
+
         /**
          * Метод преодбразований настроек группировки для числовых типов
          * @param valueConverter - функция преодразования строки в число
@@ -2819,7 +2819,7 @@
             }
             return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
         }
-    
+
         /**
          * Метод преодбразований настроек группировки для dateTime типов
          * @param valueConverter - функция преодразования строки в число
@@ -2921,7 +2921,7 @@
                             {
                                 minDate = DashboardUtils.getMinDate(attribute.attrChains().code.join('.'), attribute.sourceCode)
                             }
-    
+
                             start = new Date(minDate.time).clearTime()
                         }
                         def end
@@ -2949,7 +2949,7 @@
             }
             return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
         }
-    
+
         /**
          * Метод преодбразований настроек группировки для статусов
          * @param subjectUUID - идентификатор "текущего объекта"
@@ -3009,7 +3009,7 @@
             }
             return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
         }
-    
+
         /**
          * Метод преодбразований настроек группировки для таймеров
          * @param source - источник запроса
@@ -3070,9 +3070,9 @@
                         }
                         else
                         {
-    
+
                             def minDate
-    
+
                             if(attrIsDynamic)
                             {
                                 def tempAttr = attribute.deepClone()
@@ -3132,8 +3132,8 @@
             }
             return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
         }
-    
-    
+
+
         /**
          * Метод полученеия количества округленных миллисекунд из условия
          * @param conditionValue - условие, содержащее количество часов, минут, возможно секунд
@@ -3145,7 +3145,7 @@
             def msInSecond = 1000
             def msInMinute = 60 * msInSecond
             def minutesInHour = 60
-    
+
             Long durationInMs = conditionValue.collect {
                 switch (it.type)
                 {
@@ -3153,7 +3153,7 @@
                         return msInMinute * minutesInHour * (it.value as Integer)
                     case 'MINUTE':
                         def minutes = it.value as Integer
-    
+
                         if (roundType == TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES) {
                             minutes++
                         }
@@ -3163,7 +3163,7 @@
                         return msInMinute * minutes
                     case 'SECOND':
                         def seconds = it.value as Integer
-    
+
                         if (roundType == TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS)
                         {
                             seconds++
@@ -3176,7 +3176,7 @@
                     default: return 0
                 }
             }.sum()
-    
+
             if (roundType in [TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES])
             {
                 durationInMs--
@@ -3185,10 +3185,10 @@
             {
                 durationInMs++
             }
-    
+
             return durationInMs
         }
-    
+
         private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
         {
             Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
@@ -3273,7 +3273,7 @@
             }
             return attrIsDynamic ? dynamicFilter + possibleFilter : possibleFilter
         }
-    
+
         /**
          * Метод обхода настроек пользовательской группировки
          * @param data - настройки пользовательской группировки
@@ -3284,7 +3284,7 @@
         {
             return data.collect { andCondition -> andCondition.collect { orCondition -> mapFilter(orCondition) }}
         }
-    
+
         /**
          * Метод получения данных для диаграмм
          * @param request - запрос на получение данных
@@ -3371,7 +3371,7 @@
                                 List res = dashboardQueryWrapperUtils.getData(newRequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits?.parameter ?: false, templateUUID, paginationSettings)
                                                                     .with(formatGroup)
                                                                     .with(formatAggregation)
-    
+
                                 if(!res && !onlyFilled && !customInBreakTable)
                                 {
                                     def tempRes = ['']*(newRequestData.groups.size() + notAggregatedAttributes.size())
@@ -3392,7 +3392,7 @@
                                 }
                                 filtersTitle = filtersTitle.unique()
                                 def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filtersTitle): res]
-    
+
                                 partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
                                 Boolean hasStateOrTimer = newRequestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] } ||
                                                    newRequestData?.aggregations?.any { it?.type in Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE]  }
@@ -3433,35 +3433,35 @@
                         case 'computation':
                             def requisiteNode = node as ComputationRequisiteNode
                             def calculator = new FormulaCalculator(requisiteNode.formula)
-    
+
                             Map<String, List> fullFilterList = [:]
                             Map<String, String> fullTemplateIdList = [:]
                             def parameterFilters  = []
                             def breakdownFilters = []
                             String parameterSortingType = ''
                             Integer filterListSize = 0
-    
+
                             def dataSet = calculator.variableNames.collectEntries {
                                 Map filterMap = getInfoAboutFilters(it, request)
-    
+
                                 parameterSortingType = diagramType == DiagramType.TABLE ? '' : filterMap.parameterSortingType
                                 parameterFilters = filterMap.parameterFilters
                                 breakdownFilters = filterMap.breakdownFilters
                                 fullTemplateIdList.put(it, templateUUID)
                                 filterListSize = filterMap.filterListSize
-    
+
                                 List filters = filterListSize > 0 ? prepareFilters(filterListSize, diagramType, requestContent, parameterFilters, breakdownFilters) : []
                                 fullFilterList.put(it, filters)
-    
+
                                 return [(it): request.data[it]]
                             } as Map<String, RequestData>
-    
+
                             if(filterListSize == 0)
                             {
                                 parameterSortingType = diagramType == DiagramType.TABLE ?  null : dataSet.values().head().groups.find()?.sortingType
                                 return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, onlyFilled, diagramType, requestContent, ignoreLimits, paginationSettings)
                             }
-    
+
                             List<Integer> listIdsOfNormalAggregations = [0]
                             aggregationCnt = 1
                             List notAggregatedAttributes = []
@@ -3481,7 +3481,7 @@
                                     [(key): res.with(postProcess)]  as Map<String, List>
                                 }
                             }.transpose().collect{ it.sum() }
-    
+
                             int i = 0
                             def groups = dataSet.values().head().groups
                             def aggregations = dataSet.values().head().aggregations
@@ -3540,7 +3540,7 @@
                             {
                                 res = getTop(res, top, parameterFilters, breakdownFilters, false, parameterWithDate ? parameter : null,  parameterSortingType, aggregationSortingType)
                             }
-    
+
                             if (!parameterWithDateOrDtInterval &&
                                 (aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
                             {
@@ -3551,7 +3551,7 @@
                 }
             }
         }
-    
+
         /**
          * Метод по подготовке фильтров в запросе
          * @param filterListSize - количество списков с фильтрами
@@ -3571,7 +3571,7 @@
                 countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(requestContent)
                 countOfCustomsInFullRequest = countDataForManyCustomGroupsInParameters(requestContent, false)
             }
-    
+
             if(filterListSize == 1)
             {
                 return parameterFilters ?: breakdownFilters
@@ -3601,7 +3601,7 @@
                 }
             }
         }
-    
+
         /**
          * Метод по подготовке датасета к получению из него top-a
          * @param res - текущий датасет
@@ -3631,7 +3631,7 @@
                 return []
             }
         }
-    
+
         /**
          * Метод получения информации о фильтрах в запросе
          * @param dataKey - ключ к данным в запросе
@@ -3643,17 +3643,17 @@
             def filterList = request.data[dataKey].source.filterList.grep()
             Integer filterListSize = filterList.filters.grep().size()
             def parameterInfo = filterList.find { it?.place == 'parameter' }
-    
+
             List parameterFilters = parameterInfo?.filters
             String parameterSortingType = parameterInfo?.sortingType ?: request.data[dataKey].groups?.find()?.sortingType //если фильтры в разбивке, а упорядочиваем по параметру
             List breakdownFilters = filterList.find { it?.place == 'breakdown' }?.filters
-    
+
             return [parameterSortingType: parameterSortingType,
                     parameterFilters : parameterFilters,
                     breakdownFilters: breakdownFilters,
                     filterListSize: filterListSize ]
         }
-    
+
         /**
          * Метод проверки диаграммы на настоящее количество реальных фильтров в ней
          * @param filterListSize - текущее количество списков с фильтрами
@@ -3674,7 +3674,7 @@
             }
             return filterListSize
         }
-    
+
         /**
          * Метод по упорядочиванию итоговых датасетов для комбо
          * @param list - список для сортировки
@@ -3692,7 +3692,7 @@
             }
             return list
         }
-    
+
         /**
          * Метод по получению индекса датасета, который будет в основе комбо-диаграммы
          * @param requestContent - тело запроса
@@ -3701,9 +3701,9 @@
         Integer getSortingDataIndex(def requestContent)
         {
             def dataKeyForSorting = requestContent.sorting?.dataKey
-            return requestContent.data.findIndexOf {it == dataKeyForSorting }
+            return requestContent.data.findIndexOf {it.dataKey == dataKeyForSorting }
         }
-    
+
         /**
          * Метод проверки списка группировок на соответствие единому типу атрибута
          * @param listRequest - список запросов на построение диаграмм
@@ -3722,7 +3722,7 @@
                 standard?.size() == groups?.size() && standard?.containsAll(groups)
             }
         }
-    
+
         /**
          * Метод получения уникальных группировок
          * @param variables - результат выборки
@@ -3748,7 +3748,7 @@
                 }.unique() as Collection<Collection<String>>
             }
         }
-    
+
         /**
          * Метод округления числовых результатов
          * @param listOfLists - список данных
@@ -3778,7 +3778,7 @@
                 {
                     return null
                 }
-    
+
                 if (listIdsOfNormalAggregations.size() > 0)
                 {
                     listIdsOfNormalAggregations.each { index ->
@@ -3828,7 +3828,7 @@
 
             return percentCntAggregationIndexes
         }
-    
+
         /**
          * Метод получения индексов агрегаций определенного типа для таблицы без параметра
          * @param request - запрос
@@ -3848,7 +3848,7 @@
             }
             return percentCntAggregationIndexes
         }
-    
+
         /**
          * Метод приведения значений группировок к читаемому для человека виду
          * @param data - данные запроса
@@ -3862,7 +3862,7 @@
         {
             List list = []
             list.addAll(tempList)
-    
+
             def countGroup = data.groups.grep().size()
             def countNA = data.aggregations?.count { it?.type == Aggregation.NOT_APPLICABLE }
             if (countGroup == 0 && countNA == 0)
@@ -3879,7 +3879,7 @@
                     groups.addAll(el) //резервируем значения для групп
                     def elAggregations = el[listIdsOfNormalAggregations] //резервируем значения для агрегаций
                     elAggregations.each { groups.remove(groups.indexOf(it)) } //убираем в группах агрегации
-    
+
                     //обрабатываем группы
                     def totalGroupValues = groups.withIndex().collect { group, i ->
                         return formatGroup(requestGroups[i] as GroupParameter,
@@ -3895,7 +3895,7 @@
                 }
             }
         }
-    
+
         /**
          * Метод по преобразованию агрегаций N/A  к группировкам
          * @param notAggregated - список агрегаций N/A
@@ -3912,7 +3912,7 @@
                 new GroupParameter( type: groupType, title: 'n/a', attribute: it?.attribute)
             }
         }
-    
+
         /**
          * Метод преобразования значения группировки в зависимости от типа
          * @param parameter - тип группировки
@@ -3925,7 +3925,7 @@
         private String formatGroup(GroupParameter parameter, String fqnClass, Source source, def value, DiagramType diagramType, Boolean fromNA = false, Boolean fromBreakdown = false)
         {
             GroupType type = parameter.type
-    
+
             switch (type)
             {
                 case GroupType.OVERLAP:
@@ -4111,7 +4111,7 @@
                     def russianLocale = new Locale("ru")
                     SimpleDateFormat specialDateFormatter = new SimpleDateFormat("dd.MM.yy", russianLocale)
                     def minDate
-    
+
                     if(parameter.attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE))
                     {
                         def tempAttr = parameter.attribute.deepClone()
@@ -4171,7 +4171,7 @@
                     utils.throwReadableException("$message#${NOT_SUPPORTED_GROUP_TYPE_ERROR}")
             }
         }
-    
+
         /**
          * Метод получения значения счетчика для пользователя в формате чч:мм
          * @param value - значение в миллисекундах из БД
@@ -4184,7 +4184,7 @@
             def seconds = TimeUnit.MILLISECONDS.toSeconds(value) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(value))
             def temp = "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}"
         }
-    
+
         /**
          * Метод по получению корректного значения временного интервала для предложенного типа
          * @param millis - значение из БД в миллисекундах
@@ -4202,11 +4202,11 @@
                 {
                     tempValue = getRealValueFromDB(millis as Long, type)
                 }
-    
+
                 def fullParts = Double.toString(tempValue).tokenize('.')
-    
+
                 String integerPart
-    
+
                 if(tempValueLessOne)
                 {
                     //если значение меньше нуля, то в целой части будет 0
@@ -4217,16 +4217,16 @@
                     //иначе получаем количество символов в целой части
                     integerPart = '#' * fullParts?.find()?.size()
                 }
-    
+
                 //получаем долю
                 def fractionalPart = fullParts.last() //берем часть после точки
                 def roundIdx = fractionalPart.contains('E') //значение может быть в экспоненциальной записи
                     ? fractionalPart.dropWhile { it != '-' }.toCharArray()[-1].toString() as Long //тогда берем число после нее - ровно столько нулей стоит до числа
                     : fractionalPart.takeWhile{it == '0'}.size() + 1 //иначе идём по числу до тех пор, пока не пройдут все нули и берем + 1 значение
                 roundIdx += 1 //округляем наконец до двух чисел после всех нулей в дробной части
-    
+
                 String formatStr = '#' * roundIdx
-    
+
                 def dtIntervalDecimalFormat = new DecimalFormatSymbols().with {
                     setDecimalSeparator('.' as char)
                     new DecimalFormat("${integerPart}.${formatStr}", it)
@@ -4235,7 +4235,7 @@
             }
             return DtIntervalMarshaller.marshal(tempValue.toString(), type, millis.toString())
         }
-    
+
         /**
          * Метод получения реального значение интервала для типа из хранилища
          * @param value - значение в миллисекундах
@@ -4258,7 +4258,7 @@
                     return value/604800000
             }
         }
-    
+
         /**
          * Метод получения пустого значения
          * @param diagramType - тип диаграммы
@@ -4277,8 +4277,8 @@
                 return blankData
             }
         }
-    
-    
+
+
         /**
          * Метод по подготовке данных из Бд после запроса, при наличии дин атрибутов
          * @param res - результат запроса данных из БД
@@ -4297,9 +4297,9 @@
                 AggregationParameter dynInAggregations = requestData.aggregations?.find {
                     it?.attribute?.property == AttributeType.TOTAL_VALUE_TYPE
                 }
-    
+
                 Integer aggregationsCount = requestData?.aggregations?.size()
-    
+
                 if(dynInGroups)
                 {
                     Integer realDynAttributeIndex = requestData.groups.findIndexOf { it == dynInGroups } + aggregationsCount
@@ -4310,7 +4310,7 @@
                         return row
                     }
                 }
-    
+
                 if(dynInAggregations && diagramType == DiagramType.TABLE)
                 {
                     Integer realDynAttributeIndex = requestData.aggregations.findIndexOf { it == dynInAggregations }
@@ -4325,7 +4325,7 @@
             }
             return res
         }
-    
+
         /**
          * Метод приведения результата выборки к единой структуре
          * @param data - результат выполнения запроса на получение данных диаграммы
@@ -4350,7 +4350,7 @@
             }.inject { first, second -> first + second
             } : []
         }
-    
+
         /**
          * Метод получения всех агрегаций после суммирования по паре название(код)
          * @param resValue - итоговое значение для обработки
@@ -4387,7 +4387,7 @@
                 return value
             }
         }
-    
+
         /**
          * Метод подготовки данных, среди которых есть значения статуса
          * @param res - сет данных
@@ -4431,7 +4431,7 @@
             }
             return stateValues.toList()
         }
-    
+
         /**
          * Метод преобразования результата выборки к стандартной диаграмме
          * @param list - данные диаграмы
@@ -4504,7 +4504,7 @@
                     utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
             }
         }
-    
+
         /**
          * Метод проверки пришедших данных на превышение по количеству
          * @param groupResult - данные по группам
@@ -4520,7 +4520,7 @@
                 utils.throwReadableException("$message#${ OVERFLOW_DATA_ERROR }")
             }
         }
-    
+
         /**
          * Метод получения итоговых лейблов для диаграммы
          * @param labels - текущие лейблы
@@ -4572,7 +4572,7 @@
                     utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
             }
         }
-    
+
         /**
          * Метод преобразования результата выборки к сводке
          * @param list - данные диаграмы
@@ -4604,7 +4604,7 @@
                     utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
             }
         }
-    
+
         /**
          * Метод формирования таблицы
          * @param list - список данных из БД
@@ -4652,7 +4652,7 @@
                             }
                         }
                     }
-    
+
                     Integer i = 0
                     resultDataSet = list.collectMany {
                         if (it)
@@ -4689,14 +4689,14 @@
             def transposeDataSet = resultDataSet.transpose()
             Integer aggregationCnt = getSpecificAggregationsList(requestContent).count { it.aggregation !=  Aggregation.NOT_APPLICABLE }
             List<Map> attributes = getAttributeNamesAndValuesFromRequest(requestContent)
-    
+
             if (sourceRowNames)
             {
                 attributes = attributes[(aggregationCnt - 1)..-1]
                 // берем название самого первого показателя
                 attributes.head().name = requestContent.data.head().indicators.head().attribute.title ?: ''
             }
-    
+
             List<String> allAggregationAttributes = getSpecificAggregationsList(requestContent).name
             if (transposeDataSet.size() == 0)
             {
@@ -4705,7 +4705,7 @@
             else
             {
                 Set<Map> innerCustomGroupNames = getInnerCustomGroupNames(requestContent)
-    
+
                 List<String> attributeNames = attributes.name
                 List customValuesInBreakdown = []
                 if (innerCustomGroupNames)
@@ -4718,7 +4718,7 @@
                         customValuesInBreakdown = innerCustomGroupNames.findAll { it.attributeName == attributeNames.last() }.value
                     }
                 }
-    
+
                 return mappingTable(resultDataSet,
                                     transposeDataSet,
                                     attributes,
@@ -4738,7 +4738,7 @@
                                     request, countTotals, tableTotals, sourceRowNames, diagramType)
             }
         }
-    
+
         /**
          * Метод подготовки колонок таблицы
          * @param attributes - список атрибутов
@@ -4807,7 +4807,7 @@
                 )
             }
         }
-    
+
         /**
          * Мтод получения колонок со значениями разбивки
          * @param breakdownValues - значения разбивки
@@ -4831,7 +4831,7 @@
                 )
             }
         }
-    
+
         /**
          * Метод по проверке наличия разбивки в запросе
          * @param requestContent - текущий запрос
@@ -4842,7 +4842,7 @@
             def tempData = requestContent.data
             return tempData.any { v -> v?.breakdown?.any() }
         }
-    
+
         /**
          * Метод подготовки датасета из Бд
          * @param resultDataSet - датасет из Бд
@@ -4869,7 +4869,7 @@
             }
             return resultDataSet
         }
-    
+
         /**
          * Метод получения названия атрибутов с агрегацией N/A
          * @param attributes - все атрибуты запроса
@@ -4881,7 +4881,7 @@
                 it.aggregation == Aggregation.NOT_APPLICABLE ? it.name : null
             }
         }
-    
+
         /**
          * Метод получения "детей" по "родителю"
          * @param parent - родитель
@@ -4895,7 +4895,7 @@
                 def tempParent = new ResRow(key: parent.key, value: parent.value, parent:parent.parent, count: null)
                 boolean correctParent = JsonOutput.toJson(child?.parent) == JsonOutput.toJson(tempParent)
                 boolean unique = !children.any { it?.value == child?.value && it?.key == child?.key && it?.count == child?.count}
-    
+
                 if (correctParent && unique)
                 {
                     children << child
@@ -4903,7 +4903,7 @@
             }
             return children
         }
-    
+
         /**
          * Метод получения названий атрибутов агрегации в исходном порядке
          * @param request - тело запроса
@@ -4917,7 +4917,7 @@
                 }
             }.unique()
         }
-    
+
         /**
          * Метод получения агрегаций из запроса
          * @param widgetSettings - настройки виджета
@@ -4935,7 +4935,7 @@
                 }
             }
             String mainSource = mainSourceValue.value
-    
+
             return tempWidgetSettings?.data?.collectMany { value ->
                 if (!value.sourceForCompute && value?.indicators)
                 {
@@ -4945,13 +4945,13 @@
                         {
                             conditionTrue = !(isCompute ^ indicator?.attribute?.type == 'COMPUTED_ATTR')//xor
                         }
-    
+
                         if (conditionTrue)
                         {
                             BaseAttribute attribute = indicator?.attribute
                             String currentSource = value.source.value.value
                             String currentSourceName = currentSource != mainSource ? value.source.value.label.trim() : mainSourceValue.label.trim()
-    
+
                             if((fullIndicatorsList.count { it?.attribute?.title == attribute?.title } > 1) && !attribute?.title?.contains(currentSourceName))
                             {
                                 if (currentSourceName)
@@ -4978,7 +4978,7 @@
                 }
             }
         }
-    
+
         /**
          * Метод преобразования всех датасетов различных данных к одному
          * @param list - исходных датасет
@@ -4992,15 +4992,15 @@
             List compAggregations = getSpecificAggregationsList(requestContent, true)
             List usualAggregations = getSpecificAggregationsList(requestContent, false)
             List aggregations = getSpecificAggregationsList(requestContent)
-    
+
             List usual = list[0] //на первом месте в списке  результатов, нужно внедрить на нужные места данные из результатов вычислений
-    
+
             if (!(aggregations.size() == compAggregations.size() && compAggregations.size() == 1)) // если результат не состоит из одного вычисления
             {
                 List indexesOfComputeInRequest = aggregations.findIndexValues { it.name in compAggregations.name }
-    
+
                 List indexesOfNotAggregatedInRequest = usualAggregations.findIndexValues { it.aggregation == Aggregation.NOT_APPLICABLE }
-    
+
                 int usualAggregationSize = usualAggregations.size()
                 //количество всех агрегаций равно количеству всех вычислений
                 if (aggregations.size() == compAggregations.size())
@@ -5008,7 +5008,7 @@
                     usualAggregationSize = 1 //чтобы корректно достучаться до элемента в массиве
                     indexesOfComputeInRequest = indexesOfComputeInRequest[1..-1] //на первом месте уже стоит результат первого вычисления
                 }
-    
+
                 list[1..-1].eachWithIndex { listRow, i -> //идем по другим спискам, где уже есть вычисления, результат хранится на первом месте, i покажет место, где хранится индекс подстановки числа из вычислений
                     usual.each { row ->
                         def range = usualAggregationSize + i..-1
@@ -5023,7 +5023,7 @@
                     }
                 }
             }
-    
+
             if (!showNulls)
             {
                 //убираем null-ы в итоговом датасете
@@ -5044,7 +5044,7 @@
             }
             return [usual]
         }
-    
+
         /**
          * Метод преобразования всех датасетов различных данных к одному для таблиц без параметра
          * @param list - исходных датасет
@@ -5066,10 +5066,10 @@
                     sourcesList = []
                 }
             }
-    
+
             List compAggregations = getSpecificAggregationsList(requestContent, true)
             List aggregations = getSpecificAggregationsList(requestContent)
-    
+
             if (compAggregations.size() == aggregations.size() && compAggregations.size() == 1)
             {
                 dataSet = list
@@ -5082,7 +5082,7 @@
                 dataSet = listsGroupedBySources.collect { groupedList ->
                     def usual = groupedList[0]
                     def computeResults = groupedList[1..-1]
-    
+
                     computeResults.eachWithIndex { currentComputations, i1 ->
                         int indexOfCurrentComputation = indexesOfComputeInRequest[i1]
                         currentComputations.eachWithIndex { it, i2 ->
@@ -5092,10 +5092,10 @@
                     return usual
                 }
             }
-    
+
             return dataSet
         }
-    
+
         /**
          * Метод получения количества уникальных значений по атрибуту из БД
          * @param attributeValue - значение арибута с его группировкой и тд
@@ -5115,7 +5115,7 @@
                 attribute = dashboardQueryWrapperUtils.updateRefAttributeCode(attribute)
                 def parameter = buildSystemGroup(attributeValue.group, attribute)
                 wrapper.processGroup(wrapper,wrapper.criteria, false, parameter, DiagramType.TABLE, source)
-    
+
                 return wrapper.getResult(true, DiagramType.TABLE, false)?.unique()?.size()
             }
             else
@@ -5140,7 +5140,7 @@
                 return db.query(criteria).list().head() as Integer
             }
         }
-    
+
         /**
          * Метод по подготовке таблицы к отображению
          * @param resultDataSet - итоговый датасет
@@ -5174,7 +5174,7 @@
             breakdownValues = valuesInBasicBreakdownExceedLimit
                 ? breakdownValues[0..DashboardUtils.tableBreakdownLimit - 1]
                 : breakdownValues
-    
+
                 Collection<Column> columns = collectColumns(attributes, hasBreakdown, customValuesInBreakdown ?: breakdownValues)
 
                 if (diagramType == DiagramType.PIVOT_TABLE)
@@ -5191,13 +5191,13 @@
                     }
                     return attribut.key ?:  attribut.name
                 }
-    
+
                 if (sourceRowNames && hasBreakdown) {
                 attributeNames << attributeNames[attributeNames.size() - 1]
                 attributeNames[attributeNames.size() - 2] = 'Источник'
             }
             int cnt = attributeNames.size()
-    
+
             List notAggregatedAttributeNames = notAggregationAttributeNames(attributes)
             Integer notAggregatedAttributeSize = notAggregatedAttributeNames.size()
             List<Map<String, Object>> tempMaps = getTempMaps(resultDataSet, attributeNames, cnt)
@@ -5212,9 +5212,9 @@
             {
                 aggregationCnt = 1
             }
-    
+
             Integer parameterIndex = aggregationCnt + notAggregatedAttributeSize //индекс, с которого в строке начинаются значения параметров
-    
+
             //подготовка данных
             if (hasBreakdown)
             {
@@ -5237,7 +5237,7 @@
                         it.ID = reverseId--
                     }
                 }
-    
+
                 if (sourceRowNames)
                 {
                     Map<String, List> dataGroupedBySources = data.groupBy { it['Источник'] }
@@ -5260,12 +5260,12 @@
                     tempMaps = sortTableDataSetWithMaps(tempMaps, attributes, sorting)
                     tempMaps = getDataSetWithPagination(tempMaps, paginationSettings)
                 }
-    
+
                 if (sourceRowNames)
                 {
                     aggregationCnt = 1
                 }
-    
+
                 data = tempMaps.collect { map ->
                     def value = map[0..aggregationCnt - 1].collect {
                         it.findResult { k, v -> [(k): v ?: "0"]
@@ -5275,7 +5275,7 @@
                     {
                         value = map[aggregationCnt..-1] + value
                     }
-    
+
                     if(showRowNum && paginationSettings)
                     {
                         return [ID: reverseRowCount ? id-- : ++id, *:value.sum()]
@@ -5285,7 +5285,7 @@
                         return [*:value.sum()]
                     }
                 }
-    
+
                 if (sourceRowNames)
                 {
                     data.eachWithIndex { value, i ->
@@ -5293,7 +5293,7 @@
                     }
                 }
             }
-    
+
             Collection<Column> aggregationColumns
             if (!sourceRowNames)
             {
@@ -5316,7 +5316,7 @@
             {
                 aggregationColumns = [columns.find()]
             }
-    
+
             Collection<Integer> percentAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT)
             if (totalColumn)
             {
@@ -5356,7 +5356,7 @@
                                                     value = countInPercentCntAggregation
                                                 }
                                             }
-    
+
                                             if (!value)
                                             {
                                                 value = it.value
@@ -5413,30 +5413,30 @@
                     }
                 }
             }
-    
+
             if (!sourceRowNames)
             {
                 //агрегация всегда стоит в конце
                 columns += aggregationColumns
             }
-    
+
             if(hasBreakdown)
             {
                 data = getDataSetWithPagination(data, paginationSettings)
             }
-    
+
             if(showRowNum)
             {
                 columns.add(0, new NumberColumn(header: "", accessor: "ID", footer: "", show: showRowNum))
             }
-    
+
             if (sourceRowNames)
             {
                 columns.add(1, new NumberColumn(header: "", accessor: "Источник", footer: totalColumn ? 'Итого' : ''))
             }
-    
+
             def source = request.data.findResult { k, v -> v.source }
-    
+
             def parameterAttribute = attributes[parameterIndex]
             boolean isDynamicParameter = parameterAttribute?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
             Boolean customValuesInParameter = innerCustomGroupNames.any { it.attributeName == attributeNames[parameterIndex] }
@@ -5457,7 +5457,7 @@
                     limitParameter = checkForDateInAttribute(parameterAttribute, limitParameter)
                 }
             }
-    
+
             def breakdownAttribute = hasBreakdown ? attributes.last() : null
             Boolean limitBreakdown = false
             boolean isDynamicBreakdown = breakdownAttribute?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
@@ -5476,9 +5476,9 @@
                     limitBreakdown = checkForDateInAttribute(breakdownAttribute, limitBreakdown)
                 }
             }
-    
+
             LimitExceeded limitsExceeded = new LimitExceeded(parameter: limitParameter, breakdown: limitBreakdown)
-    
+
             List<Map<String, Object>> rowsInfo = null
             if (sourceRowNames)
             {
@@ -5585,7 +5585,7 @@
         private List<Map<String, Object>> getRowsInfoForTablesWithoutParameter(DiagramRequest request)
         {
             List<Map<String, Object>> rowsInfo = []
-    
+
             request.data.each {
                 RequestData requestData = it.value
                 Map<String, Object> rowInfo = [
@@ -5595,10 +5595,10 @@
                 ]
                 rowsInfo << rowInfo
             }
-    
+
             return rowsInfo
         }
-    
+
         /**
          * Метод для корректной обработки данных с разбивкой
          * @param groups - группы словарей данных
@@ -5627,14 +5627,14 @@
                 {
                     aggregations = updateAggregations(group, aggregationCnt, notAggregatedAttributeNames)
                 }
-    
+
                 Integer attributesCntWithoutParameters = parameterIndex + 1 //parameterIndex - количество агрегаций в запросе + 1 - разбивка, остальное параметры
                 def tempAggregations = aggregations.collate(attributesCntWithoutParameters)
                 def repeatableBreakdowns = tempAggregations.groupBy { it.last() }.findResults { k, v -> v.size() > 1 ? k : null }
                 def listOfAggregations = repeatableBreakdowns.collect { breakdownValue ->
                     return tempAggregations.findAll { it.last() == breakdownValue }
                 }
-    
+
                 if (listOfAggregations)
                 {
                     def baseMap = [:]
@@ -5680,7 +5680,7 @@
                 }
             }.flatten()
         }
-    
+
         /**
          * Метод, позволяющий сортировать значения для таблицы по нужному параметру/показателю
          * @param tempMaps - список временных мап (название параметра/показателя/разбивки:значение)
@@ -5691,13 +5691,13 @@
         def sortTableDataSetWithMaps(def tempMaps, List attributes, Sorting tableSorting)
         {
             def attrValue = tableSorting?.accessor ? attributes.find {it?.name?.trim() == tableSorting.accessor.trim()} : null
-    
+
             if(attrValue)
             {
                 def valueType = attrValue?.aggregation != Aggregation.NOT_APPLICABLE && attrValue.type == ColumnType.INDICATOR
                     ? ColumnType.INDICATOR
                     : ColumnType.PARAMETER
-    
+
                 switch(valueType)
                 {
                     case ColumnType.INDICATOR:
@@ -5710,7 +5710,7 @@
             }
             else return tempMaps
         }
-    
+
         /**
          * Метод на проверку даты в атрибуте, который нужно проверить на выход за пределы
          * @param attributeValue - значение атрибута и его группы
@@ -5724,7 +5724,7 @@
                      attributeValue.group.data as GroupType == GroupType.DAY &&
                      attributeValue.group.format in ['dd.mm.YY hh:ii', 'dd.mm.YY hh', 'dd', 'dd.mm.YY', 'dd MM'])) ? flag : false
         }
-    
+
         /**
          * Метод получения групп значений агрегации и разбивки по параметрам
          * @param tempMaps - текущие мапы значений
@@ -5748,7 +5748,7 @@
             }
             return groups
         }
-    
+
         /**
          * Метод преобразования агрегации с включением в неё значений разбивки
          * @param group - текущие группа данных по идентичным значениям параметров
@@ -5770,7 +5770,7 @@
                 }
             }
         }
-    
+
         /**
          * Метод на подготовку строк с разбивкой внутри
          * @param rows - текущие строки
@@ -5813,7 +5813,7 @@
                 return row
             }
         }
-    
+
         /**
          * Метод получения мап атрибут/значение
          * @param resultDataSet - итоговый датасет
@@ -5830,7 +5830,7 @@
                 }.collate(cnt)
             }
         }
-    
+
         /**
          * Метод создания строки дерева
          * @param map - мапа
@@ -5855,7 +5855,7 @@
             totalRow.count = index == attributeNames.size() - 1 && aggregationCnt > 0 ? row[0..aggregationCnt - 1] : null
             return totalRow
         }
-    
+
         /**
          * Метод получения всех листьев по дереву
          * @param totalRows - список всех листьев по дереву
@@ -5869,7 +5869,7 @@
             List children = getChildrenByParent(parent, tempTree)
             return [parent] + children.collectMany { getFullRowsNew(totalRows, it, tempTree) }
         }
-    
+
         /**
          * Метод получения названий и самих основных атрибутов настроек виджета
          * @param widgetSettings - настройки виджета
@@ -5887,13 +5887,13 @@
             String mainSource = mainSourceValue.value
             def aggregations = getSpecificAggregationsList(widgetSettings)
             def fullParametersList = getFullElementListInWidgetSettings(widgetSettings, 'parameters')
-    
+
             def parameterAttributes = tempWidgetSettings.data.collectMany { value ->
                 if (!value.sourceForCompute)
                 {
                     String currentSource = value.source.value.value
                     String currentSourceName = currentSource != mainSource ? value.source.value.label.trim() : mainSourceValue.label.trim()
-    
+
                     value.parameters.collect { parameter ->
                         if(fullParametersList.count { it?.attribute?.title == parameter?.attribute?.title } > 1)
                         {
@@ -5902,11 +5902,11 @@
                                 parameter?.attribute?.title = "${parameter?.attribute?.title} (${currentSourceName})"
                             }
                         }
-    
+
                         def name = parameter?.group?.way == Way.CUSTOM
                             ? parameter?.group?.data?.name
                             : parameter?.attribute?.title
-    
+
                         def group = parameter?.group
                         group = updateCustomGroupInfo(group)
                         return [name : name, attribute : parameter?.attribute,
@@ -5918,7 +5918,7 @@
                     return []
                 }
             }
-    
+
             def breakdownAttributes = tempWidgetSettings.data.collectMany { value ->
                 if (!value.sourceForCompute)
                 {
@@ -5937,16 +5937,16 @@
                     return []
                 }
             }
-    
+
             Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll() && (widgetSettings.type as DiagramType) == DiagramType.TABLE
             if (isSourceForEachRow && breakdownAttributes)
             {
                 breakdownAttributes = [breakdownAttributes.head()]
             }
-    
+
             return (aggregations + parameterAttributes + breakdownAttributes).grep()
         }
-    
+
         /**
          * Метод получения данных по элементам поля data всех настроек виджета
          * @param widgetSettings - настройки виджета
@@ -5966,7 +5966,7 @@
                 }
             }
         }
-    
+
         /**
          * Метод обновления настроек для кастомных группировок
          * @param group - группировка
@@ -5980,7 +5980,7 @@
             }
             return group
         }
-    
+
         /**
          * Метод получения названий внутренних групп из основных группировок
          * @param request - запрос
@@ -5998,7 +5998,7 @@
                         }
                     }
                 }
-    
+
                 value.breakdown?.each { breakdown ->
                     if (breakdown?.group?.way == Way.CUSTOM)
                     {
@@ -6010,7 +6010,7 @@
             }
             return attributeMaps
         }
-    
+
         /**
          * Метод преобразования результата выборки к комбо диаграме
          * @param list - данные диаграмы
@@ -6029,7 +6029,7 @@
                                                  Integer countTotals)
         {
             List transposeSets = list.collect { (it as List<List>)?.transpose() ?: [] }
-    
+
             Set labels = transposeSets.withIndex().collectMany { set, i ->
                 if (customsInBreakdown[i])
                 {
@@ -6040,9 +6040,9 @@
                     return set[1]?.findAll() ?: [] //иначе на 2-м
                 }
             }
-    
+
             labels = getTotalLabelsForDiagram(labels, groupFormat, format, changeLabels, reverseLabels)
-    
+
             Set diagramLabels = transposeSets.withIndex().collectMany { set, i ->
                 if (customsInBreakdown[i])
                 {
@@ -6120,7 +6120,7 @@
                         utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
                 }
             }
-    
+
             List fullSeries = []
             Integer listCount = list.size()
             list.eachWithIndex { dataSet, i ->
@@ -6136,7 +6136,7 @@
             }
             return new ComboDiagram(labels: labels, series: fullSeries, countTotals: countTotals)
         }
-    
+
         /**
          * Метод получения подписей по датам в корректном виде
          * @param labels - исходные подписи по датам
@@ -6156,7 +6156,7 @@
                 case GroupType.QUARTER : return quartersInCorrectOrder(labels, format, reverse)
             }
         }
-    
+
         /**
          * Метод получения подписей по минутам и часам в корректном виде
          * @param labels - исходные подписи по датам
@@ -6179,7 +6179,7 @@
             }
             return labels.sort { reverse ? - formatter.parse(it).getTime() : formatter.parse(it) }
         }
-    
+
         /**
          * Метод получения подписей по дням в корректном виде
          * @param labels - исходные подписи по датам
@@ -6216,7 +6216,7 @@
             }
             return labels.sort { reverse ? - formatter.parse(it).getTime() : formatter.parse(it) }
         }
-    
+
         /**
          * Метод получения подписей по 7-ми дням в корректном виде
          * @param labels - исходные подписи по датам
@@ -6230,7 +6230,7 @@
                 - formatter.parse(it.tokenize('-').find()).getTime()
                 : formatter.parse(it) }
         }
-    
+
         /**
          * Метод получения подписей по месяцам в корректном виде
          * @param labels - исходные подписи по датам
@@ -6249,7 +6249,7 @@
             }
             return labels.sort { reverse ? - formatter.parse(it).getTime() : formatter.parse(it) }
         }
-    
+
         /**
          * Метод получения подписей по неделям в корректном виде
          * @param labels - исходные подписи по датам
@@ -6266,7 +6266,7 @@
             }
             return labels.sort { reverse ? - formatter.parse(it.replace('-я', '')).getTime() : formatter.parse(it) }
         }
-    
+
         /**
          * Метод получения подписей по кварталам в корректном виде
          * @param labels - исходные подписи по датам
@@ -6283,7 +6283,7 @@
             }
             return labels.sort { reverse ? - formatter.parse(it.replace(' кв-л ', '')).getTime() : formatter.parse(it) }
         }
-    
+
         /**
          * Метод добавления атирбута title для ссылочных аттрибутов. Исспользовать только для вычислений формул
          * @param attr - атрибут
@@ -6296,7 +6296,7 @@
                 ? attr + [ref: [code: 'title', type: 'string', title: 'Название']]
                 : attr
         }
-    
+
         /**
          * Метод извлечение id из uuid объекта
          * @param uuid - уникальный идетнификатор
@@ -6306,7 +6306,7 @@
         {
             return uuid.split('\\$', 2)[1] as long
         }
-    
+
         /**
          * Метод для проверки является ли кастомная группировка группировкой из разбивки
          * @param requestContent - тело запроса
@@ -6325,7 +6325,7 @@
             }
             return diagramType == DiagramType.COMBO ? customsInBreakdown : customsInBreakdown.find()
         }
-    
+
         /**
          * Метод для создания кастомной группировки для динамического атрибута
          * @param dynamicAttribute - динамический атрибут
@@ -6339,7 +6339,7 @@
                 def groupType = AttributeType.OBJECT_TYPE
                 def groupName = 'totalValueGroup'
                 dynamicAttribute = new Attribute(code: 'linkTemplate', type: AttributeType.OBJECT_TYPE)
-    
+
                 def subGroupData = new SubGroupData(data: [title: 'Шаблон атрибута', uuid: uuidForTemplate],
                                                     type: 'CONTAINS')
                 def subGroup = new SubGroup(data: [[subGroupData]], name: '')
@@ -6347,13 +6347,13 @@
                                                   subGroups: [subGroup],
                                                   type: groupType,
                                                   id: '')
-    
+
                 def group = new CustomGroupInfo(data:customGroup, way: Way.CUSTOM)
                 return new NewParameter(attribute:dynamicAttribute, group:group)
             }
             return null
         }
-    
+
         /**
          * Метод получения списка фильтров
          * @param customGroup - кастомная группировка для построения фильтра
@@ -6368,7 +6368,7 @@
             if(parameter?.group)
             {
                 def customGroup = parameter?.group?.data
-    
+
                 def filterList = customGroup?.subGroups?.collect { subGroup ->
                     String attributeType = Attribute.getAttributeType(parameter.attribute).split('\\$', 2).head()
                     parameter.attribute.attrChains().last().type = attributeType
@@ -6386,7 +6386,7 @@
             }
             return null
         }
-    
+
         /**
          * Метод по получению TOP Х данных
          * @param currentRes - текущий результат запроса из БД
@@ -6421,7 +6421,7 @@
                 tempResult.sort {it[1] as Double}
             }
             tempResult = tempResult*.get(0)
-    
+
             if(parameterWithDate && !aggregationOrderWithDates)
             {
                 def labels = tempResult as Set
@@ -6442,7 +6442,7 @@
             //находим соответсвия данных с теми группами, что получили, и выводим их
             return tempResult.collectMany { value -> currentRes.findAll {it[paramIndex] == value} }
         }
-    
+
         /**
          * Метод сортировки итоговых значений в БД
          * @param res - итоговый датасет из БД
@@ -6471,7 +6471,7 @@
                     return res.sort { aggregationSortingType == 'ASC' ? it[0].toDouble() :  -it[0].toDouble() }
                 }
             }
-    
+
             if(parameterSortingType)
             {
                 res = res.sort { it[paramIndex].toUpperCase() }
@@ -6479,7 +6479,7 @@
             }
             return res
         }
-    
+
         /**
          * Метод получения данных для диаграмм без списков фильтров
          * @param node - нода реквизита запроса
@@ -6503,7 +6503,7 @@
                 case 'default':
                     def requisiteNode = node as DefaultRequisiteNode
                     RequestData requestData = request.data[requisiteNode.dataKey]
-    
+
                     List attributes = []
                     List<String> notAggregatedAttributes = []
                     Boolean tableHasBreakdown
@@ -6517,14 +6517,14 @@
                         ? request?.data?.findResult { key, value ->
                         value?.aggregations?.withIndex().findResults { val, i -> if(val.type != Aggregation.NOT_APPLICABLE) return i }
                     } : [0]
-    
+
                     String aggregationSortingType = requestData.aggregations.find()?.sortingType
                     def parameter = requestData.groups.find()
                     String parameterSortingType = isDiagramTypeTable && !top ? '' : parameter?.sortingType
                     String parameterAttributeType = Attribute.getAttributeType(parameter?.attribute)
                     Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                     Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
-    
+
                     //важно для таблицы
                     Closure formatAggregation = this.&formatAggregationSet.rcurry(
                         listIdsOfNormalAggregations,
@@ -6573,7 +6573,7 @@
                         String message = messageProvider.getConstant(WRONG_GROUP_TYPES_IN_CALCULATION_ERROR, currentUserLocale)
                         utils.throwReadableException("$message#${WRONG_GROUP_TYPES_IN_CALCULATION_ERROR}")
                     }
-    
+
                     List attributes = []
                     List<String> notAggregatedAttributes = []
                     Boolean tableHasBreakdown
@@ -6591,7 +6591,7 @@
                         [(key): dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
                                                           .with(postProcess)]
                     } as Map<String, List>
-    
+
                     //Вычисление формулы. Выглядит немного костыльно...
                     Boolean hasState = dataSet.values().head().groups?.any { value -> Attribute.getAttributeType(value?.attribute) == AttributeType.STATE_TYPE } ||
                                        dataSet.values().head().aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) == AttributeType.STATE_TYPE }
@@ -6601,7 +6601,7 @@
                     String parameterAttributeType = Attribute.getAttributeType(parameter?.attribute)
                     Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
                     Boolean parameterWithDate = parameterAttributeType in AttributeType.DATE_TYPES
-    
+
                     def res = dataSet.values().head().groups?.size() ?
                         findUniqueGroups([0], variables).collect { group ->
                             def resultCalculation = calculator.execute { variable ->
@@ -6635,7 +6635,7 @@
                     utils.throwReadableException("$message#${REQUISITE_IS_NOT_SUPPORTED_ERROR}")
             }
         }
-    
+
         /**
          * Метод применения окончательных настроек для итогов запроса
          * @param top - настройки по ТОПу
@@ -6674,7 +6674,7 @@
                                    parameterSortingType, aggregationSortingType)
                 }
             }
-    
+
             Boolean nessecaryToSort = !parameterWithDateOrDtInterval &&
                                       (aggregationSortingType || parameterSortingType) &&
                                       (diagramType in DiagramType.SortableTypes || (top && isDiagramTypeTable))
@@ -6685,7 +6685,7 @@
             return total
         }
     }
-    
+
     /**
      * Модель данных для диаграмм BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE
      */
@@ -6701,7 +6701,7 @@
          */
         Collection<Series> series = []
     }
-    
+
     /**
      * Модель данных для значений по y с разбивкой
      */
@@ -6717,7 +6717,7 @@
          */
         Collection<Object> data = []
     }
-    
+
     /**
      * Модель данных для диаграмм DONUT, PIE
      */
@@ -6733,7 +6733,7 @@
          */
         Collection<Object> series = []
     }
-    
+
     /**
      * Модель данных для диаграммы SUMMARY
      */
@@ -6749,7 +6749,7 @@
          */
         Object total
     }
-    
+
     /**
      * Модель данных для диаграммы SPEEDOMETER
      */
@@ -6760,14 +6760,14 @@
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
         Object min
-    
+
         /**
          * Значение атрибута с учетом выбранной агрегации
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
         Object max
     }
-    
+
     /**
      * Модель данных для диаграммы TABLE
      */
@@ -6795,7 +6795,7 @@
          */
         List<Map<String, Object>> rowsInfo
     }
-    
+
     /**
      * Класс, описывающий флаги на превышение данных в БД относительно ограничений
      */
@@ -6805,13 +6805,13 @@
          * флаг на превышение по параметру
          */
         Boolean parameter
-    
+
         /**
          * флаг на превышение по разбивке
          */
         Boolean breakdown
     }
-    
+
     /**
      * Модель для значений по column
      */
@@ -6855,7 +6855,7 @@
          */
         List<AggregationBreakdownColumn> columns
     }
-    
+
     class NumberColumn extends Column
     {
         /**
@@ -6863,11 +6863,11 @@
          */
         boolean show
     }
-    
+
     class AggregationColumn extends Column
     {
     }
-    
+
     class AggregationBreakdownColumn extends Column
     {
         /**
@@ -6875,7 +6875,7 @@
          */
         Indicator indicator
     }
-    
+
     class Indicator
     {
         /**
@@ -6887,7 +6887,7 @@
          */
         BaseAttribute attribute
     }
-    
+
     /**
      * Модель данных для диаграммы COMBO
      */
@@ -6903,7 +6903,7 @@
          */
         Collection<SeriesCombo> series = []
     }
-    
+
     /**
      * Модель данных для значений по y с разбивкой
      */
@@ -6931,7 +6931,7 @@
          */
         String breakdownValue = ""
     }
-    
+
     class ResRow
     {
         /**
@@ -6951,7 +6951,7 @@
          */
         ResRow parent
     }
-    
+
     trait IHasTotals
     {
         /**
