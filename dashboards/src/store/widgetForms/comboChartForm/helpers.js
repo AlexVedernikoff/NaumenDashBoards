@@ -98,7 +98,7 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
 		...state,
 		colorsSettings,
 		computedAttrs,
-		data: data.map(mapComboDataSet(state)),
+		data: data.map(mapComboDataSet(state, fixLeaveOneParameters)),
 		dataLabels,
 		displayMode,
 		header,
@@ -132,7 +132,7 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 	return {
 		...state,
 		computedAttrs,
-		data: data.map(mapComboDataSet(state)),
+		data: data.map(mapComboDataSet(state, fixLeaveOneParameters)),
 		displayMode,
 		header,
 		name,

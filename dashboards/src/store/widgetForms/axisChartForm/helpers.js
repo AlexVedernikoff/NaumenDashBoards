@@ -149,8 +149,7 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const prevDataSet = state.data[index] ?? createAxisDataSet(dataSet.dataKey);
-
-			return {...prevDataSet, ...dataSet};
+			return {...prevDataSet, ...fixLeaveOneParameters(dataSet)};
 		}),
 		displayMode,
 		header,
@@ -186,7 +185,6 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const prevDataSet = state.data[index] ?? createAxisDataSet(dataSet.dataKey);
-
 			return {
 				...prevDataSet,
 				...transformDataSet(dataSet)
