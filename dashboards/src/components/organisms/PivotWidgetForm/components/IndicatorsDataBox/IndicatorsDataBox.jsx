@@ -221,7 +221,7 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 						dataKey={dataKey}
 						dataSetIndex={dataSetIndex}
 						dataSets={data}
-						filteredSource={data[0]?.source}
+						filteredSource={source}
 						index={index}
 						onChange={this.getChangeIndicatorHandler(dataSetIndex)}
 						onChangeDataSet={this.getChangeDataSetIndicatorHandler(valueIndex)}
