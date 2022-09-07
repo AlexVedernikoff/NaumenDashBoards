@@ -545,6 +545,17 @@
                         descriptor: aggregation.descriptor
                     )
                 )
+
+                List listIdsOfNormalAggregations =
+                    requestDataCopy.aggregations?.withIndex()?.findResults { val, i ->
+                        if (val.type != Aggregation.NOT_APPLICABLE)
+                        {
+                            return i
+                        }
+                    }
+                Closure formatGroup = this.&formatGroupSet.rcurry(requestDataCopy, listIdsOfNormalAggregations, DiagramType.PIVOT_TABLE)
+                result = formatGroup(result)
+
                 aggregationFiltrationResult[aggregation] = result
             }
 
@@ -4481,6 +4492,7 @@
                     def (groupResult, breakdownResult) = transposeDataSet.tail()
                     checkAggregationAndBreakdownListSize(groupResult as Set, breakdownResult as Set)
                     def labels = groupResult?.findAll() as Set
+                    StandardDiagram standardDiagram
                     if (reverseGroups)
                     {
                         def series = (breakdownResult?.findAll() as Set)
@@ -4496,7 +4508,7 @@
                             new Series(name: labelsValue, data: data)
                         }
                         labelsForDiagram = getTotalLabelsForDiagram(labelsForDiagram, groupFormat, format, changeLabels, reverseLabels)
-                        StandardDiagram standardDiagram = new StandardDiagram(
+                        standardDiagram = new StandardDiagram(
                             labels: labelsForDiagram,
                             series: seriesForDiagram
                         )
