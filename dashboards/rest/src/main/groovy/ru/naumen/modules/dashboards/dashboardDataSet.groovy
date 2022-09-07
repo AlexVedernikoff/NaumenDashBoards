@@ -530,30 +530,50 @@
             aggregationsWithFiltration.each { aggregation ->
                 RequestData requestDataCopy = requestData.clone()
                 requestDataCopy.aggregations = [aggregation]
-                requestDataCopy.source.descriptor =
-                    dashboardQueryWrapperUtils.getDescriptorWithMergedFilters(
-                        requestDataCopy.source.descriptor,
-                        aggregation.descriptor
-                    )
 
                 List result = dashboardQueryWrapperUtils.getData(
                     requestDataCopy,
                     null,
                     currentUserLocale,
                     false,
-                    DiagramType.PIVOT_TABLE
+                    DiagramType.PIVOT_TABLE,
+                    false,
+                    '',
+                    null,
+                    new IndicatorFiltration(
+                        metaClassFqn: aggregation.attribute.sourceCode,
+                        descriptor: aggregation.descriptor
+                    )
                 )
                 aggregationFiltrationResult[aggregation] = result
             }
 
+
+            Integer groupsCount = requestData.groups.size()
+
             aggregationFiltrationResult.eachWithIndex { aggregation, filtrationResult, index ->
                 Integer aggregationIndex = allAggregations.findIndexOf { it == aggregation }
-                res[0].eachWithIndex { resultItem, i ->
+                res[0].each { resultItem ->
                     Object value = 0
-                    if (filtrationResult[i] != null)
-                    {
-                        value = filtrationResult[i][0]
+
+                    filtrationResult.each { filtrationResultItem ->
+                        if (value == 0)
+                        {
+                            Boolean filtrationResultItemMatch = true
+                            for (int i = 1; i < groupsCount + 1; i++)
+                            {
+                                filtrationResultItemMatch = filtrationResultItemMatch &&
+                                                            resultItem[resultItem.size() - i] ==
+                                                            filtrationResultItem[filtrationResultItem.size() - i]
+                            }
+
+                            if (filtrationResultItemMatch)
+                            {
+                                value = filtrationResultItem[0]
+                            }
+                        }
                     }
+
                     resultItem[aggregationIndex] = value
                 }
             }
@@ -582,15 +602,6 @@
                 requestDataCopy.aggregations = [aggregation]
                 requestDataCopy.groups = requestDataCopy.groups.collect()
 
-                if (aggregation.descriptor)
-                {
-                    requestDataCopy.source.descriptor =
-                        dashboardQueryWrapperUtils.getDescriptorWithMergedFilters(
-                            requestDataCopy.source.descriptor,
-                            aggregation.descriptor
-                        )
-                }
-
                 GroupParameter breakdownGroup =
                     buildSystemGroup(aggregation.breakdown.group, aggregation.breakdown.attribute)
                 requestDataCopy.groups << breakdownGroup
@@ -600,7 +611,14 @@
                     null,
                     currentUserLocale,
                     false,
-                    DiagramType.PIVOT_TABLE
+                    DiagramType.PIVOT_TABLE,
+                    false,
+                    '',
+                    null,
+                    aggregation.descriptor ? new IndicatorFiltration(
+                        metaClassFqn: aggregation.attribute.sourceCode,
+                        descriptor: aggregation.descriptor
+                    ) : null
                 )
 
                 List listIdsOfNormalAggregations =
@@ -621,7 +639,8 @@
             Integer aggregationsCount = allAggregations.size()
             aggregationBreakdownResult.eachWithIndex { aggregation, breakdownResult, index ->
                 Integer aggregationIndex = allAggregations.findIndexOf { it == aggregation }
-                res[0].each { resultItem ->
+
+                res[0].eachWithIndex { resultItem, resIndex ->
                     List matchBreakdownResultItems = []
                     breakdownResult.each { breakdownResultItem ->
                         Boolean breakdownResultItemMatch = true
@@ -640,7 +659,7 @@
                     matchBreakdownResultItems = matchBreakdownResultItems.collect {
                         return [it[index], it[it.size() - 1]]
                     }
-                    resultItem[aggregationIndex] = matchBreakdownResultItems
+                    res[0][resIndex][aggregationIndex] = matchBreakdownResultItems
                 }
             }
 

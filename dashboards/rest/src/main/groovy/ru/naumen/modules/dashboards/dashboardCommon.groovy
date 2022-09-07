@@ -1471,6 +1471,22 @@ class AttributeType {
 }
 
 /**
+ * Описание фильтрации для показателя
+ */
+@Canonical
+class IndicatorFiltration
+{
+    /**
+     * Декриптор фильтрации
+     */
+    String descriptor
+    /**
+     * Код метакласса показателя
+     */
+    String metaClassFqn
+}
+
+/**
  * Модель для атрибута
  */
 @Canonical
