@@ -358,9 +358,10 @@ class QueryWrapper implements CriteriaWrapper
      * @param requestData - запрос
      * @param diagramType - тип диаграммы
      * @param criteria - основная критерия
+     * @param indicatorFiltration - фильтрация на показателе
      * @return маппинг метаклассов источника и критерий
      */
-    private Map<String, Object> getSourceMetaClassCriteriaMap(RequestData requestData, DiagramType diagramType, IApiCriteria criteria)
+    private Map<String, Object> getSourceMetaClassCriteriaMap(RequestData requestData, DiagramType diagramType, IApiCriteria criteria, IndicatorFiltration indicatorFiltration)
     {
         Map<String, String> sourceDataKeyMetaClassMap = [:]
         Map<String, Object> sourceMetaClassCriteriaMap = [:]
@@ -368,6 +369,19 @@ class QueryWrapper implements CriteriaWrapper
 
         if (diagramType == DiagramType.PIVOT_TABLE)
         {
+            if (indicatorFiltration?.metaClassFqn == requestData.source.classFqn)
+            {
+                api.listdata.addFilters(
+                    criteria,
+                    api.listdata.createListDescriptor(
+                        DashboardQueryWrapperUtils.getDescriptorWithMergedFilters(
+                            requestData.source.descriptor,
+                            indicatorFiltration.descriptor
+                        )
+                    )
+                )
+            }
+
             sourceDataKeyMetaClassMap = requestData.sources.findResults {
                 return [(it.dataKey): it.classFqn]
             }.collectEntries()
@@ -384,15 +398,31 @@ class QueryWrapper implements CriteriaWrapper
                 }
 
                 IApiCriteria criteriaToJoin = criteriaToJoinFrom.addLeftJoin(link.attribute.code)
-                Source criteriaToJsonSource = requestData.sources.find {
+                Source criteriaToJoinSource = requestData.sources.find {
                     it.dataKey == link.dataKey2
                 }
-                if (criteriaToJsonSource.descriptor)
+
+                String criteriaToJoinSourceDescriptor = ''
+
+                if (indicatorFiltration?.metaClassFqn == criteriaToJoinSource.classFqn)
+                {
+                    criteriaToJoinSourceDescriptor = indicatorFiltration.descriptor
+                }
+
+                if (criteriaToJoinSource.descriptor)
+                {
+                    criteriaToJoinSourceDescriptor = DashboardQueryWrapperUtils.getDescriptorWithMergedFilters(
+                        criteriaToJoinSourceDescriptor,
+                        criteriaToJoinSource.descriptor
+                    )
+                }
+
+                if (criteriaToJoinSourceDescriptor)
                 {
                     api.listdata.addFilters(
                         criteriaToJoin,
                         api.listdata.createListDescriptor(
-                            criteriaToJsonSource.descriptor
+                            criteriaToJoinSourceDescriptor
                         )
                     )
                 }
@@ -1331,10 +1361,14 @@ class DashboardQueryWrapperUtils
      * @param requestData - запрос на получение данных
      * @param onlyFilled - вывод только заполненных полей
      * @param diagramType - тип диаграммы
+     * @param ignoreParameterLimit - флаг игнорирования лимита параметра
+     * @param templateUUID - ключ шаблона
+     * @param paginationSettings - настройки пагинации
+     * @param indicatorFiltration - настройки фильтрации на показателе
      * @return результат выборки
      */
     List<List> getData(RequestData requestData, Integer top, String currentUserLocale, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT,
-                       Boolean ignoreParameterLimit = false, String templateUUID = '', PaginationSettings paginationSettings = null)
+                       Boolean ignoreParameterLimit = false, String templateUUID = '', PaginationSettings paginationSettings = null, IndicatorFiltration indicatorFiltration = null)
     {
         validate(requestData)
         validate(requestData.source)
@@ -1346,7 +1380,7 @@ class DashboardQueryWrapperUtils
         wrapper.locale = currentUserLocale
         locale = currentUserLocale
 
-        Map<String, Object> sourceMetaClassCriteriaMap = wrapper.getSourceMetaClassCriteriaMap(requestData, diagramType, criteria)
+        Map<String, Object> sourceMetaClassCriteriaMap = wrapper.getSourceMetaClassCriteriaMap(requestData, diagramType, criteria, indicatorFiltration)
 
         requestData.aggregations.each { validate(it as AggregationParameter) }
         //необходимо, чтобы не кэшировать обработку у предыдущей агрегации
