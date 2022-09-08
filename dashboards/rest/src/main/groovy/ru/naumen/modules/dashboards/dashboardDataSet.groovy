@@ -6449,7 +6449,7 @@
             }
             if(parameterWithDate && aggregationOrderWithDates == 'ASC')
             {
-                tempResult.sort {it[1] as Double}
+							Collections.reverse(tempResult)
             }
             tempResult = tempResult*.get(0)
 
