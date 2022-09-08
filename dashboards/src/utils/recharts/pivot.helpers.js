@@ -61,6 +61,27 @@ const calcIndicatorGroupingTotalHeight = (grouping: IndicatorGrouping): number =
 };
 
 /**
+ * Формирует ключи столбцов нижнего уровня с учетом вложенности столбцов
+ * @param  {Array<PivotColumn>} columns - столбцы верхнего уровня
+ * @returns  {string[]} - ключи столбцов нижнего уровня
+ */
+const getFlatColumnKeys = (columns: Array<PivotColumn>): Array<string> => {
+	const result = [];
+
+	columns.forEach(column => {
+		if (column.type === PIVOT_COLUMN_TYPE.VALUE) {
+			result.push(column.key);
+		} else if (column.type === PIVOT_COLUMN_TYPE.GROUP) {
+			const subSumKeys = getFlatColumnKeys(column.children);
+
+			subSumKeys.forEach(key => result.push(key));
+		}
+	});
+
+	return result;
+};
+
+/**
  * Преобразует IndicatorGrouping в дерево столбцов для отображения
  * @param {IndicatorGrouping} grouping - группировка индикаторов
  * @param {number} height - высота шапки
@@ -117,7 +138,7 @@ const parseIndicatorGrouping2Columns = (
 				let width = children.reduce((p, {width}) => p + width, 0);
 
 				if (hasSum) {
-					const sumKeys = children.map(c => c.key);
+					const sumKeys = getFlatColumnKeys(children);
 					const column: PivotColumnSum = {
 						height: height - 1,
 						isLastColumnGroup,
