@@ -2,6 +2,8 @@
 import type {AttrSetConditions} from 'utils/descriptorUtils/types';
 import type {Breakdown, Indicator, SourceData} from './types';
 import type {DataSet as TableDataSet} from 'store/widgetForms/tableForm/types';
+import type {DataSet as SpeedometerDataSet} from 'store/widgetForms/speedometerForm/types';
+import type {DataSet as SummaryDataSet} from 'store/widgetForms/summaryForm/types';
 import {DEFAULT_AGGREGATION, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
 import {DEFAULT_PARAMETER} from 'store/widgetForms/constants';
 import {omit} from 'helpers';
@@ -54,7 +56,7 @@ const fixPivotIndicators = (indicators: null | Array<Indicator> | Array<PivotInd
 /**
  * Заменяет агрегацию N/A на агрегацию CNT в индикаторах источника данных
  * @param {TableDataSet} dataSet - изначальный источник данных
- * @returns {TableDataSet}
+ * @returns {TableDataSet} - источник данных c исправленными показателями
  */
 const fixIndicatorsAggregationDataSet = (dataSet: TableDataSet): TableDataSet =>
 	({
@@ -64,10 +66,10 @@ const fixIndicatorsAggregationDataSet = (dataSet: TableDataSet): TableDataSet =>
 
 /**
  * Оставляет только один показатель в источнике
- * @param {TableDataSet} dataSet - изначальный источник данных
- * @returns {TableDataSet}
+ * @param {TableDataSet | SpeedometerDataSet | SummaryDataSet} dataSet - изначальный источник данных
+ * @returns {TableDataSet | SpeedometerDataSet | SummaryDataSet} - источник данных c ровно одним показателем
  */
-const fixLeaveOneParameters = (dataSet: TableDataSet): TableDataSet => {
+function fixLeaveOneParameters <T: TableDataSet | SpeedometerDataSet | SummaryDataSet> (dataSet: T): T {
 	let result = dataSet;
 
 	if (dataSet.parameters && dataSet.parameters.length > 1) {
@@ -83,19 +85,19 @@ const fixLeaveOneParameters = (dataSet: TableDataSet): TableDataSet => {
 	}
 
 	return result;
-};
+}
 
 /**
  * Очищает параметры из таблицы для круговой диаграммы
  * @param {TableDataSet} dataSet - изначальный источник данных
- * @returns {TableDataSet}
+ * @returns {TableDataSet} - источник данных c очищенными параметрами
  */
 const fixRemoveParameters = (dataSet: TableDataSet): TableDataSet => omit(dataSet, 'parameters');
 
 /**
  * Оставляет только один индикатор в источнике
  * @param {TableDataSet} dataSet - изначальный источник данных
- * @returns {TableDataSet}
+ * @returns {TableDataSet} - источник данных c одним показателем
  */
 const fixLeaveOneIndicator = (dataSet: TableDataSet): TableDataSet => {
 	let result = dataSet;
