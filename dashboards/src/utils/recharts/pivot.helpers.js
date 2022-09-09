@@ -57,7 +57,7 @@ const calcIndicatorGroupingTotalHeight = (grouping: IndicatorGrouping): number =
 		return result;
 	});
 
-	return Math.max(...heights);
+	return Math.max(...heights, 0);
 };
 
 /**
