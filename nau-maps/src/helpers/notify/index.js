@@ -1,5 +1,4 @@
 // @flow
-
 import {cssTransition, toast} from 'react-toastify';
 import type {MessageStyleType, NotifyTemplateType} from 'types/helper';
 import React from 'react';

@@ -21,27 +21,31 @@ export class PanelPointContent extends Component<Props> {
 	};
 
 	renderTextFull () {
-		return <div onClick={this.changeViewText}>{!this.state.viewTextFull ? 'Показать подробнее...' : 'Скрыть' }</div>;
+		const text = !this.state.viewTextFull ? 'Показать подробнее...' : 'Скрыть';
+		return <div className={styles.textFull} onClick={this.changeViewText}>{text}</div>;
 	}
 
 	renderText () {
 		const {option: {label}} = this.props;
-		return (
-			<div className={styles.text}>{label}</div>
-		);
+		return <div className={styles.text}>{label}</div>;
 	}
 
-	renderLink () {
+	renderValue () {
 		const {option: {value}} = this.props;
+		const text = this.truncate(value.label, 255);
 
 		if (value.url) {
-			return <a className={styles.link} href={value.url} rel="noreferrer" target="_blank">{value.label}</a>;
-		} else {
-			return <div className={styles.link}>
-				{this.truncate(value.label, 255)}
-				{value.label.length > 255 && this.renderTextFull()}
-			</div>;
+			const props = {
+				className: styles.link,
+				href: value.url,
+				rel: 'noreferrer',
+				target: '_blank'
+			};
+
+			return <a {...props}>{text}</a>;
 		}
+
+		return <div className={styles.link}>{text}</div>;
 	}
 
 	render () {
@@ -51,7 +55,8 @@ export class PanelPointContent extends Component<Props> {
 			return (
 				<div className={styles.container}>
 					{this.renderText()}
-					{this.renderLink()}
+					{this.renderValue()}
+					{value.label.length > 255 && this.renderTextFull()}
 				</div>
 			);
 		}

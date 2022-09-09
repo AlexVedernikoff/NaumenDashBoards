@@ -14,7 +14,7 @@ export class MapPanel extends Component<Props> {
 	handleClick = name => () => {
 		const {setMapPanel, toggleMapPanel} = this.props;
 		toggleMapPanel();
-		localStorage.nauMapsMapLastSelect = name;
+		localStorage.setItem('nauMapsMapLastSelect', name);
 		setMapPanel(name);
 	};
 

@@ -34,7 +34,7 @@ export class Panel extends Component<Props> {
 
 	renderPanelContent = () => {
 		return (
-			<Scrollable attachRef={this.attachRef} scrollbarColors="grey">
+			<Scrollable attachRef={this.attachRef}>
 				<PanelContent />
 			</Scrollable>
 		);

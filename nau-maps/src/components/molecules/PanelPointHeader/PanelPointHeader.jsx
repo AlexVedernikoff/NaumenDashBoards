@@ -4,6 +4,7 @@ import {functions} from './selectors';
 import PointMap from 'icons/PointMap';
 import type {Props, State} from './types';
 import React, {Component} from 'react';
+import ReactTooltip from 'react-tooltip';
 import styles from './PanelPointHeader.less';
 
 export class PanelPointHeader extends Component<Props, State> {
@@ -33,8 +34,18 @@ export class PanelPointHeader extends Component<Props, State> {
 
 	renderText = () => {
 		const {point: {data: {header = 'Название отсутствует'}}} = this.props;
+		const props = {
+			className: styles.text
+		};
+		let value = header;
 
-		return <div className={styles.text} onClick={this.handleClickText}>{this.truncate(header, 32)}</div>;
+		if (value.length > 30) {
+			props['data-tip'] = value;
+			props['onClick'] = this.handleClickText;
+			value = this.truncate(value, 30);
+		}
+
+		return <div {...props}>{value}</div>;
 	};
 
 	render () {
@@ -42,6 +53,7 @@ export class PanelPointHeader extends Component<Props, State> {
 			<div className={styles.container}>
 				{this.renderText()}
 				{this.renderIcon()}
+				<ReactTooltip type="light" />
 			</div>
 		);
 	}
