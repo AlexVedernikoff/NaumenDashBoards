@@ -4,6 +4,7 @@ import {functions, props} from './selectors';
 import ListBtnIcon from 'icons/ListBtnIcon';
 import type {Props} from './types';
 import React, {Component} from 'react';
+import ReactTooltip from 'react-tooltip';
 import styles from './PanelHeader.less';
 
 export class PanelHeader extends Component<Props> {
@@ -21,9 +22,18 @@ export class PanelHeader extends Component<Props> {
 
 	renderText = () => {
 		const {name, showSingleObject} = this.props;
-		const text = showSingleObject ? 'Показать полный список' : name;
+		const props = {
+			className: styles.text
+		};
 
-		return <div className={styles.text}>{this.truncate(text, 30)}</div>;
+		let value = showSingleObject ? 'Показать полный список' : name;
+
+		if (value.length > 30) {
+			props['data-tip'] = value;
+			value = this.truncate(value, 30);
+		}
+
+		return <div {...props}>{value}</div>;
 	};
 
 	render () {
@@ -33,6 +43,7 @@ export class PanelHeader extends Component<Props> {
 			<div className={styles.container} onClick={setTab} >
 				{this.renderIcon()}
 				{this.renderText()}
+				<ReactTooltip type="light" />
 			</div>
 		);
 	}

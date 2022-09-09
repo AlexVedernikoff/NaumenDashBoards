@@ -42,10 +42,10 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 			notify('common', 'info', label);
 		}
 
-		dispatch(setMapArray(mapApiKey));
+		dispatch(setMap(mapApiKey));
 		dispatch(setData(objects));
 
-		const {nauMapsMapLastSelect} = localStorage;
+		const nauMapsMapLastSelect = localStorage.getItem('nauMapsMapLastSelect');
 
 		if (nauMapsMapLastSelect && mapApiKey.hasOwnProperty(nauMapsMapLastSelect)) {
 			dispatch(setMapPanel(nauMapsMapLastSelect));
@@ -114,7 +114,7 @@ const setMapPanel = (map: string) => ({
 	type: GEOLOCATION_EVENTS.SET_MAP_PANEL
 });
 
-const setMapArray = (map: string) => ({
+const setMap = (map: string) => ({
 	payload: map,
 	type: GEOLOCATION_EVENTS.SET_MAP_ARRAY
 });

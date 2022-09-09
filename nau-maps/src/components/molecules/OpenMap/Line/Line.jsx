@@ -14,7 +14,7 @@ export class Line extends Component<Props, State> {
 		toggleMapContextMenu(part);
 	};
 
-	showSingle = () => () => {
+	showSingle = () => {
 		const {part, setSingleObject} = this.props;
 		setSingleObject(part);
 	};
@@ -30,7 +30,7 @@ export class Line extends Component<Props, State> {
 			bubblingMouseEvents={false}
 			color={color}
 			dashArray={strokeStyleArray}
-			onClick={this.showSingle()}
+			onClick={this.showSingle}
 			onContextMenu={this.showContentMenu}
 			opacity={opacityFloat}
 			positions={positions}
@@ -44,18 +44,18 @@ export class Line extends Component<Props, State> {
 		const {active, part} = this.props;
 		const {geopositions: [positionsStart, positionsFinish], isIcon, iconFirst, iconSecond} = part;
 
-		return (isIcon && <div>
+		return (isIcon && <>
 			{<Mark active={active} point={{...part, geopositions: [positionsStart], icon: iconFirst}} />}
 			{<Mark active={active} point={{...part, geopositions: [positionsFinish], icon: iconSecond}} />}
-		</div>
+		</>
 		);
 	};
 
 	render () {
-		return (<div>
+		return (<>
 			{this.renderMarks()}
 			{this.renderLine()}
-		</div>
+		</>
 		);
 	}
 }

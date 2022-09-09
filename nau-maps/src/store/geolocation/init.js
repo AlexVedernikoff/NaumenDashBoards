@@ -19,7 +19,7 @@ export const initialGeolocationState: GeolocationState = {
 	loading: true,
 	mapObjects: [],
 	mapSelect: 'openStreetMap',
-	mapsKeyList: {'openStreetMap': true},
+	mapsKeyList: {openStreetMap: true},
 	panelShow: 'static',
 	params: {
 		autoUpdateLocation: true,

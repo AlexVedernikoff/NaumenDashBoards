@@ -24,7 +24,7 @@ class Line extends Component<Props, State> {
 		const strokeStyleArray = lineStyle === 'dashedLine' ? [1, 2] : [0, 0];
 		const positions = geopositions.map(geoposition => [geoposition.latitude, geoposition.longitude]);
 
-		return <Polyline
+		return (<Polyline
 			geometry={positions}
 			key={part.data.uuid}
 			onClick={this.showSingle}
@@ -39,24 +39,24 @@ class Line extends Component<Props, State> {
 			properties={{
 				hintContent: header
 			}}>
-		</Polyline>;
+		</Polyline>);
 	};
 
 	renderMarks = () => {
 		const {active, part} = this.props;
 		const {geopositions: [positionsStart, positionsFinish], isIcon, iconFirst, iconSecond} = part;
 
-		return (isIcon && <div>
+		return (isIcon && <>
 			{<Mark active={active} point={{...part, geopositions: [positionsStart], icon: iconFirst}} />}
 			{<Mark active={active} point={{...part, geopositions: [positionsFinish], icon: iconSecond}} />}
-		</div>);
+		</>);
 	};
 
 	render () {
-		return (<div>
+		return (<>
 			{this.renderMarks()}
 			{this.renderLine()}
-		</div>
+		</>
 
 		);
 	}
