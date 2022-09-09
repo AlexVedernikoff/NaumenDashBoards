@@ -1500,14 +1500,18 @@ class DashboardQueryWrapperUtils
                 totalValueCriteria = false
             }
 
-            IApiCriteria criteriaToFilter
-            if (it.attribute.metaClassFqn == requestData.source.classFqn)
+            IApiCriteria criteriaToFilter = criteria
+
+            if (diagramType == DiagramType.PIVOT_TABLE)
             {
-                criteriaToFilter = criteria
-            }
-            else
-            {
-                criteriaToFilter = sourceMetaClassCriteriaMap[it.attribute.metaClassFqn]
+                if (it.attribute.metaClassFqn == requestData.source.classFqn)
+                {
+                    criteriaToFilter = criteria
+                }
+                else
+                {
+                    criteriaToFilter = sourceMetaClassCriteriaMap[it.attribute.metaClassFqn]
+                }
             }
 
             wrapper.filtering(criteriaToFilter, totalValueCriteria, [it])
@@ -1884,18 +1888,22 @@ class DashboardQueryWrapperUtils
     static Attribute updateRefAttributeCode(Attribute attribute)
     {
         Boolean attributeIsNotDynamic = !attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
-        Boolean attrRefHasBaseValues = !attribute?.ref?.code?.contains('@')
+
+        Attribute attributeToUpdate = attribute.ref ?: attribute
+        Boolean attrRefHasBaseValues = !attributeToUpdate.code?.contains('@')
+
         //если класс/тип, на который ссылается атрибут не равен метаклассу атрибута второго уровня для него,
         //скорей всего атрибут второго уровня есть только в конкретном типе, но его нет в классе
         //также атрибут должен быть не динамический и в нём уже не проставлен этот код корректно
-        if(attribute.ref && attribute.property && attribute.ref.metaClassFqn && attributeIsNotDynamic && attrRefHasBaseValues)
+        if ((attribute.ref && attribute.property || !attribute.ref && !attribute.property) &&
+            attributeToUpdate.metaClassFqn && attributeIsNotDynamic && attrRefHasBaseValues)
         {
-            String attrRefCode = attribute.ref.code
-            def systemAttribute = getApi().metainfo.getMetaClass(attribute.ref.metaClassFqn).getAttribute(attrRefCode)
+            String attrRefCode = attributeToUpdate.code
+            def systemAttribute = getApi().metainfo.getMetaClass(attributeToUpdate.metaClassFqn).getAttribute(attrRefCode)
             Boolean attrSignedInClass = systemAttribute.declaredMetaClass.fqn.isClass()
-            if(!attrSignedInClass && attribute.property != attribute.ref.metaClassFqn)
+            if(!attrSignedInClass && (!attribute.ref || attribute.property != attribute.ref.metaClassFqn))
             {
-                attribute.ref.code = systemAttribute.attributeFqn.toString()
+                attributeToUpdate.code = systemAttribute.attributeFqn.toString()
             }
         }
         return attribute
