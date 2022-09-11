@@ -817,7 +817,11 @@ class GanttWorkHandlerService
      * @param request - тело запроса
      * @return подготовленные данные работы для добавления/редактирования
      */
-    private Map<String, Object> checkingDateAttribute(Map<String, Object> preparedWorkData, Collection<IAttributeWrapper> attributes, IUUIDIdentifiable user, EditWorkDataRequest request){
+    private Map<String, Object> checkingDateAttribute(Map<String, Object> preparedWorkData,
+                                                      Collection<IAttributeWrapper> attributes,
+                                                      IUUIDIdentifiable user,
+                                                      EditWorkDataRequest request)
+    {
         String formatEditedTime = '''dd.MM.yyyy', 'HH:mm:ss'''
         preparedWorkData.each {
             String attributeCode = it.key

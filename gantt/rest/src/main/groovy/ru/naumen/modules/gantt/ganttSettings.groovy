@@ -1023,7 +1023,7 @@ class SaveGanttVersionSettingsRequest extends BaseGanttSettingsRequest
      */
     String createdDate
     /**
-     * Изменения в работе
+     * Изменения в задачах
      */
     Collection<Map<String, Object>> tasks
 }

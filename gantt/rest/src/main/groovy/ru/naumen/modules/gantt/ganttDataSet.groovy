@@ -281,7 +281,8 @@ class GanttDataSetService
 
             diagramEntities.each { entity ->
                 Map<String, Object> task = [:]
-                if(entity.parent){
+                if(entity.parent)
+                {
                     task.parent = entity.parent
                 }
                 task.level = entity.sourceType == 'WORK' ? 0 : 1
@@ -603,7 +604,7 @@ class GanttDataSetService
                 }
                 // Добавление данных, общих для списка.
                 resMap.each {
-                    Boolean permissionToEdit = api.metainfo.getMetaClass(utils.get(it.id).metaClass).getAttribute('title').attribute.isEditableInLists()
+                    Boolean permissionToEdit = api.metainfo.getMetaClass(utils.get(it.id)).getAttribute('title').attribute.isEditableInLists()
                     it << ['level': settings.level]
                     it << ['type': settings.type]
                     it << ['editable': !permissionToEdit]
