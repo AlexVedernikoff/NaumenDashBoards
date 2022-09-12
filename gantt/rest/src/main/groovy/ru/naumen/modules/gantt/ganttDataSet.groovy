@@ -141,6 +141,12 @@ class GanttDataSetService
                 setColumnDateFormats(it, timezone)
             }
             data.tasks = filterTasksWithNoDateRanges(data.tasks)
+
+            ColumnSettings columnSettingsTitle = data.commonSettings.columnSettings.find {it.title == 'Название'}
+            data.tasks.each {
+                it.name = it[columnSettingsTitle.code]
+            }
+
         }
         return data
     }
@@ -199,10 +205,6 @@ class GanttDataSetService
                 setColumnDateFormats(it, timeZone)
             }
             data.tasks = filterTasksWithNoDateRanges(data.tasks)
-            ColumnSettings columnSettingsTitle = data.commonSettings.columnSettings.find {it.title == 'Название'}
-            data.tasks.each {
-                it.name = it[columnSettingsTitle.code]
-            }
         }
         return data
     }
@@ -216,6 +218,9 @@ class GanttDataSetService
     {
         return tasks.findResults {
             Boolean startAndEndDateExist = it.start_date && it.end_date
+            Boolean start = it.start_date
+            Boolean end = !it.end_date
+            Boolean type = it.type == SourceType.WORK
             if(it.start_date && !it.end_date && it.type == SourceType.WORK)
             {
                 it.type = 'milestone'
@@ -225,7 +230,8 @@ class GanttDataSetService
             else if (!startAndEndDateExist &&
                      it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
             {
-                return null
+                it.datesStartDateAndEndDate = false
+                return it
             }
 
             else
@@ -330,8 +336,17 @@ class GanttDataSetService
                     value = entityInSystem[attributeCode]
 
                     Collection<Long> dateInformation = entity?.attributesData.findAll { key, val ->
-                        val instanceof Long
-                    }.collect { key, val -> val }
+                        val instanceof Long || checkingItemForDate(val, dateFormat)
+                    }.collect { key, val ->
+                        if (val instanceof Long)
+                        {
+                            return val
+                        }
+                        else if (checkingItemForDate(val, dateFormat))
+                        {
+                            return Date.parse(dateFormat, val).getTime()
+                        }
+                    }
                     if (!dateInformation.isEmpty() && ['start_date', 'end_date']
                         .contains(fieldCode))
                     {
@@ -343,13 +358,32 @@ class GanttDataSetService
                     }
                     if (value in ISDtObject)
                     {
-                        value = value.UUID
+                        value = value.title
                     }
                 }
             }
         }
         return value
     }
+
+
+    /**
+     * Проверка строки на содержание даты
+     * @param work - строка для проверки
+     * @return являеться ли строка датой
+     */
+    private Boolean checkingItemForDate(String attributeValue, String dateFormat){
+        try
+        {
+            Date.parse(dateFormat, attributeValue)
+            return true
+        }
+        catch(Exception ex)
+        {
+            return false
+        }
+    }
+
 
     /**
      * Замена формата даты для колонок
@@ -609,7 +643,9 @@ class GanttDataSetService
                     it << ['type': settings.type]
                     it << ['editable': !permissionToEdit]
                     it << ['workOfLink': api.web.open(it.id)]
+                    it << ['completed': true]
                     it << ['name': null]
+                    it << ['datesStartDateAndEndDate': true]
                     if (settings.type == SourceType.WORK)
                     {
                         if (!isStartDate)
