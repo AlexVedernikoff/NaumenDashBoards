@@ -367,9 +367,10 @@ class GanttSettingsService
 
     /**
      * Метод изменения настроек для не строковых типов данных
-     * @param ganttSettings - настроеки из хранилища
+     * @param ganttSettings - настройки из хранилища
      */
-    void changingSettingsForNonTextTypes(GanttSettingsClass ganttSettings){
+    void changingSettingsForNonTextTypes(GanttSettingsClass ganttSettings)
+    {
         ganttSettings.commonSettings.columnSettings.each { columnSetting ->
             ganttSettings.resourceAndWorkSettings.each { resourceAndWorkSetting ->
                 if (resourceAndWorkSetting.type == SourceType.WORK)
@@ -396,13 +397,10 @@ class GanttSettingsService
                                     columnSetting.editor.type = 'select'
                                     columnSetting.editor.map_to = 'priority'
 
-                                    api.utils.find(metaClassFqn, [:])[attributeCode].each {
-                                        if (it)
-                                        {
-                                            columnSetting.editor.options.add(
-                                                ['label': it.title, 'value': it.UUID]
-                                            )
-                                        }
+                                    api.utils.find(metaClassFqn, [:])[attributeCode].findAll().each {
+                                        columnSetting.editor.options.add(
+                                            ['label': it.title, 'value': it.UUID]
+                                        )
                                     }
                                 }
                             }
@@ -561,7 +559,8 @@ class GanttSettingsService
             DiagramEntity entity = new DiagramEntity()
             entity.entityUUID = it.id
             entity.attributesData.title = it.text
-            if(it.parent){
+            if (it.parent)
+            {
                 entity.parent = it.parent
             }
             entity.sourceType = it.type
@@ -1408,7 +1407,7 @@ class Editor
     String map_to
 
     /**
-     * Список опций для вывода объектов
+     * Множество опций для вывода объектов
      */
     Set<Map<String, Object>> options = []
 }

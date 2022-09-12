@@ -719,7 +719,8 @@ class GanttWorkHandlerService
             String attributeCode = it.key
             Object attributeValue = it.value
 
-            if (attributeCode.contains('@')) {
+            if (attributeCode.contains('@'))
+            {
                 Collection<String> splitForDog = attributeCode.split('@')
                 attributeCode = splitForDog[splitForDog.length-1]
             }
@@ -733,7 +734,7 @@ class GanttWorkHandlerService
                     api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
                 TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                 attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
-                newWorkData << [(attributeCode): (attributeValue)]
+                newWorkData << [(attributeCode): attributeValue]
             }
             else
             {
@@ -856,20 +857,21 @@ class GanttWorkHandlerService
             }
             catch (Exception ex)
             {
-                logger.info("Переданный объект не являеться объектов")
+                logger.info('Переданный объект не является объектом')
             }
         }
         return preparedWorkData
     }
 
     /**
-     * Метод обработки даты перед сохронением
+     * Метод обработки даты перед сохранением
      * @param request - тело запроса
      * @param user - пользователь
      * @return список статусов
      */
-    private Map<String, Object>prepareWorkDataToDate(AddNewWorkRequest request,
-                                                     IUUIDIdentifiable user){
+    private Map<String, Object> prepareWorkDataToDate(AddNewWorkRequest request,
+                                                      IUUIDIdentifiable user)
+    {
         Map<String, Object> preparedWorkData = request.workData
     }
 

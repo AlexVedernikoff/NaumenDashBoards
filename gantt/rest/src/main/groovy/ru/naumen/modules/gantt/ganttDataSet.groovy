@@ -369,10 +369,12 @@ class GanttDataSetService
 
     /**
      * Проверка строки на содержание даты
-     * @param work - строка для проверки
+     * @param attributeValue - значение для приведения в дате
+     * @param dateFormat - формат даты для форматирования
      * @return являеться ли строка датой
      */
-    private Boolean checkingItemForDate(String attributeValue, String dateFormat){
+    private Boolean checkingItemForDate(String attributeValue, String dateFormat)
+    {
         try
         {
             Date.parse(dateFormat, attributeValue)
