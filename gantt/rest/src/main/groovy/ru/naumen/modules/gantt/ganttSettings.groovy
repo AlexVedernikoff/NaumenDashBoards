@@ -1385,6 +1385,11 @@ class ColumnSettings extends TitleAndCode
      * Минимальная ширина колонки
      */
     String min_width
+
+    /**
+     * Флаг на редактируемость атрибута
+     */
+    Boolean attributeEditability
 }
 
 /**
@@ -1401,6 +1406,11 @@ class Editor
      * Название атрибута для колонки
      */
     String map_to
+
+    /**
+     * Список опций для вывода объектов
+     */
+    Set<Map<String, Object>> options = []
 }
 
 /**
