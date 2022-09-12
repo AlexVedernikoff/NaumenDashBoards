@@ -199,6 +199,10 @@ class GanttDataSetService
                 setColumnDateFormats(it, timeZone)
             }
             data.tasks = filterTasksWithNoDateRanges(data.tasks)
+            ColumnSettings columnSettingsTitle = data.commonSettings.columnSettings.find {it.title == 'Название'}
+            data.tasks.each {
+                it.name = it[columnSettingsTitle.code]
+            }
         }
         return data
     }
@@ -212,11 +216,18 @@ class GanttDataSetService
     {
         return tasks.findResults {
             Boolean startAndEndDateExist = it.start_date && it.end_date
-            if (!startAndEndDateExist &&
-                it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
+            if(it.start_date && !it.end_date && it.type == SourceType.WORK)
+            {
+                it.type = 'milestone'
+                it.remove('end_date')
+                return it
+            }
+            else if (!startAndEndDateExist &&
+                     it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
             {
                 return null
             }
+
             else
             {
                 return it
@@ -270,9 +281,14 @@ class GanttDataSetService
 
             diagramEntities.each { entity ->
                 Map<String, Object> task = [:]
-                task.parent = entity.parent
-                task.level = entity.sourceType as SourceType == SourceType.RESOURCE ? 0 : 1
+                if(entity.parent)
+                {
+                    task.parent = entity.parent
+                }
+                task.level = entity.sourceType == 'WORK' ? 0 : 1
                 task.type = entity.sourceType
+                task.editable = entity.editable
+                task.workOfLink = entity.workOfLink
                 mapAttributes.keySet().each { fieldCode ->
                     task[fieldCode] =
                         getAttributeValueForVersionEntity(entity, mapAttributes[fieldCode], fieldCode)
@@ -559,7 +575,6 @@ class GanttDataSetService
             {
                 // Подготовка значений некоторых атрибутов
                 res = replaceStatusCodeWithTitle(res, listAttributes)
-
                 /* Из БД пришел набор данных. Необходимо задать правильное соответствие между названием
                    поля и значением, пришедшим из БД. Это необходимо, если технолог задал одинаковые атрибуты
                    в разных полях формы (в этом случае при простом сопоставлении получим сдвиг). Для этого
@@ -587,11 +602,14 @@ class GanttDataSetService
 
                     resMap.add(itemMap)
                 }
-
                 // Добавление данных, общих для списка.
                 resMap.each {
+                    Boolean permissionToEdit = api.metainfo.getMetaClass(utils.get(it.id)).getAttribute('title').attribute.isEditableInLists()
                     it << ['level': settings.level]
                     it << ['type': settings.type]
+                    it << ['editable': !permissionToEdit]
+                    it << ['workOfLink': api.web.open(it.id)]
+                    it << ['name': null]
                     if (settings.type == SourceType.WORK)
                     {
                         if (!isStartDate)
@@ -604,7 +622,6 @@ class GanttDataSetService
                         }
                     }
                 }
-
                 // Если есть настройка-потомок (уровень вложенности следующей в списке настройки выше, чем у текущей).
                 if ((settingsList.size() > (i + 1)) && (settingsList[i + 1].level > settings.level))
                 {

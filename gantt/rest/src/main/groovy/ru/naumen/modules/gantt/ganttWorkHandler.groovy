@@ -752,25 +752,28 @@ class GanttWorkHandlerService
                                                         IUUIDIdentifiable user)
     {
         Map<String, Object> preparedWorkData = request.workData
-        if (preparedWorkData.size() > 1)
-        {
-            preparedWorkData.each {
-                if (it.key == 'title')
-                {
-                    preparedWorkData = [(it.key): (it.value)]
-                }
-            }
-        }
+        Collection<IAttributeWrapper> attributes =
+            api.metainfo.getMetaClass(request.classFqn).getAttributes()
         if (preparedWorkData*.key.get(0) == 'title')
         {
-            Collection<IAttributeWrapper> attributes =
-                api.metainfo.getMetaClass(request.classFqn).getAttributes()
+            Map<String, Object> listAttributesEdits = [:]
             preparedWorkData.each {
                 String attributeCode = it.key
                 Object attributeValue = it.value
-
-                IAttributeWrapper attribute = attributes.find {
-                    it.code == attributeCode
+                IAttributeWrapper attribute
+                if (attributeCode != 'title')
+                {
+                    attributes =
+                        api.metainfo.getMetaClass(attributeCode.split('@').first()).getAttributes()
+                    attribute = attributes.find {
+                        it.code == attributeCode.split('@').last()
+                    }
+                }
+                else
+                {
+                    attribute = attributes.find {
+                        it.code == attributeCode
+                    }
                 }
                 if (attribute.type.code in AttributeType.DATE_TYPES)
                 {
@@ -778,10 +781,10 @@ class GanttWorkHandlerService
                         api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
                     TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                     attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
-                    preparedWorkData[attributeCode] = attributeValue
+                    listAttributesEdits << [(attribute.code): attributeValue]
                 }
             }
-            return preparedWorkData
+            return listAttributesEdits
         }
         else
         {
@@ -792,7 +795,8 @@ class GanttWorkHandlerService
             GetGanttSettingsRequest requestGetGant = new ObjectMapper()
                 .convertValue(requestContent, GetGanttSettingsRequest)
             GanttSettingsClass settings = service.getGanttSettings(requestGetGant)
-            Collection <AttributeSettings> codeColumns = settings.resourceAndWorkSettings.get(0).attributeSettings
+            Collection<AttributeSettings> codeColumns =
+                settings.resourceAndWorkSettings.get(0).attributeSettings
             codeColumns.each {
                 if (it.code == preparedWorkData*.key.get(0))
                 {
@@ -800,8 +804,42 @@ class GanttWorkHandlerService
                         preparedWorkData*.value.get(0))]
                 }
             }
+            preparedWorkData = checkingDateAttribute(preparedWorkData, attributes, user, request)
             return preparedWorkData
         }
+    }
+
+    /**
+     * Подготовка формата даты для изменений
+     * @param preparedWorkData - основные данные из запроса
+     * @param attributes - атрибуты метакласса
+     * @param user - пользователь
+     * @param request - тело запроса
+     * @return подготовленные данные работы для добавления/редактирования
+     */
+    private Map<String, Object> checkingDateAttribute(Map<String, Object> preparedWorkData,
+                                                      Collection<IAttributeWrapper> attributes,
+                                                      IUUIDIdentifiable user,
+                                                      EditWorkDataRequest request)
+    {
+        String formatEditedTime = '''dd.MM.yyyy', 'HH:mm:ss'''
+        preparedWorkData.each {
+            String attributeCode = it.key
+            Object attributeValue = it.value
+
+            IAttributeWrapper attribute = attributes.find {
+                it.code == attributeCode
+            }
+            if (attribute.type.code in AttributeType.DATE_TYPES)
+            {
+                String timezoneString =
+                    api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
+                TimeZone timezone = TimeZone.getTimeZone(timezoneString)
+                attributeValue = Date.parse(formatEditedTime, attributeValue, timezone)
+                preparedWorkData[attributeCode] = attributeValue
+            }
+        }
+        return preparedWorkData
     }
 
     /**

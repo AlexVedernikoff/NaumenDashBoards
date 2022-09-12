@@ -511,6 +511,8 @@ class GanttSettingsService
             entity.attributesData.title = it.text
             entity.parent = it.parent
             entity.sourceType = it.type as SourceType
+            entity.editable = it.editable
+            entity.workOfLink = it.workOfLink
 
             String metaClassCode = entity.entityUUID.split('\\$').first()
             Map<String, String> metaClassMapAttributes = mapAttributes[metaClassCode]
@@ -1020,6 +1022,10 @@ class SaveGanttVersionSettingsRequest extends BaseGanttSettingsRequest
      * Дата создания версии
      */
     String createdDate
+    /**
+     * Изменения в задачах
+     */
+    Collection<Map<String, Object>> tasks
 }
 
 /**
@@ -1166,11 +1172,21 @@ class DiagramEntity
     /**
      * Тип сущности
      */
-    SourceType sourceType
+    String sourceType
     /**
      * UUID ресурса для работы
      */
     String parent
+
+    /**
+     * Разрешение на внесение правок в работу
+     */
+    Boolean editable
+
+    /**
+     * Ссылка на работу
+     */
+    String workOfLink
 }
 
 /**
@@ -1178,6 +1194,10 @@ class DiagramEntity
  */
 class WorkRelation
 {
+    /**
+     * Разрешение на внесение правок в работу
+     */
+    Boolean editable
     /**
      * ID работ
      */
