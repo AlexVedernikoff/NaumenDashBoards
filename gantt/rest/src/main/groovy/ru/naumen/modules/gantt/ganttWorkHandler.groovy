@@ -714,13 +714,13 @@ class GanttWorkHandlerService
         Map<String, Object> preparedWorkData = request.workData
         Collection<IAttributeWrapper> attributes =
             api.metainfo.getMetaClass(request.classFqn).getAttributes()
-        def newWorkData = [:]
+        Map<String, Object> newWorkData = [:]
         preparedWorkData.each {
             String attributeCode = it.key
             Object attributeValue = it.value
 
             if (attributeCode.contains('@')) {
-                def splitForDog = attributeCode.split('@')
+                Collection<String> splitForDog = attributeCode.split('@')
                 attributeCode = splitForDog[splitForDog.length-1]
             }
 
@@ -733,8 +733,10 @@ class GanttWorkHandlerService
                     api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
                 TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                 attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
-                newWorkData << [(attributeCode):(attributeValue)]
-            }else{
+                newWorkData << [(attributeCode): (attributeValue)]
+            }
+            else
+            {
                 newWorkData << it
             }
         }
