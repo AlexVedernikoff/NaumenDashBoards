@@ -371,7 +371,7 @@ class GanttDataSetService
      * Проверка строки на содержание даты
      * @param attributeValue - значение для приведения в дате
      * @param dateFormat - формат даты для форматирования
-     * @return являеться ли строка датой
+     * @return является ли строка датой
      */
     private Boolean checkingItemForDate(String attributeValue, String dateFormat)
     {
