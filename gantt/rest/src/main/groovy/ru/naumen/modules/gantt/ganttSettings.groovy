@@ -18,6 +18,7 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
 import ru.naumen.core.shared.IUUIDIdentifiable
+import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 
 import static groovy.json.JsonOutput.toJson
 
@@ -228,6 +229,8 @@ class GanttSettingsService
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
     static final String GANTT_NAMESPACE = 'gantts'
     static final String GANTT_VERSION_NAMESPACE = 'ganttVersions'
+    private static final String DATA_TYPE_DATE_TIME = 'dateTime'
+    private static final String DATA_TYPE_OBJECT = 'object'
     static final List<String> ATTRIBUTE_TYPES_ALLOWED_FOR_EDITION = [
         AttributeType.CATALOG_ITEM_TYPE,
         AttributeType.CATALOG_ITEM_SET_TYPE,
@@ -356,9 +359,56 @@ class GanttSettingsService
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
         ganttSettings.diagramKey = diagramKey
+        changingSettingsForNonTextTypes(ganttSettings)
         transformGanttSettings(ganttSettings)
 
         return ganttSettings
+    }
+
+    /**
+     * Метод изменения настроек для не строковых типов данных
+     * @param ganttSettings - настройки из хранилища
+     */
+    void changingSettingsForNonTextTypes(GanttSettingsClass ganttSettings)
+    {
+        ganttSettings.commonSettings.columnSettings.each { columnSetting ->
+            ganttSettings.resourceAndWorkSettings.each { resourceAndWorkSetting ->
+                if (resourceAndWorkSetting.type == SourceType.WORK)
+                {
+                    resourceAndWorkSetting.attributeSettings.each { attributeSetting ->
+                        if (attributeSetting.code == columnSetting.code && attributeSetting.attribute.type)
+                        {
+                            String metaClassFqn = attributeSetting.attribute.metaClassFqn
+                            String attributeCode = attributeSetting.attribute.code
+                            String type = attributeSetting.attribute.type
+                            columnSetting.editor.type = attributeSetting.attribute.type
+                            IAttributeWrapper getAtribute =
+                                api.metainfo.getMetaClass(metaClassFqn).getAttribute(attributeCode)
+                            columnSetting.attributeEditability = getAtribute.editable
+                            if (columnSetting.attributeEditability)
+                            {
+                                if (attributeSetting.attribute.type == DATA_TYPE_DATE_TIME)
+                                {
+                                    columnSetting.editor.type = 'date'
+                                    columnSetting.editor.map_to = 'end_date'
+                                }
+                                if (attributeSetting.attribute.type == DATA_TYPE_OBJECT)
+                                {
+                                    columnSetting.editor.type = 'select'
+                                    columnSetting.editor.map_to = 'priority'
+
+                                    api.utils.find(metaClassFqn, [:])[attributeCode].findAll().each {
+                                        columnSetting.editor.options.add(
+                                            ['label': it.title, 'value': it.UUID]
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -505,12 +555,15 @@ class GanttSettingsService
         List<Map<String, Object>> data = ganttDataSetService
             .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null, subjectUUID)
 
-        data.each {
+        request.tasks.each {
             DiagramEntity entity = new DiagramEntity()
             entity.entityUUID = it.id
             entity.attributesData.title = it.text
-            entity.parent = it.parent
-            entity.sourceType = it.type as SourceType
+            if (it.parent)
+            {
+                entity.parent = it.parent
+            }
+            entity.sourceType = it.type
             entity.editable = it.editable
             entity.workOfLink = it.workOfLink
 
@@ -1331,6 +1384,11 @@ class ColumnSettings extends TitleAndCode
      * Минимальная ширина колонки
      */
     String min_width
+
+    /**
+     * Флаг на редактируемость атрибута
+     */
+    Boolean attributeEditability
 }
 
 /**
@@ -1347,6 +1405,11 @@ class Editor
      * Название атрибута для колонки
      */
     String map_to
+
+    /**
+     * Множество опций для вывода объектов
+     */
+    Set<Map<String, Object>> options = []
 }
 
 /**
