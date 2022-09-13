@@ -867,7 +867,7 @@ class GanttWorkHandlerService
      * Метод обработки даты перед сохранением
      * @param request - тело запроса
      * @param user - пользователь
-     * @return данные с датой в правльном формате
+     * @return данные с датой в правильном формате
      */
     private Map<String, Object> prepareWorkDataToDate(AddNewWorkRequest request,
                                                       IUUIDIdentifiable user)
