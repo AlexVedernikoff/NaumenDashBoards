@@ -529,7 +529,7 @@ class QueryWrapper implements CriteriaWrapper
      * @param sourceMetaClassCriteriaMap - маппинг метаклассов источников и критерий
      * @return текущий запрос в БД с добавленной группой
      */
-    QueryWrapper processGroup(QueryWrapper wrapper, IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, Source source, Map<String, Object> sourceMetaClassCriteriaMap)
+    QueryWrapper processGroup(QueryWrapper wrapper, IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, Source source, Map<String, Object> sourceMetaClassCriteriaMap = null)
     {
         IApiCriteria criteriaForColumn = criteria
         if (diagramType == DiagramType.PIVOT_TABLE && parameter.attribute.metaClassFqn != source.classFqn)
