@@ -61,7 +61,9 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 				if (attrSetConditions) {
 					result = attrSetConditions.attrGroupCode ?? null;
 				}
-			} else {
+			}
+
+			if (!result) {
 				const sourceFilterAttributeGroup = getSourceFilterAttributeGroup(sources, classFqn);
 
 				if (sourceFilterAttributeGroup) {

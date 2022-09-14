@@ -3,6 +3,7 @@ import type {AppState} from 'store/types';
 import type {ConnectedProps} from './types';
 import {fetchAttributes} from 'store/sources/attributes/actions';
 import {fetchGroupsAttributes} from 'store/sources/attributesData/groupsAttributes/actions';
+import {isUserModeDashboard} from 'store/dashboard/settings/selectors';
 
 /**
  * Формирует свойства для withFilterForm из redux
@@ -13,7 +14,7 @@ import {fetchGroupsAttributes} from 'store/sources/attributesData/groupsAttribut
 export const props = function <Config: {}> (state: AppState, ownProps: Config): ConnectedProps<Config> {
 	return {
 		attributes: state.sources.attributes,
-		isUserMode: false,
+		isUserMode: isUserModeDashboard(state),
 		parentProps: ownProps,
 		sources: state.sources.data.map,
 		sourcesFilters: state.sources.sourcesFilters.map
