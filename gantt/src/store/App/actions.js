@@ -267,24 +267,6 @@ const deleteWork = (workUUID: string): ThunkAction => async (dispatch: Dispatch)
 	}
 };
 
-// На следующую итерацию
-// /**
-// * Отправляет новый объект работы
-// * @param {WorkData} workData - данные работы
-// * @param {string} classFqn - метакласс работы
-// */
-// const postNewWorkData = (workData: WorkData, classFqn: string, attr): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-// 	try {
-// 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-// 		await addNewWork(workData, classFqn, timezone, attr);
-// 	} catch (error) {
-// 		dispatch(setErrorCommon(error));
-// 	} finally {
-// 		dispatch(hideLoaderSettings());
-// 	}
-// };
-
 /**
 * Отправляет измененный объект работы
 * @param {WorkData} workData - данные работы
@@ -294,8 +276,9 @@ const deleteWork = (workUUID: string): ThunkAction => async (dispatch: Dispatch)
 const postEditedWorkData = (workData: WorkData, classFqn: string, workUUID: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+		const {contentCode, subjectUuid} = getContext();
 
-		await editWorkData(workData, classFqn, timezone, workUUID);
+		await editWorkData(workData, classFqn, timezone, workUUID, contentCode, subjectUuid);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -417,7 +400,6 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 			currentInterval,
 			diagramKey,
 			endDate,
-			mandatoryAttributes,
 			milestonesCheckbox,
 			progressCheckbox,
 			startDate,
@@ -442,7 +424,6 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
 		dispatch(setDiagramData(tasks || []));
 		dispatch(setDiagramLinksData(workRelations || []));
-		dispatch(setMandatoryAttributes(mandatoryAttributes));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -498,15 +479,6 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
 	payload,
 	type: APP_EVENTS.SWITCH_WORKS_WITHOUT_START_OR_END_DATE_CHECKBOX
 });
-
-// 3итерация
-/**
-//  * Устанавливает список обязательных аттрибутов
-//  */
-//  const setMandatoryAttributes = payload => ({
-// 	payload,
-// 	type: APP_EVENTS.SET_MANDATORY_ATTRIBUTES
-// });
 
 /**
  * Устанавливает текущую версию

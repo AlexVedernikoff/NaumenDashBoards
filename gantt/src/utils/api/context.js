@@ -216,9 +216,11 @@ const addNewWork = async (workData: WorkData, classFqn: string, timezone: string
 * @param {string} classFqn - метакласс работы
 * @param {string} timezone - таймзона
 * @param {string} workUUID - идентификатор работы
+* @param {string} contentCode - code объекта
+* @param {string} subjectUuid - UUID объекта
 */
-const editWorkData = async (workData: WorkData, classFqn: string, timezone: string, workUUID: string): Promise<Source> => {
-	await api.editWorkData(workData, classFqn, timezone, workUUID);
+const editWorkData = async (workData: WorkData, classFqn: string, timezone: string, workUUID: string, contentCode, subjectUuid): Promise<Source> => {
+	await api.editWorkData(workData, classFqn, timezone, workUUID, contentCode, subjectUuid);
 };
 
 /**

@@ -13,7 +13,7 @@ const CheckedMenu = (props: Props) => {
 	const renderItems = () => items.map(item => <Item key={item.code}>{renderCheckbox(item)}</Item>
 	);
 
-	const handleCheckboxChange = (item) => ({value}) => onCheck(item, !value);
+	const handleCheckboxChange = item => ({value}) => onCheck(item, !value);
 
 	const renderCheckbox = item => {
 		return (

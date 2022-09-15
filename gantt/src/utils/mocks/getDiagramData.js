@@ -19,13 +19,23 @@ const data = {
 				"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
 				"code":"code1",
 				"show":true,
-				"editor":{"type": "text", "map_to": "text"}
+				"editor":{
+					"type": "date"
+				}
 			},
 			{
 				"title":"\u0422\u0438\u043f",
 				"code":"5af9985a-79b4-42b9-9d0f-635f6d80561e",
 				"show":true,
-				"editor":{"type": "text", "map_to": "text"}
+				"editor":{
+					"type": "select", 
+					"map_to": "priority", 
+					"options": [
+						{"label": "Сбор требований", "value": "PMProject$2449401"},
+						{"label": "Сбор требований", "value": "PMProject$2449401"},
+						{"label": "Разработка прототипа", "value": "PMProject$2460603"}
+					]
+				}
 			},
 			{
 				"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f",
@@ -68,6 +78,7 @@ const data = {
 			{code: "creationDate", title: "Дата создания"}
 		]
 	},
+	'milestonesCheckbox' : false,
 	'tasks': [
 		{
 			"id":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a",
@@ -81,6 +92,8 @@ const data = {
 			"progress":0.8,
 			"type":"RESOURCE",
 			"workOfLink":"1",
+			"editable": true,
+			"name": "INC63"
 		},
 		{
 			"id":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
@@ -92,7 +105,8 @@ const data = {
 			"level": 0,
 			"type":"project",
 			"workOfLink":"1",
-			"editable": true
+			"editable": true,
+			"name": "SD111"
 		},
 		{
 			"id":"employee$752501_d63f121f-0c59-43a9-8b6a-145a0927041c",
@@ -105,7 +119,8 @@ const data = {
 			"level":1,
 			"type":"WORK",
 			"workOfLink":"1",
-			"editable": true
+			"editable": true,
+			"name": "\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d"
 		},
 		{
 			"id":"serviceCall$2419102_0c0310d7-f454-4baf-8eea-7f38066a317c",
@@ -113,7 +128,8 @@ const data = {
 			"code1":"112",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0417\u0430\u043f\u0440\u043e\u0441 \u043d\u0430 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435",
 			"level":0,
-			"type":"RESOURCE"
+			"type":"RESOURCE",
+			"editable": true
 		},
 		{
 			"id":"serviceCall$2418501_572397e3-0c6a-4ef9-bd45-c3d2cd64b99d",
@@ -121,7 +137,8 @@ const data = {
 			"code1":"INC109",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
 			"level":0,
-			"type":"RESOURCE"
+			"type":"RESOURCE",
+			"editable": true
 		},
 		{
 			"id":"serviceCall$2418501_572397e3-0c6a-4ef9-bd45-c3d2cd64b99d211",
@@ -129,9 +146,11 @@ const data = {
 			"code1":"точка",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
 			"level":0,
-			"hide_bar": '',
+			"hide_bar": false,
 			"type":"milestone",
+			"completed": true,
 			"start_date":"2021-11-11T11:55:26",
+			"editable": true
 		},
 
 		{
@@ -140,24 +159,27 @@ const data = {
 			"code1":"точка2",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
 			"level":1,
-			"hide_bar": '',
+			"hide_bar": false,
 			"type":"milestone",
+			"completed" : true,
 			"start_date":"2021-11-13T12:55:26",
-			"parent": "serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887"
+			"parent": "serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
+			"editable": true
 		},
 	],
 	"workRelations":[
         { 
 			"source":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887", 
 			"target":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a", 
-			"type":"1"
+			"type":"1",
+			"editable": true
 		}
     ],
 	"progressCheckbox": false,
 	"workRelationCheckbox": false,
 	"startDate": "10.01.2021, 15:17:45",
 	"endDate": "11.12.2021, 15:17:45",
-	"currentInterval": {"label": "сегодня", "value": "NEXTDAYS"}
+	"currentInterval": {"label": "сегодня", "value": "NEXTDAYS"},
 };
 
 export const getDiagramData = () => {
@@ -173,7 +195,7 @@ export const getDiagramData = () => {
 				'text': 'Название на календарной сетке1',
 				'start_date': '2021-10-14T00:00:50+0000',
 				'end_date': '2021-10-14T00:01:50+0000',
-			},
+			}
 		);
 	}
 
