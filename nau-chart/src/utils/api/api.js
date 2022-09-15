@@ -10,7 +10,14 @@ export default class Api {
 		window.StompJs = top.StompJs;
 	}
 
-	async getScheme () {
-		return this.jsApi.restCallModule('schemeRestSettings', 'getSchemeData');
+	async getContext () {
+		return {
+			contentCode: this.jsApi.findContentCode(),
+			subjectUuid: this.jsApi.extractSubjectUuid()
+		};
+	}
+
+	async getScheme (contentCode: string, subjectUuid: string) {
+		return this.jsApi.restCallModule('schemeRestSettings', 'getSchemeData', subjectUuid, contentCode);
 	}
 }

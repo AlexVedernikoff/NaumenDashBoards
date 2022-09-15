@@ -7,10 +7,11 @@ import ListHide from 'icons/listHide.svg';
 import ListItem from 'components/organisms/ListItem';
 import type {Props} from 'components/organisms/Content/types';
 import React, { useState } from 'react';
+import Scrollable from 'components/atoms/Scrollable';
 import styles from './styles.less';
 
 const List = ({activeElement, data}: Props) => {
-	const [viewList, setViewList] = useState(false);
+	const [viewList, setViewList] = useState(true);
 
 	const handleOpenEdit = actions => () => {
 		const [action] = actions || [];
@@ -73,8 +74,10 @@ const List = ({activeElement, data}: Props) => {
 	return (
 		<div className={classNames}>
 			{renderChangeView()}
-			{activeElement && renderContainer(activeElement)}
-			{data.map(renderList)}
+			<Scrollable>
+				{activeElement && renderContainer(activeElement)}
+				{data.map(renderList)}
+			</Scrollable>
 		</div>
 	);
 };

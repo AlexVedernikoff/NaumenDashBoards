@@ -1,6 +1,6 @@
 // @flow
 import type {Dispatch, Entity, ThunkAction} from 'store/types';
-import {getScheme} from 'utils/api';
+import {getContext, getScheme} from 'utils/api';
 import {VERIFY_EVENTS} from './constants';
 
 /**
@@ -10,8 +10,8 @@ import {VERIFY_EVENTS} from './constants';
 const getDataEntity = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		dispatch(showLoaderData());
-
-		const response = await getScheme();
+		const {contentCode, subjectUuid} = await getContext();
+		const response = await getScheme(contentCode, subjectUuid);
 		dispatch(setEntityData([...response.entities]));
 	} catch (error) {
 		dispatch(setErrorData(error));

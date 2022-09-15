@@ -9,6 +9,7 @@ import type {State} from 'store/types';
  */
 export const props = (state: State): ConnectedProps => ({
 	data: state.entity.data,
+	position: state.entity.position,
 	scale: state.entity.scale
 });
 

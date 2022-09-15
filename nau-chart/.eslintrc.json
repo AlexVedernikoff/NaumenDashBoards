@@ -59,7 +59,8 @@
 		"local-rules/sort-class-methods": "error",
 		"local-rules/sort-imports": "error",
 		"arrow-parens": ["warn", "as-needed"],
-		"no-return-await": "warn"
+		"no-return-await": "warn",
+		"no-negated-condition": "error"
 	},
 	"settings": {
 		"react": {

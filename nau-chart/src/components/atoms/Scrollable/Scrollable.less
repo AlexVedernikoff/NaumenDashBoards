@@ -1,0 +1,160 @@
+// Тема 'grey'
+@grey-slider: rgba(0, 0, 0, .1);
+@grey-slider-hover: rgba(0, 0, 0, .3);
+@grey-track: rgba(255, 255, 255, .7);
+@grey-track-border: #E4E4E4;
+
+// Тема 'white'
+@white-slider: rgba(255, 255, 255, .3);
+@white-slider-hover: rgba(255, 255, 255, .5);
+@white-track: transparent;
+@white-track-border: rgba(255, 255, 255, .2);
+
+:local {
+	.scrollable {
+		height: 100%;
+		overflow: hidden;
+		position: relative;
+		width: 100%;
+
+		&:hover {
+			.slider.x,
+			.slider.y {
+				opacity: 1;
+			}
+		}
+
+		.inactiveZone {
+			background-color: transparent;
+			bottom: 0;
+			height: 11px;
+			position: absolute;
+			right: 0;
+			width: 11px;
+			z-index: 3;
+		}
+
+		.inner {
+			max-height: 100%;
+			max-width: 100%;
+			min-height: 100%;
+			min-width: 100%;
+			overflow-x: auto;
+			overflow-y: auto;
+			// Скрываем скроллбары браузера
+			-ms-overflow-style: none; /* IE */
+			scrollbar-width: none; /* Firefox */
+			/* Chrome, Safari */
+			&::-webkit-scrollbar {
+				display: none;
+				width: 0;
+			}
+		}
+
+		.track {
+			opacity: 0;
+			position: absolute;
+			transition: opacity .25s ease-out;
+			z-index: 1;
+
+			&:hover {
+				opacity: 1;
+			}
+
+			&.x {
+				bottom: 0;
+				height: 10px;
+				left: 0;
+				width: 100%;
+
+				&.grey {
+					background-color: @grey-track;
+					border-top: 1px solid @grey-track-border;
+				}
+
+				&.white {
+					background-color: @white-track;
+					border-top: 1px solid @white-track-border;
+				}
+			}
+
+			&.y {
+				height: 100%;
+				right: 0;
+				top: 0;
+				width: 10px;
+
+				&.grey {
+					background-color: @grey-track;
+					border-left: 1px solid @grey-track-border;
+				}
+
+				&.white {
+					background-color: @white-track;
+					border-left: 1px solid @white-track-border;
+				}
+			}
+		}
+
+		.slider {
+			border-radius: 3px;
+			margin: 2px;
+			opacity: 0;
+			position: absolute;
+			touch-action: none;
+			transition: background-color .25s ease-out, opacity .25s ease-out;
+			z-index: 2;
+
+			&.grey {
+				background-color: @grey-slider;
+
+				&.pressed {
+					background-color: @grey-slider-hover;
+					opacity: 1;
+				}
+
+				&:hover {
+					background-color: @grey-slider-hover;
+				}
+			}
+
+			&.white {
+				background-color: @white-slider;
+
+				&.pressed {
+					background-color: @white-slider-hover;
+					opacity: 1;
+				}
+
+				&:hover {
+					background-color: @white-slider-hover;
+				}
+			}
+
+			&.x {
+				bottom: 0;
+				height: 6px;
+				left: 0;
+				width: 100%;
+
+				&:hover {
+					& + .track.x {
+						opacity: 1;
+					}
+				}
+			}
+
+			&.y {
+				top: 0;
+				width: 6px;
+				right: 0;
+
+				&:hover {
+					& + .track.y {
+						opacity: 1;
+					}
+				}
+			}
+		}
+	}
+}
