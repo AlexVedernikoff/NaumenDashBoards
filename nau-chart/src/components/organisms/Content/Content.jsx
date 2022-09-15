@@ -1,5 +1,4 @@
 // @flow
-
 import cn from 'classnames';
 import {connect} from 'react-redux';
 import {
@@ -17,21 +16,22 @@ import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.less';
 
-const Content = ({data, exportTo, openContextMenu, position, scale, setActiveElement, setExportTo, setPosition}: Props) => {
+const Content = ({data, exportTo, openContextMenu, position, scale, setActiveElement, setPosition, setScale}: Props) => {
 	const stageRef = useRef(null);
 	const [isDrag, setIsDrag] = useState(false);
 	const [hoverElement, setHoverElement] = useState(null);
 
 	const [option, setOption] = useState({maxX: 0, maxY: 0, minY: 0});
+	const [offset, setOffset] = useState({x: 0, y: 0});
 	const [points, setPoints] = useState([]);
 	const [lines, setLines] = useState([]);
 
 	useEffect(() => {
 		if (stageRef.current) {
-			if (exportTo === 'jpg' || exportTo === 'png') {
-				downloadUri(stageRef.current, `scheme.${exportTo}`);
+			if (exportTo === 'jpeg' || exportTo === 'png') {
+				downloadUri(stageRef.current, exportTo);
 			} else if (exportTo === 'pdf') {
-				downloadPdf(stageRef.current, 'scheme.pdf');
+				downloadPdf(stageRef.current);
 			}
 
 			setExportTo(null);
@@ -44,12 +44,12 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 		sortPointCorrect(filterPoints);
 
 		const {bufferPoints, options} = pointsCreateCoordinate(filterPoints);
-
 		const {connectors, customOptions} = conversionSearchPosition(bufferPoints, options);
 
 		setLines(data.filter(e => e.type === 'line'));
 		setPoints(connectors);
-		setOption({maxX: customOptions.maxX + 50 * 2, maxY: customOptions.maxY + 50 * 2, minY: customOptions.minY - 50 * 2});
+		setOption({maxX: customOptions.maxX + 50, maxY: customOptions.maxY, minY: customOptions.minY - 25});
+		setOffset({x: 0, y: customOptions.maxY + customOptions.minY});
 	}, [data]);
 
 	const handleCloseContextMenu = () => {
@@ -72,6 +72,37 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 		setIsDrag(false);
 	};
 
+	const handleWheelZoom = e => {
+		e.evt.preventDefault();
+		const {deltaY, x, y} = e.evt;
+		let newScale = scale;
+
+		if (deltaY < 0) {
+			if (scale === 2) {
+				return;
+			}
+
+			if (scale >= 1) {
+				newScale = scale + 0.5;
+			} else {
+				newScale = scale * 2;
+			}
+		} else {
+			if (scale === 0.25) {
+				return;
+			}
+
+			if (scale >= 1) {
+				newScale = scale - 0.5;
+			} else {
+				newScale = scale / 2;
+			}
+		}
+
+		setScale(newScale);
+		setOffset({x: x - x / newScale, y: y - y / newScale + (option.maxY + option.minY)});
+	};
+
 	const classNames = cn({
 		[styles.hover]: hoverElement,
 		[styles.drag]: isDrag
@@ -81,14 +112,16 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 		<Stage
 			className={classNames}
 			draggable
-			height={window.innerHeight}
+			height={window.innerHeight - 2}
+			offset={offset}
 			onClick={handleCloseContextMenu}
 			onDragEnd={handleDragEnd}
 			onDragStart={handleDragStart}
+			onWheel={handleWheelZoom}
 			ref={stageRef}
 			scaleX={scale}
 			scaleY={scale}
-			width={window.innerWidth}
+			width={window.innerWidth - 2}
 			x={position.x}
 			y={position.y}
 		>
@@ -96,13 +129,14 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 				{lines.map(line => {
 					const from = points.find(s => s.id === line.from);
 					const to = points.find(s => s.id === line.to);
+
 					return <Lines
 						entity={line}
 						handleContextMenu={handleContextMenu}
 						key={line.id}
 						onClick={setActiveElement}
 						onHover={setHoverElement}
-						points={{fromX: from.x, fromY: from.y - option.minY, toX: to.x, toY: to.y - option.minY}} />;
+						points={{fromX: from.x, fromY: from.y, toX: to.x, toY: to.y}} />;
 				})}
 				{points.map(point => {
 					return <Points
@@ -113,7 +147,7 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 						onClick={setActiveElement}
 						onHover={setHoverElement}
 						x={point.x}
-						y={point.y - option.minY} />;
+						y={point.y} />;
 				})}
 			</Layer>
 		</Stage>

@@ -5,12 +5,15 @@ import {jsPDF} from 'jspdf';
 /**
  * Сохранение графического файла.
  * @param {object} canvas - холст
- * @param {string} name - название файла
+ * @param {string} exportTo - название файла
  */
-function downloadUri (canvas: HTMLCanvasElement, name: string) {
-	const imgData = canvas.toDataURL();
+function downloadUri (canvas: HTMLCanvasElement, exportTo: string) {
+	const imgData = canvas.toDataURL({
+		mimeType: `image/${exportTo}`,
+		quality: 1.0
+	});
 	const link = document.createElement('a');
-	link.download = name;
+	link.download = `scheme.${exportTo}`;
 	link.href = imgData;
 	link.click();
 }
@@ -18,9 +21,8 @@ function downloadUri (canvas: HTMLCanvasElement, name: string) {
 /**
  * Сохранение pdf файла.
  * @param {object} canvas - холст
- * @param {string} name - название файла
  */
-function downloadPdf (canvas: HTMLCanvasElement, name: string) {
+function downloadPdf (canvas: HTMLCanvasElement) {
 	const imgData = canvas.toDataURL();
 	const { height, width } = canvas.attrs;
 	// eslint-disable-next-line new-cap
@@ -72,7 +74,7 @@ function pointsCreateCoordinate (points: Entity[]): {bufferPoints: Connector[], 
 	points.forEach((entity: Entity, index: string, origins: Entity[]) => {
 		let x;
 		let y;
-		let angle;
+		let angle = 0;
 
 		const parent = bufferPoints.find(s => s.id === entity.from);
 
@@ -124,7 +126,7 @@ function pointsCreateCoordinate (points: Entity[]): {bufferPoints: Connector[], 
 			y = 0;
 		}
 
-		bufferPoints.push({angle, x, y, ...entity});
+		bufferPoints.push({...entity, angle, x, y});
 	});
 
 	return {bufferPoints, options};

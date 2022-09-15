@@ -11,27 +11,41 @@ import Reset from 'icons/reset.svg';
 
 import styles from './styles.less';
 
-const Control = ({getDataEntity, scale, setExportTo, setPosition, setScale}: Props) => {
+const Control = ({getDataEntity, position, scale, setExportTo, setPosition, setScale}: Props) => {
 	const exportFormatList = [
-		{format: 'jpg', title: 'JPG'},
+		{format: 'jpeg', title: 'JPG'},
 		{format: 'png', title: 'PNG'},
 		{format: 'pdf', title: 'PDF'}
 	];
 
 	const addScale = () => {
-		if (scale <= 1) {
+		if (scale === 2) {
+			return;
+		}
+
+		if (scale >= 1) {
+			setScale(scale + 0.5);
+		} else {
 			setScale(scale * 2);
 		}
 	};
 
 	const decreaseScale = () => {
-		if (scale >= 0.5) {
+		if (scale === 0.25) {
+			return;
+		}
+
+		if (scale >= 1) {
+			setScale(scale - 0.5);
+		} else {
 			setScale(scale / 2);
 		}
 	};
 
 	const reloadSchema = () => {
 		getDataEntity();
+		setScale(scale);
+		setPosition(position);
 	};
 
 	const exportSchema = format => () => {
