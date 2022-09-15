@@ -2758,6 +2758,10 @@ class ComputedAttr extends BaseAttribute
      * Формула для вычисления
      */
     String stringForCompute
+    /**
+     * Атрибут второго уровня
+     */
+    Attribute ref
 }
 
 /**
