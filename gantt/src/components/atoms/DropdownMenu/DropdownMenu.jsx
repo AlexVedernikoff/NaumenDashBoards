@@ -9,7 +9,7 @@ import styles from './styles.less';
 const DropdownMenu = (props: Props) => {
 	const {items, onSelect, onToggle} = props;
 
-	const handleSelect = (value) => onSelect(value);
+	const handleSelect = value => onSelect(value);
 
 	const renderItems = () => items.map(item => <Item key={item.code} onClick={() => handleSelect(item.code)}>{item.value}</Item>);
 

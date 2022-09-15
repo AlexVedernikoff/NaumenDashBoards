@@ -299,10 +299,12 @@ export default class Api {
 	* @param {string} classFqn - метакласс работы
 	* @param {string} workUUID - идентификатор работы
 	* @param {string} timezone - таймзона
+	* @param {string} contentCode - code объекта
+	* @param {string} subjectUuid - UUID объекта
 	*/
-	async editWorkData (workData: WorkData, classFqn: string, timezone: string, workUUID: string) {
+	async editWorkData (workData: WorkData, classFqn: string, timezone: string, workUUID: string, contentCode, subjectUuid) {
 		const url = `exec-post?func=modules.ganttWorkHandler.editWorkData&params=requestContent,user`;
-		const body = {classFqn, timezone, workData, workUUID};
+		const body = {classFqn, contentCode, subjectUuid, timezone, workData, workUUID};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'

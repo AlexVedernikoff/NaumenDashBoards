@@ -8,7 +8,7 @@ const MandatoryAttributes = (props: Props) => {
 
 	const [values, setValues] = useState('');
 
-	const onChange = (e) => {
+	const onChange = e => {
 		setValues(e.value);
 	};
 

@@ -2,7 +2,7 @@
 import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import cn from 'classnames';
 import {
-	Checkbox, Datepicker, IconButton, Select, TextInput
+	Checkbox, Datepicker, FormControl, IconButton, Select, TextInput
 } from 'naumen-common-components';
 import {deepClone, shiftTimeZone} from 'helpers';
 import {deleteWork, getWorlLink, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
@@ -12,7 +12,6 @@ import Modal from 'components/atoms/Modal/Modal';
 import React, {useEffect, useState} from 'react';
 import styles from './styles.less';
 import {useDispatch, useSelector} from 'react-redux';
-import MandatoryAttributes from 'components/atoms/MandatoryAttributes';
 
 const ModalTask = (props: Props) => {
 	const [currentValue, setCurrentValue] = useState(false);
@@ -25,11 +24,10 @@ const ModalTask = (props: Props) => {
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
 	const [valueError, setValueError] = useState('');
 	const [initPage, setInitPage] = useState(false);
-	const [attr, setAttr] = useState([]);
 	const [options, setOptions] = useState([]);
 	const [currentMetaClassFqn, setCurrentMetaClassFqn] = useState('');
-	const [currentMandatoryAttributes, setCurrentMandatoryAttributes] = useState([]);
-	const {attributesMap, getListOfWorkAttributes, mandatoryAttributes, resources} = props;
+	const [active, setActive] = useState(false);
+	const {attributesMap, getListOfWorkAttributes, resources} = props;
 	const dispatch = useDispatch();
 	const store = useSelector(state => state);
 
@@ -57,7 +55,9 @@ const ModalTask = (props: Props) => {
 		setTaskId(id);
 
 		const task = gantt.getTask(id);
+
 		setCurrentTask(task);
+		setActive(task.completed);
 
 		dispatch(getWorlLink(task.id));
 
@@ -69,9 +69,9 @@ const ModalTask = (props: Props) => {
 
 		for (let key in attributesMap) {
 			const taskId = task.id;
-			const metaClass = taskId.split('$')[0];
+			const newTaskId = taskId.split('$')[0];
 
-			if (key.includes(metaClass)) {
+			if (key.includes(newTaskId)) {
 				defaultCurrentMetaClass = key;
 			}
 
@@ -93,23 +93,8 @@ const ModalTask = (props: Props) => {
 
 		setCurrentValue(task.text);
 
-		const deleteDeviationForEndDate = shiftTimeZone(task.end_date);
-		const deleteDeviationForStartDate = shiftTimeZone(task.start_date);
-
-		const startDate = gantt.date.add(new Date(task.start_date), -deleteDeviationForStartDate, 'hour');
-		const endDate = gantt.date.add(new Date(task.end_date), -deleteDeviationForEndDate, 'hour');
-
-		setInputStartDate(startDate.toLocaleString());
-		setInputEndDate(endDate.toLocaleString());
-		// изменения нужны для селдующего мр по 3 итерации
-
-		// const cloneMandatoryAttributes = deepClone(mandatoryAttributes);
-
-		// for (let key in cloneMandatoryAttributes) {
-		// 	if (key === currentMetaClass) {
-		// 		setCurrentMandatoryAttributes(cloneMandatoryAttributes[key]);
-		// 	}
-		// }
+		setInputStartDate(task.start_date.toLocaleString());
+		setInputEndDate(task.end_date.toLocaleString());
 	};
 
 	gantt.hideLightbox = () => {
@@ -121,83 +106,61 @@ const ModalTask = (props: Props) => {
 		ID = 'serviceCall$' + Math.random().toString(36).substr(2, 9) + '_' + Math.random().toString(36).substr(2, 9);
 	};
 
-	const save = (e) => {
-		// const formik = formref.current.elements;
-		// const arr = [];
-
-		// for (let key of formik) {
-		// 	let b = key.name;
-		// 	let a = {[b]: key.value}
-
-		// 	arr.push(a);
-		// }
-		// setAttr(arr);
-
+	const save = () => {
 		const newStartDate = new Date(convertDateToNormal(inputStartDate));
 		const newEndDate = new Date(convertDateToNormal(inputEndDate));
 		const tasks = deepClone(store.APP.tasks);
 		const task = gantt.getTask(taskId);
+		const tasksGantt = gantt.getTaskByTime();
 
 		task.text = currentValue;
 
-		const coincidence = tasks.some(i => i.id == taskId);
+		if (Date.parse(newEndDate) >= Date.parse(newStartDate) || currentTask.type === 'milestone') {
+			const formatFunc = gantt.date.date_to_str('%Y-%m-%dT%H:%i:%s');
+			const newFormatStartDate = formatFunc(newStartDate);
+			const newFormatEndDate = formatFunc(newEndDate);
 
-		if (Date.parse(newEndDate) >= Date.parse(newStartDate)) {
-			if (!coincidence) {
-				generateId();
-				gantt.createTask({
-					code1: currentValue,
-					end_date: newEndDate,
-					id: ID,
-					start_date: newStartDate,
-					text: currentValue,
-					type: 'WORK'
-				});
+			tasks.forEach(i => {
+				if (i.id === task.id) {
+					i.start_date = newFormatStartDate;
+					i.end_date = currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate;
+					i.code1 = currentValue;
+					i.text = currentValue;
+					i.title = currentValue;
 
-				const attrStartDate = resources[1].startWorkAttribute.code;
-				const attrEndDate = resources[1].endWorkAttribute.code;
-
-				const workDate = {
-					title: currentValue
-				};
-
-				workDate[attrStartDate] = newStartDate;
-				workDate[attrEndDate] = newEndDate;
-
-				const tasksTwo = gantt.getTaskByTime();
-
-				tasks.push(tasksTwo[tasksTwo.length - 1]);
-				dispatch(postNewWorkData(workDate, currentMetaClassFqn));
-				// следующая итерация
-				// dispatch(postNewWorkData(workDate, currentMetaClassFqn, attr));
-				dispatch(setColumnTask(tasks));
-				gantt.render();
-			} else {
-				tasks.forEach(i => {
-					if (i.id === task.id) {
-						i.start_date = newStartDate;
-						i.end_date = newEndDate;
-						i.code1 = currentValue;
-						i.text = currentValue;
-						i.title = currentValue;
-						const attrStartDate = resources[1].startWorkAttribute.code;
-						const attrEndDate = resources[1].endWorkAttribute.code;
-						const workDate = {
-							title: currentValue
-						};
-
-						workDate[attrStartDate] = newStartDate;
-						workDate[attrEndDate] = newEndDate;
-
-						dispatch(postEditedWorkData(workDate, currentMetaClassFqn, taskId));
+					if (currentTask.type === 'milestone') {
+						i.completed = active;
 					}
 
-					dispatch(setColumnTask(tasks));
-					gantt.render();
-				});
-			}
+					const attrStartDate = resources[1].startWorkAttribute.code;
+					const attrEndDate = resources[1].endWorkAttribute.code;
+					const workDate = {
+						title: currentValue
+					};
 
-			setOptions([]);
+					workDate[attrStartDate] = newFormatStartDate;
+					workDate[attrEndDate] = currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate;
+
+					dispatch(postEditedWorkData(workDate, currentMetaClassFqn, taskId));
+					task.start_date = newStartDate;
+					task.end_date = currentTask.type === 'milestone' ? newStartDate : newEndDate;
+				}
+			});
+
+			tasksGantt.forEach(i => {
+				if (i.id === task.id) {
+					i.start_date = newStartDate;
+					i.end_date = currentTask.type === 'milestone' ? newStartDate : newEndDate;
+
+					if (currentTask.type === 'milestone') {
+						i.completed = active;
+					}
+				}
+			});
+
+			dispatch(setColumnTask(tasks));
+
+			gantt.render();
 			setShowModal(false);
 		} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
 			setValueError('Дата начала не может быть позднее даты завершения');
@@ -358,7 +321,20 @@ const ModalTask = (props: Props) => {
 		}
 	];
 
-	const listDataInterval = dataInterval.map((item, index) => {
+	const dataMilestoneInterval = [
+		{
+			changeDate: changeStartDate,
+			inputDate: inputStartDate,
+			renderDatePickerDate: renderDatePickerStartDate,
+			setShowDatePickerDate: setShowDatePickerStartDate,
+			showDatePickerDate: showDatePickerStartDate,
+			text: 'Контрольная точка'
+		}
+	];
+
+	const dataFinal = currentTask.type === 'milestone' ? dataMilestoneInterval : dataInterval;
+
+	const listDataInterval = dataFinal.map((item, index) => {
 		return (
 			<div className={styles.interval__wrapper_input} key={index}>
 				<span className={styles.interval__label}>{item.text}</span>
@@ -372,23 +348,10 @@ const ModalTask = (props: Props) => {
 	});
 
 	// нужно для следующего мр
-	// const [active, setActive] = useState(false);
 
-	// setActive(false);
-
-	// const handleCheckboxChange = () => {
-	// 	setActive(!active);
-
-	// 	if (currentTask.type === 'milestone') {
-	// 		const gantt_selected = document.querySelector('.gantt_milestone.gantt_selected');
-
-	// 		if (active) {
-	// 			gantt_selected.classList.remove('completed');
-	// 		} else {
-	// 			gantt_selected.classList.add('completed');
-	// 		}
-	// 	}
-	// };
+	const handleCheckboxChange = () => {
+		setActive(!active);
+	};
 
 	const renderModalTask = () => {
 		if (showModal) {
@@ -399,17 +362,11 @@ const ModalTask = (props: Props) => {
 						<label htmlFor="description">Название:
 							<TextInput label="Название" maxLength={30} onChange={onChange} value={currentValue} />
 						</label>
-						{/* // следующая итерация */}
-						{/* <div className={styles.select}>
-							<label>Группа аттрибутов:</label>
-							<Select className={cn(styles.selectIcon, styles.top)} icon={'CHEVRON'} onSelect={handleIntervalChange} options={options} placeholder='Критерий' value={valueInterval} />
-						</div> */}
-						{/* <form ref={formref} id="form" onSubmit={save}>
-						{currentMandatoryAttributes.map((item, index) => <MandatoryAttributes code={item.code} key={index} title={item.title} value='' />)}
-						</form> */}
 						<div className={styles.interval}>
 							{listDataInterval}
-							{/* <Checkbox checked={active} name="Checkbox" onChange={handleCheckboxChange} value={active} /> */}
+							<FormControl className={cn(styles.checkbox)} label="Завершен этап контрольной точки" small={true}>
+								<Checkbox checked={active} name="Checkbox" onChange={handleCheckboxChange} value={active} />
+							</FormControl>
 						</div>
 						{props.workAttributes.map(i => <div key={i.code}><label>{i.title}</label> <TextInput className={styles.input} maxLength={30}></TextInput></div>)}
 					</div>

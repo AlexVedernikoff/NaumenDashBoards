@@ -281,7 +281,7 @@ const FormPanel = (props: Props) => {
 		</div>
 	);
 
-	const onSelectStartDate = (value) => {
+	const onSelectStartDate = value => {
 		setInputStartDate(new Date(value).toLocaleString());
 		setShowDatePickerStartDate(false);
 		setStartDate(new Date(value));

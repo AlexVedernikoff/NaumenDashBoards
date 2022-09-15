@@ -13,7 +13,7 @@ import type {Dispatch, GetState, ThunkAction} from 'store/types';
 const confirmDialog = (header: string, text: string, options?: $Shape<ConfirmDialogOptions>): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<boolean> => {
 		const dialogOption = {header, text, ...DEFAULT_CONFIRM_DIALOG_OPTION, ...options};
-		return new Promise<boolean>((resolve) => {
+		return new Promise<boolean>(resolve => {
 			dispatch({
 				payload: { options: dialogOption, resolve },
 				type: COMMON_DIALOG_EVENTS.SHOW_CONFIRM_DIALOG
@@ -31,7 +31,7 @@ const confirmDialog = (header: string, text: string, options?: $Shape<ConfirmDia
 const showAlert = (header: string, text: string, options?: $Shape<AlertDialogOptions>): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<boolean> => {
 		const dialogOption = {header, text, ...DEFAULT_ALERT_OPTION, ...options};
-		return new Promise<boolean>((resolve) => {
+		return new Promise<boolean>(resolve => {
 			dispatch({
 				payload: { options: dialogOption, resolve },
 				type: COMMON_DIALOG_EVENTS.SHOW_ALERT
