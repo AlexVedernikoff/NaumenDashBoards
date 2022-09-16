@@ -211,6 +211,11 @@ class DashboardDrilldownService
         } ?: []
         requestContent.cases += attrCases
 
+			  def casesFromDescriptor = listdata.createListDescriptor(requestContent.descriptor)
+			  def listOfCasesFromDescriptor = casesFromDescriptor.fqns.case
+
+			  requestContent.cases += listOfCasesFromDescriptor
+
         DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(requestContent.dashboardKey)
         cardObjectUuid = dashboardDataSetService.getCardObjectUUID(dbSettings, user) ?: cardObjectUuid
         Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, metainfo.getMetaClass(requestContent.classFqn))
