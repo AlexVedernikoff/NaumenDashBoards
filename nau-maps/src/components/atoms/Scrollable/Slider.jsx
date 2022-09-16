@@ -5,8 +5,6 @@ import styles from './Scrollable.less';
 import type {TrackProps as Props} from './types';
 
 export class Slider extends Component<Props> {
-	props: Props;
-
 	static defaultProps = {
 		axis: 'y',
 		pressed: false,

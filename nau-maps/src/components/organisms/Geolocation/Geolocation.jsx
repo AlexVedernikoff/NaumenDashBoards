@@ -19,15 +19,43 @@ export class Geolocation extends Component<Props> {
 		super(props);
 
 		this.maxZoom = 16;
-		this.minZoom = 6;
+		this.minZoom = 3;
 		this.mapRef = React.createRef();
 	}
+
+	handleChangeAutoZoom = () => {
+		const {changeZoom, mapSelect} = this.props;
+
+		let newZoom;
+
+		switch (mapSelect) {
+			case 'yandex':
+				newZoom = this.mapRef.current.getZoom();
+				break;
+			case 'google':
+				newZoom = this.mapRef.current.getZoom();
+				break;
+			default:
+				newZoom = this.mapRef.current.leafletElement.getZoom();
+		}
+
+		changeZoom(newZoom);
+	};
+
+	leafletMapLoad = () => {
+		const {bounds} = this.props;
+
+		if (bounds && this.mapRef.current) {
+			this.mapRef.current.leafletElement.fitBounds(bounds);
+		}
+	};
 
 	yandexMapLoad = () => {
 		const {bounds} = this.props;
 
 		if (bounds && this.mapRef.current) {
 			this.mapRef.current.setBounds(bounds);
+			this.handleChangeAutoZoom();
 		}
 	};
 
@@ -131,7 +159,9 @@ export class Geolocation extends Component<Props> {
 				maxZoom={this.maxZoom}
 				minZoom={this.minZoom}
 				onClick={resetSingleObject}
+				onzoomend={this.handleChangeAutoZoom}
 				ref={this.mapRef}
+				whenReady={this.leafletMapLoad}
 				zoom={zoom}
 				zoomControl={false}
 			>

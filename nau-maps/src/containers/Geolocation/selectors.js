@@ -1,8 +1,8 @@
 // @flow
 import type {AppState} from 'store/types';
+import {changeZoom, resetSingleObject} from 'store/geolocation/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import getLatLngBounds from 'helpers/bound';
-import {resetSingleObject} from 'store/geolocation/actions';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния
@@ -25,5 +25,6 @@ export const props = (state: AppState): ConnectedProps => {
 };
 
 export const functions: ConnectedFunctions = {
+	changeZoom,
 	resetSingleObject
 };
