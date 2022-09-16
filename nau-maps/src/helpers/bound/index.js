@@ -19,10 +19,10 @@ export const getLatLngBounds = (trail: Array<Trail>) => {
 	return [
 		[
 			Math.min(...markers.map(item => item.latitude)),
-			Math.max(...markers.map(item => item.latitude))
+			Math.min(...markers.map(item => item.longitude))
 		],
 		[
-			Math.min(...markers.map(item => item.longitude)),
+			Math.max(...markers.map(item => item.latitude)),
 			Math.max(...markers.map(item => item.longitude))
 		]
 	];

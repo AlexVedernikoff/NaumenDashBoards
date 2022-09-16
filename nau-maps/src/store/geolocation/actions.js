@@ -59,7 +59,7 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 const zoomIn = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		const {controls: {zoom}} = getState().geolocation;
-		dispatch(cnangeZoom(zoom + 1));
+		dispatch(changeZoom(zoom + 1));
 	} catch (error) {
 		notify('error', 'error');
 		dispatch(recordGeolocationdError(error));
@@ -69,7 +69,7 @@ const zoomIn = (): ThunkAction => async (dispatch: Dispatch, getState: GetState)
 const zoomOut = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		const {controls: {zoom}} = getState().geolocation;
-		dispatch(cnangeZoom(zoom - 1));
+		dispatch(changeZoom(zoom - 1));
 	} catch (error) {
 		notify('error', 'error');
 		dispatch(recordGeolocationdError(error));
@@ -149,7 +149,7 @@ const resetAllGroups = () => ({
 	type: GEOLOCATION_EVENTS.RESET_ALL_GROUPS
 });
 
-const cnangeZoom = zoom => ({
+const changeZoom = zoom => ({
 	payload: zoom,
 	type: GEOLOCATION_EVENTS.CHANGE_ZOOM
 });
@@ -159,6 +159,7 @@ const selectAllGroups = () => ({
 });
 
 export {
+	changeZoom,
 	fetchGeolocation,
 	getAppConfig,
 	resetAllGroups,

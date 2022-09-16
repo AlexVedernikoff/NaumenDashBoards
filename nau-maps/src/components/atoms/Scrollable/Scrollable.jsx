@@ -8,12 +8,11 @@ import styles from './Scrollable.less';
 import Track from './Track';
 
 export class Scrollable extends Component<Props, State> {
-	props: Props;
-	state: State;
-
 	static defaultProps = {
 		scrollbarColors: 'grey'
 	};
+
+	inner: HTMLDivElement | null = null;
 
 	constructor (props: Props) {
 		super(props);
@@ -29,13 +28,11 @@ export class Scrollable extends Component<Props, State> {
 			scrollXPosition: 0,
 			scrollYIsActive: false,
 			scrollYPosition: 0,
-			shiftIsPressed: false,
+			shiftIsPressed: true,
 			sliderXWidth: 0,
 			sliderYHeight: 0
 		};
 	}
-
-	inner: HTMLDivElement | null = null;
 
 	componentDidMount () {
 		this.setScrollableState();
@@ -78,7 +75,7 @@ export class Scrollable extends Component<Props, State> {
 	handleKeyDown = (e: KeyboardEvent) => {
 		if (e.keyCode === 16) {
 			this.setState({
-				shiftIsPressed: true
+				shiftIsPressed: false
 			});
 		}
 	};
@@ -86,7 +83,7 @@ export class Scrollable extends Component<Props, State> {
 	handleKeyUp = (e: KeyboardEvent) => {
 		if (e.keyCode === 16) {
 			this.setState({
-				shiftIsPressed: false
+				shiftIsPressed: true
 			});
 		}
 	};
@@ -249,7 +246,7 @@ export class Scrollable extends Component<Props, State> {
 		let scroll: number = 0;
 
 		if (this.inner) {
-			if (!shiftIsPressed) {
+			if (shiftIsPressed) {
 				containerSize = containerHeight;
 				contentSize = contentHeight;
 				scroll = this.inner.scrollTop;
@@ -276,7 +273,7 @@ export class Scrollable extends Component<Props, State> {
 		}
 
 		if (this.inner) {
-			if (!this.state.shiftIsPressed) {
+			if (shiftIsPressed) {
 				this.inner.scrollTop += deltaY;
 			} else {
 				this.inner.scrollLeft += deltaY;
@@ -393,11 +390,7 @@ export class Scrollable extends Component<Props, State> {
 	renderInactiveZone () {
 		const {scrollXIsActive, scrollYIsActive} = this.state;
 
-		if (!(scrollXIsActive && scrollYIsActive)) {
-			return null;
-		}
-
-		return <div className={styles.inactiveZone} />;
+		return scrollXIsActive && scrollYIsActive ? <div className={styles.inactiveZone} /> : null;
 	}
 
 	renderInner () {
@@ -408,6 +401,7 @@ export class Scrollable extends Component<Props, State> {
 		props.className = styles.inner;
 		props.ref = this.setInnerRef;
 		props.style = style;
+		props.onScroll = this.handleScroll;
 
 		return <div {...props}>{children}</div>;
 	}

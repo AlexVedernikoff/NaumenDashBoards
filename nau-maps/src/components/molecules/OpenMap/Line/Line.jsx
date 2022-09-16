@@ -44,18 +44,19 @@ export class Line extends Component<Props, State> {
 		const {active, part} = this.props;
 		const {geopositions: [positionsStart, positionsFinish], isIcon, iconFirst, iconSecond} = part;
 
-		return (isIcon && <>
+		return (isIcon && <div>
 			{<Mark active={active} point={{...part, geopositions: [positionsStart], icon: iconFirst}} />}
 			{<Mark active={active} point={{...part, geopositions: [positionsFinish], icon: iconSecond}} />}
-		</>
+		</div>
 		);
 	};
 
 	render () {
-		return (<>
-			{this.renderMarks()}
-			{this.renderLine()}
-		</>
+		return (
+			<div>
+				{this.renderMarks()}
+				{this.renderLine()}
+			</div>
 		);
 	}
 }

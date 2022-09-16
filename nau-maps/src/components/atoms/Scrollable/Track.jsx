@@ -5,8 +5,6 @@ import type {SliderProps as Props} from './types';
 import styles from './Scrollable.less';
 
 export class Track extends Component<Props> {
-	props: Props;
-
 	static defaultProps = {
 		axis: 'y',
 		scrollbarColors: 'grey'
