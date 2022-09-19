@@ -67,7 +67,7 @@ class Exporter {
 		if (containers.length > 0) {
 			const options = {name, toDownload: save};
 			const pdf = await exportPDF(containers, options);
-			return pdf;
+			return {file: pdf, name};
 		}
 
 		return null;
@@ -90,7 +90,7 @@ class Exporter {
 		const name = await createContextName();
 		const options = {addBackgroundColor: true, name, toDownload: save};
 		const png = await exportPNG(container, options);
-		return png;
+		return {file: png, name};
 	}
 }
 

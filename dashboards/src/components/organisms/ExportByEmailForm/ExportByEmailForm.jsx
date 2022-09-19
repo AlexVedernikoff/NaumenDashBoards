@@ -56,11 +56,10 @@ export class Form extends PureComponent<Props, State> {
 		const {format, selectedUsers} = this.state;
 		const {current} = gridRef;
 		const type = format.value;
-		const name = await exporter.createContextName();
 
 		if (current) {
 			const {PNG} = FILE_VARIANTS;
-			const file = type === PNG
+			const {file, name} = type === PNG
 				? await exporter.exportDashboardAsPNG(current)
 				: await exporter.exportDashboardAsPDF(false);
 
