@@ -144,7 +144,9 @@ class GanttDataSetService
 
             ColumnSettings columnSettingsTitle = data.commonSettings.columnSettings.find {it.title == 'Название'}
             data.tasks.each {
-                it.name = it[columnSettingsTitle.code]
+                if(columnSettingsTitle){
+                    it.name = it[columnSettingsTitle.code]
+                }
             }
 
         }
@@ -322,6 +324,7 @@ class GanttDataSetService
                                                      String fieldCode)
     {
         Object value = null
+        String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         if (entity.attributesData[attributeCode])
         {
             value = entity.attributesData[attributeCode]

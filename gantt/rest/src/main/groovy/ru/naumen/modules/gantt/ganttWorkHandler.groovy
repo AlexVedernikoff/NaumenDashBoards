@@ -734,7 +734,7 @@ class GanttWorkHandlerService
                     api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
                 TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                 attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
-                newWorkData << [(attributeCode): attributeValue]
+                newWorkData << [(attributeCode): (attributeValue)]
             }
             else
             {
@@ -816,7 +816,7 @@ class GanttWorkHandlerService
                 }
             }
             preparedWorkData =
-                checkingDateAndObjectAttribute(preparedWorkData, attributes, user, request)
+                checkingDateAttribute(preparedWorkData, attributes, user, request)
             return preparedWorkData
         }
     }
@@ -857,21 +857,20 @@ class GanttWorkHandlerService
             }
             catch (Exception ex)
             {
-                logger.info('Переданный объект не является объектом')
+                logger.info("Переданный объект не являеться объектов")
             }
         }
         return preparedWorkData
     }
 
     /**
-     * Метод обработки даты перед сохранением
+     * Метод обработки даты перед сохронением
      * @param request - тело запроса
      * @param user - пользователь
-     * @return данные с датой в правильном формате
+     * @return список статусов
      */
-    private Map<String, Object> prepareWorkDataToDate(AddNewWorkRequest request,
-                                                      IUUIDIdentifiable user)
-    {
+    private Map<String, Object>prepareWorkDataToDate(AddNewWorkRequest request,
+                                                     IUUIDIdentifiable user){
         Map<String, Object> preparedWorkData = request.workData
     }
 
