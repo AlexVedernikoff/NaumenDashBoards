@@ -816,7 +816,7 @@ class GanttWorkHandlerService
                 }
             }
             preparedWorkData =
-                checkingDateAndObjectAttribute(preparedWorkData, attributes, user, request)
+                checkingDateAttribute(preparedWorkData, attributes, user, request)
             return preparedWorkData
         }
     }

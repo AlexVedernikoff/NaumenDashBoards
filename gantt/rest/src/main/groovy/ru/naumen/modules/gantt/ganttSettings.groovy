@@ -18,7 +18,9 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
 import ru.naumen.core.shared.IUUIDIdentifiable
-import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import ru.naumen.core.server.script.spi.ScriptDtOMap
+import ru.naumen.core.server.script.api.metainfo.*
 
 import static groovy.json.JsonOutput.toJson
 
@@ -39,6 +41,14 @@ interface GanttSettingsController
      * @return json список атрибутов {заголовок, код, тип атрибута}
      */
     String getDataSourceAttributes(Map<String, Object> requestContent)
+
+    /**
+     * Отдает список атрибутов для  статуса контрольной точки
+     * @param requestContent запрос с кодом метакласса и типами атрибутов
+     * @return json список атрибутов {заголовок, код, тип атрибута}
+     */
+    String getDataAttributesControlPointStatus(Map<String, Object> requestContent)
+
 
     /**
      * Отдает список групп атрибутов для источника данных
@@ -85,10 +95,9 @@ interface GanttSettingsController
 
     /**
      * Метод применения версии на основную диаграмму
-     * @param versionKey - ключ версии диаграммы
-     * @param diagramKey - ключ основной диаграммы
+     * @param diagramData - данные о диаграмме
      */
-    String applyVersion(String versionKey, String diagramKey)
+    String applyVersion(Map<String, Object> diagramData)
 
     /**
      * Метод изменения полей в диаграмме версий
@@ -142,6 +151,14 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
+    String getDataAttributesControlPointStatus(Map<String, Object> requestContent)
+    {
+        SourceAttributesRequest request = new ObjectMapper()
+            .convertValue(requestContent, SourceAttributesRequest)
+        return toJson(service.getDataAttributesControlPointStatus(request))
+    }
+
+    @Override
     String getDataSourceAttributeGroups(Map<String, Object> requestContent)
     {
         BaseGanttSettingsRequest request = new ObjectMapper()
@@ -192,9 +209,11 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String applyVersion(String versionKey, String diagramKey)
+    String applyVersion(Map<String, Object> diagramData)
     {
-        return Jackson.toJsonString(service.applyVersion(versionKey, diagramKey))
+        SavingChangesChart request = new ObjectMapper()
+            .convertValue(diagramData, SavingChangesChart)
+        return Jackson.toJsonString(service.applyVersion(request))
     }
 
     @Override
@@ -315,6 +334,27 @@ class GanttSettingsService
         //attributes = attributes.findAll() {it.type != 'object'}
         return attributes
     }
+    /**
+     * Отдает список атрибутов для источника данных
+     * @param request - тело запроса
+     * @return json список атрибутов {заголовок, код, тип атрибута}
+     */
+    Collection<Attribute> getDataAttributesControlPointStatus(SourceAttributesRequest request)
+    {
+        IMetaClassWrapper metaInfo = api.metainfo.getMetaClass(request.classFqn)
+        Collection<IMetaClassWrapper> metaClassTypes = api.metainfo.getTypes(request.classFqn)
+        Collection<Attribute> attributes = ([metaInfo] + metaClassTypes).collectMany { mc ->
+            Collection attributes = mc?.attributes?.toList()
+            return attributes
+                ? mappingAttribute(attributes, mc.title, mc.code)
+                : []
+        }.unique {
+            it.code
+        }.sort {
+            it.title
+        }
+        return attributes
+    }
 
     /**
      * Отдает список групп атрибутов для источника данных
@@ -371,42 +411,50 @@ class GanttSettingsService
      */
     void changingSettingsForNonTextTypes(GanttSettingsClass ganttSettings)
     {
+        Set newOptionsColumnSetting = []
         ganttSettings.commonSettings.columnSettings.each { columnSetting ->
-            ganttSettings.resourceAndWorkSettings.each { resourceAndWorkSetting ->
-                if (resourceAndWorkSetting.type == SourceType.WORK)
-                {
-                    resourceAndWorkSetting.attributeSettings.each { attributeSetting ->
-                        if (attributeSetting.code == columnSetting.code && attributeSetting.attribute.type)
-                        {
-                            String metaClassFqn = attributeSetting.attribute.metaClassFqn
-                            String attributeCode = attributeSetting.attribute.code
-                            String type = attributeSetting.attribute.type
-                            columnSetting.editor.type = attributeSetting.attribute.type
-                            IAttributeWrapper getAtribute =
-                                api.metainfo.getMetaClass(metaClassFqn).getAttribute(attributeCode)
-                            columnSetting.attributeEditability = getAtribute.editable
-                            if (columnSetting.attributeEditability)
+            if (columnSetting.editor)
+            {
+                ganttSettings.resourceAndWorkSettings.each { resourceAndWorkSetting ->
+                    if (resourceAndWorkSetting.type == SourceType.WORK)
+                    {
+                        resourceAndWorkSetting.attributeSettings.each { attributeSetting ->
+                            if (attributeSetting.code ==
+                                columnSetting.code && attributeSetting.attribute.type)
                             {
-                                if (attributeSetting.attribute.type == DATA_TYPE_DATE_TIME)
+                                String metaClassFqn = attributeSetting.attribute.metaClassFqn
+                                String attributeCode = attributeSetting.attribute.code
+                                String type = attributeSetting.attribute.type
+                                columnSetting.editor.type = attributeSetting.attribute.type
+                                IAttributeWrapper getAtribute =
+                                    api.metainfo.getMetaClass(metaClassFqn)
+                                       .getAttribute(attributeCode)
+                                columnSetting.attributeEditability = getAtribute.editabler
+                                if (columnSetting.attributeEditability)
                                 {
-                                    columnSetting.editor.type = 'date'
-                                    columnSetting.editor.map_to = 'end_date'
-                                }
-                                if (attributeSetting.attribute.type == DATA_TYPE_OBJECT)
-                                {
-                                    columnSetting.editor.type = 'select'
-                                    columnSetting.editor.map_to = 'priority'
-
-                                    api.utils.find(metaClassFqn, [:])[attributeCode].findAll().each {
-                                        columnSetting.editor.options.add(
-                                            ['label': it.title, 'value': it.UUID]
-                                        )
+                                    if (attributeSetting.attribute.type == DATA_TYPE_DATE_TIME)
+                                    {
+                                        columnSetting.editor.type = 'date'
+                                    }
+                                    if (attributeSetting.attribute.type == DATA_TYPE_OBJECT)
+                                    {
+                                        columnSetting.editor.type = 'select'
+                                        api.utils.find(metaClassFqn, [:])[attributeCode].each {
+                                            if (it)
+                                            {
+                                                newOptionsColumnSetting.add(
+                                                    ['label': it.title, 'key': it.title, 'value':
+                                                        it.UUID]
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+                columnSetting.editor.options = newOptionsColumnSetting
             }
         }
     }
@@ -597,27 +645,22 @@ class GanttSettingsService
      * @param versionKey - ключ версии диаграммы
      * @param diagramKey - ключ основной диаграммы
      */
-    void applyVersion(String versionKey, String diagramKey)
+    void applyVersion(SavingChangesChart diagramData)
     {
-        GanttVersionsSettingsClass ganttVersionSettings = getGanttVersionsSettings(versionKey)
+        Collection<Map<String, Object>> tasks = diagramData.tasksClone
+        String ganttVersionSettingsJsonValue = getJsonSettings(diagramData.diagramKey)
 
-        if (!saveJsonSettings(diagramKey, Jackson.toJsonString(ganttVersionSettings.ganttSettings)))
-        {
-            throw new Exception('Настройки не были сохранены!')
-        }
+        GanttSettingsClass ganttVersionSettings = ganttVersionSettingsJsonValue
+            ? Jackson.fromJsonString(ganttVersionSettingsJsonValue, GanttSettingsClass)
+            : new GanttSettingsClass()
 
-        ganttVersionSettings.diagramEntities.each {
-            switch (it.statusWork)
-            {
-                case StatusWork.ADDED:
-                    utils.create(it.classFqn, it.attributesData)
-                    break
-                case StatusWork.EDITED:
-                    utils.edit(it.entityUUID, it.attributesData)
-                    break
-                case StatusWork.DELETED:
-                    utils.delete(it.entityUUID)
-                    break
+        ResourceAndWorkSettings resourceWork = ganttVersionSettings.resourceAndWorkSettings.find{it.type == SourceType.WORK}
+        String communicationResourceAttribute = resourceWork.communicationResourceAttribute.code
+        String startWorkAttribute = resourceWork.startWorkAttribute.code.split('@').last()
+        String endWorkAttribute = resourceWork.endWorkAttribute.code.split('@').last()
+        tasks.findAll {it -> it.type == 'WORK'}.each{task ->
+            if(api.utils.get(task.id)[communicationResourceAttribute].UUID != task.parent){
+                api.utils.edit(api.utils.get(task.id), [(communicationResourceAttribute): api.utils.get(task.parent)])
             }
         }
     }
@@ -800,6 +843,8 @@ class GanttSettingsService
     {
         return new Attribute(
             code: getAttributeCode(value),
+            label: value.title,
+            value: getAttributeCode(value),
             title: value.title,
             type: value.type.code as String,
             property: value.type.relatedMetaClass as String,
@@ -1012,6 +1057,15 @@ class SourceAttributesRequest extends BaseRequest
     Boolean isForColumns = false
 }
 
+@Canonical
+class SourceAttributesRequestForControlPointStatus extends BaseRequest
+{
+    /**
+     * Код метакласса "родителя" (нужно на получение атрибутов связи для вложенных работ/ресурсов)
+     */
+    String parentClassFqn
+}
+
 /**
  * Базовый класс для запроса по настройкам диаграммы Ганта
  */
@@ -1079,6 +1133,23 @@ class SaveGanttVersionSettingsRequest extends BaseGanttSettingsRequest
      * Изменения в задачах
      */
     Collection<Map<String, Object>> tasks
+}
+
+
+/**
+ * Тело запроса на сохранение настроек диаграммы версий Ганта
+ */
+class SavingChangesChart
+{
+    /**
+     * Ключ для получения настроек диаграммы
+     */
+    String diagramKey
+
+    /**
+     * Изменения в задачах
+     */
+    Collection<Map<String, Object>> tasksClone
 }
 
 /**
@@ -1402,14 +1473,35 @@ class Editor
     String type
 
     /**
-     * Название атрибута для колонки
-     */
-    String map_to
-
-    /**
      * Множество опций для вывода объектов
      */
-    Set<Map<String, Object>> options = []
+    Set options = []
+}
+
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+class DataDropDown
+{
+    /**
+     * Имя элемента
+     */
+    String label
+
+    /**
+     * Ключ элемента
+     */
+    String key
+
+    /**
+     * Значение для бэка
+     */
+    Set value
+
+    DataDropDown(String label, String key, String value)
+    {
+        this.label = label
+        this.key = key
+        this.value = value
+    }
 }
 
 /**
@@ -1502,6 +1594,11 @@ class Attribute extends TitleAndCode
      * Вложенный атрибут
      */
     Attribute ref
+
+    /**
+     * Значение для отображения в списке
+     */
+    String label
 
     static Attribute fromMap(Map<String, Object> data)
     {
@@ -1635,6 +1732,12 @@ class ResourceAndWorkSettings
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Attribute endWorkAttribute
+
+    /**
+     * Атрибут статуса контрольной точки
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Attribute checkpointStatusAttr
 
     /**
      * Группа атрибутов на добавление работ
