@@ -857,20 +857,21 @@ class GanttWorkHandlerService
             }
             catch (Exception ex)
             {
-                logger.info("Переданный объект не являеться объектов")
+                logger.info('Переданный объект не является объектом')
             }
         }
         return preparedWorkData
     }
 
     /**
-     * Метод обработки даты перед сохронением
+     * Метод обработки даты перед сохранением
      * @param request - тело запроса
      * @param user - пользователь
-     * @return список статусов
+     * @return данные с датой в правильном формате
      */
-    private Map<String, Object>prepareWorkDataToDate(AddNewWorkRequest request,
-                                                     IUUIDIdentifiable user){
+    private Map<String, Object> prepareWorkDataToDate(AddNewWorkRequest request,
+                                                      IUUIDIdentifiable user)
+    {
         Map<String, Object> preparedWorkData = request.workData
     }
 
