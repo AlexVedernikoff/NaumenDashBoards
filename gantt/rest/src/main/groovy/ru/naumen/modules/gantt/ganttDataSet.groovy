@@ -144,7 +144,8 @@ class GanttDataSetService
 
             ColumnSettings columnSettingsTitle = data.commonSettings.columnSettings.find {it.title == 'Название'}
             data.tasks.each {
-                if(columnSettingsTitle){
+                if(columnSettingsTitle)
+                {
                     it.name = it[columnSettingsTitle.code]
                 }
             }

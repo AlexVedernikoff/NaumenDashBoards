@@ -734,7 +734,7 @@ class GanttWorkHandlerService
                     api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
                 TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                 attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
-                newWorkData << [(attributeCode): (attributeValue)]
+                newWorkData << [(attributeCode): attributeValue]
             }
             else
             {

@@ -95,8 +95,7 @@ interface GanttSettingsController
 
     /**
      * Метод применения версии на основную диаграмму
-     * @param versionKey - ключ версии диаграммы
-     * @param diagramKey - ключ основной диаграммы
+     * @param diagramData - данные о диаграмме
      */
     String applyVersion(Map<String, Object> diagramData)
 
@@ -337,13 +336,13 @@ class GanttSettingsService
     }
     /**
      * Отдает список атрибутов для источника данных
-     * @param requestContent - тело запроса
+     * @param request - тело запроса
      * @return json список атрибутов {заголовок, код, тип атрибута}
      */
     Collection<Attribute> getDataAttributesControlPointStatus(SourceAttributesRequest request)
     {
         IMetaClassWrapper metaInfo = api.metainfo.getMetaClass(request.classFqn)
-        Object metaClassTypes = api.metainfo.getTypes(request.classFqn)
+        Collection<IMetaClassWrapper> metaClassTypes = api.metainfo.getTypes(request.classFqn)
         Collection<Attribute> attributes = ([metaInfo] + metaClassTypes).collectMany { mc ->
             Collection attributes = mc?.attributes?.toList()
             return attributes
@@ -646,27 +645,22 @@ class GanttSettingsService
      * @param versionKey - ключ версии диаграммы
      * @param diagramKey - ключ основной диаграммы
      */
-    void applyVersion(String versionKey, String diagramKey)
+    void applyVersion(SavingChangesChart diagramData)
     {
-        GanttVersionsSettingsClass ganttVersionSettings = getGanttVersionsSettings(versionKey)
+        Collection<Map<String, Object>> tasks = diagramData.tasksClone
+        String ganttVersionSettingsJsonValue = getJsonSettings(diagramData.diagramKey)
 
-        if (!saveJsonSettings(diagramKey, Jackson.toJsonString(ganttVersionSettings.ganttSettings)))
-        {
-            throw new Exception('Настройки не были сохранены!')
-        }
+        GanttSettingsClass ganttVersionSettings = ganttVersionSettingsJsonValue
+            ? Jackson.fromJsonString(ganttVersionSettingsJsonValue, GanttSettingsClass)
+            : new GanttSettingsClass()
 
-        ganttVersionSettings.diagramEntities.each {
-            switch (it.statusWork)
-            {
-                case StatusWork.ADDED:
-                    utils.create(it.classFqn, it.attributesData)
-                    break
-                case StatusWork.EDITED:
-                    utils.edit(it.entityUUID, it.attributesData)
-                    break
-                case StatusWork.DELETED:
-                    utils.delete(it.entityUUID)
-                    break
+        ResourceAndWorkSettings resourceWork = ganttVersionSettings.resourceAndWorkSettings.find{it.type == SourceType.WORK}
+        String communicationResourceAttribute = resourceWork.communicationResourceAttribute.code
+        String startWorkAttribute = resourceWork.startWorkAttribute.code.split('@').last()
+        String endWorkAttribute = resourceWork.endWorkAttribute.code.split('@').last()
+        tasks.findAll {it -> it.type == 'WORK'}.each{task ->
+            if(api.utils.get(task.id)[communicationResourceAttribute].UUID != task.parent){
+                api.utils.edit(api.utils.get(task.id), [(communicationResourceAttribute): api.utils.get(task.parent)])
             }
         }
     }
@@ -1509,7 +1503,6 @@ class DataDropDown
         this.value = value
     }
 }
-
 
 /**
  * Типы атрибутов даннных для диаграмм
