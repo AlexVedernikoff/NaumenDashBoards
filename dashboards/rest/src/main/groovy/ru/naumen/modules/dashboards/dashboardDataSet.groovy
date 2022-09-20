@@ -336,7 +336,9 @@
                     sortingValueIsComputationAttribute = attrValue?.attribute instanceof ComputedAttr
                 }
 
-                Boolean noPaginationInSQL = requestHasBreakdown || innerCustomGroupNames || sortingValueIsComputationAttribute || tableTop
+							  Boolean isCodeState = widgetSettings.data?.parameters?.attribute?.code?.any {it.any {it == 'state'}}
+
+                Boolean noPaginationInSQL = requestHasBreakdown || innerCustomGroupNames || sortingValueIsComputationAttribute || tableTop || isCodeState
                 res = getDiagramData(request, diagramType, templateUUID, aggregationCnt, widgetSettings,
                                      tableRequestSettings?.ignoreLimits, noPaginationInSQL ? null : paginationSettings)
 
