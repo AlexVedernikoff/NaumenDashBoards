@@ -3459,7 +3459,7 @@
                                 (aggregationSortingType || parameterSortingType) &&
                                 diagramType in DiagramType.SortableTypes)
                             {
-                                return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters)
+                                return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters, getPercentCntAggregationIndexes(request))
                             }
                             return res
                         case 'computation':
@@ -3576,7 +3576,7 @@
                             if (!parameterWithDateOrDtInterval &&
                                 (aggregationSortingType || parameterSortingType) && diagramType in DiagramType.SortableTypes)
                             {
-                                return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters)
+                                return sortResList(res, aggregationSortingType, parameterSortingType, parameterFilters, breakdownFilters, getPercentCntAggregationIndexes(request))
                             }
                             return res
                     }
@@ -3822,7 +3822,11 @@
                         }
                         if (!(diagramTypeStacked && isTypeMetaClass))
                         {
-                            list[index] = list[index] = list[index] && !(
+                            if (list[index] in String && list[index].contains(','))
+                            {
+                                list[index] = list[index].replaceAll(',', '.')
+                            }
+                            list[index] = list[index] && !(
                                 list[index].toDouble().isNaN() || list[index].toDouble().isInfinite())
                                 ? DECIMAL_FORMAT.format(list[index] as Double)
                                 : DECIMAL_FORMAT.format(0)
@@ -6483,9 +6487,10 @@
          * @param parameterSortingType - тип сортировки параметра
          * @param parameterFilters - список фильтров параметра
          * @param breakdownFilters - список фильтров разбивки
+         * @param percentCntAggregationIndexes - список индексов аггрегаций PERCENT_CNT
          * @return - итоговый датасет в отсортированном виде
          */
-        List sortResList(List res,String aggregationSortingType = '', parameterSortingType = '', parameterFilters = [], breakdownFilters = [])
+        List sortResList(List res, String aggregationSortingType = '', parameterSortingType = '', parameterFilters = [], breakdownFilters = [], List percentCntAggregationIndexes = [])
         {
             int paramIndex = !breakdownFilters ? 1 : 2 // место, с которого начинаются значения параметра
             Integer aggregationIndex = 0 //место, где находятся значения агрегации
@@ -6493,15 +6498,41 @@
             {
                 if(res.find()?.size() > 2)
                 {
-                    def tempResult = res.groupBy { it[paramIndex] }.collect{ k, v -> [k, v.sum{ it[aggregationIndex] as Double } ] }
-                                        .sort { aggregationSortingType == 'ASC' ? it[1].toDouble() :  -it[1].toDouble() }
+                    def tempResult = res.groupBy {
+                        it[paramIndex]
+                    }.collect { k, v ->
+                        [k, v.sum {
+                            String value = it[aggregationIndex]
+                            if (aggregationIndex in percentCntAggregationIndexes)
+                            {
+                                value = value.split(' ')[0]
+                            }
+                            value as Double
+                        }]
+                    }
+                                        .sort {
+                                            String value = it[1]
+                                            if (aggregationIndex in percentCntAggregationIndexes)
+                                            {
+                                                value = value.split(' ')[0]
+                                            }
+                                            aggregationSortingType == 'ASC' ? value.toDouble() :
+                                                -value.toDouble()
+                                        }
                                         *.get(0)
                     //находим соответсвия данных с теми группами, что получили, и выводим их
                     return tempResult.collectMany { value -> res.findAll {it[paramIndex] == value} }
                 }
                 else
                 {
-                    return res.sort { aggregationSortingType == 'ASC' ? it[0].toDouble() :  -it[0].toDouble() }
+                    return res.sort {
+                        String value = it[0]
+                        if (aggregationIndex in percentCntAggregationIndexes)
+                        {
+                            value = value.split(' ')[0]
+                        }
+                        aggregationSortingType == 'ASC' ? value.toDouble() :  -value.toDouble()
+                    }
                 }
             }
 
@@ -6594,7 +6625,7 @@
                         total = prepareRequestWithStates(total, listIdsOfNormalAggregations, resWithPercentCnt)
                     }
                     return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
-                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
+                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request))
                 case 'computation':
                     def requisiteNode = node as ComputationRequisiteNode
                     def calculator = new FormulaCalculator(requisiteNode.formula)
@@ -6662,7 +6693,7 @@
                         getPercentCntAggregationIndexes(request)
                     )]
                     return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, formatResult(total, aggregationCnt), parameter,
-                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType)
+                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request))
                 default:
                     String message = messageProvider.getMessage(REQUISITE_IS_NOT_SUPPORTED_ERROR, currentUserLocale, nodeType: nodeType)
                     utils.throwReadableException("$message#${REQUISITE_IS_NOT_SUPPORTED_ERROR}")
@@ -6691,7 +6722,8 @@
                                                     String parameterSortingType,
                                                     String aggregationSortingType,
                                                     Boolean parameterWithDateOrDtInterval,
-                                                    DiagramType diagramType)
+                                                    DiagramType diagramType,
+                                                    List percentCntAggregationIndexes)
         {
             if (top)
             {
@@ -6713,7 +6745,7 @@
                                       (diagramType in DiagramType.SortableTypes || (top && isDiagramTypeTable))
             if (nessecaryToSort)
             {
-                total = sortResList(total, aggregationSortingType, parameterSortingType)
+                total = sortResList(total, aggregationSortingType, parameterSortingType, [], [], percentCntAggregationIndexes)
             }
             return total
         }

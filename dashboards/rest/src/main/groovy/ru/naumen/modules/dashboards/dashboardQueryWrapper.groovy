@@ -174,7 +174,7 @@ class QueryWrapper implements CriteriaWrapper
         ISelectClauseApi sc = api.selectClause
         IApiCriteriaColumn column = sc.property(criteriaForColumn, attributeCodes)
         if (parameter.attribute.type == AttributeType.CATALOG_ITEM_TYPE &&
-            aggregationType == Aggregation.AVG)
+            parameter.type == Aggregation.AVG)
         {
             column = sc.property(criteriaForColumn, attributeCodes).with(sc.&cast.rcurry('float'))
         }
