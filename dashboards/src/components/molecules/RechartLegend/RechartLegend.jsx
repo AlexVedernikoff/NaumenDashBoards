@@ -1,6 +1,6 @@
 // @flow
 import cn from 'classnames';
-import {LEGEND_LAYOUT} from 'utils/recharts/constants';
+import {DEFAULT_CHART_SETTINGS, LEGEND_LAYOUT} from 'utils/recharts/constants';
 import type {Payload, Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -29,7 +29,7 @@ export class RechartLegend extends PureComponent<Props> {
 	};
 
 	getRenderLegendItem = (isHorizontal: boolean, isCrop: boolean) => {
-		const {comboFormatter, formatter, hiddenSeries, iconSize} = this.props;
+		const {comboFormatter, formatter, hiddenSeries, iconSize, style} = this.props;
 		const itemClass = cn({
 			[styles.legendItem]: true,
 			[styles.displayInlineHorizontalItem]: isHorizontal,
@@ -37,6 +37,19 @@ export class RechartLegend extends PureComponent<Props> {
 			[styles.wrapLegendItem]: !isCrop
 		});
 		const viewBox = `0 0 ${iconSize} ${iconSize}`;
+		const {fontFamily, fontSize} = style;
+		let normalizeFontSize = DEFAULT_CHART_SETTINGS.legend.fontSize;
+
+		if (typeof fontSize === 'number') {
+			normalizeFontSize = fontSize;
+		} else if (typeof fontSize === 'string' && fontSize !== 'auto') {
+			normalizeFontSize = Number.parseInt(fontSize);
+		}
+
+		const fontStyle = {
+			fontFamily: fontFamily ?? DEFAULT_CHART_SETTINGS.legend.fontFamily,
+			fontSize: normalizeFontSize
+		};
 
 		return (item, index) => {
 			const {dataKey, value} = item;
@@ -63,6 +76,7 @@ export class RechartLegend extends PureComponent<Props> {
 					</svg>
 					<span
 						className={itemLabelClass}
+						style={fontStyle}
 						title={valueData}
 					>
 						{valueData}

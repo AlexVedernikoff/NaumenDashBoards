@@ -1,6 +1,7 @@
 // @flow
 import type {ComboValueFormatter, ValueFormatter} from 'utils/recharts/formater/types';
 import {LEGEND_LAYOUT} from 'utils/recharts/constants';
+import type {ReChartLegendStyle} from 'utils/recharts/types';
 import type {TextHandler} from 'store/widgets/data/types';
 
 type Align = 'left' | 'center' | 'right';
@@ -35,6 +36,7 @@ export type Props = {
 		top: number,
 	},
 	payload: Array<Payload>,
+	style: ReChartLegendStyle,
 	textHandler: TextHandler,
 	toggleSeriesShow?: (series: string) => void,
 	verticalAlign: VerticalAlign,

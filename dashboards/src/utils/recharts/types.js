@@ -112,6 +112,12 @@ export type CircleSeries = Array<{
 	color: (string) => string
 }>;
 
+export type ReChartLegendStyle = {
+	fontFamily: string,
+	fontSize: number | string | null,
+	maxWidth?: number
+};
+
 export type ReChartLegend = {
 	align: $Values<typeof LEGEND_ALIGN>,
 	height?: number,
