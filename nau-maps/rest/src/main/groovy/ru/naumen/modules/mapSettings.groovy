@@ -19,7 +19,9 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.ea.IAppContentInfo
 import groovy.transform.Canonical
+import ru.naumen.commons.server.utils.StringUtilities
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
+import groovy.json.JsonSlurper
 
 class ConstantMap
 {
@@ -90,7 +92,7 @@ class MapSettings
     @JsonSchemaMeta(title = 'Визуализация по умолчанию')
     DefaultVisualization defVisualization = new DefaultVisualization()
     @JsonSchemaMeta(title = 'API')
-    Collection<APISettings> interfaceSettings = [new APISettings()]
+    APISettings apiSettings = new APISettings()
 }
 
 /**
@@ -150,7 +152,7 @@ class ContentPointSettings
     String scriptText = ''
     @UiSchemaMeta(widget = 'abstract-select', source = 'getContentTitleMap')
     @JsonSchemaMeta(title = 'Места использования')
-    Collection<String> listStrategy = []
+    Collection<String> placesOfUsePoint = []
 }
 
 /**
@@ -184,7 +186,7 @@ class PointCharacteristics
 /**
  * Настройки для встройки 'Стратегия определения объектов для отображения на карт'
  */
-@JsonSchemaMeta(requiredFields = ['strategyDisplayingMap'], title = 'Стратегия определения обьектов для отображения на карте')
+@JsonSchemaMeta(requiredFields = ['strategyDisplayingMap'], title = 'Стратегия определения объектов для отображения на карте')
 class StrategyDeterminingObjectsMap
 {
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
@@ -243,7 +245,7 @@ class ContentLinesSettings
     String scriptText = ''
     @UiSchemaMeta(widget = 'abstract-select', source = 'getContentTitleMap')
     @JsonSchemaMeta(title = 'Места использования')
-    Collection<String> listStrategy = []
+    Collection<String> placesOfUseLines = []
 }
 
 /**
@@ -384,13 +386,13 @@ String getListColors()
 String getContentTitleMap()
 {
     Collection<IAppContentInfo> contentInfo =
-        api.apps.listContents(ConstantSchemes.EMBEDDED_APPLICATION_CODE)
+        api.apps.listContents(ConstantMap.EMBEDDED_APPLICATION_CODE)
     Collection<LinkedHashMap> argum = []
     contentInfo.collect {
         String dataForUuid =
             StringUtilities.transliterate(it.contentTitle.replaceAll('\\s+', '').toLowerCase())
-        argum << [selectable  : true, title: it.contentTitle, uuid:
-            dataForUuid, level: 0, extra: 'тест']
+        argum << [selectable     : true, title: it.contentTitle, uuid:
+            it.contentUuid, level: 0, extra: 'тест']
     }
     return toJson(argum)
 }
@@ -439,19 +441,15 @@ void postSaveActions()
     installStrategyCode(settings?.abstractPointCharacteristics.last())
     saveSettings(settings)
 }
-/**
- * Метод, определяющий код стратегии
- * @param contentSettings - данные из мастера настроек
- * @result опредяет значение для вкладки код стратегии
- */
+
 void installStrategyCode(AbstractPointCharacteristics contentSettings)
 {
     contentSettings.each {
         it.strategies.each { code ->
             String codeStrategy = code?.codeStrategy
             String nameStrategy = code?.nameStrategy
-            if ((codeStrategy == ConstantMap.FIRST_PART_STRATEGY_CODE || !codeStrategy) &&
-							 nameStrategy)
+            if ((codeStrategy == ConstantMap.FIRST_PART_STRATEGY_CODE || codeStrategy == "") &&
+                nameStrategy != "")
             {
                 Integer hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
                     (nameStrategy.hashCode() * -1)
@@ -468,11 +466,22 @@ void checkingCorrectnessScript(String scriptText)
     {
         try
         {
-            api.utils.executeScript(scriptText)
+            LinkedHashMap<String, Object> bindings = new JsonSlurper()
+                .parseText(getDataOnBindings())
+            api.utils.executeScript(scriptText, bindings)
         }
-        catch (ScriptServiceException ex)
+        catch (Exception ex)
         {
-            api.utils.throwReadableException("Invalid script passed: '${ scriptText }'")
+            api
+                .utils
+                .throwReadableException("Invalid script passed: '${ scriptText }' \n${ ex.message }")
         }
     }
+}
+
+String getDataOnBindings()
+{
+    String namespace = 'mapDataElementSystem'
+    String key = 'mapData'
+    return api.keyValue.get(namespace, key)
 }

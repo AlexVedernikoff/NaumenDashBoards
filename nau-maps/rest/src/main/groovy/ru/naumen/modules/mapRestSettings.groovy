@@ -29,6 +29,8 @@ import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 import org.jsoup.nodes.Document
+import ru.naumen.core.server.script.spi.ScriptDtOList
+import com.google.gson.internal.LinkedTreeMap
 
 //БЛОК REST АПИ--------------------------------------------------------
 
@@ -36,12 +38,18 @@ import org.jsoup.nodes.Document
  * Метод для получения данных об объектах для вывода на карту
  * @param objectUuid - uuid текущего объекта
  * @param contentUuid - uuid карточки объекта
+ * @param userUuid - информация о текущем пользователе
  * @return данные о трассах в json формате
  */
-String getMapObjects(String objectUuid, String contentUuid)
+String getMapObjects(String subjectUuid, String contentUuid, LinkedTreeMap userUuid)
 {
-    ScriptDtObject object = utils.get(objectUuid)
-    return getMapInfo(object, contentUuid, objectUuid)
+    Object subjectObject = api.utils.get(subjectUuid)
+    Object userObject = userUuid['admin'] ?: api.utils.get(userUuid['uuid'])
+    LinkedHashMap<String, Object> bindings = userUuid['admin'] ? ['subject': subjectObject] :
+        ['subject': subjectUuid, 'user': userObject]
+    saveBindingsDataToKeyValue(bindings)
+    ScriptDtObject object = utils.get(subjectUuid)
+    return getMapInfo(object, contentUuid, bindings)
 }
 
 //СЛУЖЕБНЫЙ БЛОК--------------------------------------------------------------
@@ -49,16 +57,18 @@ String getMapObjects(String objectUuid, String contentUuid)
  * Метод, позволяющий получить информацию для вывода на карту
  * @param object - текущий объект, карточка которого открыта
  * @param contentUuid - uuid карточки объекта
- * @param objectUuid - данные о точках или линиях
+ * @param bindings дополнительные параметры контекста выполнения скрипта
  * @return данные о трассах в json формате
  */
-private String getMapInfo(ScriptDtObject object, String contentUuid, String objectUuid)
+private String getMapInfo(ScriptDtObject object,
+                          String contentUuid,
+                          LinkedHashMap<String, Object> bindings)
 {
     MapSettings getSettingsWizardSettings = new SettingsProvider().getSettings()
-    APISettings mapApiKey = getSettingsWizardSettings?.interfaceSettings.first()
+    APISettings mapApiKey = getSettingsWizardSettings?.apiSettings
     Collection<String> errors = []
     Collection<LinkedHashMap> objects =
-        callParamsSettingsMethod(errors, 'Нет данных для отображения', [], contentUuid, objectUuid)
+        callParamsSettingsMethod(errors, 'Нет данных для отображения', [], contentUuid, bindings)
     LinkedHashMap aggregations = [objects: objects, errors: errors, mapApiKey: mapApiKey]
     return new ObjectMapper().writeValueAsString(aggregations)
 }
@@ -69,18 +79,18 @@ private String getMapInfo(ScriptDtObject object, String contentUuid, String obje
  * @param errorText - текст ошибки
  * @param defaultValue - значение по умолчанию на случай, если произошла ошибка
  * @param contentUuid - uuid карточки объекта
- * @param objectUuid - UUID объекта
+ * @param bindings дополнительные параметры контекста выполнения скрипта
  * @return результат вызова метода с названием methodName или значение по умолчанию, ошибку в списке и информацию в логе
  */
 private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> errors,
                                                            String errorText,
                                                            Collection defaultValue,
                                                            String contentUuid,
-                                                           String objectUuid)
+                                                           LinkedHashMap<String, Object> bindings)
 {
     try
     {
-        return new DataGeneration().getDataDisplayMap(contentUuid, objectUuid) ?: defaultValue
+        return new DataGeneration().getDataDisplayMap(contentUuid, bindings) ?: defaultValue
     }
     catch (Exception ex)
     {
@@ -88,6 +98,18 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
         logger.error("#mapRestSettings> ${ ex.message }", ex)
     }
     return defaultValue
+}
+
+/**
+ * Метод сохранения в keyValue хранилеще данные о дополнительных параметрах контекста
+ * @param bindings дополнительные параметры контекста выполнения скрипта
+ */
+void saveBindingsDataToKeyValue(LinkedHashMap<String, Object> bindings)
+{
+    String namespace = 'mapDataElementSystem'
+    String key = 'mapData'
+    String value = new ObjectMapper().writeValueAsString(bindings)
+    api.keyValue.put(namespace, key, value)
 }
 
 //БЛОК СКРИПТОВОГО АПИ--------------------------------------------------------
@@ -125,7 +147,6 @@ class ElementsMap
     {
         Object defaultSettingsWizardSettings = new SettingsProvider()
             .getSettings()?.defVisualization
-
         String color = dbTrail.hasProperty(strategie?.color) && dbTrail[strategie?.color] ?
             dbTrail[strategie?.color] : defaultSettingsWizardSettings?.colorLineMap
         String width = dbTrail.hasProperty(strategie?.weight) && dbTrail[strategie?.weight] ?
@@ -133,44 +154,144 @@ class ElementsMap
         String opacity = dbTrail.hasProperty(strategie?.opacity) && dbTrail[strategie?.opacity] ?
             dbTrail[strategie?.opacity] : defaultSettingsWizardSettings?.opacity
         String lineStyle = strategie.lineStyle ?: defaultSettingsWizardSettings.lineStyle
-
         String dataDisplayPointA
         String dataDisplayPointB
+
         if (strategie.displayingLinesDots)
         {
             dataDisplayPointA =
                 dbTrail.hasProperty(strategie?.pathToIconA) && dbTrail[strategie?.pathToIconA] ?
-                    "${api.web.getBaseUrl()}${'download?uuid='}${dbTrail[strategie?.pathToIconA].UUID.first()}" :
+                    "${ api.web.getBaseUrl() }${ 'download?uuid=' }${ dbTrail[strategie?.pathToIconA].UUID.first() }" :
                     null
             dataDisplayPointB =
                 dbTrail.hasProperty(strategie?.pathToIconB) && dbTrail[strategie?.pathToIconB] ?
-                    "$api.web.getBaseUrl()}${'download?uuid='}${dbTrail[strategie?.pathToIconB].UUID.first()}" :
+                    "${ api.web.getBaseUrl() }${ 'download?uuid=' }${ dbTrail[strategie?.pathToIconB].UUID.first() }" :
                     null
         }
 
-        return dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.gradLongA
-            ? createTrailBuilder(dbTrail)
-            .setHeader(dbTrail.title)
-            .setColor(color)
-            .setOpacity(opacity)
-            .setWidth(width)
-            .setLineStyle(lineStyle)
-            .setGeopositions(dbTrail)
-            .setDisplayingLinesDots(strategie.displayingLinesDots)
-            .setIconFirst(dataDisplayPointA)
-            .setIconSecond(dataDisplayPointB)
-            .addOption(
-                AREA_A,
-                new Value(label: dbTrail.siteA.title, url: api.web.open(dbTrail.siteA.UUID))
+        TrailBuilder trailBuilder =
+            dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.gradLongA
+                ? createTrailBuilder(dbTrail)
+                .setHeader(dbTrail.title)
+                .setColor(color)
+                .setOpacity(opacity)
+                .setWidth(width)
+                .setLineStyle(lineStyle)
+                .setGeopositions(dbTrail)
+                .setDisplayingLinesDots(strategie.displayingLinesDots)
+                .setIconFirst(dataDisplayPointA)
+                .setIconSecond(dataDisplayPointB)
+                .setParts(dbTrail)
+                .setEquipments(dbTrail)
+                .addAction(GO_TO_CARD, api.web.open(dbTrail.UUID))
+                : null
+        Collection attributesFromGroup =
+            getSetAttributesOutputCharacteristics(defaultSettingsWizardSettings)
+        addOptionsElementsOnMap(
+            trailBuilder,
+            dbTrail,
+            attributesFromGroup,
+            strategie.metaClassObject
+        )
+        return trailBuilder
+    }
+
+    /**
+     * Получение списка дефолтных характеристик для вывода в списке объектов
+     * @param defaultSettingsWizardSettings - дефолтные настройки из мастера настроек
+     * @return список дефолтных характеристик
+     */
+    Collection getSetAttributesOutputCharacteristics(Object defaultSettingsWizardSettings)
+    {
+        Collection<DataCharacteristicDisplayListObjects> dataCharacteristicDisplayListObjects = []
+        defaultSettingsWizardSettings.points.each {
+            dataCharacteristicDisplayListObjects.add(
+                new DataCharacteristicDisplayListObjects(
+                    it.metaClassObject.id,
+                    it.attributeGroup
+                )
             )
-            .addOption(
-                AREA_B,
-                new Value(label: dbTrail.siteB.title, url: api.web.open(dbTrail.siteB.UUID))
-            )
-            .setParts(dbTrail)
-            .setEquipments(dbTrail)
-            .addAction(GO_TO_CARD, api.web.open(dbTrail.UUID))
-            : null
+        }
+        Collection<MetaclassNameAndAttributeList> attributesFromGroup = []
+        dataCharacteristicDisplayListObjects.each {
+            Collection listattributes =
+                api.metainfo.getMetaClass(it.metaClassData)
+                   .getAttributeGroup(it.groupAttribute).attributes
+            attributesFromGroup
+                .add(new MetaclassNameAndAttributeList(it.metaClassData, listattributes))
+        }
+        return attributesFromGroup
+    }
+
+    /**
+     * Добавление опций для вывода списка атрибутов на картах
+     * @param builder - объект с данными об элементе на карте
+     * @param dbTrail - объект трассы из БД
+     * @param attributesFromGroup - список атрибутов
+     * @param metaClassObject - имя используемого в вкладке матакласса
+     */
+    void addOptionsElementsOnMap(Object builder,
+                                 ISDtObject dbTrail,
+                                 Collection attributesFromGroup,
+                                 String metaClassObject)
+    {
+        attributesFromGroup.each { characteristicsDisplayObjects ->
+            if (characteristicsDisplayObjects.metaclassName == metaClassObject)
+            {
+                characteristicsDisplayObjects.listAttribute.each { currentAttribute ->
+                    String valueLabel
+                    String linkElement
+                    try
+                    {
+                        valueLabel = dbTrail[currentAttribute.code] ?: NOT_SPECIFIED
+                        if (currentAttribute.type == 'object')
+                        {
+                            linkElement = api.web.open(dbTrail[currentAttribute.code].UUID)
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    if (valueLabel && builder)
+                    {
+                        if (currentAttribute.type.code ==
+                            DATA_TYPE_HYPERLINK && valueLabel != NOT_SPECIFIED)
+                        {
+                            Document doc = Jsoup.parse(valueLabel)
+                            Elements links = doc.select("a[href]")
+                            builder
+                                .addOption(
+                                    currentAttribute.title,
+                                    new Value(label: doc.text(), url: links.attr("href"))
+                                )
+                        }
+                        else if (currentAttribute.type.code == 'state')
+                        {
+                            valueLabel = api.metainfo.getStateTitle(dbTrail)
+                            builder
+                                .addOption(
+                                    currentAttribute.title,
+                                    new Value(label: valueLabel, url: linkElement)
+                                )
+                        }
+                        else
+                        {
+
+                            builder
+                                .addOption(
+                                    currentAttribute.title,
+                                    new Value(
+                                        label: formattedValueLabel(
+                                            valueLabel,
+                                            currentAttribute.type.code
+                                        ), url: linkElement
+                                    )
+                                )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -260,15 +381,12 @@ class ElementsMap
                                           OutputObjectStrategies strategie,
                                           Integer indexElement = 0)
     {
+        Object defaultSettingsWizardSettings = new SettingsProvider()
+            .getSettings()?.defVisualization
         CharacteristicsDisplayListObjects settings = new SettingsProvider()
             .getSettings()?.defVisualization?.points?.first()
         String codeAttributeGroup = settings?.attributeGroup
         String codeMetaClass = settings?.metaClassObject.id
-
-        Collection attributesFromGroup =
-            api.metainfo.getMetaClass(codeMetaClass)
-               .getAttributeGroup(codeAttributeGroup).attributes
-
         if (equipment && equipment.title && equipment.ciModel && equipment.location)
         {
             Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
@@ -281,47 +399,15 @@ class ElementsMap
                 .setIcon(equipment)
                 .setGeopositions(equipment, strategie)
                 .addAction(GO_TO_CARD, api.web.open(equipment.UUID))
-            attributesFromGroup.each {
-                String valueLabel
-                String linkElement
-                try
-                {
-                    valueLabel = equipment[it.code] ?: NOT_SPECIFIED
-                    linkElement = api.web.open(equipment[it.code].UUID)
-                }
-                catch (Exception ex)
-                {
-                    valueLabel =
-                        api.utils.find(codeMetaClass, [:])[indexElement][it.code] ?: NOT_SPECIFIED
-                    api.metainfo.getMetaClass(codeMetaClass).attributes.each { currentAttribute ->
-                        if (currentAttribute.code == it.code && currentAttribute.type == 'object')
-                        {
-                            linkElement = api.web.open(
-                                api.utils.find(codeMetaClass, [:])[indexElement][it.code]?.UUID
-                            )
-                        }
-                    }
-                }
-                if (it.type.code == DATA_TYPE_HYPERLINK && valueLabel != NOT_SPECIFIED)
-                {
-                    Document doc = Jsoup.parse(valueLabel)
-                    Elements links = doc.select("a[href]")
-                    formedEquipmentObject
-                        .addOption(it.title, new Value(label: doc.text(), url: links.attr("href")))
-                }
-                else
-                {
-                    formedEquipmentObject
-                        .addOption(
-                            it.title,
-                            new Value(
-                                label: formattedValueLabel(valueLabel, it.type.code),
-                                url: linkElement
-                            )
-                        )
-                }
-            }
 
+            Set attributesFromGroup =
+                getSetAttributesOutputCharacteristics(defaultSettingsWizardSettings)
+            addOptionsElementsOnMap(
+                formedEquipmentObject,
+                equipment,
+                attributesFromGroup,
+                strategie.metaClassObject
+            )
             return formedEquipmentObject
         }
     }
@@ -362,16 +448,10 @@ class ElementsMap
         return new ActionBuilder()
     }
 
-    /**
-     * Метод по проверке и форматированию данных перед отправкой на фронт
-     * @param valueLabel - значение атрибута
-     * @param dataType - тип данных
-     * @return правильно отформатированная строка
-     */
     String formattedValueLabel(String valueLabel, String dataType)
     {
-        if ((dataType == DATA_TYPE_CATALOGITEMSET || dataType == DATA_TYPE_BO_LINKS) &&
-            valueLabel != NOT_SPECIFIED)
+        LinkedHashMap<String, Collection> unitMeasurementTime = ['SECOND': ['секунда', 'секунды', 'секунд'], 'MINUTE': ['минута', 'минуты', 'минут'], 'HOUR': ['час', 'часа', 'часов'], 'DAY': ['день', 'дня', 'дней'], 'WEEK': ['неделя', 'недели', 'недель'], 'YEAR': ['год', 'года', 'лет']]
+        if (valueLabel[0] == '[' && valueLabel[valueLabel.length() - 1] == ']')
         {
             valueLabel = valueLabel.substring(1, valueLabel.length() - 1)
         }
@@ -385,10 +465,12 @@ class ElementsMap
         }
         else if (dataType == DATA_TYPE_DT_INTERVAL)
         {
-            if (valueLabel.contains('HOUR'))
+            if (unitMeasurementTime[valueLabel.split(' ').last()])
             {
-                valueLabel =
-                    fixNumerical(valueLabel.split(' ')[0].toInteger(), 'час', 'часа', 'часов')
+                valueLabel = fixNumerical(
+                    valueLabel.split(' ')[0].toInteger(),
+                    unitMeasurementTime[valueLabel.split(' ').last()]
+                )
             }
         }
         else if (dataType == DATA_TYPE_RICHTEXT)
@@ -398,13 +480,7 @@ class ElementsMap
         return valueLabel
     }
 
-    /**
-     * Метод подбора правильного окончания для Русских числительных
-     * @param numberHours - числительное для подбора окончания
-     * @param arr - набор варинатов для заполнения строки
-     * @return правильно отформатированная строка
-     */
-    String fixNumerical(Integer numberHours, String... arr)
+    String fixNumerical(Integer numberHours, Collection arr)
     {
         String result
         Integer num100 = numberHours % 100
@@ -489,6 +565,24 @@ enum EquipmentType
     }
 }
 
+class DataCharacteristicDisplayListObjects
+{
+    /**
+     * Метакласс
+     */
+    String metaClassData
+
+    /**
+     * Группа атрибутов
+     */
+    String groupAttribute
+
+    DataCharacteristicDisplayListObjects(String metaClassData, String groupAttribute)
+    {
+        this.metaClassData = metaClassData
+        this.groupAttribute = groupAttribute
+    }
+}
 /**
  * Класс, описывающий формат для объектов, отправляемых на фронт
  */
@@ -797,22 +891,35 @@ class SectionBuilder extends MapObjectBuilder
     SectionBuilder setGeopositions(ISDtObject dbPart)
     {
         Collection<Geoposition> geopositions = []
-        if(dbPart && dbPart.siteA && dbPart.siteB)
+        if (dbPart && dbPart.siteA && dbPart.siteB)
         {
-            geopositions.add(new Geoposition(latitude: dbPart.siteA.gradLat, longitude: dbPart.siteA.gradLong))
-            geopositions.add(new Geoposition(latitude: dbPart.siteB.gradLat, longitude: dbPart.siteB.gradLong))
+            geopositions.add(
+                new Geoposition(
+                    latitude: dbPart.siteA.gradLat,
+                    longitude: dbPart.siteA.gradLong
+                )
+            )
+            geopositions.add(
+                new Geoposition(
+                    latitude: dbPart.siteB.gradLat,
+                    longitude: dbPart.siteB.gradLong
+                )
+            )
         }
 
         this.geopositions = geopositions
         return this
     }
 
-    SectionBuilder setGeopositions(Double latitudeA, Double longitudeA, Double latitudeB, Double longitudeB)
+    SectionBuilder setGeopositions(Double latitudeA,
+                                   Double longitudeA,
+                                   Double latitudeB,
+                                   Double longitudeB)
     {
-        if(latitudeA && latitudeB && longitudeA&& longitudeB)
+        if (latitudeA && latitudeB && longitudeA && longitudeB)
         {
-            this.geopositions.add(new Geoposition(latitude:  latitudeA, longitude: longitudeA))
-            this.geopositions.add(new Geoposition(latitude:  latitudeB, longitude: longitudeB))
+            this.geopositions.add(new Geoposition(latitude: latitudeA, longitude: longitudeA))
+            this.geopositions.add(new Geoposition(latitude: latitudeB, longitude: longitudeB))
         }
         return this
     }
@@ -875,7 +982,7 @@ class BasePointBuilder extends MapObjectBuilder
         def geoposition = latitude && longitude
             ? new Geoposition(latitude: latitude, longitude: longitude)
             : null
-        if(geoposition)
+        if (geoposition)
         {
             this.geopositions = [geoposition]
         }
@@ -885,7 +992,7 @@ class BasePointBuilder extends MapObjectBuilder
     BasePointBuilder setIcon(def dbEquip)
     {
         String fileUuid = dbEquip?.classification?.icon?.find()?.UUID ?: ''
-        this.icon = fileUuid ? "/sd/operator/download?uuid=${fileUuid}" : ''
+        this.icon = fileUuid ? "/sd/operator/download?uuid=${ fileUuid }" : ''
         return this
     }
 }
@@ -942,9 +1049,18 @@ class MapObjectBuilder
         return this
     }
 
-    public MapObjectBuilder addOption(String label, Value value, PresentationType presentation = PresentationType.RIGHT_OF_LABEL)
+    public MapObjectBuilder addOption(String label,
+                                      Value value,
+                                      PresentationType presentation =
+                                          PresentationType.RIGHT_OF_LABEL)
     {
-        this.options.add(new Option(label: label, value: value, presentation: presentation.name().toLowerCase()))
+        this.options.add(
+            new Option(
+                label: label,
+                value: value,
+                presentation: presentation.name().toLowerCase()
+            )
+        )
 
         return this
     }
@@ -958,7 +1074,14 @@ class MapObjectBuilder
 
     public MapObjectBuilder addAction(String name, String link, boolean inPlace = false)
     {
-        this.actions.add(new OpenLinkAction(name: name, link: link, inPlace: inPlace, type:ActionType.OPEN_LINK))
+        this.actions.add(
+            new OpenLinkAction(
+                name: name,
+                link: link,
+                inPlace: inPlace,
+                type: ActionType.OPEN_LINK
+            )
+        )
 
         return this
     }
@@ -968,5 +1091,24 @@ class MapObjectBuilder
         this.actions = actions
 
         return this
+    }
+}
+
+class MetaclassNameAndAttributeList
+{
+    /**
+     *  Имя метакласса
+     */
+    String metaclassName
+
+    /**
+     *  Список атрибутов
+     */
+    Collection listAttribute
+
+    MetaclassNameAndAttributeList(String metaclassName, Collection listAttribute)
+    {
+        this.metaclassName = metaclassName
+        this.listAttribute = listAttribute
     }
 }
