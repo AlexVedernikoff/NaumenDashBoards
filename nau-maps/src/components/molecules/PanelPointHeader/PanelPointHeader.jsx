@@ -35,13 +35,13 @@ export class PanelPointHeader extends Component<Props, State> {
 	renderText = () => {
 		const {point: {data: {header = 'Название отсутствует'}}} = this.props;
 		const props = {
-			className: styles.text
+			className: styles.text,
+			onClick: this.handleClickText
 		};
 		let value = header;
 
 		if (value.length > 30) {
 			props['data-tip'] = value;
-			props['onClick'] = this.handleClickText;
 			value = this.truncate(value, 30);
 		}
 

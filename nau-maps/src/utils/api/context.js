@@ -1,5 +1,5 @@
 // @flow
-import type {Context} from 'types/api';
+import type {Context, UserData} from 'types/api';
 import {initialGeolocationState} from 'store/geolocation/init';
 import {notify} from 'helpers/notify';
 
@@ -15,6 +15,7 @@ const getContext = (): Context => {
 	if (process.env.NODE_ENV === 'development') {
 		return {
 			contentCode: 'Dashbord12',
+			currentUser: 'user12',
 			subjectUuid: 'root$101'
 		};
 	}
@@ -23,6 +24,7 @@ const getContext = (): Context => {
 
 	return {
 		contentCode: jsApi.findContentCode(),
+		currentUser: jsApi.getCurrentUser(),
 		subjectUuid: jsApi.extractSubjectUuid()
 	};
 };
@@ -60,9 +62,9 @@ const getParams = async () => {
 	return paramsApp;
 };
 
-const getMapObjects = async (contentCode: string, subjectUuid: string) => {
+const getMapObjects = async (contentCode: string, subjectUuid: string, currentUser: UserData) => {
 	const {jsApi} = window;
-	return await jsApi.restCallModule('mapRestSettings', 'getMapObjects', subjectUuid, contentCode);
+	return await jsApi.restCallModule('mapRestSettings', 'getMapObjects', subjectUuid, contentCode, currentUser);
 };
 
 const changeState = async (uuid: string, states: Array<string>): Promise<string | null> => {
