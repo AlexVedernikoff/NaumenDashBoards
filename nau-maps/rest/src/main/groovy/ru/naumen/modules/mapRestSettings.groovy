@@ -458,7 +458,7 @@ class ElementsMap
     String formattedValueLabel(String valueLabel, String dataType)
     {
         LinkedHashMap<String, Collection> unitMeasurementTime = ['SECOND': ['секунда', 'секунды', 'секунд'], 'MINUTE': ['минута', 'минуты', 'минут'], 'HOUR': ['час', 'часа', 'часов'], 'DAY': ['день', 'дня', 'дней'], 'WEEK': ['неделя', 'недели', 'недель'], 'YEAR': ['год', 'года', 'лет']]
-        if (valueLabel.matches('^\\[\\w+\\]'))
+        if (valueLabel.matches('^\\[.+\\]$'))
         {
             valueLabel = valueLabel.substring(1, valueLabel.length() - 1)
         }
