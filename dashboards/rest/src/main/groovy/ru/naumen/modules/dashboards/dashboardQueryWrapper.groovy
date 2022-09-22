@@ -210,7 +210,7 @@ class QueryWrapper implements CriteriaWrapper
             IApiCriteriaColumn countColumn
             if (withCount)
             {
-                countColumn = sc.property(attributeCodes).with(sc.&count)
+                countColumn = sc.property(attributeCodes).with(sc.&countDistinct)
                 column = sc.concat(
                     sc.cast(countColumn, 'string'),
                     sc.constant(' '),
