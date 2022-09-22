@@ -66,7 +66,7 @@ class DataGeneration
     /**
      * Метод по получению данных из БД через Мастер настроек
      * @param nameContent - имя контента
-     * @param bindings дополнительные параметры контекста выполнения скрипта
+     * @param bindings - дополнительные параметры контекста выполнения скрипта
      * @return список данных из БД
      */
     Object getDataDisplayMap(String nameContent, LinkedHashMap<String, Object> bindings)
@@ -155,7 +155,7 @@ class DataGeneration
      * @param strategies - набор настроек из мастера
      * @param nameContent - имя контента
      * @param isDataAboutPointsOrLines - данные о точках или линиях
-     * @param bindings дополнительные параметры контекста выполнения скрипта
+     * @param bindings - дополнительные параметры контекста выполнения скрипта
      * @return коллекция данных для отображения данных на вкладке
      */
     Collection collectingData(Collection<OutputObjectStrategies> strategies,

@@ -29,7 +29,6 @@ import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 import org.jsoup.nodes.Document
-import ru.naumen.core.server.script.spi.ScriptDtOList
 import com.google.gson.internal.LinkedTreeMap
 
 //БЛОК REST АПИ--------------------------------------------------------
@@ -48,7 +47,7 @@ String getMapObjects(String subjectUuid, String contentUuid, LinkedTreeMap userU
     LinkedHashMap<String, Object> bindings = userUuid['admin'] ? ['subject': subjectObject] :
         ['subject': subjectUuid, 'user': userObject]
     saveBindingsDataToKeyValue(bindings)
-    ScriptDtObject object = utils.get(subjectUuid)
+    ISDtObject object = utils.get(subjectUuid)
     return getMapInfo(object, contentUuid, bindings)
 }
 
@@ -57,7 +56,7 @@ String getMapObjects(String subjectUuid, String contentUuid, LinkedTreeMap userU
  * Метод, позволяющий получить информацию для вывода на карту
  * @param object - текущий объект, карточка которого открыта
  * @param contentUuid - uuid карточки объекта
- * @param bindings дополнительные параметры контекста выполнения скрипта
+ * @param bindings - дополнительные параметры контекста выполнения скрипта
  * @return данные о трассах в json формате
  */
 private String getMapInfo(ScriptDtObject object,
@@ -79,7 +78,7 @@ private String getMapInfo(ScriptDtObject object,
  * @param errorText - текст ошибки
  * @param defaultValue - значение по умолчанию на случай, если произошла ошибка
  * @param contentUuid - uuid карточки объекта
- * @param bindings дополнительные параметры контекста выполнения скрипта
+ * @param bindings - дополнительные параметры контекста выполнения скрипта
  * @return результат вызова метода с названием methodName или значение по умолчанию, ошибку в списке и информацию в логе
  */
 private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> errors,
@@ -101,7 +100,7 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
 }
 
 /**
- * Метод сохранения в keyValue хранилеще данные о дополнительных параметрах контекста
+ * Метод сохранения в keyValue хранилище данные о дополнительных параметрах контекста
  * @param bindings дополнительные параметры контекста выполнения скрипта
  */
 void saveBindingsDataToKeyValue(LinkedHashMap<String, Object> bindings)
@@ -145,7 +144,7 @@ class ElementsMap
      */
     private TrailBuilder createTrail(ISDtObject dbTrail, OutputObjectStrategies strategie)
     {
-        Object defaultSettingsWizardSettings = new SettingsProvider()
+        DefaultVisualization defaultSettingsWizardSettings = new SettingsProvider()
             .getSettings()?.defVisualization
         String color = dbTrail.hasProperty(strategie?.color) && dbTrail[strategie?.color] ?
             dbTrail[strategie?.color] : defaultSettingsWizardSettings?.colorLineMap
@@ -201,7 +200,7 @@ class ElementsMap
      * @param defaultSettingsWizardSettings - дефолтные настройки из мастера настроек
      * @return список дефолтных характеристик
      */
-    Collection getSetAttributesOutputCharacteristics(Object defaultSettingsWizardSettings)
+    Collection getSetAttributesOutputCharacteristics(DefaultVisualization defaultSettingsWizardSettings)
     {
         Collection<DataCharacteristicDisplayListObjects> dataCharacteristicDisplayListObjects = []
         defaultSettingsWizardSettings.points.each {
@@ -228,7 +227,7 @@ class ElementsMap
      * @param builder - объект с данными об элементе на карте
      * @param dbTrail - объект трассы из БД
      * @param attributesFromGroup - список атрибутов
-     * @param metaClassObject - имя используемого в вкладке матакласса
+     * @param metaClassObject - имя используемого в вкладке метакласса
      */
     void addOptionsElementsOnMap(Object builder,
                                  ISDtObject dbTrail,
@@ -251,6 +250,8 @@ class ElementsMap
                     }
                     catch (Exception ex)
                     {
+                        logger
+                            .error("Metaclass ${ dbTrail.UUID.split('\\$').first() } does not contain this attribute - ${ currentAttribute.code } \n${ ex.message }")
                     }
                     if (valueLabel && builder)
                     {
@@ -258,11 +259,11 @@ class ElementsMap
                             DATA_TYPE_HYPERLINK && valueLabel != NOT_SPECIFIED)
                         {
                             Document doc = Jsoup.parse(valueLabel)
-                            Elements links = doc.select("a[href]")
+                            Elements links = doc.select('a[href]')
                             builder
                                 .addOption(
                                     currentAttribute.title,
-                                    new Value(label: doc.text(), url: links.attr("href"))
+                                    new Value(label: doc.text(), url: links.attr('href'))
                                 )
                         }
                         else if (currentAttribute.type.code == 'state')
@@ -448,10 +449,16 @@ class ElementsMap
         return new ActionBuilder()
     }
 
+    /**
+     * Метод по проверке и форматированию данных перед отправкой на фронт
+     * @param valueLabel - значение атрибута
+     * @param dataType - тип данных
+     * @return правильно отформатированная строка
+     */
     String formattedValueLabel(String valueLabel, String dataType)
     {
         LinkedHashMap<String, Collection> unitMeasurementTime = ['SECOND': ['секунда', 'секунды', 'секунд'], 'MINUTE': ['минута', 'минуты', 'минут'], 'HOUR': ['час', 'часа', 'часов'], 'DAY': ['день', 'дня', 'дней'], 'WEEK': ['неделя', 'недели', 'недель'], 'YEAR': ['год', 'года', 'лет']]
-        if (valueLabel[0] == '[' && valueLabel[valueLabel.length() - 1] == ']')
+        if (valueLabel.matches('^\\[\\w+\\]'))
         {
             valueLabel = valueLabel.substring(1, valueLabel.length() - 1)
         }
@@ -468,7 +475,7 @@ class ElementsMap
             if (unitMeasurementTime[valueLabel.split(' ').last()])
             {
                 valueLabel = fixNumerical(
-                    valueLabel.split(' ')[0].toInteger(),
+                    valueLabel.split(' ').first().toInteger(),
                     unitMeasurementTime[valueLabel.split(' ').last()]
                 )
             }
@@ -480,6 +487,12 @@ class ElementsMap
         return valueLabel
     }
 
+    /**
+     * Метод подбора правильного окончания для Русских числительных
+     * @param numberHours - числительное для подбора окончания
+     * @param arr - набор варинатов для заполнения строки
+     * @return правильно отформатированная строка
+     */
     String fixNumerical(Integer numberHours, Collection arr)
     {
         String result
@@ -1049,10 +1062,10 @@ class MapObjectBuilder
         return this
     }
 
-    public MapObjectBuilder addOption(String label,
-                                      Value value,
-                                      PresentationType presentation =
-                                          PresentationType.RIGHT_OF_LABEL)
+    MapObjectBuilder addOption(String label,
+                               Value value,
+                               PresentationType presentation =
+                                   PresentationType.RIGHT_OF_LABEL)
     {
         this.options.add(
             new Option(

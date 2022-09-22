@@ -19,7 +19,6 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.ea.IAppContentInfo
 import groovy.transform.Canonical
-import ru.naumen.commons.server.utils.StringUtilities
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import groovy.json.JsonSlurper
 
@@ -389,8 +388,6 @@ String getContentTitleMap()
         api.apps.listContents(ConstantMap.EMBEDDED_APPLICATION_CODE)
     Collection<LinkedHashMap> argum = []
     contentInfo.collect {
-        String dataForUuid =
-            StringUtilities.transliterate(it.contentTitle.replaceAll('\\s+', '').toLowerCase())
         argum << [selectable     : true, title: it.contentTitle, uuid:
             it.contentUuid, level: 0, extra: 'тест']
     }
@@ -442,6 +439,10 @@ void postSaveActions()
     saveSettings(settings)
 }
 
+/**
+ * Метод генерирующий код для формы "Код стратегии"
+ * @param contentSettings - данные с настройками из мастера
+ */
 void installStrategyCode(AbstractPointCharacteristics contentSettings)
 {
     contentSettings.each {
