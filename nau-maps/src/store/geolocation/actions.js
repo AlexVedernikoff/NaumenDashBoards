@@ -29,10 +29,10 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<any>
 const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		let data = testData;
-		const {context: {contentCode, subjectUuid}} = getState().geolocation;
+		const {context: {contentCode, currentUser, subjectUuid}} = getState().geolocation;
 
 		if (environment !== 'development') {
-			data = await getMapObjects(contentCode, subjectUuid);
+			data = await getMapObjects(contentCode, subjectUuid, currentUser);
 		}
 
 		const {errors, mapApiKey = {}, objects} = data;
