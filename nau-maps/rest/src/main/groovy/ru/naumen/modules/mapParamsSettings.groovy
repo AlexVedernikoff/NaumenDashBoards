@@ -8,11 +8,12 @@
  */
 package ru.naumen.modules.inventory
 
-
 import ru.naumen.core.server.script.spi.ScriptDtOList
 import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.annotation.JsonIgnore
 import ru.naumen.core.shared.dto.ISDtObject
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
+import com.fasterxml.jackson.databind.ObjectMapper
 
 /**
  * Метод по получению данных из БД о трассах и точках(их участках и оборудовании на учасках)
@@ -65,22 +66,21 @@ class DataGeneration
     /**
      * Метод по получению данных из БД через Мастер настроек
      * @param nameContent - имя контента
-     * @param objectUuid - UUID объекта
+     * @param bindings - дополнительные параметры контекста выполнения скрипта
      * @return список данных из БД
      */
-    Object getDataDisplayMap(String nameContent, String objectUuid)
+    Object getDataDisplayMap(String nameContent, LinkedHashMap<String, Object> bindings)
     {
         Collection<AbstractPointCharacteristics> abstractCharacteristicsData = new SettingsProvider()
             .getSettings()?.abstractPointCharacteristics
-
         Collection<OutputObjectStrategies> strategiesPoint =
             getSettingsFromWizardSettingsPoint(abstractCharacteristicsData.first())
         Collection<OutputObjectStrategies> strategiesLine =
             getSettingsFromWizardSettingsLine(abstractCharacteristicsData.last())
 
         Collection<MapObjectBuilder> pointData = []
-        pointData += collectingData(strategiesPoint, nameContent, true, objectUuid)
-        pointData += collectingData(strategiesLine, nameContent, false, objectUuid)
+        pointData += collectingData(strategiesPoint, nameContent, true, bindings)
+        pointData += collectingData(strategiesLine, nameContent, false, bindings)
         return pointData
     }
 
@@ -110,8 +110,9 @@ class DataGeneration
         Collection<OutputObjectStrategies> dataWizardSettings = []
         data?.strategies?.each {
             OutputObjectStrategies strategies = new StrategiesPoint()
+                .setMetaClassObject(it?.metaClassObject?.id)
                 .setScriptText(it?.scriptText)
-                .setPlacesOfUse(it?.placesOfUse)
+                .setPlacesOfUse(it?.placesOfUsePoint)
                 .setPathLatitudeCoordinates(it?.coordinatesSettings?.pathCoordinatLongitud)
                 .setPathLongitudeCoordinates(it?.coordinatesSettings?.pathCoordinatLatitude)
             dataWizardSettings.add(strategies)
@@ -130,8 +131,9 @@ class DataGeneration
         Collection<OutputObjectStrategies> dataWizardSettings = []
         data?.strategies?.each {
             OutputObjectStrategies strategies = new StrategiesLine()
+                .setMetaClassObject(it?.metaClassObject?.id)
                 .setScriptText(it?.scriptText)
-                .setPlacesOfUse(it?.placesOfUse)
+                .setPlacesOfUse(it?.placesOfUseLines)
                 .setColor(it?.characteristicsLine?.colour)
                 .setOpacity(it?.characteristicsLine?.opacity)
                 .setWeight(it?.characteristicsLine?.width)
@@ -153,23 +155,22 @@ class DataGeneration
      * @param strategies - набор настроек из мастера
      * @param nameContent - имя контента
      * @param isDataAboutPointsOrLines - данные о точках или линиях
-     * @param objectUuid - - UUID объекта
+     * @param bindings - дополнительные параметры контекста выполнения скрипта
      * @return коллекция данных для отображения данных на вкладке
      */
     Collection collectingData(Collection<OutputObjectStrategies> strategies,
                               String nameContent,
                               Boolean isDataAboutPointsOrLines,
-                              String objectUuid)
+                              LinkedHashMap<String, Object> bindings)
     {
         ElementsMap elementsMap = new ElementsMap()
         Collection dataToDisplay = []
         strategies?.each { strategie ->
             strategie?.placesOfUse?.each { place ->
-                if (place == nameContent.toLowerCase())
+                if (place == nameContent)
                 {
-                    String textScriptReceiptSubject = "subject = utils.get('${ objectUuid }'); "
-                    String executeScriptText = textScriptReceiptSubject + strategie.scriptText
-                    ScriptDtOList executeScript = api.utils.executeScript(executeScriptText)
+                    ScriptDtOList executeScript =
+                        api.utils.executeScript(strategie.scriptText, bindings)
                     if (isDataAboutPointsOrLines)
                     {
                         executeScript.eachWithIndex { num, idx ->
@@ -184,11 +185,11 @@ class DataGeneration
                     }
                     else
                     {
-                        executeScript.findResults {
-                            if (elementsMap.createTrail(it, strategie))
+                        executeScript.each { currentObject ->
+                            if (elementsMap.createTrail(currentObject, strategie))
                             {
                                 dataToDisplay += new LinkedOnMap(
-                                    elementsMap.createTrail(it, strategie)
+                                    elementsMap.createTrail(currentObject, strategie)
                                 )
                             }
                         }
@@ -294,7 +295,7 @@ class LinkedOnMap
     /**
      * Признак отображения иконки
      */
-    Boolean displayingLinesDots
+    Boolean isIcon
     /**
      * Ссылка на иконку А
      */
@@ -314,6 +315,7 @@ class LinkedOnMap
         this.geopositions = trailBuilder.geopositions
         this.iconFirst = trailBuilder.iconFirst
         this.iconSecond = trailBuilder.iconSecond
+        this.isIcon = trailBuilder.displayingLinesDots
         this.parts = trailBuilder.parts.findResults {
             mapSection(it)
         }
@@ -334,7 +336,7 @@ class LinkedOnMap
                                  lineStyle   : this.lineStyle,
                                  iconFirst   : this.iconFirst,
                                  iconSecond  : this.iconSecond,
-                                 isIcon      : this.displayingLinesDots] : [:]
+                                 isIcon      : this.isIcon] : [:]
     }
 
     private LinkedHashMap mapPoint(BasePointBuilder basePointBuilder)
@@ -349,7 +351,7 @@ class LinkedOnMap
                                    lineStyle   : this.lineStyle,
                                    iconFirst   : this.iconFirst,
                                    iconSecond  : this.iconSecond,
-                                   isIcon      : this.displayingLinesDots] : [:]
+                                   isIcon      : this.isIcon] : [:]
     }
 }
 
@@ -408,6 +410,17 @@ class OutputObjectStrategies
      * Места использования настроек из мастера
      */
     Collection<String> placesOfUse
+
+    /**
+     * Код используемого метакласса
+     */
+    String metaClassObject
+
+    OutputObjectStrategies setMetaClassObject(String metaClassObject)
+    {
+        this.metaClassObject = metaClassObject
+        return this
+    }
 
     OutputObjectStrategies setScriptText(String scriptText)
     {
