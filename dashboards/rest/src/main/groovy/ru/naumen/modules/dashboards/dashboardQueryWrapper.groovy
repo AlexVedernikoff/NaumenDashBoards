@@ -1881,7 +1881,7 @@ class DashboardQueryWrapperUtils
     }
 
     /**
-     * Метод по изменению кода атрибута второго по уровню, если он есть только в конкретном типе, но его нет в классе
+     * Метод по изменению кода атрибута, если он есть только в конкретном типе, но его нет в классе
      * @param attribute - атрибут целиком
      * @return атрибут с новым кодом
      */
@@ -1892,11 +1892,10 @@ class DashboardQueryWrapperUtils
         Attribute attributeToUpdate = attribute.ref ?: attribute
         Boolean attrRefHasBaseValues = !attributeToUpdate.code?.contains('@')
 
-        //если класс/тип, на который ссылается атрибут не равен метаклассу атрибута второго уровня для него,
-        //скорей всего атрибут второго уровня есть только в конкретном типе, но его нет в классе
+        //если класс/тип, на который ссылается атрибут не равен метаклассу атрибута,
+        //скорей всего атрибут есть только в конкретном типе, но его нет в классе
         //также атрибут должен быть не динамический и в нём уже не проставлен этот код корректно
-        if ((attribute.ref && attribute.property || !attribute.ref && !attribute.property) &&
-            attributeToUpdate.metaClassFqn && attributeIsNotDynamic && attrRefHasBaseValues)
+        if (attributeToUpdate.metaClassFqn && attributeIsNotDynamic && attrRefHasBaseValues)
         {
             String attrRefCode = attributeToUpdate.code
             def systemAttribute = getApi().metainfo.getMetaClass(attributeToUpdate.metaClassFqn).getAttribute(attrRefCode)
