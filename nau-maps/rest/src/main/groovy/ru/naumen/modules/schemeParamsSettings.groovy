@@ -10,13 +10,14 @@ package ru.naumen.modules.inventory
 
 import ru.naumen.core.server.script.spi.ScriptDtOList
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
+import ru.naumen.core.server.script.api.injection.InjectApi
 
 /**
  * Метод по получению данных из БД через Мастер настроек
  * @param nameContent - имя контента
  * @return список данных из БД
  */
-Object getDataDisplayScheme(String nameContent)
+Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bindings)
 {
     SchemesSettings settings = new SettingsProviderSchemes().getSettings()
     Collection<AbstractSchemesCharacteristics> abstractCharacteristicsData =
@@ -34,15 +35,16 @@ Object getDataDisplayScheme(String nameContent)
     String scriptPointBAttributeData = "${ pointScriptText.first() }.${ linkAttribute }.${ pointB }"
     try
     {
-        ScriptDtOList dataLine = api.utils.executeScript(scriptLineAttributeData)
-        Collection dataPointA = api.utils.executeScript(scriptPointAAttributeData)
-        Collection dataPointB = api.utils.executeScript(scriptPointBAttributeData)
+        ScriptDtOList dataLine = api.utils.executeScript(scriptLineAttributeData, bindings)
+        Collection dataPointA = api.utils.executeScript(scriptPointAAttributeData, bindings)
+        Collection dataPointB = api.utils.executeScript(scriptPointBAttributeData, bindings)
 
         pointData += collectingData(dataLine, dataPointA, dataPointB)
     }
     catch (Exception ex)
     {
         logger.info("Передан неверный скрипт!")
+        logger.error("#schemeParamsSettings ${ ex.message }", ex)
     }
     return pointData
 }
@@ -149,4 +151,102 @@ private LinkedHashMap<String, Object> schemeHierarchy(HierarchyCommunicationBuil
                                             options: hierarchyCommunicationBuilder.options,
                                             uuid   : hierarchyCommunicationBuilder.UUID
     ] : [:]
+}
+
+@InjectApi
+class StrategiesDisplayingObjectsSchemas
+{
+    /**
+     * Текст скрипта
+     */
+    String scriptText
+    /**
+     * Места использования настроек из мастера
+     */
+    Collection<String> placesOfUse
+
+    OutputObjectStrategies setScriptText(String scriptText)
+    {
+        this.scriptText = scriptText
+        return this
+    }
+
+    OutputObjectStrategies setPlacesOfUse(Collection<String> placesOfUse)
+    {
+        Collection<String> setPlaces = []
+        placesOfUse.each {
+            setPlaces.add(it)
+        }
+        this.placesOfUse = setPlaces
+        return this
+    }
+}
+
+class CommunicationSettingsHierarchy extends OutputObjectStrategies
+{
+    /**
+     * Цвет элемента
+     */
+    String color
+    /**
+     * Прозрачность элемента
+     */
+    String opacity
+    /**
+     * Толщина линии
+     */
+    String weight
+    /**
+     * Тип линии
+     */
+    String lineStyle
+
+    StrategiesLine setColor(String color)
+    {
+        this.color = color
+        return this
+    }
+
+    StrategiesLine setOpacity(String opacity)
+    {
+        this.opacity = opacity
+        return this
+    }
+
+    StrategiesLine setWeight(String weight)
+    {
+        this.weight = weight
+        return this
+    }
+
+    StrategiesLine setLineStyle(String lineStyle)
+    {
+        this.lineStyle = lineStyle
+        return this
+    }
+}
+
+class RelationshipsObjectSettings extends OutputObjectStrategies
+{
+    /**
+     * Путь к координатам широты
+     */
+    String pathLatitudeCoordinates
+
+    /**
+     * Путь к координатам долготы
+     */
+    String pathLongitudeCoordinates
+
+    StrategiesPoint setPathLatitudeCoordinates(String pathLatitudeCoordinates)
+    {
+        this.pathLatitudeCoordinates = pathLatitudeCoordinates
+        return this
+    }
+
+    StrategiesPoint setPathLongitudeCoordinates(String pathLongitudeCoordinates)
+    {
+        this.pathLongitudeCoordinates = pathLongitudeCoordinates
+        return this
+    }
 }
