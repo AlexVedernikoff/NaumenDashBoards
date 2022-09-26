@@ -85,7 +85,7 @@ class WidgetForm extends Component<Props, State> {
 				indicators && indicators.forEach(indicator => {
 					const {tooltip} = indicator;
 
-					if (tooltip && tooltip.show && tooltip.title === '') {
+					if (tooltip && tooltip.show && tooltip.text === '') {
 						indicator.tooltip = {...DEFAULT_TOOLTIP_SETTINGS};
 						changed = true;
 					}

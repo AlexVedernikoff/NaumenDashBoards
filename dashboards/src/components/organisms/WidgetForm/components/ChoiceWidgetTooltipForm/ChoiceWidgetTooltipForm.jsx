@@ -83,9 +83,9 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 		}
 	};
 
-	handleChangeText = ({value: title}: OnChangeEvent<string>) => {
+	handleChangeText = ({value: text}: OnChangeEvent<string>) => {
 		const selectedTooltip = this.getSelectedTooltip();
-		return this.setSelectedTooltip({...selectedTooltip, title});
+		return this.setSelectedTooltip({...selectedTooltip, text});
 	};
 
 	handleShow = ({value: change}: OnChangeEvent<boolean>) => this.changeShow(!change, false);
@@ -141,7 +141,7 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 
 	renderText = () => {
 		const {selected} = this.state;
-		const {title} = this.getSelectedTooltip();
+		const {text, title} = this.getSelectedTooltip();
 
 		return (
 			<FormField>
@@ -150,7 +150,7 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 					maxLength={1000}
 					name={selected}
 					onChange={this.handleChangeText}
-					value={title}
+					value={text ?? title}
 				/>
 			</FormField>
 		);
