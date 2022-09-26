@@ -1417,7 +1417,7 @@ class AttributeType {
     static final Collection<String> ALL_ATTRIBUTE_TYPES = [OBJECT_TYPE, TIMER_TYPE, BACK_TIMER_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE,
                                                            CATALOG_ITEM_TYPE, CATALOG_ITEM_SET_TYPE, META_CLASS_TYPE, DT_INTERVAL_TYPE, DATE_TYPE,
                                                            DATE_TIME_TYPE, STRING_TYPE, INTEGER_TYPE, DOUBLE_TYPE, STATE_TYPE,
-                                                           LOCALIZED_TEXT_TYPE, BOOL_TYPE].asImmutable()
+                                                           LOCALIZED_TEXT_TYPE, BOOL_TYPE, TEXT_TYPE].asImmutable()
 
     static final Collection<String> ATTRIBUTE_TYPES_WITHOUT_TIMER = [OBJECT_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE, CATALOG_ITEM_TYPE,
                                                                      CATALOG_ITEM_SET_TYPE, META_CLASS_TYPE, DT_INTERVAL_TYPE, DATE_TYPE,
@@ -1461,6 +1461,7 @@ class AttributeType {
     static final String DATE_TIME_TYPE ='dateTime'
     static final String STRING_TYPE ='string'
     static final String INTEGER_TYPE ='integer'
+    static final String TEXT_TYPE = 'text'
 
     static final String DOUBLE_TYPE ='double'
     static final String STATE_TYPE ='state'

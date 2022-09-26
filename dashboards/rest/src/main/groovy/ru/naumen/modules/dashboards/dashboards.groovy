@@ -27,6 +27,7 @@ import ru.naumen.core.server.script.spi.IScriptUtils
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 import ru.naumen.core.shared.dto.ISDtObject
+import ru.naumen.metainfo.shared.IClassFqn
 
 import static groovy.json.JsonOutput.toJson
 import static MessageProvider.*
@@ -1686,8 +1687,7 @@ class DashboardsService
     private Collection<Attribute> mappingAttribute(List attributes, String sourceName, String sourceCode)
     {
         return attributes.findResults {
-            def isAttributeOfRelatedObject = it.metaClass?.getAttribute(it.code)?.type?.attributeType?.isAttributeOfRelatedObject()
-            if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES && !isAttributeOfRelatedObject)
+            if (!it.computable && it.type.code in AttributeType.ALL_ATTRIBUTE_TYPES)
             {
                 Boolean ableForAvg = DashboardUtils.checkIfAbleForAvg(it.metaClass.code, it.code, it.type.code)
                 buildAttribute(it, sourceName?.replace('Event for ', ''), sourceCode, ableForAvg)
@@ -1701,7 +1701,7 @@ class DashboardsService
             code: value.code,
             title: value.title,
             type: value.type.code as String,
-            property: value.type.relatedMetaClass as String,
+            property: value.type.relatedMetaClass?.getId(),
             metaClassFqn: value.metaClass.code,
             declaredMetaClass: value.declaredMetaClass,
             sourceName: sourceName,
