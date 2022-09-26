@@ -125,11 +125,12 @@ export class TableWidget extends PureComponent<Props, State> {
 		return row || id === 1 ? row : this.findRow(id - 1, accessor);
 	};
 
-	getLastTypedColumn = (columns: $ReadOnlyArray<Column>, type: ColumnType): ?Column => columns.find((column, index, columns) => {
-		const nextColumn = columns[index + 1];
+	getLastTypedColumn = (columns: $ReadOnlyArray<Column>, type: ColumnType): ?Column =>
+		columns && columns.find((column, index, columns) => {
+			const nextColumn = columns[index + 1];
 
-		return column.type === type && (!nextColumn || nextColumn.type !== type);
-	});
+			return column.type === type && (!nextColumn || nextColumn.type !== type);
+		});
 
 	getNewColumnsWidth = (column: Column, newWidth: number, columnsWidth: ColumnsWidth, minWidth: ?number = null): ColumnsWidth => {
 		const {columns} = this.props.data;
