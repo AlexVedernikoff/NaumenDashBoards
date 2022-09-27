@@ -178,12 +178,13 @@ export class BarWidget extends PureComponent<Props, State> {
 	renderRechartLegend = () => {
 		const {hiddenSeries, toggleSeriesShow} = this.props;
 		const {options: {formatters, legend}} = this.state;
-		const {textHandler} = legend;
+		const {style, textHandler} = legend;
 
 		return (
 			<RechartLegend
 				formatter={formatters.legend}
 				hiddenSeries={hiddenSeries}
+				style={style}
 				textHandler={textHandler}
 				toggleSeriesShow={toggleSeriesShow}
 			/>
