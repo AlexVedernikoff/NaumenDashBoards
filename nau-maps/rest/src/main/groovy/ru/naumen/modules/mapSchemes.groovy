@@ -26,12 +26,18 @@ import static com.amazonaws.util.json.Jackson.toJsonString as toJson
     title = 'Нажмите "Сохранить", чтобы продолжить',
     description = 'Нажмите "Сохранить", чтобы продолжить'
 )
-class ConstantSchemes{
+
+class ConstantSchemes
+{
     public static final String NAME_MECHANISM_SETTINGS = 'schemes'
-    public static final String EMBEDDED_APPLICATION_CODE = 'testSvg'
+    public static final String EMBEDDED_APPLICATION_CODE = 'testScheme'
     public static final String ACTUAL_VERSION = 'actualVersion'
     public static final String FIRST_PART_STRATEGY_CODE = 'schemesStrategy'
 }
+
+/**
+ * Артефакт от портала, обязательно нужны какие-то инициирующие настройки
+ */
 class SchemesInitialSettings
 {
     @JsonSchemaMeta(title = 'Инициирование настроек')
@@ -73,6 +79,9 @@ class MetaClassObjectSchemes
     }
 }
 
+/**
+ * Артефакт от портала первый уровень полей - вкладки, поэтому значащие поля, на втором уровне
+ */
 class SchemesInitialContainer
 {
     @JsonSchemaMeta(title = 'Соглашаюсь настраивать инвентори', description = 'Обязательный шаг, без этого настройки не проинициализируются')
@@ -86,16 +95,8 @@ class SchemesSettings
     Collection<AbstractSchemesCharacteristics> abstractSchemesCharacteristics = [new HierarchyCommunicationSettings(), new ObjecRelationshipsSettings()]
     @JsonSchemaMeta(title = 'Визуализация по умолчанию')
     Collection<DefaultVisualizationSchemes> defaultVisualizationSchemes = [new DefaultVisualizationSchemes()]
-    @UiSchemaMeta(hidden = 'All')
-    BugFixSchema commonSettings = new BugFixSchema()
 }
 
-@JsonSchemaMeta(title = ' ')
-class BugFixSchema
-{
-    @UiSchemaMeta(hidden = 'All')
-    String scheme = 'bugfixschema'
-}
 /**
  * Настройки для владки 'Стратегии вывода объектов'
  */
@@ -109,7 +110,7 @@ class BugFixSchema
 )
 @JsonSubTypes([
     @JsonSubTypes.Type(value =
-    HierarchyCommunicationSettings, name = 'hierarchyCommunicationSettings'),
+    HierarchyCommunicationSettings, name = 'hierarchyCommunicationSettings' ),
     @JsonSubTypes.Type(value = ObjecRelationshipsSettings, name = 'objecRelationshipsSettings')])
 abstract class AbstractSchemesCharacteristics
 {
@@ -308,11 +309,11 @@ Object getInitSettings()
     return new SchemesInitialSettings()
 }
 
-
 void saveSettings(SchemesSettings settings)
 {
     String nameSpace = ConstantSchemes.NAME_MECHANISM_SETTINGS
-    Integer actualVersion = api.keyValue.get(nameSpace, ConstantSchemes.ACTUAL_VERSION) as Integer ?: 0
+    Integer actualVersion =
+        api.keyValue.get(nameSpace, ConstantSchemes.ACTUAL_VERSION) as Integer ?: 0
 
     String settingsJson = Jackson.toJsonString(
         new SettingsWithTimeStampSchemes(
@@ -354,22 +355,23 @@ String getAttributesChildMetaclass()
                        .getAttribute(attributeName).type.relatedMetaClass
                 api.metainfo.getMetaClass(metaclass)?.attributes.each {
                     listAttributes << [title     : it.title,
-                                    uuid      : it.code,
-                                    level     : 1,
-                                    selectable: true]
+                                       uuid      : it.code,
+                                       level     : 1,
+                                       selectable: true]
                 }
             }
         }
     }
-    return toJson(listAttributes)
+    return Jackson.toJsonString(listAttributes)
 }
 
 String getContentTitle()
 {
-    Collection<IAppContentInfo> contentInfo = api.apps.listContents(ConstantSchemes.EMBEDDED_APPLICATION_CODE)
+    Collection<IAppContentInfo> contentInfo =
+        api.apps.listContents(ConstantSchemes.EMBEDDED_APPLICATION_CODE)
     Collection<LinkedHashMap> argum = []
     contentInfo.collect {
-        argum << [selectable: true, title: it.contentTitle, uuid:
+        argum << [selectable : true, title: it.contentTitle, uuid:
             it.tabUuid, level: 0, extra: 'тест']
     }
     return Jackson.toJsonString(argum)
@@ -413,9 +415,10 @@ void postSaveActions()
         it.strategies.each { code ->
             String codeStrategy = code?.hierarchyCodeStrategy
             String nameStrategy = code?.hierarchyNameStrategy
-            if ((codeStrategy == ConstantSchemes.FIRST_PART_STRATEGY_CODE || codeStrategy == "") && nameStrategy != "")
+            if ((codeStrategy == ConstantSchemes.FIRST_PART_STRATEGY_CODE || codeStrategy == "") &&
+                nameStrategy != "")
             {
-                integer hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
+                Integer hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
                     (nameStrategy.hashCode() * -1)
                 code?.hierarchyCodeStrategy = ConstantSchemes.FIRST_PART_STRATEGY_CODE + hashCode
             }
@@ -425,9 +428,10 @@ void postSaveActions()
         it.strategies.each { code ->
             String codeStrategy = code?.objectCodeStrategy
             String nameStrategy = code?.objectNameStrategy
-            if ((codeStrategy == ConstantSchemes.FIRST_PART_STRATEGY_CODE || codeStrategy == "") && nameStrategy != "")
+            if ((codeStrategy == ConstantSchemes.FIRST_PART_STRATEGY_CODE || codeStrategy == "") &&
+                nameStrategy != "")
             {
-                integer hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
+                Integer hashCode = nameStrategy.hashCode() > 0 ? nameStrategy.hashCode() :
                     (nameStrategy.hashCode() * -1)
                 code?.objectCodeStrategy = ConstantSchemes.FIRST_PART_STRATEGY_CODE + hashCode
             }
@@ -435,4 +439,3 @@ void postSaveActions()
     }
     saveSettings(settings)
 }
-
