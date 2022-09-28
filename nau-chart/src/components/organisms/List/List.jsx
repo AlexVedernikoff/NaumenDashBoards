@@ -10,10 +10,10 @@ import React, { useState } from 'react';
 import Scrollable from 'components/atoms/Scrollable';
 import styles from './styles.less';
 
-const List = ({activeElement, data}: Props) => {
+const List = ({activeElement, data, showEditForm}: Props) => {
 	const [viewList, setViewList] = useState(true);
 
-	const handleOpenEdit = actions => () => {
+	const handleOpenLink = actions => () => {
 		const [action] = actions || [];
 
 		if (action) {
@@ -21,6 +21,10 @@ const List = ({activeElement, data}: Props) => {
 
 			window.open(link, '_blank', 'noopener,noreferrer');
 		}
+	};
+
+	const handleOpenEdit = uuid => () => {
+		showEditForm(uuid);
 	};
 
 	const handleChangeView = () => {
@@ -49,11 +53,11 @@ const List = ({activeElement, data}: Props) => {
 		);
 	};
 
-	const renderTitle = ({actions, title}) => {
+	const renderTitle = ({actions, title, uuid}) => {
 		return (
-			<div className={styles.itemTitleContainer} onClick={handleOpenEdit(actions)}>
-				<div className={styles.itemTitle}>{title}</div>
-				<Edit className={styles.itemEditButton} />
+			<div className={styles.itemTitleContainer} >
+				<div className={styles.itemTitle} onClick={handleOpenLink(actions)}>{title}</div>
+				<Edit className={styles.itemEditButton} onClick={handleOpenEdit(uuid)} />
 			</div>
 		);
 	};

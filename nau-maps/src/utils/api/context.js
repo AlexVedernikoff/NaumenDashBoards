@@ -97,10 +97,23 @@ const changeResponsible = async (uuid: string): Promise<string | null> => {
 	return result || Promise.resolve(null);
 };
 
+const getEditForm = async (objectUUID: string, editFormCode: string) => {
+	return new Promise((resolve, reject) => {
+		this.jsApi.commands.quickEditObject(objectUUID, editFormCode, {}, (uuid, error) => {
+			if (error) {
+				reject(error);
+			} else {
+				resolve(uuid);
+			}
+		});
+	});
+};
+
 export {
 	changeResponsible,
 	changeState,
 	getContext,
+	getEditForm,
 	getParams,
 	getMapObjects,
 	injectJsApi

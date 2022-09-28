@@ -16,7 +16,7 @@ import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.less';
 
-const Content = ({data, exportTo, openContextMenu, position, scale, setActiveElement, setPosition, setScale}: Props) => {
+const Content = ({data, exportTo, openContextMenu, position, scale, setActiveElement, setExportTo, setPosition, setScale}: Props) => {
 	const stageRef = useRef(null);
 	const [isDrag, setIsDrag] = useState(false);
 	const [hoverElement, setHoverElement] = useState(null);
@@ -30,11 +30,11 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 		if (stageRef.current) {
 			if (exportTo === 'jpeg' || exportTo === 'png') {
 				downloadUri(stageRef.current, exportTo);
+				setExportTo(null);
 			} else if (exportTo === 'pdf') {
 				downloadPdf(stageRef.current);
+				setExportTo(null);
 			}
-
-			setExportTo(null);
 		}
 	}, [exportTo]);
 

@@ -1,7 +1,7 @@
 // @flow
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {GEOLOCATION_EVENTS} from 'store/geolocation/constants';
-import {getContext, getMapObjects, getParams} from 'utils/api';
+import {getContext, getEditForm, getMapObjects, getParams} from 'utils/api';
 import type {GroupCode, Point, PointType} from 'types/point';
 import {notify} from 'helpers/notify';
 import testData from 'helpers/testData';
@@ -49,6 +49,24 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 
 		if (nauMapsMapLastSelect && mapApiKey.hasOwnProperty(nauMapsMapLastSelect)) {
 			dispatch(setMapPanel(nauMapsMapLastSelect));
+		}
+	} catch (error) {
+		notify('error', 'error');
+		dispatch(recordGeolocationdError(error));
+	}
+};
+
+const goToElementMap = () => ({
+	type: GEOLOCATION_EVENTS.GO_TO_ELEMENT
+});
+
+const showEditForm = (objectUUID: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {editFormCode} = getState();
+	try {
+		const uuid = await getEditForm(objectUUID, editFormCode);
+
+		if (uuid) {
+			dispatch(fetchGeolocation);
 		}
 	} catch (error) {
 		notify('error', 'error');
@@ -159,6 +177,7 @@ const selectAllGroups = () => ({
 });
 
 export {
+	goToElementMap,
 	changeZoom,
 	fetchGeolocation,
 	getAppConfig,
@@ -168,6 +187,7 @@ export {
 	setSingleObject,
 	setMapPanel,
 	setTab,
+	showEditForm,
 	toggleFilter,
 	toggleGroup,
 	toggleMapPanel,

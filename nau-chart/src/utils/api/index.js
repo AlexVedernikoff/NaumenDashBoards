@@ -1,6 +1,6 @@
 // @flow
 import Api from './api';
-import type {Context} from './types';
+import type {Context, UserData} from './types';
 import FakeApi from './fakeApi';
 
 const api = process.env.NODE_ENV === 'development' ? new FakeApi() : new Api();
@@ -19,6 +19,14 @@ export const getContext = async (): Promise<Context> => {
  * Возвращает Entity для вывода схемы
  * @returns {Promise<string>} - Uuid
  */
-export const getScheme = async (contentCode: string, subjectUuid: string): Promise<string> => {
-	return api.getScheme(contentCode, subjectUuid);
+export const getScheme = async (contentCode: string, subjectUuid: string, currentUser: UserData): Promise<string> => {
+	return api.getScheme(contentCode, subjectUuid, currentUser);
+};
+
+/**
+ * Вызывает форму для редактирования и возвращает Uuid редактируемого элемента
+ * @returns {Promise<{uuid: string|null}>} - Uuid
+ */
+export const getEditForm = async (objectUUID: string): Promise<string> => {
+	return api.getEditForm(objectUUID);
 };

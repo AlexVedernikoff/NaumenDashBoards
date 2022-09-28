@@ -21,7 +21,7 @@ export class Line extends Component<Props, State> {
 
 	renderLine = () => {
 		const {part} = this.props;
-		const {color, data: {header = ''}, geopositions, lineStyle = 'solidLine', opacity = 100, weight = 6} = part;
+		const {color, data: {header = ''}, geopositions, lineStyle = 'solidLine', opacity = 100, tooltip, weight = 6} = part;
 		const opacityFloat = Number(opacity) / 100;
 		const strokeStyleArray = lineStyle === 'dashedLine' ? '7, 11' : '0, 0';
 		const positions = geopositions.map(geoposition => new LatLng(geoposition.latitude, geoposition.longitude));
@@ -36,7 +36,7 @@ export class Line extends Component<Props, State> {
 			positions={positions}
 			weight={weight}
 		>
-			<TooltipPoint sticky={true} title={header} />
+			<TooltipPoint sticky={true} title={tooltip || header} />
 		</Polyline>;
 	};
 

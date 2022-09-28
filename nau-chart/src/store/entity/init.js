@@ -5,6 +5,7 @@ import {VERIFY_EVENTS} from './constants';
 export const initialVerifyState: EntityState = {
 	activeElement: null,
 	data: [],
+	editFormCode: 'quickCEOuFrom',
 	error: false,
 	exportTo: null,
 	loading: false,

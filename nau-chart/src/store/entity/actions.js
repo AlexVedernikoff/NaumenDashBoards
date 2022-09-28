@@ -1,6 +1,6 @@
 // @flow
-import type {Dispatch, Entity, ThunkAction} from 'store/types';
-import {getContext, getScheme} from 'utils/api';
+import type {Dispatch, Entity, GetState, ThunkAction} from 'store/types';
+import {getContext, getEditForm, getScheme} from 'utils/api';
 import {VERIFY_EVENTS} from './constants';
 
 /**
@@ -10,13 +10,36 @@ import {VERIFY_EVENTS} from './constants';
 const getDataEntity = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		dispatch(showLoaderData());
-		const {contentCode, subjectUuid} = await getContext();
-		const response = await getScheme(contentCode, subjectUuid);
-		dispatch(setEntityData([...response.entities]));
+		const {contentCode, currentUser, subjectUuid} = await getContext();
+		const {entities, formCode} = await getScheme(contentCode, subjectUuid, currentUser);
+
+		dispatch(setEntityData(entities));
+
+		if (formCode) {
+			dispatch(setEditForm(formCode));
+		}
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
 		dispatch(hideLoaderData());
+	}
+};
+
+/**
+ * Запрашивает форму редактирования для элемента и обновляет данные
+ * @param {string} objectUUID - uuid обьекта
+ * @returns {ThunkAction}
+ */
+const showEditForm = (objectUUID: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {editFormCode} = getState();
+	try {
+		const uuid = await getEditForm(objectUUID, editFormCode);
+
+		if (uuid) {
+			dispatch(getDataEntity);
+		}
+	} catch (error) {
+		dispatch(setErrorData(error));
 	}
 };
 
@@ -88,10 +111,20 @@ const setPosition = (payload: {x: number, y: number}) => ({
 	type: VERIFY_EVENTS.SET_POSITION
 });
 
+/**
+ * Установка кода для вызова формы редактирования
+ * @param {string} editFormCode - код
+ */
+const setEditForm = (editFormCode: string) => ({
+	editFormCode,
+	type: VERIFY_EVENTS.SET_EDIT_FORM
+});
+
 export {
 	setActiveElement,
 	setScale,
 	setExportTo,
+	showEditForm,
 	setPosition,
 	getDataEntity
 };

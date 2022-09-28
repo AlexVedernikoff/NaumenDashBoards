@@ -20,7 +20,7 @@ export class Mark extends Component<Props, State> {
 
 	render () {
 		const {active, point} = this.props;
-		const {data, geopositions: [positions], icon} = point;
+		const {data, geopositions: [positions], icon, tooltip} = point;
 		const {equipType, header = '', type} = data;
 		const iconMarker = getCustomOrDefaultIconMarker(equipType || type, active, icon);
 
@@ -31,7 +31,7 @@ export class Mark extends Component<Props, State> {
 				onContextMenu={this.showContentMenu}
 				position={[positions.latitude, positions.longitude]}
 			>
-				<TooltipPoint title={header} />
+				<TooltipPoint title={tooltip || header} />
 			</Marker>
 		);
 	}
