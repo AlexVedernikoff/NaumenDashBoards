@@ -5,6 +5,7 @@ export default class FakeApi {
 		await new Promise(resolve => setTimeout(() => resolve(), 1000));
 		return {
 			contentCode: 'NauChart12',
+			currentUser: 'user12',
 			subjectUuid: 'root$101'
 		};
 	}
@@ -12,5 +13,10 @@ export default class FakeApi {
 	async getScheme () {
 		await new Promise(resolve => setTimeout(() => resolve(), 1000));
 		return data;
+	}
+
+	async getEditForm (objectUUID) {
+		await new Promise(resolve => setTimeout(() => resolve(), 1000));
+		return {uuid: objectUUID};
 	}
 }

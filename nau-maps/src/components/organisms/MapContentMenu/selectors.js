@@ -1,7 +1,7 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {resetSingleObject, toggleMapContextMenu} from 'store/geolocation/actions';
+import {resetSingleObject, showEditForm, toggleMapContextMenu} from 'store/geolocation/actions';
 
 /**
  * @param {AppState} state - глобальное хранилище состояния
@@ -17,5 +17,6 @@ export const props = (state: AppState): ConnectedProps => {
 
 export const functions: ConnectedFunctions = {
 	resetSingleObject,
+	showEditForm,
 	toggleMapContextMenu
 };

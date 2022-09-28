@@ -5,7 +5,7 @@ import type {Props} from 'components/organisms/Content/types';
 import React from 'react';
 import styles from './styles.less';
 
-const ContextMenu = ({activeElement, contextMenu}: Props) => {
+const ContextMenu = ({activeElement, contextMenu, showEditForm}: Props) => {
 	if (!contextMenu) {
 		return null;
 	}
@@ -21,6 +21,11 @@ const ContextMenu = ({activeElement, contextMenu}: Props) => {
 		}
 	};
 
+	const handleEditForm = () => {
+		const {uuid} = activeElement;
+		showEditForm(uuid);
+	};
+
 	return (
 		<div
 			className={styles.wrapMenu}
@@ -30,6 +35,7 @@ const ContextMenu = ({activeElement, contextMenu}: Props) => {
 			}}
 		>
 			<ul className={styles.wrapMenuList}>
+				<li className={styles.wrapMenuListItem} onClick={handleEditForm}>Редактировать</li>
 				<li className={styles.wrapMenuListItem} onClick={handleOpenPage}>Перейти на карточку обьекта</li>
 			</ul>
 		</div>

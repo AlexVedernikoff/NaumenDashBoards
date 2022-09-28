@@ -36,6 +36,7 @@ export type Entity = {
 export type EntityState = {
 	activeElement: Entity,
 	data: Entity[],
+	editFormCode: string,
 	error: boolean,
 	exportTo: string,
 	loading: boolean,

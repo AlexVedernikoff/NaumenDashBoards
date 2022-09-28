@@ -1,12 +1,23 @@
 :local {
-	.contentMenu {
-		cursor: pointer;
-		background-color: #FFFFFF;
-		border-radius: 2px;
-		box-shadow: 0 2px 8px rgba(95, 95, 95, 0.2);
-		font-size: 13px;
-		line-height: 15px;
-		padding: 10px 12px;
+	.menuList {
 		position: absolute;
+		background: #FFFFFF;
+		box-shadow: 0 2px 8px rgba(95, 95, 95, 0.2);
+		border-radius: 2px;
+		list-style: none;
+		margin: 0 4px 0 0;
+		padding: 6px 0;
+
+		.menuListItem {
+			cursor: pointer;
+			font-size: 14px;
+			line-height: 16px;
+			padding: 8px 12px;
+			white-space: nowrap;
+
+			&:hover {
+				background: #F2F2F2;
+			}
+		}
 	}
 }

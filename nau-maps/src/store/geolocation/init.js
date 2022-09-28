@@ -16,11 +16,11 @@ export const initialGeolocationState: GeolocationState = {
 		zoom: 10
 	},
 	error: false,
+	goToElement: false,
 	loading: true,
 	mapObjects: [],
 	mapSelect: 'openStreetMap',
 	mapsKeyList: {openStreetMap: true},
-	panelShow: 'static',
 	params: {
 		autoUpdateLocation: true,
 		colorPart: '#000000',

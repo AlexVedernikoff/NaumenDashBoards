@@ -60,10 +60,10 @@ export class Geolocation extends Component<Props> {
 	};
 
 	componentDidUpdate (prevProps: Props) {
-		const {bounds, mapSelect, showSingleObject, singleObject, timeUpdate, zoom} = this.props;
+		const {bounds, goToElement, mapSelect, singleObject, timeUpdate, zoom} = this.props;
 
 		if (this.mapRef.current) {
-			if (showSingleObject) {
+			if (goToElement) {
 				const {geopositions: [position]} = singleObject;
 				const {latitude, longitude} = position;
 				switch (mapSelect) {

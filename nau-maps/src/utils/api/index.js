@@ -4,6 +4,7 @@ import {
 	changeResponsible,
 	changeState,
 	getContext,
+	getEditForm,
 	getMapObjects,
 	getParams
 } from './context';
@@ -15,6 +16,7 @@ export {
 	changeState,
 	client,
 	getContext,
+	getEditForm,
 	getMapObjects,
 	getParams
 };

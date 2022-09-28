@@ -19,7 +19,7 @@ export class Mark extends Component<Props, State> {
 
 	render () {
 		const {active, point} = this.props;
-		const {data, geopositions: [positions], icon} = point;
+		const {data, geopositions: [positions], icon, tooltip} = point;
 		const {equipType, header = '', type} = data;
 		const {options: {iconUrl}} = getCustomOrDefaultIconMarker(equipType || type, active, icon);
 
@@ -35,7 +35,7 @@ export class Mark extends Component<Props, State> {
 					iconLayout: 'default#image'
 				}}
 				properties={{
-					hintContent: header
+					hintContent: tooltip || header
 				}}
 			>
 			</Placemark>

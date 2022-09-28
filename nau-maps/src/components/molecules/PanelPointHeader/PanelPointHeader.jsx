@@ -1,5 +1,6 @@
 // @flow
 import {connect} from 'react-redux';
+import EditIcon from 'icons/EditIcon';
 import {functions} from './selectors';
 import PointMap from 'icons/PointMap';
 import type {Props, State} from './types';
@@ -15,16 +16,33 @@ export class PanelPointHeader extends Component<Props, State> {
 		window.open(link, '_blank', 'noopener,noreferrer');
 	};
 
+	handleEditForm = () => {
+		const {showEditForm, singleObject} = this.props;
+
+		const {data: {uuid}} = singleObject;
+
+		showEditForm(uuid);
+	};
+
 	showSingle = () => {
-		const {point, setSingleObject} = this.props;
+		const {goToElementMap, point, setSingleObject} = this.props;
 		setSingleObject(point);
+		goToElementMap(point);
 	};
 
 	truncate = (str, n) => {
 		return str.length > n ? str.substr(0, n - 1) + '...' : str;
 	};
 
-	renderIcon = () => {
+	renderIconEdit = () => {
+		return (
+			<div className={styles.icon} onClick={this.handleEditForm} title="Редактировать">
+				<EditIcon />
+			</div>
+		);
+	};
+
+	renderIconSingle = () => {
 		return (
 			<div className={styles.icon} onClick={this.showSingle} title="Показать на карте">
 				<PointMap />
@@ -52,7 +70,8 @@ export class PanelPointHeader extends Component<Props, State> {
 		return (
 			<div className={styles.container}>
 				{this.renderText()}
-				{this.renderIcon()}
+				{this.renderIconSingle()}
+				{this.renderIconEdit()}
 				<ReactTooltip type="light" />
 			</div>
 		);
