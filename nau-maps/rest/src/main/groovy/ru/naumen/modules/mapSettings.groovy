@@ -359,8 +359,6 @@ class APISettings
 {
     @JsonSchemaMeta(title = 'Ключ API Яндекс Карты')
     String yandex = ''
-    @JsonSchemaMeta(title = 'Ключ API Google Maps')
-    String google = ''
 }
 
 Object getDefaultSettings(def initSettings)
@@ -389,7 +387,7 @@ String getContentTitleMap()
     Collection<LinkedHashMap> argum = []
     contentInfo.collect {
         argum << [selectable     : true, title: it.contentTitle, uuid:
-            it.contentUuid, level: 0, extra: 'тест']
+            it.contentUuid, level: 0, extra: it.contentUuid]
     }
     return toJson(argum)
 }
@@ -456,7 +454,6 @@ void installStrategyCode(AbstractPointCharacteristics contentSettings)
                     (nameStrategy.hashCode() * -1)
                 code?.codeStrategy = ConstantMap.FIRST_PART_STRATEGY_CODE + hashCode
             }
-            checkingCorrectnessScript(code.scriptText)
         }
     }
 }

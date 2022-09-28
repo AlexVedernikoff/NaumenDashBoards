@@ -45,7 +45,7 @@ String getMapObjects(String subjectUuid, String contentUuid, LinkedTreeMap userU
     Object subjectObject = api.utils.get(subjectUuid)
     Object userObject = userUuid['admin'] ?: api.utils.get(userUuid['uuid'])
     LinkedHashMap<String, Object> bindings = userUuid['admin'] ? ['subject': subjectObject] :
-        ['subject': subjectUuid, 'user': userObject]
+        ['subject': subjectObject, 'user': userObject]
     saveBindingsDataToKeyValue(bindings)
     ISDtObject object = utils.get(subjectUuid)
     return getMapInfo(object, contentUuid, bindings)
@@ -95,6 +95,7 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
     {
         errors.add(errorText)
         logger.error("#mapRestSettings> ${ ex.message }", ex)
+        api.utils.throwReadableException(" ${ ex.message }")
     }
     return defaultValue
 }
@@ -121,6 +122,7 @@ class ElementsMap
     public static final String NOT_SPECIFIED = 'не указано'
     public static final String DATA_TYPE_HYPERLINK = 'hyperlink'
     public static final String DATA_TYPE_BO_LINKS = 'boLinks'
+    public static final String DATA_TYPE_BACK_BO_LINKS = 'backBOLinks'
     public static final String DATA_TYPE_CATALOGITEMSET = 'catalogItemSet'
     public static final String DATA_TYPE_BOOLEAN = 'bool'
     public static final String DATA_TYPE_DT_INTERVAL = 'dtInterval'
@@ -152,6 +154,8 @@ class ElementsMap
             dbTrail[strategie?.weight] : defaultSettingsWizardSettings?.width
         String opacity = dbTrail.hasProperty(strategie?.opacity) && dbTrail[strategie?.opacity] ?
             dbTrail[strategie?.opacity] : defaultSettingsWizardSettings?.opacity
+        String tooltip = dbTrail.hasProperty(strategie?.tooltip) && dbTrail[strategie?.tooltip] ?
+            dbTrail[strategie?.tooltip] : null
         String lineStyle = strategie.lineStyle ?: defaultSettingsWizardSettings.lineStyle
         String dataDisplayPointA
         String dataDisplayPointB
@@ -176,6 +180,7 @@ class ElementsMap
                 .setOpacity(opacity)
                 .setWidth(width)
                 .setLineStyle(lineStyle)
+                .setTooltip(tooltip)
                 .setGeopositions(dbTrail)
                 .setDisplayingLinesDots(strategie.displayingLinesDots)
                 .setIconFirst(dataDisplayPointA)
@@ -206,18 +211,22 @@ class ElementsMap
         defaultSettingsWizardSettings.points.each {
             dataCharacteristicDisplayListObjects.add(
                 new DataCharacteristicDisplayListObjects(
-                    it.metaClassObject.id,
+                    it?.metaClassObject?.id,
+                    it?.metaClassObject?.caseId,
                     it.attributeGroup
                 )
             )
         }
         Collection<MetaclassNameAndAttributeList> attributesFromGroup = []
         dataCharacteristicDisplayListObjects.each {
+            String metaClassData =
+                it.metaClassCaseId ? String.join('$', it.metaClassId, it.metaClassCaseId) :
+                    it.metaClassId
             Collection listattributes =
-                api.metainfo.getMetaClass(it.metaClassData)
+                api.metainfo.getMetaClass(metaClassData)
                    .getAttributeGroup(it.groupAttribute).attributes
             attributesFromGroup
-                .add(new MetaclassNameAndAttributeList(it.metaClassData, listattributes))
+                .add(new MetaclassNameAndAttributeList(metaClassData, listattributes))
         }
         return attributesFromGroup
     }
@@ -234,61 +243,78 @@ class ElementsMap
                                  Collection attributesFromGroup,
                                  String metaClassObject)
     {
-        attributesFromGroup.each { characteristicsDisplayObjects ->
-            if (characteristicsDisplayObjects.metaclassName == metaClassObject)
-            {
-                characteristicsDisplayObjects.listAttribute.each { currentAttribute ->
-                    String valueLabel
-                    String linkElement
-                    try
+        MetaclassNameAndAttributeList metaclassNameAndAttributeList =
+            attributesFromGroup.find { characteristicsDisplayObjects ->
+                characteristicsDisplayObjects.metaclassName == dbTrail.getMetainfo().toString()
+            }
+        if (metaclassNameAndAttributeList)
+        {
+            metaclassNameAndAttributeList.listAttribute.each { currentAttribute ->
+                String valueLabel
+                String linkElement
+                Collection<Value> boLinkTypeAttribute = []
+                try
+                {
+                    if (currentAttribute.type.code ==
+                        DATA_TYPE_BO_LINKS || currentAttribute.type.code == DATA_TYPE_BACK_BO_LINKS)
                     {
-                        valueLabel = dbTrail[currentAttribute.code] ?: NOT_SPECIFIED
-                        if (currentAttribute.type == 'object')
-                        {
-                            linkElement = api.web.open(dbTrail[currentAttribute.code].UUID)
+                        dbTrail[currentAttribute.code].each {
+                            boLinkTypeAttribute
+                                .add(new Value(label: it.title, url: api.web.open(it.UUID)))
                         }
                     }
-                    catch (Exception ex)
+                    valueLabel = dbTrail[currentAttribute.code] ?: NOT_SPECIFIED
+                    if (currentAttribute.type.code == 'object')
                     {
-                        logger
-                            .error("Metaclass ${ dbTrail.UUID.split('\\$').first() } does not contain this attribute - ${ currentAttribute.code } \n${ ex.message }")
+                        linkElement = api.web.open(dbTrail[currentAttribute.code].UUID)
                     }
-                    if (valueLabel && builder)
+                }
+                catch (Exception ex)
+                {
+                    logger
+                        .error("Metaclass ${ dbTrail.UUID.split('\\$').first() } does not contain this attribute - ${ currentAttribute.code } \n${ ex.message }")
+                }
+                if (valueLabel && builder)
+                {
+                    if (currentAttribute.type.code ==
+                        DATA_TYPE_HYPERLINK && valueLabel != NOT_SPECIFIED)
                     {
-                        if (currentAttribute.type.code ==
-                            DATA_TYPE_HYPERLINK && valueLabel != NOT_SPECIFIED)
-                        {
-                            Document doc = Jsoup.parse(valueLabel)
-                            Elements links = doc.select('a[href]')
-                            builder
-                                .addOption(
-                                    currentAttribute.title,
-                                    new Value(label: doc.text(), url: links.attr('href'))
-                                )
-                        }
-                        else if (currentAttribute.type.code == 'state')
-                        {
-                            valueLabel = api.metainfo.getStateTitle(dbTrail)
-                            builder
-                                .addOption(
-                                    currentAttribute.title,
-                                    new Value(label: valueLabel, url: linkElement)
-                                )
-                        }
-                        else
-                        {
+                        Document doc = Jsoup.parse(valueLabel)
+                        Elements links = doc.select('a[href]')
+                        builder
+                            .addOption(
+                                currentAttribute.title,
+                                new Value(label: doc.text(), url: links.attr('href'))
+                            )
+                    }
+                    else if (currentAttribute.type.code == 'state')
+                    {
+                        valueLabel = api.metainfo.getStateTitle(dbTrail)
+                        builder
+                            .addOption(
+                                currentAttribute.title,
+                                new Value(label: valueLabel, url: linkElement)
+                            )
+                    }
+                    else if (currentAttribute.type.code ==
+                             DATA_TYPE_BO_LINKS ||
+                             currentAttribute.type.code == DATA_TYPE_BACK_BO_LINKS)
+                    {
+                        builder.addOption(currentAttribute.title, boLinkTypeAttribute)
+                    }
+                    else
+                    {
 
-                            builder
-                                .addOption(
-                                    currentAttribute.title,
-                                    new Value(
-                                        label: formattedValueLabel(
-                                            valueLabel,
-                                            currentAttribute.type.code
-                                        ), url: linkElement
-                                    )
+                        builder
+                            .addOption(
+                                currentAttribute.title,
+                                new Value(
+                                    label: formattedValueLabel(
+                                        valueLabel,
+                                        currentAttribute.type.code
+                                    ), url: linkElement
                                 )
-                        }
+                            )
                     }
                 }
             }
@@ -386,6 +412,9 @@ class ElementsMap
             .getSettings()?.defVisualization
         CharacteristicsDisplayListObjects settings = new SettingsProvider()
             .getSettings()?.defVisualization?.points?.first()
+        String tooltip =
+            equipment.hasProperty(strategie?.tooltip) && equipment[strategie?.tooltip] ?
+                equipment[strategie?.tooltip] : null
         String codeAttributeGroup = settings?.attributeGroup
         String codeMetaClass = settings?.metaClassObject.id
         if (equipment && equipment.title && equipment.ciModel && equipment.location)
@@ -398,6 +427,7 @@ class ElementsMap
             )
                 .setHeader(equipment.title)
                 .setIcon(equipment)
+                .setTooltip(tooltip)
                 .setGeopositions(equipment, strategie)
                 .addAction(GO_TO_CARD, api.web.open(equipment.UUID))
 
@@ -581,18 +611,26 @@ enum EquipmentType
 class DataCharacteristicDisplayListObjects
 {
     /**
-     * Метакласс
+     * Класс объекта
      */
-    String metaClassData
+    String metaClassId
+
+    /**
+     * Код объекта
+     */
+    String metaClassCaseId
 
     /**
      * Группа атрибутов
      */
     String groupAttribute
 
-    DataCharacteristicDisplayListObjects(String metaClassData, String groupAttribute)
+    DataCharacteristicDisplayListObjects(String metaClassId,
+                                         String metaClassCaseId,
+                                         String groupAttribute)
     {
-        this.metaClassData = metaClassData
+        this.metaClassId = metaClassId
+        this.metaClassCaseId = metaClassCaseId
         this.groupAttribute = groupAttribute
     }
 }
@@ -625,7 +663,24 @@ class Option
     /**
      * Значение
      */
-    Value value
+    Collection value
+    /**
+     * Формат отображения
+     */
+    String presentation
+}
+
+@TupleConstructor()
+class OptionBoLinkAttribute
+{
+    /**
+     * Название опции
+     */
+    String label
+    /**
+     * Cписок значений
+     */
+    Collection<Value> value
     /**
      * Формат отображения
      */
@@ -779,14 +834,21 @@ class TrailBuilder extends MapObjectBuilder
      * Информация по отображению иконки
      */
     Boolean displayingLinesDots
+
     /**
      * Ссылка на иконку А
      */
     String iconFirst
+
     /**
      * Ссылка на иконку B
      */
     String iconSecond
+
+    /**
+     * Текст всплывающей подсказки
+     */
+    String tooltip
 
     protected TrailBuilder()
     {
@@ -819,6 +881,12 @@ class TrailBuilder extends MapObjectBuilder
     TrailBuilder setLineStyle(String lineStyle)
     {
         this.lineStyle = lineStyle
+        return this
+    }
+
+    TrailBuilder setTooltip(String tooltip)
+    {
+        this.tooltip = tooltip
         return this
     }
 
@@ -975,6 +1043,11 @@ class BasePointBuilder extends MapObjectBuilder
     @JsonIgnore
     String icon
 
+    /**
+     * Текст всплывающей подсказки
+     */
+    String tooltip
+
     BasePointBuilder setGeopositions(ISDtObject dbEquip, OutputObjectStrategies strategie)
     {
         def geoposition = dbEquip && dbEquip.location
@@ -1008,6 +1081,13 @@ class BasePointBuilder extends MapObjectBuilder
         this.icon = fileUuid ? "/sd/operator/download?uuid=${ fileUuid }" : ''
         return this
     }
+
+    BasePointBuilder setTooltip(String tooltip)
+    {
+        this.tooltip = tooltip
+        return this
+    }
+
 }
 
 /**
@@ -1064,6 +1144,21 @@ class MapObjectBuilder
 
     MapObjectBuilder addOption(String label,
                                Value value,
+                               PresentationType presentation =
+                                   PresentationType.RIGHT_OF_LABEL)
+    {
+        this.options.add(
+            new Option(
+                label: label,
+                value: [value],
+                presentation: presentation.name().toLowerCase()
+            )
+        )
+        return this
+    }
+
+    MapObjectBuilder addOption(String label,
+                               Collection<Value> value,
                                PresentationType presentation =
                                    PresentationType.RIGHT_OF_LABEL)
     {
