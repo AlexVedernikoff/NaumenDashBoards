@@ -2711,6 +2711,10 @@ class PercentageRelativeAttr extends BaseAttribute
      * Флаг на возможность включения агрегации AVG
      */
     Boolean ableForAvg = false
+    /**
+     * Атрибут второго уровня
+     */
+    Attribute ref
 
     /**
      * Полное копирование атрибута включая вложенные

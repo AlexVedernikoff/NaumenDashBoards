@@ -415,7 +415,7 @@
 
 
                         tableTotals = transposeRes?.withIndex()?.collect { val, i ->
-                            if (i in listIdsOfNormalAggregations || isSourceForEachRow)
+                            if (i in listIdsOfNormalAggregations)
                             {
                                 return val.sum {
                                     List<String> countAndPercentValuesForTable
