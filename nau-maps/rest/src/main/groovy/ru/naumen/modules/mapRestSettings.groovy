@@ -95,7 +95,7 @@ private Collection<LinkedHashMap> callParamsSettingsMethod(Collection<String> er
     {
         errors.add(errorText)
         logger.error("#mapRestSettings> ${ ex.message }", ex)
-        api.utils.throwReadableException(" ${ ex.message }")
+        api.utils.throwReadableException(ex.message)
     }
     return defaultValue
 }
@@ -253,70 +253,64 @@ class ElementsMap
                 String valueLabel
                 String linkElement
                 Collection<Value> boLinkTypeAttribute = []
-                try
+                if (dbTrail.hasProperty(currentAttribute.code) &&
+                    dbTrail[currentAttribute.code] && builder)
                 {
-                    if (currentAttribute.type.code ==
-                        DATA_TYPE_BO_LINKS || currentAttribute.type.code == DATA_TYPE_BACK_BO_LINKS)
+                    valueLabel = dbTrail[currentAttribute.code] ?: NOT_SPECIFIED
+                    if (currentAttribute.type.code == 'object')
+                    {
+                        linkElement = api.web.open(dbTrail[currentAttribute.code].UUID)
+                    }
+                    if (currentAttribute.type.code in [DATA_TYPE_BO_LINKS, DATA_TYPE_BACK_BO_LINKS])
                     {
                         dbTrail[currentAttribute.code].each {
                             boLinkTypeAttribute
                                 .add(new Value(label: it.title, url: api.web.open(it.UUID)))
                         }
                     }
-                    valueLabel = dbTrail[currentAttribute.code] ?: NOT_SPECIFIED
-                    if (currentAttribute.type.code == 'object')
+                    if (valueLabel)
                     {
-                        linkElement = api.web.open(dbTrail[currentAttribute.code].UUID)
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger
-                        .error("Metaclass ${ dbTrail.UUID.split('\\$').first() } does not contain this attribute - ${ currentAttribute.code } \n${ ex.message }")
-                }
-                if (valueLabel && builder)
-                {
-                    if (currentAttribute.type.code ==
-                        DATA_TYPE_HYPERLINK && valueLabel != NOT_SPECIFIED)
-                    {
-                        Document doc = Jsoup.parse(valueLabel)
-                        Elements links = doc.select('a[href]')
-                        builder
-                            .addOption(
-                                currentAttribute.title,
-                                new Value(label: doc.text(), url: links.attr('href'))
-                            )
-                    }
-                    else if (currentAttribute.type.code == 'state')
-                    {
-                        valueLabel = api.metainfo.getStateTitle(dbTrail)
-                        builder
-                            .addOption(
-                                currentAttribute.title,
-                                new Value(label: valueLabel, url: linkElement)
-                            )
-                    }
-                    else if (currentAttribute.type.code ==
-                             DATA_TYPE_BO_LINKS ||
-                             currentAttribute.type.code == DATA_TYPE_BACK_BO_LINKS)
-                    {
-                        builder.addOption(currentAttribute.title, boLinkTypeAttribute)
-                    }
-                    else
-                    {
-
-                        builder
-                            .addOption(
-                                currentAttribute.title,
-                                new Value(
-                                    label: formattedValueLabel(
-                                        valueLabel,
-                                        currentAttribute.type.code
-                                    ), url: linkElement
+                        if (currentAttribute.type.code ==
+                            DATA_TYPE_HYPERLINK && valueLabel != NOT_SPECIFIED)
+                        {
+                            Document doc = Jsoup.parse(valueLabel)
+                            Elements links = doc.select('a[href]')
+                            builder
+                                .addOption(
+                                    currentAttribute.title,
+                                    new Value(label: doc.text(), url: links.attr('href'))
                                 )
-                            )
+                        }
+                        else if (currentAttribute.type.code == 'state')
+                        {
+                            valueLabel = api.metainfo.getStateTitle(dbTrail)
+                            builder
+                                .addOption(
+                                    currentAttribute.title,
+                                    new Value(label: valueLabel, url: linkElement)
+                                )
+                        }
+                        else if (currentAttribute.type.code in [DATA_TYPE_BO_LINKS,
+                                                                DATA_TYPE_BACK_BO_LINKS])
+                        {
+                            builder.addOption(currentAttribute.title, boLinkTypeAttribute)
+                        }
+                        else
+                        {
+                            builder
+                                .addOption(
+                                    currentAttribute.title,
+                                    new Value(
+                                        label: formattedValueLabel(
+                                            valueLabel,
+                                            currentAttribute.type.code
+                                        ), url: linkElement
+                                    )
+                                )
+                        }
                     }
                 }
+
             }
         }
     }
