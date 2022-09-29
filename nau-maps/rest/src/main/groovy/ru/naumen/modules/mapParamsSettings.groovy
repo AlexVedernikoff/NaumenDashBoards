@@ -115,6 +115,8 @@ class DataGeneration
                 .setPlacesOfUse(it?.placesOfUsePoint)
                 .setPathLatitudeCoordinates(it?.coordinatesSettings?.pathCoordinatLongitud)
                 .setPathLongitudeCoordinates(it?.coordinatesSettings?.pathCoordinatLatitude)
+                .setTooltip(it?.pointCharacteristics?.pathTextTooltip)
+                .setPathIcon(it?.pointCharacteristics?.pathIcon)
             dataWizardSettings.add(strategies)
         }
         return dataWizardSettings
@@ -142,6 +144,7 @@ class DataGeneration
                 .setPathCoordinatesLongitudA(it?.coordinatesLine?.pathCoordinatesLongitudA)
                 .setPathCoordinatesLatitudeB(it?.coordinatesLine?.pathCoordinatesLatitudeB)
                 .setPathCoordinatesLongitudB(it?.coordinatesLine?.pathCoordinatesLongitudB)
+                .setTooltip(it?.pathTooltip)
                 .setDisplayingLinesDots(it?.displayingEndLineDots)
                 .setPathToIconA(it?.pathIconA)
                 .setPathToIconB(it?.pathIconB)
@@ -240,6 +243,11 @@ class PointsOnMap
      */
     String lineStyle
 
+    /**
+     * Текст всплывающей подсказки
+     */
+    String tooltip
+
     PointsOnMap(BasePointBuilder basePointBuilder)
     {
         this.type = MapObjectType.POINT
@@ -250,6 +258,7 @@ class PointsOnMap
         this.opacity = settingsWizardSettings?.opacity
         this.weight = settingsWizardSettings?.width
         this.lineStyle = settingsWizardSettings?.lineStyle
+        this.tooltip = basePointBuilder?.tooltip
     }
 }
 
@@ -305,6 +314,11 @@ class LinkedOnMap
      */
     String iconSecond
 
+    /**
+     * Текст всплывающей подсказки
+     */
+    String tooltip
+
     LinkedOnMap(TrailBuilder trailBuilder)
     {
         this.color = trailBuilder.color
@@ -316,6 +330,7 @@ class LinkedOnMap
         this.iconFirst = trailBuilder.iconFirst
         this.iconSecond = trailBuilder.iconSecond
         this.isIcon = trailBuilder.displayingLinesDots
+        this.tooltip = trailBuilder.tooltip
         this.parts = trailBuilder.parts.findResults {
             mapSection(it)
         }
@@ -336,7 +351,8 @@ class LinkedOnMap
                                  lineStyle   : this.lineStyle,
                                  iconFirst   : this.iconFirst,
                                  iconSecond  : this.iconSecond,
-                                 isIcon      : this.isIcon] : [:]
+                                 isIcon      : this.isIcon,
+                                 tooltip     : this.tooltip] : [:]
     }
 
     private LinkedHashMap mapPoint(BasePointBuilder basePointBuilder)
@@ -351,7 +367,8 @@ class LinkedOnMap
                                    lineStyle   : this.lineStyle,
                                    iconFirst   : this.iconFirst,
                                    iconSecond  : this.iconSecond,
-                                   isIcon      : this.isIcon] : [:]
+                                   isIcon      : this.isIcon,
+                                   tooltip     : this.tooltip] : [:]
     }
 }
 
@@ -493,6 +510,11 @@ class StrategiesLine extends OutputObjectStrategies
      */
     String pathToIconB
 
+    /**
+     * Текст всплывающей подсказки
+     */
+    String tooltip
+
     StrategiesLine setColor(String color)
     {
         this.color = color
@@ -559,6 +581,11 @@ class StrategiesLine extends OutputObjectStrategies
         return this
     }
 
+    StrategiesLine setTooltip(String tooltip)
+    {
+        this.tooltip = tooltip
+        return this
+    }
 }
 
 class StrategiesPoint extends OutputObjectStrategies
@@ -573,6 +600,16 @@ class StrategiesPoint extends OutputObjectStrategies
      */
     String pathLongitudeCoordinates
 
+    /**
+     * Текст всплывающей подсказки
+     */
+    String tooltip
+
+    /**
+     * Иконка для отображения
+     */
+    String pathIcon
+
     StrategiesPoint setPathLatitudeCoordinates(String pathLatitudeCoordinates)
     {
         this.pathLatitudeCoordinates = pathLatitudeCoordinates
@@ -582,6 +619,18 @@ class StrategiesPoint extends OutputObjectStrategies
     StrategiesPoint setPathLongitudeCoordinates(String pathLongitudeCoordinates)
     {
         this.pathLongitudeCoordinates = pathLongitudeCoordinates
+        return this
+    }
+
+    StrategiesPoint setTooltip(String tooltip)
+    {
+        this.tooltip = tooltip
+        return this
+    }
+
+    StrategiesPoint setPathIcon(String pathIcon)
+    {
+        this.pathIcon = pathIcon
         return this
     }
 }
