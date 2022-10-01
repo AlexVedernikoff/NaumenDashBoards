@@ -253,11 +253,10 @@ class ElementsMap
                 String valueLabel
                 String linkElement
                 Collection<Value> boLinkTypeAttribute = []
-                if (dbTrail.hasProperty(currentAttribute.code) &&
-                    dbTrail[currentAttribute.code] && builder)
+                if (dbTrail.hasProperty(currentAttribute.code) && builder)
                 {
                     valueLabel = dbTrail[currentAttribute.code] ?: NOT_SPECIFIED
-                    if (currentAttribute.type.code == 'object')
+                    if (currentAttribute.type.code == 'object' && dbTrail[currentAttribute.code])
                     {
                         linkElement = api.web.open(dbTrail[currentAttribute.code].UUID)
                     }
