@@ -3,6 +3,7 @@ import cn from 'classnames';
 import {getCellStyle, getParameterStyle, getValueForColumn} from './helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import type {PivotColumn, PivotDataRow} from 'utils/recharts/types';
+import {PIVOT_COLUMN_TYPE} from 'utils/recharts/constants';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
@@ -12,6 +13,22 @@ import {TEXT_HANDLERS} from 'store/widgets/data/constants';
 export class PivotRow extends PureComponent<Props, State> {
 	state = {
 		showChildren: true
+	};
+
+	handleClickCell = (column: PivotColumn) => () => {
+		const {drillDown, filter} = this.props;
+
+		if (column.type === PIVOT_COLUMN_TYPE.VALUE) {
+			if (column.isBreakdown) {
+				const keySplitIndex = column.key.indexOf('$');
+				const indicator = column.key.slice(0, keySplitIndex);
+				const breakdown = column.key.slice(keySplitIndex + 1);
+
+				drillDown(indicator, filter, breakdown);
+			} else {
+				drillDown(column.key, filter);
+			}
+		}
 	};
 
 	handleToggleShowChild = e => {
@@ -28,7 +45,7 @@ export class PivotRow extends PureComponent<Props, State> {
 		const cellStyle = getCellStyle(columnsWidth[index + 1], level, style);
 
 		return (
-			<div className={className} key={column.key} style={cellStyle}>
+			<div className={className} key={column.key} onClick={this.handleClickCell(column)} style={cellStyle}>
 				{formatValue}
 			</div>
 		);
@@ -67,8 +84,8 @@ export class PivotRow extends PureComponent<Props, State> {
 	};
 
 	renderSubRow = (subRow: PivotDataRow, idx: number) => {
-		const {columns, columnsWidth, filter, formatters, index, level, style} = this.props;
-		const subFilter = {...filter, [subRow.key]: subRow.value};
+		const {columns, columnsWidth, drillDown, filter, formatters, index, level, style} = this.props;
+		const subFilter = [...filter, {key: subRow.key, value: subRow.value}];
 		const subIndex = `${index}${idx + 1}.`;
 		const key = `${subRow.key}::${subRow.value}`;
 
@@ -76,6 +93,7 @@ export class PivotRow extends PureComponent<Props, State> {
 			<PivotRow
 				columns={columns}
 				columnsWidth={columnsWidth}
+				drillDown={drillDown}
 				filter={subFilter}
 				formatters={formatters}
 				index={subIndex}

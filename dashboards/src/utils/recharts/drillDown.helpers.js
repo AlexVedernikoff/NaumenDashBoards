@@ -1,28 +1,31 @@
 // @flow
-/* eslint-disable no-unused-vars */
 import type {
 	AddFilterProps,
 	DrillDownOptions,
+	FoundPivotIndicatorInfo,
 	GetCircleDrillDownOptions,
 	GetComboDrillDownOptions,
-	GetDrillDownOptions
+	GetDrillDownOptions,
+	GetPivotDrillDownOptions
 } from './types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {
 	AxisData,
 	AxisWidget,
-	Chart,
 	ChartDataSet,
 	CircleData,
 	CircleWidget,
 	ComboData,
 	ComboWidget,
 	Group,
-	MixedAttribute
+	MixedAttribute,
+	PivotIndicator,
+	PivotWidget
 } from 'store/widgets/data/types';
+import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
-import {deepClone} from 'helpers';
+import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {getAttributeValue, getSourceAttribute} from 'store/sources/attributes/helpers';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
@@ -50,28 +53,25 @@ const isNeedsClearedValue = (attribute: Attribute, group: Group): boolean => {
  * Добавляет фильтр группировки
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @param {AddFilterProps} props - данные для нового фильтра
- * @returns {DrillDownMixin}
+ * @returns {void}
  */
-const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDownMixin => {
-	const {attribute, group, value} = props;
-	let newMixin = mixin;
+const updateGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): void => {
+	const {attribute, descriptor, group, value} = props;
 
 	if (attribute && group) {
-		newMixin = deepClone(mixin);
 		const clearedValue = hasUUIDsInLabels(attribute, group) ? getSeparatedLabel(value) : value;
 
 		if (clearedValue) {
-			newMixin.title = `${mixin.title}. ${clearedValue}`;
+			mixin.title = `${mixin.title}. ${clearedValue}`;
 		}
 
-		newMixin.filters.push({
+		mixin.filters.push({
 			attribute,
+			descriptor,
 			group,
 			value: isNeedsClearedValue(attribute, group) ? clearedValue : value
 		});
 	}
-
-	return newMixin;
 };
 
 /**
@@ -79,13 +79,14 @@ const addGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): DrillDown
  *
  * @param {AxisData | CircleData} dataSet - набор данных виджета
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
- * @returns {DrillDownMixin}
+ * @returns {void}
  */
-const addIndicatorInfo = (dataSet: AxisData | CircleData, mixin: DrillDownMixin): DrillDownMixin => {
+const addIndicatorInfo = (dataSet: AxisData | CircleData, mixin: DrillDownMixin): void => {
 	const {aggregation, attribute} = dataSet.indicators[0];
 
-	attribute && mixin.filters.push({aggregation, attribute});
-	return mixin;
+	if (attribute) {
+		mixin.filters.push({aggregation, attribute});
+	}
 };
 
 /**
@@ -93,11 +94,11 @@ const addIndicatorInfo = (dataSet: AxisData | CircleData, mixin: DrillDownMixin)
  * @param {AxisData} dataSet - набор данных виджета
  * @param {string} value - значение параметра
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
- * @returns {DrillDownMixin}
+ * @returns {void}
  */
-const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMixin): DrillDownMixin => {
+const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMixin): void => {
 	const {attribute, group} = dataSet.parameters[0];
-	return addGroupFilter(mixin, {attribute, group, value});
+	return updateGroupFilter(mixin, {attribute, group, value});
 };
 
 /**
@@ -106,20 +107,17 @@ const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMi
  * @param {ChartDataSet} dataSet - набор данных виджета
  * @param {string} value - значение разбивки
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
- * @returns {DrillDownMixin}
+ * @returns {void}
  */
-const addBreakdownFilter = (dataSet: ChartDataSet, value: string, mixin: DrillDownMixin): DrillDownMixin => {
+const addBreakdownFilter = (dataSet: ChartDataSet, value: string, mixin: DrillDownMixin): void => {
 	const {breakdown} = dataSet;
 	const breakdownSet = breakdown && breakdown.find(attrSet => attrSet.dataKey === dataSet.dataKey);
-	let newMixin = mixin;
 
 	if (breakdownSet) {
 		const {attribute, group} = breakdownSet;
 
-		newMixin = addGroupFilter(mixin, {attribute, group, value});
+		updateGroupFilter(mixin, {attribute, group, value});
 	}
-
-	return newMixin;
 };
 
 /**
@@ -187,21 +185,6 @@ const hasDrillDownCircleWidget = (widget: CircleWidget) => {
 	return false;
 };
 
-/**
- * Определяет можно ли в данном Combo-виджете производить DrillDown
- *
- * @param {ComboWidget} widget - виджет для проверки
- * @param {string} dataKey - идентификатор источника данных
- * @returns {boolean} - возвращает true, если по данному комбо-виджету данные в дриллдауне будут ожидаемыми
- * false - если по указанному комбо-виджету нельзя построить корректную выборку.
- */
-const hasDrillDownComboWidget = (widget: ComboWidget, dataKey: string) => {
-	const {data} = widget;
-	const dataSet = data.find(dataSet => dataSet.dataKey === dataKey);
-
-	return dataSet ? hasDrillDownByParameter(dataSet) : false;
-};
-
 const makeGeneratorAxisDrillDownOptions = (widget: AxisWidget): GetDrillDownOptions => {
 	let result: GetDrillDownOptions;
 
@@ -210,16 +193,16 @@ const makeGeneratorAxisDrillDownOptions = (widget: AxisWidget): GetDrillDownOpti
 	} else {
 		if (hasDrillDownAxisWidget(widget)) {
 			result = (parameterValue: string, breakdownValue?: string): DrillDownOptions => {
-				let mixin = createDrillDownMixin(widget);
+				const mixin = createDrillDownMixin(widget);
 
 				const index = getMainDataSetIndex(widget.data);
 				const dataSet = widget.data[index];
 
-				mixin = addIndicatorInfo(dataSet, mixin);
-				mixin = addParameterFilter(dataSet, parameterValue, mixin);
+				addIndicatorInfo(dataSet, mixin);
+				addParameterFilter(dataSet, parameterValue, mixin);
 
 				if (breakdownValue) {
-					mixin = addBreakdownFilter(dataSet, breakdownValue, mixin);
+					addBreakdownFilter(dataSet, breakdownValue, mixin);
 				}
 
 				return {index, mixin, mode: 'success'};
@@ -240,13 +223,13 @@ const makeGeneratorCircleDrillDownOptions = (widget: CircleWidget): GetCircleDri
 	} else {
 		if (hasDrillDownCircleWidget(widget)) {
 			result = (breakdownValue: string): DrillDownOptions => {
-				let mixin = createDrillDownMixin(widget);
+				const mixin = createDrillDownMixin(widget);
 
 				const index = getMainDataSetIndex(widget.data);
 				const dataSet = widget.data[index];
 
-				mixin = addIndicatorInfo(dataSet, mixin);
-				mixin = addBreakdownFilter(dataSet, breakdownValue, mixin);
+				addIndicatorInfo(dataSet, mixin);
+				addBreakdownFilter(dataSet, breakdownValue, mixin);
 
 				return {index, mixin, mode: 'success'};
 			};
@@ -267,13 +250,13 @@ const makeGeneratorComboDrillDownOptions = (widget: ComboWidget): GetComboDrillD
 
 			if (hasDrillDownByParameter(dataSet)) {
 				handlers[dataKey] = (parameterValue: string, breakdownValue?: string) => {
-					let mixin = createDrillDownMixin(widget);
+					const mixin = createDrillDownMixin(widget);
 
-					mixin = addIndicatorInfo(dataSet, mixin);
-					mixin = addParameterFilter(dataSet, parameterValue, mixin);
+					addIndicatorInfo(dataSet, mixin);
+					addParameterFilter(dataSet, parameterValue, mixin);
 
 					if (breakdownValue) {
-						mixin = addBreakdownFilter(dataSet, breakdownValue, mixin);
+						addBreakdownFilter(dataSet, breakdownValue, mixin);
 					}
 
 					return {index, mixin, mode: 'success'};
@@ -295,11 +278,127 @@ const makeGeneratorComboDrillDownOptions = (widget: ComboWidget): GetComboDrillD
 	};
 };
 
+/**
+ * Ищет индикатор по ключу в виджете сводной таблицы
+ * @param {PivotWidget} widget - виджет сводной таблицы
+ * @param {string} key - ключ индикатора
+ * @returns {FoundPivotIndicatorInfo} - индекс и найденный индикатор
+ */
+const findIndicatorInfoInPivot = (widget: PivotWidget, key: string): FoundPivotIndicatorInfo => {
+	let indicator = null;
+
+	const index = widget.data.findIndex((dataSet, idx) => {
+		indicator = dataSet.indicators.find(item => item.key === key);
+		return indicator;
+	});
+
+	return {index, indicator};
+};
+
+/**
+ * Добавляет индикатор в миксин дриллдауна сводной таблицы
+ * @param {DrillDownMixin} mixin - миксин дриллдауна
+ * @param {PivotIndicator} indicator - индикатор сводной таблицы
+ * @returns {void}
+ */
+const addIndicatorToPivotMixin = (mixin: DrillDownMixin, indicator: PivotIndicator) => {
+	const {aggregation, attribute: indicatorAttribute} = indicator;
+
+	if (indicatorAttribute) {
+		mixin.filters.push({aggregation, attribute: indicatorAttribute});
+	}
+};
+
+/**
+ * Добавляет параметры в миксин дриллдауна сводной таблицы
+ *
+ * @param {DrillDownMixin} mixin - миксин дриллдауна
+ * @param {Array} parameters - список значений ключ параметра - значение
+ * @param {Array} parametersMap - справочник информации о параметрах
+ * @returns {void}
+ */
+const addParametersToPivotMixin = (
+	mixin: DrillDownMixin,
+	parameters: Array<{key: string, value: string}>,
+	parametersMap: {[key: string]: Object}
+): void => {
+	parameters.forEach(filter => {
+		const {attribute, descriptor, group} = parametersMap[filter.key] ?? {};
+
+		if (attribute) {
+			updateGroupFilter(mixin, {attribute, descriptor, group, value: filter.value});
+		}
+	});
+};
+
+/**
+ * Добавляет разбивку индикатора в миксин дриллдауна сводной таблицы
+ * @param {DrillDownMixin} mixin - миксин дриллдауна
+ * @param {PivotIndicator} indicator - индикатор сводной таблицы
+ * @param {string} breakdown - значение разбивки
+ * @returns {void}
+ */
+const addBreakdownToPivotMixin = (mixin: DrillDownMixin, indicator: PivotIndicator, breakdown?: string): void => {
+	if (indicator.breakdown && breakdown) {
+		const {attribute, group} = indicator.breakdown;
+
+		if (attribute) {
+			updateGroupFilter(mixin, {attribute, group, value: breakdown});
+		}
+	}
+};
+
+/**
+ * Формирует функцию-генератор параметров для запроса ссылки на дриллдаун для сводной таблицы
+ * @param {PivotWidget} widget - виджет
+ * @param {DiagramBuildData} rawData - сырые серверные данные
+ * @returns {GetPivotDrillDownOptions} - функция-генератор запросов для дриллдауна
+ */
+const makeGeneratorPivotDrillDownOptions = (widget: PivotWidget, rawData: DiagramBuildData): GetPivotDrillDownOptions => {
+	let result: GetPivotDrillDownOptions;
+
+	if (isMobile().any) {
+		result = () => ({mode: 'disable'});
+	} else {
+		const {columns} = rawData;
+		const parametersSet = {};
+
+		columns.filter(column => column.type === COLUMN_TYPES.PARAMETER).forEach(({accessor, attribute, descriptor, group}) => {
+			parametersSet[accessor] = {attribute, descriptor, group};
+		});
+
+		result = (indicatorKey: string, filters: Array<{key: string, value: string}>, breakdown?: string) => {
+			let mixinResult = {mode: 'error'};
+			const lastParameter = filters[filters.length - 1];
+			const {attribute} = parametersSet[lastParameter.key];
+
+			if (hasAttributeDrillDown(attribute)) {
+				const {index, indicator} = findIndicatorInfoInPivot(widget, indicatorKey);
+
+				if (indicator) {
+					const mixin = createDrillDownMixin(widget);
+
+					addIndicatorToPivotMixin(mixin, indicator);
+					addParametersToPivotMixin(mixin, filters, parametersSet);
+					addBreakdownToPivotMixin(mixin, indicator, breakdown);
+
+					mixinResult = {index, mixin, mode: 'success'};
+				}
+			}
+
+			return mixinResult;
+		};
+	}
+
+	return result;
+};
+
 export {
 	addBreakdownFilter,
 	addParameterFilter,
 	makeGeneratorAxisDrillDownOptions,
 	makeGeneratorCircleDrillDownOptions,
+	makeGeneratorPivotDrillDownOptions,
 	makeGeneratorComboDrillDownOptions,
 	isNeedsClearedValue
 };

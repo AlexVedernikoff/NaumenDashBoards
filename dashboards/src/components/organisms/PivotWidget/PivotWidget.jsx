@@ -7,6 +7,7 @@ import type {Props, State} from './types';
 import React, {createRef, PureComponent} from 'react';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import styles from './styles.less';
+import t from 'localization';
 
 export class PivotWidget extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -48,6 +49,18 @@ export class PivotWidget extends PureComponent<Props, State> {
 
 	handleChangeColumnsWidth = (columnsWidth: Array<number>) => this.setState({columnsWidth});
 
+	handleDrillDown = (indicator: string, filters: Array<{key: string, value: string}>, breakdown?: string) => {
+		const {drillDown, setWidgetWarning, widget} = this.props;
+		const {options: {getDrillDownOptions}} = this.state;
+		const params = getDrillDownOptions(indicator, filters, breakdown);
+
+		if (params.mode === 'error') {
+			setWidgetWarning({id: widget.id, message: t('drillDownBySelection::Fail')});
+		} else if (params.mode === 'success') {
+			drillDown(widget, params.index, params.mixin);
+		}
+	};
+
 	handleResize = (...props) => {
 		const {updateOptions} = this.props;
 		const {current: container} = this.containerRef;
@@ -65,6 +78,7 @@ export class PivotWidget extends PureComponent<Props, State> {
 				columns={columnsList}
 				columnsWidth={columnsWidth}
 				data={data}
+				drillDown={this.handleDrillDown}
 				formatters={formatters}
 				style={bodyStyle}
 			/>

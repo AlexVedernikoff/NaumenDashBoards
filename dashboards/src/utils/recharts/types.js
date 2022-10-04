@@ -15,6 +15,7 @@ import type {
 	FontStyle,
 	Group,
 	Legend,
+	PivotIndicator,
 	Ranges,
 	SpeedometerIndicatorSettings,
 	TextHandler
@@ -49,6 +50,8 @@ export type DrillDownOptions = DrillDownErrorOptions | DrillDownSuccessOptions;
 export type GetDrillDownOptions = (parameter: string, breakdown?: string) => DrillDownOptions;
 
 export type GetCircleDrillDownOptions = (breakdown: string) => DrillDownOptions;
+
+export type GetPivotDrillDownOptions = (indicator: string, filter: Array<{key: string, value: string}>, breakdown?: string) => DrillDownOptions;
 
 export type GetComboDrillDownOptions = (dataKey: string, parameter: string, breakdown?: string) => DrillDownOptions;
 
@@ -273,6 +276,7 @@ export type PivotColumnSum = {
 
 export type PivotColumnValues = {
 	...PivotColumnBase,
+	isBreakdown: boolean,
 	type: typeof PIVOT_COLUMN_TYPE.VALUE
 };
 
@@ -283,11 +287,11 @@ export type PivotColumnParameter = {
 
 export type PivotColumnGroup = {
 	...PivotColumnBase,
-	children: Array<PivotColumnGroup | PivotColumnSum | PivotColumnValues>,
+	children: Array<PivotColumnGroup | PivotColumnParameter | PivotColumnSum | PivotColumnValues>,
 	type: typeof PIVOT_COLUMN_TYPE.EMPTY_GROUP | typeof PIVOT_COLUMN_TYPE.GROUP
 };
 
-export type PivotColumn = PivotColumnGroup | PivotColumnSum | PivotColumnValues;
+export type PivotColumn = PivotColumnGroup | PivotColumnParameter | PivotColumnSum | PivotColumnValues;
 
 export type PivotColumns = {
 	columns: Array<PivotColumn>,
@@ -313,6 +317,7 @@ export type PivotOptions = {
 	columnWidth: number,
 	data: PivotSeriesData,
 	formatters: PivotFormatter,
+	getDrillDownOptions: GetPivotDrillDownOptions,
 	headers: Array<PivotColumn>,
 	headerStyle: PivotHeaderSettings,
 	headHeight: number,
@@ -359,6 +364,7 @@ export type AddFiltersProps = {
 
 export type AddFilterProps = {
 	attribute?: Attribute,
+	descriptor?: string,
 	group?: Group,
 	value: string
 };
@@ -382,4 +388,9 @@ export type ValueFromSeriesLabelResult = {
 export type ParseColumnsResult = {
 	columns: Array<PivotColumn>,
 	totalHeight: number
+};
+
+export type FoundPivotIndicatorInfo = {
+	index: number,
+	indicator: ?PivotIndicator
 };
