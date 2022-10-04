@@ -61,7 +61,7 @@ const ROW_HEIGHT = 32;
 
 const DEFAULT_CELL_SETTINGS = Object.freeze({
 	fontColor: 'black',
-	fontStyle: undefined
+	fontStyle: FONT_STYLES.UNDERLINE
 });
 
 const DEFAULT_HEADER_CELL_SETTINGS = Object.freeze({

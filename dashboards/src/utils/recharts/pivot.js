@@ -4,6 +4,7 @@ import {getBuildSet} from 'store/widgets/data/helpers';
 import {getColumnWidth, getSeriesData, parseColumns, parseColumnsFlat, parseMetadata} from './pivot.helpers';
 import {getPivotFormatter} from './formater';
 import {getPivotWidget} from './helpers';
+import {makeGeneratorPivotDrillDownOptions} from './drillDown.helpers';
 import type {PivotOptions} from './types';
 import type {Widget} from 'store/widgets/data/types';
 
@@ -25,6 +26,7 @@ const getOptions = (
 			const columnsList = parseColumnsFlat(headers);
 			const columnWidth = getColumnWidth(columnsList, container);
 			const formatters = getPivotFormatter(pivotWidget, data, container);
+			const getDrillDownOptions = makeGeneratorPivotDrillDownOptions(pivotWidget, rawData);
 
 			return {
 				bodyStyle,
@@ -32,6 +34,7 @@ const getOptions = (
 				columnsList,
 				data,
 				formatters,
+				getDrillDownOptions,
 				headHeight,
 				headerStyle,
 				headers,

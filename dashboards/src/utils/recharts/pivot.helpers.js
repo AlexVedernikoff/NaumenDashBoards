@@ -72,7 +72,7 @@ const parseIndicatorGrouping2Columns = (
 	height: number,
 	breakdown: PivotBreakdownInfo
 ): Array<PivotColumn> => {
-	const result = [];
+	const result: Array<PivotColumn> = [];
 	const isLastColumnGroup = false;
 
 	grouping.forEach(item => {
@@ -84,6 +84,7 @@ const parseIndicatorGrouping2Columns = (
 				const breakdownColumns = breakdown[key];
 				const children = breakdownColumns.map(({accessor: key, header: title}) => ({
 					height: height - 1,
+					isBreakdown: true,
 					isLastColumnGroup,
 					key,
 					title,
@@ -105,7 +106,7 @@ const parseIndicatorGrouping2Columns = (
 
 				result.push(group);
 			} else {
-				result.push({height, isLastColumnGroup, key, title, type: PIVOT_COLUMN_TYPE.VALUE, width: 1});
+				result.push({height, isBreakdown: false, isLastColumnGroup, key, title, type: PIVOT_COLUMN_TYPE.VALUE, width: 1});
 			}
 		}
 
@@ -144,10 +145,15 @@ const parseIndicatorGrouping2Columns = (
 
 				result.push(group);
 			} else {
-				result.push({height, isLastColumnGroup, key, title, type: PIVOT_COLUMN_TYPE.EMPTY_GROUP, width: 1});
+				const group: PivotColumnGroup = {
+					children: [], height, isLastColumnGroup, key, title, type: PIVOT_COLUMN_TYPE.EMPTY_GROUP, width: 1
+				};
+
+				result.push(group);
 			}
 		}
 	});
+
 	return result;
 };
 

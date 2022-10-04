@@ -1,21 +1,22 @@
 // @flow
 import type {PivotDataRow} from 'utils/recharts/types';
-import {PivotRow} from 'PivotWidget/components/PivotRow/PivotRow';
+import PivotRow from 'PivotWidget/components/PivotRow/PivotRow';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class Body extends PureComponent<Props> {
 	renderTopRow = (row: PivotDataRow, idx: number) => {
-		const {columns, columnsWidth, formatters, style} = this.props;
+		const {columns, columnsWidth, drillDown, formatters, style} = this.props;
 		const key = `row_${row.key}::${row.value}`;
-		const filter = {[row.key]: row.value};
+		const filter = [{key: row.key, value: row.value}];
 		const index = `${idx + 1}.`;
 
 		return (
 			<PivotRow
 				columns={columns}
 				columnsWidth={columnsWidth}
+				drillDown={drillDown}
 				filter={filter}
 				formatters={formatters}
 				index={index}
