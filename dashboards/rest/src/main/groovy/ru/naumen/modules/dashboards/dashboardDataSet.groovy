@@ -5582,16 +5582,28 @@
                     }
                     breakdownValues = breakdownValues.unique()
 
-									 if (aggregation.breakdown?.group?.format == 'MM YY') {
-										 	List tempBreakdownValues = []
-										 		 for (int i = 0; i < NOMINATIVE_RUSSIAN_MONTH.size(); i++) {
-											  		for (int j = 1; j < breakdownValues.size(); j++) {
-																if (NOMINATIVE_RUSSIAN_MONTH[i].equals(breakdownValues[j].split(" ")[0])) tempBreakdownValues.add(breakdownValues[j])
-														}
-												 }
-										 	tempBreakdownValues.sort { a, b ->  (a.split(" ")[1] as Integer) <=> (b.split(" ")[1] as Integer) }
-										 	breakdownValues = tempBreakdownValues
-									 }
+                    if (aggregation.breakdown?.group?.format == 'MM YY')
+                    {
+                        List tempBreakdownValues = []
+                        for (int i = 0; i < NOMINATIVE_RUSSIAN_MONTH.size(); i++)
+                        {
+                            for (int j = 1; j < breakdownValues.size(); j++)
+                            {
+                                if (NOMINATIVE_RUSSIAN_MONTH[i].equals(
+                                    breakdownValues[j].split(" ")[0]
+                                ))
+                                {
+                                    tempBreakdownValues.add(breakdownValues[j])
+                                }
+                            }
+                        }
+                        tempBreakdownValues.sort { a, b
+                            ->
+                            (a.split(" ")[1] as Integer) <=> (b.split(" ")[1] as Integer)
+                        }
+                        breakdownValues = tempBreakdownValues
+                    }
+
                     Map breakdownAttributeValue = [
                         name       : aggregation.attribute?.title,
                         attribute  : aggregation.attribute,
@@ -5615,7 +5627,7 @@
                     )
 
                     Column column = columns.find {
-                        it.attribute == aggregation.attribute
+                        it.attribute == aggregation.attribute && it.accessor == aggregation.key
                     }
 
                     column.columns = breakdownColumns
