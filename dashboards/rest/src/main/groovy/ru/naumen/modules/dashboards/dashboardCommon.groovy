@@ -2209,11 +2209,6 @@ class Constants {
                 (value.hasField('indicators') || value['sourceForCompute']) && !value.hasField('descriptor')
             }
         },
-        (PivotTableData) : { value ->
-            return use(JacksonUtils) {
-                (value.hasField('type') || value['type'] == 'PivotDataSet')
-            }
-        },
         (TableCurrentData): { value ->
             return use(JacksonUtils) {
                 value.hasField('parameters') && value.hasField('descriptor')
@@ -4064,9 +4059,9 @@ class TableCurrentData extends DiagramNowData
      */
     Collection<NewParameter> parameters
     /**
-     * Источник старого формата
+     * Источник нового формата
      */
-    SourceValue source
+    NewSourceValue source
     /**
      * Фильтрация источника
      */
