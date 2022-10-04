@@ -10,18 +10,28 @@ export class IconButton extends PureComponent<Props> {
 	static defaultProps = {
 		active: false,
 		className: '',
+		disable: false,
 		round: true,
 		tip: '',
 		variant: VARIANTS.INFO
 	};
 
+	handleClick = event => {
+		const {disable, onClick} = this.props;
+
+		if (!disable && onClick) {
+			onClick(event);
+		}
+	};
+
 	render () {
-		const {active, className, icon, onClick, round, tip, variant} = this.props;
+		const {active, className, disable, icon, round, tip, variant} = this.props;
 		const {GRAY, INFO} = VARIANTS;
 		const buttonCN = cn({
 			[styles.button]: true,
 			[styles.round]: round,
-			[styles.active]: active,
+			[styles.disable]: disable,
+			[styles.active]: active && !disable,
 			[className]: true,
 			[styles.info]: variant === INFO,
 			[styles.gray]: variant === GRAY
@@ -30,7 +40,7 @@ export class IconButton extends PureComponent<Props> {
 		return (
 			<button
 				className={buttonCN}
-				onClick={onClick}
+				onClick={this.handleClick}
 				title={tip}
 				type="button"
 			>

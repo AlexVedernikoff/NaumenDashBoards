@@ -5,6 +5,7 @@ import {VARIANTS} from './constants';
 export type DefaultProps = {|
 	active: boolean,
 	className: string,
+	disable: boolean,
 	round: boolean,
 	tip: React$Node,
 	variant: $Keys<typeof VARIANTS>

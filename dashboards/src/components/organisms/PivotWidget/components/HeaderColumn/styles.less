@@ -8,10 +8,6 @@
 		flex-direction: column;
 		overflow: hidden;
 		position: relative;
-
-		&:last-child {
-			border-right: none;
-		}
 	}
 
 	.parameter {
@@ -19,6 +15,15 @@
 		border-left: solid 1px @ninegrey;
 		left: 0;
 		position: sticky;
+		top: 0;
+		z-index: 2;
+	}
+
+	.totalSum {
+		background-color: @white;
+		border-left: solid 1px @ninegrey !important;
+		position: sticky;
+		right: 0;
 		top: 0;
 		z-index: 2;
 	}

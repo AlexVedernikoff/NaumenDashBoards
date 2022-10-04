@@ -9,12 +9,15 @@ import type {
 	PivotColumn,
 	PivotColumnGroup,
 	PivotColumnSum,
+	PivotColumnTotalSum,
 	PivotDataItem,
+	PivotDataRow,
 	PivotMetadata,
 	PivotRawRow,
 	PivotSeriesData
 } from './types';
 import {PIVOT_COLUMN_MIN_WIDTH, PIVOT_COLUMN_TYPE} from './constants';
+import t from 'localization';
 
 /**
  * Создает группировку индикаторов по умолчанию из данных виджета
@@ -192,6 +195,16 @@ const makeParameterCell = (height: number): PivotColumn => ({
 	width: 1
 });
 
+const makeTotalRowAmountCell = (height: number, columns: Array<PivotColumn>): PivotColumnTotalSum => ({
+	height,
+	isLastColumnGroup: true,
+	key: 'Σ::TotalRowAmountCell',
+	sumKeys: columns.filter(column => column.type === PIVOT_COLUMN_TYPE.VALUE).map(column => column.key),
+	title: t('PivotWidget::Total'),
+	type: PIVOT_COLUMN_TYPE.TOTAL_SUM,
+	width: 1
+});
+
 /**
  * Рассчитывает дерево столбцов и высоту шапки
  * @param {PivotWidget} widget - информация о виджете
@@ -216,7 +229,16 @@ export const parseColumns = (
 		...parseIndicatorGrouping2Columns(indicatorGrouping, totalHeight, breakdown)
 	];
 
-	return {columns, totalHeight};
+	const columnsList = parseColumnsFlat(columns);
+
+	if (widget.showTotalRowAmount) {
+		const totalRowAmountCell = makeTotalRowAmountCell(totalHeight, columnsList);
+
+		columns.push(totalRowAmountCell);
+		columnsList.push(totalRowAmountCell);
+	}
+
+	return {columns, columnsList, totalHeight};
 };
 
 /**
@@ -226,7 +248,7 @@ export const parseColumns = (
  * @returns {Array<PivotColumn>} - столбцы нижнего уровня
  */
 export const parseColumnsFlat = (columns: Array<PivotColumn>, isTopLevel: boolean = true): Array<PivotColumn> => {
-	const result = [];
+	const result: Array<PivotColumn> = [];
 
 	columns.forEach(column => {
 		if (column.type === PIVOT_COLUMN_TYPE.GROUP) {
@@ -245,14 +267,36 @@ export const parseColumnsFlat = (columns: Array<PivotColumn>, isTopLevel: boolea
 };
 
 /**
- * Формирует ширину столбцов по умолчанию
+ * Рассчитывает ширину столбцов
  * @param {Array<PivotColumn>} columns - список столбцов
  * @param {HTMLDivElement} container - контейнер
- * @returns {number} - ширина столбцов по умолчанию
+ * @returns {Array} - ширина столбцов
  */
-export const getColumnWidth = (columns: Array<PivotColumn>, container: HTMLDivElement): number => {
-	const {width: containerWidth} = container.getBoundingClientRect();
-	return Math.trunc(Math.max((containerWidth - 9) / (columns.length + 1), PIVOT_COLUMN_MIN_WIDTH));
+export const getColumnsWidth = (columns: Array<PivotColumn>, container: HTMLDivElement): Array<number> => {
+	let result = [];
+
+	if (columns.length > 0) {
+		let {width: containerWidth} = container.getBoundingClientRect();
+		const lastColumn = columns[columns.length - 1];
+		let columnsLength = columns.length + 1;
+
+		if (lastColumn.type === PIVOT_COLUMN_TYPE.TOTAL_SUM) {
+			containerWidth -= PIVOT_COLUMN_MIN_WIDTH;
+			columnsLength -= 1;
+		}
+
+		const calcWidth = (containerWidth - 9) / columnsLength;
+		const withWithTruncMin = Math.max(calcWidth, PIVOT_COLUMN_MIN_WIDTH);
+		const defaultWidth = Math.trunc(withWithTruncMin);
+		const widthByType: {[key: string]: number} = {
+			[PIVOT_COLUMN_TYPE.PARAMETER]: defaultWidth * 2,
+			[PIVOT_COLUMN_TYPE.TOTAL_SUM]: PIVOT_COLUMN_MIN_WIDTH
+		};
+
+		result = columns.map(({type}) => widthByType[type] ?? defaultWidth);
+	}
+
+	return result;
 };
 
 /**
@@ -412,6 +456,7 @@ const groupDataFromParameters = (
 			if (tailParameters.length === 0 || children.length === 0) {
 				result.push({
 					data: parseRawData(subData, dataColumns),
+					isTotal: false,
 					key,
 					value: String(value)
 				});
@@ -419,6 +464,7 @@ const groupDataFromParameters = (
 				result.push({
 					children,
 					data: calculateTotals(children, dataColumns),
+					isTotal: false,
 					key,
 					value: String(value)
 				});
@@ -429,13 +475,36 @@ const groupDataFromParameters = (
 	return result;
 };
 
+const makeTotalRow = (pivotData: PivotSeriesData, dataColumns: Array<string>): PivotDataRow => {
+	const data = {};
+
+	dataColumns.forEach(column => { data[column] = 0; });
+	pivotData.forEach(({data: item}) => {
+		dataColumns.forEach(column => {
+			const value = item[column];
+
+			if (typeof value === 'number') {
+				data[column] += value;
+			}
+		});
+	});
+
+	return {
+		data,
+		isTotal: true,
+		key: 'Σ::totalRow',
+		value: t('PivotWidget::Total')
+	};
+};
+
 /**
  * Формирует древовидные данные для сводной таблицы
  * @param {DiagramBuildData} rawData - данные с сервера
  * @param {PivotMetadata} metadata - метаданные сводной таблицы
+ * @param {boolean} showTotalAmount - добавить строку итоги
  * @returns {PivotSeriesData}
  */
-export const getSeriesData = (rawData: DiagramBuildData, metadata: PivotMetadata): PivotSeriesData => {
+export const getSeriesData = (rawData: DiagramBuildData, metadata: PivotMetadata, showTotalAmount: boolean): PivotSeriesData => {
 	const {data} = rawData;
 	const {breakdown, dataColumns, parameters} = metadata;
 	const columns = [...dataColumns];
@@ -449,6 +518,10 @@ export const getSeriesData = (rawData: DiagramBuildData, metadata: PivotMetadata
 	});
 
 	const result = groupDataFromParameters(data, parameters, columns);
+
+	if (showTotalAmount) {
+		result.push(makeTotalRow(result, columns));
+	}
 
 	return result;
 };

@@ -437,7 +437,8 @@ type SourcesAndFieldsExtended =
 type PivotWidget =
 	| 'PivotWidget::HideChildren'
 	| 'PivotWidget::ShowChildren'
-	| 'PivotWidget::Sum';
+	| 'PivotWidget::Sum'
+	| 'PivotWidget::Total';
 
 // components/organisms/TextWidgetForm
 type TextWidgetForm =

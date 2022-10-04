@@ -81,7 +81,15 @@ export class HeaderColumn extends PureComponent<Props, State> {
 		}, 0);
 	};
 
-	renderDivider = () => (<div className={styles.divider} onMouseDown={this.mouseDown}></div>);
+	renderDivider = () => {
+		const {column} = this.props;
+
+		if (column.type !== PIVOT_COLUMN_TYPE.TOTAL_SUM) {
+			return <div className={styles.divider} onMouseDown={this.mouseDown}></div>;
+		}
+
+		return null;
+	};
 
 	renderSubColumn = () => {
 		const {column, formatter, style} = this.props;
@@ -133,7 +141,10 @@ export class HeaderColumn extends PureComponent<Props, State> {
 	render () {
 		const {column, style} = this.props;
 		const {columnWidth} = this.state;
-		const className = cn(styles.column, {[styles.parameter]: column.type === PIVOT_COLUMN_TYPE.PARAMETER});
+		const className = cn(styles.column, {
+			[styles.parameter]: column.type === PIVOT_COLUMN_TYPE.PARAMETER,
+			[styles.totalSum]: column.type === PIVOT_COLUMN_TYPE.TOTAL_SUM
+		});
 		const columnStyle = getHeaderColumnStyle(columnWidth, style);
 
 		return (

@@ -254,6 +254,7 @@ export type PivotDataItem = {[accessor: string]: number | [number, number] | nul
 export type PivotDataRow = {
 	children?: Array<PivotDataRow>,
 	data: PivotDataItem,
+	isTotal: boolean,
 	key: string,
 	value: string
 };
@@ -274,6 +275,12 @@ export type PivotColumnSum = {
 	type: typeof PIVOT_COLUMN_TYPE.SUM
 };
 
+export type PivotColumnTotalSum = {
+	...PivotColumnBase,
+	sumKeys: Array<string>,
+	type: typeof PIVOT_COLUMN_TYPE.TOTAL_SUM
+};
+
 export type PivotColumnValues = {
 	...PivotColumnBase,
 	isBreakdown: boolean,
@@ -291,7 +298,7 @@ export type PivotColumnGroup = {
 	type: typeof PIVOT_COLUMN_TYPE.EMPTY_GROUP | typeof PIVOT_COLUMN_TYPE.GROUP
 };
 
-export type PivotColumn = PivotColumnGroup | PivotColumnParameter | PivotColumnSum | PivotColumnValues;
+export type PivotColumn = PivotColumnGroup | PivotColumnParameter | PivotColumnSum | PivotColumnValues | PivotColumnTotalSum;
 
 export type PivotColumns = {
 	columns: Array<PivotColumn>,
@@ -314,13 +321,14 @@ export type PivotMetadata = {
 export type PivotOptions = {
 	bodyStyle: PivotBodySettings,
 	columnsList: Array<PivotColumn>,
-	columnWidth: number,
+	columnsWidth: Array<number>,
 	data: PivotSeriesData,
 	formatters: PivotFormatter,
 	getDrillDownOptions: GetPivotDrillDownOptions,
 	headers: Array<PivotColumn>,
 	headerStyle: PivotHeaderSettings,
 	headHeight: number,
+	showTotal: boolean,
 	type: 'PivotOptions',
 };
 
@@ -387,6 +395,7 @@ export type ValueFromSeriesLabelResult = {
 
 export type ParseColumnsResult = {
 	columns: Array<PivotColumn>,
+	columnsList: Array<PivotColumn>,
 	totalHeight: number
 };
 

@@ -13,11 +13,11 @@
 		padding: 4px;
 
 		&:hover {
+			background-color: @lightgrey;
+
 			svg {
 				fill: @black;
 			}
-
-			background-color: @lightgrey;
 		}
 
 		&:active {
@@ -59,6 +59,23 @@
 			svg {
 				fill: @darkgrey !important;
 				stroke: @darkgrey !important;
+			}
+		}
+	}
+
+	.disable {
+		color:  @grey;
+		cursor: default;
+
+		svg {
+			fill: @grey;
+		}
+
+		&:hover {
+			background-color: transparent;
+
+			svg {
+				fill: @grey;
 			}
 		}
 	}

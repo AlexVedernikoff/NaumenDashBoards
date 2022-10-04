@@ -6,7 +6,7 @@ import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Parameter, ParameterOrder} from 'store/widgetForms/types';
 import ParameterFieldset from 'WidgetFormPanel/components/ParameterFieldset';
 import type {Props} from './types';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import SortableList from 'TableWidgetForm/components/SortableList';
 import t from 'localization';
 
@@ -53,6 +53,11 @@ export class ParametersDataBox extends PureComponent<Props> {
 		onChange(newValue);
 	};
 
+	handleClickShowTotal = () => {
+		const {onChangeShowTotal, showTotal} = this.props;
+		return onChangeShowTotal(!showTotal);
+	};
+
 	handleRemove = (index: number) => {
 		const {onChange, value} = this.props;
 		const newValue = value.filter((_, idx) => idx !== index);
@@ -86,7 +91,15 @@ export class ParametersDataBox extends PureComponent<Props> {
 		return null;
 	};
 
-	renderRightControl = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddButton} round={false} />;
+	renderRightControl = () => {
+		const {showTotal} = this.props;
+		return (
+			<Fragment>
+				<IconButton active={showTotal} icon={ICON_NAMES.SUM} onClick={this.handleClickShowTotal} round={false} />
+				<IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddButton} round={false} />
+			</Fragment>
+		);
+	};
 
 	render () {
 		const {value} = this.props;

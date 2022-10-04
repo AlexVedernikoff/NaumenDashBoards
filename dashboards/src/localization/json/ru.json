@@ -195,6 +195,7 @@
 	"PivotWidget::HideChildren": "Скрыть",
 	"PivotWidget::ShowChildren": "Показать",
 	"PivotWidget::Sum": "Сумма",
+	"PivotWidget::Total": "Итого",
 	"PivotWidgetForm::PivotStyleBox": "Сводная таблица",
 	"PivotWidgetForm::Indicators": "Показатели",
 	"PivotWidgetForm::ParameterRowColor": "Заливка строки параметра",

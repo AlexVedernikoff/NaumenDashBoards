@@ -6,19 +6,24 @@ import {createPivotIndicator} from 'store/widgetForms/pivotForm/helpers';
 import type {DataSet, PivotIndicator} from 'store/widgetForms/pivotForm/types';
 import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
 import FormBox from 'components/molecules/FormBox';
+import {hasDisableTotal} from './helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import IndicatorFieldset from 'WidgetFormPanel/components/IndicatorFieldset';
 import type {IndicatorValue, Props, State} from './types';
 import memoize from 'memoize-one';
-import React, {PureComponent} from 'react';
+import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import t from 'localization';
 
 export class IndicatorsDataBox extends PureComponent<Props, State> {
-	state = {
-		values: []
-	};
+	constructor (props) {
+		super();
+		this.state = {
+			disableTotalSum: hasDisableTotal(props.data ?? []),
+			values: []
+		};
+	}
 
 	getEmptyHelpers = memoize(() => ({
 		filterAttributeByMainDataSet: (options, dataSetIndex) => options,
@@ -26,7 +31,27 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 		getCommonAttributes: () => []
 	}));
 
-	calculateValues = () => {
+	componentDidMount () {
+		this.calculateValues();
+	}
+
+	async componentDidUpdate (prevProps: Props) {
+		const {data} = this.props;
+
+		if (!this.compareDataKeys(data, prevProps.data)) {
+			await this.calculateValues();
+		}
+
+		if (prevProps.data !== data) {
+			const disableTotalSum = hasDisableTotal(data);
+
+			this.setState({disableTotalSum}, this.checkDisableTotalSum);
+		} else {
+			this.checkDisableTotalSum();
+		}
+	}
+
+	calculateValues = async () => new Promise(resolve => {
 		const {data} = this.props;
 		const values = [];
 
@@ -40,7 +65,16 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 			}
 		});
 
-		this.setState({values});
+		this.setState({values}, resolve);
+	});
+
+	checkDisableTotalSum = () => {
+		const {onChangeShowTotal, showTotal} = this.props;
+		const {disableTotalSum} = this.state;
+
+		if (showTotal && disableTotalSum) {
+			onChangeShowTotal(false);
+		}
 	};
 
 	compareDataKeys = (data: Array<DataSet>, prevData: Array<DataSet>) => {
@@ -60,18 +94,6 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 
 		return result;
 	};
-
-	componentDidMount () {
-		this.calculateValues();
-	}
-
-	componentDidUpdate (prevProps: Props) {
-		const {data} = this.props;
-
-		if (!this.compareDataKeys(data, prevProps.data)) {
-			this.calculateValues();
-		}
-	}
 
 	getChangeBreakdownHandler = (valueIndex: number) => (breakdowns: Breakdown) => {
 		const {values} = this.state;
@@ -161,6 +183,11 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 		}
 	};
 
+	handleClickShowTotal = () => {
+		const {onChangeShowTotal, showTotal} = this.props;
+		return onChangeShowTotal(!showTotal);
+	};
+
 	updateData = () => {
 		const {data, onChange} = this.props;
 		const {values} = this.state;
@@ -237,7 +264,23 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 		return null;
 	};
 
-	renderRightControl = () => <IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddButton} round={false} />;
+	renderRightControl = () => {
+		const {showTotal} = this.props;
+		const {disableTotalSum} = this.state;
+
+		return (
+			<Fragment>
+				<IconButton
+					active={showTotal}
+					disable={disableTotalSum}
+					icon={ICON_NAMES.SUM}
+					onClick={this.handleClickShowTotal}
+					round={false}
+				/>
+				<IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddButton} round={false} />
+			</Fragment>
+		);
+	};
 
 	render () {
 		const {values} = this.state;

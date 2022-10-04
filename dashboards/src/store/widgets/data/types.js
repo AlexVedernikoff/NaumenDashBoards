@@ -607,6 +607,8 @@ export type PivotWidget = {
 	links: Array<PivotLink>,
 	parametersOrder: Array<ParameterOrder>,
 	pivot: PivotStyle,
+	showTotalAmount: boolean,
+	showTotalRowAmount: boolean,
 	type: typeof WIDGET_TYPES.PIVOT_TABLE
 };
 

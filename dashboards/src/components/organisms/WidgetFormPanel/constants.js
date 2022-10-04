@@ -77,6 +77,7 @@ const showName = 'showName';
 const showShadow = 'showShadow';
 const showSubTotalAmount = 'showSubTotalAmount';
 const showTotalAmount = 'showTotalAmount';
+const showTotalRowAmount = 'showTotalRowAmount';
 const sorting = 'sorting';
 const source = 'source';
 const sources = 'sources';
@@ -160,6 +161,7 @@ const DIAGRAM_FIELDS = {
 	showShadow,
 	showSubTotalAmount,
 	showTotalAmount,
+	showTotalRowAmount,
 	sorting,
 	source,
 	sourceForCompute,

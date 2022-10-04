@@ -37,12 +37,15 @@ export class PivotRow extends PureComponent<Props, State> {
 	};
 
 	renderCell = (column: PivotColumn, index: number) => {
-		const {columnsWidth, formatters, level, row: {data}, style} = this.props;
+		const {columnsWidth, formatters, level, row: {data, isTotal}, style} = this.props;
+		const isTotalColumn = column.type === PIVOT_COLUMN_TYPE.TOTAL_SUM;
 		const className = cn(styles.valueCell, {
-			[styles.valueCellLast]: column.isLastColumnGroup
+			[styles.valueCellLast]: column.isLastColumnGroup,
+			[styles.totalColumn]: isTotalColumn
 		});
-		const formatValue = getValueForColumn(column, data, formatters.value);
-		const cellStyle = getCellStyle(columnsWidth[index + 1], level, style);
+		const formatter = isTotal ? formatters.total : formatters.value;
+		const formatValue = getValueForColumn(column, data, formatter);
+		const cellStyle = getCellStyle(columnsWidth[index + 1], level, style, isTotal);
 
 		return (
 			<div className={className} key={column.key} onClick={this.handleClickCell(column)} style={cellStyle}>
@@ -53,13 +56,15 @@ export class PivotRow extends PureComponent<Props, State> {
 
 	renderCells = () => {
 		const {columns} = this.props;
-		return columns.slice(1).map(this.renderCell);
+		const valuesCells = columns.filter(({type}) => type !== PIVOT_COLUMN_TYPE.PARAMETER);
+
+		return valuesCells.map(this.renderCell);
 	};
 
 	renderIndex = () => {
-		const {index, style} = this.props;
+		const {index, row, style} = this.props;
 
-		if (style.showRowNum) {
+		if (style.showRowNum && !row.isTotal) {
 			return (<span className={styles.index}>{index}</span>);
 		}
 
@@ -68,7 +73,7 @@ export class PivotRow extends PureComponent<Props, State> {
 
 	renderParameter = () => {
 		const {columnsWidth, formatters, level, row, style} = this.props;
-		const parameterStyle = getParameterStyle(columnsWidth[0], level, style);
+		const parameterStyle = getParameterStyle(columnsWidth[0], level, style, row.isTotal);
 		const value = formatters.parameter(row.value);
 		const className = cn(styles.cell, styles.parameter, {
 			[styles.cellNoWrap]: style.textHandler === TEXT_HANDLERS.CROP
@@ -136,9 +141,10 @@ export class PivotRow extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {level} = this.props;
+		const {level, row} = this.props;
 		const className = cn(styles.row, {
-			[styles.topRow]: level === 0
+			[styles.topRow]: level === 0,
+			[styles.totalRow]: row.isTotal
 		});
 
 		return (

@@ -195,6 +195,7 @@
 	"PivotWidget::HideChildren": "Hide",
 	"PivotWidget::ShowChildren": "Show",
 	"PivotWidget::Sum": "Sum",
+	"PivotWidget::Total": "Total",
 	"PivotWidgetForm::PivotStyleBox": "Pivot",
 	"PivotWidgetForm::Indicators": "Indicators",
 	"PivotWidgetForm::ParameterRowColor": "Parameter row color",

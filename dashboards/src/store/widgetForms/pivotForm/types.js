@@ -44,6 +44,8 @@ export type Values = $Exact<{
 	navigation: NavigationSettings,
 	parametersOrder: Array<ParameterOrder>,
 	pivot: PivotStyle,
+	showTotalAmount: boolean,
+	showTotalRowAmount: boolean,
 	templateName: string,
 	tooltip: WidgetTooltip,
 }>;

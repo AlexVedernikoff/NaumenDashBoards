@@ -18,7 +18,7 @@ export const getValueForColumn = (column: PivotColumn, data: PivotDataItem, form
 	let value = null;
 	let keyForFormats = column.key;
 
-	if (column.type === PIVOT_COLUMN_TYPE.SUM) {
+	if (column.type === PIVOT_COLUMN_TYPE.SUM || column.type === PIVOT_COLUMN_TYPE.TOTAL_SUM) {
 		let result = null;
 		const {sumKeys} = column;
 		const values = sumKeys.map(key => data[key]).filter(Boolean);
@@ -46,9 +46,10 @@ export const getValueForColumn = (column: PivotColumn, data: PivotDataItem, form
  * @param {number} width - ширина ячейки
  * @param {number} level - уровень вложенности
  * @param {PivotBodySettings} style - стиль таблицы
+ * @param {boolean} isTotal - ячейка находится в строке Итого
  * @returns {ParameterStyle}
  */
-export const getParameterStyle = (width: number, level: number, style: PivotBodySettings): ParameterStyle => {
+export const getParameterStyle = (width: number, level: number, style: PivotBodySettings, isTotal: boolean): ParameterStyle => {
 	const {parameterRowColor, parameterSettings} = style;
 	const {fontColor, fontStyle} = parameterSettings;
 	const backgroundColor = level === 0 && parameterRowColor ? parameterRowColor : 'white';
@@ -62,9 +63,9 @@ export const getParameterStyle = (width: number, level: number, style: PivotBody
 		color: fontColor,
 		flex: `0 0 ${Math.max(width, 0)}px`,
 		fontStyle: fontStyle === FONT_STYLES.ITALIC ? 'italic' : '',
-		fontWeight: fontStyle === FONT_STYLES.BOLD ? '500' : 'normal',
+		fontWeight: fontStyle === FONT_STYLES.BOLD || isTotal ? '500' : 'normal',
 		paddingLeft: `${padding}px`,
-		textDecoration: fontStyle === FONT_STYLES.UNDERLINE ? 'underline' : ''
+		textDecoration: fontStyle === FONT_STYLES.UNDERLINE || !isTotal ? 'underline' : ''
 	};
 };
 
@@ -73,9 +74,10 @@ export const getParameterStyle = (width: number, level: number, style: PivotBody
  * @param {number} width - ширина ячейки
  * @param {number} level - уровень вложенности
  * @param {PivotBodySettings} style - стиль таблицы
+ * @param {boolean} isTotal - ячейка находится в строке Итого
  * @returns {ParameterStyle}
  */
-export const getCellStyle = (width: number, level: number, style: PivotBodySettings): CellStyle => {
+export const getCellStyle = (width: number, level: number, style: PivotBodySettings, isTotal: boolean): CellStyle => {
 	const {indicatorSettings, parameterRowColor, textAlign} = style;
 	const backgroundColor = level === 0 && parameterRowColor ? parameterRowColor : 'transparent';
 	const {fontColor, fontStyle} = indicatorSettings;
@@ -85,8 +87,8 @@ export const getCellStyle = (width: number, level: number, style: PivotBodySetti
 		color: fontColor,
 		flex: `0 0 ${Math.max(width, 0)}px`,
 		fontStyle: fontStyle === FONT_STYLES.ITALIC ? 'italic' : '',
-		fontWeight: fontStyle === FONT_STYLES.BOLD ? '500' : 'normal',
+		fontWeight: fontStyle === FONT_STYLES.BOLD || isTotal ? '500' : 'normal',
 		textAlign,
-		textDecoration: fontStyle === FONT_STYLES.UNDERLINE ? 'underline' : ''
+		textDecoration: fontStyle === FONT_STYLES.UNDERLINE || !isTotal ? 'underline' : ''
 	};
 };

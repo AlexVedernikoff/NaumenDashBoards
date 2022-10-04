@@ -66,6 +66,16 @@ export class ParamsTab extends Component<Props> {
 		});
 	};
 
+	handleChangeShowTotalAmount = (value: boolean) => {
+		const {onChange} = this.props;
+		return onChange(DIAGRAM_FIELDS.showTotalAmount, value);
+	};
+
+	handleChangeShowTotalRowAmount = (value: boolean) => {
+		const {onChange} = this.props;
+		return onChange(DIAGRAM_FIELDS.showTotalRowAmount, value);
+	};
+
 	handleRemoveDataSet = (index: number) => {
 		const {onChange, values} = this.props;
 		const {data} = values;
@@ -120,7 +130,7 @@ export class ParamsTab extends Component<Props> {
 
 	render () {
 		const {onChange, values} = this.props;
-		const {data, displayMode, indicatorGrouping, links, navigation, parametersOrder} = values;
+		const {data, displayMode, indicatorGrouping, links, navigation, parametersOrder, showTotalAmount, showTotalRowAmount} = values;
 
 		return (
 			<Fragment>
@@ -128,8 +138,19 @@ export class ParamsTab extends Component<Props> {
 				<WidgetSelectBox />
 				<SourceBox onAdd={this.handleAddDataSet}>{data.map(this.renderSourceFieldset)}</SourceBox>
 				<SourceLinksBox data={data} links={links} onChange={this.handleChangeLinks} />
-				<ParametersDataBox data={data} onChange={this.handleChangeParameters} value={parametersOrder} />
-				<IndicatorsDataBox data={data} onChange={this.handleChangeIndicators} />
+				<ParametersDataBox
+					data={data}
+					onChange={this.handleChangeParameters}
+					onChangeShowTotal={this.handleChangeShowTotalAmount}
+					showTotal={showTotalAmount}
+					value={parametersOrder}
+				/>
+				<IndicatorsDataBox
+					data={data}
+					onChange={this.handleChangeIndicators}
+					onChangeShowTotal={this.handleChangeShowTotalRowAmount}
+					showTotal={showTotalRowAmount}
+				/>
 				<IndicatorsGroupBox data={data} onChange={this.handleChangeIndicatorsGroupBox} value={indicatorGrouping} />
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />

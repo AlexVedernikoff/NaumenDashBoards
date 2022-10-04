@@ -1,6 +1,6 @@
 // @flow
 import type {PivotDataRow} from 'utils/recharts/types';
-import PivotRow from 'PivotWidget/components/PivotRow/PivotRow';
+import PivotRow from 'PivotWidget/components/PivotRow';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';

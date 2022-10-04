@@ -81,6 +81,11 @@ const checkCntPercentFormatter = (
 	};
 };
 
+/**
+ * Форматтер для столбцов сводной таблицы
+ * @param {PivotWidget} widget - виджет сводной таблицы
+ * @returns {ValuePivotFormatter} - форматтер значений сводной по столбцам
+ */
 const getValueFormatter = (widget: PivotWidget): ValuePivotFormatter => {
 	const defaultString = getDefaultValue(widget.pivot?.body?.defaultValue?.value ?? DEFAULT_TABLE_VALUE.EMPTY_ROW);
 	let defaultFormatter = pivotNullFormatter(defaultString, getPivotFormatterForAttribute(null, DEFAULT_AGGREGATION.COUNT));
@@ -107,12 +112,27 @@ const getValueFormatter = (widget: PivotWidget): ValuePivotFormatter => {
 		(key in formatters) ? formatters[key](value) : defaultFormatter(value);
 };
 
+/**
+ * Форматтер для итогов
+ * @param {PivotWidget} widget - виджет сводной таблицы
+ * @returns {ValuePivotFormatter} - форматтер значений сводной с одним столбцом
+ */
+const getTotalFormatter = (widget: PivotWidget): ValuePivotFormatter => {
+	const defaultString = getDefaultValue(widget.pivot?.body?.defaultValue?.value ?? DEFAULT_TABLE_VALUE.EMPTY_ROW);
+	const numberFormat = {...DEFAULT_NUMBER_AXIS_FORMAT, symbolCount: null};
+	const totalFormatter = checkNumber(makeFormatterByNumberFormat(numberFormat, false));
+	const formatter = pivotNullFormatter(defaultString, totalFormatter);
+
+	return (key: string, value: string | [number, number] | number | null) => formatter(value);
+};
+
 const getPivotFormatter = (widget: PivotWidget, data: PivotSeriesData, container: HTMLDivElement): PivotFormatter => {
 	const titleFormatter = getLabelFormatter();
 
 	return {
 		indicator: titleFormatter,
 		parameter: titleFormatter,
+		total: getTotalFormatter(widget),
 		value: getValueFormatter(widget)
 	};
 };

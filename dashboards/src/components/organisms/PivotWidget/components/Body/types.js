@@ -10,5 +10,6 @@ export type Props = {
 	data: PivotSeriesData,
 	drillDown: DrillDownAction,
 	formatters: PivotFormatter,
+	showTotal: boolean,
 	style: PivotBodySettings
 };

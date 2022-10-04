@@ -1,7 +1,7 @@
 // @flow
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getBuildSet} from 'store/widgets/data/helpers';
-import {getColumnWidth, getSeriesData, parseColumns, parseColumnsFlat, parseMetadata} from './pivot.helpers';
+import {getColumnsWidth, getSeriesData, parseColumns, parseMetadata} from './pivot.helpers';
 import {getPivotFormatter} from './formater';
 import {getPivotWidget} from './helpers';
 import {makeGeneratorPivotDrillDownOptions} from './drillDown.helpers';
@@ -21,23 +21,24 @@ const getOptions = (
 
 		if (buildDataSet) {
 			const metadata = parseMetadata(rawData);
-			const data = getSeriesData(rawData, metadata);
-			const {columns: headers, totalHeight: headHeight} = parseColumns(pivotWidget, data, metadata.breakdown);
-			const columnsList = parseColumnsFlat(headers);
-			const columnWidth = getColumnWidth(columnsList, container);
+			const data = getSeriesData(rawData, metadata, pivotWidget.showTotalAmount);
+			const {columns: headers, columnsList, totalHeight: headHeight} = parseColumns(pivotWidget, data, metadata.breakdown);
+			const columnsWidth = getColumnsWidth(columnsList, container);
 			const formatters = getPivotFormatter(pivotWidget, data, container);
+			const showTotal = pivotWidget.showTotalAmount;
 			const getDrillDownOptions = makeGeneratorPivotDrillDownOptions(pivotWidget, rawData);
 
 			return {
 				bodyStyle,
-				columnWidth,
 				columnsList,
+				columnsWidth,
 				data,
 				formatters,
 				getDrillDownOptions,
 				headHeight,
 				headerStyle,
 				headers,
+				showTotal,
 				type: 'PivotOptions'
 			};
 		}

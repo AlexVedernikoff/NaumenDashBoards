@@ -16,10 +16,13 @@ export class PivotWidget extends PureComponent<Props, State> {
 
 	containerRef: DivRef = createRef();
 
-	state: State = {
-		columnsWidth: [],
-		options: {}
-	};
+	constructor (props: Props) {
+		super();
+		this.state = {
+			columnsWidth: props.options?.columnsWidth ?? [],
+			options: props.options ?? {}
+		};
+	}
 
 	static getDerivedStateFromProps (props: Props, state: State) {
 		const {options} = props;
@@ -33,15 +36,16 @@ export class PivotWidget extends PureComponent<Props, State> {
 
 	componentDidUpdate (prevProps: Props) {
 		const {options} = this.props;
-		const {columnsWidth} = this.state;
 
 		if (prevProps.options !== options && options.type === 'PivotOptions') {
-			const {columnWidth: prevColumnWidth} = prevProps.options;
-			const {columnWidth, columnsList} = options;
+			const {columnsWidth: prevColumnsWidth} = prevProps.options;
+			const {columnsWidth} = options;
 
-			if (columnsList.length !== columnsWidth.length || prevColumnWidth !== columnWidth) {
-				const columnsWidth = Array.from({length: columnsList.length}).map((_, i) => i === 0 ? columnWidth * 2 : columnWidth);
-
+			if (
+				!prevColumnsWidth
+				|| prevColumnsWidth.length !== columnsWidth.length
+				|| prevColumnsWidth.some((width, idx) => width !== columnsWidth[idx])
+			) {
 				this.setState({columnsWidth});
 			}
 		}
@@ -71,7 +75,7 @@ export class PivotWidget extends PureComponent<Props, State> {
 	};
 
 	renderBody = () => {
-		const {columnsWidth, options: {bodyStyle, columnsList, data, formatters}} = this.state;
+		const {columnsWidth, options: {bodyStyle, columnsList, data, formatters, showTotal}} = this.state;
 
 		return (
 			<Body
@@ -80,6 +84,7 @@ export class PivotWidget extends PureComponent<Props, State> {
 				data={data}
 				drillDown={this.handleDrillDown}
 				formatters={formatters}
+				showTotal={showTotal}
 				style={bodyStyle}
 			/>
 		);
@@ -98,7 +103,7 @@ export class PivotWidget extends PureComponent<Props, State> {
 				style={headerStyle}
 			/>
 		);
-	};;
+	};
 
 	render () {
 		const {className} = this.props;

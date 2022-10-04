@@ -59,5 +59,6 @@ export type SpeedometerFormatter = {
 export type PivotFormatter = {
 	indicator: StringFormatter,
 	parameter: StringFormatter,
+	total: ValuePivotFormatter,
 	value: ValuePivotFormatter
 };
