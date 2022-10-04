@@ -276,28 +276,24 @@ export class ComboWidget extends PureComponent<Props, State> {
 	renderXAxis = () => {
 		const {options: {formatters, xaxis}} = this.state;
 		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xaxis;
+		const labelStyle = showName
+			? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
+			: null;
 
-		if (show) {
-			const labelStyle = showName
-				? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
-				: null;
-
-			return (
-				<XAxis
-					dataKey="name"
-					fontFamily={fontFamily}
-					fontSize={fontSize}
-					height={height}
-					interval={interval}
-					label={labelStyle}
-					tick={this.renderXAxisTick()}
-					tickFormatter={formatters.parameter}
-					type="category"
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<XAxis
+				dataKey="name"
+				fontFamily={fontFamily}
+				fontSize={fontSize}
+				height={height}
+				hide={!show}
+				interval={interval}
+				label={labelStyle}
+				tick={this.renderXAxisTick()}
+				tickFormatter={formatters.parameter}
+				type="category"
+			/>
+		);
 	};
 
 	renderXAxisTick = () => {
@@ -319,41 +315,37 @@ export class ComboWidget extends PureComponent<Props, State> {
 	renderYAxis = (yaxis, idx) => {
 		const {options: {formatters}} = this.state;
 		const {axisName: value, color, dataKey, fontFamily, fontSize, max, min, show, showName, width} = yaxis;
-
-		if (show) {
-			const orientation = idx === 0 ? 'left' : 'right';
-			const label = showName
-				? (
-					<YTitleLabel
-						color={color}
-						fontFamily={fontFamily}
-						fontSize={fontSize}
-						offset={fontSize}
-						orientation={orientation}
-						value={value}
-					/>
-				)
-				: null;
-
-			return (
-				<YAxis
-					domain={[min, max]}
+		const orientation = idx === 0 ? 'left' : 'right';
+		const label = showName
+			? (
+				<YTitleLabel
+					color={color}
 					fontFamily={fontFamily}
 					fontSize={fontSize}
-					interval={0}
-					key={dataKey}
-					label={label}
+					offset={fontSize}
 					orientation={orientation}
-					stroke={color}
-					tickFormatter={formatters.indicator(dataKey)}
-					type="number"
-					width={width}
-					yAxisId={dataKey}
+					value={value}
 				/>
-			);
-		}
+			)
+			: null;
 
-		return null;
+		return (
+			<YAxis
+				domain={[min, max]}
+				fontFamily={fontFamily}
+				fontSize={fontSize}
+				hide={!show}
+				interval={0}
+				key={dataKey}
+				label={label}
+				orientation={orientation}
+				stroke={color}
+				tickFormatter={formatters.indicator(dataKey)}
+				type="number"
+				width={width}
+				yAxisId={dataKey}
+			/>
+		);
 	};
 
 	render () {
