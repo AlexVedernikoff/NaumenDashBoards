@@ -360,3 +360,10 @@ export const formatMSInterval = (ms: number): string => {
 
 	return result;
 };
+
+/**
+ * Очищает завершающие нули в дате
+ * @param {string} date - неочищенная дата
+ * @returns {string} - Человекочитаемый формат даты
+ */
+export const formatDate = (date: string): string => date.endsWith(' 00:00') ? date.slice(0, -6) : date;

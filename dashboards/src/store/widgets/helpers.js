@@ -68,11 +68,20 @@ const hasPercent = (attribute: MixedAttribute | null, aggregation: string): bool
 /**
  * Сообщает используется ли в наборе данных виджета агрегация в значение + процент
  * @param {MixedAttribute} attribute - атрибут
- * @param {MixedAttribute} aggregation - агрегация
+ * @param {string} aggregation - агрегация
  * @returns {boolean} - true - агрегация как PERCENT_CNT, false - другая
  */
 const hasPercentCount = (attribute: MixedAttribute | null, aggregation: string): boolean =>
 	Boolean(getSourceAttribute(attribute) && aggregation === DEFAULT_AGGREGATION.PERCENT_CNT);
+
+/**
+ * Сообщает используется ли в наборе данных виджета агрегация и атрибут, по которой возвращается неформатированная дата
+ * @param {MixedAttribute} attribute - атрибут
+ * @param {string} aggregation - агрегация
+ * @returns {boolean} - true - агрегация как PERCENT_CNT, false - другая
+ */
+const hasDate = (attribute: MixedAttribute | null, aggregation: string): boolean =>
+	Boolean(attribute && attribute.type === ATTRIBUTE_TYPES.date && aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE);
 
 /**
  * Сообщает используется ли в наборе данных виджета агрегация в процентах
@@ -185,11 +194,12 @@ export {
 	getLayoutWidgets,
 	hasBreakdown,
 	hasChartColorsSettings,
-	hasUUIDsInLabels,
-	hasMSInterval,
 	hasCountPercent,
+	hasDate,
+	hasMSInterval,
 	hasPercent,
 	hasPercentCount,
+	hasUUIDsInLabels,
 	isAllowedTopAggregation,
 	isAxisChart,
 	isCircleChart,
