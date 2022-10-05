@@ -7,6 +7,7 @@ import {
 	checkZero,
 	defaultNumberFormatter,
 	defaultStringFormatter,
+	formatDate,
 	formatMSInterval,
 	getLabelFormatter,
 	loggerFormatter,
@@ -246,5 +247,15 @@ describe('Formatters test', () => {
 		expect(formatMSInterval(2 * week + 14 * min + 15 * sec)).toBe(' 336 ч 855 с')
 		expect(formatMSInterval(2 * week + 2 * hours + 14 * min + 15 * sec)).toBe(' 338 ч 855 с')
 		expect(formatMSInterval(2 * week + 3 * days + 2 * hours + 14 * min + 15 * sec)).toBe(' 410 ч 855 с')
+	});
+
+	it('formatDate', () => {
+		expect(formatDate('')).toBe('');
+		expect(formatDate('-')).toBe('-');
+		expect(formatDate('[not empty]')).toBe('[not empty]');
+		expect(formatDate('20.02.2005')).toBe('20.02.2005');
+		expect(formatDate('20.02.2005 00:00')).toBe('20.02.2005');
+		expect(formatDate('1.1.2022 00:00')).toBe('1.1.2022');
+		expect(formatDate('1.1.2022 00:00:00')).toBe('1.1.2022 00:00:00');
 	});
 });

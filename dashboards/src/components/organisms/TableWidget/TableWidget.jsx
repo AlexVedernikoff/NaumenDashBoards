@@ -8,7 +8,7 @@ import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
-import {formatMSInterval} from 'utils/recharts/formater/helpers';
+import {formatDate, formatMSInterval} from 'utils/recharts/formater/helpers';
 import {
 	getIndicatorAttribute,
 	getSeparatedLabel,
@@ -17,7 +17,7 @@ import {
 	isIndicatorColumn,
 	parsePercentCountColumnValueForTable
 } from 'store/widgets/buildData/helpers';
-import {hasMSInterval, hasPercent, hasPercentCount, hasUUIDsInLabels} from 'store/widgets/helpers';
+import {hasDate, hasMSInterval, hasPercent, hasPercentCount, hasUUIDsInLabels} from 'store/widgets/helpers';
 import HeaderCell from 'Table/components/HeaderCell';
 import {ID_ACCESSOR} from './constants';
 import {LIMIT_NAMES} from './components/ValueWithLimitWarning/constants';
@@ -361,6 +361,8 @@ export class TableWidget extends PureComponent<Props, State> {
 				cellValue = parsePercentCountColumnValueForTable(value);
 			} else if (value && hasPercent(attribute, aggregation)) {
 				cellValue = `${value}%`;
+			} else if (value && hasDate(attribute, aggregation)) {
+				cellValue = formatDate(value);
 			} else if (isCardObjectColumn(column, aggregation)) {
 				cellValue = getSeparatedLabel(value);
 			}
