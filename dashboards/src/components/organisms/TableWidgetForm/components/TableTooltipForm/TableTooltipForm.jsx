@@ -191,7 +191,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 			const key = `${sourceCode} ${code} ${aggregation} ${idx}`;
 			const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = indicator;
 
-			if (tooltip.show) {
+			if (tooltip && tooltip.show) {
 				return (
 					<Fragment key={key}>
 						{this.renderIndicatorSelect(indicator, showDeleteButton)}
@@ -219,7 +219,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 
 	renderIndicatorFontOptions = (indicator: Indicator) => {
 		const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = indicator;
-		const {fontFamily = DEFAULT_TOOLTIP_SETTINGS.fontFamily, fontSize = DEFAULT_TOOLTIP_SETTINGS.fontSize} = tooltip;
+		const {fontFamily = DEFAULT_TOOLTIP_SETTINGS.fontFamily, fontSize = DEFAULT_TOOLTIP_SETTINGS.fontSize} = tooltip || DEFAULT_TOOLTIP_SETTINGS;
 
 		return (
 			<FormField row>
@@ -276,7 +276,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 
 	renderIndicatorTextArea = (indicator: Indicator) => {
 		const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = indicator;
-		const focus = tooltip.title === '';
+		const focus = tooltip?.title === '';
 
 		return (
 			<FormField label={t('TableWidgetForm::TableTooltipForm::TooltipText')}>
@@ -284,7 +284,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 					focusOnMount={focus}
 					name={DIAGRAM_FIELDS.title}
 					onChange={this.getChangeIndicatorTextHandler(indicator)}
-					value={tooltip.title}
+					value={tooltip?.title ?? ''}
 				/>
 			</FormField>
 		);

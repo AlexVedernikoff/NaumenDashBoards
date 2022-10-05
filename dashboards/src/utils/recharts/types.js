@@ -196,7 +196,7 @@ export type SpeedometerDataOptions = {
 	formatter: NumberFormatter,
 	style: SpeedometerIndicatorSettings,
 	title: string,
-	tooltip: ?WidgetTooltip,
+	tooltip?: WidgetTooltip | null,
 	total: number
 };
 
@@ -229,7 +229,7 @@ export type ComboChartOptions = {
 
 export type SummaryData = {
 	formatter: NumberFormatter,
-	tooltip: ?WidgetTooltip,
+	tooltip?: WidgetTooltip | null,
 };
 
 export type SummaryStyle = {
@@ -284,7 +284,7 @@ export type PivotColumnTotalSum = {
 export type PivotColumnValues = {
 	...PivotColumnBase,
 	isBreakdown: boolean,
-	tooltip: ?WidgetTooltip,
+	tooltip?: WidgetTooltip | null,
 	type: typeof PIVOT_COLUMN_TYPE.VALUE
 };
 
@@ -296,7 +296,7 @@ export type PivotColumnParameter = {
 export type PivotColumnGroup = {
 	...PivotColumnBase,
 	children: Array<PivotColumnGroup | PivotColumnParameter | PivotColumnSum | PivotColumnValues>,
-	tooltip: ?WidgetTooltip,
+	tooltip?: WidgetTooltip | null,
 	type: typeof PIVOT_COLUMN_TYPE.EMPTY_GROUP | typeof PIVOT_COLUMN_TYPE.GROUP
 };
 

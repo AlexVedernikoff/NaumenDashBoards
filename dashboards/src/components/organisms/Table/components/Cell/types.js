@@ -26,5 +26,5 @@ export type Props = {
 	fontStyle?: FontStyle,
 	last: boolean,
 	onClick?: OnClickCell,
-	tooltip?: WidgetTooltip
+	tooltip?: WidgetTooltip | null,
 };

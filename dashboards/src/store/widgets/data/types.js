@@ -145,7 +145,7 @@ export type WidgetTooltip = {
 export type Indicator = {
 	aggregation: string,
 	attribute: MixedAttribute | null,
-	tooltip?: WidgetTooltip
+	tooltip?: WidgetTooltip | null
 };
 
 export type DataTopSettings = {

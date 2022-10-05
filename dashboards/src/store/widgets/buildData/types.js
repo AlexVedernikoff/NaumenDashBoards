@@ -10,7 +10,7 @@ export type BaseColumn = {
 	columns?: Array<BaseColumn>,
 	footer: string,
 	header: string,
-	tooltip: ?WidgetTooltip,
+	tooltip?: WidgetTooltip | null,
 	type?: string,
 	width?: number
 };

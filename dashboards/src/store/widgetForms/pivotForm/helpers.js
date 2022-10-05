@@ -84,6 +84,7 @@ const changeValues = (
 		header,
 		name,
 		navigation,
+		showTotalAmount = false,
 		templateName,
 		tooltip
 	} = values;
@@ -102,6 +103,8 @@ const changeValues = (
 		navigation,
 		parametersOrder: parametersOrder,
 		pivot,
+		showTotalAmount,
+		showTotalRowAmount: false,
 		templateName,
 		tooltip
 	};
@@ -136,6 +139,7 @@ const changeValuesByTable = (
 		header,
 		name,
 		navigation,
+		showTotalAmount,
 		table,
 		templateName,
 		tooltip
@@ -155,6 +159,8 @@ const changeValuesByTable = (
 		navigation,
 		parametersOrder,
 		pivot,
+		showTotalAmount,
+		showTotalRowAmount: false,
 		templateName,
 		tooltip
 	};

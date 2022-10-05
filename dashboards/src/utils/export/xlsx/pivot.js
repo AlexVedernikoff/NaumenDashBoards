@@ -38,7 +38,7 @@ class PivotTable extends Table {
 		}
 
 		const metadata = parseMetadata(data);
-		const {columns: headers, totalHeight} = parseColumns(widget, data, metadata.breakdown);
+		const {columns: headers, totalHeight} = parseColumns(widget, data, metadata.breakdown, {});
 		const parametersColumns = this.columns
 			.filter(column => column.type === COLUMN_TYPES.PARAMETER)
 			.map(baseColumnToPivotBaseColumn(totalHeight));

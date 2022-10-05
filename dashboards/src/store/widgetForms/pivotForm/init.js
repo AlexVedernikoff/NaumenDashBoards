@@ -18,6 +18,8 @@ export const initialState: State = {
 	navigation: DEFAULT_NAVIGATION_SETTINGS,
 	parametersOrder: [],
 	pivot: DEFAULT_PIVOT_SETTINGS,
+	showTotalAmount: false,
+	showTotalRowAmount: false,
 	templateName: '',
 	tooltip: DEFAULT_TOOLTIP_SETTINGS
 };

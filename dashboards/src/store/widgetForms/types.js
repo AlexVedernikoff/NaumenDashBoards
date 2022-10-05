@@ -28,7 +28,7 @@ export type Indicator = {
 	aggregation: string,
 	attribute: MixedAttribute | null,
 	descriptor?: string | null,
-	tooltip?: WidgetTooltip
+	tooltip?: WidgetTooltip | null
 };
 
 export type Parameter = {
