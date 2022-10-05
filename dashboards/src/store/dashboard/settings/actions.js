@@ -454,7 +454,6 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
 
 /**
  * Создает состояние для дашборда
- *
  * @returns {ThunkAction}
  * @param {boolean} personalDashboard - указывает является ли новое состояние, состоянием персонального дашборда
  */

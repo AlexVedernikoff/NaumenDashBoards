@@ -22,7 +22,12 @@ const getOptions = (
 		if (buildDataSet) {
 			const metadata = parseMetadata(rawData);
 			const data = getSeriesData(rawData, metadata, pivotWidget.showTotalAmount);
-			const {columns: headers, columnsList, totalHeight: headHeight} = parseColumns(pivotWidget, data, metadata.breakdown);
+			const {columns: headers, columnsList, totalHeight: headHeight} = parseColumns(
+				pivotWidget,
+				data,
+				metadata.breakdown,
+				metadata.tooltips
+			);
 			const columnsWidth = getColumnsWidth(columnsList, container);
 			const formatters = getPivotFormatter(pivotWidget, data, container);
 			const showTotal = pivotWidget.showTotalAmount;

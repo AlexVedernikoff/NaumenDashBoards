@@ -16,27 +16,23 @@ const requestSourceFilters = () => ({type: SOURCES_FILTERS_EVENTS.REQUEST_SOURCE
 /**
  * Окончание загрузки данных
  * @returns {object} Action окончания загрузки данных
- *
  */
 const receiveSourceFilters = () => ({type: SOURCES_FILTERS_EVENTS.RECEIVE_SOURCE_FILTERS});
 
 /**
  * Ошибка загрузки данных
  * @returns {object} Action ошибки загрузки данных
- *
  */
 const requestSourceFiltersError = () => ({type: SOURCES_FILTERS_EVENTS.REQUEST_SOURCE_FILTERS_ERROR});
 
 /**
  * Очистка статусов загрузки данных
  * @returns {object} Action ошибки загрузки данных
- *
  */
 const clearRequestSourceFiltersStatus = () => ({type: SOURCES_FILTERS_EVENTS.CLEAR_REQUEST_SOURCE_FILTERS_STATUS});
 
 /**
  * Загрузка предустановленных фильтров для указанного источника
- *
  * @param {string} metaClass  - идентификатор источника
  * @returns {ThunkAction}
  */
@@ -119,6 +115,7 @@ const deleteSourcesFilter = (source: string, filterId: string): ThunkAction =>
 				return {message: exception.message, result: false};
 			}
 		}
+
 		return {message: t('store::sources::sourcesFilters::FilterRemovalError'), result: false};
 	};
 

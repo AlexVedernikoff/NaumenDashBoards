@@ -14,7 +14,8 @@ import type {
 	PivotDataRow,
 	PivotMetadata,
 	PivotRawRow,
-	PivotSeriesData
+	PivotSeriesData,
+	PivotTooltipInfo
 } from './types';
 import {PIVOT_COLUMN_MIN_WIDTH, PIVOT_COLUMN_TYPE} from './constants';
 import t from 'localization';
@@ -89,12 +90,14 @@ const getFlatColumnKeys = (columns: Array<PivotColumn>): Array<string> => {
  * @param {IndicatorGrouping} grouping - группировка индикаторов
  * @param {number} height - высота шапки
  * @param {PivotBreakdownInfo} breakdown - информация о разбивках
+ * @param {PivotTooltipInfo} tooltips - информация о подсказках
  * @returns {Array<PivotColumn>} - дерево столбцов для отображения
  */
 const parseIndicatorGrouping2Columns = (
 	grouping: IndicatorGrouping,
 	height: number,
-	breakdown: PivotBreakdownInfo
+	breakdown: PivotBreakdownInfo,
+	tooltips: PivotTooltipInfo
 ): Array<PivotColumn> => {
 	const result: Array<PivotColumn> = [];
 	const isLastColumnGroup = false;
@@ -112,6 +115,7 @@ const parseIndicatorGrouping2Columns = (
 					isLastColumnGroup,
 					key,
 					title,
+					tooltip: null,
 					type: PIVOT_COLUMN_TYPE.VALUE,
 					width: 1
 				}));
@@ -124,13 +128,23 @@ const parseIndicatorGrouping2Columns = (
 					isLastColumnGroup,
 					key,
 					title,
+					tooltip: tooltips[key] ?? null,
 					type: PIVOT_COLUMN_TYPE.GROUP,
 					width: children.length
 				};
 
 				result.push(group);
 			} else {
-				result.push({height, isBreakdown: false, isLastColumnGroup, key, title, type: PIVOT_COLUMN_TYPE.VALUE, width: 1});
+				result.push({
+					height,
+					isBreakdown: false,
+					isLastColumnGroup,
+					key,
+					title,
+					tooltip: tooltips[key] ?? null,
+					type: PIVOT_COLUMN_TYPE.VALUE,
+					width: 1
+				});				
 			}
 		}
 
@@ -138,7 +152,7 @@ const parseIndicatorGrouping2Columns = (
 			const {hasSum, key, label: title} = item;
 
 			if (item.children && item.children.length > 0) {
-				const children = parseIndicatorGrouping2Columns(item.children, height - 1, breakdown);
+				const children = parseIndicatorGrouping2Columns(item.children, height - 1, breakdown, tooltips);
 				let width = children.reduce((p, {width}) => p + width, 0);
 
 				if (hasSum) {
@@ -163,6 +177,7 @@ const parseIndicatorGrouping2Columns = (
 					isLastColumnGroup,
 					key,
 					title,
+					tooltip: null,
 					type: PIVOT_COLUMN_TYPE.GROUP,
 					width
 				};
@@ -170,7 +185,14 @@ const parseIndicatorGrouping2Columns = (
 				result.push(group);
 			} else {
 				const group: PivotColumnGroup = {
-					children: [], height, isLastColumnGroup, key, title, type: PIVOT_COLUMN_TYPE.EMPTY_GROUP, width: 1
+					children: [], 
+					height, 
+					isLastColumnGroup, 
+					key, 
+					title, 
+					tooltip: null,
+					type: PIVOT_COLUMN_TYPE.EMPTY_GROUP, 
+					width: 1
 				};
 
 				result.push(group);
@@ -191,6 +213,7 @@ const makeParameterCell = (height: number): PivotColumn => ({
 	isLastColumnGroup: false,
 	key: 'parameter',
 	title: '',
+	tooltip: null,
 	type: PIVOT_COLUMN_TYPE.PARAMETER,
 	width: 1
 });
@@ -210,12 +233,14 @@ const makeTotalRowAmountCell = (height: number, columns: Array<PivotColumn>): Pi
  * @param {PivotWidget} widget - информация о виджете
  * @param {DiagramBuildData} rawData - сырые данные виджета
  * @param {PivotBreakdownInfo} breakdown - информация о разбивках
+ * @param {PivotTooltipInfo} tooltips - информация о подсказках
  * @returns {ParseColumnsResult}
  */
 export const parseColumns = (
 	widget: PivotWidget,
 	rawData: DiagramBuildData,
-	breakdown: PivotBreakdownInfo
+	breakdown: PivotBreakdownInfo,
+	tooltips: PivotTooltipInfo
 ): ParseColumnsResult => {
 	let {indicatorGrouping} = widget;
 
@@ -226,7 +251,7 @@ export const parseColumns = (
 	const totalHeight = calcIndicatorGroupingTotalHeight(indicatorGrouping);
 	const columns = [
 		makeParameterCell(totalHeight),
-		...parseIndicatorGrouping2Columns(indicatorGrouping, totalHeight, breakdown)
+		...parseIndicatorGrouping2Columns(indicatorGrouping, totalHeight, breakdown, tooltips)
 	];
 
 	const columnsList = parseColumnsFlat(columns);
@@ -328,11 +353,31 @@ export const getBreakdown = (rawData: DiagramBuildData): PivotBreakdownInfo => {
 	const {columns} = rawData;
 	const breakdown = {};
 
-	columns.filter(({columns, type}) => type === COLUMN_TYPES.INDICATOR && columns).forEach(column => {
-		breakdown[column.accessor] = column.columns?.map(({accessor, header}) => ({accessor, header}));
+	columns.forEach(column => {
+		if (column.type === COLUMN_TYPES.INDICATOR && column.columns) {
+			breakdown[column.accessor] = column.columns.map(({accessor, header}) => ({accessor, header}));
+		}
 	});
 
 	return breakdown;
+};
+
+/**
+ * Формирует метаданные по подсказкам для сводной таблицы
+ * @param {DiagramBuildData} rawData - сырые серверные данные
+ * @returns {PivotTooltipInfo} - метаданные по подсказкам
+ */
+export const getTooltips = (rawData: DiagramBuildData): PivotTooltipInfo => {
+	const {columns} = rawData;
+	const tooltip: PivotTooltipInfo = {};
+
+	columns.forEach(column => {
+		if (column.type === COLUMN_TYPES.INDICATOR && column.tooltip) {
+			tooltip[column.accessor] = column.tooltip;
+		}
+	});
+
+	return tooltip;
 };
 
 /**
@@ -343,7 +388,8 @@ export const getBreakdown = (rawData: DiagramBuildData): PivotBreakdownInfo => {
 export const parseMetadata = (rawData: DiagramBuildData): PivotMetadata => ({
 	breakdown: getBreakdown(rawData),
 	dataColumns: getIndicatorsColumns(rawData),
-	parameters: getParametersColumns(rawData)
+	parameters: getParametersColumns(rawData),
+	tooltips: getTooltips(rawData)
 });
 
 export const addPivotData = (

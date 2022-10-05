@@ -284,6 +284,7 @@ export type PivotColumnTotalSum = {
 export type PivotColumnValues = {
 	...PivotColumnBase,
 	isBreakdown: boolean,
+	tooltip: ?WidgetTooltip,
 	type: typeof PIVOT_COLUMN_TYPE.VALUE
 };
 
@@ -295,6 +296,7 @@ export type PivotColumnParameter = {
 export type PivotColumnGroup = {
 	...PivotColumnBase,
 	children: Array<PivotColumnGroup | PivotColumnParameter | PivotColumnSum | PivotColumnValues>,
+	tooltip: ?WidgetTooltip,
 	type: typeof PIVOT_COLUMN_TYPE.EMPTY_GROUP | typeof PIVOT_COLUMN_TYPE.GROUP
 };
 
@@ -312,10 +314,15 @@ export type PivotBreakdownInfo = {
 	}>
 };
 
+export type PivotTooltipInfo = {
+	[accessor: string]: WidgetTooltip
+};
+
 export type PivotMetadata = {
 	breakdown: PivotBreakdownInfo,
 	dataColumns: Array<string>,
-	parameters: Array<string>
+	parameters: Array<string>,
+	tooltips: PivotTooltipInfo
 };
 
 export type PivotOptions = {

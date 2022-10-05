@@ -173,7 +173,6 @@ const fetchDiagramBuildData = (
 
 /**
  * Проверяет и согласует ограничения и вид отображения виджета
- *
  * @param {string} widgetId - id виджет для проверки
  * @param {DiagramBuildData} data - данные для проверки отображения
  * @param {EditWidgetChunkDataAction} editWidgetChunkData - thunk частичного изменения виджета

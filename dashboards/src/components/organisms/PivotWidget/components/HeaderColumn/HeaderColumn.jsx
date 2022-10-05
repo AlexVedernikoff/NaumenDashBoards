@@ -6,6 +6,7 @@ import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import t from 'localization';
+import WidgetTooltip from 'components/molecules/WidgetTooltip';
 
 export class HeaderColumn extends PureComponent<Props, State> {
 	dragStart = false;
@@ -128,12 +129,14 @@ export class HeaderColumn extends PureComponent<Props, State> {
 		const {column, formatter, style} = this.props;
 		const title = column.type === PIVOT_COLUMN_TYPE.SUM ? t('PivotWidget::Sum') : formatter(column.title);
 		const titleStyle = getTitleStyle(column.height, style);
+		const tooltip = column.tooltip || null;
 
 		return (
 			<div className={styles.title} style={titleStyle}>
 				<div className={styles.titleWrap} title={title}>
 					{title}
 				</div>
+				<WidgetTooltip tooltip={tooltip} />
 			</div>
 		);
 	};

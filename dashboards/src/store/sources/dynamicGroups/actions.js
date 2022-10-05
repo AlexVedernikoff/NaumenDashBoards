@@ -6,7 +6,6 @@ import {findFilterById} from 'store/sources/sourcesFilters/selectors';
 
 /**
  * Получение группы динамических атрибутов
- *
  * @param {string} dataKey - ключ набора данных
  * @param {string} descriptor - дескриптор источника
  * @param {string} filterId - (optional) сохраненный фильтр источника

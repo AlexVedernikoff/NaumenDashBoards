@@ -63,6 +63,7 @@
 		"require-atomic-updates": "off",
 		"semi": [2, "always"],
 		"no-extra-semi": "error",
+		"no-unneeded-ternary":  ["error", { "defaultAssignment": false }],
 		"object-curly-spacing": ["error", "never"],
 		"sort-destructure-keys/sort-destructure-keys": [2, {"caseSensitive": true}],
 		"sort-keys": [2, "asc", {"caseSensitive": true}],

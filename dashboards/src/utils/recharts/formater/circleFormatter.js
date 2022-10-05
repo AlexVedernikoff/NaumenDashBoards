@@ -67,7 +67,6 @@ const getCategoryFormatter = (widget: CircleWidget): ValueFormatter => {
 
 /**
  * Фабрика форматеров для круговой диаграммы
- *
  * @param {CircleWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
  * @param {HTMLDivElement} container - контейнер отрисовки виджета

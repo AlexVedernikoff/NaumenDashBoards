@@ -93,7 +93,6 @@ const saveWidget = (widget: AnyWidget, fetchBuildData: FetchBuildDataAction): Th
 
 /**
  * Сохраняет график
- *
  * @param {Chart} widget - данные виджета
  * @param {FetchBuildDataAction} fetchBuildData - thunk обновления данных виджета
  * @returns {ThunkAction}
@@ -280,7 +279,6 @@ const createWidget = (settings: AnyWidget, fetchBuildData: FetchBuildDataAction)
 
 /**
  * Копирует виджет
- *
  * @param {string} dashboardKey - идентификатор дашборда
  * @param {string} widgetKey - идентификатор виджета
  * @param {FetchBuildDataAction} fetchBuildData - thunk обновления данных виджета

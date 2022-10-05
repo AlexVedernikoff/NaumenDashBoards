@@ -76,7 +76,6 @@ const updateGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): void =
 
 /**
  * Добавляет в примесь данных данные индикатора
- *
  * @param {AxisData | CircleData} dataSet - набор данных виджета
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @returns {void}
@@ -103,7 +102,6 @@ const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMi
 
 /**
  * Добавляет в примесь данных данные разбивки
- *
  * @param {ChartDataSet} dataSet - набор данных виджета
  * @param {string} value - значение разбивки
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов

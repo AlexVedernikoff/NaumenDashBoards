@@ -83,7 +83,6 @@ const handleShowUnnecessaryElements = (container: HTMLDivElement, show: boolean)
 
 /**
  * Создает canvas элемент снимка
- *
  * @param {HTMLDivElement} container - DOM элемент с графиком виджета
  * @param {CreateImageOptions} options - опции экспорта
  * @returns {Promise<Blob>}
@@ -139,7 +138,6 @@ const createPng = async (image: HTMLCanvasElement, name: string = '', toDownload
 
 /**
  * Создает снимок div-элемента
- *
  * @param {HTMLDivElement} container - DOM элемент с графиком виджета
  * @param {ExportPNGOptions} options - опции экспорта
  * @returns {Promise<Blob>}

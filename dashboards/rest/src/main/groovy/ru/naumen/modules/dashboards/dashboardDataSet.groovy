@@ -1247,7 +1247,7 @@
                         return group
                     }
                 }
-                return groups ? groups : []
+                return groups || []
             }
 
             List fullAggregations = requestData?.aggregations?.collectMany {
