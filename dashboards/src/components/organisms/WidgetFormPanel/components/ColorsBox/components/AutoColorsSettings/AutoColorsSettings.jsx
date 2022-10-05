@@ -34,10 +34,10 @@ export class AutoColorsSettings extends PureComponent<Props, State> {
 
 		if (showPicker && colorIndex === index) {
 			showPicker = false;
-		} else if (colorIndex !== index) {
-			showPicker = true;
-		} else {
+		} else if (colorIndex === index) {
 			showPicker = !showPicker;
+		} else {
+			showPicker = true;
 		}
 
 		this.setState({

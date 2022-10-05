@@ -10,9 +10,17 @@ export type BaseColumn = {
 	columns?: Array<BaseColumn>,
 	footer: string,
 	header: string,
-	tooltip: WidgetTooltip,
+	tooltip: ?WidgetTooltip,
 	type?: string,
 	width?: number
+};
+
+export type PivotBaseColumn = {
+	...BaseColumn,
+	columns?: Array<PivotBaseColumn>,
+	height: number,
+	sumKeys?: string[],
+	width: number
 };
 
 export type ColumnType = $Keys<typeof COLUMN_TYPES>;

@@ -82,7 +82,9 @@ class SelectWithCustomEdit extends Component<Props, State> {
 		const {name, onSelect} = this.props;
 
 		if (onSelect) {
-			onSelect({name, value: value !== '' ? value : null}, callback);
+			const newValue = value === '' ? null : value;
+
+			onSelect({name, value: newValue}, callback);
 		}
 
 		this.setState({showForm: false});

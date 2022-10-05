@@ -57,7 +57,11 @@ export class MainSelect extends Component<Props> {
 	renderField = () => {
 		const {components, value} = this.props;
 
-		return !value?.ref ? <components.Field /> : null;
+		if (!value?.ref) {
+			return <components.Field />;
+		}
+
+		return null;
 	};
 
 	renderList = props => <List {...props} />;

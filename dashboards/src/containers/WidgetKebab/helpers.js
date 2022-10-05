@@ -42,7 +42,7 @@ const navigationSelector = memoize((widget: AnyWidget): NavigationProps | null =
 
 		if (navigation.show) {
 			const {showTip, tip} = navigation;
-			const text = !showTip ? '' : tip;
+			const text = showTip ? tip : '';
 			return {text};
 		}
 	}

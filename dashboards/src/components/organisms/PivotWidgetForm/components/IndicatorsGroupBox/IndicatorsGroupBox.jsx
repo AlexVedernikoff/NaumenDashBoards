@@ -38,7 +38,9 @@ export class IndicatorsGroupBox extends PureComponent<Props, State> {
 	handleCreateValue = () => {
 		const {data, value} = this.props;
 
-		if (!value) {
+		if (value) {
+			this.showEditModal();
+		} else {
 			const newValue = data.flatMap(dataSet => dataSet.indicators.map(indicator => (
 				indicator.attribute
 					? {
@@ -51,8 +53,6 @@ export class IndicatorsGroupBox extends PureComponent<Props, State> {
 			)).filter(Boolean));
 
 			this.setState({showModal: true, value: newValue});
-		} else {
-			this.showEditModal();
 		}
 	};
 

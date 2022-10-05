@@ -111,14 +111,86 @@ function omit<T: Object> (obj: T, key: string): T {
 	return obj;
 }
 
+/**
+ * Удаляет элемент по индексу
+ * @param {Array} array - исходный массив
+ * @param {number} index - индекс элемента
+ * @returns {Array} - массив без элемента
+ */
+function removeElement<T> (array: Array<T>, index: number): Array<T> {
+	const result = array.slice(0);
+
+	if (index >= 0 && index < array.length) {
+		result.splice(index, 1);
+	}
+
+	return result;
+}
+
+/**
+ * Добавляет элемент в массив
+ * @param {Array} array - исходный массив
+ * @param {any} element - новый элемент
+ * @returns {Array} - массив с добавленным элементом
+ */
+function addElement<T> (array: Array<T>, element: T): Array<T> {
+	const result = array.slice(0);
+
+	result.push(element);
+
+	return result;
+}
+
+/**
+ * Удаляет элемент по индексу
+ * @param {Array} array - исходный массив
+ * @param {number} index - индекс элемента
+ * @param {any} element - новый элемент
+ * @returns {Array} - массив с замененным элементом
+ */
+function replaceElement<T> (array: Array<T>, index: number, element: T): Array<T> {
+	const result = array.slice(0);
+
+	if (index >= 0 && index < array.length) {
+		result.splice(index, 1, element);
+	}
+
+	return result;
+}
+
+/**
+ * Вставляет элемент по индексу
+ * @param {Array} array - исходный массив
+ * @param {number} index - индекс элемента
+ * @param {any} element - новый элемент
+ * @returns {Array} - массив с новым элементом
+ */
+function insertElement<T> (array: Array<T>, index: number, element: T): Array<T> {
+	const result = array.slice(0);
+
+	if (index > 0 && index < array.length) {
+		result.splice(index, 0, element);
+	} else if (index <= 0) {
+		result.splice(0, 0, element);
+	} else if (index >= array.length) {
+		result.push(element);
+	}
+
+	return result;
+}
+
 export {
+	addElement,
 	debounce,
 	deepClone,
 	escapeString,
 	extend,
 	getLayoutMode,
 	getMapValues,
+	insertElement,
 	isMacOS,
 	isObject,
-	omit
+	omit,
+	removeElement,
+	replaceElement
 };

@@ -78,18 +78,15 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 	};
 
 	compareDataKeys = (data: Array<DataSet>, prevData: Array<DataSet>) => {
-		let result = true;
+		let result = false;
 
-		if (data.length !== prevData.length) {
-			result = false;
-		} else {
+		if (data.length === prevData.length) {
 			const dataKeysSets = new Set(data.map(({dataKey}) => dataKey));
 			const prevDataKeysSets = new Set(prevData.map(({dataKey}) => dataKey));
-			const hasAll = [...dataKeysSets, ...prevDataKeysSets].every(
+
+			result = [...dataKeysSets, ...prevDataKeysSets].every(
 				value => dataKeysSets.has(value) && prevDataKeysSets.has(value)
 			);
-
-			result = hasAll;
 		}
 
 		return result;

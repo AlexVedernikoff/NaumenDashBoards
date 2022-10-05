@@ -81,10 +81,10 @@ export class WidgetsGrid extends Component<Props, State> {
 			if (!window.dashboardPopStateEmitter) {
 				window.dashboardPopStateEmitter = event => {
 					if (isLayoutsChanged()) {
-						if (!confirm(t('WidgetsGrid::ConfirmCloseWindow'))) {
-							window.parent.history.back();
-						} else {
+						if (confirm(t('WidgetsGrid::ConfirmCloseWindow'))) {
 							forceUnload = true;
+						} else {
+							window.parent.history.back();
 						}
 					}
 				};
@@ -360,7 +360,7 @@ export class WidgetsGrid extends Component<Props, State> {
 			[styles.gridContainer]: true,
 			[styles.MKGridContainer]: this.isDesktopMK()
 		});
-		const onContextMenu = !isMobileDevice ? this.onContextMenu : null;
+		const onContextMenu = isMobileDevice ? null : this.onContextMenu;
 
 		return (
 			<div className={containerCN} onClick={this.handleClick} onContextMenu={onContextMenu} ref={this.gridContainerRef}>

@@ -1,6 +1,6 @@
 // @flow
 import {createContextName, getSnapshotName} from './helpers';
-import exportTableSheet from './xlxs';
+import exportSheet from './xlsx';
 import {exportPDF} from './pdf';
 import {exportPNG} from './core';
 import {FILE_VARIANTS} from './constants';
@@ -44,7 +44,7 @@ class Exporter {
 	) {
 		const snapshotName = await getSnapshotName(widget.name);
 
-		await exportTableSheet(snapshotName, data);
+		await exportSheet(snapshotName, data, widget);
 	}
 
 	async exportWidgetAsPDF (widget: Widget, save: boolean = false) {

@@ -40,6 +40,7 @@
 		"no-param-reassign": 2,
 		"no-tabs": ["error", { "allowIndentationTabs": true }],
 		"no-var": "error",
+		"no-negated-condition": "error",
 		"arrow-parens": ["warn", "as-needed"],
 		"arrow-body-style": ["warn", "as-needed"],
 		"operator-linebreak": ["error", "before"],

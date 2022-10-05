@@ -46,13 +46,13 @@ export class AbsolutePortal extends Component<Props, State> {
 	cloneDOMElement = (child: React$Element<'string'>, style: Object) => {
 		let {props, ref} = child;
 
-		if (!ref) {
+		if (ref) {
+			this.childRef = ref;
+		} else {
 			props = {
 				...props,
 				ref: this.childRef
 			};
-		} else {
-			this.childRef = ref;
 		}
 
 		return cloneElement(child, {...props, style});

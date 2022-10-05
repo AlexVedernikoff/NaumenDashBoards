@@ -352,9 +352,7 @@ export const addPivotData = (
 ): number | [number, number] | void => {
 	let result;
 
-	if (!data) {
-		result = add;
-	} else {
+	if (data) {
 		if (Array.isArray(data) && data.length === 2) {
 			if (Array.isArray(add) && add.length === 2) {
 				result = [data[0] + add[0], data[1] + add[1]];
@@ -368,6 +366,8 @@ export const addPivotData = (
 				result = data + add;
 			}
 		}
+	} else {
+		result = add;
 	}
 
 	return result;
@@ -411,7 +411,7 @@ const parseRawData = (subData: Array<PivotRawRow>, columns: Array<string>): Pivo
 			const rawValue = row[column];
 
 			if (typeof rawValue === 'string') {
-				if (rawValue.indexOf(' ') !== -1) {
+				if (rawValue.includes(' ')) {
 					const [cnt, percent] = rawValue.split(' ');
 					const cntVal = parseFloat(cnt);
 					const percentVal = parseFloat(percent);

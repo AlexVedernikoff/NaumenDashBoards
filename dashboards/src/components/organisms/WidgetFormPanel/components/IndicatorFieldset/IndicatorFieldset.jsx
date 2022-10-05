@@ -1,4 +1,5 @@
 // @flow
+import {addElement, deepClone, omit, replaceElement} from 'helpers';
 import type {Attribute} from 'store/sources/attributes/types';
 import AttributeAggregationField from 'WidgetFormPanel/components/AttributeAggregationField';
 import AttributeCreatingModal from 'containers/AttributeCreatingModal';
@@ -9,7 +10,6 @@ import type {ComputedAttr, PercentageRelativeAttr} from 'store/widgets/data/type
 import ComputedAttributeEditor from 'WidgetFormPanel/components/ComputedAttributeEditor';
 import Container from 'components/atoms/Container';
 import CreationPanel from 'components/atoms/CreationPanel';
-import {deepClone, omit} from 'helpers';
 import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
 import {descriptorContainsFilter} from 'utils/descriptorUtils';
 import type {DiagramDataSet, Indicator} from 'store/widgetForms/types';
@@ -283,10 +283,10 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		const attrIndex = computedAttrs.findIndex(attr => attr.code === newAttribute.code);
 		let newComputedAttrs = computedAttrs;
 
-		if (attrIndex !== -1) {
-			newComputedAttrs = newComputedAttrs.map((attr, i) => i === attrIndex ? newAttribute : attr);
+		if (attrIndex === -1) {
+			newComputedAttrs = addElement(newComputedAttrs, newAttribute);
 		} else {
-			newComputedAttrs = [...newComputedAttrs, newAttribute];
+			newComputedAttrs = replaceElement(newComputedAttrs, attrIndex, newAttribute);
 		}
 
 		setFieldValue(DIAGRAM_FIELDS.computedAttrs, newComputedAttrs);

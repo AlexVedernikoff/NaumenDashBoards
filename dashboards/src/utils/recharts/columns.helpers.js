@@ -16,7 +16,7 @@ const normalizeSeries = (data: RechartData): RechartData =>
 		const rowValueSum = Object.values(values).reduce((sum, value) => sum + (+value), 0);
 
 		Object.entries(values).forEach(([key, value]) => {
-			result[key] = rowValueSum !== 0 ? (+value) * 100 / rowValueSum : 0;
+			result[key] = rowValueSum === 0 ? 0 : (+value) * 100 / rowValueSum;
 		});
 
 		return result;

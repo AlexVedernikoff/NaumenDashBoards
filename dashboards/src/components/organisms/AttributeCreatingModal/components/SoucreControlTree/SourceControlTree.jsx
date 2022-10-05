@@ -14,7 +14,11 @@ export class SourceControlTree extends PureComponent<Props> {
 	renderAddConstantButton = () => {
 		const {onAddConstant, searchValue} = this.props;
 
-		return !searchValue ? <CreationPanel onClick={onAddConstant} text={t('SourceControlTree::AddConstants')} /> : null;
+		if (!searchValue) {
+			return <CreationPanel onClick={onAddConstant} text={t('SourceControlTree::AddConstants')} />;
+		}
+
+		return null;
 	};
 
 	renderFoundInfo = () => {

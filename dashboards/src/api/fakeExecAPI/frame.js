@@ -40,8 +40,8 @@ export default class Frame extends fakeExecMFFrame {
 		const newHeaders = {...headers, 'Content-Type': 'application/json'};
 		const fakePromise = fakeFetch(fakeUrl, options);
 
-		return fakePromise !== null
-			? fakePromise
-			: fetch(fakeUrl, {...options, headers: newHeaders});
+		return fakePromise === null
+			? fetch(fakeUrl, {...options, headers: newHeaders})
+			: fakePromise;
 	}
 }

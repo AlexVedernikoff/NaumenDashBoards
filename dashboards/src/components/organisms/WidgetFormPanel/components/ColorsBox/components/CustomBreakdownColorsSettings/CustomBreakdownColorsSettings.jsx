@@ -1,4 +1,5 @@
 // @flow
+import {addElement, replaceElement} from 'helpers';
 import ColorField from 'WidgetFormPanel/components/ColorsBox/components/ColorField';
 import {equalLabels, getBreakdownColors} from 'utils/recharts/helpers';
 import {getSeparatedLabel} from 'store/widgets/buildData/helpers';
@@ -29,9 +30,9 @@ export class CustomBreakdownColorsSettings extends PureComponent<Props> {
 		const {colors} = value;
 		const label = labels[Number(name)];
 		const colorSettingsIndex = colors.findIndex(({key}) => equalLabels(key, label));
-		const newColors = colorSettingsIndex !== -1
-			? colors.map((colorSettings, i) => i === colorSettingsIndex ? {...colorSettings, color} : colorSettings)
-			: [...colors, {color, key: label}];
+		const newColors = colorSettingsIndex === -1
+			? addElement(colors, {color, key: label})
+			: replaceElement(colors, colorSettingsIndex, {...colors[colorSettingsIndex], color});
 
 		onChange({
 			...value,

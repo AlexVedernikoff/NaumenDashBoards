@@ -213,7 +213,7 @@ export class ParamsTab extends PureComponent<Props> {
 		const {calcTotalColumn, data} = this.props.values;
 		const isLast = data.length === 1;
 		const isMain = index === this.mainIndex;
-		const parentClassFqn = !isMain ? data[this.mainIndex].source.value?.value : '';
+		const parentClassFqn = isMain ? '' : data[this.mainIndex].source.value?.value;
 
 		return (
 			<CALC_TOTAL_CONTEXT.Provider key={`DataSetSettings_${dataSet.dataKey}`} value={calcTotalColumn}>

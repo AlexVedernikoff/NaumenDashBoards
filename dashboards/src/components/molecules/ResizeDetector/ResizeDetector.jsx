@@ -37,13 +37,13 @@ export class ResizeDetector extends PureComponent<Props, State> {
 		const {forwardedRefKey} = this.props;
 		let {props} = child;
 
-		if (!props[forwardedRefKey]) {
+		if (props[forwardedRefKey]) {
+			this.elementRef = props[forwardedRefKey];
+		} else {
 			props = {
 				...props,
 				[forwardedRefKey]: this.elementRef
 			};
-		} else {
-			this.elementRef = props[forwardedRefKey];
 		}
 
 		return cloneElement(child, props);
@@ -52,13 +52,13 @@ export class ResizeDetector extends PureComponent<Props, State> {
 	cloneDOMElement = (child: React$Element<'string'>) => {
 		let {props, ref} = child;
 
-		if (!ref) {
+		if (ref) {
+			this.elementRef = ref;
+		} else {
 			props = {
 				...props,
 				ref: this.elementRef
 			};
-		} else {
-			this.elementRef = ref;
 		}
 
 		return cloneElement(child, props);
