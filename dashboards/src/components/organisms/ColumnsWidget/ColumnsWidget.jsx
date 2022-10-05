@@ -1,12 +1,24 @@
 // @flow
 import AxisTooltip from 'components/molecules/RechartTooltip';
-import {Bar, BarChart, CartesianGrid, Cell, LabelList, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import BarLabel from 'components/molecules/BarLabel';
+import {
+	Bar,
+	BarChart,
+	CartesianGrid,
+	Cell,
+	Customized,
+	LabelList,
+	Legend,
+	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis
+} from 'recharts';
 import EmptyWidget from 'components/molecules/EmptyWidget';
 import type {Props, State} from './types';
 import ReChartWidget from 'components/molecules/ReChartWidget';
 import React, {PureComponent} from 'react';
 import RechartLegend from 'components/molecules/RechartLegend';
+import {StoreLabel, StoredLabels} from 'containers/LabelsStorage';
 import {SUB_TOTAL_POSITION} from 'utils/recharts/constants';
 import t from 'localization';
 import {TotalCustomLabel, XCategoryLabel, YTitleLabel} from 'components/molecules/AxisLabels';
@@ -108,12 +120,14 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 	};
 
 	renderColumnsChart = () => {
-		const {widget} = this.props;
+		const {clearLabels, widget} = this.props;
 		const {options} = this.state;
 		const {data, series, stackOffset} = options;
 		const margin = {bottom: 5, left: 30, right: 30, top: 5};
 
 		if (data.length !== 0) {
+			clearLabels && clearLabels();
+
 			return (
 				<BarChart barGap={1} data={data} layout="horizontal" margin={margin} stackOffset={stackOffset}>
 					<Tooltip content={this.renderTooltipContent} />
@@ -121,6 +135,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 					{this.renderXAxis()}
 					{this.renderYAxis()}
 					{series.map(this.renderBar)}
+					<Customized component={<StoredLabels />} />
 					{this.renderLegend()}
 				</BarChart>
 			);
@@ -140,7 +155,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 			return (
 				<LabelList
 					className={showClassName}
-					content={<BarLabel />}
+					content={<StoreLabel dataKey={key} />}
 					dataKey={key}
 					fill={fontColor}
 					fontFamily={fontFamily}

@@ -1,13 +1,25 @@
 // @flow
 import AxisTooltip from 'components/molecules/RechartTooltip';
-import {Bar, CartesianGrid, ComposedChart, LabelList, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import BarLabel from 'components/molecules/BarLabel';
+import {
+	Bar,
+	CartesianGrid,
+	ComposedChart,
+	Customized,
+	LabelList,
+	Legend,
+	Line,
+	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis
+} from 'recharts';
 import {COMBO_TYPES} from 'store/widgets/data/constants';
 import EmptyWidget from 'components/molecules/EmptyWidget';
 import type {Props, State} from './types';
 import ReChartWidget from 'components/molecules/ReChartWidget';
 import React, {PureComponent} from 'react';
 import RechartLegend from 'components/molecules/RechartLegend';
+import {StoreLabel, StoredLabels} from 'containers/LabelsStorage';
 import t from 'localization';
 import {XCategoryLabel, YTitleLabel} from 'components/molecules/AxisLabels';
 
@@ -164,6 +176,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 					{this.renderXAxis()}
 					{yaxis.map(this.renderYAxis)}
 					{sortedSeries.map(this.renderSeries)}
+					<Customized component={<StoredLabels />} />
 					{this.renderLegend()}
 				</ComposedChart>
 			);
@@ -180,7 +193,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 			// класс rechart_dataLabels_shadow объявлен глобально в стилях ReChartWidget
 			const showClassName = showShadow ? 'rechart_dataLabels_shadow' : '';
 			const position = isBar ? 'center' : 'top';
-			const label = isBar ? (<BarLabel />) : null;
+			const label = isBar ? (<StoreLabel dataKey={dataKey} />) : null;
 
 			return (
 				<LabelList
