@@ -246,51 +246,43 @@ export class BarWidget extends PureComponent<Props, State> {
 	renderXAxis = () => {
 		const {options: {formatters, xaxis}} = this.state;
 		const {axisName: value, domain, fontFamily, fontSize, show, showName} = xaxis;
+		const labelStyle = showName
+			? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
+			: null;
 
-		if (show) {
-			const labelStyle = showName
-				? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
-				: null;
-
-			return (
-				<XAxis
-					domain={domain}
-					fontFamily={fontFamily}
-					fontSize={fontSize}
-					interval={0}
-					label={labelStyle}
-					tickFormatter={formatters.indicator}
-					type="number"
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<XAxis
+				domain={domain}
+				fontFamily={fontFamily}
+				fontSize={fontSize}
+				hide={!show}
+				interval={0}
+				label={labelStyle}
+				tickFormatter={formatters.indicator}
+				type="number"
+			/>
+		);
 	};
 
 	renderYAxis = () => {
 		const {options: {formatters, yaxis}} = this.state;
 		const {axisName, fontFamily, fontSize, show, showName, width} = yaxis;
+		const label = showName
+			? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={axisName} />
+			: null;
 
-		if (show) {
-			const label = showName
-				? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={axisName} />
-				: null;
-
-			return (
-				<YAxis
-					dataKey="name"
-					interval={0}
-					label={label}
-					tick={this.renderYAxisTick()}
-					tickFormatter={formatters.parameter}
-					type="category"
-					width={width}
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<YAxis
+				dataKey="name"
+				hide={!show}
+				interval={0}
+				label={label}
+				tick={this.renderYAxisTick()}
+				tickFormatter={formatters.parameter}
+				type="category"
+				width={width}
+			/>
+		);
 	};
 
 	renderYAxisTick = () => {

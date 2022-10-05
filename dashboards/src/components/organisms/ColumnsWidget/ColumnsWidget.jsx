@@ -245,30 +245,26 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 	renderXAxis = () => {
 		const {formatters, xaxis} = this.state.options;
 		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xaxis;
+		const labelStyle = showName
+			? {fontFamily, fontSize, height, offset: -3, position: 'insideBottom', value}
+			: null;
+		const yPadding = fontSize * 0.25;
 
-		if (show) {
-			const labelStyle = showName
-				? {fontFamily, fontSize, height, offset: -3, position: 'insideBottom', value}
-				: null;
-			const yPadding = fontSize * 0.25;
-
-			return (
-				<XAxis
-					dataKey="name"
-					dy={yPadding}
-					fontFamily={fontFamily}
-					fontSize={fontSize}
-					height={height}
-					interval={interval}
-					label={labelStyle}
-					tick={this.renderXCategoryLabel()}
-					tickFormatter={formatters.parameter}
-					type="category"
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<XAxis
+				dataKey="name"
+				dy={yPadding}
+				fontFamily={fontFamily}
+				fontSize={fontSize}
+				height={height}
+				hide={!show}
+				interval={interval}
+				label={labelStyle}
+				tick={this.renderXCategoryLabel()}
+				tickFormatter={formatters.parameter}
+				type="category"
+			/>
+		);
 	};
 
 	renderXCategoryLabel = () => {
@@ -290,27 +286,23 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 	renderYAxis = () => {
 		const {formatters, yaxis} = this.state.options;
 		const {axisName: value, domain, fontFamily, fontSize, show, showName, width} = yaxis;
+		const label = showName
+			? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={value} />
+			: null;
 
-		if (show) {
-			const label = showName
-				? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={value} />
-				: null;
-
-			return (
-				<YAxis
-					domain={domain}
-					fontFamily={fontFamily}
-					fontSize={fontSize}
-					interval={0}
-					label={label}
-					tickFormatter={formatters.indicator}
-					type="number"
-					width={width}
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<YAxis
+				domain={domain}
+				fontFamily={fontFamily}
+				fontSize={fontSize}
+				hide={!show}
+				interval={0}
+				label={label}
+				tickFormatter={formatters.indicator}
+				type="number"
+				width={width}
+			/>
+		);
 	};
 
 	render () {

@@ -194,28 +194,24 @@ export class LinesWidget extends PureComponent<Props, State> {
 	renderXAxis = () => {
 		const {options: {formatters, xaxis}} = this.state;
 		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xaxis;
+		const labelStyle = showName
+			? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
+			: null;
 
-		if (show) {
-			const labelStyle = showName
-				? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
-				: null;
-
-			return (
-				<XAxis
-					dataKey="name"
-					fontFamily={fontFamily}
-					fontSize={fontSize}
-					height={height}
-					interval={interval}
-					label={labelStyle}
-					tick={this.renderXAxisTick()}
-					tickFormatter={formatters.parameter}
-					type="category"
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<XAxis
+				dataKey="name"
+				fontFamily={fontFamily}
+				fontSize={fontSize}
+				height={height}
+				hide={!show}
+				interval={interval}
+				label={labelStyle}
+				tick={this.renderXAxisTick()}
+				tickFormatter={formatters.parameter}
+				type="category"
+			/>
+		);
 	};
 
 	renderXAxisTick = () => {
@@ -236,27 +232,23 @@ export class LinesWidget extends PureComponent<Props, State> {
 	renderYAxis = () => {
 		const {options: {formatters, yaxis}} = this.state;
 		const {axisName: value, fontFamily, fontSize, show, showName, width} = yaxis;
+		const label = showName
+			? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={value} />
+			: null;
 
-		if (show) {
-			const label = showName
-				? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={value} />
-				: null;
-
-			return (
-				<YAxis
-					domain={[0, dataMax => Math.ceil(dataMax * 1.1)]}
-					fontFamily={fontFamily}
-					fontSize={fontSize}
-					interval={0}
-					label={label}
-					tickFormatter={formatters.indicator}
-					type="number"
-					width={width}
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<YAxis
+				domain={[0, dataMax => Math.ceil(dataMax * 1.1)]}
+				fontFamily={fontFamily}
+				fontSize={fontSize}
+				hide={!show}
+				interval={0}
+				label={label}
+				tickFormatter={formatters.indicator}
+				type="number"
+				width={width}
+			/>
+		);
 	};
 
 	render () {
