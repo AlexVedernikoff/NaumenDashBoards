@@ -15,11 +15,45 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 /**
  * Метод по получению данных из БД через Мастер настроек
  * @param nameContent - имя контента
+ * @param bindings - дополнительные параметры контекста выполнения скрипта
  * @return список данных из БД
  */
 Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bindings)
 {
+    String variableDescribingHierarchyCommunicationSettings = 'hierarchyCommunicationSettings'
+    String variableDescribingObjectRelationshipsSettings = 'objecRelationshipsSettings'
     SchemesSettings settings = new SettingsProviderSchemes().getSettings()
+    Collection<MapObjectBuilder> pointData = []
+    if (checkingPlaceUseInSettingsWizard(
+        variableDescribingHierarchyCommunicationSettings,
+        settings,
+        nameContent
+    ))
+    {
+        pointData += dataForHierarchyCommunicationSettings(settings, nameContent, bindings)
+    }
+    if (checkingPlaceUseInSettingsWizard(
+        variableDescribingObjectRelationshipsSettings,
+        settings,
+        nameContent
+    ))
+    {
+        pointData += dataForObjecRelationshipsSettings(settings, nameContent, bindings)
+    }
+    return pointData
+}
+
+/**
+ * Метод сохранения данных о линиях и точках для отображения на карте
+ * @param settings данные из мастера настроек
+ * @param nameContent - имя контента
+ * @param bindings - дополнительные параметры контекста выполнения скрипта
+ * @return колекцию данных для отображения заданных на вкладе
+ */
+Collection<HierarchyCommunicationBuilder> dataForHierarchyCommunicationSettings(SchemesSettings settings,
+                                                                                String nameContent,
+                                                                                LinkedHashMap<String, Object> bindings)
+{
     Collection<AbstractSchemesCharacteristics> abstractCharacteristicsData =
         settings?.abstractSchemesCharacteristics
     Collection<String> pointScriptText = getListScript(abstractCharacteristicsData.first())
@@ -27,59 +61,24 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
         abstractCharacteristicsData.first()?.strategies?.pathCoordinatLongitud.first()
     String pointA = abstractCharacteristicsData.first()?.strategies?.pointA.first()
     String pointB = abstractCharacteristicsData.first()?.strategies?.pointB.first()
-
-    Collection<MapObjectBuilder> pointData = []
-
     String scriptLineAttributeData = "${ pointScriptText.first() }.${ linkAttribute }"
     String scriptPointAAttributeData = "${ pointScriptText.first() }.${ linkAttribute }.${ pointA }"
     String scriptPointBAttributeData = "${ pointScriptText.first() }.${ linkAttribute }.${ pointB }"
+    ScriptDtOList dataLine
+    Collection dataPointA
+    Collection dataPointB
     try
     {
-        ScriptDtOList dataLine = api.utils.executeScript(scriptLineAttributeData, bindings)
-        Collection dataPointA = api.utils.executeScript(scriptPointAAttributeData, bindings)
-        Collection dataPointB = api.utils.executeScript(scriptPointBAttributeData, bindings)
-
-        pointData += collectingData(dataLine, dataPointA, dataPointB)
+        dataLine = api.utils.executeScript(scriptLineAttributeData, bindings)
+        dataPointA = api.utils.executeScript(scriptPointAAttributeData, bindings)
+        dataPointB = api.utils.executeScript(scriptPointBAttributeData, bindings)
     }
     catch (Exception ex)
     {
         logger.info("Передан неверный скрипт!")
         logger.error("#schemeParamsSettings ${ ex.message }", ex)
     }
-    return pointData
-}
-
-/**
- * Метод получения колекции всех стриптов
- * @param data данные из мастера настроек
- * @return коллекция скриптов
- */
-Collection<String> getListScript(AbstractSchemesCharacteristics data)
-{
-    Collection<String> dataScriptText = []
-    data?.strategies?.each
-        {
-            String currentScript = it?.scriptText
-            dataScriptText.add(currentScript)
-        }
-    return dataScriptText
-}
-
-/**
- * Метод сохранения данных о линиях и точках для отображения на карте
- * @param dataLine - данные по атрибуту объекта
- * @param dataPointA - данные по связанному атрибуту по точке А
- * @param dataPointB - данные по связанному атрибуту по точке B
- * @return колекцию данных для отображения заданных на вкладе
- */
-Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataLine,
-                                                         Collection dataPointA,
-                                                         Collection dataPointB)
-{
     Set<HierarchyCommunicationBuilder> pointData = []
-    Collection settings = new SettingsProviderSchemes()
-        .getSettings()
-        ?.abstractSchemesCharacteristics?.first()?.strategies?.characteristicsOutputDiagram?.first()
     ElementsScheme elementsScheme = new ElementsScheme()
     Integer id = 0
     dataLine.eachWithIndex { num, idx ->
@@ -131,6 +130,252 @@ Collection<HierarchyCommunicationBuilder> collectingData(ScriptDtOList dataLine,
     return pointData.collect {
         return schemeHierarchy(it)
     }
+}
+
+/**
+ * Метод получения данных для вкладки мастера 'Связь выбранных объектов'
+ * @param settings данные из мастера настроек
+ * @param nameContent - имя контента
+ * @param bindings - дополнительные параметры контекста выполнения скрипта
+ * @return данные для отображения на схеме
+ */
+Collection<HierarchyCommunicationBuilder> dataForObjecRelationshipsSettings(SchemesSettings settings,
+                                                                            String nameContent,
+                                                                            LinkedHashMap<String, Object> bindings)
+{
+    Collection<AbstractSchemesCharacteristics> abstractCharacteristicsData =
+        settings?.abstractSchemesCharacteristics
+    Collection<String> pointScriptText = getListScript(abstractCharacteristicsData.last())
+    ElementsScheme elementsScheme = new ElementsScheme()
+    String scriptLineAttributeData = pointScriptText.first()
+    Collection result = []
+    try
+    {
+        scriptedBusinessObjectsSetupWizard = api.utils.executeScript(scriptLineAttributeData)
+    }
+    catch (Exception ex)
+    {
+        logger.info("Передан неверный скрипт!")
+        logger.error("#schemeParamsSettings ${ ex.message }", ex)
+    }
+    Collection listPathCoordenadesLongitud =
+        abstractCharacteristicsData.last()?.strategies?.first().rulesLinkingSchemaObjects.collect {
+            it.pathCoordinatLongitud
+        }
+    Collection<SchemaElement> allElementsScheme =
+        getAllElementsScheme(scriptedBusinessObjectsSetupWizard, listPathCoordenadesLongitud)
+
+    Integer id = 0
+    Collection<HierarchyCommunicationBuilder> pointData = []
+    allElementsScheme.each { currentElementSchema -> pointData.add([])
+    }
+    transformationDataDisplayFront(pointData, id, allElementsScheme, elementsScheme, null)
+    return pointData.sort {
+        it.size()
+    }.last()
+}
+
+/**
+ * Преобразование данных в формат для отображения на фронт
+ * @param pointData - список данных для отображения
+ * @param id - идентификатор элемента схемы
+ * @param allElementsScheme - все элементы для схем в бэковом формате
+ * @param elementsScheme - элемент схемы
+ * @param idParent - идентификатор родительского элемента
+ * @return преобразованные данные
+ */
+void transformationDataDisplayFront(Collection<HierarchyCommunicationBuilder> pointData,
+                                    Integer id,
+                                    Object allElementsScheme,
+                                    ElementsScheme elementsScheme,
+                                    Integer idParent)
+{
+    pointData.eachWithIndex { currentScheme, ind ->
+        if (allElementsScheme)
+        {
+
+            if (allElementsScheme[ind] && allElementsScheme[ind].level == 0)
+            {
+                currentScheme.add(
+                    elementsScheme.createHierarchyCommunicationPoint(
+                        allElementsScheme[ind].systemObject,
+                        ++id,
+                        null
+                    )
+                )
+                transformationDataDisplayFront(
+                    pointData,
+                    id,
+                    allElementsScheme[ind].childElements,
+                    elementsScheme,
+                    ind
+                )
+            }
+            else
+            {
+                Integer from
+                allElementsScheme.eachWithIndex { schemaElement, indElementsScheme ->
+                    if (schemaElement && ind == idParent)
+                    {
+                        if (!from)
+                        {
+                            from = id
+                        }
+                        currentScheme.add(
+                            elementsScheme.createHierarchyCommunicationLine(
+                                schemaElement.systemObject,
+                                ++id,
+                                from
+                            )
+                        )
+                        currentScheme.add(
+                            elementsScheme.createHierarchyCommunicationPoint(
+                                schemaElement.systemObject,
+                                ++id,
+                                from
+                            )
+                        )
+                        transformationDataDisplayFront(
+                            pointData,
+                            id,
+                            schemaElement.childElements,
+                            elementsScheme,
+                            idParent
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Получение данных для работы на бэке
+ * @param scriptedBusinessObjectsSetupWizard - список скриптовых элементов из мастера
+ * @param linkAttributes - ссылочные атрибуты по которым будут получаться данных
+ * @return список данных для работы на бэке
+ */
+Collection<SchemaElement> getAllElementsScheme(Collection scriptedBusinessObjectsSetupWizard,
+                                               Collection linkAttributes)
+{
+    Collection<SchemaElement> allElementsScheme = []
+    linkAttributes.eachWithIndex { linkAttribute, idAttribute ->
+        if (idAttribute == 0)
+        {
+            scriptedBusinessObjectsSetupWizard.each { firstLevelElement ->
+                Object systemObject = api.utils.get(firstLevelElement.UUID)
+                Collection<SchemaElement> childElements = firstLevelElement[linkAttribute] ?
+                    listChildElements(
+                        firstLevelElement[linkAttribute],
+                        idAttribute + 1,
+                        ) : null
+                String title = systemObject ? systemObject.title : null
+                allElementsScheme
+                    .add(new SchemaElement(idAttribute, title, systemObject, childElements))
+            }
+        }
+        else
+        {
+            Collection<SchemaElement> elementsPreviousIteration = []
+            elementsPreviousIteration =
+                getAllBusinessObjectsCurrentLevel(allElementsScheme, idAttribute)
+            elementsPreviousIteration.each { firstLevelElement ->
+                if (firstLevelElement)
+                {
+                    Object systemObject = firstLevelElement.systemObject
+                    Collection<SchemaElement> childElements = systemObject[linkAttribute] ?
+                        listChildElements(
+                            systemObject[linkAttribute],
+                            idAttribute + 1,
+                            ) : null
+                    firstLevelElement.setChildElements(childElements)
+                }
+            }
+        }
+    }
+    allElementsScheme
+}
+
+/**
+ * Метод формирования списка дочерних элементов объекта
+ * @param attribute - атрибут
+ * @param level - уровень элемента
+ * @return список дочерних элементов
+ */
+Collection<SchemaElement> listChildElements(Object attribute, Integer level)
+{
+    Collection<SchemaElement> childElements = []
+    if (attribute instanceof Collection)
+    {
+        attribute.each {
+            String title = it ? it.title : null
+            childElements.add(new SchemaElement(level, title, api.utils.get(it.UUID), null))
+        }
+    }
+    else
+    {
+        String title = attribute ? attribute.title : null
+        childElements.add(new SchemaElement(level, title, api.utils.get(attribute.UUID), null))
+    }
+    return childElements
+}
+
+/**
+ * Метод формирования списка дочерних элементов объекта
+ * @param elements - элемент схемы
+ * @param level - уровень элемента
+ * @return список дочерних элементов
+ */
+Collection<SchemaElement> getAllBusinessObjectsCurrentLevel(Collection<SchemaElement> elements,
+                                                            Integer level)
+{
+    if (elements.childElements.flatten() &&
+        elements.childElements?.flatten()?.first()?.level == level)
+    {
+        return elements.childElements.flatten()
+    }
+    else
+    {
+        if (elements.childElements.flatten())
+        {
+            getAllBusinessObjectsCurrentLevel(elements.childElements.flatten(), level)
+        }
+    }
+    return null
+}
+
+/**
+ * Метод получения колекции всех стриптов
+ * @param data данные из мастера настроек
+ * @return коллекция скриптов
+ */
+Collection<String> getListScript(AbstractSchemesCharacteristics data)
+{
+    Collection<String> dataScriptText = []
+    data?.strategies?.each
+        {
+            String currentScript = it?.scriptText
+            dataScriptText.add(currentScript)
+        }
+    return dataScriptText
+}
+
+/**
+ * Проверка использования ВП в мастере настроек
+ * @param usedTabSettingsWizard имя схемы используемой в мастере
+ * @param settings данные из мастера настроек
+ * @param nameContent имя используемого контента
+ * @return используемость ВП
+ */
+Boolean checkingPlaceUseInSettingsWizard(String usedTabSettingsWizard,
+                                         SchemesSettings settings,
+                                         String nameContent)
+{
+    return settings?.abstractSchemesCharacteristics.find { abstractCharacteristics
+        ->
+        abstractCharacteristics.typeSchemes == usedTabSettingsWizard
+    }.strategies.find { strateg -> strateg.listStrategy.contains(nameContent)
+    } ?: false
 }
 
 /**
@@ -248,5 +493,41 @@ class RelationshipsObjectSettings extends OutputObjectStrategies
     {
         this.pathLongitudeCoordinates = pathLongitudeCoordinates
         return this
+    }
+}
+
+class SchemaElement
+{
+    /**
+     * Уровень отображения на схеме
+     */
+    Integer level
+
+    /**
+     * Имя элемента
+     */
+    String title
+
+    /**
+     * Объект системы
+     */
+    Object systemObject
+
+    /**
+     * Список дочерних элементов
+     */
+    Collection<SchemaElement> childElements
+
+    SchemaElement(level, title, systemObject, childElements)
+    {
+        this.level = level
+        this.title = title
+        this.systemObject = systemObject
+        this.childElements = childElements
+    }
+
+    void setChildElements(Collection<SchemaElement> childElements)
+    {
+        this.childElements = childElements
     }
 }

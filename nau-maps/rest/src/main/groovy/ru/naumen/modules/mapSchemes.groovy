@@ -20,6 +20,7 @@ import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.ea.IAppContentInfo
 import groovy.transform.Canonical
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
+import ru.naumen.metainfo.shared.ClassFqn
 
 @MechanismSettings(name = 'schemes-initial')
 @JsonSchemaMeta(
