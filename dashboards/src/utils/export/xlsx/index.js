@@ -25,7 +25,7 @@ const exportSheet = async (name: string, data: PivotBuildData | TableBuildData, 
 	if (tableElement) {
 		const XLSX = await import('xlsx');
 		const workbook = XLSX.utils.book_new();
-		const sheet = XLSX.utils.table_to_sheet(tableElement);
+		const sheet = XLSX.utils.table_to_sheet(tableElement, {raw: true});
 		let tableName = name;
 
 		if (tableName.length >= TABLE_NAME_LENGTH_LIMIT) {
