@@ -26,6 +26,7 @@ import ru.naumen.core.server.script.api.ITypesApi
 import ru.naumen.core.server.script.api.IWebApi
 import ru.naumen.core.server.script.api.IWhereClauseApi
 import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
+import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 import ru.naumen.core.server.script.spi.IScriptUtils
 import ru.naumen.metainfo.shared.IAttrReference
 import java.text.SimpleDateFormat
@@ -211,10 +212,18 @@ class DashboardDrilldownService
         } ?: []
         requestContent.cases += attrCases
 
-			  def casesFromDescriptor = listdata.createListDescriptor(requestContent.descriptor)
-			  def listOfCasesFromDescriptor = casesFromDescriptor.fqns.case
-
-			  requestContent.cases += listOfCasesFromDescriptor
+        if (requestContent.descriptor)
+        {
+            def casesFromDescriptor = listdata.createListDescriptor(requestContent.descriptor)
+            def listOfCasesFromDescriptor = casesFromDescriptor.fqns.code
+            listOfCasesFromDescriptor.each { code ->
+                IMetaClassWrapper metaClass = metainfo.getMetaClass(code).parent
+                if (metaClass.code != 'abstractBO')
+                {
+                    requestContent.cases << code
+                }
+            }
+        }
 
         DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(requestContent.dashboardKey)
         cardObjectUuid = dashboardDataSetService.getCardObjectUUID(dbSettings, user) ?: cardObjectUuid
