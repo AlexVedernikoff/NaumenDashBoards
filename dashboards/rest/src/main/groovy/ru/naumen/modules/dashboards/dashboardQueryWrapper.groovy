@@ -1504,7 +1504,7 @@ class DashboardQueryWrapperUtils
 
             if (diagramType == DiagramType.PIVOT_TABLE)
             {
-                if (it.attribute.declaredMetaClass == requestData.source.classFqn)
+                if (requestData.source.classFqn in [it.attribute.declaredMetaClass, it.attribute.metaClassFqn])
                 {
                     criteriaToFilter = criteria
                 }
