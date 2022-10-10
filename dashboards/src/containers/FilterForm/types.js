@@ -31,5 +31,6 @@ export type InjectedProps = {
 export type State = {
 	fetchingFilterAttributes: boolean,
 	filterAttributes: Array<Attribute> | null,
+	needToClose: boolean,
 	openingFilterForm: boolean,
 };

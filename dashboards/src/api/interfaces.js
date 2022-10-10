@@ -16,10 +16,12 @@ import type {
 } from './types';
 
 export interface FilterFormAPI {
+	closeForm (): void;
 	openForm (descriptor: FilterFormContextDTO, options: FilterFormOptionsDTO): Promise<FilterFormAnswerDTO>;
 }
 
 export interface FrameAPI {
+	closeFilterForm(): void;
 	getApplicationCode (): string;
 	getContentCode (): string;
 	getCurrentContentParameters (): Promise<ContentParametersDTO>;

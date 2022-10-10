@@ -16,8 +16,17 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 		state = {
 			fetchingFilterAttributes: false,
 			filterAttributes: null,
+			needToClose: false,
 			openingFilterForm: false
 		};
+
+		componentWillUnmount () {
+			const {needToClose} = this.state;
+
+			if (needToClose) {
+				api.instance.filterForm.closeForm();
+			}
+		}
 
 		fetchFilterAttributes = async (source: SourceData) => {
 			const {fetchingFilterAttributes} = this.state;
@@ -120,9 +129,11 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 					: createFilterContext(classFqn, getDescriptorCases);
 				const options = await this.updateContext(context, classFqn, descriptor);
 
-				this.setState({openingFilterForm: false});
+				this.setState({needToClose: true, openingFilterForm: false});
 
 				const {serializedContext} = await api.instance.filterForm.openForm(context, options);
+
+				this.setState({needToClose: false});
 
 				return serializedContext;
 			} catch (e) {

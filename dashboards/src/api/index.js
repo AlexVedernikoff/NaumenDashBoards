@@ -43,7 +43,7 @@ class ApiService {
 		return new ExecAPI();
 	}
 
-	get instance () {
+	get instance (): API {
 		if (!this.apiInstance) {
 			this.apiInstance = this.configureAPI();
 		}

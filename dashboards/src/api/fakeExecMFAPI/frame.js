@@ -107,6 +107,8 @@ export default class Frame implements FrameAPI {
 		return awaitResult;
 	}
 
+	closeFilterForm () { }
+
 	getViewMode () {
 		return 'fullScreen';
 	}
