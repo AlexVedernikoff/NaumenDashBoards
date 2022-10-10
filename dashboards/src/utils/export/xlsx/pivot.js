@@ -100,7 +100,7 @@ class PivotTable extends Table {
 	};
 
 	createSumRow = (parameterValue: string, subDataSet: Array<Row>): string => {
-		const parameter = `<th colspan="${this.parametersLength}">${parameterValue}</th>`;
+		const parameter = `<th>${parameterValue}</th>`;
 		const dataColumns = this.dataColumns.filter(column => column.type === COLUMN_TYPES.INDICATOR);
 		const data = {};
 
@@ -116,9 +116,10 @@ class PivotTable extends Table {
 			});
 		});
 
+		const appendix = '<th></th>'.repeat(this.parametersLength - 1);
 		const values = dataColumns.map(column => `<th>${data[column.accessor]}</th>`).join('');
 
-		return `<tr>${parameter}${values}</tr>`;
+		return `<tr>${parameter}${appendix}${values}</tr>`;
 	};
 
 	getDataColumns = (): Array<PivotBaseColumn> => this.dataColumns;
