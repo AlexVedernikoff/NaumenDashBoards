@@ -169,7 +169,8 @@ Collection<HierarchyCommunicationBuilder> dataForObjecRelationshipsSettings(Sche
     Collection<HierarchyCommunicationBuilder> pointData = []
     allElementsScheme.each { currentElementSchema -> pointData.add([])
     }
-    transformationDataDisplayFront(pointData, id, allElementsScheme, elementsScheme, null)
+    transformationDataDisplayFront(pointData, allElementsScheme, elementsScheme, null)
+    new SchemaWorkingElements().zeroingId()
     return pointData.sort {
         it.size()
     }.last()
@@ -190,6 +191,7 @@ void transformationDataDisplayFront(Collection<HierarchyCommunicationBuilder> po
                                     ElementsScheme elementsScheme,
                                     Integer idParent)
 {
+    SchemaWorkingElements idSchemaElement = new SchemaWorkingElements()
     pointData.eachWithIndex { currentScheme, ind ->
         if (allElementsScheme)
         {
@@ -199,7 +201,7 @@ void transformationDataDisplayFront(Collection<HierarchyCommunicationBuilder> po
                 currentScheme.add(
                     elementsScheme.createHierarchyCommunicationPoint(
                         allElementsScheme[ind].systemObject,
-                        ++id,
+                        idSchemaElement.incrementId(),
                         null
                     )
                 )
@@ -219,25 +221,24 @@ void transformationDataDisplayFront(Collection<HierarchyCommunicationBuilder> po
                     {
                         if (!from)
                         {
-                            from = id
+                            from = idSchemaElement.getId()
                         }
                         currentScheme.add(
                             elementsScheme.createHierarchyCommunicationLine(
                                 schemaElement.systemObject,
-                                ++id,
+                                idSchemaElement.incrementId(),
                                 from
                             )
                         )
                         currentScheme.add(
                             elementsScheme.createHierarchyCommunicationPoint(
                                 schemaElement.systemObject,
-                                ++id,
+                                idSchemaElement.incrementId(),
                                 from
                             )
                         )
                         transformationDataDisplayFront(
                             pointData,
-                            id,
                             schemaElement.childElements,
                             elementsScheme,
                             idParent
@@ -529,5 +530,28 @@ class SchemaElement
     void setChildElements(Collection<SchemaElement> childElements)
     {
         this.childElements = childElements
+    }
+}
+
+class SchemaWorkingElements
+{
+    /**
+     * Идентификатор элемента на схеме
+     */
+    static Integer id = 0
+
+    Integer incrementId()
+    {
+        return ++id
+    }
+
+    Integer getId()
+    {
+        return id
+    }
+
+    void zeroingId()
+    {
+        id = 0
     }
 }
