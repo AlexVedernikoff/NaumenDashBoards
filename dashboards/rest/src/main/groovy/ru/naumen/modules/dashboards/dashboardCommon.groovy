@@ -102,6 +102,20 @@ enum DiagramType
 }
 
 /**
+ * Типы датасетов
+ */
+enum DataSetType
+{
+    AXIS_DATA_SET,
+    CIRCLE_DATA_SET,
+    COMBO_DATA_SET,
+    SUMMARY_DATA_SET,
+    SPEEDOMETER_DATA_SET,
+    TABLE_DATA_SET,
+    PIVOT_DATA_SET
+}
+
+/**
  * Типы группировки даннных для диаграмм. DAY, WEEK, MONTH, QUARTER, YEAR, SEVEN_DAYS только для дат
  */
 enum GroupType
@@ -2201,12 +2215,18 @@ class Constants {
         },
         (PivotTableData) : { value ->
             return use(JacksonUtils) {
-                (value.hasField('type') || value['type'] == 'PivotDataSet')
+                (value.hasField('__type') && value['__type'] == DataSetType.PIVOT_DATA_SET)
             }
         },
         (DiagramNewData) : { value ->
             return use(JacksonUtils) {
-                (value.hasField('indicators') || value['sourceForCompute']) && !value.hasField('descriptor')
+                Boolean dataSetTypeMatch = false
+                if (value.hasField('type') && value['__type'] in DataSetType)
+                {
+                    dataSetTypeMatch = true
+                }
+                dataSetTypeMatch || (value.hasField('indicators') || value['sourceForCompute'])
+                    && !value.hasField('descriptor')
             }
         },
         (TableCurrentData): { value ->
@@ -3966,6 +3986,10 @@ abstract class DiagramNowData
      * Заголовок для источника
      */
     String sourceRowName
+    /**
+     * Типа датасета
+     */
+    DataSetType __type
 }
 
 /**
