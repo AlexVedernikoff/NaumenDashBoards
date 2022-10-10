@@ -21,6 +21,8 @@ import groovy.transform.TupleConstructor
 import com.google.gson.internal.LinkedTreeMap
 import org.jsoup.select.Elements
 import org.jsoup.nodes.Document
+import ru.naumen.core.shared.dto.ISDtObject
+import groovy.transform.Canonical
 
 /**
  * Метод для получения данных об объектах для вывода на cхему
@@ -67,7 +69,7 @@ class ElementsScheme
     {
         return new HierarchyCommunicationBuilder()
     }
-    Collection settingsСharacteristicsСommunicationHierarchy = new SettingsProviderSchemes()
+    Collection settingsCharacteristicsCommunicationHierarchy = new SettingsProviderSchemes()
         .getSettings()
         ?.abstractSchemesCharacteristics
         ?.first()?.strategies?.characteristicsOutputDiagram
@@ -88,12 +90,12 @@ class ElementsScheme
     {
         String mainText
         String additionalText
-        if (settingsСharacteristicsСommunicationHierarchy?.first()?.mainText &&
-            settingsСharacteristicsСommunicationHierarchy.first()?.additionalText)
+        if (settingsCharacteristicsCommunicationHierarchy?.first()?.mainText &&
+            settingsCharacteristicsCommunicationHierarchy.first()?.additionalText)
         {
-            mainText = settingsСharacteristicsСommunicationHierarchy?.first()?.mainText?.first()
+            mainText = settingsCharacteristicsCommunicationHierarchy?.first()?.mainText?.first()
             additionalText =
-                settingsСharacteristicsСommunicationHierarchy.first()?.additionalText?.first()
+                settingsCharacteristicsCommunicationHierarchy.first()?.additionalText?.first()
         }
 
         String descData = 'Не заполнено'
@@ -123,8 +125,8 @@ class ElementsScheme
         hierarchyCommunicationBuilder.setHeader(scriptData.title)
         hierarchyCommunicationBuilder
             .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
-        Collection attributesFromGroup = settingsСharacteristicsСommunicationHierarchy.first() ?
-            characteristicsOutputDiagram(settingsСharacteristicsСommunicationHierarchy.first()) :
+        Collection attributesFromGroup = settingsCharacteristicsCommunicationHierarchy.first() ?
+            characteristicsOutputDiagram(settingsCharacteristicsCommunicationHierarchy.first()) :
             characteristicsOutputDiagram(settingsDefaultVisualization)
         gettingDataForValueAndLinkElement(
             hierarchyCommunicationBuilder,
@@ -158,8 +160,8 @@ class ElementsScheme
         hierarchyCommunicationBuilder
             .addAction('Перейти на карточку', api.web.open(scriptData?.UUID))
 
-        Collection attributesFromGroup = settingsСharacteristicsСommunicationHierarchy.first() ?
-            characteristicsOutputDiagram(settingsСharacteristicsСommunicationHierarchy.first()) :
+        Collection attributesFromGroup = settingsCharacteristicsCommunicationHierarchy.first() ?
+            characteristicsOutputDiagram(settingsCharacteristicsCommunicationHierarchy.first()) :
             characteristicsOutputDiagram(settingsDefaultVisualization)
         gettingDataForValueAndLinkElement(
             hierarchyCommunicationBuilder,
@@ -176,14 +178,13 @@ class ElementsScheme
      * @param attributesFromGroup - список атрибутов
      */
     void gettingDataForValueAndLinkElement(Object builder,
-                                           Object dbTrail,
+                                           ISDtObject dbTrail,
                                            Collection attributesFromGroup)
     {
-
         MetaclassNameAndAttributeListSchemes metaclassNameAndAttributeList =
             attributesFromGroup.find { characteristicsDisplayObjects ->
                 characteristicsDisplayObjects.metaclassName == dbTrail.getMetainfo().toString()
-                if (builder instanceof HierarchyCommunicationBuilder)
+                if (builder in HierarchyCommunicationBuilder)
                 {
                     builder.setTitle(dbTrail[characteristicsDisplayObjects.mainTextAttribute])
                     builder.setDesc(dbTrail[characteristicsDisplayObjects.additionalTextAttribute])
@@ -256,10 +257,15 @@ class ElementsScheme
         }
     }
 
-    Collection<MetaclassNameAndAttributeListSchemes> characteristicsOutputDiagram(Object listСharacteristics)
+    /**
+     * Получение списка характеристик для вывода в списке объектов
+     * @param listCharacteristics - настройки из мастера настроек
+     * @return список характеристик
+     */
+    Collection<MetaclassNameAndAttributeListSchemes> characteristicsOutputDiagram(Collection listCharacteristics)
     {
         Collection<MetaclassNameAndAttributeListSchemes> attributesFromGroup = []
-        listСharacteristics.each {
+        listCharacteristics.each {
             if (it.metaclassObjects && it.attributeGroup)
             {
                 String metaClassData = !it.metaclassObjects.caseId ? it.metaclassObjects.id :
@@ -555,6 +561,7 @@ class HierarchyCommunicationBuilder
     }
 }
 
+@Canonical
 class MetaclassNameAndAttributeListSchemes
 {
     /**
@@ -582,20 +589,9 @@ class MetaclassNameAndAttributeListSchemes
      */
     String iconAttribute
 
-    MetaclassNameAndAttributeListSchemes(String metaclassName,
-                                         String mainTextAttribute,
-                                         String additionalTextAttribute,
-                                         Collection listAttribute,
-                                         String iconAttribute)
-    {
-        this.metaclassName = metaclassName
-        this.mainTextAttribute = mainTextAttribute
-        this.additionalTextAttribute = additionalTextAttribute
-        this.listAttribute = listAttribute
-        this.iconAttribute = iconAttribute
-    }
 }
 
+@Canonical
 class DataCharacteristicDisplayListObjectsSchemes
 {
     /**
@@ -607,10 +603,4 @@ class DataCharacteristicDisplayListObjectsSchemes
      * Группа атрибутов
      */
     String groupAttribute
-
-    DataCharacteristicDisplayListObjectsSchemes(String metaClassData, String groupAttribute)
-    {
-        this.metaClassData = metaClassData
-        this.groupAttribute = groupAttribute
-    }
 }
