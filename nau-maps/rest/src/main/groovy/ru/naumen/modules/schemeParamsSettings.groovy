@@ -186,7 +186,6 @@ Collection<HierarchyCommunicationBuilder> dataForObjecRelationshipsSettings(Sche
  * @return преобразованные данные
  */
 void transformationDataDisplayFront(Collection<HierarchyCommunicationBuilder> pointData,
-                                    Integer id,
                                     Object allElementsScheme,
                                     ElementsScheme elementsScheme,
                                     Integer idParent)
@@ -207,7 +206,6 @@ void transformationDataDisplayFront(Collection<HierarchyCommunicationBuilder> po
                 )
                 transformationDataDisplayFront(
                     pointData,
-                    id,
                     allElementsScheme[ind].childElements,
                     elementsScheme,
                     ind
