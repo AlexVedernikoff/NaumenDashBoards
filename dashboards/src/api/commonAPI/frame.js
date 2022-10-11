@@ -60,4 +60,8 @@ export default class Frame implements FrameAPI {
 			return window.jsApi.commands.filterForm(context, options.useRestriction);
 		}
 	}
+
+	closeFilterForm () {
+		window.jsApi.forms.cancel && window.jsApi.forms.cancel();
+	}
 }

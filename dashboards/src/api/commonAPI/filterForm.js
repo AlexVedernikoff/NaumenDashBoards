@@ -11,6 +11,10 @@ export default class FilterForm implements FilterFormAPI {
 		this.frame = frame;
 	}
 
+	closeForm () {
+		this.frame.closeFilterForm();
+	}
+
 	openForm (context: FilterFormContextDTO, options: FilterFormOptionsDTO) {
 		return this.frame.openFilterForm(context, options);
 	}
