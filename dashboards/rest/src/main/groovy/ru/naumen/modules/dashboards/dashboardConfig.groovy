@@ -83,6 +83,12 @@ interface DashboardConfig
      * Обновляет дескрипторы виджетов у дашбордов в хранилище с применения uuid на применение code
      */
     void setCodeInsteadOfUuidInDashboardsSettings()
+
+    /**
+     * Метод получения ошибок по дашбордам
+     * @return маппинг ключей дашбордов и текст ошибки
+     */
+    String getDashboardErrorsData()
 }
 
 @InheritConstructors
@@ -153,6 +159,16 @@ class DashboardConfigImpl extends BaseController implements DashboardConfig
     void setCodeInsteadOfUuidInDashboardsSettings()
     {
         service.setCodeInsteadOfUuidInDashboardsSettings()
+    }
+
+    /**
+     * Метод получения ошибок по дашбордам
+     * @return маппинг ключей дашбордов и текст ошибки
+     */
+    @Override
+    String getDashboardErrorsData()
+    {
+        return toJson(service.getDashboardErrorsData())
     }
 }
 
@@ -753,4 +769,28 @@ class DashboardConfigService
         }
     }
 
+    /**
+     * Метод получения ошибок по дашбордам
+     * @return маппинг ключей дашбордов и текст ошибки
+     */
+    Map<String, String> getDashboardErrorsData()
+    {
+        List dashboardKeys = getDashboardKeys('widgets', 'dashboards')
+        Map dashboardErrorsData = [:]
+
+        dashboardKeys.each { dashboardKey ->
+            String dashboardSettings = api.keyValue.get('dashboards', dashboardKey)
+            try
+            {
+                Jackson.fromJsonString(dashboardSettings, DashboardSettingsClass)
+            }
+            catch (Exception e)
+            {
+                String stackTraceString = e.getStackTrace().toString()
+                dashboardErrorsData[dashboardKey] = e.cause.message
+            }
+        }
+
+        return dashboardErrorsData
+    }
 }
