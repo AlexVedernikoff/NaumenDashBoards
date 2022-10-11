@@ -27,6 +27,19 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 	const [lines, setLines] = useState([]);
 
 	useEffect(() => {
+		const handleResize = () => {
+			stageRef.current.width(window.innerWidth);
+			stageRef.current.height(window.innerHeight);
+		};
+
+		if (stageRef.current) {
+			window.addEventListener('resize', handleResize);
+		}
+
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
+	useEffect(() => {
 		if (stageRef.current) {
 			if (exportTo === 'jpeg' || exportTo === 'png') {
 				downloadUri(stageRef.current, exportTo);

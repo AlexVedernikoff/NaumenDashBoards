@@ -103,6 +103,7 @@ export type GeolocationAction =
 export type GeolocationState = {
 	context: Context | Object,
 	controls: Controls,
+	editFormCode: string,
 	error: boolean,
 	goToElement: boolean,
 	loading: boolean,

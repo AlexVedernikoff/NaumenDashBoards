@@ -17,10 +17,7 @@ export class PanelPointHeader extends Component<Props, State> {
 	};
 
 	handleEditForm = () => {
-		const {showEditForm, singleObject} = this.props;
-
-		const {data: {uuid}} = singleObject;
-
+		const {point: {data: {uuid}}, showEditForm} = this.props;
 		showEditForm(uuid);
 	};
 
@@ -70,8 +67,8 @@ export class PanelPointHeader extends Component<Props, State> {
 		return (
 			<div className={styles.container}>
 				{this.renderText()}
-				{this.renderIconSingle()}
 				{this.renderIconEdit()}
+				{this.renderIconSingle()}
 				<ReactTooltip type="light" />
 			</div>
 		);

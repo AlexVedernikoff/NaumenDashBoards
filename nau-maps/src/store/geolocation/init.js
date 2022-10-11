@@ -15,6 +15,7 @@ export const initialGeolocationState: GeolocationState = {
 		panelOpen: true,
 		zoom: 10
 	},
+	editFormCode: 'quickCEOuFrom',
 	error: false,
 	goToElement: false,
 	loading: true,
@@ -25,7 +26,7 @@ export const initialGeolocationState: GeolocationState = {
 		autoUpdateLocation: true,
 		colorPart: '#000000',
 		groupingMethodName: '',
-		listName: 'Объекты ВОЛС',
+		listName: 'Список объектов',
 		locationUpdateFrequency: {interval: 'SECOND', length: 60},
 		requestCurrentLocation: false,
 		trailsMethodName: 'trailsMethodName',

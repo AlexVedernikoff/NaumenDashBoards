@@ -48,6 +48,7 @@
     "file-loader": "^1.1.11",
     "flow-bin": "^0.108.0",
     "flow-typed": "^2.4.0",
+		"groovy-webpack-plugin": "2.1.1",
     "html-webpack-plugin": "^3.2.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^23.1.0",
@@ -101,6 +102,8 @@
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
+		"build-dev": "cross-env NODE_ENV=development webpack --config ./webpack/config.js && npm run zip",
+		"build-license": "cross-env NODE_ENV=production LICENSE=use webpack --config ./webpack/config.js && npm run zip",
     "clear": "rm -rf ./dist/*",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --config ./webpack/config.js",
     "flow": "flow",
