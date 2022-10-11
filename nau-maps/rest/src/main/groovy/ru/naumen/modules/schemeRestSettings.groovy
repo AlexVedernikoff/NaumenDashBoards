@@ -21,6 +21,8 @@ import groovy.transform.TupleConstructor
 import com.google.gson.internal.LinkedTreeMap
 import org.jsoup.select.Elements
 import org.jsoup.nodes.Document
+import ru.naumen.core.shared.dto.ISDtObject
+import groovy.transform.Canonical
 
 /**
  * Метод для получения данных об объектах для вывода на cхему
@@ -57,6 +59,8 @@ class ElementsScheme
 {
     public static final String NOT_SPECIFIED = 'не указано'
     public static final String DATA_TYPE_HYPERLINK = 'hyperlink'
+    public static final String DATA_TYPE_BO_LINKS = 'boLinks'
+    public static final String DATA_TYPE_BACK_BO_LINKS = 'backBOLinks'
     public static final String DATA_TYPE_BOOLEAN = 'bool'
     public static final String DATA_TYPE_DT_INTERVAL = 'dtInterval'
     public static final String DATA_TYPE_RICHTEXT = 'richtext'
@@ -65,11 +69,11 @@ class ElementsScheme
     {
         return new HierarchyCommunicationBuilder()
     }
-    Collection settingsСharacteristicsСommunicationHierarchy = new SettingsProviderSchemes()
+    Collection settingsCharacteristicsCommunicationHierarchy = new SettingsProviderSchemes()
         .getSettings()
         ?.abstractSchemesCharacteristics
         ?.first()?.strategies?.characteristicsOutputDiagram
-    Collection settingsdefaultVisualization = new SettingsProviderSchemes()
+    Collection settingsDefaultVisualization = new SettingsProviderSchemes()
         .getSettings()
         ?.defaultVisualizationSchemes
 
@@ -84,13 +88,26 @@ class ElementsScheme
                                                                     Integer id,
                                                                     Long from = id)
     {
-        String mainText = settingsСharacteristicsСommunicationHierarchy.first()?.mainText?.first()
-        String additionalText =
-            settingsСharacteristicsСommunicationHierarchy.first()?.additionalText?.first()
+        String mainText
+        String additionalText
+        if (settingsCharacteristicsCommunicationHierarchy?.first()?.mainText &&
+            settingsCharacteristicsCommunicationHierarchy.first()?.additionalText)
+        {
+            mainText = settingsCharacteristicsCommunicationHierarchy?.first()?.mainText?.first()
+            additionalText =
+                settingsCharacteristicsCommunicationHierarchy.first()?.additionalText?.first()
+        }
 
-        String descData = mainText ? scriptData[mainText] : 'Не заполнено'
-        String titleData = additionalText ? scriptData[additionalText] : 'Не заполнено'
-
+        String descData = 'Не заполнено'
+        String titleData = 'Не заполнено'
+        if (mainText && scriptData.hasProperty(mainText))
+        {
+            descData = scriptData[mainText]
+        }
+        if (additionalText && scriptData.hasProperty(additionalText))
+        {
+            titleData = scriptData[additionalText]
+        }
         HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
         hierarchyCommunicationBuilder.setDesc(descData)
         if (id == 1)
@@ -108,9 +125,9 @@ class ElementsScheme
         hierarchyCommunicationBuilder.setHeader(scriptData.title)
         hierarchyCommunicationBuilder
             .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
-
-        Collection attributesFromGroup =
-            getSetAttributesOutputCharacteristics(settingsСharacteristicsСommunicationHierarchy)
+        Collection attributesFromGroup = settingsCharacteristicsCommunicationHierarchy.first() ?
+            characteristicsOutputDiagram(settingsCharacteristicsCommunicationHierarchy.first()) :
+            characteristicsOutputDiagram(settingsDefaultVisualization)
         gettingDataForValueAndLinkElement(
             hierarchyCommunicationBuilder,
             scriptData,
@@ -132,19 +149,20 @@ class ElementsScheme
                                                                    Long from = id)
     {
         HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
-        hierarchyCommunicationBuilder.setDesc(scriptData.title)
+        hierarchyCommunicationBuilder.setDesc(scriptData?.title)
+        hierarchyCommunicationBuilder.setUUID(scriptData?.UUID)
+        hierarchyCommunicationBuilder.setHeader(scriptData?.title)
+        hierarchyCommunicationBuilder.setTitle(scriptData?.title)
         hierarchyCommunicationBuilder.setFrom(from)
         hierarchyCommunicationBuilder.setTo(id + 1)
         hierarchyCommunicationBuilder.setId(id)
-        hierarchyCommunicationBuilder.setTitle(scriptData.title)
         hierarchyCommunicationBuilder.setType('line')
-        hierarchyCommunicationBuilder.setUUID(scriptData.UUID)
-        hierarchyCommunicationBuilder.setHeader(scriptData.title)
         hierarchyCommunicationBuilder
-            .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
+            .addAction('Перейти на карточку', api.web.open(scriptData?.UUID))
 
-        Collection attributesFromGroup =
-            getSetAttributesOutputCharacteristics(settingsСharacteristicsСommunicationHierarchy)
+        Collection attributesFromGroup = settingsCharacteristicsCommunicationHierarchy.first() ?
+            characteristicsOutputDiagram(settingsCharacteristicsCommunicationHierarchy.first()) :
+            characteristicsOutputDiagram(settingsDefaultVisualization)
         gettingDataForValueAndLinkElement(
             hierarchyCommunicationBuilder,
             scriptData,
@@ -160,33 +178,39 @@ class ElementsScheme
      * @param attributesFromGroup - список атрибутов
      */
     void gettingDataForValueAndLinkElement(Object builder,
-                                           ScriptDtObject dbTrail,
+                                           ISDtObject dbTrail,
                                            Collection attributesFromGroup)
     {
-        Object metaClassObject = new SettingsProviderSchemes()
-            .getSettings()
-            ?.abstractSchemesCharacteristics
-            ?.first()?.strategies.first()?.metaclassObjects?.id
-        attributesFromGroup.each { characteristicsDisplayObjects ->
-            if (characteristicsDisplayObjects.metaclassName == metaClassObject)
-            {
-                characteristicsDisplayObjects.listAttribute.each { currentAttribute ->
-                    String valueLabel
-                    String linkElement
-                    try
+        MetaclassNameAndAttributeListSchemes metaclassNameAndAttributeList =
+            attributesFromGroup.find { characteristicsDisplayObjects ->
+                characteristicsDisplayObjects.metaclassName == dbTrail.getMetainfo().toString()
+                if (builder in HierarchyCommunicationBuilder)
+                {
+                    builder.setTitle(dbTrail[characteristicsDisplayObjects.mainTextAttribute])
+                    builder.setDesc(dbTrail[characteristicsDisplayObjects.additionalTextAttribute])
+                }
+            }
+        if (metaclassNameAndAttributeList)
+        {
+            metaclassNameAndAttributeList.listAttribute.each { currentAttribute ->
+                String valueLabel
+                String linkElement
+                Collection<ValueSchemes> boLinkTypeAttribute = []
+                if (dbTrail.hasProperty(currentAttribute.code) && builder)
+                {
+                    valueLabel = dbTrail[currentAttribute.code] ?: NOT_SPECIFIED
+                    if (currentAttribute.type.code == 'object' && dbTrail[currentAttribute.code])
                     {
-                        valueLabel = dbTrail[currentAttribute.code] ?: NOT_SPECIFIED
-                        if (currentAttribute.type == 'object')
-                        {
-                            linkElement = api.web.open(dbTrail[currentAttribute.code].UUID)
+                        linkElement = api.web.open(dbTrail[currentAttribute.code].UUID)
+                    }
+                    if (currentAttribute.type.code in [DATA_TYPE_BO_LINKS, DATA_TYPE_BACK_BO_LINKS])
+                    {
+                        dbTrail[currentAttribute.code].each {
+                            boLinkTypeAttribute
+                                .add(new ValueSchemes(label: it.title, url: api.web.open(it.UUID)))
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        logger
-                            .error("Metaclass ${ dbTrail.UUID.split('\\$').first() } does not contain this attribute - ${ currentAttribute.code } \n${ ex.message }")
-                    }
-                    if (valueLabel && builder)
+                    if (valueLabel)
                     {
                         if (currentAttribute.type.code ==
                             DATA_TYPE_HYPERLINK && valueLabel != NOT_SPECIFIED)
@@ -207,6 +231,11 @@ class ElementsScheme
                                     currentAttribute.title,
                                     new ValueSchemes(label: valueLabel, url: linkElement)
                                 )
+                        }
+                        else if (currentAttribute.type.code in [DATA_TYPE_BO_LINKS,
+                                                                DATA_TYPE_BACK_BO_LINKS])
+                        {
+                            builder.addOption(currentAttribute.title, boLinkTypeAttribute)
                         }
                         else
                         {
@@ -230,46 +259,30 @@ class ElementsScheme
 
     /**
      * Получение списка характеристик для вывода в списке объектов
-     * @param defaultSettingsWizardSettings - дефолтные настройки из мастера настроек
-     * @return список дефолтных характеристик
+     * @param listCharacteristics - настройки из мастера настроек
+     * @return список характеристик
      */
-    Collection getSetAttributesOutputCharacteristics(def settingsСharacteristicsСommunicationHierarchy)
+    Collection<MetaclassNameAndAttributeListSchemes> characteristicsOutputDiagram(Collection listCharacteristics)
     {
-        logger.info("LOGGER231 ${ settingsdefaultVisualization.getClass() }")
-        logger.info("LOGGER232 ${ settingsСharacteristicsСommunicationHierarchy.getClass() }")
-
-        Collection dataCharacteristicDisplayListObjects = []
-        if (settingsСharacteristicsСommunicationHierarchy)
-        {
-            settingsСharacteristicsСommunicationHierarchy.first().each {
-                dataCharacteristicDisplayListObjects.add(
-                    new DataCharacteristicDisplayListObjectsSchemes(
-                        it.metaclassObjects.id,
-                        it.attributeGroup
-                    )
-                )
-            }
-        }
-        else
-        {
-            settingsdefaultVisualization.each {
-                dataCharacteristicDisplayListObjects.add(
-                    new DataCharacteristicDisplayListObjectsSchemes(
-                        it.metaClassObject.id,
-                        it.attributeGroup
-                    )
-                )
-            }
-        }
         Collection<MetaclassNameAndAttributeListSchemes> attributesFromGroup = []
-        dataCharacteristicDisplayListObjects.each {
-            if (it.metaClassData && it.groupAttribute)
+        listCharacteristics.each {
+            if (it.metaclassObjects && it.attributeGroup)
             {
-                Collection listattributes =
-                    api.metainfo.getMetaClass(it.metaClassData)
-                       .getAttributeGroup(it.groupAttribute).attributes
+                String metaClassData = !it.metaclassObjects.caseId ? it.metaclassObjects.id :
+                    String.join('$', it.metaclassObjects.id, it.metaclassObjects.caseId)
+                Collection listAttributes =
+                    api.metainfo.getMetaClass(metaClassData)
+                       .getAttributeGroup(it.attributeGroup).attributes
                 attributesFromGroup
-                    .add(new MetaclassNameAndAttributeListSchemes(it.metaClassData, listattributes))
+                    .add(
+                        new MetaclassNameAndAttributeListSchemes(
+                            metaClassData,
+                            it.mainText,
+                            it.additionalText,
+                            listAttributes,
+                            it.icon
+                        )
+                    )
             }
         }
         return attributesFromGroup
@@ -548,6 +561,7 @@ class HierarchyCommunicationBuilder
     }
 }
 
+@Canonical
 class MetaclassNameAndAttributeListSchemes
 {
     /**
@@ -556,17 +570,28 @@ class MetaclassNameAndAttributeListSchemes
     String metaclassName
 
     /**
+     *  Атрибут главного текста
+     */
+    String mainTextAttribute
+
+    /**
+     *  Атрибут дополнительного текста
+     */
+    String additionalTextAttribute
+
+    /**
      *  Список атрибутов
      */
     Collection listAttribute
 
-    MetaclassNameAndAttributeListSchemes(String metaclassName, Collection listAttribute)
-    {
-        this.metaclassName = metaclassName
-        this.listAttribute = listAttribute
-    }
+    /**
+     *  Атрибут иконки
+     */
+    String iconAttribute
+
 }
 
+@Canonical
 class DataCharacteristicDisplayListObjectsSchemes
 {
     /**
@@ -578,10 +603,4 @@ class DataCharacteristicDisplayListObjectsSchemes
      * Группа атрибутов
      */
     String groupAttribute
-
-    DataCharacteristicDisplayListObjectsSchemes(String metaClassData, String groupAttribute)
-    {
-        this.metaClassData = metaClassData
-        this.groupAttribute = groupAttribute
-    }
 }
