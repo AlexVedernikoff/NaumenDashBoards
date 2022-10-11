@@ -16,18 +16,26 @@ export default {
 				{
 					label: 'Модель',
 					presentation: 'right_of_label',
-					value: {
-						label: 'TT 120',
-						url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4402'
-					}
+					value: [
+						{
+							label: 'TT 120',
+							url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4402'
+						}
+					]
 				},
 				{
 					label: 'Расположение',
 					presentation: 'right_of_label',
-					value: {
-						label: 'Подвал Южная',
-						url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
-					}
+					value: [
+						{
+							label: 'Подвал Южная',
+							url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+						},
+						{
+							label: 'Подвал Южная 2',
+							url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+						}
+					]
 				}
 			],
 			title: '1111',

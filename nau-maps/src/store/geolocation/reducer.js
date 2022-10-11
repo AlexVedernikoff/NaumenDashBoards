@@ -26,6 +26,11 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				success: true,
 				timeUpdate: new Date().getTime()
 			};
+		case GEOLOCATION_EVENTS.SET_EDIT_FORM:
+			return {
+				...state,
+				editFormCode: action.payload
+			};
 		case GEOLOCATION_EVENTS.SET_MAP_PANEL:
 			return {
 				...state,

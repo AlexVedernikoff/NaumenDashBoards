@@ -8,7 +8,20 @@ import {jsPDF} from 'jspdf';
  * @param {string} exportTo - название файла
  */
 function downloadUri (canvas: HTMLCanvasElement, exportTo: string) {
-	const imgData = canvas.toDataURL({
+	let element = canvas;
+
+	if (exportTo === 'jpeg') {
+		const { height, width } = canvas.attrs;
+		element = document.createElement('canvas');
+		const ctx = element.getContext('2d');
+		element.width = width;
+		element.height = height;
+		ctx.fillStyle = '#FFFFFF';
+		ctx.fillRect(0, 0, width, height);
+		ctx.drawImage(canvas.toCanvas(), 0, 0, width, height);
+	}
+
+	const imgData = element.toDataURL({
 		mimeType: `image/${exportTo}`,
 		quality: 1.0
 	});
@@ -23,15 +36,16 @@ function downloadUri (canvas: HTMLCanvasElement, exportTo: string) {
  * @param {object} canvas - холст
  */
 function downloadPdf (canvas: HTMLCanvasElement) {
-	const imgData = canvas.toDataURL();
+	const imgData = canvas.toDataURL({quality: 1.0});
 	const { height, width } = canvas.attrs;
 	// eslint-disable-next-line new-cap
 	const pdf = new jsPDF({
 		format: [width, height],
+		hotfixes: ['px_scaling'],
 		orientation: 'l',
 		unit: 'px'
 	});
-	pdf.addImage(imgData, 'jpg', 0, 0);
+	pdf.addImage(imgData, 'png', 0, 0);
 
 	pdf.save('scheme.pdf');
 }

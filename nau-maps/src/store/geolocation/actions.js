@@ -35,7 +35,7 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 			data = await getMapObjects(contentCode, subjectUuid, currentUser);
 		}
 
-		const {errors, mapApiKey = {}, objects} = data;
+		const {errors, mapApiKey = {}, objects, formCode} = data;
 
 		if (errors && errors.length > 0) {
 			const label = errors.join(', ') + '.';
@@ -49,6 +49,28 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 
 		if (nauMapsMapLastSelect && mapApiKey.hasOwnProperty(nauMapsMapLastSelect)) {
 			dispatch(setMapPanel(nauMapsMapLastSelect));
+		}
+
+		if (formCode) {
+			dispatch(setEditForm(formCode));
+		}
+	} catch (error) {
+		notify('error', 'error');
+		dispatch(recordGeolocationdError(error));
+	}
+};
+
+const goToElementMap = () => ({
+	type: GEOLOCATION_EVENTS.GO_TO_ELEMENT
+});
+
+const showEditForm = (objectUUID: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	const {editFormCode} = getState().geolocation;
+	try {
+		const uuid = await getEditForm(objectUUID, editFormCode);
+
+		if (uuid) {
+			dispatch(fetchGeolocation);
 		}
 	} catch (error) {
 		notify('error', 'error');
@@ -174,6 +196,15 @@ const changeZoom = zoom => ({
 
 const selectAllGroups = () => ({
 	type: GEOLOCATION_EVENTS.SELECT_ALL_GROUPS
+});
+
+/**
+ * Установка кода для вызова формы редактирования
+ * @param {string} payload - код
+ */
+const setEditForm = (payload: string) => ({
+	payload,
+	type: GEOLOCATION_EVENTS.SET_EDIT_FORM
 });
 
 export {
