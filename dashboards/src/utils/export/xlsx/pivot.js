@@ -90,7 +90,10 @@ class PivotTable extends Table {
 		this.topParameterValues.forEach(topValue => {
 			const subDataSet = this.data.filter(row => row[this.topParameterAccessor] === topValue);
 
-			result.push(this.createSumRow(topValue, subDataSet));
+			if (this.parametersLength > 1) {
+				result.push(this.createSumRow(topValue, subDataSet));
+			}
+
 			subDataSet.forEach(row => {
 				result.push(this.createRow(row));
 			});
