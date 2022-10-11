@@ -333,7 +333,7 @@ Collection<SchemaElement> getAllBusinessObjectsCurrentLevel(Collection<SchemaEle
     Collection flatten = elements?.childElements?.flatten()
     if (flatten?.first()?.level != level)
     {
-        getAllBusinessObjectsCurrentLevel(flatten, level)
+        return getAllBusinessObjectsCurrentLevel(flatten, level)
     }
     else
     {
