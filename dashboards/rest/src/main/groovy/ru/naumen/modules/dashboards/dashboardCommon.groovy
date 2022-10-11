@@ -799,7 +799,7 @@ class DashboardUtils
                     breakdown: getNewFormatBreakdownOrNull(dataOrZeroWidget.breakdown, dataOrZeroWidget.breakdownGroup, dataKey),
                     dataKey: dataKey,
                     sourceForCompute: dataOrZeroWidget.sourceForCompute,
-                    source: new NewSourceValue(value: dataOrZeroWidget.source, descriptor: dataOrZeroWidget.descriptor),
+                    source: dataOrZeroWidget.source in NewSourceValue ? dataOrZeroWidget.source : new NewSourceValue(value: dataOrZeroWidget.source, descriptor: dataOrZeroWidget.descriptor),
                     top: new Top(),
                     type: dataOrZeroWidget.type)]
             case [AxisPrev, CirclePrev, SummaryPrev]:
@@ -816,7 +816,7 @@ class DashboardUtils
                             showEmptyData: it.showEmptyData,
                             showBlankData: it.showBlankData,
                             sourceForCompute: it.sourceForCompute,
-                            source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
+                            source: it.source in NewSourceValue ? it.source : new NewSourceValue(value: it.source, descriptor: it.descriptor),
                             top: it.top,
                             type: it.type)
                     }
@@ -835,7 +835,7 @@ class DashboardUtils
                 return [new DiagramNewData(
                     breakdown: getNewFormatBreakdownOrNull(dataOrZeroWidget.breakdown, dataOrZeroWidget.breakdownGroup, dataKey),
                     indicators: dataOrZeroWidget.sourceForCompute ? [] : [new NewIndicator(aggregation:  dataOrZeroWidget.aggregation, attribute: dataOrZeroWidget.indicator)],
-                    source: new NewSourceValue(value: dataOrZeroWidget.source, descriptor: dataOrZeroWidget.descriptor),
+                    source: dataOrZeroWidget.source in NewSourceValue ? dataOrZeroWidget.source : new NewSourceValue(value: dataOrZeroWidget.source, descriptor: dataOrZeroWidget.descriptor),
                     sourceForCompute: dataOrZeroWidget.sourceForCompute,
                     dataKey: dataKey,
                     top: new Top()
@@ -846,7 +846,7 @@ class DashboardUtils
                     return dataOrZeroWidget.collect {new DiagramNewData(
                         breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
                         indicators: it.sourceForCompute ? [] : [new NewIndicator(aggregation: it.aggregation, attribute: it.indicator)],
-                        source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
+                        source: it.source in NewSourceValue ? it.source : new NewSourceValue(value: it.source, descriptor: it.descriptor),
                         sourceForCompute: it.sourceForCompute,
                         showEmptyData: it.showEmptyData,
                         showBlankData: it.showBlankData,
@@ -876,7 +876,7 @@ class DashboardUtils
                             breakdown: getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey),
                             dataKey: it.dataKey,
                             sourceForCompute: it.sourceForCompute,
-                            source: new NewSourceValue(value: it.source, descriptor: it.descriptor),
+                            source: it.source in NewSourceValue ? it.source : new NewSourceValue(value: it.source, descriptor: it.descriptor),
                             )
                     }
                 }
