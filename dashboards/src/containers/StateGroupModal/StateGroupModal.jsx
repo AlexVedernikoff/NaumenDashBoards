@@ -32,7 +32,7 @@ export class StateGroupModal extends Component<Props> {
 	renderSelect = (props: SelectProps) => (
 		<DATA_CONTEXT.Consumer>
 			{({items, loading}: StateData) => (
-				<MaterialSelect fetchOptions={this.handleFetch} loading={loading} options={items} {...props} />
+				<MaterialSelect fetchOptions={this.handleFetch} isSearching={true} loading={loading} options={items} {...props} />
 			)}
 		</DATA_CONTEXT.Consumer>
 	);
