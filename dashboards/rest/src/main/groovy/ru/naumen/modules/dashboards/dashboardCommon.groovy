@@ -2225,8 +2225,7 @@ class Constants {
                 {
                     dataSetTypeMatch = true
                 }
-                dataSetTypeMatch || (value.hasField('indicators') || value['sourceForCompute'])
-                    && !value.hasField('descriptor')
+                dataSetTypeMatch || (value.hasField('indicators') || value['sourceForCompute']) && !value.hasField('descriptor')
             }
         },
         (TableCurrentData): { value ->
