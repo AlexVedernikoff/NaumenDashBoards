@@ -17,6 +17,7 @@ import type {DataSet as AxisDataSet} from 'store/widgetForms/axisChartForm/types
 
 export type DataSet = $Exact<{
 	...AxisDataSet,
+	__type: 'COMBO_DATA_SET',
 	type: ComboType
 }>;
 

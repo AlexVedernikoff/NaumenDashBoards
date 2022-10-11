@@ -42,12 +42,12 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 			await this.calculateValues();
 		}
 
-		if (prevProps.data !== data) {
+		if (prevProps.data === data) {
+			this.checkDisableTotalSum();
+		} else {
 			const disableTotalSum = hasDisableTotal(data);
 
 			this.setState({disableTotalSum}, this.checkDisableTotalSum);
-		} else {
-			this.checkDisableTotalSum();
 		}
 	}
 

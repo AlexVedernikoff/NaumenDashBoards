@@ -77,6 +77,7 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async 
 	const {attrGroupCode = ''} = parseAttrSetConditions(payload) ?? {};
 
 	dispatch(requestLink(id));
+
 	try {
 		const {link} = await api.instance.drillDown.getLink(payload, subjectUuid, type, dashboard.settings.code, attrGroupCode);
 

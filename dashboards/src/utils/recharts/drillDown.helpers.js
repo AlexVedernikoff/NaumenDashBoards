@@ -80,7 +80,7 @@ const updateGroupFilter = (mixin: DrillDownMixin, props: AddFilterProps): void =
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @returns {void}
  */
-const addIndicatorInfo = (dataSet: AxisData | CircleData, mixin: DrillDownMixin): void => {
+const addIndicatorInfo = (dataSet: AxisData | CircleData | ComboData, mixin: DrillDownMixin): void => {
 	const {aggregation, attribute} = dataSet.indicators[0];
 
 	if (attribute) {
@@ -95,7 +95,7 @@ const addIndicatorInfo = (dataSet: AxisData | CircleData, mixin: DrillDownMixin)
  * @param {DrillDownMixin} mixin - примесь данных для перехода на список объектов
  * @returns {void}
  */
-const addParameterFilter = (dataSet: AxisData, value: string, mixin: DrillDownMixin): void => {
+const addParameterFilter = (dataSet: AxisData | ComboData, value: string, mixin: DrillDownMixin): void => {
 	const {attribute, group} = dataSet.parameters[0];
 	return updateGroupFilter(mixin, {attribute, group, value});
 };

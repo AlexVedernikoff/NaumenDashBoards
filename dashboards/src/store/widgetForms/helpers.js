@@ -84,6 +84,7 @@ function fixLeaveOneParameters <T: TableDataSet | SpeedometerDataSet | SummaryDa
 		};
 	}
 
+	// $FlowFixMe: тип у T не меняется
 	return result;
 }
 

@@ -16,6 +16,7 @@ import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
  * @returns {DataSet}
  */
 const createSummaryDataSet = (dataKey: string): DataSet => ({
+	__type: 'SUMMARY_DATA_SET',
 	dataKey,
 	indicators: [DEFAULT_INDICATOR],
 	source: DEFAULT_SOURCE,
@@ -48,6 +49,7 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 			const transformIndicators = compose(fixPivotIndicators, fixIndicatorsAggregation);
 
 			return {
+				__type: 'SUMMARY_DATA_SET',
 				dataKey,
 				indicators: transformIndicators(indicators).slice(0, 1),
 				source,

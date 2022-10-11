@@ -58,7 +58,7 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 		onChange(DIAGRAM_FIELDS.data, newValue.data);
 	};
 
-	getIndicator = (data: ?Array<SummaryDataSet | SpeedometerDataSet>) => data?.find(data => !data.sourceForCompute)?.indicators?.[0];
+	getIndicator = (data: Array<SummaryDataSet> | Array<SpeedometerDataSet> | null) => data?.find(data => !data.sourceForCompute)?.indicators?.[0];
 
 	getSelectedTooltip = () => {
 		const {indicator, selected, tooltip} = this.state;
@@ -100,7 +100,7 @@ class ChoiceWidgetTooltipForm extends PureComponent<Props, State> {
 			onChange(DIAGRAM_FIELDS.tooltip, newTooltip);
 		} else {
 			const {data} = value;
-			const newDataValue: Array<SummaryDataSet | SpeedometerDataSet> = deepClone(data);
+			const newDataValue: Array<SummaryDataSet> | Array<SpeedometerDataSet> = deepClone(data);
 			const indicator = this.getIndicator(newDataValue);
 
 			if (indicator) {

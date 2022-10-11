@@ -57,9 +57,7 @@ const getSelectedWidget = createSelector(
  */
 const getAllWidgets = createSelector(
 	getWidgetsData,
-	(data: WidgetsDataState): Widget[] => {
-		return getMapValues(data.map);
-	}
+	(data: WidgetsDataState): Widget[] => getMapValues(data.map)
 );
 
 /**

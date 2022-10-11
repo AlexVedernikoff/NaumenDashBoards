@@ -144,7 +144,7 @@ const parseIndicatorGrouping2Columns = (
 					tooltip: tooltips[key] ?? null,
 					type: PIVOT_COLUMN_TYPE.VALUE,
 					width: 1
-				});				
+				});
 			}
 		}
 
@@ -185,13 +185,13 @@ const parseIndicatorGrouping2Columns = (
 				result.push(group);
 			} else {
 				const group: PivotColumnGroup = {
-					children: [], 
-					height, 
-					isLastColumnGroup, 
-					key, 
-					title, 
+					children: [],
+					height,
+					isLastColumnGroup,
+					key,
+					title,
 					tooltip: null,
-					type: PIVOT_COLUMN_TYPE.EMPTY_GROUP, 
+					type: PIVOT_COLUMN_TYPE.EMPTY_GROUP,
 					width: 1
 				};
 
