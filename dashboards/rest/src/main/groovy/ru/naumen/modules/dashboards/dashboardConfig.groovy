@@ -773,7 +773,7 @@ class DashboardConfigService
      * Метод получения ошибок по дашбордам
      * @return маппинг ключей дашбордов и текст ошибки
      */
-    Map<String, String> getDashboardErrorsData()
+    Map<String, Map> getDashboardErrorsData()
     {
         List dashboardKeys = getDashboardKeys('widgets', 'dashboards')
         Map dashboardErrorsData = [:]
@@ -786,8 +786,11 @@ class DashboardConfigService
             }
             catch (Exception e)
             {
-                String stackTraceString = e.getStackTrace().toString()
-                dashboardErrorsData[dashboardKey] = e.cause.message
+                Map dashboardErrorData = [
+                    'cause': e.cause.message,
+                    'dashboard': api.keyValue.get(DASHBOARD_NAMESPACE, dashboardKey)
+                ]
+                dashboardErrorsData[dashboardKey] = dashboardErrorData
             }
         }
 
