@@ -524,6 +524,8 @@ type ChartDataSetSettings =
 
 // components/organisms/WidgetFormPanel/components/ColorsBox
 type ColorsBox =
+	| 'ColorsBox::ClearButton'
+	| 'ColorsBox::ClearButtonTooltip'
 	| 'ColorsBox::Automatically'
 	| 'ColorsBox::Manually'
 	| 'ColorsBox::ColorsOfChart';

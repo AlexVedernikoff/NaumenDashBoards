@@ -249,6 +249,8 @@
 	"ChartDataSetSettings::ShowEmptyData": "Показывать незаполненные данные",
 	"ChartDataSetSettings::ShowZeroValues": "Показывать нулевые значения",
 	"CustomColorsSettings::ApplyForAllWidgets": "Применить для всех виджетов на дашборде",
+	"ColorsBox::ClearButton": "Сбросить палитру",
+	"ColorsBox::ClearButtonTooltip": "При нажатии цвета виджета сбросятся к текущей дефолтной палитре",
 	"ColorsBox::Automatically": "Автоматически",
 	"ColorsBox::Manually": "Вручную",
 	"ColorsBox::ColorsOfChart": "Цвета диаграммы",

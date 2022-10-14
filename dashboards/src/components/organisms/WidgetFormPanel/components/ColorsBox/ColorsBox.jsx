@@ -6,6 +6,7 @@ import type {
 	CustomChartColorsSettings
 } from 'store/widgets/data/types';
 import AutoColorsSettings from './components/AutoColorsSettings';
+import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import {CHART_COLORS_SETTINGS_TYPES} from 'store/widgets/data/constants';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import CustomColorsSettings from './components/CustomColorsSettings';
@@ -14,7 +15,9 @@ import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import RadioField from 'components/atoms/RadioField';
 import React, {Fragment, PureComponent} from 'react';
+import styles from './styles.less';
 import t from 'localization';
+import T from 'components/atoms/Translation';
 
 export class ColorsBox extends PureComponent<Props> {
 	static defaultProps = {
@@ -66,6 +69,25 @@ export class ColorsBox extends PureComponent<Props> {
 		);
 	};
 
+	renderClearButton = (showClear: boolean) => {
+		const {isChanged, onClear} = this.props;
+
+		if (showClear && isChanged) {
+			return (
+				<Button
+					className={styles.clearButton}
+					onClick={onClear}
+					tooltip={t('ColorsBox::ClearButtonTooltip')}
+					variant={BUTTON_VARIANTS.SIMPLE}
+				>
+					<T text="ColorsBox::ClearButton" />
+				</Button>
+			);
+		}
+
+		return null;
+	};
+
 	renderCustomColorsSettings = () => {
 		const {disabledCustomSettings, labels, usesBreakdownCustomSettings, value} = this.props;
 		const {auto: autoSettings, custom: customSettings} = value;
@@ -93,21 +115,19 @@ export class ColorsBox extends PureComponent<Props> {
 		return this.getCurrentSettingsType() === CUSTOM ? this.renderCustomColorsSettings() : this.renderAutoColorsSettings();
 	};
 
-	renderSettingsTypeControl = (value: ChartColorsSettingsType, label: string, disabled: boolean = false) => {
-		const checked = this.getCurrentSettingsType() === value;
-
-		return (
-			<FormField>
-				<RadioField
-					checked={checked}
-					disabled={disabled}
-					label={label}
-					onChange={this.handleChangeType}
-					value={value}
-				/>
-			</FormField>
-		);
-	};
+	renderSettingsTypeControl = (
+		value: ChartColorsSettingsType,
+		label: string,
+		showClear: boolean,
+		disabled: boolean = false
+	) => (
+		<FormField>
+			<div className={styles.autoContainer}>
+				{this.renderSettingsTypeField(value, label, disabled)}
+				{this.renderClearButton(showClear)}
+			</div>
+		</FormField>
+	);
 
 	renderSettingsTypeControls = () => {
 		const {disabledCustomSettings} = this.props;
@@ -115,9 +135,23 @@ export class ColorsBox extends PureComponent<Props> {
 
 		return (
 			<Fragment>
-				{this.renderSettingsTypeControl(AUTO, t('ColorsBox::Automatically'))}
-				{this.renderSettingsTypeControl(CUSTOM, t('ColorsBox::Manually'), disabledCustomSettings)}
+				{this.renderSettingsTypeControl(AUTO, t('ColorsBox::Automatically'), true)}
+				{this.renderSettingsTypeControl(CUSTOM, t('ColorsBox::Manually'), false, disabledCustomSettings)}
 			</Fragment>
+		);
+	};
+
+	renderSettingsTypeField = (value: ChartColorsSettingsType, label: string, disabled: boolean) => {
+		const checked = this.getCurrentSettingsType() === value;
+
+		return (
+			<RadioField
+				checked={checked}
+				disabled={disabled}
+				label={label}
+				onChange={this.handleChangeType}
+				value={value}
+			/>
 		);
 	};
 

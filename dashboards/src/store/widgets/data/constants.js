@@ -295,6 +295,7 @@ const DEFAULT_COLORS_SETTINGS: ChartColorsSettings = Object.freeze({
 		colors: DEFAULT_CHART_COLORS
 	},
 	custom: {
+		data: null,
 		useGlobal: false
 	},
 	type: CHART_COLORS_SETTINGS_TYPES.AUTO

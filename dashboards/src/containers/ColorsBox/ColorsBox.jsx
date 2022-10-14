@@ -11,6 +11,7 @@ import {
 import ColorsBox from 'WidgetFormPanel/components/ColorsBox';
 import {compose} from 'redux';
 import {connect} from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 import {functions, props} from './selectors';
 import {getCustomColorsSettingsKey, getCustomColorsSettingsKeyByData} from 'store/widgets/data/helpers';
 import {hasBreakdown, isAxisChart, isCircleChart} from 'store/widgets/helpers';
@@ -26,10 +27,12 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 	};
 
 	state = {
-		labels: this.getLabels(this.props)
+		labels: this.getLabels(this.props),
+		valueChanged: false
 	};
 
 	componentDidMount () {
+		this.checkValueChanged();
 		this.setSettingsByActualData();
 	}
 
@@ -50,22 +53,18 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 			this.setSettingsByActualData();
 			this.setState({labels: this.getLabels(this.props)});
 		}
-	}
 
-	getLabels (props: Props): Array<string> {
-		const {buildData, widget} = props;
-		let labels = [];
-
-		if (buildData?.data && (isCircleChart(buildData.type) || isAxisChart(buildData.type))) {
-			const {labels: dataLabels, series} = buildData.data;
-
-			labels = hasBreakdown(widget) && !isCircleChart(widget.type)
-				? series.map(s => s.name)
-				: dataLabels;
+		if (!deepEqual(value, prevValue)) {
+			this.checkValueChanged();
 		}
-
-		return labels;
 	}
+
+	checkValueChanged = () => {
+		const {value} = this.props;
+		const valueChanged = !deepEqual(value, DEFAULT_COLORS_SETTINGS);
+
+		this.setState({valueChanged});
+	};
 
 	createCustomSettings = (widget: Widget | Values) => {
 		const {colors: defaultColors} = this.props.value.auto;
@@ -101,6 +100,19 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 
 		return settingsData;
 	};
+
+	getLabels (props: Props): Array<string> {
+		const {buildData, widget} = props;
+		let labels = [];
+
+		if (buildData?.data && (isCircleChart(buildData.type) || isAxisChart(buildData.type))) {
+			const {labels: dataLabels, series} = buildData.data;
+
+			labels = hasBreakdown(widget) && !isCircleChart(widget.type) ? series.map(s => s.name) : dataLabels;
+		}
+
+		return labels;
+	}
 
 	getNewSettingsByResetGlobal = (settings: ChartColorsSettings) => {
 		const {
@@ -168,6 +180,11 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 		onChange(name, newSettings);
 	};
 
+	handleClear = () => {
+		const {name, onChange} = this.props;
+		return onChange(name, DEFAULT_COLORS_SETTINGS);
+	};
+
 	isDisabledCustomSettings = () => {
 		const {disabledCustomSettings, globalColorsSettings, type, values, widget} = this.props;
 		const currentKey = getCustomColorsSettingsKeyByData(values.data, type.value);
@@ -207,14 +224,16 @@ export class ColorsBoxContainer extends React.Component<Props, State> {
 
 	render () {
 		const {name, position, value, widget} = this.props;
-		const {labels} = this.state;
+		const {labels, valueChanged} = this.state;
 
 		return (
 			<ColorsBox
 				disabledCustomSettings={this.isDisabledCustomSettings()}
+				isChanged={valueChanged}
 				labels={labels}
 				name={name}
 				onChange={this.handleChange}
+				onClear={this.handleClear}
 				position={position}
 				usesBreakdownCustomSettings={hasBreakdown(widget)}
 				value={value}

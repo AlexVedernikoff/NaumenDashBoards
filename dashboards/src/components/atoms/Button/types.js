@@ -9,6 +9,7 @@ export type Props = {
 	disabled: boolean,
 	onClick?: (e: Event) => any,
 	outline: boolean,
+	tooltip: string,
 	type: string,
 	variant: $Keys<typeof VARIANTS>
 };

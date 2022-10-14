@@ -33,7 +33,7 @@ export class Button extends Component<Props> {
 	};
 
 	render () {
-		const {children, disabled, onClick, type} = this.props;
+		const {children, disabled, onClick, tooltip, type} = this.props;
 
 		const className = this.getClassNames();
 		const props = {
@@ -41,6 +41,7 @@ export class Button extends Component<Props> {
 			className,
 			disabled,
 			onClick,
+			title: tooltip,
 			type
 		};
 
