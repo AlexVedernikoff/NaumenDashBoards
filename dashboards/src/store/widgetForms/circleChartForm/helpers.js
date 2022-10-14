@@ -18,6 +18,7 @@ import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
  * @returns {DataSet}
  */
 const createCircleDataSet = (dataKey: string): DataSet => ({
+	__type: 'CIRCLE_DATA_SET',
 	breakdown: getDefaultBreakdown(dataKey),
 	dataKey,
 	indicators: [DEFAULT_INDICATOR],
@@ -58,6 +59,7 @@ const changeValuesByAxisOrComboChart = (state: State, values: AxisValues | Combo
 			const {breakdown, dataKey, indicators, showBlankData, showEmptyData, source, sourceForCompute, top} = dataSet;
 
 			return {
+				__type: 'CIRCLE_DATA_SET',
 				breakdown: sourceForCompute ? [] : (breakdown ?? getDefaultBreakdown(dataKey)),
 				dataKey,
 				indicators,
@@ -103,7 +105,7 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const prevDataSet = state.data[index] ?? createCircleDataSet(dataSet.dataKey);
-			return {...prevDataSet, ...dataSet};
+			return {...prevDataSet, ...dataSet, __type: 'CIRCLE_DATA_SET'};
 		}),
 		displayMode,
 		header,

@@ -14,12 +14,12 @@ import type {Values as TableValues} from 'src/store/widgetForms/tableForm/types'
  * @returns {DataSet}
  */
 const createPivotDataSet = (dataKey: string): DataSet => ({
+	__type: 'PIVOT_DATA_SET',
 	dataKey,
 	indicators: [],
 	parameters: [],
 	source: DEFAULT_SOURCE,
-	sourceForCompute: false,
-	type: 'PivotDataSet'
+	sourceForCompute: false
 });
 
 /**

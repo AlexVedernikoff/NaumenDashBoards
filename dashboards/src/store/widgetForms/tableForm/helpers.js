@@ -16,6 +16,7 @@ import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
  * @returns {DataSet}
  */
 const createTableDataSet = (dataKey: string, addSourceRowName: boolean = false): DataSet => ({
+	__type: 'TABLE_DATA_SET',
 	dataKey,
 	indicators: [DEFAULT_INDICATOR],
 	parameters: [DEFAULT_PARAMETER],
@@ -51,6 +52,7 @@ const changeValuesByCircleChart = (state: State, values: CircleChartValues): Sta
 			const {breakdown, dataKey, indicators, source, sourceForCompute} = dataSet;
 
 			return {
+				__type: 'TABLE_DATA_SET',
 				breakdown,
 				dataKey,
 				indicators,
@@ -96,6 +98,7 @@ const changeValuesByAxisOrComboCharts = (state: State, values: AxisChartValues |
 			const {breakdown, dataKey, indicators, parameters, source, sourceForCompute} = dataSet;
 
 			return {
+				__type: 'TABLE_DATA_SET',
 				breakdown,
 				dataKey,
 				indicators,
@@ -162,6 +165,7 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 
 			return {
 				...dataSet,
+				__type: 'TABLE_DATA_SET',
 				breakdown,
 				indicators,
 				parameters
@@ -208,6 +212,7 @@ const changeValuesByPivot = (state: State, values: PivotValues): State => {
 			const {dataKey, indicators, source, sourceForCompute} = dataSet;
 
 			return {
+				__type: 'TABLE_DATA_SET',
 				breakdown: [],
 				dataKey,
 				indicators: fixPivotIndicators(indicators),

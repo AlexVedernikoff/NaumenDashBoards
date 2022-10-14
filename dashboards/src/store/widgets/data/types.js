@@ -266,6 +266,7 @@ export type AxisSettings = {
 };
 
 export type AxisData = {
+	__type: 'AXIS_DATA_SET',
 	breakdown?: Breakdown,
 	dataKey: string,
 	indicators: Array<Indicator>,
@@ -297,6 +298,7 @@ export type AxisWidget = {
 // Круговой график
 
 export type CircleData = {
+	__type: 'CIRCLE_DATA_SET',
 	breakdown: Breakdown,
 	dataKey: string,
 	indicators: Array<Indicator>,
@@ -333,6 +335,7 @@ export type ComboType = $Keys<typeof COMBO_TYPES>;
 
 export type ComboData = {
 	...AxisData,
+	__type: 'COMBO_DATA_SET',
 	type: ComboType
 };
 
@@ -354,6 +357,7 @@ export type ChartDataSet = AxisData | CircleData | ComboData;
 // Сводка
 
 export type SummaryData = {
+	__type: 'SUMMARY_DATA_SET',
 	dataKey: string,
 	indicators: Array<Indicator>,
 	source: SourceData,
@@ -438,7 +442,10 @@ export type Ranges = {
 	use: boolean
 };
 
-export type SpeedometerData = SummaryData;
+export type SpeedometerData = {
+	...SummaryData,
+	__type: 'SPEEDOMETER_DATA_SET',
+};
 
 export type SpeedometerWidget = {
 	...BaseWidget,
@@ -459,6 +466,7 @@ export type TableSorting = {
 };
 
 export type TableData = {
+	__type: 'TABLE_DATA_SET',
 	breakdown?: Breakdown,
 	dataKey: string,
 	indicators: Array<Indicator>,
@@ -569,12 +577,12 @@ export type PivotIndicator = {
 };
 
 export type PivotData = {
+	__type: 'PIVOT_DATA_SET',
 	dataKey: string,
 	indicators: Array<PivotIndicator>,
 	parameters: Array<Parameter>,
 	source: SourceData,
-	sourceForCompute: boolean,
-	type: 'PivotDataSet'
+	sourceForCompute: boolean
 };
 
 export type ParameterOrder = {

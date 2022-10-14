@@ -17,6 +17,7 @@ import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
  * @returns {DataSet}
  */
 const createAxisDataSet = (dataKey: string): $Exact<DataSet> => ({
+	__type: 'AXIS_DATA_SET',
 	dataKey,
 	indicators: [DEFAULT_INDICATOR],
 	parameters: [DEFAULT_PARAMETER],
@@ -62,6 +63,7 @@ const changeValuesByCircleChart = (state: State, values: CircleValues): State =>
 
 			return {
 				...dataSet,
+				__type: 'AXIS_DATA_SET',
 				indicators,
 				parameters,
 				xAxisName,
@@ -111,7 +113,7 @@ const changeValuesByComboChart = (state: State, values: ComboValues): State => {
 		data: data.map((dataSet, index) => {
 			const {type, ...rest} = dataSet;
 
-			return rest;
+			return {...rest, __type: 'AXIS_DATA_SET'};
 		}),
 		dataLabels,
 		displayMode,
@@ -149,7 +151,7 @@ const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerVal
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const prevDataSet = state.data[index] ?? createAxisDataSet(dataSet.dataKey);
-			return {...prevDataSet, ...fixLeaveOneParameters(dataSet)};
+			return {...prevDataSet, ...fixLeaveOneParameters(dataSet), __type: 'AXIS_DATA_SET'};
 		}),
 		displayMode,
 		header,

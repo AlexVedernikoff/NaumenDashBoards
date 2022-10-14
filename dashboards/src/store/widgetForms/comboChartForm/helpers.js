@@ -19,13 +19,14 @@ import type {Values as PivotValues} from 'store/widgetForms/pivotForm/types';
  */
 const createComboDataSet = (dataKey: string): DataSet => ({
 	...createAxisDataSet(dataKey),
+	__type: 'COMBO_DATA_SET',
 	type: COMBO_TYPES.COLUMN
 });
 
 const mapComboDataSet = (state: State, transform: Function = item => item) =>
-	(dataSet, index: number) => {
+	(dataSet, index: number): DataSet => {
 		const prevDataSet = state.data[index] ?? createComboDataSet(dataSet.dataKey);
-		return {...prevDataSet, ...transform(dataSet)};
+		return {...prevDataSet, ...transform(dataSet), __type: 'COMBO_DATA_SET'};
 	};
 
 /**
