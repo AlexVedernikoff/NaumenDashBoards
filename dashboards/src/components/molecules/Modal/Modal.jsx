@@ -27,13 +27,13 @@ export class Modal extends Component<Props> {
 	};
 
 	getContainerCN = () => {
-		const {className, ref, size} = this.props;
+		const {className, relativeElement, size} = this.props;
 		const {FULL_WIDTH, LARGE, SMALL} = SIZES;
 
 		return cn({
 			[className]: true,
 			[styles.container]: true,
-			[styles.flatContainer]: !!ref,
+			[styles.flatContainer]: !!relativeElement,
 			[styles.fullWidth]: size === FULL_WIDTH,
 			[styles.largeContainer]: size === LARGE,
 			[styles.smallContainer]: size === SMALL
