@@ -247,6 +247,8 @@
 "ChartDataSetSettings::ShowEmptyData","Показывать незаполненные данные","Show unfilled data",,
 "ChartDataSetSettings::ShowZeroValues","Показывать нулевые значения","Show null values",,
 "CustomColorsSettings::ApplyForAllWidgets","Применить для всех виджетов на дашборде","Apply to all widgets on the dashboard",,
+"ColorsBox::ClearButton","Сбросить палитру","Reset palette",,
+"ColorsBox::ClearButtonTooltip","При нажатии цвета виджета сбросятся к текущей дефолтной палитре","When you click the widget colors will be reset to the current default palette",,
 "ColorsBox::Automatically","Автоматически","Automatically",,
 "ColorsBox::Manually","Вручную","Manually",,
 "ColorsBox::ColorsOfChart","Цвета диаграммы","Chart colors",,

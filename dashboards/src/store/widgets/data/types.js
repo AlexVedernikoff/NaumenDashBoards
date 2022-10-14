@@ -245,7 +245,7 @@ export type AutoChartColorsSettings = {
 };
 
 export type CustomChartColorsSettings = {
-	data?: CustomChartColorsSettingsData,
+	data: CustomChartColorsSettingsData | null,
 	useGlobal: boolean
 };
 

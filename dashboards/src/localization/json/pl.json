@@ -249,6 +249,8 @@
 	"ChartDataSetSettings::ShowEmptyData": "",
 	"ChartDataSetSettings::ShowZeroValues": "",
 	"CustomColorsSettings::ApplyForAllWidgets": "",
+	"ColorsBox::ClearButton": "",
+	"ColorsBox::ClearButtonTooltip": "",
 	"ColorsBox::Automatically": "",
 	"ColorsBox::Manually": "",
 	"ColorsBox::ColorsOfChart": "",

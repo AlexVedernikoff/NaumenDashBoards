@@ -28,7 +28,8 @@ export type ContainerProps = InjectedProps & {|
 |};
 
 export type State = {
-	labels: Array<string>
+	labels: Array<string>,
+	valueChanged: boolean
 };
 
 export type OwnerProps = ComponentProps & TypeInjectedProps & ContainerProps;

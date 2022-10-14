@@ -249,6 +249,8 @@
 	"ChartDataSetSettings::ShowEmptyData": "Show unfilled data",
 	"ChartDataSetSettings::ShowZeroValues": "Show null values",
 	"CustomColorsSettings::ApplyForAllWidgets": "Apply to all widgets on the dashboard",
+	"ColorsBox::ClearButton": "Reset palette",
+	"ColorsBox::ClearButtonTooltip": "When you click the widget colors will be reset to the current default palette",
 	"ColorsBox::Automatically": "Automatically",
 	"ColorsBox::Manually": "Manually",
 	"ColorsBox::ColorsOfChart": "Chart colors",
