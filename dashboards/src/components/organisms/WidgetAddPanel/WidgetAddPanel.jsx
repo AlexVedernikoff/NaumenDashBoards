@@ -1,13 +1,14 @@
 // @flow
 import Button from 'components/atoms/Button';
 import {COPY_WIDGET_ERRORS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import type {DivRef} from 'components/types';
 import IconButton, {VARIANTS} from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import Modal from 'components/molecules/Modal';
 import MultiDropDownList from 'components/molecules/MultiDropDownList';
 import NewWidget from 'store/widgets/data/NewWidget';
 import type {Props} from 'containers/WidgetAddPanel/types';
-import React, {Component, Fragment} from 'react';
+import React, {Component, createRef, Fragment} from 'react';
 import {SIZES} from 'components/molecules/Modal/constants';
 import type {State} from './types';
 import styles from './styles.less';
@@ -20,6 +21,8 @@ import type {Value} from 'components/molecules/MultiDropDownList/types';
 import WidgetForm from 'components/templates/WidgetForm';
 
 export class WidgetAddPanel extends Component<Props, State> {
+	relativeElement: DivRef = createRef();
+
 	state = {
 		invalidCopyData: null
 	};
@@ -36,7 +39,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 		this.addWidget(new NewWidget(layoutMode, WIDGET_TYPES.TEXT));
 	};
 
-	addWidget = (widget: NewWidget) => widget && this.props.addNewWidget(widget);
+	addWidget = (widget: NewWidget) => widget && this.props.addNewWidget(widget, this.relativeElement);
 
 	handleCloseModal = () => this.setState({invalidCopyData: null});
 
@@ -64,7 +67,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 				});
 			}
 
-			copyWidget(dashboardId, widgetId);
+			copyWidget(dashboardId, widgetId, this.relativeElement);
 		}
 	};
 
@@ -76,12 +79,12 @@ export class WidgetAddPanel extends Component<Props, State> {
 			const {dashboardId, widgetId} = invalidCopyData;
 
 			this.setState({invalidCopyData: null});
-			copyWidget(dashboardId, widgetId);
+			copyWidget(dashboardId, widgetId, this.relativeElement);
 		}
 	};
 
 	renderAddButtons = () => (
-		<div className={styles.title}>
+		<div className={styles.title} ref={this.relativeElement}>
 			<div className={styles.titleRow}>
 				<span><T text="WidgetAddPanel::AddText" /></span>
 				<IconButton
@@ -152,6 +155,7 @@ export class WidgetAddPanel extends Component<Props, State> {
 					notice={true}
 					onClose={this.handleCloseModal}
 					onSubmit={this.handleSubmitModal}
+					relativeElement={this.relativeElement}
 					size={SIZES.SMALL}
 				>
 					{message}

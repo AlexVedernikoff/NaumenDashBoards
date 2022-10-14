@@ -19,6 +19,7 @@ export class Modal extends Component<Props> {
 		defaultButton: DEFAULT_BUTTONS.SUBMIT_BUTTON,
 		footerPosition: FOOTER_POSITIONS.LEFT,
 		notice: false,
+		ref: null,
 		setBlurRoot: value => {},
 		showCancelButton: true,
 		size: SIZES.NORMAL,
@@ -26,12 +27,13 @@ export class Modal extends Component<Props> {
 	};
 
 	getContainerCN = () => {
-		const {className, size} = this.props;
+		const {className, ref, size} = this.props;
 		const {FULL_WIDTH, LARGE, SMALL} = SIZES;
 
 		return cn({
 			[className]: true,
 			[styles.container]: true,
+			[styles.flatContainer]: !!ref,
 			[styles.fullWidth]: size === FULL_WIDTH,
 			[styles.largeContainer]: size === LARGE,
 			[styles.smallContainer]: size === SMALL
@@ -77,12 +79,20 @@ export class Modal extends Component<Props> {
 	);
 
 	renderModal = () => {
-		const {size} = this.props;
+		const {relativeElement, size} = this.props;
 		const width = Number.isInteger(size) && size;
+		let marginTop = '5%';
+
+		if (relativeElement?.current) {
+			const div = relativeElement.current;
+			const {top} = div.getBoundingClientRect();
+
+			marginTop = top;
+		}
 
 		return (
 			<div className={styles.modal}>
-				<div className={this.getContainerCN()} onClick={this.prevent} style={{width}}>
+				<div className={this.getContainerCN()} onClick={this.prevent} style={{marginTop, width}}>
 					{this.renderModalHeader()}
 					{this.renderModalBody()}
 					{this.renderModalFooter()}

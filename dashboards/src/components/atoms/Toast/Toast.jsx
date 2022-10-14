@@ -18,10 +18,15 @@ export class Toast extends PureComponent<Props> {
 	};
 
 	render () {
-		const {text} = this.props.data;
+		const {position, text, topOffset} = this.props.data;
+		const css = {};
+
+		if (topOffset && position === 'byElement') {
+			css.top = topOffset;
+		}
 
 		return (
-			<div className={this.getClassName()}>
+			<div className={this.getClassName()} style={css}>
 				{text}
 			</div>
 		);

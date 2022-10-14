@@ -9,6 +9,7 @@ import {
 	setUseGlobalChartSettings as setUseGlobalChartSettingsInner,
 	updateWidget
 } from './data/actions';
+import type {DivRef} from 'components/types';
 import {fetchBuildData as fetchBuildDataInner} from './buildData/actions';
 import type {ThunkAction} from 'store/types';
 
@@ -24,7 +25,7 @@ const saveWidget = (widget: AnyWidget): ThunkAction => saveWidgetInner(widget, f
 const setUseGlobalChartSettings = (key: string, useGlobal: boolean, targetWidgetId: string = ''): ThunkAction =>
 	setUseGlobalChartSettingsInner(key, useGlobal, fetchBuildData, targetWidgetId);
 
-const copyWidget = (dashboardKey: string, widgetKey: string): ThunkAction =>
+const copyWidget = (dashboardKey: string, widgetKey: string, relativeElement?: DivRef): ThunkAction =>
 	copyWidgetInner(dashboardKey, widgetKey, fetchBuildData);
 
 const saveWidgetWithNewFilters = (widget: Widget): ThunkAction =>

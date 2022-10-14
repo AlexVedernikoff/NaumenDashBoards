@@ -1,5 +1,6 @@
 // @flow
 import type {ConnectedProps, Option, OwnProps} from 'containers/WidgetKebab/types';
+import type {DivRef} from 'components/types';
 import {FILE_VARIANTS} from 'utils/export';
 
 export type ComponentFunctions = {
@@ -8,7 +9,7 @@ export type ComponentFunctions = {
 	onDrillDown: (selectedSource: Option) => void,
 	onExport: (element: HTMLDivElement, format: $Keys<typeof FILE_VARIANTS>) => void,
 	onNavigation: () =>void,
-	onRemove: () => void,
+	onRemove: (ref?: DivRef) => void,
 	onSelect: () => void
 };
 

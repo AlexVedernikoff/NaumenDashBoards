@@ -1,14 +1,14 @@
 // @flow
 import type {Breakdown, Parameter, Widget} from 'store/widgets/data/types';
 import {createNewSubGroup} from 'GroupModal/helpers';
+import type {DivRef, OnChangeEvent, OnSelectEvent} from 'components/types';
 import {ERRORS_CONTEXT} from 'GroupModal/HOCs/withErrors';
 import GroupSelect from 'GroupModal/components/CustomGroupSelect';
 import InfoPanel from 'components/atoms/InfoPanel';
 import type {InfoPanelProps, Props, State} from './types';
 import Loader from 'components/atoms/Loader';
 import {LOCAL_PREFIX_ID} from 'GroupModal/constants';
-import type {OnChangeEvent, OnSelectEvent} from 'components/types';
-import React, {Component} from 'react';
+import React, {Component, createRef} from 'react';
 import styles from './styles.less';
 import type {SubGroup} from 'GroupModal/types';
 import SubGroupSection from 'GroupModal/components/SubGroupSection';
@@ -19,6 +19,8 @@ import uuid from 'tiny-uuid';
 import {VARIANTS} from 'components/atoms/InfoPanel/constants';
 
 export class CustomGroup extends Component<Props, State> {
+	relativeElement: DivRef = createRef();
+
 	static defaultProps = {
 		loading: false,
 		schema: null,
@@ -60,7 +62,7 @@ export class CustomGroup extends Component<Props, State> {
 	handleChangeName = (event: OnChangeEvent<string>) => {
 		const {onUpdate, value} = this.props;
 
-		value && onUpdate({...value, name: event.value});
+		value && onUpdate({...value, name: event.value}, false, this.relativeElement);
 	};
 
 	handleClickCreate = () => {
@@ -77,7 +79,7 @@ export class CustomGroup extends Component<Props, State> {
 			};
 
 			onClearUnnamed();
-			onUpdate(group);
+			onUpdate(group, false, this.relativeElement);
 			onSelect(id);
 		} else {
 			this.setState({showLimitInfo: true});
@@ -98,7 +100,7 @@ export class CustomGroup extends Component<Props, State> {
 		if (value) {
 			this.setState({showRemovalInfo: false});
 
-			onRemove(value.id, !value.id.startsWith(LOCAL_PREFIX_ID));
+			onRemove(value.id, !value.id.startsWith(LOCAL_PREFIX_ID), this.relativeElement);
 			onSelect('');
 		}
 	};
@@ -124,7 +126,7 @@ export class CustomGroup extends Component<Props, State> {
 	handleUpdate = (subGroups: Array<SubGroup>) => {
 		const {onUpdate, value} = this.props;
 
-		value && onUpdate({...value, subGroups});
+		value && onUpdate({...value, subGroups}, false, this.relativeElement);
 	};
 
 	// $FlowFixMe[prop-missing]
@@ -139,10 +141,10 @@ export class CustomGroup extends Component<Props, State> {
 
 		if (value && isValid) {
 			if (value.id.startsWith(LOCAL_PREFIX_ID)) {
-				id = await onCreate(value);
+				id = await onCreate(value, this.relativeElement);
 			} else {
 				if (force || this.getUsingWidgets().length === 0) {
-					onUpdate(value, true);
+					onUpdate(value, true, this.relativeElement);
 
 					id = value.id;
 				} else {
@@ -207,6 +209,8 @@ export class CustomGroup extends Component<Props, State> {
 
 	renderLoader = () => this.props.loading && <div className={styles.loaderContainer}><Loader size={50} /></div>;
 
+	renderRelativeElement = () => <div className={styles.relativeElement} ref={this.relativeElement} />;
+
 	renderRemovalInfo = () => {
 		const {showRemovalInfo} = this.state;
 
@@ -261,8 +265,11 @@ export class CustomGroup extends Component<Props, State> {
 		return value && <SubGroupSection onUpdate={this.handleUpdate} subGroups={value.subGroups} />;
 	};
 
-	renderTitle = () => <Text className={styles.title} type={TEXT_TYPES.TITLE}><T text="CustomGroup::ConfigurationGroup" /></Text>;
-
+	renderTitle = () => (
+		<Text className={styles.title} type={TEXT_TYPES.TITLE}>
+			<T text="CustomGroup::ConfigurationGroup" />
+		</Text>
+	);
 	renderUseInfo = () => {
 		const {showUseInfo, usedInWidgets} = this.state;
 
@@ -281,6 +288,7 @@ export class CustomGroup extends Component<Props, State> {
 
 		return (
 			<ERRORS_CONTEXT.Provider value={errors}>
+				{this.renderRelativeElement()}
 				{this.renderSaveInfo()}
 				{this.renderRemovalInfo()}
 				{this.renderLimitInfo()}

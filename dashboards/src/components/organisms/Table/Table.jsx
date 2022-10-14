@@ -6,13 +6,13 @@ import type {Column, ColumnsWidth, Components, FixedPositions, Props, State, Val
 import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
 import {DEFAULT_COLUMN_WIDTH} from './components/Cell/constants';
 import {DEFAULT_TABLE_SETTINGS} from 'store/widgetForms/tableForm/constants';
+import type {DivRef} from 'components/types';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import HeaderCell from './components/HeaderCell';
 import {isLegacyBrowser} from 'utils/export/helpers';
 import Pagination from './components/Pagination';
 import React, {createRef, PureComponent} from 'react';
-import type {Ref} from 'components/types';
 import ResizeDetector from 'components/molecules/ResizeDetector';
 import Row from './components/Row';
 import {SORTING_TYPES} from 'store/widgets/data/constants';
@@ -44,10 +44,10 @@ export class Table extends PureComponent<Props, State> {
 		TotalCell: Cell,
 		Value: this.renderValue
 	};
-	tableRef: Ref<'div'> = createRef();
-	headerRef: Ref<'div'> = createRef();
-	footerRef: Ref<'div'> = createRef();
-	totalRef: Ref<'div'> = createRef();
+	tableRef: DivRef = createRef();
+	headerRef: DivRef = createRef();
+	footerRef: DivRef = createRef();
+	totalRef: DivRef = createRef();
 
 	state = {
 		columnsWidth: {},

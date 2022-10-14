@@ -330,6 +330,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 		dispatch({
 			type: DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
 		});
+
 		dispatch(createToast({
 			text: t('store::dashboard::settings::FileSentSuccessfully')
 		}));

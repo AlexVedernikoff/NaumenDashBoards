@@ -5,6 +5,7 @@ import {createToast} from 'store/toasts/actions';
 import type {CustomGroup} from './types';
 import {CUSTOM_GROUPS_EVENTS} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import type {DivRef} from 'components/types';
 import {getParams} from 'store/helpers';
 import t from 'localization';
 
@@ -44,17 +45,18 @@ const fetchCustomGroup = (payload: string): ThunkAction => async (dispatch: Disp
  * @param {string} payload - идентификатор группировки
  * @returns {ThunkAction}
  */
-const getCustomGroup = (payload: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<CustomGroup | null> => {
-	const state = getState();
-	const {map} = state.customGroups;
-	let result: CustomGroup | null = payload in map ? map[payload].data : null;
+const getCustomGroup = (payload: string): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<CustomGroup | null> => {
+		const state = getState();
+		const {map} = state.customGroups;
+		let result: CustomGroup | null = payload in map ? map[payload].data : null;
 
-	if (!result) {
-		result = await dispatch(fetchCustomGroup(payload)) ?? null;
-	}
+		if (!result) {
+			result = await dispatch(fetchCustomGroup(payload)) ?? null;
+		}
 
-	return result;
-};
+		return result;
+	};
 
 /**
  * Получает список пользовательских группировок
@@ -80,61 +82,64 @@ const fetchCustomGroups = (): ThunkAction => async (dispatch: Dispatch, getState
 	}
 };
 
-const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup): ThunkAction => async (dispatch: Dispatch): Promise<string | null> => {
-	let id = null;
+const createCustomGroup = ({id: localId, ...customGroupData}: CustomGroup, relativeElement?: DivRef): ThunkAction =>
+	async (dispatch: Dispatch): Promise<string | null> => {
+		let id = null;
 
-	try {
-		({id} = await api.instance.dashboardSettings.customGroup.save(getParams(), customGroupData));
+		try {
+			({id} = await api.instance.dashboardSettings.customGroup.save(getParams(), customGroupData));
 
-		dispatch(removeCustomGroup(localId));
-		dispatch(saveCustomGroup({...customGroupData, id}));
-	} catch (e) {
-		const errorMessage = e instanceof ApiError ? e.message : t('store::customGroups::FailCreate');
+			dispatch(removeCustomGroup(localId));
+			dispatch(saveCustomGroup({...customGroupData, id}));
+		} catch (e) {
+			const errorMessage = e instanceof ApiError ? e.message : t('store::customGroups::FailCreate');
 
-		dispatch(createToast({
-			text: errorMessage,
-			type: 'error'
-		}));
-	}
-
-	return id;
-};
-
-const deleteCustomGroup = (groupKey: string, remote: boolean = true): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	try {
-		if (remote) {
-			await api.instance.dashboardSettings.customGroup.delete(getParams(), groupKey);
+			dispatch(createToast({
+				text: errorMessage,
+				type: 'error'
+			}, relativeElement));
 		}
 
-		dispatch(removeCustomGroup(groupKey));
-	} catch (e) {
-		const errorMessage = e instanceof ApiError ? e.message : t('store::customGroups::FailDelete');
+		return id;
+	};
 
-		dispatch(createToast({
-			text: errorMessage,
-			type: 'error'
-		}));
-	}
-};
+const deleteCustomGroup = (groupKey: string, remote: boolean = true, relativeElement?: DivRef): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
+		try {
+			if (remote) {
+				await api.instance.dashboardSettings.customGroup.delete(getParams(), groupKey);
+			}
 
-const updateCustomGroup = (group: CustomGroup, remote: boolean = false): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	let updatedGroup = group;
+			dispatch(removeCustomGroup(groupKey));
+		} catch (e) {
+			const errorMessage = e instanceof ApiError ? e.message : t('store::customGroups::FailDelete');
 
-	try {
-		if (remote) {
-			({group: updatedGroup} = await api.instance.dashboardSettings.customGroup.update(getParams(), group));
+			dispatch(createToast({
+				text: errorMessage,
+				type: 'error'
+			}, relativeElement));
 		}
+	};
 
-		dispatch(saveCustomGroup(updatedGroup));
-	} catch (e) {
-		const errorMessage = e instanceof ApiError ? e.message : t('store::customGroups::FailSave');
+const updateCustomGroup = (group: CustomGroup, remote: boolean = false, relativeElement?: DivRef): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
+		let updatedGroup = group;
 
-		dispatch(createToast({
-			text: errorMessage,
-			type: 'error'
-		}));
-	}
-};
+		try {
+			if (remote) {
+				({group: updatedGroup} = await api.instance.dashboardSettings.customGroup.update(getParams(), group));
+			}
+
+			dispatch(saveCustomGroup(updatedGroup));
+		} catch (e) {
+			const errorMessage = e instanceof ApiError ? e.message : t('store::customGroups::FailSave');
+
+			dispatch(createToast({
+				text: errorMessage,
+				type: 'error'
+			}, relativeElement));
+		}
+	};
 
 const saveCustomGroup = payload => ({
 	payload,
