@@ -11,6 +11,7 @@ import {DASHBOARD_EVENTS} from 'store/dashboard/settings/constants';
 import {deepClone} from 'helpers';
 import {DEFAULT_BUTTONS, FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import type {DivRef} from 'components/types';
 import type {FetchBuildDataAction} from 'store/widgets/buildData/types';
 import {fetchCustomGroups} from 'store/customGroups/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
@@ -27,9 +28,10 @@ import t from 'localization';
 
 /**
  * Добавляет новый виджет
+ * @param {DivRef} relativeElement - элемент, вызвавший событие проверки
  * @returns {ThunkAction}
  */
-const checkWidgetsCount = () => (dispatch: Dispatch, getState: GetState): void => {
+const checkWidgetsCount = (relativeElement?: DivRef) => (dispatch: Dispatch, getState: GetState): void => {
 	const {map} = getState().widgets.data;
 	const {DASHBOARD_WIDGET_COUNT_LIMIT: LIMIT} = LIMITS;
 
@@ -37,17 +39,18 @@ const checkWidgetsCount = () => (dispatch: Dispatch, getState: GetState): void =
 		throw dispatch(createToast({
 			text: t('store::widgets::data::Limit', {limit: LIMIT}),
 			type: 'error'
-		}));
+		}, relativeElement));
 	}
 };
 
 /**
  * Добавляет новый виджет
  * @param {NewWidget} payload - объект нового виджета
+ * @param {DivRef} relativeElement - элемент, вызвавший событие проверки
  * @returns {ThunkAction}
  */
-const addNewWidget = (payload: NewWidget): ThunkAction => (dispatch: Dispatch): void => {
-	dispatch(checkWidgetsCount());
+const addNewWidget = (payload: NewWidget, relativeElement?: DivRef): ThunkAction => (dispatch: Dispatch): void => {
+	dispatch(checkWidgetsCount(relativeElement));
 
 	batch(() => {
 		dispatch(focusWidget(payload.id));
@@ -282,16 +285,22 @@ const createWidget = (settings: AnyWidget, fetchBuildData: FetchBuildDataAction)
  * @param {string} dashboardKey - идентификатор дашборда
  * @param {string} widgetKey - идентификатор виджета
  * @param {FetchBuildDataAction} fetchBuildData - thunk обновления данных виджета
+ * @param {DivRef} relativeElement - элемент, вызвавший событие проверки
  * @returns {ThunkAction}
  */
-const copyWidget = (dashboardKey: string, widgetKey: string, fetchBuildData: FetchBuildDataAction): ThunkAction =>
+const copyWidget = (
+	dashboardKey: string,
+	widgetKey: string,
+	fetchBuildData: FetchBuildDataAction,
+	relativeElement?: DivRef
+): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 		dispatch({
 			type: WIDGETS_EVENTS.REQUEST_WIDGET_COPY
 		});
 
 		try {
-			dispatch(checkWidgetsCount());
+			dispatch(checkWidgetsCount(relativeElement));
 
 			const widget = await api.instance.dashboardSettings.widget.copyWidget(getParams(), dashboardKey, widgetKey);
 			const widgetCustomColorsSettingsUpdated = await dispatch(updateWidgetCustomColorsSettings(widget));
@@ -323,13 +332,15 @@ const copyWidget = (dashboardKey: string, widgetKey: string, fetchBuildData: Fet
 /**
  * Удаляет виджет c запросом разрешения у пользователя
  * @param {string} widgetId - идентификатор виджета;
+ * @param {DivRef} relativeElement - вызывающий контейнер
  * @returns {ThunkAction}
  */
-const removeWidgetWithConfirm = (widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const removeWidgetWithConfirm = (widgetId: string, relativeElement?: DivRef): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	const confirmOptions = {
 		cancelText: t('store::widgets::data::RemoveWidgetConfirmNo'),
 		defaultButton: DEFAULT_BUTTONS.CANCEL_BUTTON,
 		footerPosition: FOOTER_POSITIONS.RIGHT,
+		relativeElement,
 		size: SIZES.SMALL,
 		submitText: t('store::widgets::data::RemoveWidgetConfirmYes')
 	};

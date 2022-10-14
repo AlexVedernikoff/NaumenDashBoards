@@ -25,6 +25,7 @@ import {
 	WIDGETS_EVENTS
 } from './constants';
 import type {DashboardItem, WidgetItem} from 'store/dashboards/types';
+import type {DivRef} from 'components/types';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import {LEGEND_DISPLAY_TYPES, LEGEND_POSITIONS} from 'utils/recharts/constants';
 import NewWidget from './NewWidget';
@@ -793,9 +794,9 @@ export type SetUseGlobalChartSettingsAction = (key: string, useGlobal: boolean, 
 
 export type SaveWidgetWithNewFiltersAction = (widget: $Shape<Widget>) => ThunkAction;
 
-export type AddNewWidgetAction = (widget: NewWidget) => ThunkAction;
+export type AddNewWidgetAction = (widget: NewWidget, relativeElement?: DivRef) => ThunkAction;
 
-export type DispatchAddNewWidget = (widget: NewWidget) => Promise<void>;
+export type DispatchAddNewWidget = (widget: NewWidget, relativeElement?: DivRef) => Promise<void>;
 
 export type CopyWidgetError = $Values<typeof COPY_WIDGET_ERRORS>;
 

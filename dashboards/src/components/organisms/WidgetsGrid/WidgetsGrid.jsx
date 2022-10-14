@@ -42,6 +42,7 @@ export class WidgetsGrid extends Component<Props, State> {
 		lastWebLGLayouts: null,
 		width: null
 	};
+	contextMenuRef: DivRef = createRef();
 	gridContainerRef: DivRef = createRef();
 	dashGrid: Ref<typeof Grid> = createRef();
 
@@ -59,7 +60,7 @@ export class WidgetsGrid extends Component<Props, State> {
 				? calculatePosition(layoutMode, breakpoints, cols, rowHeight, width, contextMenu.x, contextMenu.y)
 				: null;
 
-			addNewWidget(new NewWidget(layoutMode, type, recommendedPosition));
+			addNewWidget(new NewWidget(layoutMode, type, recommendedPosition), this.contextMenuRef);
 			this.setState({contextMenu: null});
 		}
 	};
@@ -210,7 +211,7 @@ export class WidgetsGrid extends Component<Props, State> {
 
 		if (contextMenu) {
 			return (
-				<ContextMenu {...contextMenu} hideContextMenu={this.hideContextMenu}>
+				<ContextMenu {...contextMenu} forwardedRef={this.contextMenuRef} hideContextMenu={this.hideContextMenu}>
 					<MenuItem key='widget' onClick={this.addNewDiagram}><T text="WidgetsGrid::ContextMenuCreateWidget" /></MenuItem>
 					<MenuItem key='text' onClick={this.addNewText}><T text="WidgetsGrid::ContextMenuCreateText" /></MenuItem>
 				</ContextMenu>

@@ -2,6 +2,7 @@
 import {TOASTS_EVENTS} from './constants';
 
 export type ToastPosition =
+	| 'byElement'
 	| 'bottomLeft'
 	| 'bottomRight'
 	| 'topLeft'
@@ -26,6 +27,7 @@ export type Toast = {
 	position: ToastPosition,
 	text: string,
 	time: number,
+	topOffset?: number,
 	type: ToastType
 };
 

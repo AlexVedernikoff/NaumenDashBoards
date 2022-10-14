@@ -82,10 +82,11 @@ export class WidgetKebab extends PureComponent<Props> {
 	};
 
 	renderRemoveMenuItem = () => {
-		const {editable, onRemove} = this.props;
+		const {editable, onRemove, widgetRef} = this.props;
+		const handleRemove = () => onRemove(widgetRef);
 
 		if (editable) {
-			return <KebabIconButton icon={ICON_NAMES.BASKET} onClick={onRemove} text={t('WidgetKebab::Delete')} />;
+			return <KebabIconButton icon={ICON_NAMES.BASKET} onClick={handleRemove} text={t('WidgetKebab::Delete')} />;
 		}
 
 		return null;

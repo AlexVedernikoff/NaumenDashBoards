@@ -48,7 +48,10 @@ export class ParamsTab extends PureComponent<Props> {
 
 	confirmClearSources = async () => {
 		const {confirm} = this.props;
-		const result = await confirm(t('TableWidgetForm::ParamsTab::ConfirmClearSourcesHeader'), t('TableWidgetForm::ParamsTab::ConfirmClearSourcesText'));
+		const result = await confirm(
+			t('TableWidgetForm::ParamsTab::ConfirmClearSourcesHeader'),
+			t('TableWidgetForm::ParamsTab::ConfirmClearSourcesText')
+		);
 
 		return result;
 	};

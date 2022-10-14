@@ -1,5 +1,6 @@
 // @flow
 import {COMMON_DIALOG_EVENTS, DEFAULT_BUTTONS, FOOTER_POSITIONS, SIZES} from './constants';
+import type {DivRef} from 'components/types';
 import type {LangType} from 'localization/localize_types';
 
 type Size = $Keys<typeof SIZES>;
@@ -22,6 +23,7 @@ export type ConfirmDialogOptions = {|
 	className: string,
 	defaultButton: DefaultButton,
 	footerPosition: FooterPosition,
+	relativeElement?: DivRef,
 	size: Size | number,
 	submitText: LangType,
 |};
@@ -29,6 +31,7 @@ export type ConfirmDialogOptions = {|
 export type AlertDialogOptions = {|
 	className: string,
 	footerPosition: FooterPosition,
+	relativeElement?: DivRef,
 	size: Size | number,
 	submitText: LangType,
 |};
@@ -38,12 +41,12 @@ export type CommonDialogsOptionsRequired = {|
 	text: string,
 |};
 
-export type CommonDialogsOpions = {...CommonDialogsOptionsRequired, ...CommonDialogsOptionsOptional};
+export type CommonDialogsOptions = {...CommonDialogsOptionsRequired, ...CommonDialogsOptionsOptional};
 
 export type CommonDialogResolver = (resolveState: Promise<boolean> | boolean) => void;
 
 export type CommonDialog = {
-	options: CommonDialogsOpions,
+	options: CommonDialogsOptions,
 	resolve: CommonDialogResolver,
 };
 

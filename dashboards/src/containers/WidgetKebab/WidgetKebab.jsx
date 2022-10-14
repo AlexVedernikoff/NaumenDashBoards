@@ -9,6 +9,7 @@ import {
 import {CLEAR_FILTER} from './constants';
 import {connect} from 'react-redux';
 import {DIAGRAM_WIDGET_TYPES} from 'store/widgets/data/constants';
+import type {DivRef} from 'components/types';
 import {FILE_VARIANTS} from 'utils/export';
 import {functions, props} from './selectors';
 import type {Props, State} from './types';
@@ -90,10 +91,10 @@ export class WidgetKebabContainer extends PureComponent<Props, State> {
 		}
 	};
 
-	handleRemove = () => {
+	handleRemove = (relativeElement?: DivRef) => {
 		const {removeWidgetWithConfirm, widget} = this.props;
 
-		removeWidgetWithConfirm(widget.id);
+		removeWidgetWithConfirm(widget.id, relativeElement);
 	};
 
 	handleSelect = () => {

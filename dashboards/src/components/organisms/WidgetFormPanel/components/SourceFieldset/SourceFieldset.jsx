@@ -231,7 +231,8 @@ export class SourceFieldset extends Component<Props, State> {
 				approvalToApply.result
 				|| await confirm(
 					t('SourceFieldset::ConfirmFilterTitle'),
-					t('SourceFieldset::ConfirmFilterMessage')
+					t('SourceFieldset::ConfirmFilterMessage'),
+					{relativeElement: this.containerRef}
 				)
 			) {
 				this.changeSource({

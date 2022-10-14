@@ -1,7 +1,7 @@
 // @flow
 import type {AnyWidget, PivotWidget, TableWidget, Widget} from 'store/widgets/data/types';
+import type {DivRef} from 'components/types';
 import type {DrillDownAction} from 'store/widgets/links/types';
-import type {Ref} from 'components/types';
 import type {ThunkAction} from 'store/types';
 
 export type Option = {
@@ -46,7 +46,7 @@ export type ConnectedFunctions = {
 	exportPivotToXLSX: (widget: PivotWidget) => ThunkAction,
 	exportTableToXLSX: (widget: TableWidget) => ThunkAction,
 	openNavigationLink: (dashboardId: string, widgetId: string) => ThunkAction,
-	removeWidgetWithConfirm: (widgetId: string) => ThunkAction,
+	removeWidgetWithConfirm: (widgetId: string, ref?: DivRef) => ThunkAction,
 	saveWidgetWithNewFilters: (widget: Widget) => ThunkAction,
 	selectWidget: (widgetId: string) => ThunkAction,
 };
@@ -54,7 +54,7 @@ export type ConnectedFunctions = {
 export type OwnProps = {
 	className: string,
 	widget: AnyWidget,
-	widgetRef: Ref<'div'>
+	widgetRef: DivRef
 };
 
 export type State = {

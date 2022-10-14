@@ -1,5 +1,6 @@
 // @flow
 import {DEFAULT_BUTTONS, FOOTER_POSITIONS, SIZES} from './constants';
+import type {DivRef} from 'components/types';
 import type {Node} from 'react';
 
 type Size = $Keys<typeof SIZES>;
@@ -15,6 +16,7 @@ export type DefaultProps = {|
 	defaultButton: DefaultButtons,
 	footerPosition: FooterPosition,
 	notice: boolean,
+	relativeElement: ?DivRef,
 	setBlurRoot: (value: boolean) => void,
 	showCancelButton: boolean,
 	size: Size | number,

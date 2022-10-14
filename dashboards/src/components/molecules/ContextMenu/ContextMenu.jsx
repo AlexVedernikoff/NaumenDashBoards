@@ -27,11 +27,11 @@ export class ContextMenu extends PureComponent<Props> {
 	};
 
 	render () {
-		const {x: left, y: top} = this.props;
+		const {forwardedRef, x: left, y: top} = this.props;
 		const style = {left, top};
 
 		return (
-			<div className={styles.referencePoint} style={style}>
+			<div className={styles.referencePoint} ref={forwardedRef} style={style}>
 				{this.renderMenu()}
 			</div>
 		);
