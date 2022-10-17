@@ -6674,8 +6674,13 @@
                     def variables = dataSet.collectEntries { key, data ->
                         Closure postProcess =
                             this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
-                        [(key): dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
-                                                          .with(postProcess)]
+                        Collection result = dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
+                                                                .with(postProcess)
+                        if (result.first() in Collection && result.first().size() == 0)
+                        {
+                            result[0][0] = 0
+                        }
+                        [(key): result]
                     } as Map<String, List>
 
                     //Вычисление формулы. Выглядит немного костыльно...
