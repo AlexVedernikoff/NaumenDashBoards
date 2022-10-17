@@ -73,7 +73,7 @@ const getNiceScale = (value: number, additiveLow: boolean = false) => {
 		const additive = 5 - remainder;
 
 		result = value + additive;
-	} else {
+	} else if (value !== 0) {
 		const exponent = Math.round(Math.log10(value) - 1);
 		const converter = Math.pow(10, exponent);
 
