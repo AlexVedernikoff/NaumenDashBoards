@@ -70,9 +70,9 @@ export const withBaseWidget = <Config: WidgetProps>(
 		renderContent = () => {
 			const {buildData: {data, error, loading}, drillDown, setWidgetWarning, ...props} = this.props;
 			const {widget} = props;
-			const {hiddenSeries, options} = this.state;
+			const {hiddenSeries, options, updateError} = this.state;
 
-			if (!error && !loading && options) {
+			if (!error && !updateError && !loading && options) {
 				return (
 					<Content widget={widget}>
 						<Component

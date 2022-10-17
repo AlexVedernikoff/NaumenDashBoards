@@ -7,6 +7,6 @@ import type {DataSet} from 'store/widgetForms/pivotForm/types';
  * @returns {boolean}
  */
 export const hasDisableTotal = (data: Array<DataSet>): boolean => {
-	const aggregations = data.flatMap(dataSet => dataSet.indicators.map(indicator => indicator.aggregation));
+	const aggregations = data.flatMap(dataSet => dataSet.indicators?.map(indicator => indicator.aggregation) ?? []);
 	return aggregations.length === 0 || !aggregations.every(aggregation => aggregation === aggregations[0]);
 };
