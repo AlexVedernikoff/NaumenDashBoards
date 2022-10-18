@@ -6250,7 +6250,7 @@
         {
             //данный формат dd MM, но на старых версиях виджетов формата может не быть,
             // а этот использовался по умолчанию
-            SimpleDateFormat formatter = new SimpleDateFormat("dd MMM", new Locale("ru"))
+            SimpleDateFormat formatter = new SimpleDateFormat("dd LLLL", new Locale("ru"))
             switch(format)
             {
                 case 'dd.mm.YY hh:ii':
@@ -6301,10 +6301,10 @@
         {
             //данный формат MM, но на старых версиях виджетов формата может не быть,
             // а этот использовался по умолчанию
-            SimpleDateFormat formatter = new SimpleDateFormat("MMM", new Locale("ru"))
+            SimpleDateFormat formatter = new SimpleDateFormat("LLLL", new Locale("ru"))
             if (format == 'MM YY')
             {
-                formatter = new SimpleDateFormat("MMM yyyy", new Locale("ru"))
+                formatter = new SimpleDateFormat("LLLL yyyy", new Locale("ru"))
             }
             return labels.sort { reverse ? - formatter.parse(it).getTime() : formatter.parse(it) }
         }
