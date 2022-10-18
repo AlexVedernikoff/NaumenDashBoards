@@ -22,6 +22,7 @@ import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import ru.naumen.core.server.script.spi.ScriptDtOMap
 import ru.naumen.core.server.script.api.metainfo.*
+import ru.naumen.core.shared.dto.ISDtObject
 
 import static groovy.json.JsonOutput.toJson
 
@@ -239,7 +240,7 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String updateTasks(Collection<Map<String, String>> tasks,  String versionKey)
+    String updateTasks(Collection<Map<String, String>> tasks, String versionKey)
     {
         return Jackson.toJsonString(service.updateTasks(tasks, versionKey))
     }
@@ -249,7 +250,7 @@ class GanttSettingsImpl implements GanttSettingsController
     {
         CheckWorksOfResourceData requestData = new ObjectMapper()
             .convertValue(requestContent, CheckWorksOfResourceData)
-        return Jackson.toJsonString(service.checkWorksOfResource(requestData))
+        return toJson(service.checkWorksOfResource(requestData))
     }
 }
 
@@ -262,8 +263,10 @@ class GanttSettingsService
     private static final String OLD_GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
     static final String GANTT_NAMESPACE = 'gantts'
+    static final String TYPE_SELECT = 'select'
     static final String GANTT_VERSION_NAMESPACE = 'ganttVersions'
     private static final String DATA_TYPE_OBJECT = 'object'
+
     static final List<String> ATTRIBUTE_TYPES_ALLOWED_FOR_EDITION = [
         AttributeType.CATALOG_ITEM_TYPE,
         AttributeType.CATALOG_ITEM_SET_TYPE,
@@ -541,9 +544,9 @@ class GanttSettingsService
         ganttSettings.workRelations = currentGanttSettings.workRelations
 
         ganttSettings.commonSettings = updateColumnsInCommonSettings(ganttSettings.commonSettings)
-        if (saveJsonSettings(subjectUUID, Jackson.toJsonString(ganttSettings)) && saveJsonSettings(
+        if (saveJsonSettings(subjectUUID, toJson(ganttSettings)) && saveJsonSettings(
             request?.ganttSettings?.diagramKey,
-            Jackson.toJsonString(ganttSettings)
+            toJson(ganttSettings)
         ))
         {
             return ganttSettings
@@ -574,7 +577,7 @@ class GanttSettingsService
             if (ganttVersionSettings?.title && subjectUuidInKey == requestContent.subjectUuid)
             {
                 return [
-                    'title': ganttVersionSettings.title,
+                    'title'     : ganttVersionSettings.title,
                     'diagramKey': ganttVersionSettings.versionKey
                 ]
             }
@@ -734,44 +737,39 @@ class GanttSettingsService
         String startWorkAttribute = resourceWork.startWorkAttribute.code.split('@').last()
         String endWorkAttribute = resourceWork.endWorkAttribute.code.split('@').last()
         String checkpointStatusAttr = resourceWork.checkpointStatusAttr.code.split('@').last()
+        Map editableDataInSystem = [:]
+        ISDtObject metaObjectWork
         tasks.findAll { it -> it.type == 'WORK'
         }.each { task ->
-            if (api.utils.get(task.id)[communicationResourceAttribute].UUID != task.parent)
+            metaObjectWork = api.utils.get(task.id)
+            if (metaObjectWork[communicationResourceAttribute].UUID != task.parent)
             {
-                api.utils.edit(
-                    api.utils.get(task.id),
-                    [(communicationResourceAttribute): api.utils.get(task.parent)]
-                )
+                editableDataInSystem << [(communicationResourceAttribute):
+                                             api.utils.get(task.parent)]
             }
-            api.utils.edit(
-                api.utils.get(task.id),
-                [(startWorkAttribute): getDateToSave(task.start_date)]
-            )
-            api.utils.edit(
-                api.utils.get(task.id),
-                [(endWorkAttribute): getDateToSave(task.end_date)]
-            )
+            editableDataInSystem << [(startWorkAttribute): getDateToSave(task.start_date)]
+            editableDataInSystem << [(endWorkAttribute): getDateToSave(task.end_date)]
+            api.utils.edit(metaObjectWork, editableDataInSystem)
         }
         tasks.findAll { it -> it.type == 'milestone'
         }.each { task ->
-            api.utils.edit(
-                api.utils.get(task.id),
-                [(checkpointStatusAttr): getDateToSave(task.start_date)]
-            )
+            metaObjectWork = api.utils.get(task.id)
+            editableDataInSystem << [(checkpointStatusAttr): getDateToSave(task.start_date)]
+            api.utils.edit(metaObjectWork, editableDataInSystem)
         }
     }
 
     /**
      * Метод преобразования даты из строки в класс Date
-     * @param requestContent - даты в строковом виде
-     * @return дата в нужной форме
+     * @param attributeValue - даты в строковом виде
+     * @return дата в корректном виде
      */
     Date getDateToSave(String attributeValue)
     {
         String formatEditedTime = "yyyy-MM-dd'T'HH:mm:ss"
-        String timezoneString = "Europe/Moscow"
+        String timezoneString = 'Europe/Moscow'
         TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-        def attributeDate = Date.parse(formatEditedTime, attributeValue, timezone)
+        Date attributeDate = Date.parse(formatEditedTime, attributeValue, timezone)
         return attributeDate
     }
 
@@ -780,7 +778,7 @@ class GanttSettingsService
      * @param requestContent - тело запроса
      * @return возможность перемещения работы
      */
-    Boolean checkWorksOfResource(CheckWorksOfResourceData requestData)
+    Boolean checkWorksOfResource(CheckWorksOfResourceData requestContent)
     {
         String versionKey = requestData.diagramKey
         String ganttVersionSettingsJsonValue = getJsonSettings(requestData.diagramKey)
@@ -800,17 +798,10 @@ class GanttSettingsService
         {
             throw new Exception("error: attribute ${ communicationResourceAttribute } metaclass ${ metaClassFqn } non-editable")
         }
-        try
-        {
-            api.utils.edit(
-                api.utils.get(requestData.workId),
-                [(communicationResourceAttribute): api.utils.get(requestData.resourceId)]
-            )
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex)
-        }
+        api.utils.edit(
+            api.utils.get(requestData.workId),
+            [(communicationResourceAttribute): api.utils.get(requestData.resourceId)]
+        )
     }
 
     /**
@@ -1496,7 +1487,7 @@ class DiagramEntity
     Integer level
 
     /**
-     * Завершонность работы
+     * Завершенность работы
      */
     Boolean completed
 }

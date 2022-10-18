@@ -288,7 +288,7 @@ class GanttDataSetService
 
             diagramEntities.each { entity ->
                 Map<String, Object> task = [:]
-                if (entity.sourceType == "WORK")
+                if (entity.sourceType == 'WORK')
                 {
                     task.parent = entity.parent
                 }
@@ -379,7 +379,6 @@ class GanttDataSetService
         }
         return value
     }
-
 
     /**
      * Проверка строки на содержание даты
@@ -597,11 +596,14 @@ class GanttDataSetService
             }
             // Проверка на null необходима, чтобы не выпала ошибка при запросе из БД.
             // В случае, если атрибут равен null, добавляем его позднее - после запроса в БД.
-            boolean isStartDate, isEndDate
+            boolean isStartDate, isEndDate, attributeForMilestone
+            String milestoneAttributeName
             if (settings.type == SourceType.WORK)
             {
                 isStartDate = settings.startWorkAttribute
                 isEndDate = settings.endWorkAttribute
+                attributeForMilestone = settings.checkpointStatusAttr
+                milestoneAttributeName = settings.checkpointStatusAttr.code.split('@').last()
                 if (isStartDate)
                 {
                     mapAttributes.put('start_date', prepare(settings.startWorkAttribute))
@@ -609,6 +611,10 @@ class GanttDataSetService
                 if (isEndDate)
                 {
                     mapAttributes.put('end_date', prepare(settings.endWorkAttribute))
+                }
+                if (attributeForMilestone)
+                {
+                    milestoneAttributeName = settings.checkpointStatusAttr.code.split('@').last()
                 }
             }
 
@@ -680,7 +686,7 @@ class GanttDataSetService
                             it << ['end_date': null]
                         }
                     }
-                    ScriptDtObject currentObject = api.utils.get(it.id)
+                    ISDtObject currentObject = api.utils.get(it.id)
                     if (currentObject.hasProperty(milestoneAttributeName) &&
                         currentObject[milestoneAttributeName])
                     {
@@ -710,7 +716,11 @@ class GanttDataSetService
                         result.add(it)
                         // Рекурсивный вызов для "потомков". Список с настройками передается со второго элемента.
                         result.addAll(
-                            buildDataListFromSettings(settingsList[(i + 1)..-1], it['id'], subjectUUID)
+                            buildDataListFromSettings(
+                                settingsList[(i + 1)..-1],
+                                it['id'],
+                                subjectUUID
+                            )
                         )
                         return
                     }

@@ -255,7 +255,7 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
     @Override
     String getWorkPageLink(String workUUID, String diagramKey)
     {
-        return Jackson.toJsonString(service.getWorkPageLink(workUUID, diagramKey))
+        return toJson(service.getWorkPageLink(workUUID, diagramKey))
     }
 }
 
@@ -342,7 +342,7 @@ class GanttWorkHandlerService
                                 attributeCode = attributeCode.split('@').last()
                             }
                         }
-                        ScriptDtObject currentObject = api.utils.get(workDateData.workUUID)
+                        ISDtObject currentObject = api.utils.get(workDateData.workUUID)
                         String milestoneAttributeName =
                             it?.checkpointStatusAttr?.code?.split('@')?.last()
                         if (currentObject?.hasProperty(milestoneAttributeName) &&
@@ -478,14 +478,16 @@ class GanttWorkHandlerService
             }
         }
         Map<String, Object> preparedWorkData = prepareWorkDataToUpdate(request, user)
+        Map editedWorks = [:]
         ISDtObject res = utils.get(request.workUUID)
         String errorMessage = ''
         preparedWorkData.each {
             if (api.metainfo.getMetaClass(request.classFqn).getAttribute(it.key).editable)
             {
-                utils.edit(res, [(it.key): (it.value)])
+                editedWorks << [(it.key): (it.value)]
             }
         }
+        utils.edit(res, editedWorks)
     }
 
     /**
@@ -777,7 +779,7 @@ class GanttWorkHandlerService
             if (attributeCode.contains('@'))
             {
                 Collection<String> splitForDog = attributeCode.split('@')
-                attributeCode = splitForDog[splitForDog.length-1]
+                attributeCode = splitForDog[splitForDog.length - 1]
             }
 
             IAttributeWrapper attribute = attributes.find {
@@ -797,13 +799,13 @@ class GanttWorkHandlerService
             }
         }
         Map<String, Object> mandatoryAttributes = [:]
-        request.attr.each{ entry ->
-            entry.each{
-                mandatoryAttributes << [(it.key):(it.value)]
+        request.attr.each { entry ->
+            entry.each {
+                mandatoryAttributes << [(it.key): (it.value)]
             }
         }
         mandatoryAttributes.each {
-            newWorkData << [(it.key):(it.value)]
+            newWorkData << [(it.key): (it.value)]
         }
         return newWorkData
     }
@@ -871,7 +873,7 @@ class GanttWorkHandlerService
 
             if (request.workData.completed)
             {
-                def dateData =
+                String dateData =
                     listAttributesEdits.get(request.workData*.key.get(1).split('@').last())
                 listAttributesEdits = [(checkpointStatusAttr): (dateData)]
             }
@@ -889,7 +891,8 @@ class GanttWorkHandlerService
                     }
                 if (request.workData.completed.toBoolean())
                 {
-                    changeStatusToFinal(milestoneMetaObject, endState)
+                    Integer statusChangeCounter = 0
+                    changeStatusToFinal(milestoneMetaObject, endState, statusChangeCounter)
                     listAttributesEdits += [state: statusForTransitionFromEndState]
                 }
                 else
@@ -932,7 +935,9 @@ class GanttWorkHandlerService
      * @param endState - код конечного статуса
      * @return подготовленные данные работы для добавления/редактирования
      */
-    void changeStatusToFinal(ScriptDtObject milestoneMetaObject, String endState)
+    void changeStatusToFinal(ScriptDtObject milestoneMetaObject,
+                             String endState,
+                             Integer statusChangeCounter)
     {
         api.metainfo.getMetaClass(milestoneMetaObject).workflow.states.code.each {
             if (api.metainfo.getMetaClass(milestoneMetaObject).workflow.isTransitionExists(
@@ -941,12 +946,11 @@ class GanttWorkHandlerService
             ))
             {
                 api.utils.edit(milestoneMetaObject, [state: it])
-
             }
         }
-        if (milestoneMetaObject.state != endState)
+        if (milestoneMetaObject.state != endState && statusChangeCounter < 15)
         {
-            changeStatusToFinal(milestoneMetaObject, endState)
+            changeStatusToFinal(milestoneMetaObject, endState, ++statusСhangeСounte)
         }
         else
         {
