@@ -6676,10 +6676,12 @@
                             this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
                         Collection result = dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
                                                                 .with(postProcess)
-                        if (result.first() in Collection && result.first().size() == 0)
+
+                        if (result.size() == 0 || result.first() in Collection && result.first().size() == 0)
                         {
-                            result[0][0] = 0
+                            result[0] = [0]
                         }
+
                         [(key): result]
                     } as Map<String, List>
 
