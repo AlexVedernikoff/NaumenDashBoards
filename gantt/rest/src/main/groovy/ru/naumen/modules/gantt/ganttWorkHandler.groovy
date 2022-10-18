@@ -19,6 +19,7 @@ import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.core.server.script.api.metainfo.*
 import static groovy.json.JsonOutput.toJson
+import ru.naumen.core.server.script.spi.ScriptDtObject
 
 @Field @Lazy @Delegate GanttWorkHandlerController ganttWorkHandler = new GanttWorkHandlerImpl()
 
@@ -133,9 +134,10 @@ interface GanttWorkHandlerController
     /**
      * Метод получения ссылки на карточку работы
      * @param workUUID - UUID работы
+     * @param diagramKey - ключ диаграммы
      * @return ссылка на карточку работы
      */
-    String getWorkPageLink(String workUUID)
+    String getWorkPageLink(String workUUID, String diagramKey)
 }
 
 @InheritConstructors
@@ -161,7 +163,8 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
     @Override
     String getWorkAttributes(String metaClassFqn, String attributeGroupCode, String workUUID = null)
     {
-        return Jackson.toJsonString(service.getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID))
+        return
+        Jackson.toJsonString(service.getWorkAttributes(metaClassFqn, attributeGroupCode, workUUID))
     }
 
     @Override
@@ -250,9 +253,9 @@ class GanttWorkHandlerImpl implements GanttWorkHandlerController
     }
 
     @Override
-    String getWorkPageLink(String workUUID)
+    String getWorkPageLink(String workUUID, String diagramKey)
     {
-        return service.getWorkPageLink(workUUID)
+        return toJson(service.getWorkPageLink(workUUID, diagramKey))
     }
 }
 
@@ -339,8 +342,15 @@ class GanttWorkHandlerService
                                 attributeCode = attributeCode.split('@').last()
                             }
                         }
+                        ISDtObject currentObject = api.utils.get(workDateData.workUUID)
+                        String milestoneAttributeName =
+                            it?.checkpointStatusAttr?.code?.split('@')?.last()
+                        if (currentObject?.hasProperty(milestoneAttributeName) &&
+                            currentObject[milestoneAttributeName])
+                        {
+                            attributeCode = milestoneAttributeName
+                        }
                     }
-
                     api.utils.edit(work, [(attributeCode): newDateToUpdate])
                     updateRelatedEntitiesDeadlines(relatedEntities, newDateToUpdate)
                 }
@@ -458,9 +468,26 @@ class GanttWorkHandlerService
      */
     void editWorkData(EditWorkDataRequest request, IUUIDIdentifiable user)
     {
+        if (request.workData.size() == 1)
+        {
+            if (!
+                api.metainfo.getMetaClass(request.classFqn)
+                   .getAttribute(request.workData*.key.first()).editable)
+            {
+                throw new Exception("error: attribute ${ request.workData*.key.first() } metaclass ${ request.classFqn } non-editable")
+            }
+        }
         Map<String, Object> preparedWorkData = prepareWorkDataToUpdate(request, user)
+        Map editedWorks = [:]
         ISDtObject res = utils.get(request.workUUID)
-        utils.edit(res, preparedWorkData)
+        String errorMessage = ''
+        preparedWorkData.each {
+            if (api.metainfo.getMetaClass(request.classFqn).getAttribute(it.key).editable)
+            {
+                editedWorks << [(it.key): (it.value)]
+            }
+        }
+        utils.edit(res, editedWorks)
     }
 
     /**
@@ -694,13 +721,43 @@ class GanttWorkHandlerService
     }
 
     /**
-     * Метод получения ссылки на карточку работы
+     * Метод получения информации о редактируемости элемента схемы
      * @param workUUID - UUID работы
+     * @param diagramKey - ключ диаграммы
      * @return ссылка на карточку работы
      */
-    String getWorkPageLink(String workUUID)
+    Map<String, Object> getWorkPageLink(String workUUID, String diagramKey)
     {
-        return api.web.open(workUUID)
+        GanttSettingsService ganttSettingsService = GanttSettingsService.instance
+        String ganttVersionSettingsJsonValue = ganttSettingsService.getJsonSettings(diagramKey)
+
+        GanttSettingsClass ganttVersionSettings = ganttVersionSettingsJsonValue
+            ? Jackson.fromJsonString(ganttVersionSettingsJsonValue, GanttSettingsClass)
+            : new GanttSettingsClass()
+        ResourceAndWorkSettings resourceWork = ganttVersionSettings.resourceAndWorkSettings.find {
+            it.type == SourceType.WORK
+        }
+
+        String metaClassFqn = resourceWork.startWorkAttribute.metaClassFqn
+        String startWorkAttribute = resourceWork.startWorkAttribute.code.split('@').last()
+        String endWorkAttribute = resourceWork.endWorkAttribute.code.split('@').last()
+
+        Map<String, Object> dataModalWindowOperation = [:]
+        dataModalWindowOperation << ['link': api.web.open(workUUID)]
+        dataModalWindowOperation << ['title':
+                                         api.metainfo.getMetaClass(metaClassFqn)
+                                            .getAttribute('title').attribute.isEditable()]
+        dataModalWindowOperation << ['startDate':
+                                         api.metainfo.getMetaClass(metaClassFqn)
+                                            .getAttribute(startWorkAttribute)
+                                            .attribute.isEditable()]
+        dataModalWindowOperation << ['endDate':
+                                         api.metainfo.getMetaClass(metaClassFqn)
+                                            .getAttribute(endWorkAttribute).attribute.isEditable()]
+        dataModalWindowOperation << ['disabledCompete':
+                                         api.metainfo.getMetaClass(metaClassFqn)
+                                            .getAttribute('state').attribute.isEditable()]
+        return dataModalWindowOperation
     }
 
     /**
@@ -722,7 +779,7 @@ class GanttWorkHandlerService
             if (attributeCode.contains('@'))
             {
                 Collection<String> splitForDog = attributeCode.split('@')
-                attributeCode = splitForDog[splitForDog.length-1]
+                attributeCode = splitForDog[splitForDog.length - 1]
             }
 
             IAttributeWrapper attribute = attributes.find {
@@ -742,13 +799,13 @@ class GanttWorkHandlerService
             }
         }
         Map<String, Object> mandatoryAttributes = [:]
-        request.attr.each{ entry ->
-            entry.each{
-                mandatoryAttributes << [(it.key):(it.value)]
+        request.attr.each { entry ->
+            entry.each {
+                mandatoryAttributes << [(it.key): (it.value)]
             }
         }
         mandatoryAttributes.each {
-            newWorkData << [(it.key):(it.value)]
+            newWorkData << [(it.key): (it.value)]
         }
         return newWorkData
     }
@@ -762,6 +819,16 @@ class GanttWorkHandlerService
     private Map<String, Object> prepareWorkDataToUpdate(EditWorkDataRequest request,
                                                         IUUIDIdentifiable user)
     {
+        GanttSettingsService ganttSettingsService = GanttSettingsService.instance
+
+        String diagramKey =
+            ganttSettingsService.generateDiagramKey(request.subjectUuid, request.contentCode)
+        String ganttSettingsFromKeyValue = ganttSettingsService.getJsonSettings(diagramKey)
+
+        GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
+            ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
+            : new GanttSettingsClass()
+
         Map<String, Object> preparedWorkData = request.workData
         Collection<IAttributeWrapper> attributes =
             api.metainfo.getMetaClass(request.classFqn).getAttributes()
@@ -775,25 +842,65 @@ class GanttWorkHandlerService
                 if (attributeCode != 'title')
                 {
                     attributes =
-                        api.metainfo.getMetaClass(attributeCode.split('@').first()).getAttributes()
+                        api.metainfo.getMetaClass(attributeCode.split('@').first())?.getAttributes()
                     attribute = attributes.find {
-                        it.code == attributeCode.split('@').last()
+                        it.code == attributeCode?.split('@')?.last()
                     }
                 }
                 else
                 {
-                    attribute = attributes.find {
+                    attribute = attributes?.find {
                         it.code == attributeCode
                     }
+                    listAttributesEdits += [(attribute.code): request.workData.title]
                 }
-                if (attribute.type.code in AttributeType.DATE_TYPES)
+                if (attribute?.type?.code in AttributeType.DATE_TYPES)
                 {
                     String timezoneString =
                         api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
                     TimeZone timezone = TimeZone.getTimeZone(timezoneString)
                     attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
-                    listAttributesEdits << [(attribute.code): attributeValue]
+                    listAttributesEdits << [(attribute?.code): attributeValue]
                 }
+            }
+            Boolean editabilityStatus =
+                api.metainfo.getMetaClass(request.classFqn).getAttribute('state').editable
+
+            ResourceAndWorkSettings resourceWork = ganttSettings.resourceAndWorkSettings.find {
+                it.type == SourceType.WORK
+            }
+            String checkpointStatusAttr = resourceWork.checkpointStatusAttr.code.split('@').last()
+
+            if (request.workData.completed)
+            {
+                String dateData =
+                    listAttributesEdits.get(request.workData*.key.get(1).split('@').last())
+                listAttributesEdits = [(checkpointStatusAttr): (dateData)]
+            }
+            if (request.workData.completed && editabilityStatus)
+            {
+                ScriptDtObject milestoneMetaObject = api.utils.get(request.workUUID)
+                String endState =
+                    api.metainfo.getMetaClass(milestoneMetaObject).workflow.endState.code
+                String statusForTransitionFromEndState =
+                    api.metainfo.getMetaClass(milestoneMetaObject).workflow.states.code.find {
+                        api.metainfo.getMetaClass(milestoneMetaObject).workflow.isTransitionExists(
+                            endState,
+                            it
+                        )
+                    }
+                if (request.workData.completed.toBoolean())
+                {
+                    Integer statusChangeCounter = 0
+                    changeStatusToFinal(milestoneMetaObject, endState, statusChangeCounter)
+                    listAttributesEdits += [state: statusForTransitionFromEndState]
+                }
+                else
+                {
+                    api.utils.edit(milestoneMetaObject, [state: statusForTransitionFromEndState])
+                    listAttributesEdits += [state: statusForTransitionFromEndState]
+                }
+
             }
             return listAttributesEdits
         }
@@ -817,7 +924,37 @@ class GanttWorkHandlerService
             }
             preparedWorkData =
                 checkingDateAttribute(preparedWorkData, attributes, user, request)
-            return preparedWorkData
+
+        }
+        return preparedWorkData
+    }
+
+    /**
+     * Метод изменения статуса на финальный
+     * @param milestoneMetaObject - метаинформация о вехе на диаграмме
+     * @param endState - код конечного статуса
+     * @return подготовленные данные работы для добавления/редактирования
+     */
+    void changeStatusToFinal(ScriptDtObject milestoneMetaObject,
+                             String endState,
+                             Integer statusChangeCounter)
+    {
+        api.metainfo.getMetaClass(milestoneMetaObject).workflow.states.code.each {
+            if (api.metainfo.getMetaClass(milestoneMetaObject).workflow.isTransitionExists(
+                milestoneMetaObject.state,
+                it
+            ))
+            {
+                api.utils.edit(milestoneMetaObject, [state: it])
+            }
+        }
+        if (milestoneMetaObject.state != endState && statusChangeCounter < 15)
+        {
+            changeStatusToFinal(milestoneMetaObject, endState, ++statusСhangeСounte)
+        }
+        else
+        {
+            return
         }
     }
 

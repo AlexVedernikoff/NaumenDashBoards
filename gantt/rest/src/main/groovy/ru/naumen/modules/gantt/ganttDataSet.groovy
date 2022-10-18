@@ -14,12 +14,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Field
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
-import static groovy.json.JsonOutput.toJson
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.shared.dto.ISDtObject
 import groovy.json.JsonSlurper
 import ru.naumen.core.server.script.api.ISelectClauseApi
 import ru.naumen.core.server.script.api.criteria.IApiCriteria
+import ru.naumen.core.server.script.spi.ScriptDtObject
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 
@@ -58,7 +59,9 @@ class GanttDataSetImpl implements GanttDataSetController
     @Override
     String getGanttVersionDiagramData(Map<String, String> requestData, IUUIDIdentifiable user)
     {
-        return toJson(service.getGanttVersionDiagramData(requestData.versionKey, user, requestData.timezone))
+        return toJson(
+            service.getGanttVersionDiagramData(requestData.versionKey, user, requestData.timezone)
+        )
     }
 }
 
@@ -119,14 +122,17 @@ class GanttDataSetService
                 ganttWorkHandlerService.getAttributeGroups(metaClassCode)
             )
         }
-
         if (!(settings?.resourceAndWorkSettings))
         {
             data.tasks = []
         }
         else
         {
-            data.tasks = buildDataListFromSettings(settings.resourceAndWorkSettings, null, request.subjectUUID)
+            data.tasks = buildDataListFromSettings(
+                settings.resourceAndWorkSettings,
+                null,
+                request.subjectUUID
+            )
             def timezone =
                 TimeZone.getTimeZone(
                     api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
@@ -141,15 +147,16 @@ class GanttDataSetService
                 setColumnDateFormats(it, timezone)
             }
             data.tasks = filterTasksWithNoDateRanges(data.tasks)
-
-            ColumnSettings columnSettingsTitle = data.commonSettings.columnSettings.find {it.title == 'Название'}
-            data.tasks.each {
-                if(columnSettingsTitle)
-                {
-                    it.name = it[columnSettingsTitle.code]
+            if (data.commonSettings)
+            {
+                ColumnSettings columnSettingsTitle = data.commonSettings?.columnSettings?.first()
+                data.tasks.each {
+                    if (columnSettingsTitle)
+                    {
+                        it.name = it[columnSettingsTitle.code]
+                    }
                 }
             }
-
         }
         return data
     }
@@ -166,16 +173,16 @@ class GanttDataSetService
                                                 String timezone)
     {
         GanttSettingsService service = GanttSettingsService.instance
-        GanttVersionsSettingsClass ganttVersionsSettings = service.getGanttVersionsSettings(versionKey)
+        GanttVersionsSettingsClass ganttVersionsSettings =
+            service.getGanttVersionsSettings(versionKey)
         GanttDiagramData data = new GanttDiagramData()
-
         data.commonSettings = ganttVersionsSettings.ganttSettings.commonSettings
         data.diagramKey = ganttVersionsSettings.ganttSettings.diagramKey
         data.workRelations = ganttVersionsSettings.ganttSettings.workRelations
         data.workRelationCheckbox = ganttVersionsSettings.ganttSettings.workRelationCheckbox
         data.progressCheckbox = ganttVersionsSettings.ganttSettings.progressCheckbox
-
-        if (ganttVersionsSettings.ganttSettings.startDate && ganttVersionsSettings.ganttSettings.endDate)
+        if (ganttVersionsSettings.ganttSettings.startDate &&
+            ganttVersionsSettings.ganttSettings.endDate)
         {
             String startDate = ganttVersionsSettings.ganttSettings.startDate
             String endDate = ganttVersionsSettings.ganttSettings.endDate
@@ -184,7 +191,6 @@ class GanttDataSetService
             data.startDate = sd.format(GANTT_DATE_PATTERN)
             data.endDate = ed.format(GANTT_DATE_PATTERN)
         }
-
         if (!ganttVersionsSettings.ganttSettings.resourceAndWorkSettings)
         {
             data.tasks = []
@@ -200,7 +206,6 @@ class GanttDataSetService
                 ganttVersionsSettings.ganttSettings.resourceAndWorkSettings.find {
                     it.startWorkAttribute && it.endWorkAttribute
                 }
-
             data.tasks.each {
                 formatWorkDates(it, workAttributeSettings, timeZone)
                 setWorkTypeToProjectIfItHasChildren(it, data.tasks)
@@ -224,14 +229,8 @@ class GanttDataSetService
             Boolean start = it.start_date
             Boolean end = !it.end_date
             Boolean type = it.type == SourceType.WORK
-            if(it.start_date && !it.end_date && it.type == SourceType.WORK)
-            {
-                it.type = 'milestone'
-                it.remove('end_date')
-                return it
-            }
-            else if (!startAndEndDateExist &&
-                     it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
+            if (!startAndEndDateExist &&
+                it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
             {
                 it.datesStartDateAndEndDate = false
                 return it
@@ -271,7 +270,6 @@ class GanttDataSetService
             {
                 return
             }
-
             Map<String, String> mapAttributes = ['id': 'UUID', 'text': 'title']
             if (it.type as SourceType == SourceType.WORK)
             {
@@ -290,26 +288,38 @@ class GanttDataSetService
 
             diagramEntities.each { entity ->
                 Map<String, Object> task = [:]
-                if(entity.parent)
+                if (entity.sourceType == 'WORK')
                 {
                     task.parent = entity.parent
                 }
-                task.level = entity.sourceType == 'WORK' ? 0 : 1
                 task.type = entity.sourceType
+                task.datesStartDateAndEndDate = entity.datesStartDateAndEndDate
                 task.editable = entity.editable
+                task.level = entity.level
+                task.name = entity.name
                 task.workOfLink = entity.workOfLink
+
                 mapAttributes.keySet().each { fieldCode ->
                     task[fieldCode] =
-                        getAttributeValueForVersionEntity(entity, mapAttributes[fieldCode], fieldCode)
-                    if (task[fieldCode] && fieldCode in ['start_date', 'end_date'] && !(task[fieldCode] in Date))
+                        getAttributeValueForVersionEntity(
+                            entity,
+                            mapAttributes[fieldCode],
+                            fieldCode
+                        )
+                    if (task[fieldCode] &&
+                        fieldCode in ['start_date', 'end_date'] && !(task[fieldCode] in Date))
                     {
-                        task[fieldCode] = new Date(task[fieldCode])
+                        task[fieldCode] = Date.parse("yyyy-MM-dd'T'HH:mm:ss", task[fieldCode])
                     }
+                }
+                if (task.type == 'milestone')
+                {
+                    task.completed = entity.completed
+                    task.remove('end_date')
                 }
                 tasks << task
             }
         }
-
         return tasks
     }
 
@@ -370,7 +380,6 @@ class GanttDataSetService
         return value
     }
 
-
     /**
      * Проверка строки на содержание даты
      * @param attributeValue - значение для приведения в дате
@@ -389,7 +398,6 @@ class GanttDataSetService
             return false
         }
     }
-
 
     /**
      * Замена формата даты для колонок
@@ -517,7 +525,8 @@ class GanttDataSetService
      * @return список List<String, String> параметров для построения диаграммы
      */
     private List<Map<String, String>> buildDataListFromSettings(Collection<ResourceAndWorkSettings> settingsList,
-                                                                String parentUUID, String subjectUUID)
+                                                                String parentUUID,
+                                                                String subjectUUID)
     {
         /* За текущую настройку из списка настроек, берется 1-ый элемент settingsList[0]. В цикле совершается поиск таких
            настроек, для которых уровень вложенности level равен level-у текущей. Таким образом находятся по сути соседние
@@ -587,11 +596,14 @@ class GanttDataSetService
             }
             // Проверка на null необходима, чтобы не выпала ошибка при запросе из БД.
             // В случае, если атрибут равен null, добавляем его позднее - после запроса в БД.
-            boolean isStartDate, isEndDate
+            boolean isStartDate, isEndDate, attributeForMilestone
+            String milestoneAttributeName
             if (settings.type == SourceType.WORK)
             {
                 isStartDate = settings.startWorkAttribute
                 isEndDate = settings.endWorkAttribute
+                attributeForMilestone = settings.checkpointStatusAttr
+                milestoneAttributeName = settings.checkpointStatusAttr.code.split('@').last()
                 if (isStartDate)
                 {
                     mapAttributes.put('start_date', prepare(settings.startWorkAttribute))
@@ -599,6 +611,10 @@ class GanttDataSetService
                 if (isEndDate)
                 {
                     mapAttributes.put('end_date', prepare(settings.endWorkAttribute))
+                }
+                if (attributeForMilestone)
+                {
+                    milestoneAttributeName = settings.checkpointStatusAttr.code.split('@').last()
                 }
             }
 
@@ -632,7 +648,16 @@ class GanttDataSetService
                 res.each { item ->
                     Map<String, String> itemMap =
                         mapAttributesIndexes.collectEntries { key, valueMap ->
-                            return [(key): updateIfMetaClass(item[valueMap.ind], valueMap.attr)]
+                            Object attributeValue = item[valueMap.ind]
+                            if (attributeValue == true)
+                            {
+                                attributeValue = 'да'
+                            }
+                            else if (attributeValue == false)
+                            {
+                                attributeValue = 'нет'
+                            }
+                            return [(key): updateIfMetaClass(attributeValue, valueMap.attr)]
                         }
 
                     if (itemMap.parent)
@@ -644,12 +669,10 @@ class GanttDataSetService
                 }
                 // Добавление данных, общих для списка.
                 resMap.each {
-                    Boolean permissionToEdit = api.metainfo.getMetaClass(utils.get(it.id)).getAttribute('title').attribute.isEditableInLists()
                     it << ['level': settings.level]
                     it << ['type': settings.type]
-                    it << ['editable': !permissionToEdit]
+                    it << ['editable': true]
                     it << ['workOfLink': api.web.open(it.id)]
-                    it << ['completed': true]
                     it << ['name': null]
                     it << ['datesStartDateAndEndDate': true]
                     if (settings.type == SourceType.WORK)
@@ -663,6 +686,22 @@ class GanttDataSetService
                             it << ['end_date': null]
                         }
                     }
+                    ISDtObject currentObject = api.utils.get(it.id)
+                    if (currentObject.hasProperty(milestoneAttributeName) &&
+                        currentObject[milestoneAttributeName])
+                    {
+                        String elementWithFinalStatus =
+                            api.metainfo.getMetaClass(currentObject).workflow.getState(
+                                currentObject.state
+                            ).code
+                        String currentElementStatus =
+                            api.metainfo.getMetaClass(currentObject).workflow.endState.code
+                        it.type = 'milestone'
+                        it << ['completed': elementWithFinalStatus == currentElementStatus]
+                        it.start_date = currentObject[milestoneAttributeName]
+                        it.remove('end_date')
+                    }
+
                 }
                 // Если есть настройка-потомок (уровень вложенности следующей в списке настройки выше, чем у текущей).
                 if ((settingsList.size() > (i + 1)) && (settingsList[i + 1].level > settings.level))
@@ -677,7 +716,11 @@ class GanttDataSetService
                         result.add(it)
                         // Рекурсивный вызов для "потомков". Список с настройками передается со второго элемента.
                         result.addAll(
-                            buildDataListFromSettings(settingsList[(i + 1)..-1], it['id'], subjectUUID)
+                            buildDataListFromSettings(
+                                settingsList[(i + 1)..-1],
+                                it['id'],
+                                subjectUUID
+                            )
                         )
                         return
                     }
