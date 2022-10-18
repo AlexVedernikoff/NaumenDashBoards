@@ -457,14 +457,11 @@ class GanttSettingsService
                                     attributeCode = attributeSetting.attribute.property
                                     columnSetting.editor.type = TYPE_SELECT
                                     Set elementsDirectory = []
-                                    api.utils.find(attributeCode, [:]).each {
-                                        if (it)
-                                        {
+                                    api.utils.find(attributeCode, [:]).findAll().each {
                                             elementsDirectory.add(
                                                 ['label': it.title, 'key': it.title, 'value':
                                                     it.UUID]
                                             )
-                                        }
                                     }
                                     columnSetting.editor.options = elementsDirectory
                                     break
@@ -483,14 +480,11 @@ class GanttSettingsService
                                         api.metainfo.getMetaClass(metaClassFqn)
                                            .getAttribute(attributeCode)
                                            .getType().getRelatedMetaClass().toString()
-                                    api.utils.find(referenceClass, [:]).each {
-                                        if (it)
-                                        {
+                                    api.utils.find(referenceClass, [:]).findAll().each {
                                             newOptionsColumnSetting.add(
                                                 ['label': it.title, 'key': it.title, 'value':
                                                     it.UUID]
                                             )
-                                        }
                                     }
                                     columnSetting.editor.options = newOptionsColumnSetting
                                     break
