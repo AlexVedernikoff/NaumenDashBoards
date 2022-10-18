@@ -1798,8 +1798,8 @@ class DashboardDrilldownService
         FilterProvider ddMmYyyyHhIiStaticFilter = { String format, String value, def filterBuilder,
                                                     Attribute attr, String classFqn, String descriptor ->
             List<String> fullDate = value.split()
-            def(date, dateTime) = fullDate
-            String[] splitDate = date.tokenize('.')
+            def(dateString, dateTime) = fullDate
+            String[] splitDate = dateString.tokenize('.')
             def (day, month, year) = splitDate
 
             def(hour, minute) = dateTime.split(':')
@@ -2147,7 +2147,7 @@ class DashboardDrilldownService
                 hours_static_ref                  : hhHourStaticRefFilter,
 
                 ii_minute_dynamic                : minuteDynamicFilter,
-                ii_minute_static                 : minuteStaticFilter,
+                ii_minutes_static                : minuteStaticFilter,
                 ii_minute_static_ref             : minuteStaticRefFilter,
 
                 minute_dynamic                   : minuteDynamicFilter,
