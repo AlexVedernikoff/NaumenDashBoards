@@ -1099,7 +1099,16 @@ class QueryWrapper implements CriteriaWrapper
                 //двухуровневый атрибут, второй уровень которого был добавлен синтетически, обработка для условия EQUAL, NOT_EQUAL
                 code = attribute.code
             }
-            String columnCode = attribute.attrChains()*.code.join('.').replace('metaClass', valueToPut)
+
+            String columnCode
+            if (attribute.type == AttributeType.TEXT_TYPE)
+            {
+                columnCode = attribute.code.replace('metaClass', valueToPut)
+            }
+            else
+            {
+                columnCode = attribute.attrChains()*.code.join('.').replace('metaClass', valueToPut)
+            }
             String parameterFqn = attribute.attrChains().last().metaClassFqn
             if (attribute.attrChains()*.code.any { it == 'id' })
             {

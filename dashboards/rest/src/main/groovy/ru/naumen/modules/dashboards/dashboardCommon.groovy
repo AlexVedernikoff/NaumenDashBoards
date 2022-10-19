@@ -1457,7 +1457,7 @@ class AttributeType {
 
     static final Collection<String> DYNAMIC_ATTRIBUTE_TYPES = [DATE_TYPE, DATE_TIME_TYPE, DT_INTERVAL_TYPE, STRING_TYPE].asImmutable()
 
-    static final Collection<String> HAS_UUID_TYPES = [*LINK_TYPES]
+    static final Collection<String> HAS_UUID_TYPES = [OBJECT_TYPE,  CATALOG_ITEM_TYPE, CATALOG_ITEM_SET_TYPE, BO_LINKS_TYPE, BACK_BO_LINKS_TYPE]
 
     static final String OBJECT_TYPE = 'object'
 
