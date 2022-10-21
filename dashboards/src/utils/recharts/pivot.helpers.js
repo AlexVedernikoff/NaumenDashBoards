@@ -1,9 +1,7 @@
 // @flow
 import {COLUMN_TYPES} from 'store/widgets/buildData/constants';
-import type {DiagramBuildData} from 'store/widgets/buildData/types';
-import type {IndicatorGrouping, PivotWidget} from 'store/widgets/data/types';
-import {INDICATOR_GROUPING_TYPE} from 'store/widgets/data/constants';
 import type {
+	ContainerSize,
 	ParseColumnsResult,
 	PivotBreakdownInfo,
 	PivotColumn,
@@ -17,6 +15,9 @@ import type {
 	PivotSeriesData,
 	PivotTooltipInfo
 } from './types';
+import type {DiagramBuildData} from 'store/widgets/buildData/types';
+import type {IndicatorGrouping, PivotWidget} from 'store/widgets/data/types';
+import {INDICATOR_GROUPING_TYPE} from 'store/widgets/data/constants';
 import {PIVOT_COLUMN_MIN_WIDTH, PIVOT_COLUMN_TYPE} from './constants';
 import t from 'localization';
 
@@ -294,14 +295,14 @@ export const parseColumnsFlat = (columns: Array<PivotColumn>, isTopLevel: boolea
 /**
  * Рассчитывает ширину столбцов
  * @param {Array<PivotColumn>} columns - список столбцов
- * @param {HTMLDivElement} container - контейнер
+ * @param {ContainerSize} container - контейнер
  * @returns {Array} - ширина столбцов
  */
-export const getColumnsWidth = (columns: Array<PivotColumn>, container: HTMLDivElement): Array<number> => {
+export const getColumnsWidth = (columns: Array<PivotColumn>, container: ContainerSize): Array<number> => {
 	let result = [];
 
 	if (columns.length > 0) {
-		let {width: containerWidth} = container.getBoundingClientRect();
+		let {width: containerWidth} = container;
 		const lastColumn = columns[columns.length - 1];
 		let columnsLength = columns.length + 1;
 

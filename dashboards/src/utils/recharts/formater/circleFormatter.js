@@ -69,14 +69,12 @@ const getCategoryFormatter = (widget: CircleWidget): ValueFormatter => {
  * Фабрика форматеров для круговой диаграммы
  * @param {CircleWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {CircleFormatter} - объект с функциями форматерами и параметрами построения
  */
 const getCircleFormatterBase = (
 	widget: CircleWidget,
 	labels: Array<string> | Array<number>,
-	container: HTMLDivElement,
 	percentStore: PercentStore = {}
 ): CircleFormatter => {
 	const {dataLabels} = widget;
@@ -98,7 +96,6 @@ const getCircleFormatterBase = (
  * Нужна для формирования тест-кейсов по виджетам
  * @param {CircleWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {CircleFormatter} - объект с функциями форматерами и параметрами построения
  */
@@ -106,12 +103,10 @@ const getCircleFormatterBase = (
 const getCircleFormatterDebug = (
 	widget: CircleWidget,
 	labels: Array<string> | Array<number>,
-	container: HTMLDivElement,
 	percentStore: PercentStore = {}
 ): CircleFormatter => {
-	const {clientWidth} = container;
-	const store = {container: {clientWidth}, labels, widget};
-	const baseFormatter = getCircleFormatterBase(widget, labels, container, percentStore);
+	const store = {labels, widget};
+	const baseFormatter = getCircleFormatterBase(widget, labels, percentStore);
 	const category = [];
 	const label = [];
 

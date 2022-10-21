@@ -5,6 +5,7 @@ import type {
 	CalculateCategoryHeightResult,
 	CalculateCategoryRotateHeight,
 	CalculateCategoryWidthResult,
+	ContainerSize,
 	DataLabelsOptions,
 	MultilineHeightResult,
 	ReChartLegend,
@@ -396,15 +397,15 @@ const transformLegendPosition = (
 
 /**
  * Трансформирует легенду для ReChart
- * @param {HTMLDivElement} container - общий контейнер
+ * @param {ContainerSize} container - общий контейнер
  * @param {Legend} legend - легенда
  * @returns {ReChartLegend} - ReChart легенда
  */
-const getLegendOptions = (container: HTMLDivElement, legend: ?Legend): ReChartLegend => {
+const getLegendOptions = (container: ContainerSize, legend: ?Legend): ReChartLegend => {
 	if (legend) {
 		const {displayType, fontFamily, fontSize, position, show, textHandler} = legend;
 		const [align, verticalAlign] = transformLegendPosition(position);
-		const {height: containerHeight, width: containerWidth} = container.getBoundingClientRect();
+		const {height: containerHeight, width: containerWidth} = container;
 		let layout = LEGEND_LAYOUT.VERTICAL;
 		let height;
 		let width;
@@ -415,7 +416,7 @@ const getLegendOptions = (container: HTMLDivElement, legend: ?Legend): ReChartLe
 			height = LEGEND_HEIGHT;
 			width = containerWidth;
 		} else {
-			height = containerHeight;
+			height = containerHeight - 10; // wrapper padding
 			width = containerWidth * LEGEND_WIDTH_PERCENT;
 		}
 
@@ -850,20 +851,20 @@ const calculateYAxisNumberWidth = (maxString: string, settings: AxisOptions, axi
 /**
  * Формирование настроек осей X при отображении категорий (столбчатая, линейная, комбо)
  * @param {AxisWidget | ComboWidget} widget - виджет
- * @param {HTMLDivElement} container - общий контейнер
+ * @param {ContainerSize} container - общий контейнер
  * @param {Array<string>} labels - подписи категорий
  * @param {string} axisName - название оси
  * @returns {AxisOptions} - настройки оси X
  */const getXAxisCategory = (
 	widget: AxisWidget | ComboWidget,
-	container: HTMLDivElement,
+	container: ContainerSize,
 	labels: Array<string> = [],
 	axisName: string = ''
 ): AxisOptions => {
 	const settings = getRechartAxisSetting(widget.parameter);
 	const addPlaceForName = settings.showName ? settings.fontSize * 2 : 0;
 	const maxHeight = LEGEND_HEIGHT - addPlaceForName;
-	let {width} = container.getBoundingClientRect();
+	let {width} = container;
 
 	if (widget.legend && widget.legend.show) {
 		const {position} = widget.legend;

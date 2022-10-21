@@ -1,5 +1,5 @@
 // @flow
-import type {AxisOptions, RechartData} from './types';
+import type {AxisOptions, ContainerSize, RechartData} from './types';
 import type {AxisWidget} from 'store/widgets/data/types';
 import {calculateCategoryWidth, calculateStringsSize, getNiceScale, getRechartAxisSetting} from './helpers';
 import {LEGEND_HEIGHT, XAXIS_MAX_WIDTH} from './constants';
@@ -25,7 +25,7 @@ const normalizeSeries = (data: RechartData): RechartData =>
 /**
  * Формирует настройки оси Y для вертикальных графиков
  * @param {AxisWidget} widget - виджет
- * @param {HTMLDivElement} container - контейнер
+ * @param {ContainerSize} container - контейнер
  * @param {Array<string>} labels - метки виджета
  * @param {Function} formatter - функция форматирования параметра
  * @param {string} axisName - название оси
@@ -33,7 +33,7 @@ const normalizeSeries = (data: RechartData): RechartData =>
  */
 const getYAxisCategory = (
 	widget: AxisWidget,
-	container: HTMLDivElement,
+	container: ContainerSize,
 	labels: string[],
 	formatter: (value: string | number) => string,
 	axisName: string = ''
@@ -41,7 +41,7 @@ const getYAxisCategory = (
 	const settings = getRechartAxisSetting(widget.parameter);
 	const addPlaceForName = settings.showName ? settings.fontSize * 1.5 : 0;
 	const maxWidth = XAXIS_MAX_WIDTH - addPlaceForName;
-	let {height} = container.getBoundingClientRect();
+	let {height} = container;
 
 	if (widget.legend) {
 		const {position} = widget.legend;
@@ -62,7 +62,7 @@ const getYAxisCategory = (
 /**
  * Формирует настройки оси X для вертикальных графиков
  * @param {AxisWidget} widget - виджет
- * @param {HTMLDivElement} container - контейнер
+ * @param {ContainerSize} container - контейнер
  * @param {Array} subContainers - контейнеры, изменяющие ширину графика
  * @param {string} axisName - название оси
  * @param {boolean} isNormalized - флаг, показывающий нормализованные ли значения у оси
@@ -70,14 +70,14 @@ const getYAxisCategory = (
  */
 const getXAxisNumber = (
 	widget: AxisWidget,
-	container: HTMLDivElement,
+	container: ContainerSize,
 	subContainers: Array<{width?: number}>,
 	axisName: string = '',
 	isNormalized: boolean = false
 ): AxisOptions => {
 	const settings = getRechartAxisSetting(widget.indicator);
 	const showSubTotalAmount = widget.showSubTotalAmount;
-	const {width: containerWidth} = container.getBoundingClientRect();
+	const {width: containerWidth} = container;
 	const graphWidth = containerWidth - subContainers.reduce((acc, subContainer) => acc + (subContainer.width ?? 0), 0);
 	let domain = [0, 1];
 

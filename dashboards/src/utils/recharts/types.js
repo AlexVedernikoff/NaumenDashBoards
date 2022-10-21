@@ -33,6 +33,8 @@ import {
 import type {PivotBodySettings, PivotHeaderSettings} from 'src/store/widgets/data/types';
 import type {WidgetTooltip} from 'store/widgets/data/types.js';
 
+export type ContainerSize = {height: number, width: number};
+
 export type Labels = Array<Array<string>>;
 
 export type DrillDownErrorOptions = {

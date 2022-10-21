@@ -21,10 +21,9 @@ import {hasCountPercent, hasMSInterval, hasPercent} from 'store/widgets/helpers'
 /**
  * Создает форматер для блока легенды
  * @param {AxisWidget} widget - виджет
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @returns {ValueFormatter} - функция-форматер
  */
-const getLegendFormatter = (widget: AxisWidget, container: HTMLDivElement): ValueFormatter => {
+const getLegendFormatter = (widget: AxisWidget): ValueFormatter => {
 	const dataSet = getMainDataSet(widget.data);
 	const {breakdown, parameters} = dataSet;
 	const format = Array.isArray(breakdown)
@@ -106,14 +105,12 @@ const getCategoryFormatter = (widget: AxisWidget): ValueFormatter => {
  * Фабрика форматеров для осевой диаграммы
  * @param {AxisWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {AxisFormatter} - объект с функциями форматерами и параметрами построения
  */
 const getAxisFormatterBase = (
 	widget: AxisWidget,
 	labels: Array<string> | Array<number>,
-	container: HTMLDivElement,
 	percentStore: PercentStore = {}
 ): AxisFormatter => {
 	const {dataLabels} = widget;
@@ -127,7 +124,7 @@ const getAxisFormatterBase = (
 	return {
 		dataLabel: getDataFormatter(widget, normalizedDataLabelsFormat, percentStore, true, true),
 		indicator: getDataFormatter(widget, indicatorsFormat, percentStore, false, false),
-		legend: getLegendFormatter(widget, container),
+		legend: getLegendFormatter(widget),
 		parameter: categoryFormatter,
 		tooltip: compose(getDataFormatter(widget, normalizedDataLabelsFormat, percentStore, false, true))
 	};
@@ -138,7 +135,6 @@ const getAxisFormatterBase = (
  * Нужна для формирования тест-кейсов по виджетам
  * @param {AxisWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {AxisFormatter} - объект с функциями форматерами и параметрами построения
  */
@@ -146,12 +142,10 @@ const getAxisFormatterBase = (
 const getAxisFormatterDebug = (
 	widget: AxisWidget,
 	labels: Array<string> | Array<number>,
-	container: HTMLDivElement,
 	percentStore: PercentStore
 ): AxisFormatter => {
-	const {clientWidth} = container;
-	const store = {container: {clientWidth}, labels, widget};
-	const baseFormatter = getAxisFormatterBase(widget, labels, container, percentStore);
+	const store = {labels, widget};
+	const baseFormatter = getAxisFormatterBase(widget, labels, percentStore);
 	const dataLabel = [];
 	const indicator = [];
 	const legend = [];

@@ -16,23 +16,26 @@ export const withBaseWidget = <Config: WidgetProps>(
 ): React$ComponentType<Config> => {
 	class WithBaseWidget extends PureComponent<Config & ComponentProps, ComponentState> {
 		state = {
-			container: null,
+			height: 0,
 			hiddenSeries: [],
 			options: {},
-			updateError: false
+			updateError: false,
+			width: 0
 		};
 
 		widgetRef: DivRef = createRef();
 
 		static getDerivedStateFromProps (props: Config & ComponentProps, state: ComponentState) {
 			const {buildData, globalColorsSettings, widget} = props;
-			const {container} = state;
+			const {height, width} = state;
 			const {data, error, loading} = buildData;
 
 			if (!error && !loading && data) {
 				try {
-					const options = container
-						? getOptions(widget, data, container, globalColorsSettings)
+					const containerSize = {height, width};
+
+					const options = width > 0 && height > 0
+						? getOptions(widget, data, containerSize, globalColorsSettings)
 						: {};
 
 					return {options, updateError: false};
@@ -65,7 +68,10 @@ export const withBaseWidget = <Config: WidgetProps>(
 			return {hiddenSeries};
 		});
 
-		updateOptions = (container: HTMLDivElement) => this.setState({container});
+		updateOptions = (container: HTMLDivElement) => {
+			const {height, width} = container.getBoundingClientRect();
+			return this.setState({height, width});
+		};
 
 		renderContent = () => {
 			const {buildData: {data, error, loading}, drillDown, setWidgetWarning, ...props} = this.props;

@@ -66,8 +66,8 @@ export class ReChartWidget extends PureComponent<Props, State> {
 		});
 		return (
 			<ResizeDetector onResize={this.handleResize}>
-				<div className={className} ref={this.containerRef}>
-					<div className={this.getClassName()} >
+				<div className={className}>
+					<div className={this.getClassName()} ref={this.containerRef}>
 						{children}
 					</div>
 					{this.renderTotal()}

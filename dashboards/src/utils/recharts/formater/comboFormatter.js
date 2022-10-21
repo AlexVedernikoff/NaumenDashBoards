@@ -8,7 +8,13 @@ import {
 	percentFormat,
 	sevenDaysFormatter
 } from './helpers';
-import type {ComboFormatter, ComboNumberFormatter, ComboValueFormatter, PercentStore, ValueFormatter} from './types';
+import type {
+	ComboFormatter,
+	ComboNumberFormatter,
+	ComboValueFormatter,
+	PercentStore,
+	ValueFormatter
+} from './types';
 import type {ComboWidget} from 'store/widgets/data/types';
 import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
@@ -93,7 +99,7 @@ const getCategoryFormatter = (widget: ComboWidget): ValueFormatter => {
 	return makeFormatterByFormat(parameter.format ?? getDefaultFormatForAttribute(attribute, group), false);
 };
 
-const getLegendFormatter = (widget: ComboWidget, container: HTMLDivElement, crop: boolean): ComboValueFormatter => {
+const getLegendFormatter = (widget: ComboWidget, crop: boolean): ComboValueFormatter => {
 	const formatters = {};
 
 	widget.data.forEach(dataSet => {
@@ -119,14 +125,12 @@ const getLegendFormatter = (widget: ComboWidget, container: HTMLDivElement, crop
  * Фабрика форматеров для комбо диаграммы
  * @param {ComboWidget} widget - виджет
  * @param {Array<string> | Array<number>} labels - метки данных для расчета переносов
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @param {PercentStore} percentStore - данные для cnt(%)
  * @returns {ComboFormatter} - объект с функциями форматерами и параметрами построения
  */
 const getComboFormatterBase = (
 	widget: ComboWidget,
 	labels: Array<string> | Array<number>,
-	container: HTMLDivElement,
 	percentStore: PercentStore = {}
 ): ComboFormatter => {
 	const categoryFormatter = getCategoryFormatter(widget);
@@ -135,7 +139,7 @@ const getComboFormatterBase = (
 	return {
 		dataLabel: getDataFormatters(widget, true, percentStore),
 		indicator: indicatorFormatter,
-		legend: getLegendFormatter(widget, container, true),
+		legend: getLegendFormatter(widget, true),
 		parameter: categoryFormatter
 	};
 };
