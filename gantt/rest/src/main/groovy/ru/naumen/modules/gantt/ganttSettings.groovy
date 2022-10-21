@@ -567,8 +567,12 @@ class GanttSettingsService
         Collection<String> versionKeysToRemove = []
         Collection<Map<String, String>> result = ganttSettings.diagramVersionsKeys.findResults {
             String subjectUuidInKey = it.split('_').first()
+            String contentCode = it.split('_')[1]
             GanttVersionsSettingsClass ganttVersionSettings = getGanttVersionsSettings(it)
-            if (ganttVersionSettings?.title && subjectUuidInKey == requestContent.subjectUuid)
+            if (ganttVersionSettings?.title &&
+                subjectUuidInKey ==
+                requestContent.subjectUuid &&
+                requestContent.diagramKey.split('_').last() == contentCode)
             {
                 return [
                     'title'     : ganttVersionSettings.title,
@@ -581,10 +585,7 @@ class GanttSettingsService
                 return null
             }
         }
-
         ganttSettings.diagramVersionsKeys -= versionKeysToRemove
-        saveJsonSettings(requestContent.diagramKey, toJson(ganttSettings))
-
         return result
     }
 
@@ -622,13 +623,31 @@ class GanttSettingsService
         GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
+        String versionKey =
+            String
+                .join('_', String.join('_', subjectUUID, contentCode), UUID.randomUUID().toString())
 
-        String versionKey = String.join('_', subjectUUID, UUID.randomUUID().toString())
         Date createdDate = Date.parse(GANTT_VERSION_DATE_PATTERN, request.createdDate)
 
         ganttSettings.diagramVersionsKeys << versionKey
         ganttSettings.diagramVersionsKeys = ganttSettings.diagramVersionsKeys.unique()
-
+        ganttSettings.diagramKey = diagramKey
+        Collection<SequenceChartElements> sequenceWorks = []
+        request.tasks.each
+            {
+                if (it.type == 'WORK' || it.type == 'milestone')
+                {
+                    SequenceChartElements elements = new SequenceChartElements()
+                    elements.parentUuid = it.parent
+                    elements.workUuid = it.id
+                    elements.idLocations = it.positionElement
+                    sequenceWorks.add(elements)
+                }
+            }
+        saveJsonSettings(
+            String.join('_', 'sequenceWorks', versionKey),
+            Jackson.toJsonString(sequenceWorks)
+        )
         if (!saveJsonSettings(subjectUUID, Jackson.toJsonString(ganttSettings)))
         {
             throw new Exception('Настройки не были сохранены!')
@@ -680,6 +699,8 @@ class GanttSettingsService
             entity.editable = it.editable
             entity.name = it.name
             entity.level = it.level
+            entity.positionElement = it.positionElement
+
             if (it?.containsKey('completed'))
             {
                 entity.completed = it.completed
@@ -695,6 +716,8 @@ class GanttSettingsService
             }
             ganttVersionSettings.diagramEntities << entity
         }
+
+        ganttVersionSettings.workRelations = request.workRelations
 
         if (saveJsonSettings(
             versionKey,
@@ -751,6 +774,11 @@ class GanttSettingsService
             editableDataInSystem << [(checkpointStatusAttr): getDateToSave(task.start_date)]
             api.utils.edit(metaObjectWork, editableDataInSystem)
         }
+        ganttVersionSettings.workRelations = diagramData.workRelations
+        if (!saveJsonSettings(diagramData.diagramKey, Jackson.toJsonString(ganttVersionSettings)))
+        {
+            throw new Exception('Настройки не были сохранены!')
+        }
     }
 
     /**
@@ -774,8 +802,8 @@ class GanttSettingsService
      */
     Boolean checkWorksOfResource(CheckWorksOfResourceData requestContent)
     {
-        String versionKey = requestData.diagramKey
-        String ganttVersionSettingsJsonValue = getJsonSettings(requestData.diagramKey)
+        String versionKey = requestContent.diagramKey
+        String ganttVersionSettingsJsonValue = getJsonSettings(requestContent.diagramKey)
 
         GanttSettingsClass ganttVersionSettings = ganttVersionSettingsJsonValue
             ? Jackson.fromJsonString(ganttVersionSettingsJsonValue, GanttSettingsClass)
@@ -786,16 +814,56 @@ class GanttSettingsService
         String communicationResourceAttribute =
             resourceWork.communicationResourceAttribute.code.split('@').last()
         String metaClassFqn = resourceWork.communicationResourceAttribute.metaClassFqn
-        if (!
-            api.metainfo.getMetaClass(metaClassFqn)
-               .getAttribute(communicationResourceAttribute).attribute.isEditable())
-        {
-            throw new Exception("error: attribute ${ communicationResourceAttribute } metaclass ${ metaClassFqn } non-editable")
-        }
+        Boolean movingWorkWithinCurrentResource
         api.utils.edit(
-            api.utils.get(requestData.workId),
-            [(communicationResourceAttribute): api.utils.get(requestData.resourceId)]
+            api.utils.get(requestContent.workId),
+            [(communicationResourceAttribute): api.utils.get(requestContent.resourceId)]
         )
+        String getKeyData = requestContent.versionKey ?: requestContent.diagramKey
+        String keySequenceWork = String.join('_', 'sequenceWorks', getKeyData)
+        String dataChartElements = getJsonSettings(keySequenceWork)
+        Collection chartElements = dataChartElements
+            ? Jackson.fromJsonString(dataChartElements, Collection)
+            : []
+        Collection listEditableObjects = chartElements.findAll {
+            it.parentUuid == requestContent.resourceId
+        }
+        Collection listEditable = []
+        Integer scet
+        listEditableObjects.eachWithIndex { num, idx ->
+            if (idx < requestContent.positionElement)
+            {
+                listEditable << num
+            }
+            if (idx == requestContent.positionElement)
+            {
+                listEditable << ['parentUuid'           : requestContent.resourceId, 'workUuid':
+                    requestContent.workId, 'idLocations': idx]
+                scet = idx
+                listEditable << ['parentUuid'  : num.parentUuid, 'workUuid':
+                    num.workUuid, 'idLocations': ++scet]
+            }
+            if (idx > requestContent.positionElement)
+            {
+                if (requestContent.workId != num.workUuid)
+                {
+                    num.idLocations = ++scet
+                    listEditable << num
+                }
+            }
+        }
+        GanttVersionsSettingsClass ganttVersionsSettings =
+            getGanttVersionsSettings(requestContent.versionKey)
+        ganttVersionsSettings.diagramEntities.each { ganttVer ->
+            def elem = listEditable.find { editable ->
+                editable.workUuid == ganttVer.entityUUID
+            }
+            if (elem)
+            {
+                ganttVer.positionElement = elem.idLocations
+            }
+        }
+        saveJsonSettings(requestContent.versionKey, Jackson.toJsonString(ganttVersionsSettings))
     }
 
     /**
@@ -1266,6 +1334,11 @@ class SaveGanttVersionSettingsRequest extends BaseGanttSettingsRequest
      * Изменения в задачах
      */
     Collection<Map<String, Object>> tasks
+
+    /**
+     * Связи между работами
+     */
+    Collection workRelations
 }
 
 /**
@@ -1279,9 +1352,24 @@ class SavingChangesChart
     String diagramKey
 
     /**
-     * Изменения в задачах
+     * Изменения в работах
      */
     Collection<Map<String, Object>> tasksClone
+
+    /**
+     * Связи между работами
+     */
+    Collection workRelations
+
+    /**
+     * Код контента
+     */
+    String contentCode
+
+    /**
+     * UUID объекта
+     */
+    String subjectUuid
 }
 
 /**
@@ -1387,6 +1475,11 @@ class GanttVersionsSettingsClass
      * Настройки диаграммы версий
      */
     GanttSettingsClass ganttSettings
+
+    /**
+     * Настройки связей между работами
+     */
+    Collection workRelations = []
 }
 
 /**
@@ -1423,6 +1516,16 @@ class CheckWorksOfResourceData
      * Идентификатор работы
      */
     String workId
+
+    /**
+     * Позиция элемента
+     */
+    Integer positionElement
+
+    /**
+     * Версия диаграммы
+     */
+    String versionKey
 }
 
 /**
@@ -1484,6 +1587,11 @@ class DiagramEntity
      * Завершенность работы
      */
     Boolean completed
+
+    /**
+     * Позиция элемента
+     */
+    Integer positionElement
 }
 
 /**
@@ -2018,4 +2126,25 @@ class TitleAndCode
      * Код
      */
     String code
+}
+
+/**
+ * Класс с информацией о последовательности элементов
+ */
+class SequenceChartElements
+{
+    /**
+     * Uuid родительского элемента
+     */
+    String parentUuid
+
+    /**
+     * Uuid текущего элемента
+     */
+    String workUuid
+
+    /**
+     * Идентификатор расположения
+     */
+    Integer idLocations
 }
