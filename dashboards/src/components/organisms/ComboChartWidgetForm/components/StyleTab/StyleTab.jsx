@@ -1,6 +1,6 @@
 // @flow
 import AxisSettingsBox from 'components/organisms/AxisChartWidgetForm/components/AxisSettingsBox';
-import ColorsBox from 'WidgetFormPanel/components/ColorsBox';
+import ColorsBox from 'containers/ColorsBox';
 import DataLabelsBox from 'WidgetFormPanel/components/DataLabelsBox';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FormField from 'components/molecules/FormField';
@@ -138,6 +138,8 @@ export class StyleTab extends Component<Props> {
 					name={DIAGRAM_FIELDS.colorsSettings}
 					onChange={this.handleChange}
 					value={colorsSettings}
+					values={values}
+					widget={widget}
 				/>
 			</div>
 		);
