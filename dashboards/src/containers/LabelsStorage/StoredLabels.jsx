@@ -6,7 +6,7 @@ import React, {PureComponent} from 'react';
 
 export class StoredLabels extends PureComponent<{}> {
 	renderLabel = (label: Label, idx: number) => {
-		const {content, formatter, height, parentViewBox, textBreakAll, value, viewBox, width, ...props} = label;
+		const {content, dataKey, formatter, height, parentViewBox, textBreakAll, value, viewBox, width, ...props} = label;
 		const dx = width / 2;
 		const dy = height / 2;
 		const textValue = formatter ? formatter(value) : value;

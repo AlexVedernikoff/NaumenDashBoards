@@ -13,11 +13,27 @@
 		box-shadow: @box-shadow !important;
 		color: @black !important;
 		font-size: 13px;
-		left: 0;
-		margin-top: 3px;
+		max-width: 200px;
 		padding: 0 !important;
 		position: absolute;
 		z-index: 2;
+
+		&.down {
+			margin-top: 3px;
+		}
+
+		&.top {
+			bottom: 0;
+			margin-bottom: 3px;
+		}
+
+		&.left{
+			left: 0;
+		}
+
+		&.right{
+			right: 0;
+		}
 
 		li {
 			> div {
@@ -32,7 +48,9 @@
 
 .rc-menu {
 	> .rc-menu-item {
+		overflow: hidden;
 		padding: 8px 36px 9px 12px !important;
+		text-overflow: ellipsis;
 	}
 
 	> .rc-menu-submenu-active .rc-menu-submenu-title,
