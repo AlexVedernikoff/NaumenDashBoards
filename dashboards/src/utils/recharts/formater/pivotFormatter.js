@@ -126,7 +126,7 @@ const getTotalFormatter = (widget: PivotWidget): ValuePivotFormatter => {
 	return (key: string, value: string | [number, number] | number | null) => formatter(value);
 };
 
-const getPivotFormatter = (widget: PivotWidget, data: PivotSeriesData, container: HTMLDivElement): PivotFormatter => {
+const getPivotFormatter = (widget: PivotWidget, data: PivotSeriesData): PivotFormatter => {
 	const titleFormatter = getLabelFormatter();
 
 	return {

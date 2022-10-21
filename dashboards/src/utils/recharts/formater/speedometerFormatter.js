@@ -10,10 +10,9 @@ import type {SpeedometerWidget} from 'store/widgets/data/types';
 /**
  * Создает форматер для итогового значения на спидометре
  * @param {SpeedometerWidget} widget - виджет
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @returns {NumberFormatter}
  */
-const getTotalFormatter = (widget: SpeedometerWidget, container: HTMLDivElement): NumberFormatter => {
+const getTotalFormatter = (widget: SpeedometerWidget): NumberFormatter => {
 	const {data, indicator} = widget;
 	const {computedFormat, format} = indicator;
 	const mainDataSet = getMainDataSet(data);
@@ -36,10 +35,9 @@ const getTotalFormatter = (widget: SpeedometerWidget, container: HTMLDivElement)
 /**
  * Создает форматер для граничных значений на спидометре
  * @param {SpeedometerWidget} widget - виджет
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @returns {NumberFormatter}
  */
-const getBordersFormatter = (widget: SpeedometerWidget, container: HTMLDivElement): NumberFormatter => {
+const getBordersFormatter = (widget: SpeedometerWidget): NumberFormatter => {
 	const {format} = widget.borders.style;
 	const numberFormat = format ?? DEFAULT_NUMBER_AXIS_FORMAT;
 	const formatter = checkNumber(makeFormatterByNumberFormat(numberFormat, false));
@@ -50,10 +48,9 @@ const getBordersFormatter = (widget: SpeedometerWidget, container: HTMLDivElemen
 /**
  * Создает форматер для значений в легенде или значений размещенных на дуге
  * @param {SpeedometerWidget} widget - виджет
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @returns {NumberFormatter}
  */
-const getRangesFormatter = (widget: SpeedometerWidget, container: HTMLDivElement): NumberFormatter => {
+const getRangesFormatter = (widget: SpeedometerWidget): NumberFormatter => {
 	const {format} = widget.ranges.style;
 	const numberFormat = format ?? DEFAULT_NUMBER_AXIS_FORMAT;
 	const formatter = checkNumber(makeFormatterByNumberFormat(numberFormat, false));
@@ -64,13 +61,12 @@ const getRangesFormatter = (widget: SpeedometerWidget, container: HTMLDivElement
 /**
  * Фабрика форматеров для диаграммы спидометра
  * @param {SpeedometerWidget} widget - виджет
- * @param {HTMLDivElement} container - контейнер отрисовки виджета
  * @returns {SpeedometerFormatter} - объект с функциями форматерами
  */
-const getSpeedometerFormatterBase = (widget: SpeedometerWidget, container: HTMLDivElement): SpeedometerFormatter => ({
-	borders: getBordersFormatter(widget, container),
-	ranges: getRangesFormatter(widget, container),
-	total: getTotalFormatter(widget, container)
+const getSpeedometerFormatterBase = (widget: SpeedometerWidget): SpeedometerFormatter => ({
+	borders: getBordersFormatter(widget),
+	ranges: getRangesFormatter(widget),
+	total: getTotalFormatter(widget)
 });
 
 export {getSpeedometerFormatterBase as getSpeedometerFormatter};

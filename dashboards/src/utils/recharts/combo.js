@@ -1,5 +1,5 @@
 // @flow
-import type {ComboChartOptions} from './types';
+import type {ComboChartOptions, ContainerSize} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {getComboFormatter} from './formater';
@@ -12,7 +12,7 @@ import type {Widget} from 'store/widgets/data/types';
 const getOptions = (
 	widget: Widget,
 	rawData: DiagramBuildData,
-	container: HTMLDivElement,
+	container: ContainerSize,
 	globalColorsSettings: GlobalCustomChartColorsSettings
 ): $Shape<ComboChartOptions> => {
 	const comboWidget = getComboWidget(widget);
@@ -21,7 +21,7 @@ const getOptions = (
 		const buildDataSet = getBuildSet(comboWidget);
 		const {labels} = rawData;
 		const {data, percentStore} = getComboSeriesData(rawData);
-		const formatters = getComboFormatter(comboWidget, labels, container, percentStore);
+		const formatters = getComboFormatter(comboWidget, labels, percentStore);
 
 		if (buildDataSet) {
 			const {xAxisName} = buildDataSet;

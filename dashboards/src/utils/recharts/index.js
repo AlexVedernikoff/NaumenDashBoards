@@ -1,6 +1,6 @@
 // @flow
 import {calculateStringsSize} from 'src/utils/recharts/helpers';
-import type {ChartOptions} from './types';
+import type {ChartOptions, ContainerSize} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {EMPTY_CHART_OPTIONS} from './constants';
 import getBarOptions from './bar';
@@ -21,14 +21,14 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * Функция возвращает объединенный набор базовых и типовых опций
  * @param {Widget} widget - виджет
  * @param {DiagramBuildData} data - данные графика виджета
- * @param {HTMLDivElement} container - контейнер, где размещен график
+ * @param {ContainerSize} container - размеры контейнера, где размещен график
  * @param {GlobalCustomChartColorsSettings} globalColorsSettings - глобальные настройки цветов
  * @returns {ChartOptions}
  */
 const getOptions = (
 	widget: Widget,
 	data: DiagramBuildData,
-	container: HTMLDivElement,
+	container: ContainerSize,
 	globalColorsSettings: GlobalCustomChartColorsSettings
 ): ChartOptions => {
 	const {type} = widget;

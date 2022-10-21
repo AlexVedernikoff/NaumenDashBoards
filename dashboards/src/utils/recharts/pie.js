@@ -1,5 +1,5 @@
 // @flow
-import type {CircleChartOptions} from './types';
+import type {CircleChartOptions, ContainerSize} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {DIAGRAM_WIDGET_TYPES} from 'store/widgets/data/constants';
 import {getBuildSet} from 'store/widgets/data/helpers';
@@ -12,7 +12,7 @@ import type {Widget} from 'store/widgets/data/types';
 const getOptions = (
 	widget: Widget,
 	rawData: DiagramBuildData,
-	container: HTMLDivElement,
+	container: ContainerSize,
 	globalColorsSettings: GlobalCustomChartColorsSettings
 ): $Shape<CircleChartOptions> => {
 	const circleWidget = getCircleWidget(widget);
@@ -22,7 +22,7 @@ const getOptions = (
 
 		if (buildDataSet) {
 			const {data, percentStore} = getCircleSeriesData(circleWidget, rawData, globalColorsSettings);
-			const formatters = getCircleFormatter(circleWidget, rawData.labels, container, percentStore);
+			const formatters = getCircleFormatter(circleWidget, rawData.labels, percentStore);
 			const getDrillDownOptions = makeGeneratorCircleDrillDownOptions(circleWidget);
 
 			return {

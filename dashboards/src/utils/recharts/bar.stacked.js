@@ -1,5 +1,5 @@
 // @flow
-import type {AxisChartOptions} from './types';
+import type {AxisChartOptions, ContainerSize} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getAxisFormatter} from './formater';
 import {getAxisWidget, getDataLabels, getLegendOptions, getSeriesData, getSeriesInfo, makeSubTotalGetter} from './helpers';
@@ -13,7 +13,7 @@ import type {Widget} from 'store/widgets/data/types';
 const getOptions = (
 	widget: Widget,
 	rawData: DiagramBuildData,
-	container: HTMLDivElement,
+	container: ContainerSize,
 	globalColorsSettings: GlobalCustomChartColorsSettings
 ): $Shape<AxisChartOptions> => {
 	const axisWidget = getAxisWidget(widget);
@@ -24,7 +24,7 @@ const getOptions = (
 		if (buildDataSet) {
 			const {labels} = rawData;
 			let {data: seriesData, percentStore} = getSeriesData(rawData);
-			const formatters = getAxisFormatter(axisWidget, labels, container, percentStore);
+			const formatters = getAxisFormatter(axisWidget, labels, percentStore);
 			const {xAxisName, yAxisName} = buildDataSet;
 			const getDrillDownOptions = makeGeneratorAxisDrillDownOptions(axisWidget);
 			const {indicators} = buildDataSet;

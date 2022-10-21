@@ -1,17 +1,17 @@
 // @flow
+import type {ContainerSize, PivotOptions} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {getColumnsWidth, getSeriesData, parseColumns, parseMetadata} from './pivot.helpers';
 import {getPivotFormatter} from './formater';
 import {getPivotWidget} from './helpers';
 import {makeGeneratorPivotDrillDownOptions} from './drillDown.helpers';
-import type {PivotOptions} from './types';
 import type {Widget} from 'store/widgets/data/types';
 
 const getOptions = (
 	widget: Widget,
 	rawData: DiagramBuildData,
-	container: HTMLDivElement
+	container: ContainerSize
 ): $Shape<PivotOptions> => {
 	const pivotWidget = getPivotWidget(widget);
 
@@ -29,7 +29,7 @@ const getOptions = (
 				metadata.tooltips
 			);
 			const columnsWidth = getColumnsWidth(columnsList, container);
-			const formatters = getPivotFormatter(pivotWidget, data, container);
+			const formatters = getPivotFormatter(pivotWidget, data);
 			const showTotal = pivotWidget.showTotalAmount;
 			const getDrillDownOptions = makeGeneratorPivotDrillDownOptions(pivotWidget, rawData);
 

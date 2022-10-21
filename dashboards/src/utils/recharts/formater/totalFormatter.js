@@ -7,7 +7,7 @@ import {INTEGER_AGGREGATION} from 'store/widgets/constants';
 import type {SpeedometerWidget, SummaryWidget} from 'store/widgets/data/types';
 import type {TotalFormatter} from './types';
 
-const getTotalFormatterBase = (widget: SummaryWidget | SpeedometerWidget, container: HTMLDivElement): TotalFormatter => {
+const getTotalFormatterBase = (widget: SummaryWidget | SpeedometerWidget): TotalFormatter => {
 	const {data, indicator} = widget;
 	const {computedFormat, format} = indicator;
 	const mainDataSet = getMainDataSet(data);
