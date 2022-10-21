@@ -121,3 +121,12 @@ export type TaskItem = {
 };
 
 export type Tasks = TaskItem[];
+
+export type ConnectionItem = {
+	editable: boolean,
+	source: string,
+	target: string,
+	type: string,
+};
+
+export type WorkRelations = ConnectionItem[];

@@ -2,7 +2,7 @@
 import {Button} from 'naumen-common-components';
 import {connect} from 'react-redux';
 import {Datepicker} from 'components/molecules/Datepicker/Datepicker.jsx';
-import {deepClone} from 'helpers';
+import {deepClone, normalizeDate} from 'helpers';
 import {functions, props} from 'components/organisms/FormPanel/selectors';
 import {gantt} from 'naumen-gantt';
 import IconButton from 'components/atoms/IconButton';
@@ -17,8 +17,11 @@ import {useDispatch, useSelector} from 'react-redux';
 const АctionBar = props => {
 	const [active, setActive] = useState(true);
 
-	const [inputStartDate, setInputStartDate] = useState(props.startDate ? new Date(props.startDate).toLocaleString() : undefined);
-	const [inputEndDate, setInputEndDate] = useState(props.endDate ? new Date(props.endDate).toLocaleString() : undefined);
+	const sd = new Date(props.startDate).toLocaleString();
+	const ed = new Date(props.endDate).toLocaleString();
+
+	const [inputStartDate, setInputStartDate] = useState(sd);
+	const [inputEndDate, setInputEndDate] = useState(ed);
 
 	const [flag, setFlag] = useState(true);
 
@@ -75,16 +78,8 @@ const АctionBar = props => {
 
 	useEffect(() => {
 		if (endDate && startDate) {
-			if (typeof endDate !== 'string' && typeof startDate !== 'string') {
-				const inputEndDate = new Date(endDate).toLocaleString(endDate);
-				const inputstartDate = new Date(startDate).toLocaleString(startDate);
-
-				setInputEndDate(inputEndDate);
-				setInputStartDate(inputstartDate);
-			} else {
-				setInputEndDate(endDate);
-				setInputStartDate(startDate);
-			}
+			setInputEndDate(normalizeDate(endDate.toLocaleString()).toLocaleString());
+			setInputStartDate(normalizeDate(startDate.toLocaleString()).toLocaleString());
 		}
 	}, [endDate, startDate]);
 
@@ -144,23 +139,9 @@ const АctionBar = props => {
 		}
 	};
 
-	const convertDateToNormal = date => {
-		const chunkDate = date.split(',');
-		const dotReplacement = chunkDate[0].replace(/\./g, ',').split(',');
-
-		[dotReplacement[0], dotReplacement[1]] = [dotReplacement[1], dotReplacement[0]];
-
-		const modifiedDate = dotReplacement.join('.') + ',' + chunkDate[1];
-
-		const withoutDotsandDash = modifiedDate.replace(/\./g, '/').replace(/\,/g, '');
-		const modifiedDateStr = new Date(withoutDotsandDash);
-
-		return modifiedDateStr;
-	};
-
 	const sibmitRange = () => {
-		const newStartDate = new Date(convertDateToNormal(inputStartDate));
-		const newEndDate = new Date(convertDateToNormal(inputEndDate));
+		const newStartDate = normalizeDate(inputStartDate);
+		const newEndDate = normalizeDate(inputEndDate);
 
 		if (Date.parse(newEndDate) >= Date.parse(newStartDate)) {
 			const date = {
@@ -217,6 +198,13 @@ const АctionBar = props => {
 	};
 
 	const submitConfirmation = () => {
+		const {diagramKey, saveDataCurrentVersion, versionKey} = props;
+		const {tasks} = store.APP;
+		const tasksClone = deepClone(tasks);
+
+		const links = gantt.getLinks();
+
+		saveDataCurrentVersion(diagramKey, tasksClone, links);
 		setShowModalConfirmation(!showModalConfirmation);
 	};
 
@@ -274,9 +262,9 @@ const АctionBar = props => {
 
 	const submitSaveVersion = () => {
 		const title = deepClone(nameValue);
-		const tasks = store.APP.tasks;
+		const {tasks, workRelations} = store.APP;
 
-		props.savedGanttVersionSettings(title, new Date().toLocaleString(), tasks);
+		props.savedGanttVersionSettings(title, new Date().toLocaleString(), tasks, workRelations);
 		dispatch(props.setCurrentVersion(''));
 
 		setShowModalSave(!showModalSave);
@@ -353,9 +341,15 @@ const АctionBar = props => {
 	};
 
 	const selectedVersion = version => {
-		props.getVersionSettings(version.diagramKey);
 		handleModalClose();
-		gantt.render();
+		gantt.clearAll();
+
+		setTimeout(() => {
+			props.getVersionSettings(version.diagramKey);
+
+			gantt.parse(JSON.stringify({data: store.APP.tasks, links: store.APP.workRelations}));
+			gantt.render();
+		}, 0);
 	};
 
 	const deleteVersion = (title, diagramKey) => {
@@ -417,7 +411,7 @@ const АctionBar = props => {
 					{/* <IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={addNewTask} tip="Добавить работу" /> */}
 					<IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={refresh} tip="Обновить" />
 					<Button className={styles.btn} onClick={openConfirmationModal}>Применить</Button>
-					<Button className={styles.btn} onClick={openSaveModal}>Сохранить</Button>
+					<Button className={styles.btn} onClick={openSaveModal}>Сохранить вид</Button>
 				</div>
 			</div>
 		);

@@ -3,11 +3,10 @@ import './gant-export';
 import './styles.less';
 import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import CheckedMenu from 'components/atoms/CheckedMenu';
-import {codeMainColumn} from 'src/store/App/constants';
-import {deepClone, shiftTimeZone} from 'helpers';
+import {deepClone, normalizeDate, shiftTimeZone} from 'helpers';
 import {gantt} from 'naumen-gantt';
 import ModalTask from 'components/atoms/ModalTask';
-import {postEditedWorkData, setColumnSettings, setColumnTask} from 'store/App/actions';
+import {postEditedWorkData, savePositionOfWork, setColumnSettings, setColumnTask, setDiagramLinksData} from 'store/App/actions';
 import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
@@ -29,6 +28,8 @@ const Gantt = (props: Props) => {
 	const [column, setColumn] = useState('');
 	const [res, setRes] = useState([]);
 	const [position, setPosition] = useState({left: 0, top: 0});
+	const [errorAttr, setErrorAttr] = useState(false);
+	const [tIndex, setTindex] = useState('');
 	const dispatch = useDispatch();
 	const ganttContainer = useRef(null);
 	const store = useSelector(state => state);
@@ -120,32 +121,27 @@ const Gantt = (props: Props) => {
 		};
 	};
 
-	const editTimeZone = task => {
-		let startDate = null;
-		let endDate = null;
-
-		const deleteDeviationForEndDate = shiftTimeZone(task.end_date);
-		const deleteDeviationForStartDate = shiftTimeZone(task.start_date);
-
-		startDate = gantt.date.add(new Date(task.start_date), +deleteDeviationForStartDate, 'hour');
-		endDate = gantt.date.add(new Date(task.end_date), +deleteDeviationForEndDate, 'hour');
-
-		return {'endDate': endDate, 'startDate': startDate, 'workUUID': task.id};
-	};
-
 	const editWorkInterval = () => {
 		const tasks = gantt.getTaskByTime();
-		const tasksWithoutExcess = [];
+		const keys = ['end_date', 'start_date', 'id'];
 
-		tasks.forEach(task => {
-			tasksWithoutExcess.push({
-				end_date: task.end_date,
-				id: task.id,
-				start_date: task.start_date
-			});
+		const tasksWithoutExcess = tasks.map(task => keys.reduce((acc, key) => {
+			acc[key] = task[key];
+			return acc;
+		}, {}));
+
+		const newTasks = tasksWithoutExcess.map(task => {
+			let startDate = null;
+			let endDate = null;
+
+			const shiftedEndDate = shiftTimeZone(task.end_date);
+			const shiftedStartDate = shiftTimeZone(task.start_date);
+
+			startDate = gantt.date.add(new Date(task.start_date), +shiftedStartDate, 'hour');
+			endDate = gantt.date.add(new Date(task.end_date), +shiftedEndDate, 'hour');
+
+			return {endDate, startDate, workUUID: task.id};
 		});
-
-		const newTasks = tasksWithoutExcess.map(editTimeZone);
 
 		const arr = [];
 
@@ -190,13 +186,15 @@ const Gantt = (props: Props) => {
 		gantt.config.order_branch = true;
 		gantt.config.readonly = true;
 
-		gantt.templates.progress_text = (start, end, task) => gantt.getState().drag_id === task.id ? Math.round(task.progress * 100) + '%' : '';
-		gantt.templates.rightside_text = (start, end, task) => task.type === gantt.config.types.milestone ? task.text : '';
+		gantt.templates.progress_text = (start, end, task) => Math.round(task.progress * 100) + '%';
+		gantt.templates.rightside_text = (start, end, task) => task.text;
 
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
 		gantt.attachEvent('onAfterLinkDelete', () => {
 			const links = gantt.getLinks();
+
+			dispatch(setDiagramLinksData(links));
 
 			props.saveChangedWorkRelations(links);
 		});
@@ -259,6 +257,8 @@ const Gantt = (props: Props) => {
 				link.editable = true;
 			});
 
+			dispatch(setDiagramLinksData(links));
+
 			props.saveChangedWorkRelations(links);
 			editWorkInterval();
 		});
@@ -276,10 +276,11 @@ const Gantt = (props: Props) => {
 
 		gantt.config.auto_scheduling = true;
 
-		gantt.attachEvent('onAfterTaskMove', (id, parent) => {
+		gantt.attachEvent('onAfterTaskMove', (id, parent, tindex) => {
 			gantt.batchUpdate(function () {
 				const tasksClone = deepClone(tasks);
 
+				setTindex(tindex);
 				tasksClone.forEach(task => {
 					if (task.id === id) {
 						task.parent = parent;
@@ -289,9 +290,25 @@ const Gantt = (props: Props) => {
 				dispatch(setColumnTask(tasksClone));
 			});
 		});
+
+		gantt.attachEvent('onRowDragStart', function (id, target, e) {
+			return true;
+		});
 	}, []);
 
-	gantt.attachEvent('onAfterTaskDrag', debounce(function (id) {
+	gantt.attachEvent('onBeforeRowDragEnd', debounce(async function (id, _, tindex) {
+		const parent = gantt.getTask(id).parent;
+
+		const res = await savePositionOfWork(id, parent, store.APP.diagramKey, tIndex, store.APP.currentVersion)(dispatch);
+
+		if (res && res.status === 500) {
+			gantt.moveTask(id, tindex, parent);
+
+			alert('Нередактируемый атрибут, нельзя переместить работу');
+		}
+	}, 100));
+
+	gantt.attachEvent('onAfterTaskDrag', debounce(function (id, parent) {
 		const task = gantt.getTask(id);
 		const newTasks = store.APP.tasks;
 
@@ -318,10 +335,11 @@ const Gantt = (props: Props) => {
 	// Изменяет прогресс в задачах при изменении store.APP.workProgresses
 	useEffect(() => {
 		let arrProgressValues = [];
+		const {workProgresses} = store.APP;
 
-		if (Object.keys(store.APP.workProgresses).length && !firstUpdate) {
-			if (store.APP.workProgresses) {
-				arrProgressValues = Object.values(store.APP.workProgresses);
+		if (Object.keys(workProgresses).length && !firstUpdate) {
+			if (workProgresses) {
+				arrProgressValues = Object.values(workProgresses);
 
 				for (let i = 0; i < tasks.length; i++) {
 					tasks[i].progress = arrProgressValues[i];
@@ -332,20 +350,19 @@ const Gantt = (props: Props) => {
 			gantt.render();
 		}
 
-		gantt.parse((JSON.stringify({data: tasks, links: workRelations})));
+		gantt.parse(JSON.stringify({data: tasks, links: store.APP.workRelations}));
+		gantt.render();
 	}, [store.APP.workProgresses]);
 
 	const [firstUpdate, setFirstUpdate] = useState(true);
 
 	// Изменяет время и дату настроек диаграммы гантта при изменении [store.APP.startDate, store.APP.endDate]
 	useEffect(() => {
-		if (!firstUpdate) {
-			gantt.config.start_date = store.APP.startDate;
-			gantt.config.end_date = store.APP.endDate;
-			gantt.render();
-		}
+		const {endDate, startDate} = store.APP;
 
-		setFirstUpdate(false);
+		gantt.config.start_date = typeof startDate === 'string' ? normalizeDate(startDate) : normalizeDate((startDate).toLocaleString());
+		gantt.config.end_date = typeof endDate === 'string' ? normalizeDate(endDate) : normalizeDate((endDate).toLocaleString());
+		gantt.render();
 	}, [store.APP.startDate, store.APP.endDate]);
 
 	// Изменяет временной формат на диграемме при изменении scale
@@ -412,7 +429,7 @@ const Gantt = (props: Props) => {
 	}, [store.APP.stateMilestonesCheckbox]);
 
 	gantt.templates.task_class = (start, end, task) => {
-		return (task.type === 'milestone' && task.completed === true) ? 'completed' : undefined;
+		if (task.type === 'milestone' && task.completed) return `completed`;
 	};
 
 	// Отображает или скрывает прогресс при изменении props.progressCheckbox
@@ -497,46 +514,57 @@ const Gantt = (props: Props) => {
 		return true;
 	});
 
-	inlineEditors.attachEvent('onBeforeSave', debounce(function (state) {
+	inlineEditors.attachEvent('onBeforeSave', debounce(async function (state) {
 		setColumn(state.columnName);
-
 		const columns = props.columns;
 		const column = columns.find(column => column.code === state.columnName);
-		const columnOption = column.editor.options.find(option => option.key === state.newValue);
+		const columnOption = column.editor.options?.find(option => option.key === state.newValue);
 
 		const code = props.resources[1].attributeSettings.find(item => item.code === state.columnName
 			? item.attribute : null);
 		const attributeCode = code.attribute.code;
 		const newTasks = deepClone(tasks);
 
-		newTasks.map(function (i) {
-			if (i.id === state.id) {
-				for (const key in i) {
-					if (key === state.columnName) {
-						i[key] = state.newValue;
-						i.text = state.newValue;
-					}
+		const newTask = newTasks.find(i => i.id === state.id);
+
+		if (newTask) {
+			for (const key in newTask) {
+				if (key === state.columnName) {
+					newTask[key] = state.newValue;
+					newTask.text = state.newValue;
 				}
 			}
-		});
 
-		newTasks.find(i => {
-			if (i.id === state.id) {
-				const workDate = {};
+			const workDate = {};
 
-				workDate[attributeCode] = column.editor.type === 'select' ? columnOption.value : state.newValue;
+			workDate[attributeCode] = column.editor.type === 'select' ? columnOption.value : state.newValue;
 
-				if (i.id.includes('s')) {
-					const metaClassStr = 'serviceCall$PMTask';
+			if (newTask.id.includes('s')) {
+				const metaClassStr = 'serviceCall$PMTask';
 
-					dispatch(postEditedWorkData(workDate, metaClassStr, i.id));
+				const res = await postEditedWorkData(workDate, metaClassStr, newTask.id)(dispatch);
+
+				if (res) {
+					res.status === 500 ? setErrorAttr(true) : setErrorAttr(false);
+					alert('Нередактируемый атрибут');
+					return false;
 				} else {
-					const metaClassStr = 'employee';
+					dispatch(postEditedWorkData(workDate, metaClassStr, newTask.id));
+				}
+			} else {
+				const metaClassStr = 'employee';
 
-					dispatch(postEditedWorkData(workDate, metaClassStr, i.id));
+				const res = await postEditedWorkData(workDate, metaClassStr, newTask.id)(dispatch);
+
+				if (res) {
+					res.status === 500 ? setErrorAttr(true) : setErrorAttr(false);
+					alert('Нередактируемый атрибут');
+					return false;
+				} else {
+					dispatch(postEditedWorkData(workDate, metaClassStr, newTask.id));
 				}
 			}
-		});
+		}
 
 		const tasksGantt = gantt.getTaskByTime();
 
@@ -642,7 +670,7 @@ const Gantt = (props: Props) => {
 				postNewWorkData={props.postNewWorkData}
 				resources={props.resources}
 				workAttributes={props.workAttributes}
-				workLink={props.workLink}
+				workData={props.workData}
 			/>
 		);
 	};

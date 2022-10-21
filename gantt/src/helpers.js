@@ -64,6 +64,25 @@ const extend = (target: Object, source: Object): Object => {
 const deepClone = (object: Object) => JSON.parse(JSON.stringify(object));
 
 /**
+ * Реализует конвертацию даты для обхода FireFox
+ * @param {string} date - исходная дата
+ * @returns {object}
+ */
+const normalizeDate = date => {
+	const [datePart, time] = date.split(',');
+	const dateParts = datePart.replace(/[\.\-]/g, ',').split(',');
+
+	if (dateParts[2].length === 4) {
+		[dateParts[0], dateParts[2]] = [dateParts[2], dateParts[0]];
+	}
+
+	const modifiedDateString = dateParts.join('/') + time;
+	const modifiedDate = new Date(modifiedDateString);
+
+	return modifiedDate;
+};
+
+/**
  * Вырезает смещение из даты
  * @param {Date} date - дата с выставленным timeZone
  * @returns {string} - значение смещения
@@ -136,6 +155,7 @@ export {
 	getMapValues,
 	isMacOS,
 	isObject,
+	normalizeDate,
 	omit,
 	shiftTimeZone
 };

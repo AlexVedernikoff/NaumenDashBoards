@@ -15,9 +15,25 @@
 		}
 	}
 
+	.labelMilestone {
+		color: #737373;
+		font-size: 13px;
+		padding-top: 4px;
+		margin-bottom: 5px;
+	}
+
 	.label {
 		color: #737373;
 		font-size: 13px;
+	}
+
+	.milestoneSelect {
+		max-width: 100% !important;
+
+		&>div>div {
+			color: #323232;
+			font-size: 13px;
+		}
 	}
 
 	.bigButton {
@@ -69,6 +85,11 @@
 		&[disabled] .bigButton {
 			display: none;
 		}
+	}
+
+	.disabledValueField {
+		opacity: .8;
+		pointer-events: none;
 	}
 
 	.padding {
@@ -155,6 +176,14 @@
 		}
 	}
 
+	.selectIcon svg {
+		fill: #999999;
+	}
+	
+	.selectWidth {
+		max-width: 60%;
+	}
+
 	.sourceTreeSelect {
 		background-color: @white;
 		border-radius: @border-radius;
@@ -184,20 +213,7 @@
 		}
 	}
 
-	.selectIcon svg {
-		fill: #999999;
-	}
-
-	.selectWidth {
-		max-width: 60%;
-	}
-
 	.width {
 		width: 100%;
-	}
-
-	.disabledValueField {
-		opacity: .8;
-		pointer-events: none;
 	}
 }

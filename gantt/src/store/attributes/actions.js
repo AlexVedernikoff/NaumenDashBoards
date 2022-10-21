@@ -1,7 +1,7 @@
 // @flow
 import {ATTRIBUTES_EVENTS} from './constants';
 import type {Dispatch, ThunkAction} from 'store/types';
-import {getDataSourceAttributes, getDataSourceAttributesByTypes} from 'utils/api';
+import {getDataAttributesControlPointStatus, getDataSourceAttributes, getDataSourceAttributesByTypes} from 'utils/api';
 import type {OnLoadCallback} from 'store/sources/types';
 
 /**
@@ -20,6 +20,20 @@ const fetchAttributes = (classFqn: string, parentClassFqn: string | null = null,
 
 			callback && callback(attributes);
 			dispatch(receiveAttributes(attributes, classFqn));
+		} catch (error) {
+			dispatch(recordAttributesError(classFqn));
+		}
+	};
+
+const fetchAttributesMilestones = (classFqn: string, parentClassFqn: string | null = null, callback?: OnLoadCallback): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
+		dispatch(requestAttributes(classFqn));
+
+		try {
+			const attributesMilestones = await getDataAttributesControlPointStatus(classFqn, parentClassFqn);
+
+			callback && callback(attributesMilestones);
+			dispatch(receiveAttributesMilestone(attributesMilestones));
 		} catch (error) {
 			dispatch(recordAttributesError(classFqn));
 		}
@@ -55,6 +69,11 @@ const receiveAttributes = (attributes, classFqn) => ({
 	type: ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES
 });
 
+const receiveAttributesMilestone = payload => ({
+	payload,
+	type: ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES_MILISTONE
+});
+
 const recordAttributesError = (payload: string) => ({
 	payload,
 	type: ATTRIBUTES_EVENTS.RECORD_ATTRIBUTES_ERROR
@@ -62,5 +81,6 @@ const recordAttributesError = (payload: string) => ({
 
 export {
 	fetchAttributes,
-	fetchAttributesByTypes
+	fetchAttributesByTypes,
+	fetchAttributesMilestones
 };

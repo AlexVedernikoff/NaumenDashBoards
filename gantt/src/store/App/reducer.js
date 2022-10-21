@@ -36,10 +36,10 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 				...state,
 				versions: action.payload
 			};
-		case APP_EVENTS.SET_WORK_LINK:
+		case APP_EVENTS.SET_WORK_DATA:
 			return {
 				...state,
-				workLink: action.workLink
+				workData: action.workData
 			};
 		case APP_EVENTS.SET_CURRENT_VALUE_FOR_INTERVAL:
 			return {

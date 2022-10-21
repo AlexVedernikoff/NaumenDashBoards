@@ -82,26 +82,25 @@ const data = {
 	'tasks': [
 		{
 			"id":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a",
-			"text":"INC63",
-			"code1":"INC63",
+			"text":"2021-11-11, 12:55:26",
+			"code1":"2021-11-11, 12:55:26",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
 			"start_date":"2021-11-11T12:55:26",
 			"end_date": "2021-11-13T12:55:26",
 			"level":0,
-			"editor": {"map_to": "text", "type": "text"},
 			"progress":0.8,
 			"type":"RESOURCE",
 			"workOfLink":"1",
 			"editable": true,
-			"name": "INC63"
+			"name": "2021-11-11, 12:55:26"
 		},
 		{
 			"id":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
 			"text":"SD111",
 			"code1":"SD111",
 			"5af9985a-79b4-42b9-9d0f-635f6d80561e": false,
-			"start_date":"2021-11-11T11:55:26",
-			"end_date": "2021-11-13T11:55:26",
+			"start_date":"2028-11-11T11:55:26",
+			"end_date": "2029-11-13T11:55:26",
 			"level": 0,
 			"type":"project",
 			"workOfLink":"1",
@@ -177,8 +176,8 @@ const data = {
     ],
 	"progressCheckbox": false,
 	"workRelationCheckbox": false,
-	"startDate": "10.01.2021, 15:17:45",
-	"endDate": "11.12.2021, 15:17:45",
+	"startDate": "2020-09-28, 17:57:45",
+	"endDate": "2024-09-07, 08:00:00",
 	"currentInterval": {"label": "сегодня", "value": "NEXTDAYS"},
 };
 

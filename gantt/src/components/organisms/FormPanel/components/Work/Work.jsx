@@ -5,7 +5,7 @@ import {Button, Checkbox, Container, FormControl, Icon, Select, TreeSelect} from
 import cn from 'classnames';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import {Column, SourceItem} from 'src/store/App/types';
-import {connect} from 'react-redux';
+import {connect, useSelector} from 'react-redux';
 import {copyWithExclusion, getAdditionalFields, getPaddingLeftForChildren, getParentClassFqn, getPrevItem, replaceElementInArray} from 'components/organisms/FormPanel/utils';
 import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import {deepClone} from 'helpers';
@@ -30,6 +30,9 @@ const Work = (props: Props) => {
 	const [showMenu, setShowMenu] = useState(false);
 	const [top, setTop] = useState(null);
 	const mayBeNested = getPrevItem(index)?.type === 'WORK';
+	const [valueMileStone, setValueMileStone] = useState(work?.checkpointStatusAttr?.title);
+
+	const store = useSelector(state => state);
 
 	useEffect(() => {
 		setTop(document.getElementById('workSettingsButton' + index)?.getBoundingClientRect().top);
@@ -417,6 +420,40 @@ const Work = (props: Props) => {
 		return null;
 	};
 
+	const renderMilestoneBlock = () => {
+		if (store.APP.milestonesCheckbox) {
+			return (
+				<>
+					<span className={styles.labelMilestone}>Атрибут контрольной точки</span>
+					<Select className={cn(styles.milestoneSelect, styles.selectIcon, styles.selectWidth, styles.width)}
+						fetchOptions={getOptionsForBondWithMilestone}
+						icon={'CHEVRON'}
+						isSearching={true}
+						onSelect={(value) => handleMilestoneChange(value)}
+						options={props.attributesMilestones}
+						placeholder='Атрибут контрольной точки'
+						value={valueMileStone}
+					/>
+				</>
+			);
+		}
+	};
+
+	const handleMilestoneChange = ({value}) => {
+		const checkpointStatusAttr = deepClone(work.endWorkAttribute);
+
+		checkpointStatusAttr.title = value?.title;
+		checkpointStatusAttr.code = value?.code;
+
+		setValueMileStone(value.label);
+
+		onChange({...work, checkpointStatusAttr});
+	};
+
+	const getOptionsForBondWithMilestone = () => {
+		props.fetchAttributesMilestones('serviceCall$PMTask', 'employee');
+	};
+
 	const renderCollapsableFormBox = () => (
 		<CollapsableFormBox handleAddNewBlock={() => handleAddNewBlock()} handleDeleteBlock={() => setShowModalRemoving(true)} title={getHeaderForm()}>
 			<Container className={styles.container}>
@@ -428,6 +465,7 @@ const Work = (props: Props) => {
 				{work.nested && renderBondWithWork()}
 				{renderDate(work?.startWorkAttribute?.date, 'start')}
 				{renderDate(work?.endWorkAttribute?.date, 'end')}
+				{renderMilestoneBlock()}
 			</Container>
 		</CollapsableFormBox>
 	);

@@ -24,6 +24,11 @@
 		right: 0;
 	}
 
+	.disabledInput {
+		opacity: .4 !important;
+		pointer-events: none !important;
+	}
+
 	.error {
 		color: red;
 	}
@@ -46,6 +51,11 @@
 		label {
 			margin-top: 10px;
 			margin-bottom: 8px;
+
+			&.disabledInput {
+				opacity: .4;
+				pointer-events: none;
+			}
 		}
 
 		.select {

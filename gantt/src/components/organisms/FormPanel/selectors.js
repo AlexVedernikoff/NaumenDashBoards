@@ -7,6 +7,7 @@ import {
 	getGanttData,
 	getVersionSettings,
 	getVersionSettingsAll,
+	saveDataCurrentVersion,
 	saveSettings,
 	savedGanttVersionSettings,
 	setCommonSettings,
@@ -16,9 +17,13 @@ import {
 	setResourceSettings,
 	switchWorkRelationCheckbox
 } from 'store/App/actions';
+import {
+	fetchAttributesMilestones
+} from 'store/attributes/actions';
 
 const props = (state: AppState) => {
 	const {
+		attributes,
 		currentInterval,
 		diagramKey,
 		endDate,
@@ -40,6 +45,7 @@ const props = (state: AppState) => {
 	} = state.APP;
 
 	return {
+		attributes,
 		currentInterval,
 		diagramKey,
 		endDate,
@@ -65,9 +71,11 @@ const functions = {
 	cancelSettings,
 	changeScale,
 	deleteGanttVersionSettings,
+	fetchAttributesMilestones,
 	getGanttData,
 	getVersionSettings,
 	getVersionSettingsAll,
+	saveDataCurrentVersion,
 	saveSettings,
 	savedGanttVersionSettings,
 	setCommonSettings,

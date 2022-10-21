@@ -40,12 +40,13 @@ const GanttGrid = (props: Props) => {
 					saveChangedWorkInterval ={props.saveChangedWorkInterval }
 					saveChangedWorkProgress={props.saveChangedWorkProgress}
 					saveChangedWorkRelations={props.saveChangedWorkRelations}
+					savePositionOfWork={props.savePositionOfWork}
 					scale={props.scale}
 					style={{height: '100%', width: '100%'}}
 					switchProgressCheckbox={props.switchProgressCheckbox}
 					tasks={props.tasks}
 					workAttributes={props.workAttributes}
-					workLink={props.workLink}
+					workData={props.workData}
 					workRelationCheckbox={props.workRelationCheckbox}
 					workRelations={props.workRelations}
 				/>
