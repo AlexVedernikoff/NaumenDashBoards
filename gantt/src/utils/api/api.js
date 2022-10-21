@@ -1,5 +1,5 @@
 // @flow
-import {Settings, UserData} from 'src/store/App/types';
+import {Settings, Tasks, WorkRelations} from 'src/store/App/types';
 
 export default class Api {
 	constructor () {
@@ -56,10 +56,11 @@ export default class Api {
 	* @param {string} subjectUUID - UUID объекта
 	* @param {string} title - название версии
 	* @param {Tasks} tasks - задачи на диаграмме
+	* @param {WorkRelations} workRelations - объект связи между работами
 	*/
-	async saveGanttVersionSettingsRequest (contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks) {
+	async saveGanttVersionSettingsRequest (contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations) {
 		const url = `exec-post?func=modules.ganttSettings.saveGanttVersionSettings&params=requestContent`;
-		const body = {contentCode, createdDate, subjectUUID, tasks, title};
+		const body = {contentCode, createdDate, subjectUUID, tasks, title, workRelations};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -108,6 +109,25 @@ export default class Api {
 	async editWorkDateRangesFromVersionRequest (subjectUUID: string, contentCode: string, timezone: string, versionKey: string, workDateInterval: workDateInterval) {
 		const url = `exec-post?func=modules.ganttWorkHandler.editWorkDateRangesForVersion&params=requestContent,user,%27${versionKey}%27`;
 		const body = {contentCode, subjectUUID, timezone, workDateInterval};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Применяет версию
+	* @param {string} diagramKey - ключ диаграммы
+	* @param {Tasks} tasksClone - копия задач на диаграмме
+	* @param {WorkRelations} workRelations - объект связи между работами
+	* @param {string} subjectUUID - Uuid объекта
+	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+	*/
+	async applyVersion (diagramKey: string, tasksClone: Tasks, workRelations: WorkRelations, contentCode: string, subjectUuid: string) {
+		const url = `exec-post?func=modules.ganttSettings.applyVersion&params=requestContent`;
+		const body = {contentCode, diagramKey, subjectUuid, tasksClone, workRelations};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -239,14 +259,39 @@ export default class Api {
 	}
 
 	/**
-	* Получает ссылку на страницу работы
+	* Получает данные для работы
 	* @param {string} workUUID - идентификатор работы
+	* @param {string} diagramKey - ключ диаграммы
 	* @returns {ThunkAction}
 	*/
-	async getWorkPageLink (workUUID: string) {
-		const url = `exec?func=modules.ganttWorkHandler.getWorkPageLink&params=%27${workUUID}%27`;
+	async getWorkDataForWork (workUUID: string, diagramKey: string) {
+		const url = `exec?func=modules.ganttWorkHandler.getWorkPageLink&params=%27${workUUID}%27,%27${diagramKey}%27`;
 		const options = {
 			method: 'GET'
+		};
+
+		return this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Проверяет работы ресурса
+	* @param {string} workId - идентификатор работы
+	* @param {string} resourceId - идентификатор ресурса
+	* @param {string} diagramKey - ключ диаграммы
+	* @returns {ThunkAction}
+	*/
+	async checkWorksOfResource (workId: string, resourceId: string, diagramKey: string, tIndex, versionKey) {
+		const url = `exec-post?func=modules.ganttSettings.checkWorksOfResource&params=requestContent`;
+		const body = {
+			diagramKey,
+			positionElement: tIndex,
+			resourceId,
+			versionKey,
+			workId
+		};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
 		};
 
 		return this.jsApi.restCall(url, options);
@@ -297,12 +342,12 @@ export default class Api {
 	* Изменяет данные работы
 	* @param {WorkData} workData - данные работы
 	* @param {string} classFqn - метакласс работы
-	* @param {string} workUUID - идентификатор работы
 	* @param {string} timezone - таймзона
+	* @param {string} workUUID - идентификатор работы
 	* @param {string} contentCode - code объекта
 	* @param {string} subjectUuid - UUID объекта
 	*/
-	async editWorkData (workData: WorkData, classFqn: string, timezone: string, workUUID: string, contentCode, subjectUuid) {
+	async editWorkData (workData: WorkData, classFqn: string, timezone: string, workUUID: string, contentCode: string, subjectUuid: string) {
 		const url = `exec-post?func=modules.ganttWorkHandler.editWorkData&params=requestContent,user`;
 		const body = {classFqn, contentCode, subjectUuid, timezone, workData, workUUID};
 		const options = {
@@ -310,12 +355,12 @@ export default class Api {
 			method: 'POST'
 		};
 
-		this.jsApi.restCallAsJson(url, options);
+		return this.jsApi.restCallAsJson(url, options);
 	}
 
 	/**
-	 * Получает аттрибуты работы
-	 * @param {string} attributeGroupCode - код группы аттрибутов
+	 * Получает атрибуты работы
+	 * @param {string} attributeGroupCode - код группы атрибутов
 	 * @param {string} metaClassFqn - метакласс работы
 	 * @param {string} workUUID - идентификатор работы
 	 * @returns {ThunkAction}
@@ -378,6 +423,22 @@ export default class Api {
 	async getDataSourceAttributesByTypes (classFqn: string, types: string) {
 		const url = `exec-post?func=modules.ganttSettings.getDataSourceAttributes&params=requestContent`;
 		const body = {classFqn, types};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		return this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Получает данные атрибутов статуса контрольной точки
+	* @param {workRelations} classFqn - метакласс работы
+	* @param {string} parentClassFqn - метакласс родителя работы
+	*/
+	async getDataAttributesControlPointStatus (classFqn: string, parentClassFqn: string) {
+		const url = `exec-post?func=modules.ganttSettings.getDataAttributesControlPointStatus&params=requestContent`;
+		const body = {classFqn, parentClassFqn};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'

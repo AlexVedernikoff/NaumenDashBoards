@@ -1,5 +1,5 @@
 // @flow
-import {fetchAttributes} from 'store/attributes/actions';
+import {fetchAttributes, fetchAttributesMilestones} from 'store/attributes/actions';
 
 const props = (state: AppState) => {
 	const {attributes, resources} = state.APP;
@@ -13,7 +13,8 @@ const props = (state: AppState) => {
 };
 
 const functions = {
-	fetchAttributes
+	fetchAttributes,
+	fetchAttributesMilestones
 };
 
 export {

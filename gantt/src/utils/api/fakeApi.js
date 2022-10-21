@@ -111,6 +111,25 @@ export default class FakeApi {
 		];
 	}
 
+	async getDataAttributesControlPointStatus (classFqn, parentClassFqn) {
+		await new Promise(resolve => setTimeout(() => resolve(), 3000));
+
+		return [
+			{
+				'code': 'd951f9',
+				'label': 'Дата',
+				'title': 'Дата',
+				'value': 'd951f9'
+			},
+			{
+				'code': 'd951f10',
+				'label': 'Конечная Дата',
+				'title': 'Конечная Дата',
+				'value': 'd951f10'
+			}
+		];
+	}
+
 	async postData (subjectUuid, contentCode, data) {
 		await new Promise(resolve => setTimeout(() => resolve(), 300));
 		return data;
@@ -124,11 +143,19 @@ export default class FakeApi {
 		await new Promise(resolve => setTimeout(() => resolve(), 300));
 	}
 
+	async checkWorksOfResource (workId, resourceId, diagramKey) {
+		await new Promise(resolve => setTimeout(() => resolve(), 300));
+	}
+
 	async postChangedWorkRelations (workRelations, contentCode, subjectUuid) {
 		await new Promise(resolve => setTimeout(() => resolve(), 300));
 	}
 
 	async editWorkDateRangesFromVersionRequest () {
+		await new Promise(resolve => setTimeout(() => resolve(), 300));
+	}
+
+	async applyVersion () {
 		await new Promise(resolve => setTimeout(() => resolve(), 300));
 	}
 
@@ -147,8 +174,14 @@ export default class FakeApi {
 		return 'GantTest';
 	}
 
-	getWorkPageLink () {
-		return 'link';
+	getWorkDataForWork () {
+		return {
+			'PMPlanDate': true,
+			'disabledCompete': false,
+			'endDate': true,
+			'link': 'https://nordclangant.nsd.naumen.ru/sd/operator/?anchor=uuid:serviceCall$2453008',
+			'title': false
+		};
 	}
 
 	getSubjectUuid () {

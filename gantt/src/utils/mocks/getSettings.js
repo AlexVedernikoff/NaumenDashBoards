@@ -99,6 +99,19 @@ export default {
 						"code": "d951f959-640b-4b47-b7ed-2f0daf7867"
 					}
 				],
+				"checkpointStatusAttr": {
+					"code": "stateStartTime",
+					"declaredMetaClass": "serviceCall$PMTask",
+					"label": null,
+					"metaClassFqn": "serviceCall$PMTask",
+					"property": null,
+					"ref": null,
+					"sourceCode": "serviceCall$PMTask",
+					"sourceName": "Проектная активность",
+					"title": "Дата входа в статус",
+					"type": "dateTime",
+					"value": null
+				},
 				"communicationResourceAttribute": {
 					"code": "d951f7",
 					"title": "Название"
@@ -112,9 +125,9 @@ export default {
 					}
 				},
 				"id": "567876543456",
-				"parent": "123456789",
 				"level": 1,
-				"type": "RESOURCE"
+				"parent": "123456789",
+				"type": "WORK"
 			},
 	],
 	"workProgresses": {

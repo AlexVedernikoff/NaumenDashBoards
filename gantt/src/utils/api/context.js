@@ -2,7 +2,7 @@
 import {api} from './';
 import {arrayToTree} from 'utils/arrayToTree';
 import {FilterFormDescriptorDTO} from './types';
-import type {Params, Settings, Source, Task, UserData} from 'store/app/types';
+import type {Params, Settings, Source, Task, Tasks, UserData, WorkRelations} from 'store/app/types';
 
 const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
 	hasDynamic,
@@ -37,9 +37,10 @@ const getGanttVersionsSettings = async (versionKey: string, timezone: string): P
 * @param {string} contentCode - ключ контента, на котором расположена диаграмма
 * @param {string} subjectUUID - UUID объекта
 * @param {Tasks} tasks - задачи на диаграмме
+* @param {WorkRelations} workRelations - объект связи между работами
 */
-const saveGanttVersionSettingsRequest = async (contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks): Promise<Params> => {
-	api.saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUUID, title, tasks);
+const saveGanttVersionSettingsRequest = async (contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations): Promise<Params> => {
+	api.saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUUID, title, tasks, workRelations);
 };
 
 /**
@@ -124,12 +125,13 @@ const getGanttVersionDiagramData = async (user: UserData): Promise<Params> => {
 };
 
 /**
- * Получает ссылку на страницу работы
- * @param {string} workUUID - идентификатор работы
- * @returns {string} link - ссылка на карточку работы
- */
-const getWorkPageLink = async (workUUID: string): Promise<Params> => {
-	return api.getWorkPageLink(workUUID);
+* Получает данные для работы
+* @param {string} workUUID - идентификатор работы
+* @param {string} diagramKey - ключ диаграммы
+* @returns {ThunkAction}
+*/
+const getWorkDataForWork = async (workUUID: string, diagramKey: string): Promise<Params> => {
+	return api.getWorkDataForWork(workUUID, diagramKey);
 };
 
 /**
@@ -191,11 +193,21 @@ const getDiagramData = async (contentCode: string, subjectUuid: string, timezone
 
 /**
  * Возвращает список атрибутов для источника данных
- * @param classFqn - код класса
- * @param parentClassFqn - код класса родителя
+ * @param {string} classFqn - код класса
+ * @param {string} parentClassFqn - код класса родителя
  */
 const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string = null): Promise<Source> => {
 	const attributes = await api.getDataSourceAttributes(classFqn, parentClassFqn);
+	return attributes;
+};
+
+/**
+* Получает данные атрибутов статуса контрольной точки
+* @param {string} classFqn - метакласс работы
+* @param {string} parentClassFqn - код класса родителя
+*/
+ const getDataAttributesControlPointStatus = async (classFqn: string, parentClassFqn: string = null): Promise<Source> => {
+	const attributes = await api.getDataAttributesControlPointStatus(classFqn, parentClassFqn);
 	return attributes;
 };
 
@@ -208,6 +220,17 @@ const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string 
 */
 const addNewWork = async (workData: WorkData, classFqn: string, timezone: string, attr): Promise<Source> => {
 	await api.addNewWork(workData, classFqn, timezone, attr);
+};
+
+/**
+* Проверяет работы ресурса
+* @param {string} workId - идентификатор работы
+* @param {string} resourceId - идентификатор ресурса
+* @param {string} diagramKey - ключ диаграммы
+* @returns {ThunkAction}
+*/
+const checkWorksOfResource = async (workId: string, resourceId: string, diagramKey: string, tIndex, versionKey): Promise<Source> => {
+	await api.checkWorksOfResource(workId, resourceId, diagramKey, tIndex, versionKey);
 };
 
 /**
@@ -244,11 +267,11 @@ const postChangedWorkInterval = async (timezone: string, workDateInterval: workD
 
 /**
  * Отправляет изменение связей
- * @param workRelations - объект связи между работами
- * @param contentCode - code объекта
- * @param subjectUuid -  UUID объекта
+ * @param {WorkRelations} workRelations - объект связи между работами
+ * @param {string} contentCode - code объекта
+ * @param {string} subjectUuid -  UUID объекта
  */
-const postChangedWorkRelations = async (workRelations, contentCode: string, subjectUuid: string) => {
+const postChangedWorkRelations = async (workRelations: WorkRelations, contentCode: string, subjectUuid: string) => {
 	await api.postChangedWorkRelations(workRelations, contentCode, subjectUuid);
 };
 
@@ -314,8 +337,8 @@ const getDataSources = async (): Promise<Params> => {
 };
 
 /**
- * Получает аттрибуты работы
- * @param {string} attributeGroupCode - код группы аттрибутов
+ * Получает атрибуты работы
+ * @param {string} attributeGroupCode - код группы атрибутов
  * @param {string} metaClassFqn - метакласс работы
  * @param {string} workUUID - идентификатор работы
  * @returns {ThunkAction}
@@ -325,10 +348,24 @@ const getWorkAttributes = async (attributeGroupCode: string, metaClassFqn: strin
 	return workAttributes;
 };
 
+/**
+* Применяет версию
+* @param {string} diagramKey - ключ диаграммы
+* @param {Tasks} tasksClone - копия задач на диаграмме
+* @param {WorkRelations} workRelations - объект связи между работами
+* @param {string} subjectUUID - Uuid объекта
+* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+*/
+const applyVersion = async (diagramKey: string, tasksClone: Tasks, workRelations: WorkRelations, contentCode: string, subjectUuid: string) => {
+	await api.applyVersion(diagramKey, tasksClone, workRelations, contentCode, subjectUuid);
+};
+
 export {
 	addNewWork,
 	addNewWorkForVersionRequest,
+	applyVersion,
 	changeWorkProgressFromVersionRequest,
+	checkWorksOfResource,
 	deleteGanttVersionSettingsRequest,
 	deleteWorkDateRanges,
 	deleteWorkFromVersionDiagramRequest,
@@ -340,6 +377,7 @@ export {
 	getCurrentUser,
 	getDataSourceAttributes,
 	getDataSourceAttributesByTypes,
+	getDataAttributesControlPointStatus,
 	getDataSources,
 	getDiagramData,
 	getGanttVersionDiagramData,
@@ -347,7 +385,7 @@ export {
 	getGanttVersionsSettings,
 	getInitialParams,
 	getInitialSettings,
-	getWorkPageLink,
+	getWorkDataForWork,
 	openFilterForm,
 	getUserData,
 	postChangedWorkRelations,

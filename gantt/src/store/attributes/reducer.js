@@ -14,6 +14,11 @@ const reducer = (state: AttributesState = initialAttributesState, action: Attrib
 					uploaded: true
 				}
 			};
+		case ATTRIBUTES_EVENTS.RECEIVE_ATTRIBUTES_MILISTONE:
+			return {
+				...state,
+				attributesMilestones: action.payload
+			};
 		case ATTRIBUTES_EVENTS.RECORD_ATTRIBUTES_ERROR:
 			return {
 				...state,

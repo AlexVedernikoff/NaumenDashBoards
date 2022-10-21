@@ -4,8 +4,8 @@ import cn from 'classnames';
 import {
 	Checkbox, Datepicker, FormControl, IconButton, Select, TextInput
 } from 'naumen-common-components';
-import {deepClone, shiftTimeZone} from 'helpers';
-import {deleteWork, getWorlLink, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
+import {deepClone, normalizeDate, shiftTimeZone} from 'helpers';
+import {deleteWork, getWorkData, postEditedWorkData, postNewWorkData, setColumnTask} from 'store/App/actions';
 import {gantt} from 'naumen-gantt';
 import {listMetaClass} from './consts';
 import Modal from 'components/atoms/Modal/Modal';
@@ -23,6 +23,7 @@ const ModalTask = (props: Props) => {
 	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
 	const [valueError, setValueError] = useState('');
+	const [workLink, setWorkLink] = useState('/');
 	const [initPage, setInitPage] = useState(false);
 	const [options, setOptions] = useState([]);
 	const [currentMetaClassFqn, setCurrentMetaClassFqn] = useState('');
@@ -35,20 +36,6 @@ const ModalTask = (props: Props) => {
 		setCurrentValue(target.value);
 	};
 
-	const convertDateToNormal = date => {
-		const chunkDate = date.split(',');
-		const dotReplacement = chunkDate[0].replace(/\./g, ',').split(',');
-
-		[dotReplacement[0], dotReplacement[1]] = [dotReplacement[1], dotReplacement[0]];
-
-		const modifiedDate = dotReplacement.join('.') + ',' + chunkDate[1];
-
-		const withoutDotsandDash = modifiedDate.replace(/\./g, '/').replace(/\,/g, '');
-		const modifiedDateStr = new Date(withoutDotsandDash);
-
-		return modifiedDateStr;
-	};
-
 	const [currentTask, setCurrentTask] = useState({});
 
 	gantt.showLightbox = id => {
@@ -59,7 +46,7 @@ const ModalTask = (props: Props) => {
 		setCurrentTask(task);
 		setActive(task.completed);
 
-		dispatch(getWorlLink(task.id));
+		dispatch(getWorkData(task.id, store.APP.diagramKey));
 
 		let defaultCurrentMetaClass = 'serviceCall$PMTask';
 
@@ -107,8 +94,8 @@ const ModalTask = (props: Props) => {
 	};
 
 	const save = () => {
-		const newStartDate = new Date(convertDateToNormal(inputStartDate));
-		const newEndDate = new Date(convertDateToNormal(inputEndDate));
+		const newStartDate = normalizeDate(inputStartDate);
+		const newEndDate = normalizeDate(inputEndDate);
 		const tasks = deepClone(store.APP.tasks);
 		const task = gantt.getTask(taskId);
 		const tasksGantt = gantt.getTaskByTime();
@@ -140,6 +127,7 @@ const ModalTask = (props: Props) => {
 
 					workDate[attrStartDate] = newFormatStartDate;
 					workDate[attrEndDate] = currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate;
+					workDate.completed = currentTask.type === 'milestone' ? active : null;
 
 					dispatch(postEditedWorkData(workDate, currentMetaClassFqn, taskId));
 					task.start_date = newStartDate;
@@ -197,7 +185,7 @@ const ModalTask = (props: Props) => {
 		}
 	};
 
-	const [valueInterval, setValueInterval] = useState('Группы аттрибутов');
+	const [valueInterval, setValueInterval] = useState('Группы атрибутов');
 	const handleIntervalChange = ({value}) => {
 		const metaClass = toString(currentMetaClassFqn).includes('employee');
 		let attribute = '';
@@ -256,6 +244,14 @@ const ModalTask = (props: Props) => {
 		return () => document.removeEventListener('click', onCloseDateModal);
 	});
 
+	useEffect(() => {
+		const {link} = store.APP.workData;
+
+		if (link) {
+			setWorkLink(link);
+		}
+	}, [store.APP.workData]);
+
 	const renderDatePickerEndDate = () => {
 		if (showDatePickerEndDate) {
 			return <div className={styles.datepicker}><Datepicker onSelect={(value) => onSelectEndDate(value)} value="" /> </div>;
@@ -294,7 +290,7 @@ const ModalTask = (props: Props) => {
 					<input name="delete" onClick={remove} type="button" value="Удалить" />
 				</div>
 				<div className={styles.buttons_grops}>
-					<a className="workLink" href={props.workLink} rel="noreferrer" target="_blank">Переход на карточку работы</a>
+					<a className="workLink" href={workLink && workLink} rel="noreferrer" target="_blank">Переход на карточку работы</a>
 					<input name="close" onClick={cancel} type="button" value="Отмена" />
 					<input name="save" onClick={save} type="button" value="Сохранить" />
 				</div>
@@ -353,20 +349,35 @@ const ModalTask = (props: Props) => {
 		setActive(!active);
 	};
 
+	const renderCheckboxMilestone = () => {
+		const classNames = cn({
+			[styles.checkbox]: true,
+			[styles.disabledInput]: store.APP.workData.disabledCompete
+		});
+
+		if (typeof currentTask.completed === 'boolean') {
+			return (
+				<FormControl className={classNames} label="Завершен этап контрольной точки" small={true}>
+					<Checkbox checked={active} name="Checkbox" onChange={handleCheckboxChange} value={active} />
+				</FormControl>
+			);
+		}
+
+		return null;
+	};
+
 	const renderModalTask = () => {
 		if (showModal) {
 			return (
 				<div id="my-form">
 					{renderHeader()}
 					<div className={styles.modalFooter}>
-						<label htmlFor="description">Название:
+						<label className={!store.APP.workData.title && styles.disabledInput} htmlFor="description">Название:
 							<TextInput label="Название" maxLength={30} onChange={onChange} value={currentValue} />
 						</label>
 						<div className={styles.interval}>
 							{listDataInterval}
-							<FormControl className={cn(styles.checkbox)} label="Завершен этап контрольной точки" small={true}>
-								<Checkbox checked={active} name="Checkbox" onChange={handleCheckboxChange} value={active} />
-							</FormControl>
+							{renderCheckboxMilestone()}
 						</div>
 						{props.workAttributes.map(i => <div key={i.code}><label>{i.title}</label> <TextInput className={styles.input} maxLength={30}></TextInput></div>)}
 					</div>

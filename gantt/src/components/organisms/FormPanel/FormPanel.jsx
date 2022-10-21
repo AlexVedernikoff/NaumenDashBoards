@@ -14,7 +14,7 @@ import cn from 'classnames';
 import type {Column, ResourceSetting} from 'src/store/App/types';
 import {CommonSettings} from 'store/App/types';
 import {connect} from 'react-redux';
-import {deepClone, shiftTimeZone} from 'src/helpers';
+import {deepClone, normalizeDate, shiftTimeZone} from 'src/helpers';
 import {defaultColumn} from 'src/store/App/constants';
 import {defaultResourceSetting} from 'store/App/constants';
 import Form from 'src/components/atoms/Form';
@@ -33,22 +33,32 @@ import {v4 as uuidv4} from 'uuid';
 import Work from './components/Work';
 
 const FormPanel = (props: Props) => {
-	const {errorSettings, loading, resources, settings} = props;
+	const {endDate, errorSettings, loading, resources, settings, startDate} = props;
 	const {columnSettings} = settings;
+	const sd = startDate
+		? typeof startDate === 'string'
+			? normalizeDate(startDate).toLocaleString()
+			: new Date(startDate).toLocaleString()
+		: undefined;
+	const ed = endDate
+		? typeof endDate === 'string'
+			? normalizeDate(endDate).toLocaleString()
+			: new Date(endDate).toLocaleString()
+		: undefined;
 	const [showModal, setShowModal] = useState(false);
 	const [columnSettingsModal, setColumnSettingsModal] = useState([]);
 	const [layout, setLayout] = useState([]);
 	const [error, setError] = useState('');
-	const [inputStartDate, setInputStartDate] = useState('');
-	const [inputEndDate, setInputEndDate] = useState('');
+	const [inputStartDate, setInputStartDate] = useState(sd);
+	const [inputEndDate, setInputEndDate] = useState(ed);
 	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
 	const [valueError, setValueError] = useState('');
 	const [inputMonthDays, setInputMonthDays] = useState('');
 	const [inputLastDays, setinputLastDays] = useState('');
 	const [currentInterval, setCurrentInterval] = useState({label: 'с ... по', value: 'INTERVAL'});
-	const [startDate, setStartDate] = useState('');
-	const [endDate, setEndDate] = useState('');
+	const [diagramStartDate, setDiagramStartDate] = useState('');
+	const [diagramEndDate, setDiagramEndDate] = useState('');
 
 	useEffect(() => {
 		setCurrentInterval(props.currentInterval);
@@ -230,25 +240,25 @@ const FormPanel = (props: Props) => {
 			worksWithoutStartOrEndDateCheckbox
 		} = props;
 		const newError = checkingSettings();
-		const deleteDeviationForEndDate = shiftTimeZone(endDate);
-		const deleteDeviationForStartDate = shiftTimeZone(startDate);
+		const shiftedEndDate = shiftTimeZone(diagramEndDate);
+		const shiftedStartDate = shiftTimeZone(diagramStartDate);
 
 		setError(newError);
 
 		if (!newError) {
-			setEndDate(gantt.date.add(new Date(endDate), deleteDeviationForEndDate, 'hour'));
-			setStartDate(gantt.date.add(new Date(startDate), deleteDeviationForStartDate, 'hour'));
+			setDiagramEndDate(gantt.date.add(new Date(diagramEndDate), shiftedEndDate, 'hour'));
+			setDiagramStartDate(gantt.date.add(new Date(diagramStartDate), shiftedStartDate, 'hour'));
 
 			saveSettings(
 				{
 					commonSettings: settings,
 					currentInterval,
 					diagramKey,
-					endDate,
+					endDate: diagramEndDate,
 					milestonesCheckbox,
 					progressCheckbox,
 					resourceAndWorkSettings: resources,
-					startDate,
+					startDate: diagramStartDate,
 					stateMilestonesCheckbox,
 					workProgresses,
 					workRelationCheckbox,
@@ -284,13 +294,13 @@ const FormPanel = (props: Props) => {
 	const onSelectStartDate = value => {
 		setInputStartDate(new Date(value).toLocaleString());
 		setShowDatePickerStartDate(false);
-		setStartDate(new Date(value));
+		setDiagramStartDate(new Date(value));
 	};
 
-	const onSelectEndDate = (value) => {
+	const onSelectEndDate = value => {
 		setInputEndDate(new Date(value).toLocaleString());
 		setShowDatePickerEndDate(!showDatePickerEndDate);
-		setEndDate(new Date(value));
+		setDiagramEndDate(new Date(value));
 	};
 
 	const renderDatePickerStartDate = () => {
@@ -312,7 +322,7 @@ const FormPanel = (props: Props) => {
 		}
 	};
 
-	React.useEffect(() => {
+	useEffect(() => {
 		document.addEventListener('click', onCloseDateModal);
 		return () => document.removeEventListener('click', onCloseDateModal);
 	});
@@ -323,24 +333,10 @@ const FormPanel = (props: Props) => {
 		}
 	};
 
-	const convertDateToNormal = date => {
-		const chunkDate = date.split(',');
-		const dotReplacement = chunkDate[0].replace(/\./g, ',').split(',');
-
-		[dotReplacement[0], dotReplacement[1]] = [dotReplacement[1], dotReplacement[0]];
-
-		const modifiedDate = dotReplacement.join('.') + ',' + chunkDate[1];
-
-		const withoutDotsandDash = modifiedDate.replace(/\./g, '/').replace(/\,/g, '');
-		const modifiedDateStr = new Date(withoutDotsandDash);
-
-		return modifiedDateStr;
-	};
-
 	const sibmitRange = () => {
 		if (valueInterval.value === 'INTERVAL') {
-			const newStartDate = new Date(convertDateToNormal(inputStartDate));
-			const newEndDate = new Date(convertDateToNormal(inputEndDate));
+			const newStartDate = normalizeDate(inputStartDate);
+			const newEndDate = normalizeDate(inputEndDate);
 
 			if (Date.parse(newEndDate) >= Date.parse(newStartDate) && (inputStartDate.length && inputEndDate.length)) {
 				const date = {
@@ -348,8 +344,8 @@ const FormPanel = (props: Props) => {
 					startDate: newStartDate
 				};
 
-				setStartDate(newStartDate);
-				setEndDate(newEndDate);
+				setDiagramStartDate(newStartDate);
+				setDiagramEndDate(newEndDate);
 
 				props.setRangeTime(date);
 				setValueError('');
@@ -376,8 +372,8 @@ const FormPanel = (props: Props) => {
 					startDate: today
 				};
 
-				setStartDate(today);
-				setEndDate(new Date(monthDays));
+				setDiagramStartDate(today);
+				setDiagramEndDate(new Date(monthDays));
 
 				props.setRangeTime(date);
 				setValueError('');
@@ -398,8 +394,8 @@ const FormPanel = (props: Props) => {
 					startDate: new Date(monthDays)
 				};
 
-				setStartDate(new Date(monthDays));
-				setEndDate(today);
+				setDiagramStartDate(new Date(monthDays));
+				setDiagramEndDate(today);
 				setValueError('');
 
 				props.setRangeTime(date);
@@ -410,8 +406,8 @@ const FormPanel = (props: Props) => {
 				startDate: new Date()
 			};
 
-			setStartDate(new Date());
-			setEndDate(new Date());
+			setDiagramStartDate(new Date());
+			setDiagramEndDate(new Date());
 
 			props.setRangeTime(date);
 		}
@@ -664,7 +660,6 @@ const FormPanel = (props: Props) => {
 				return `Заполните у работы "${resources[i]?.source?.value?.label}" атрибуты начала/окончания`;
 			}
 		}
-
 		return '';
 	};
 

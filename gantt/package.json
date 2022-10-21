@@ -174,7 +174,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/config.js && npm run zip",
     "build-dev": "npm run clear && cross-env NODE_ENV=development webpack --config ./webpack/config.js && npm run zip",
-    "build-license": "npm run clear && cross-env NODE_ENV=production LICENSE=use webpack --config ./webpack/config.js && npm run zip",
+    "build-license": "cross-env NODE_ENV=production LICENSE=use webpack --config ./webpack/config.js && npm run zip",
     "clear": "rm -rf ./dist/*",
     "clear-zip": "rm *.zip",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --config ./webpack/config.js",

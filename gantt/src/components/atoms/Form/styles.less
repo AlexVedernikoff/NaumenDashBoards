@@ -1,16 +1,22 @@
 @import '/styles/variables';
 
 :local {
-	.wrapper {
-		background-color: rgba(0, 0, 0, 0.1);
-		bottom: 0;
-		left: 0;
-		overflow-y: scroll;
-		position: fixed;
-		right: 0;
-		top: 0;
-		// затемненная подложка должна оставаться под основным контентом формы
-		z-index: 29;
+	.buttonGroup {
+		display: flex;
+		flex-direction: row;
+		margin-left: auto;
+	}
+
+	.content {
+		background-color: white;
+		border-radius: 0 0 @border-radius @border-radius;
+		font-size: 13px;
+		padding: 4px 0 10px 4px;
+		position: relative;
+
+		& input {
+			font-size: 13px;
+		}
 	}
 
 	.form {
@@ -21,6 +27,21 @@
 		top: 30% !important;
 		width: 600px;
 		z-index: 30;
+	}
+
+	.form button:not(.submitButton) {
+		color: #595959;
+		font-size: 13px;
+		margin-right: 13px;
+		width: auto;
+
+		&:hover, &:active {
+			color: #FFFFFF;
+		}
+	}
+
+	.gantt_tooltip {
+		z-index: 1;
 	}
 
 	.header {
@@ -35,41 +56,23 @@
 		padding: 3px 20px;
 	}
 
-	.buttonGroup {
-		display: flex;
-		flex-direction: row;
-		margin-left: auto;
-	}
-
-	.content {
-		background-color: white;
-		border-radius: 0 0 @border-radius @border-radius;
-		padding: 4px 0 10px 4px;
-		position: relative;
-		font-size: 13px;
-
-		& input {
-			font-size: 13px;
-		}
-	}
-
 	.noticeContent {
 		padding: 24px 24px 36px 24px;
 	}
 
-	.form button:not(.submitButton) {
-		color: #595959;
-		font-size: 13px;
-		margin-right: 13px;
-		width: auto;
-
-		&:hover, &:active {
-			color: #FFFFFF;
-		}
-	}
-
 	.submitButton {
 		font-size: 13px;
+	}
+
+	.wrapper {
+		background-color: rgba(0, 0, 0, 0.1);
+		bottom: 0;
+		left: 0;
+		overflow-y: scroll;
+		position: fixed;
+		right: 0;
+		top: 0;
+		z-index: 29;
 	}
 }
 
@@ -79,4 +82,5 @@
 
 #panel {
 	margin-top: 41px;
+	z-index: 2;
 }

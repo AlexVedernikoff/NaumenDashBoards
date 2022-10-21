@@ -41,7 +41,7 @@ export const initialAppState: AppState = {
 	},
 	versions: [],
 	workAttributes: [],
-	workLink: 'link',
+	workData: {},
 	workProgresses: {},
 	workRelationCheckbox: false,
 	workRelations: [],

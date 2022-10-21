@@ -8,6 +8,7 @@ import {
 	saveChangedWorkInterval,
 	saveChangedWorkProgress,
 	saveChangedWorkRelations,
+	savePositionOfWork,
 	setRangeTime,
 	switchProgressCheckbox
 } from 'store/App/actions';
@@ -24,7 +25,7 @@ const props = (state: AppState) => {
 		settings,
 		tasks,
 		workAttributes,
-		workLink,
+		workData,
 		workRelationCheckbox,
 		workRelations
 	} = state.APP;
@@ -43,7 +44,7 @@ const props = (state: AppState) => {
 		scale,
 		tasks,
 		workAttributes,
-		workLink,
+		workData,
 		workRelationCheckbox,
 		workRelations
 	};
@@ -57,6 +58,7 @@ const functions = {
 	saveChangedWorkInterval,
 	saveChangedWorkProgress,
 	saveChangedWorkRelations,
+	savePositionOfWork,
 	setRangeTime,
 	switchProgressCheckbox
 };
