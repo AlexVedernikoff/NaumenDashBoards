@@ -17,6 +17,7 @@ import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
+import static com.amazonaws.util.json.Jackson.fromJsonString as fromJson
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 import com.fasterxml.jackson.annotation.JsonAutoDetect
@@ -623,9 +624,7 @@ class GanttSettingsService
         GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
-        String versionKey =
-            String
-                .join('_', String.join('_', subjectUUID, contentCode), UUID.randomUUID().toString())
+        String versionKey = [subjectUUID, contentCode, UUID.randomUUID().toString()].join('_')
 
         Date createdDate = Date.parse(GANTT_VERSION_DATE_PATTERN, request.createdDate)
 
@@ -635,7 +634,7 @@ class GanttSettingsService
         Collection<SequenceChartElements> sequenceWorks = []
         request.tasks.each
             {
-                if (it.type == 'WORK' || it.type == 'milestone')
+                if (it.type in ['WORK', 'milestone'])
                 {
                     SequenceChartElements elements = new SequenceChartElements()
                     elements.parentUuid = it.parent
@@ -646,7 +645,7 @@ class GanttSettingsService
             }
         saveJsonSettings(
             String.join('_', 'sequenceWorks', versionKey),
-            Jackson.toJsonString(sequenceWorks)
+            toJson(sequenceWorks)
         )
         if (!saveJsonSettings(subjectUUID, Jackson.toJsonString(ganttSettings)))
         {
@@ -775,7 +774,7 @@ class GanttSettingsService
             api.utils.edit(metaObjectWork, editableDataInSystem)
         }
         ganttVersionSettings.workRelations = diagramData.workRelations
-        if (!saveJsonSettings(diagramData.diagramKey, Jackson.toJsonString(ganttVersionSettings)))
+        if (!saveJsonSettings(diagramData.diagramKey, toJson(ganttVersionSettings)))
         {
             throw new Exception('Настройки не были сохранены!')
         }
@@ -823,13 +822,13 @@ class GanttSettingsService
         String keySequenceWork = String.join('_', 'sequenceWorks', getKeyData)
         String dataChartElements = getJsonSettings(keySequenceWork)
         Collection chartElements = dataChartElements
-            ? Jackson.fromJsonString(dataChartElements, Collection)
+            ? fromJson(dataChartElements, Collection)
             : []
         Collection listEditableObjects = chartElements.findAll {
             it.parentUuid == requestContent.resourceId
         }
         Collection listEditable = []
-        Integer scet
+        Integer sequenceNumberLocations
         listEditableObjects.eachWithIndex { num, idx ->
             if (idx < requestContent.positionElement)
             {
@@ -837,25 +836,29 @@ class GanttSettingsService
             }
             if (idx == requestContent.positionElement)
             {
-                listEditable << ['parentUuid'           : requestContent.resourceId, 'workUuid':
-                    requestContent.workId, 'idLocations': idx]
-                scet = idx
-                listEditable << ['parentUuid'  : num.parentUuid, 'workUuid':
-                    num.workUuid, 'idLocations': ++scet]
+                listEditable << ['parentUuid' : requestContent.resourceId,
+                                 'workUuid'   : requestContent.workId,
+                                 'idLocations': idx]
+                sequenceNumberLocations = idx
+                listEditable << ['parentUuid' : num.parentUuid,
+                                 'workUuid'   : num.workUuid,
+                                 'idLocations': ++sequenceNumberLocations]
+
             }
             if (idx > requestContent.positionElement)
             {
                 if (requestContent.workId != num.workUuid)
                 {
-                    num.idLocations = ++scet
+                    num.idLocations = ++sequenceNumberLocations
                     listEditable << num
                 }
             }
         }
+        String keyForGettingDataFromStorage = requestContent.versionKey ?: requestContent.diagramKey
         GanttVersionsSettingsClass ganttVersionsSettings =
-            getGanttVersionsSettings(requestContent.versionKey)
+            getGanttVersionsSettings(keyForGettingDataFromStorage)
         ganttVersionsSettings.diagramEntities.each { ganttVer ->
-            def elem = listEditable.find { editable ->
+            Map elem = listEditable.find { editable ->
                 editable.workUuid == ganttVer.entityUUID
             }
             if (elem)
@@ -863,7 +866,7 @@ class GanttSettingsService
                 ganttVer.positionElement = elem.idLocations
             }
         }
-        saveJsonSettings(requestContent.versionKey, Jackson.toJsonString(ganttVersionsSettings))
+        saveJsonSettings(requestContent.versionKey, toJson(ganttVersionsSettings))
     }
 
     /**
