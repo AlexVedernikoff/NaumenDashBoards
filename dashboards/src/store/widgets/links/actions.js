@@ -74,7 +74,7 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async 
 	const {context, dashboard} = getState();
 	const {subjectUuid} = context;
 	const {id, type} = widget;
-	const {attrGroupCode = ''} = parseAttrSetConditions(payload) ?? {};
+	const {attrGroupCode = ''} = await parseAttrSetConditions(payload) ?? {};
 
 	dispatch(requestLink(id));
 

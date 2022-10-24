@@ -8,6 +8,7 @@ import styles from './styles.less';
 export class Icon extends PureComponent<Props> {
 	static defaultProps = {
 		className: '',
+		fill: 'currentColor',
 		height: 16,
 		title: '',
 		viewBox: '0 0 16 16',
@@ -15,11 +16,11 @@ export class Icon extends PureComponent<Props> {
 	};
 
 	render () {
-		const {className, height, name, onClick, title, viewBox, width} = this.props;
+		const {className, fill, height, name, onClick, title, viewBox, width} = this.props;
 		const svgCN = cn(styles.icon, className);
 
 		return (
-			<svg className={svgCN} fill="currentColor" height={height} onClick={onClick} viewBox={viewBox} width={width} >
+			<svg className={svgCN} fill={fill} height={height} onClick={onClick} viewBox={viewBox} width={width} >
 				{title && <title>{title}</title>}
 				<use className={styles.use} xlinkHref={`#${name}`} />
 			</svg>

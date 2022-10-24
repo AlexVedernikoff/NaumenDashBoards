@@ -43,12 +43,15 @@ const calcTotalColumn = 'calcTotalColumn';
 const checked = 'checked';
 const colorsSettings = 'colorsSettings';
 const computedAttrs = 'computedAttrs';
+const comparePeriod = 'comparePeriod';
 const count = 'count';
 const data = 'data';
 const dataLabels = 'dataLabels';
 const diagramName = 'diagramName';
 const disabled = 'disabled';
 const displayType = 'displayType';
+const down = 'down';
+const endDate = 'endDate';
 const format = 'format';
 const from = 'from';
 const header = 'header';
@@ -66,6 +69,7 @@ const min = 'min';
 const parameter = 'parameter';
 const parameters = 'parameters';
 const parametersOrder = 'parametersOrder';
+const period = 'period';
 const position = 'position';
 const ranges = 'ranges';
 const scale = 'scale';
@@ -83,6 +87,7 @@ const source = 'source';
 const sources = 'sources';
 const sourceForCompute = 'sourceForCompute';
 const sourceRowName = 'sourceRowName';
+const startDate = 'startDate';
 const style = 'style';
 const template = 'template';
 const templateName = 'templateName';
@@ -94,6 +99,7 @@ const tooltip = 'tooltip';
 const top = 'top';
 const type = 'type';
 const use = 'use';
+const up = 'up';
 const useName = 'useName';
 const value = 'value';
 const xAxisName = 'xAxisName';
@@ -126,6 +132,7 @@ const DIAGRAM_FIELDS = {
 	calcTotalColumn,
 	checked,
 	colorsSettings,
+	comparePeriod,
 	computedAttrs,
 	count,
 	data,
@@ -133,6 +140,8 @@ const DIAGRAM_FIELDS = {
 	diagramName,
 	disabled,
 	displayType,
+	down,
+	endDate,
 	format,
 	from,
 	header,
@@ -150,6 +159,7 @@ const DIAGRAM_FIELDS = {
 	parameter,
 	parameters,
 	parametersOrder,
+	period,
 	position,
 	ranges,
 	scale,
@@ -167,6 +177,7 @@ const DIAGRAM_FIELDS = {
 	sourceForCompute,
 	sourceRowName,
 	sources,
+	startDate,
 	style,
 	template,
 	templateName,
@@ -177,6 +188,7 @@ const DIAGRAM_FIELDS = {
 	tooltip,
 	top,
 	type,
+	up,
 	use,
 	useName,
 	value,

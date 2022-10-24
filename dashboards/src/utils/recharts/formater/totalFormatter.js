@@ -1,6 +1,6 @@
 // @flow
 import {checkNumber, formatMSInterval, makeFormatterByNumberFormat} from './helpers';
-import {DEFAULT_NUMBER_AXIS_FORMAT} from 'store/widgets/data/constants';
+import {DEFAULT_NUMBER_AXIS_FORMAT, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {getMainDataSet} from 'store/widgets/data/helpers';
 import {hasMSInterval} from 'store/widgets/helpers';
 import {INTEGER_AGGREGATION} from 'store/widgets/constants';
@@ -24,8 +24,17 @@ const getTotalFormatterBase = (widget: SummaryWidget | SpeedometerWidget): Total
 		formatter = checkNumber(makeFormatterByNumberFormat(numberFormat, false));
 	}
 
+	let diffFormatter = checkNumber(makeFormatterByNumberFormat(DEFAULT_NUMBER_AXIS_FORMAT));
+
+	if (widget.type === WIDGET_TYPES.SUMMARY) {
+		const symbolCount = widget.comparePeriod?.format?.symbolCount ?? 0;
+
+		diffFormatter = checkNumber(makeFormatterByNumberFormat({...DEFAULT_NUMBER_AXIS_FORMAT, additional: '%', symbolCount}, false));
+	}
+
 	return {
-		data: formatter
+		data: formatter,
+		diff: diffFormatter
 	};
 };
 

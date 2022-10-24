@@ -1,4 +1,6 @@
 // @flow
+import ComparePeriodBox from 'components/organisms/SummaryWidgetForm/components/ComparePeriodBox';
+import type {ComponentProps as Props} from 'containers/SummaryWidgetForm/components/ParamsTab/types';
 import {createSummaryDataSet} from 'store/widgetForms/summaryForm/helpers';
 import type {DataSet} from 'store/widgetForms/summaryForm/types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
@@ -6,7 +8,6 @@ import DisplayModeSelectBox from 'containers/DisplayModeSelectBox';
 import type {Indicator} from 'store/widgetForms/types';
 import IndicatorsBox from 'WidgetFormPanel/components/IndicatorsBox';
 import NavigationBox from 'containers/NavigationBox';
-import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import SourceBox from 'WidgetFormPanel/components/SourceBox';
 import SourceFieldset from 'containers/SourceFieldset';
@@ -22,10 +23,11 @@ export class ParamsTab extends PureComponent<Props> {
 	};
 
 	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
-		const {onChange, values} = this.props;
+		const {onChange, onCheckAllowComparePeriod, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 
 		onChange(DIAGRAM_FIELDS.data, newData, callback);
+		onCheckAllowComparePeriod();
 	};
 
 	handleChangeIndicators = (index: number, indicators: Array<Indicator>, callback?: Function) => {
@@ -62,7 +64,7 @@ export class ParamsTab extends PureComponent<Props> {
 	renderSourceFieldset = (dataSet: DataSet, index: number, data: Array<DataSet>) => (
 		<SourceFieldset
 			index={index}
-			key={`SourceFieldset_${dataSet.dataKey}`}
+			key={dataSet.dataKey}
 			onChange={this.handleChangeDataSet}
 			onRemove={this.handleRemoveDataSet}
 			removable={data.length > 1}
@@ -72,7 +74,7 @@ export class ParamsTab extends PureComponent<Props> {
 
 	render () {
 		const {onChange, values} = this.props;
-		const {data, displayMode, navigation} = values;
+		const {comparePeriod, data, displayMode, navigation} = values;
 
 		return (
 			<Fragment>
@@ -80,6 +82,7 @@ export class ParamsTab extends PureComponent<Props> {
 				<WidgetSelectBox />
 				<SourceBox onAdd={this.handleAddDataSet}>{data.map(this.renderSourceFieldset)}</SourceBox>
 				{data.map(this.renderIndicatorsBox)}
+				{false && <ComparePeriodBox name={DIAGRAM_FIELDS.comparePeriod} onChange={onChange} value={comparePeriod} /> /* SMRMEXT-12334 */}
 				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />
 			</Fragment>

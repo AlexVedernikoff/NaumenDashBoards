@@ -39,7 +39,7 @@ export class ParamsTab extends Component<Props> {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
 	handleChangeIndicators = (data: Array<DataSet>) => {

@@ -11,15 +11,15 @@ import type {
 import type {
 	AxisSettings,
 	BordersStyle,
+	ComparePeriodFormat,
 	DataLabels,
 	FontStyle,
 	Group,
 	Legend,
 	PivotIndicator,
 	Ranges,
-	SpeedometerIndicatorSettings,
-	TextHandler
-} from 'store/widgets/data/types';
+	SpeedometerIndicatorSettings
+	, TextHandler} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DrillDownMixin} from 'store/widgets/links/types';
 import {
@@ -230,21 +230,32 @@ export type ComboChartOptions = {
 };
 
 export type SummaryData = {
+	diffFormatter: NumberFormatter,
 	formatter: NumberFormatter,
 	tooltip?: WidgetTooltip | null,
 };
 
 export type SummaryStyle = {
 	color: string,
+	diff: ComparePeriodFormat,
 	fontFamily: string,
 	fontSize: number | string,
 	fontStyle?: FontStyle
 };
 
+export type DiffValues = {
+	indicator: string,
+	percent: number,
+	period: string,
+	value: number
+};
+
 export type SummaryOptions = {
 	data: SummaryData,
+	diff: ?DiffValues,
 	style: SummaryStyle,
 	type: 'SummaryOptions',
+	value: number,
 };
 
 /** PIVOT */

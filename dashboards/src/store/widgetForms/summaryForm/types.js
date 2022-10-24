@@ -1,5 +1,6 @@
 // @flow
 import type {
+	ComparePeriod,
 	ComputedAttr,
 	DisplayMode,
 	Header,
@@ -17,6 +18,7 @@ export type DataSet = $Exact<{
 }>;
 
 export type Values = $Exact<{
+	comparePeriod: ComparePeriod,
 	computedAttrs: Array<ComputedAttr>,
 	// $FlowFixMe
 	data: Array<DataSet>,

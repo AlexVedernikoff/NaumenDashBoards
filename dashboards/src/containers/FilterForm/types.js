@@ -5,6 +5,11 @@ import type {GroupsAttributeItem} from 'store/sources/attributesData/groupsAttri
 import type {SourceData} from 'src/store/widgets/data/types';
 import type {SourcesFiltersMap} from 'store/sources/sourcesFilters/types';
 
+export type FilterFormResult = {
+	descriptor: string | null,
+	success: boolean
+};
+
 export type ConnectedProps<Config> = {
 	attributes: AttributesMap,
 	isUserMode: boolean,
@@ -24,7 +29,7 @@ export type InjectedProps = {
 	fetchFilterAttributes: (source: SourceData) => Promise<void>,
 	fetchingFilterAttributes: boolean,
 	filterAttributes: Array<Attribute> | null,
-	openFilterForm: (source: SourceData) => Promise<string | null>,
+	openFilterForm: (source: SourceData) => Promise<FilterFormResult>,
 	openingFilterForm: boolean,
 };
 

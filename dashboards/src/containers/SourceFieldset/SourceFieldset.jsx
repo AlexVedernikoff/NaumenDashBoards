@@ -3,6 +3,7 @@ import type {BreakdownItem, Parameter} from 'store/widgetForms/types';
 import {compose} from 'redux';
 import {connect} from 'react-redux';
 import type {DataSet, Props} from './types';
+import type {FilterFormResult} from 'containers/FilterForm/types';
 import {functions, props} from './selectors';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import React, {Component} from 'react';
@@ -45,11 +46,11 @@ export class SourceFieldsetContainer extends Component<Props> {
 		onChange(dataSetIndex, dataSet, callback);
 	};
 
-	setContext = async (): Promise<string | null> => {
+	setContext = async (): Promise<FilterFormResult> => {
 		const {clearDynamicAttributeGroups, openFilterForm, value} = this.props;
 		const serializedContext = await openFilterForm(value.source);
 
-		if (serializedContext) {
+		if (serializedContext.success) {
 			clearDynamicAttributeGroups(value.dataKey);
 		}
 

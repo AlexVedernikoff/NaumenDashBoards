@@ -1,6 +1,7 @@
 // @flow
 import {compose} from 'redux';
 import type {DataSet, State} from './types';
+import {DEFAULT_COMPARE_PERIOD} from 'store/widgets/data/constants';
 import {DEFAULT_INDICATOR, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {fixIndicatorsAggregation, fixPivotIndicators} from 'store/widgetForms/helpers';
 import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
@@ -43,6 +44,7 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 	} = values;
 
 	return {
+		comparePeriod: DEFAULT_COMPARE_PERIOD,
 		computedAttrs,
 		data: data.map(dataSet => {
 			const {dataKey, indicators, source, sourceForCompute} = dataSet;

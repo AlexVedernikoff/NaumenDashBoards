@@ -11,10 +11,10 @@ import ComputedAttributeEditor from 'WidgetFormPanel/components/ComputedAttribut
 import Container from 'components/atoms/Container';
 import CreationPanel from 'components/atoms/CreationPanel';
 import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
-import {descriptorContainsFilter} from 'utils/descriptorUtils';
 import type {DiagramDataSet, Indicator} from 'store/widgetForms/types';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FieldButton from 'components/atoms/FieldButton';
+import type {FilterFormResult} from 'containers/FilterForm/types';
 import FormField from 'WidgetFormPanel/components/FormField';
 import {getDefaultAggregation} from 'WidgetFormPanel/components/AttributeAggregationField/helpers';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
@@ -78,12 +78,12 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			if (value) {
 				const {label} = value;
 				const sourceData = {descriptor: descriptor ?? null, value};
-				const serializedContext = await openFilterForm(sourceData);
+				const filters: FilterFormResult = await openFilterForm(sourceData);
 
-				if (serializedContext) {
+				if (filters.success && filters.descriptor) {
 					const attribute: PercentageRelativeAttr = {
 						code: uuid(),
-						descriptor: serializedContext,
+						descriptor: filters.descriptor ?? '',
 						title: `${label} - ${t('IndicatorFieldset::SourcePercentageRelativeField')}`,
 						type: ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR
 					};
@@ -107,10 +107,10 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			if (attribute && source && value) {
 				const descriptor = attribute.descriptor ?? source.descriptor ?? null;
 				const sourceData = {descriptor, value};
-				const serializedContext = await openFilterForm(sourceData);
+				const filters = await openFilterForm(sourceData);
 
-				if (serializedContext) {
-					const newAttribute = {...attribute, descriptor: serializedContext};
+				if (filters.success && filters.descriptor) {
+					const newAttribute = {...attribute, descriptor: filters.descriptor};
 
 					this.change({
 						...this.props.value,
@@ -188,13 +188,13 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 			if (value) {
 				const sourceData = {descriptor: descriptor ?? '', value};
-				const serializedContext = await openFilterForm(sourceData);
+				const filterForm = await openFilterForm(sourceData);
 
-				if (serializedContext) {
-					if (descriptorContainsFilter(serializedContext)) {
+				if (filterForm.success) {
+					if (filterForm.descriptor) {
 						this.change({
 							...indicator,
-							descriptor: serializedContext
+							descriptor: filterForm.descriptor
 						});
 					} else {
 						this.change(omit(indicator, 'descriptor'));
@@ -374,7 +374,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 		if (filteredSource) {
 			const {descriptor} = value;
-			const icon = descriptorContainsFilter(descriptor) ? ICON_NAMES.FILLED_FILTER : ICON_NAMES.FILTER;
+			const icon = descriptor ? ICON_NAMES.FILLED_FILTER : ICON_NAMES.FILTER;
 
 			return (
 				<IconButton icon={icon} onClick={this.handleClickFilter} />

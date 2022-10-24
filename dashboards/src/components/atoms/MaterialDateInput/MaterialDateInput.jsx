@@ -1,4 +1,5 @@
 // @flow
+import cn from 'classnames';
 import Datepicker from 'components/molecules/Datepicker';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import moment from 'utils/moment.config';
@@ -8,6 +9,10 @@ import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class MaterialDateInput extends PureComponent<Props, State> {
+	static defaultProps = {
+		className: ''
+	};
+
 	state = {
 		showDatepicker: false
 	};
@@ -57,9 +62,10 @@ export class MaterialDateInput extends PureComponent<Props, State> {
 	};
 
 	render () {
+		const className = cn(styles.container, this.props.className);
 		return (
 			<OutsideClickDetector onClickOutside={this.handleClickOutside}>
-				<div className={styles.container}>
+				<div className={className}>
 					{this.renderValue()}
 					{this.renderCalendarIcon()}
 					{this.renderDatepicker()}

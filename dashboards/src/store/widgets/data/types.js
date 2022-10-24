@@ -6,6 +6,7 @@ import {
 	AXIS_FORMAT_TYPE,
 	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
+	COMPARE_PERIOD,
 	COPY_WIDGET_ERRORS,
 	DEFAULT_TABLE_VALUE,
 	DISPLAY_MODE,
@@ -59,7 +60,7 @@ export type Source = {
 
 export type CustomFilter = {
 	attributes: Attribute[],
-	descriptor?: string,
+	descriptor?: string | null,
 	label: string,
 };
 
@@ -120,6 +121,12 @@ export type NumberAxisFormat = {
 };
 
 export type AxisFormat = LabelAxisFormat | NumberAxisFormat;
+
+export type ComparePeriodFormat = {
+	down?: string,
+	symbolCount?: ?number,
+	up?: string,
+};
 
 export type Parameter = {
 	attribute: Attribute,
@@ -265,6 +272,15 @@ export type AxisSettings = {
 	showName: boolean
 };
 
+export type ComparePeriod = {
+	allow: boolean,
+	endDate?: string,
+	format?: ComparePeriodFormat,
+	period: $Keys<typeof COMPARE_PERIOD>,
+	show: boolean,
+	startDate?: string
+};
+
 export type AxisData = {
 	__type: 'AXIS_DATA_SET',
 	breakdown?: Breakdown,
@@ -375,6 +391,7 @@ export type SummaryIndicator = {
 
 export type SummaryWidget = {
 	...BaseWidget,
+	comparePeriod: ComparePeriod,
 	data: Array<SummaryData>,
 	indicator: SummaryIndicator,
 	type: typeof WIDGET_TYPES.SUMMARY

@@ -2,12 +2,12 @@
 import api from 'api';
 import {connect} from 'react-redux';
 import type {Context} from 'utils/descriptorUtils/types';
-import {createFilterContext, getFilterContext, parseCasesAndGroupCode} from 'utils/descriptorUtils';
+import {createFilterContext, descriptorContainsFilter, getFilterContext, parseCasesAndGroupCode} from 'utils/descriptorUtils';
 import type {FilterFormOptionsDTO} from 'api/types';
+import type {FilterFormResult, InjectedProps, Props, State} from './types';
 import {findFilter, getSourceFilterAttributeGroup} from './helpers';
 import {functions, props} from './selectors';
 import {getDescriptorCases} from 'store/helpers';
-import type {InjectedProps, Props, State} from './types';
 import React, {PureComponent} from 'react';
 import type {SourceData} from 'src/store/widgets/data/types';
 
@@ -36,7 +36,7 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 
 				const {value: classFqn} = source.value;
 				const descriptor = this.getSourceDescriptor(source);
-				const attrGroupCode = this.getAttrGroupCodeForSource(classFqn, descriptor);
+				const attrGroupCode = await this.getAttrGroupCodeForSource(classFqn, descriptor);
 				const filterAttributes = await this.getFilterAttributes(classFqn, attrGroupCode);
 
 				this.setState({fetchingFilterAttributes: false, filterAttributes});
@@ -58,14 +58,14 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 			return result;
 		};
 
-		getAttrGroupCodeForSource = (classFqn: string, descriptor: string): string | null => {
+		getAttrGroupCodeForSource = async (classFqn: string, descriptor: string): Promise<string | null> => {
 			const {isUserMode, sources} = this.props;
 			let result = null;
 
 			if (isUserMode) {
 				// пользовательский режим
 				// дескриптор у источника всегда выставлен
-				const attrSetConditions = parseCasesAndGroupCode(descriptor);
+				const attrSetConditions = await parseCasesAndGroupCode(descriptor);
 
 				if (attrSetConditions) {
 					result = attrSetConditions.attrGroupCode ?? null;
@@ -118,34 +118,43 @@ export const withFilterForm = <Config: {}>(Component: React$ComponentType<Config
 			return result;
 		};
 
-		openFilterForm = async (source: SourceData) => {
+		openFilterForm = async (source: SourceData): Promise<FilterFormResult> => {
+			let result = {
+				descriptor: null,
+				success: false
+			};
+
 			try {
 				this.setState({openingFilterForm: true});
 
 				const {value: classFqn} = source.value;
 				const descriptor = this.getSourceDescriptor(source);
 				const context: Context = descriptor
-					? getFilterContext(descriptor, classFqn, getDescriptorCases)
-					: createFilterContext(classFqn, getDescriptorCases);
+					? await getFilterContext(descriptor, classFqn, getDescriptorCases)
+					: await createFilterContext(classFqn, getDescriptorCases);
 				const options = await this.updateContext(context, classFqn, descriptor);
 
 				this.setState({needToClose: true, openingFilterForm: false});
 
 				const {serializedContext} = await api.instance.filterForm.openForm(context, options);
+				const hasFilters = await descriptorContainsFilter(serializedContext);
 
 				this.setState({needToClose: false});
 
-				return serializedContext;
+				result = {
+					descriptor: hasFilters ? serializedContext : null,
+					success: true
+				};
 			} catch (e) {
 				console.error('Filtration error: ', e);
 			}
 
-			return null;
+			return result;
 		};
 
 		updateContext = async (context: Context, classFqn: string, descriptor: string): Promise<FilterFormOptionsDTO> => {
 			const {fetchGroupsAttributes, isUserMode} = this.props;
-			const attrGroupCode = this.getAttrGroupCodeForSource(classFqn, descriptor);
+			const attrGroupCode = await this.getAttrGroupCodeForSource(classFqn, descriptor);
 			const options: FilterFormOptionsDTO = {
 				restriction: null,
 				useRestriction: attrGroupCode !== null

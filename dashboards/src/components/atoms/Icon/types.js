@@ -10,6 +10,7 @@ export type Symbol = {
 
 export type Props = {
 	className: string,
+	fill: ?string,
 	height: number,
 	name: IconName,
 	onClick?: (e: SyntheticMouseEvent<HTMLElement>) => void,

@@ -46,11 +46,11 @@ export class ParamsTab extends PureComponent<Props> {
 		return onChange(DIAGRAM_FIELDS.borders, value, callback);
 	};
 
-	handleChangeDataSet = (index: number, newDataSet: DataSet) => {
+	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 
-		onChange(DIAGRAM_FIELDS.data, newData);
+		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
 
 	handleChangeIndicators = (index: number, indicators: Array<Indicator>, callback?: Function) => {

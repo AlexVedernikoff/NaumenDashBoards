@@ -45,7 +45,7 @@ export class IndicatorBox extends PureComponent<Props> {
 					<FontSizeSelect
 						name={DIAGRAM_FIELDS.fontSize}
 						onSelect={this.handleSelect}
-						useAuto={useAutoFontSize}
+						usesAuto={useAutoFontSize}
 						value={fontSize}
 					/>
 				</FormField>

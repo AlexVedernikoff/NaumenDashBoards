@@ -4,7 +4,6 @@ import Checkbox from 'components/atoms/Checkbox';
 import cn from 'classnames';
 import type {ContainerProps} from 'components/molecules/TreeSelect/types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER} from 'store/widgetForms/constants';
-import {descriptorContainsFilter} from 'utils/descriptorUtils';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import {DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import FieldError from 'src/components/atoms/FieldError';
@@ -42,6 +41,7 @@ export class SourceFieldset extends Component<Props, State> {
 
 	state = {
 		error: null,
+		hasFilter: false,
 		mode: null,
 		showEditForm: false
 	};
@@ -81,12 +81,15 @@ export class SourceFieldset extends Component<Props, State> {
 
 	callFilterModal = async () => {
 		const {onOpenFilterForm, value} = this.props;
-		const context = await onOpenFilterForm();
+		const filters = await onOpenFilterForm();
 
-		if (context) {
+		if (filters.success) {
+			const hasFilter = filters.descriptor !== null;
+
+			this.setState({hasFilter});
 			this.changeSource({
 				...value.source,
-				descriptor: context,
+				descriptor: filters.descriptor,
 				filterId: null
 			});
 		}
@@ -259,8 +262,9 @@ export class SourceFieldset extends Component<Props, State> {
 
 	isCurrentFilterChanged = (): boolean => {
 		const {value: {source}} = this.props;
-		const {descriptor} = source;
-		return source.filterId === null && descriptorContainsFilter(descriptor);
+		const {hasFilter} = this.state;
+
+		return source.filterId === null && hasFilter;
 	};
 
 	isDynamicAttribute = (attribute: ?Attribute) => attribute?.property === DYNAMIC_ATTRIBUTE_PROPERTY;
@@ -353,9 +357,10 @@ export class SourceFieldset extends Component<Props, State> {
 
 	renderFilterButton = (): React$Node => {
 		const {openingFilterForm, usesFilter, value} = this.props;
+		const {hasFilter} = this.state;
 		const {FILLED_FILTER, FILTER} = ICON_NAMES;
-		const {descriptor, filterId} = value.source;
-		const active = !!filterId || descriptorContainsFilter(descriptor);
+		const {filterId} = value.source;
+		const active = !!filterId || hasFilter;
 		const iconName = active ? FILLED_FILTER : FILTER;
 		const className = cn({
 			[styles.filterButtonIconOpening]: openingFilterForm,

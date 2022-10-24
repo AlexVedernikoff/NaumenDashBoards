@@ -1,0 +1,38 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		left: 0;
+		position: absolute;
+		top: 0;
+		z-index: 100;
+	}
+
+	.tooltip {
+		background-color: @white;
+		box-shadow: @box-shadow;
+		display: flex;
+		flex-direction: column;
+		min-width: 230px;
+		position: absolute;
+
+		div {
+			white-space: nowrap;
+		}
+
+		.title {
+			background-color: @gainsboro;
+			margin: 2px;
+			padding: 8px 14px;
+		}
+
+		.indicator {
+			padding: 4.5px 10px;
+		}
+
+		.period {
+			color: @grey;
+			padding: 4.5px 10px;
+		}
+	}
+}

@@ -167,13 +167,6 @@ const dataSelector = memoize((widget: AnyWidget): ?DropDownParams => {
 });
 
 /**
- * Проверка того, что на виджете установленна пользовательская фильтрация
- * @param {Widget} widget - виджет
- * @returns {boolean}
- */
-const hasUserFilters = (widget: Widget) => widget.data.some(item => item.source.widgetFilterOptions?.some(filter => descriptorContainsFilter(filter.descriptor)));
-
-/**
  * Формирует список пользовательских фильтров на виджете
  * @param {Widget} widget - виджет
  * @returns {FiltersOnWidget} - options - элементы для выпадающего списка; selected - выбранный элемент
@@ -197,7 +190,7 @@ const getFiltersOnWidget = (widget: Widget): FiltersOnWidget => {
 
 					subResult.push(option);
 
-					if (descriptorContainsFilter(descriptor)) {
+					if (descriptor) {
 						selected = value;
 					}
 				});
@@ -258,8 +251,8 @@ const getNewDescriptor = async (filter: CustomFilter, classFqn: string): Promise
 
 	try {
 		const context = descriptor
-			? getFilterContext(descriptor, classFqn, getDescriptorCases)
-			: createFilterContext(classFqn, getDescriptorCases);
+			? await getFilterContext(descriptor, classFqn, getDescriptorCases)
+			: await createFilterContext(classFqn, getDescriptorCases);
 
 		if (context) {
 			context['attrCodes'] = filter.attributes.map(attr => {
@@ -293,7 +286,7 @@ const changeFiltersOnWidget = async (widget: Widget, value: string) => {
 
 	if (filter) {
 		const newDescriptor = await getNewDescriptor(filter, source.value.value);
-		const updateDescriptor = descriptorContainsFilter(newDescriptor) ? newDescriptor : '';
+		const updateDescriptor = await descriptorContainsFilter(newDescriptor) ? newDescriptor : null;
 		const newWidget = deepClone(widget);
 		const widgetFilter = newWidget.data[dataSetIndex]?.source.widgetFilterOptions?.[filterIndex];
 
@@ -319,7 +312,7 @@ const clearFiltersOnWidget = (widget: Widget) => {
 		const {widgetFilterOptions} = dataSet.source;
 
 		if (widgetFilterOptions) {
-			widgetFilterOptions.forEach(widgetFilter => { widgetFilter.descriptor = ''; });
+			widgetFilterOptions.forEach(widgetFilter => { widgetFilter.descriptor = null; });
 		}
 	});
 
@@ -348,7 +341,6 @@ export {
 	filtersOnWidgetSelector,
 	getDataForNavigation,
 	getNewDescriptor,
-	hasUserFilters,
 	modeSelector,
 	navigationSelector,
 	parseDiagramWidget

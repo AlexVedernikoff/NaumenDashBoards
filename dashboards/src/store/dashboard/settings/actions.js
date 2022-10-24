@@ -371,7 +371,7 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
 
 	if (descriptorStr && foundKey) {
 		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode, WIDGET_TYPES.BAR);
-		const classFqn = getValueFromDescriptor(descriptorStr);
+		const classFqn = await getValueFromDescriptor(descriptorStr);
 		const {label, value} = sources.data.map[classFqn].value;
 		const {axisChartForm: values} = widgetForms;
 		const newData = values.data.map((dataSet, i) => i === 0 ? ({

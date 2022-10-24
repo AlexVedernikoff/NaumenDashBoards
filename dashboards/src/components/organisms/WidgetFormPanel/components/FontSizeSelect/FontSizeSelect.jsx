@@ -16,8 +16,12 @@ export class FontSizeSelect extends PureComponent<Props, State> {
 	};
 
 	state = {
-		options: this.getOptions(this.props)
+		options: []
 	};
+
+	componentDidMount () {
+		this.setState({options: this.getOptions(this.props)});
+	}
 
 	componentDidUpdate (prevProps: Props) {
 		if (prevProps.usesAuto !== this.props.usesAuto) {
@@ -27,7 +31,6 @@ export class FontSizeSelect extends PureComponent<Props, State> {
 
 	getOptions (props: Props) {
 		const {options, usesAuto} = props;
-
 		return usesAuto ? [FONT_SIZE_AUTO_OPTION, ...options] : options;
 	}
 
@@ -41,7 +44,8 @@ export class FontSizeSelect extends PureComponent<Props, State> {
 	};
 
 	render () {
-		const {className, editable, name, onSelect, options, value} = this.props;
+		const {className, editable, name, onSelect, value} = this.props;
+		const {options} = this.state;
 
 		return (
 			<Select

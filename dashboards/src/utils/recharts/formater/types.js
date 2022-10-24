@@ -47,7 +47,8 @@ export type ComboFormatter = {
 };
 
 export type TotalFormatter = {
-	data: NumberFormatter
+	data: NumberFormatter,
+	diff: NumberFormatter
 };
 
 export type SpeedometerFormatter = {

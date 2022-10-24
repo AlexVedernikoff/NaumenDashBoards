@@ -84,6 +84,7 @@ export class Datepicker extends PureComponent<Props, State> {
 		const hasCurrentMonth = date.get('month') === currentDate.get('month');
 		const isWeekend = WEEKEND_DAYS.includes(date.isoWeekday());
 		const isSelected = value && moment(value).isSame(date, 'day') && hasCurrentMonth;
+		const dateValue = date.format();
 
 		const dayCN = cn({
 			[styles.day]: true,
@@ -95,7 +96,7 @@ export class Datepicker extends PureComponent<Props, State> {
 		});
 
 		return (
-			<div className={dayCN} data-value={date.format()} onClick={this.handleClickDay}>
+			<div className={dayCN} data-value={dateValue} key={dateValue} onClick={this.handleClickDay}>
 				{date.get('date')}
 			</div>
 		);

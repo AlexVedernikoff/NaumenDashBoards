@@ -30,11 +30,11 @@ const getDefaultBreakdown = (dataKey: string): Breakdown => [{
  * @param {SourceData} data - источник с установленным дескриптором
  * @returns {AttrSetConditions} - информация для фильтрации атрибутов
  */
-const parseAttrSetConditions = (data: ?SourceData): ?AttrSetConditions => {
+const parseAttrSetConditions = async (data: ?SourceData): Promise<?AttrSetConditions> => {
 	let result = null;
 
 	if (data && data.descriptor) {
-		result = parseCasesAndGroupCode(data.descriptor);
+		result = await parseCasesAndGroupCode(data.descriptor);
 	}
 
 	return result;

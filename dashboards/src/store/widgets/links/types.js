@@ -21,6 +21,8 @@ export type DrillDownMixin = {
 	descriptor?: string,
 	filterId?: string,
 	filters: Array<Filter>,
+	isSummaryAdditionalValue?: boolean,
+	summaryWidgetKey?: string,
 	title: string,
 	widgetFilters?: WidgetFilters[]
 };
