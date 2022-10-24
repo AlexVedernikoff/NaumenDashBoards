@@ -2571,7 +2571,7 @@
                             value: value,
                             title: title,
                             id: id,
-                            type: Comparison.NOT_EQUAL,
+                            type: Comparison.NOT_EQUAL_AND_NOT_NULL,
                             attribute: attribute
                         )
                     case Condition.IN:
@@ -6214,6 +6214,7 @@
                 case [GroupType.WEEK, GroupType.YEAR] : return weeksInCorrectOrder(labels, format, reverse)
                 case GroupType.QUARTER : return quartersInCorrectOrder(labels, format, reverse)
             }
+            return labels
         }
 
         /**
