@@ -92,7 +92,7 @@ class GanttDataSetService
         GanttSettingsService service = GanttSettingsService.instance
         GanttSettingsClass settings = service.getGanttSettings(request)
 
-        def data = new GanttDiagramData()
+        GanttDiagramData data = new GanttDiagramData()
         data.commonSettings = settings.commonSettings
         data.diagramKey = settings.diagramKey
         data.workRelations = settings.workRelations
@@ -178,7 +178,7 @@ class GanttDataSetService
         GanttDiagramData data = new GanttDiagramData()
         data.commonSettings = ganttVersionsSettings.ganttSettings.commonSettings
         data.diagramKey = ganttVersionsSettings.ganttSettings.diagramKey
-        data.workRelations = ganttVersionsSettings.ganttSettings.workRelations
+        data.workRelations = ganttVersionsSettings.workRelations
         data.workRelationCheckbox = ganttVersionsSettings.ganttSettings.workRelationCheckbox
         data.progressCheckbox = ganttVersionsSettings.ganttSettings.progressCheckbox
         if (ganttVersionsSettings.ganttSettings.startDate &&
@@ -288,12 +288,17 @@ class GanttDataSetService
 
             diagramEntities.each { entity ->
                 Map<String, Object> task = [:]
-                if (entity.sourceType == 'WORK')
+                if (entity.sourceType == 'WORK' || entity.sourceType == 'milestone')
                 {
                     task.parent = entity.parent
+                    task.datesStartDateAndEndDate = entity.datesStartDateAndEndDate
+                    task.positionElement = entity.positionElement
+                }
+                else
+                {
+                    task.datesStartDateAndEndDate = false
                 }
                 task.type = entity.sourceType
-                task.datesStartDateAndEndDate = entity.datesStartDateAndEndDate
                 task.editable = entity.editable
                 task.level = entity.level
                 task.name = entity.name
@@ -701,7 +706,10 @@ class GanttDataSetService
                         it.start_date = currentObject[milestoneAttributeName]
                         it.remove('end_date')
                     }
-
+                    if (settings.type == SourceType.WORK || it.type == 'milestone')
+                    {
+                        it << ['positionElement': null]
+                    }
                 }
                 // Если есть настройка-потомок (уровень вложенности следующей в списке настройки выше, чем у текущей).
                 if ((settingsList.size() > (i + 1)) && (settingsList[i + 1].level > settings.level))
