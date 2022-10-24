@@ -608,7 +608,9 @@ class GanttDataSetService
                 isStartDate = settings.startWorkAttribute
                 isEndDate = settings.endWorkAttribute
                 attributeForMilestone = settings.checkpointStatusAttr
-                milestoneAttributeName = settings.checkpointStatusAttr.code.split('@').last()
+                if(milestoneAttributeName){
+                    milestoneAttributeName = settings.checkpointStatusAttr.code.split('@').last()
+                }
                 if (isStartDate)
                 {
                     mapAttributes.put('start_date', prepare(settings.startWorkAttribute))
@@ -692,7 +694,7 @@ class GanttDataSetService
                         }
                     }
                     ISDtObject currentObject = api.utils.get(it.id)
-                    if (currentObject.hasProperty(milestoneAttributeName) &&
+                    if (milestoneAttributeName && currentObject.hasProperty(milestoneAttributeName) &&
                         currentObject[milestoneAttributeName])
                     {
                         String elementWithFinalStatus =
