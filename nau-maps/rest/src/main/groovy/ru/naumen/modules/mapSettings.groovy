@@ -25,7 +25,7 @@ import groovy.json.JsonSlurper
 class ConstantMap
 {
     public static final String NAME_MECHANISM_SETTINGS = 'map'
-    public static final String EMBEDDED_APPLICATION_CODE = 'testSvg'
+    public static final String EMBEDDED_APPLICATION_CODE = 'nauMaps'
     public static final String ACTUAL_VERSION = 'actualVersion'
     public static final String FIRST_PART_STRATEGY_CODE = 'mapStrategy'
 }
@@ -393,6 +393,7 @@ String getContentTitleMap()
 }
 
 @InjectApi
+
 class SettingsProvider
 {
     MapSettings getSettings()
@@ -404,7 +405,8 @@ class SettingsProvider
             int actualVersionNumber = actualVersion as Integer
             if (actualVersionNumber > -1)
             {
-                String settingsJson = api.keyValue.get(nameSpace, "settings$actualVersion")
+                String keyForVersion = 'settings' + actualVersion
+                String settingsJson = api.keyValue.get(nameSpace, keyForVersion)
                 MapSettingsWithTimeStamp settings =
                     Jackson.fromJsonString(settingsJson, MapSettingsWithTimeStamp)
                 return settings.settings
@@ -425,7 +427,8 @@ void saveSettings(MapSettings settings)
         )
     )
     actualVersion++
-    api.keyValue.put(nameSpace, "settings$actualVersion", settingsJson)
+    String keyForVersion = 'settings' + actualVersion
+    api.keyValue.put(nameSpace, keyForVersion, settingsJson)
     api.keyValue.put(nameSpace, ConstantMap.ACTUAL_VERSION, actualVersion.toString())
 }
 
