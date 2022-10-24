@@ -8,6 +8,7 @@ import {
 	pointsCreateCoordinate,
 	sortPointCorrect
 } from './helpers';
+import type {Entity} from 'store/entity/types';
 import {functions, props} from './selectors';
 import {Layer, Stage} from 'react-konva';
 import Lines from 'components/organisms/Element/Lines';
@@ -20,11 +21,9 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 	const stageRef = useRef(null);
 	const [isDrag, setIsDrag] = useState(false);
 	const [hoverElement, setHoverElement] = useState(null);
-
-	const [option, setOption] = useState({maxX: 0, maxY: 0, minY: 0});
 	const [offset, setOffset] = useState({x: 0, y: 0});
-	const [points, setPoints] = useState([]);
-	const [lines, setLines] = useState([]);
+	const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
+	const [schemes, setSchemes] = useState([]);
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -52,17 +51,16 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 	}, [exportTo]);
 
 	useEffect(() => {
-		const filterPoints = data.filter(e => e.type === 'point');
+		data.forEach((entities: Entity[]) => {
+			const filterPoints = entities.filter(e => e.type === 'point');
+			const filterLines = entities.filter(e => e.type === 'line');
 
-		sortPointCorrect(filterPoints);
+			sortPointCorrect(filterPoints); // приведения к правильному порядку основываясь на зависимости от id и родитель/ребенок
+			const {bufferPoints, options} = pointsCreateCoordinate(filterPoints); // первичная выкладка элементов на схеме
+			const {connectors, customOptions} = conversionSearchPosition(bufferPoints, options); // корректировка выкладки для устранения пересечений
 
-		const {bufferPoints, options} = pointsCreateCoordinate(filterPoints);
-		const {connectors, customOptions} = conversionSearchPosition(bufferPoints, options);
-
-		setLines(data.filter(e => e.type === 'line'));
-		setPoints(connectors);
-		setOption({maxX: customOptions.maxX + 50, maxY: customOptions.maxY, minY: customOptions.minY - 25});
-		setOffset({x: 0, y: customOptions.maxY + customOptions.minY});
+			setSchemes(oldArray => [...oldArray, {lines: filterLines, options: customOptions, points: connectors}]);
+		});
 	}, [data]);
 
 	const handleCloseContextMenu = () => {
@@ -88,32 +86,77 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 	const handleWheelZoom = e => {
 		e.evt.preventDefault();
 		const {deltaY, x, y} = e.evt;
-		let newScale = scale;
+		const newScale = setScale(deltaY < 0);
 
-		if (deltaY < 0) {
-			if (scale === 2) {
-				return;
-			}
-
-			if (scale >= 1) {
-				newScale = scale + 0.5;
-			} else {
-				newScale = scale * 2;
-			}
-		} else {
-			if (scale === 0.25) {
-				return;
-			}
-
-			if (scale >= 1) {
-				newScale = scale - 0.5;
-			} else {
-				newScale = scale / 2;
-			}
+		if (newScale) {
+			setOffset({
+				x: x - x / newScale - (position.x - position.x / newScale),
+				y: y - y / newScale - (position.y - position.y / newScale)
+			});
+			setMousePosition({x, y});
 		}
+	};
 
-		setScale(newScale);
-		setOffset({x: x - x / newScale, y: y - y / newScale + (option.maxY + option.minY)});
+	const renderSchemeItems = () => {
+		let widthMax = 0;
+		let offsetX = 0;
+		let offsetY = 0;
+		let isIndividual = false;
+
+		return schemes.map(({lines, options, points}) => {
+			if (widthMax < options.maxX) { // максимальная ширина схем
+				widthMax = options.maxX;
+			}
+
+			if (points.length === 1) { // одинарный элемент
+				if (isIndividual) {
+					offsetX += 150;
+				}
+
+				isIndividual = true;
+			} else {
+				isIndividual = false;
+				offsetX = 0;
+			}
+
+			if (!isIndividual) { // сдвиг в низ на холсте для отрисовки схем
+				offsetY += -options.minY + 25;
+			} else if (offsetX > widthMax) { // если не помещаются одинарные в линию
+				offsetX = 0;
+				offsetY += 180;
+			}
+
+			const schemeItems = [];
+			lines.forEach(line => {
+				const from = points.find(s => s.id === line.from);
+				const to = points.find(s => s.id === line.to);
+
+				schemeItems.push(<Lines
+					entity={line}
+					handleContextMenu={handleContextMenu}
+					key={line.id}
+					onClick={setActiveElement}
+					onHover={setHoverElement}
+					points={{fromX: from.x + offsetX, fromY: from.y + offsetY, toX: to.x + offsetX, toY: to.y + offsetY}} />);
+			});
+			points.forEach(point => {
+				schemeItems.push(<Points
+					className={styles.hover}
+					entity={point}
+					handleContextMenu={handleContextMenu}
+					key={point.id}
+					onClick={setActiveElement}
+					onHover={setHoverElement}
+					x={point.x + offsetX}
+					y={point.y + offsetY} />);
+			});
+
+			if (!isIndividual) { // если многомерная схема то сдвигаем вниз на 350
+				offsetY += options.maxY + 350;
+			}
+
+			return schemeItems;
+		});
 	};
 
 	const classNames = cn({
@@ -139,29 +182,7 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 			y={position.y}
 		>
 			<Layer>
-				{lines.map(line => {
-					const from = points.find(s => s.id === line.from);
-					const to = points.find(s => s.id === line.to);
-
-					return <Lines
-						entity={line}
-						handleContextMenu={handleContextMenu}
-						key={line.id}
-						onClick={setActiveElement}
-						onHover={setHoverElement}
-						points={{fromX: from.x, fromY: from.y, toX: to.x, toY: to.y}} />;
-				})}
-				{points.map(point => {
-					return <Points
-						className={styles.hover}
-						entity={point}
-						handleContextMenu={handleContextMenu}
-						key={point.id}
-						onClick={setActiveElement}
-						onHover={setHoverElement}
-						x={point.x}
-						y={point.y} />;
-				})}
+				{renderSchemeItems()}
 			</Layer>
 		</Stage>
 	);

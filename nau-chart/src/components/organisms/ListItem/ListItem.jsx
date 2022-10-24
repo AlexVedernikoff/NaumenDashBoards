@@ -10,7 +10,7 @@ const ListItem = ({label, value}: Props) => {
 	return (
 		<div className={styles.itemContainer} key={label}>
 			<div className={styles.itemTitle}>{label}</div>
-			{[value].map(({ label, url }) => <ListItemValue key={label} label={label} url={url} />)}
+			{value.map(({label, url}) => <ListItemValue key={label} label={label} url={url} />)}
 		</div>
 	);
 };

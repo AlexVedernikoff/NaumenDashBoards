@@ -11,7 +11,7 @@ import Scrollable from 'components/atoms/Scrollable';
 import styles from './styles.less';
 
 const List = ({activeElement, data, showEditForm}: Props) => {
-	const [viewList, setViewList] = useState(true);
+	const [viewList, setViewList] = useState(false);
 
 	const handleOpenLink = actions => () => {
 		const [action] = actions || [];
@@ -80,7 +80,7 @@ const List = ({activeElement, data, showEditForm}: Props) => {
 			{renderChangeView()}
 			<Scrollable>
 				{activeElement && renderContainer(activeElement)}
-				{data.map(renderList)}
+				{data.flat().map(renderList)}
 			</Scrollable>
 		</div>
 	);

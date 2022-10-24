@@ -2,7 +2,7 @@
 export type ConnectedProps = {
 	scale: number,
 	setExportTo: (format: string) => {},
-	setScale: (scale: number) => {},
+	setScale: (delta: boolean | undefined) => {},
 };
 
 export type ConnectedFunctions = {

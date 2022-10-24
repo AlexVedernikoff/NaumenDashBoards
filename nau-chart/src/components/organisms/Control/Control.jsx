@@ -19,27 +19,11 @@ const Control = ({getDataEntity, position, scale, setExportTo, setPosition, setS
 	];
 
 	const addScale = () => {
-		if (scale === 2) {
-			return;
-		}
-
-		if (scale >= 1) {
-			setScale(scale + 0.5);
-		} else {
-			setScale(scale * 2);
-		}
+		setScale(true);
 	};
 
 	const decreaseScale = () => {
-		if (scale === 0.25) {
-			return;
-		}
-
-		if (scale >= 1) {
-			setScale(scale - 0.5);
-		} else {
-			setScale(scale / 2);
-		}
+		setScale(false);
 	};
 
 	const reloadSchema = () => {
@@ -53,7 +37,7 @@ const Control = ({getDataEntity, position, scale, setExportTo, setPosition, setS
 	};
 
 	const resetSchemaSetting = () => {
-		setScale(1);
+		setScale();
 		setPosition({x: 0, y: 0});
 	};
 

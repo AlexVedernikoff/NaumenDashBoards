@@ -86,12 +86,45 @@ const setActiveElement = (payload: Entity) => ({
 
 /**
  * Установка зума
- * @param {number} payload - зум
+ * @param {boolean | undefined} delta - направление изменения зума, при отсутствии сброс к дефолту
+ * @returns {ThunkAction<number>} значение зума
  */
-const setScale = (payload: string) => ({
-	payload,
-	type: VERIFY_EVENTS.SET_SCALE
-});
+const setScale = (delta: boolean | undefined): ThunkAction => (dispatch: Dispatch, getState: GetState): number => {
+	const {scale} = getState().entity;
+
+	let newScale = scale;
+
+	if (delta === undefined) {
+		newScale = 1;
+	} else if (delta) {
+		if (scale === 2) {
+			return;
+		}
+
+		if (scale >= 1) {
+			newScale = scale + 0.5;
+		} else {
+			newScale = scale * 2;
+		}
+	} else {
+		if (scale === 0.25) {
+			return;
+		}
+
+		if (scale >= 1) {
+			newScale = scale - 0.5;
+		} else {
+			newScale = scale / 2;
+		}
+	}
+
+	dispatch({
+		payload: newScale,
+		type: VERIFY_EVENTS.SET_SCALE
+	});
+
+	return newScale;
+};
 
 /**
  * Установка экспорта
