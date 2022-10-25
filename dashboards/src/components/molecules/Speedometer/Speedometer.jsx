@@ -71,7 +71,7 @@ export class Speedometer extends PureComponent<Props, State> {
 				if (legendInVertical) {
 					legendWidth = Math.round(width / 4);
 					graphWidth = width - legendWidth;
-					legendHeight = height;
+					legendHeight = height - 30;
 				} else {
 					legendHeight = Math.round(height / 4);
 					graphHeight = height - legendHeight;
