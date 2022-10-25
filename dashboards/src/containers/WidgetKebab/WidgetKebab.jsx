@@ -1,4 +1,5 @@
 // @flow
+import api from 'api';
 import {
 	changeFiltersOnWidget,
 	clearFiltersOnWidget,
@@ -18,7 +19,8 @@ import WidgetKebab from 'components/organisms/Widget/components/WidgetKebab/Widg
 
 export class WidgetKebabContainer extends PureComponent<Props, State> {
 	state = {
-		diagramWidget: null
+		diagramWidget: null,
+		needToCloseFilterForm: false
 	};
 
 	static getDerivedStateFromProps (props, state) {
@@ -28,11 +30,21 @@ export class WidgetKebabContainer extends PureComponent<Props, State> {
 		};
 	}
 
+	componentWillUnmount () {
+		const {needToCloseFilterForm} = this.state;
+
+		if (needToCloseFilterForm) {
+			api.instance.filterForm.closeForm();
+		}
+	}
+
 	handleChangeFiltersOnWidget = async filter => {
 		const {saveWidgetWithNewFilters} = this.props;
 		const {diagramWidget} = this.state;
 		const {value} = filter;
 		let newWidget = null;
+
+		this.setState({needToCloseFilterForm: true});
 
 		if (diagramWidget) {
 			if (typeof value === 'string') {
@@ -45,6 +57,8 @@ export class WidgetKebabContainer extends PureComponent<Props, State> {
 		if (newWidget) {
 			await saveWidgetWithNewFilters(newWidget);
 		}
+
+		this.setState({needToCloseFilterForm: false});
 	};
 
 	handleChangeMode = ({value: displayMode}) => {
