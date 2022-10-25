@@ -5,7 +5,8 @@ import {createContext} from 'react';
 const LABELS_STORAGE_CONTEXT = createContext<Context>({
 	clearLabels: () => {},
 	getLabels: () => [],
-	registerLabel: () => {}
+	registerLabel: () => {},
+	unregisterLabel: () => {}
 });
 
 LABELS_STORAGE_CONTEXT.displayName = 'LABELS_STORAGE_CONTEXT';

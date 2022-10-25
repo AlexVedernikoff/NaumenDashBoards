@@ -26,7 +26,8 @@ export type StoreLabelProps = Label & { };
 export type Context = {
 	clearLabels: () => void,
 	getLabels: () => Array<Label>,
-	registerLabel: (key: string, label: Label) => void
+	registerLabel: (key: string, label: Label) => void,
+	unregisterLabel: (key: string) => void
 };
 
 export type InjectedProps = {
