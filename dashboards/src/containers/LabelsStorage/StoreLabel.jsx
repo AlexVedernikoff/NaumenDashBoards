@@ -21,11 +21,12 @@ export class StoreLabel extends PureComponent<Props> {
 
 	registerLabel = (context: Context) => {
 		const {height, width} = this.props;
+		const key = generateLabelKey(this.props);
 
-		if (height > 1 && width > 1) { // Проверка на нулевые области
-			const key = generateLabelKey(this.props);
-
+		if (height >= 1 && width >= 1) { // Проверка на нулевые области
 			context.registerLabel(key, this.props);
+		} else {
+			context.unregisterLabel(key);
 		}
 	};
 

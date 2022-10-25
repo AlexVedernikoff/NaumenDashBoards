@@ -14,13 +14,20 @@ export const withLabelsStorage = <Config: {}>(Component: React$ComponentType<Con
 		getHelpers = () => ({
 			clearLabels: this.clearLabels,
 			getLabels: this.getLabels,
-			registerLabel: this.registerLabel
+			registerLabel: this.registerLabel,
+			unregisterLabel: this.unregisterLabel
 		});
 
 		getLabels = () => Object.values(this.labels);
 
 		registerLabel = (key: string, label: Label) => {
 			this.labels[key] = label;
+		};
+
+		unregisterLabel = (key: string) => {
+			if (key in this.labels) {
+				delete this.labels[key];
+			}
 		};
 
 		render () {
