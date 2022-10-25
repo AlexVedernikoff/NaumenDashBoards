@@ -21,8 +21,14 @@ export class Toast extends PureComponent<Props> {
 		const {position, text, topOffset} = this.props.data;
 		const css = {};
 
-		if (topOffset && position === 'byElement') {
-			css.top = topOffset;
+		if (document.body && topOffset && position === 'byElement') {
+			const documentOffset = document.body.offsetHeight - topOffset;
+
+			if (documentOffset >= 200) {
+				css.top = topOffset;
+			} else {
+				css.bottom = documentOffset;
+			}
 		}
 
 		return (
