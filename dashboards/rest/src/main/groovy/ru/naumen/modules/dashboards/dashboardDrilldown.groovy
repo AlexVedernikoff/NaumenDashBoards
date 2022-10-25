@@ -217,8 +217,8 @@ class DashboardDrilldownService
             def casesFromDescriptor = listdata.createListDescriptor(requestContent.descriptor)
             def listOfCasesFromDescriptor = casesFromDescriptor.fqns.code
             listOfCasesFromDescriptor.each { code ->
-                IMetaClassWrapper metaClass = metainfo.getMetaClass(code).parent
-                if (metaClass.code != 'abstractBO')
+                IMetaClassWrapper metaClass = metainfo.getMetaClass(code)?.parent
+                if (metaClass && metaClass.code != 'abstractBO')
                 {
                     requestContent.cases << code
                 }
