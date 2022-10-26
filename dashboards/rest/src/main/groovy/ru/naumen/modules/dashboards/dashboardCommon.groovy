@@ -766,6 +766,12 @@ class DashboardUtils
     static Date getMinDate(String code, String classFqn, String descriptor = '')
     {
         def res
+
+        if (code.contains('@'))
+        {
+            code = code.split('@').last()
+        }
+
         if(descriptor)
         {
             def sc = getApi().selectClause

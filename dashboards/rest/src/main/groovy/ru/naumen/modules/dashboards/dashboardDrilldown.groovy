@@ -767,14 +767,15 @@ class DashboardDrilldownService
                                             case Condition.LAST:
                                                 return filterBuilder.OR(attr.code, 'lastN', it.data as int)
                                             case Condition.LAST_HOURS:
-                                                Date date = DateUtils.addMinutes(it.data, offsetMinutes)
-                                                return filterBuilder.OR(attr.code, 'lastNHours', date as Double)
+                                                Double hours = it.data as Double
+                                                hours += (offsetMinutes / 60)
+                                                return filterBuilder.OR(attr.code, 'lastNHours', hours)
                                             case Condition.NEAR:
-                                                Date date = DateUtils.addMinutes(it.data, offsetMinutes)
-                                                return filterBuilder.OR(attr.code, 'nextN', date as int)
+                                                return filterBuilder.OR(attr.code, 'nextN', it.data as int)
                                             case Condition.NEAR_HOURS:
-                                                Date date = DateUtils.addMinutes(it.data, offsetMinutes)
-                                                return filterBuilder.OR(attr.code, 'nextNHours', date as Double)
+                                                Double hours = it.data as Double
+                                                hours += (offsetMinutes / 60)
+                                                return filterBuilder.OR(attr.code, 'nextNHours', hours)
                                             case Condition.BETWEEN:
                                                 String dateFormat
                                                 def dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
@@ -1753,8 +1754,8 @@ class DashboardDrilldownService
         FilterProvider ddMmYyyyHhStaticFilter = { String format, String value, def filterBuilder,
                                                   Attribute attr, String classFqn, String descriptor ->
             List<String> fullDate = value.replace('ч', '').replace(',', '').split()
-            def (date, hour) = fullDate
-            String[] splitDate = date.tokenize('.')
+            def (dateString, hour) = fullDate
+            String[] splitDate = dateString.tokenize('.')
             def (day, month, year) = splitDate
 
             def datePoint = date.createDateTimePointPredicates(['DAY', day as int, 'EQ'],
