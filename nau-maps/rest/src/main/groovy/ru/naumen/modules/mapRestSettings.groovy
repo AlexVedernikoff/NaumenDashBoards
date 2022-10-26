@@ -46,7 +46,6 @@ String getMapObjects(String subjectUuid, String contentUuid, LinkedTreeMap userU
     Object userObject = userUuid['admin'] ?: api.utils.get(userUuid['uuid'])
     LinkedHashMap<String, Object> bindings = userUuid['admin'] ? ['subject': subjectObject] :
         ['subject': subjectObject, 'user': userObject]
-    saveBindingsDataToKeyValue(bindings)
     ISDtObject object = utils.get(subjectUuid)
     return getMapInfo(object, contentUuid, bindings)
 }
@@ -410,7 +409,7 @@ class ElementsMap
                 equipment[strategie?.tooltip] : null
         String codeAttributeGroup = settings?.attributeGroup
         String codeMetaClass = settings?.metaClassObject.id
-        if (equipment && equipment.title && equipment.ciModel && equipment.location)
+        if (equipment && equipment.title && equipment[strategie.pathLatitudeCoordinates] && equipment[strategie.pathLongitudeCoordinates])
         {
             Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
             BasePointBuilder formedEquipmentObject = createPointObjectBuilder(
@@ -1043,7 +1042,7 @@ class BasePointBuilder extends MapObjectBuilder
 
     BasePointBuilder setGeopositions(ISDtObject dbEquip, OutputObjectStrategies strategie)
     {
-        def geoposition = dbEquip && dbEquip.location
+        def geoposition = dbEquip
             ? new Geoposition(
             latitude: dbEquip[strategie.pathLatitudeCoordinates],
             longitude: dbEquip[strategie.pathLongitudeCoordinates]
