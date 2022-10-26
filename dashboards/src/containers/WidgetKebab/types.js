@@ -58,7 +58,8 @@ export type OwnProps = {
 };
 
 export type State = {
-	diagramWidget: ?Widget
+	diagramWidget: ?Widget,
+	needToCloseFilterForm: boolean,
 };
 
 export type Props = ConnectedFunctions & ConnectedProps & OwnProps;
