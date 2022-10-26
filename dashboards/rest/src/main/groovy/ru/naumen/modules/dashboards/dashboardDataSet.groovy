@@ -108,8 +108,8 @@
                 widgetFilters = []
             }
             return user
-                ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user).with(JsonOutput.&toJson) }
-                : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user).with(JsonOutput.&toJson)
+                ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, requestContent).with(JsonOutput.&toJson) }
+                : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, requestContent).with(JsonOutput.&toJson)
         }
 
         @Override
@@ -126,8 +126,8 @@
                 widgetFilters = []
             }
             return user
-                ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.tableRequestSettings).with(JsonOutput.&toJson) }
-                : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.tableRequestSettings).with(JsonOutput.&toJson)
+                ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.tableRequestSettings, requestContent).with(JsonOutput.&toJson) }
+                : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.tableRequestSettings, requestContent).with(JsonOutput.&toJson)
         }
     }
 
@@ -253,6 +253,7 @@
          * @param widgetFilters - список пользовательских фильтров для виджета
          * @param frontOffsetMinutes - смещение в минутах относительно 0 часового пояса, полученное с фронта
          * @param tableRequestSettings - настройки для запроса по таблице
+         * @param requestContent - тело запроса
          * @return Типизированниые данные для построения диаграмм
          */
         def buildDiagram(String dashboardKey,
@@ -261,7 +262,8 @@
                          Collection<WidgetFilterResponse> widgetFilters = [],
                          Integer frontOffsetMinutes,
                          IUUIDIdentifiable user = null,
-                         TableRequestSettings tableRequestSettings = null)
+                         TableRequestSettings tableRequestSettings = null,
+                         Map<String, Object> requestContent)
         {
             currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
             DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey, true)
@@ -348,7 +350,7 @@
                     String requestDataKey = request.data.keySet().first()
                     RequestData requestData = request.data[requestDataKey]
                     res = applyIndicatorsFiltration(requestData, res)
-                    res = applyIndicatorsBreakdown(requestData, res)
+                    res = applyIndicatorsBreakdown(requestData, res, subjectUUID, offsetUTCMinutes, templateUUID, requestContent, dbSettings, aggregationCnt, widgetSettings)
                 }
 
                 DashboardUtils.log('dashboardDataSet', 342, 'res', res, true)
@@ -598,9 +600,18 @@
          * Метод применения разбивки на показателях
          * @param requestData - данные запроса
          * @param res - результат первоначального запроса
+         * @param subjectUUID - идентификатор "текущего объекта"
+         * @param offsetUTCMinutes - смещение в минутах относительно 0 часового пояса
+         * @param templateUUID - uuid шаблона динамического атрибута
+         * @param requestContent - тело запроса
+         * @param dbSettings - настройки дашборда
+         * @param aggregationCnt - количество агрегаций
+         * @param widgetSettings - тела запроса по метаданным из хранилища по ключу дашборда и виджета
          * @return результат с разбивкой на показателях
          */
-        private List applyIndicatorsBreakdown(RequestData requestData, List res)
+        private List applyIndicatorsBreakdown(RequestData requestData, List res, String subjectUUID, Integer offsetUTCMinutes,
+                                              String templateUUID, Map<String, Object> requestContent,
+                                              DashboardSettingsClass dbSettings, Integer aggregationCnt, Widget widgetSettings)
         {
             Collection<AggregationParameter> allAggregations = requestData.aggregations
             Collection<AggregationParameter> aggregationsWithBreakdown =
@@ -614,26 +625,6 @@
                 RequestData requestDataCopy = requestData.clone()
                 requestDataCopy.aggregations = [aggregation]
                 requestDataCopy.groups = requestDataCopy.groups.collect()
-
-                GroupParameter breakdownGroup =
-                    buildSystemGroup(aggregation.breakdown.group, aggregation.breakdown.attribute)
-                requestDataCopy.groups << breakdownGroup
-
-                List result = dashboardQueryWrapperUtils.getData(
-                    requestDataCopy,
-                    null,
-                    currentUserLocale,
-                    false,
-                    DiagramType.PIVOT_TABLE,
-                    false,
-                    '',
-                    null,
-                    aggregation.descriptor ? new IndicatorFiltration(
-                        metaClassFqn: aggregation.attribute.sourceCode,
-                        descriptor: aggregation.descriptor
-                    ) : null
-                )
-
                 List listIdsOfNormalAggregations =
                     requestDataCopy.aggregations?.withIndex()?.findResults { val, i ->
                         if (val.type != Aggregation.NOT_APPLICABLE)
@@ -642,8 +633,95 @@
                         }
                     }
                 Closure formatGroup = this.&formatGroupSet.rcurry(requestDataCopy, listIdsOfNormalAggregations, DiagramType.PIVOT_TABLE)
-                result = formatGroup(result)
+                List result = []
+                if (aggregation.breakdown.group?.way == Way.SYSTEM)
+                {
+                    GroupParameter breakdownGroup =
+                        buildSystemGroup(aggregation.breakdown.group, aggregation.breakdown.attribute)
+                    requestDataCopy.groups << breakdownGroup
 
+                    result = dashboardQueryWrapperUtils.getData(
+                        requestDataCopy,
+                        null,
+                        currentUserLocale,
+                        false,
+                        DiagramType.PIVOT_TABLE,
+                        false,
+                        '',
+                        null,
+                        aggregation.descriptor ? new IndicatorFiltration(
+                            metaClassFqn: aggregation.attribute.sourceCode,
+                            descriptor: aggregation.descriptor
+                        ) : null
+                    )
+                    result = formatGroup(result)
+                } else
+                {
+                    Source source = requestData.source
+                    NewBreakdown breakdownAttribute = aggregation.breakdown
+                    breakdownAttribute.group =
+                        Group
+                            .mappingGroup(breakdownAttribute.group, dbSettings?.customGroups, false)
+                    NewParameter breakdownCustomGroup = new NewParameter(
+                        group: breakdownAttribute?.group,
+                        attribute: breakdownAttribute?.attribute
+                    )
+                    FilterList breakdownFilter = getFilterList(
+                        breakdownCustomGroup,
+                        subjectUUID,
+                        'breakdown',
+                        source,
+                        offsetUTCMinutes
+                    )
+                    List newParameterFilters = breakdownFilter.filters
+                    List filtering = prepareFilters(
+                        1,
+                        DiagramType.PIVOT_TABLE,
+                        requestContent,
+                        [],
+                        newParameterFilters
+                    )
+                    result = filtering?.withIndex()?.collectMany { filters, i ->
+                        requestDataCopy.filters = filters
+                        result = dashboardQueryWrapperUtils.getData(
+                            requestDataCopy,
+                            null,
+                            currentUserLocale,
+                            false,
+                            DiagramType.PIVOT_TABLE,
+                            false,
+                            templateUUID,
+                            aggregation.descriptor ? new IndicatorFiltration(
+                                metaClassFqn: aggregation.attribute.sourceCode,
+                                descriptor: aggregation.descriptor
+                            ) : null
+                        )
+                                                           .with(formatGroup)
+
+                        List<String> notAggregatedAttributes = []
+                        List attributes = getAttributeNamesAndValuesFromRequest(widgetSettings)
+                        notAggregatedAttributes = notAggregationAttributeNames(attributes)
+                        Collection filtersTitle = requestDataCopy.filters.unique {
+                            it.id
+                        }.findResults {
+                            if (it.title)
+                            {
+                                String titleValue = (it.title).find()
+                                if (dbSettings.type in DiagramType.SortableTypes && titleValue)
+                                {
+                                    return "${ titleValue }#${ (it.id).find() }"
+                                }
+                                return titleValue
+                            }
+                        }
+                        filtersTitle = filtersTitle.unique()
+                        Object partial = [(filtersTitle): result]
+                        partial = formatResult(
+                            partial,
+                            aggregationCnt + notAggregatedAttributes.size() + 1
+                        )
+                    }
+                }
                 replaceResultAttributeMetaClass(result, new DiagramRequest(data: [(requestDataCopy.source.dataKey): requestDataCopy]))
                 aggregationBreakdownResult[aggregation] = result
             }
@@ -675,7 +753,6 @@
                     res[0][resIndex][aggregationIndex] = matchBreakdownResultItems
                 }
             }
-
             return res
         }
 
@@ -1995,14 +2072,14 @@
          */
         private GroupParameter buildSystemGroup(def groupType, Attribute attr, String title = 'breakdown')
         {
-            return groupType?.way == Way.SYSTEM ? new GroupParameter(
+            return new GroupParameter(
                 title: title,
                 type: Attribute.getAttributeType(attr) == AttributeType.DT_INTERVAL_TYPE
                     ? getDTIntervalGroupType(groupType.data as String)
                     : groupType.data as GroupType,
                 attribute: attr,
                 format: groupType.format
-            ) : null
+            )
         }
 
         /**
@@ -3539,16 +3616,8 @@
                                     } : [[calculator.execute { key ->
                                     totalVar[key as String].find().find() as Double ?: 0
                                 }]]
-                                def title = fullFilterList.find().value.title.grep()
-                                def id = fullFilterList.find().value.id.grep()
-                                res = formatAggregationSet(
-                                    res,
-                                    listIdsOfNormalAggregations,
-                                    request,
-                                    diagramType,
-                                    onlyFilled,
-                                    getPercentCntAggregationIndexes(request)
-                                )
+
+
                                 def filtersTitle = title.any {it[0] != ''}
                                     ? (title[i] as Set)?.withIndex().findResults { val, idx ->
                                     return val.findResults {
@@ -6779,7 +6848,6 @@
             }
             return total
         }
-    }
 
     /**
      * Модель данных для диаграмм BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE
