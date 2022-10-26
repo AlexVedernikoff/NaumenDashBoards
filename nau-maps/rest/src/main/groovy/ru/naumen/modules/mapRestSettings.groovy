@@ -30,6 +30,7 @@ import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 import org.jsoup.nodes.Document
 import com.google.gson.internal.LinkedTreeMap
+import ru.naumen.core.server.script.api.metainfo.MetaClassWrapper
 
 //БЛОК REST АПИ--------------------------------------------------------
 
@@ -188,8 +189,8 @@ class ElementsMap
                 .setEquipments(dbTrail)
                 .addAction(GO_TO_CARD, api.web.open(dbTrail.UUID))
                 : null
-        Collection attributesFromGroup =
-            getSetAttributesOutputCharacteristics(defaultSettingsWizardSettings)
+        MetaclassNameAndAttributeList attributesFromGroup =
+            getSetAttributesOutputCharacteristics(defaultSettingsWizardSettings, dbTrail)
         addOptionsElementsOnMap(
             trailBuilder,
             dbTrail,
@@ -202,32 +203,79 @@ class ElementsMap
     /**
      * Получение списка дефолтных характеристик для вывода в списке объектов
      * @param defaultSettingsWizardSettings - дефолтные настройки из мастера настроек
+     * @param dbTrail - объект трассы из БД
      * @return список дефолтных характеристик
      */
-    Collection getSetAttributesOutputCharacteristics(DefaultVisualization defaultSettingsWizardSettings)
+    MetaclassNameAndAttributeList getSetAttributesOutputCharacteristics(DefaultVisualization defaultSettingsWizardSettings,
+                                                                        ISDtObject dbTrail)
     {
-        Collection<DataCharacteristicDisplayListObjects> dataCharacteristicDisplayListObjects = []
-        defaultSettingsWizardSettings.points.each {
-            dataCharacteristicDisplayListObjects.add(
-                new DataCharacteristicDisplayListObjects(
-                    it?.metaClassObject?.id,
-                    it?.metaClassObject?.caseId,
-                    it.attributeGroup
-                )
-            )
-        }
-        Collection<MetaclassNameAndAttributeList> attributesFromGroup = []
-        dataCharacteristicDisplayListObjects.each {
+        CharacteristicsDisplayListObjects dataCharacteristicDisplay = findingMetaclassMatches(
+            api.metainfo.getMetaClass(dbTrail),
+            defaultSettingsWizardSettings.points
+        )
+        MetaclassNameAndAttributeList attributesFromGroup
+        if (dataCharacteristicDisplay)
+        {
             String metaClassData =
-                it.metaClassCaseId ? String.join('$', it.metaClassId, it.metaClassCaseId) :
-                    it.metaClassId
-            Collection listattributes =
-                api.metainfo.getMetaClass(metaClassData)
-                   .getAttributeGroup(it.groupAttribute).attributes
-            attributesFromGroup
-                .add(new MetaclassNameAndAttributeList(metaClassData, listattributes))
+                dataCharacteristicDisplay?.metaClassObject?.caseId ? String.join(
+                    '$',
+                    dataCharacteristicDisplay?.metaClassObject?.id,
+                    dataCharacteristicDisplay?.metaClassObject?.caseId
+                ) :
+                    dataCharacteristicDisplay?.metaClassObject?.id
+            Collection listAttributes =
+                api.metainfo.getMetaClass(api.metainfo.getMetaClass(dbTrail).code)
+                   .getAttributeGroup(dataCharacteristicDisplay?.attributeGroup).attributes
+            attributesFromGroup = new MetaclassNameAndAttributeList(metaClassData, listAttributes)
         }
         return attributesFromGroup
+    }
+
+    /**
+     * Получение соответствующего объекту набора характеристик для вывода в списке объектов
+     * @param metaClassInfo - метаинформация об объекте
+     * @param characteristicsForOutput - список всех характеристик из мастера
+     * @return характеристика для объекта
+     */
+    CharacteristicsDisplayListObjects findingMetaclassMatches(MetaClassWrapper metaClassInfo,
+                                                              Collection characteristicsForOutput)
+    {
+        MetaClass
+        CharacteristicsDisplayListObjects characteristicsDisplay
+        if (!metaClassInfo)
+        {
+            return null
+        }
+        characteristicsDisplay = characteristicsForOutput.find {
+            String metaclassСodeFromWizard = it?.metaClassObject?.caseId ?
+                String.join('$', it?.metaClassObject?.id, it?.metaClassObject?.caseId) :
+                it?.metaClassObject?.id
+            return metaClassInfo?.code == metaclassСodeFromWizard
+        }
+        if (!characteristicsDisplay)
+        {
+            characteristicsForOutput.each {
+                String metaclassСodeFromWizard = it?.metaClassObject?.caseId ?
+                    String.join('$', it?.metaClassObject?.id, it?.metaClassObject?.caseId) :
+                    it?.metaClassObject?.id
+                if (metaClassInfo?.parent?.code ==
+                    metaclassСodeFromWizard &&
+                    it?.metaClassObject?.id == metaClassInfo?.code?.split('\\$')?.first())
+                {
+                    characteristicsDisplay = it
+                }
+                else if (metaClassInfo?.code == metaclassСodeFromWizard)
+                {
+                    characteristicsDisplay = it
+                }
+                else
+                {
+                    characteristicsDisplay =
+                        findingMetaclassMatches(metaClassInfo.parent, characteristicsForOutput)
+                }
+            }
+        }
+        return characteristicsDisplay
     }
 
     /**
@@ -239,16 +287,12 @@ class ElementsMap
      */
     void addOptionsElementsOnMap(Object builder,
                                  ISDtObject dbTrail,
-                                 Collection attributesFromGroup,
+                                 MetaclassNameAndAttributeList attributesFromGroup,
                                  String metaClassObject)
     {
-        MetaclassNameAndAttributeList metaclassNameAndAttributeList =
-            attributesFromGroup.find { characteristicsDisplayObjects ->
-                characteristicsDisplayObjects.metaclassName == dbTrail.getMetainfo().toString()
-            }
-        if (metaclassNameAndAttributeList)
+        if (attributesFromGroup)
         {
-            metaclassNameAndAttributeList.listAttribute.each { currentAttribute ->
+            attributesFromGroup.listAttribute.each { currentAttribute ->
                 String valueLabel
                 String linkElement
                 Collection<Value> boLinkTypeAttribute = []
@@ -426,8 +470,8 @@ class ElementsMap
                 .setGeopositions(equipment, strategie)
                 .addAction(GO_TO_CARD, api.web.open(equipment.UUID))
 
-            Set attributesFromGroup =
-                getSetAttributesOutputCharacteristics(defaultSettingsWizardSettings)
+            MetaclassNameAndAttributeList attributesFromGroup =
+                getSetAttributesOutputCharacteristics(defaultSettingsWizardSettings, equipment)
             addOptionsElementsOnMap(
                 formedEquipmentObject,
                 equipment,
