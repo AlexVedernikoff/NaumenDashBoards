@@ -409,7 +409,10 @@ class ElementsMap
                 equipment[strategie?.tooltip] : null
         String codeAttributeGroup = settings?.attributeGroup
         String codeMetaClass = settings?.metaClassObject.id
-        if (equipment && equipment.title && equipment[strategie.pathLatitudeCoordinates] && equipment[strategie.pathLongitudeCoordinates])
+        if (equipment &&
+            equipment.title &&
+            equipment[strategie.pathLatitudeCoordinates] &&
+            equipment[strategie.pathLongitudeCoordinates])
         {
             Boolean equipIsActive = equipment.getMetaClass().code.toLowerCase().contains('active')
             BasePointBuilder formedEquipmentObject = createPointObjectBuilder(
