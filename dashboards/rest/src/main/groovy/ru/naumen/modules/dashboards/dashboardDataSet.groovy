@@ -3617,6 +3617,16 @@
                                     totalVar[key as String].find().find() as Double ?: 0
                                 }]]
 
+                                def title = fullFilterList.find().value.title.grep()
+                                def id = fullFilterList.find().value.id.grep()
+                                res = formatAggregationSet(
+                                    res,
+                                    listIdsOfNormalAggregations,
+                                    request,
+                                    diagramType,
+                                    onlyFilled,
+                                    getPercentCntAggregationIndexes(request)
+                                )
 
                                 def filtersTitle = title.any {it[0] != ''}
                                     ? (title[i] as Set)?.withIndex().findResults { val, idx ->
