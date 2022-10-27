@@ -190,7 +190,7 @@ class ElementsMap
                 .addAction(GO_TO_CARD, api.web.open(dbTrail.UUID))
                 : null
         MetaclassNameAndAttributeList attributesFromGroup =
-            getSetAttributesOutputCharacteristics(defaultSettingsWizardSettings, dbTrail)
+            getListAttributesOutputCharacteristics(defaultSettingsWizardSettings, dbTrail)
         addOptionsElementsOnMap(
             trailBuilder,
             dbTrail,
@@ -206,8 +206,8 @@ class ElementsMap
      * @param dbTrail - объект трассы из БД
      * @return список дефолтных характеристик
      */
-    MetaclassNameAndAttributeList getSetAttributesOutputCharacteristics(DefaultVisualization defaultSettingsWizardSettings,
-                                                                        ISDtObject dbTrail)
+    MetaclassNameAndAttributeList getListAttributesOutputCharacteristics(DefaultVisualization defaultSettingsWizardSettings,
+                                                                         ISDtObject dbTrail)
     {
         CharacteristicsDisplayListObjects dataCharacteristicDisplay = findingMetaclassMatches(
             api.metainfo.getMetaClass(dbTrail),
@@ -240,31 +240,30 @@ class ElementsMap
     CharacteristicsDisplayListObjects findingMetaclassMatches(MetaClassWrapper metaClassInfo,
                                                               Collection characteristicsForOutput)
     {
-        MetaClass
         CharacteristicsDisplayListObjects characteristicsDisplay
         if (!metaClassInfo)
         {
             return null
         }
         characteristicsDisplay = characteristicsForOutput.find {
-            String metaclassСodeFromWizard = it?.metaClassObject?.caseId ?
+            String metaClassCodeFromWizard = it?.metaClassObject?.caseId ?
                 String.join('$', it?.metaClassObject?.id, it?.metaClassObject?.caseId) :
                 it?.metaClassObject?.id
-            return metaClassInfo?.code == metaclassСodeFromWizard
+            return metaClassInfo?.code == metaClassCodeFromWizard
         }
         if (!characteristicsDisplay)
         {
             characteristicsForOutput.each {
-                String metaclassСodeFromWizard = it?.metaClassObject?.caseId ?
+                String metaClassCodeFromWizard = it?.metaClassObject?.caseId ?
                     String.join('$', it?.metaClassObject?.id, it?.metaClassObject?.caseId) :
                     it?.metaClassObject?.id
                 if (metaClassInfo?.parent?.code ==
-                    metaclassСodeFromWizard &&
+                    metaClassCodeFromWizard &&
                     it?.metaClassObject?.id == metaClassInfo?.code?.split('\\$')?.first())
                 {
                     characteristicsDisplay = it
                 }
-                else if (metaClassInfo?.code == metaclassСodeFromWizard)
+                else if (metaClassInfo?.code == metaClassCodeFromWizard)
                 {
                     characteristicsDisplay = it
                 }
@@ -471,7 +470,7 @@ class ElementsMap
                 .addAction(GO_TO_CARD, api.web.open(equipment.UUID))
 
             MetaclassNameAndAttributeList attributesFromGroup =
-                getSetAttributesOutputCharacteristics(defaultSettingsWizardSettings, equipment)
+                getListAttributesOutputCharacteristics(defaultSettingsWizardSettings, equipment)
             addOptionsElementsOnMap(
                 formedEquipmentObject,
                 equipment,
