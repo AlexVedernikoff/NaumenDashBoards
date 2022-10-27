@@ -1683,7 +1683,11 @@
                         if (groupTypes.size() == 1)
                         {
                             //Группировка одного типа можно продолжать
-                            breakdownMap = mayBeBreakdown.collectEntries { el ->
+                            breakdownMap = mayBeBreakdown
+                                .findAll { el ->
+                                    el?.group?.way != Way.CUSTOM
+                                }
+                                .collectEntries { el ->
                                 dynamicInBreakdown = el?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
                                 if(dynamicInBreakdown)
                                 {
