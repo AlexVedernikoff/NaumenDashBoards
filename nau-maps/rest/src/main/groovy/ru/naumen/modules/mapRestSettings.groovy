@@ -182,6 +182,7 @@ class ElementsMap
                 .setLineStyle(lineStyle)
                 .setTooltip(tooltip)
                 .setGeopositions(dbTrail)
+                .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(dbTrail)))
                 .setDisplayingLinesDots(strategie.displayingLinesDots)
                 .setIconFirst(dataDisplayPointA)
                 .setIconSecond(dataDisplayPointB)
@@ -246,24 +247,18 @@ class ElementsMap
             return null
         }
         characteristicsDisplay = characteristicsForOutput.find {
-            String metaClassCodeFromWizard = it?.metaClassObject?.caseId ?
-                String.join('$', it?.metaClassObject?.id, it?.metaClassObject?.caseId) :
-                it?.metaClassObject?.id
-            return metaClassInfo?.code == metaClassCodeFromWizard
+            return metaClassInfo?.code == getCodeMetaClass(it)
         }
         if (!characteristicsDisplay)
         {
             characteristicsForOutput.each {
-                String metaClassCodeFromWizard = it?.metaClassObject?.caseId ?
-                    String.join('$', it?.metaClassObject?.id, it?.metaClassObject?.caseId) :
-                    it?.metaClassObject?.id
                 if (metaClassInfo?.parent?.code ==
-                    metaClassCodeFromWizard &&
-                    it?.metaClassObject?.id == metaClassInfo?.code?.split('\\$')?.first())
+                    getCodeMetaClass(it) &&
+                    it?.metaClassObject?.id == metaClassInfo?.code?.tokenize('$')?.first())
                 {
                     characteristicsDisplay = it
                 }
-                else if (metaClassInfo?.code == metaClassCodeFromWizard)
+                else if (metaClassInfo?.code == getCodeMetaClass(it))
                 {
                     characteristicsDisplay = it
                 }
@@ -466,6 +461,7 @@ class ElementsMap
                 .setHeader(equipment.title)
                 .setIcon(equipment)
                 .setTooltip(tooltip)
+                .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(equipment)))
                 .setGeopositions(equipment, strategie)
                 .addAction(GO_TO_CARD, api.web.open(equipment.UUID))
 
@@ -479,6 +475,63 @@ class ElementsMap
             )
             return formedEquipmentObject
         }
+    }
+
+    /**
+     * Метод получения кода редактирования, при его наличии в мастере
+     * @param equipment - оборудование из БД
+     * @return код формы редактирования
+     */
+    String getCodeEditingForm(MetaClassWrapper equipment)
+    {
+        if (!equipment)
+        {
+            return null
+        }
+
+        Collection<ActionsWithObjects> actionsWithObjects = new SettingsProvider()
+            .getSettings()?.actionsWithObjects
+        String codeParent
+        String codeSystemObject = equipment.code
+
+        ActionsWithObjects action = actionsWithObjects.find {
+            getCodeMetaClass(it) == codeSystemObject
+        }
+
+        if (!action)
+        {
+            action = actionsWithObjects.find {
+                getCodeMetaClass(it) == equipment?.parent?.code
+            }
+        }
+
+        if (!action)
+        {
+            action = actionsWithObjects.find {
+                getCodeMetaClass(it) == codeSystemObject.tokenize('$')?.first()
+            }
+        }
+
+        if (!action)
+        {
+            codeParent = getCodeEditingForm(equipment.parent)
+        }
+
+        return action ? action.codeEditingForm : codeParent
+    }
+
+    /**
+     * Метод получения кода метакласса из мастера настроек
+     * @param wizardSettingsElement - текущая вкладка настроек мастера
+     * @return код метакласса
+     */
+    String getCodeMetaClass(Object wizardSettingsElement)
+    {
+        return wizardSettingsElement?.metaClassObject?.caseId ? String.join(
+            '$',
+            wizardSettingsElement?.metaClassObject?.id,
+            wizardSettingsElement?.metaClassObject?.caseId
+        ) : wizardSettingsElement?.metaClassObject?.id
     }
 
     /**
@@ -888,6 +941,17 @@ class TrailBuilder extends MapObjectBuilder
      */
     String tooltip
 
+    /**
+     * Код формы редактирования
+     */
+    String codeEditingForm
+
+    TrailBuilder setCodeEditingForm(String codeEditingForm)
+    {
+        this.codeEditingForm = codeEditingForm
+        return this
+    }
+
     protected TrailBuilder()
     {
         super(MapObjectType.WOLS, null)
@@ -1085,6 +1149,17 @@ class BasePointBuilder extends MapObjectBuilder
      * Текст всплывающей подсказки
      */
     String tooltip
+
+    /**
+     * Код формы редактирования
+     */
+    String codeEditingForm
+
+    BasePointBuilder setCodeEditingForm(String codeEditingForm)
+    {
+        this.codeEditingForm = codeEditingForm
+        return this
+    }
 
     BasePointBuilder setGeopositions(ISDtObject dbEquip, OutputObjectStrategies strategie)
     {
