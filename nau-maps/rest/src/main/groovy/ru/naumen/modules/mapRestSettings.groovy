@@ -254,7 +254,7 @@ class ElementsMap
             characteristicsForOutput.each {
                 if (metaClassInfo?.parent?.code ==
                     getCodeMetaClass(it) &&
-                    it?.metaClassObject?.id == metaClassInfo?.code?.split('\\$')?.first())
+                    it?.metaClassObject?.id == metaClassInfo?.code?.tokenize('$')?.first())
                 {
                     characteristicsDisplay = it
                 }
@@ -478,7 +478,7 @@ class ElementsMap
     }
 
     /**
-     * Метод полчения кода редактировании, при его наличии в мастере
+     * Метод получения кода редактирования, при его наличии в мастере
      * @param equipment - оборудование из БД
      * @return код формы редактирования
      */
@@ -491,11 +491,10 @@ class ElementsMap
 
         Collection<ActionsWithObjects> actionsWithObjects = new SettingsProvider()
             .getSettings()?.actionsWithObjects
-        ActionsWithObjects action
         String codeParent
         String codeSystemObject = equipment.code
 
-        action = actionsWithObjects.find {
+        ActionsWithObjects action = actionsWithObjects.find {
             getCodeMetaClass(it) == codeSystemObject
         }
 
@@ -509,7 +508,7 @@ class ElementsMap
         if (!action)
         {
             action = actionsWithObjects.find {
-                getCodeMetaClass(it) == codeSystemObject.split('\\$')?.first()
+                getCodeMetaClass(it) == codeSystemObject.tokenize('$')?.first()
             }
         }
 
