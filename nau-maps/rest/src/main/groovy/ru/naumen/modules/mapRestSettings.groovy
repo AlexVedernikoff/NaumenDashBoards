@@ -258,7 +258,7 @@ class ElementsMap
                 {
                     characteristicsDisplay = it
                 }
-                else if (metaClassInfo?.code == metaClassCodeFromWizard)
+                else if (metaClassInfo?.code == getCodeMetaClass(it))
                 {
                     characteristicsDisplay = it
                 }
