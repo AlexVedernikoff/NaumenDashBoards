@@ -362,7 +362,8 @@ enum ComboType
 {
     COLUMN,
     COLUMN_STACKED,
-    LINE
+    LINE,
+    PivotDataSet
 }
 
 /**
@@ -2219,19 +2220,19 @@ class Constants {
                 value.hasField('xAxis')
             }
         },
-        (PivotTableData) : { value ->
-            return use(JacksonUtils) {
-                (value.hasField('__type') && value['__type'] == DataSetType.PIVOT_DATA_SET)
-            }
-        },
         (DiagramNewData) : { value ->
             return use(JacksonUtils) {
                 Boolean dataSetTypeMatch = false
-                if (value.hasField('type') && value['__type'] in DataSetType)
+                if (value.hasField('__type') && value['__type'] in DataSetType)
                 {
                     dataSetTypeMatch = true
                 }
                 dataSetTypeMatch || (value.hasField('indicators') || value.hasField('sourceForCompute'))
+            }
+        },
+        (PivotTableData) : { value ->
+            return use(JacksonUtils) {
+                (value.hasField('__type') && value['__type'] == DataSetType.PIVOT_DATA_SET)
             }
         },
         (TableCurrentData): { value ->
@@ -4071,6 +4072,9 @@ class DiagramNewData extends DiagramNowData
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     ComboType type
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String descriptor
 }
 
 /**
