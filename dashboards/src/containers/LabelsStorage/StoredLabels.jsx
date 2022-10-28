@@ -20,7 +20,7 @@ export class StoredLabels extends PureComponent<{}> {
 	};
 
 	renderLabels = (context: Context) => (
-		<g>
+		<g style={{pointerEvents: 'none'}}>
 			{context?.getLabels?.().map(this.renderLabel)}
 		</g>
 	);
