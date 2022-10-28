@@ -248,10 +248,16 @@ class PointsOnMap
      */
     String tooltip
 
+    /**
+     * Код формы редактирования
+     */
+    String codeEditingForm
+
     PointsOnMap(BasePointBuilder basePointBuilder)
     {
         this.type = MapObjectType.POINT
         this.geopositions = basePointBuilder?.geopositions
+        this.codeEditingForm = basePointBuilder?.codeEditingForm
         this.icon = basePointBuilder?.icon
         this.data = basePointBuilder
         this.color = settingsWizardSettings?.colorLineMap
@@ -319,12 +325,18 @@ class LinkedOnMap
      */
     String tooltip
 
+    /**
+     * Код формы редактирования
+     */
+    String codeEditingForm
+
     LinkedOnMap(TrailBuilder trailBuilder)
     {
         this.color = trailBuilder.color
         this.opacity = trailBuilder.opacity
         this.weight = trailBuilder.width
         this.lineStyle = trailBuilder.lineStyle
+        this.codeEditingForm = trailBuilder?.codeEditingForm
         this.type = trailBuilder.type
         this.geopositions = trailBuilder.geopositions
         this.iconFirst = trailBuilder.iconFirst

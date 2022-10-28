@@ -90,6 +90,8 @@ class MapSettings
     Collection<AbstractPointCharacteristics> abstractPointCharacteristics = [new PointSettings(), new LinesSettings()]
     @JsonSchemaMeta(title = 'Визуализация по умолчанию')
     DefaultVisualization defVisualization = new DefaultVisualization()
+    @JsonSchemaMeta(title = 'Действия с объектами')
+    Collection<ActionsWithObjects> actionsWithObjects = [new ActionsWithObjects()]
     @JsonSchemaMeta(title = 'API')
     APISettings apiSettings = new APISettings()
 }
@@ -131,7 +133,7 @@ class PointSettings extends AbstractPointCharacteristics
 class ContentPointSettings
 {
     @JsonSchemaMeta(title = 'Название стратегии', nullable = false)
-    String nameStrategy = 'TP'
+    String nameStrategy = ''
     @UiSchemaMeta(disabled = true)
     @JsonSchemaMeta(title = 'Код стратегии')
     String codeStrategy = ''
@@ -349,6 +351,20 @@ class CharacteristicsDisplayListObjects
     @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaClassObject')
     @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
+}
+
+/**
+ * Настройки для владки 'Действия с объектами'
+ */
+@JsonSchemaMeta(title = 'Действия с объектами')
+class ActionsWithObjects
+{
+    @UiSchemaMeta(widget = 'metaClass-select')
+    @JsonSchemaMeta(title = 'Метакласс')
+    MetaClassObject metaClassObject = new MetaClassObject('', '')
+
+    @JsonSchemaMeta(title = 'Код формы редактирования')
+    String codeEditingForm = ''
 }
 
 /**
