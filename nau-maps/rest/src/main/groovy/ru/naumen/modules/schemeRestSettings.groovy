@@ -23,6 +23,7 @@ import org.jsoup.select.Elements
 import org.jsoup.nodes.Document
 import ru.naumen.core.shared.dto.ISDtObject
 import groovy.transform.Canonical
+import ru.naumen.core.server.script.api.metainfo.MetaClassWrapper
 
 /**
  * Метод для получения данных об объектах для вывода на cхему
@@ -41,7 +42,7 @@ private String getSchemeData(String objectUuid, String contentUuid, LinkedTreeMa
         ['subject': subjectUuid, 'user': userObject]
     try
     {
-        Collection<LinkedHashMap> getData =
+        Collection getData =
             modules.schemeParamsSettings.getDataDisplayScheme(contentUuid, bindings) ?: defaultValue
         aggregations = [entities: getData]
 
@@ -121,6 +122,8 @@ class ElementsScheme
         hierarchyCommunicationBuilder.setId(id)
         hierarchyCommunicationBuilder.setTitle(titleData)
         hierarchyCommunicationBuilder.setType('point')
+        hierarchyCommunicationBuilder
+            .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
         hierarchyCommunicationBuilder.setUUID(scriptData.UUID)
         hierarchyCommunicationBuilder.setHeader(scriptData.title)
         hierarchyCommunicationBuilder
@@ -139,7 +142,7 @@ class ElementsScheme
 
     /**
      * Метод для получения данных о связях между точками
-     * @param equipment - оборудование из БД
+     * @param scriptData - оборудование из БД
      * @param id -Уникальный номер сущности
      * @param from - точка, к которой привязывается текущий элемент
      * @return данные по линиям между точками
@@ -153,6 +156,8 @@ class ElementsScheme
         hierarchyCommunicationBuilder.setUUID(scriptData?.UUID)
         hierarchyCommunicationBuilder.setHeader(scriptData?.title)
         hierarchyCommunicationBuilder.setTitle(scriptData?.title)
+        hierarchyCommunicationBuilder
+            .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
         hierarchyCommunicationBuilder.setFrom(from)
         hierarchyCommunicationBuilder.setTo(id + 1)
         hierarchyCommunicationBuilder.setId(id)
@@ -169,6 +174,63 @@ class ElementsScheme
             attributesFromGroup
         )
         return hierarchyCommunicationBuilder
+    }
+
+    /**
+     * Метод получения кода редактирования, при его наличии в мастере
+     * @param scriptData - оборудование из БД
+     * @return код формы редактирования
+     */
+    String getCodeEditingForm(MetaClassWrapper scriptData)
+    {
+        if (!scriptData)
+        {
+            return null
+        }
+
+        Collection<ActionsWithObjects> actionsWithObjects = new SettingsProviderSchemes()
+            .getSettings()?.actionsWithObjects
+        String codeParent
+        String codeSystemObject = scriptData.code
+
+        ActionsWithObjects action = actionsWithObjects.find {
+            getCodeMetaClass(it) == codeSystemObject
+        }
+
+        if (!action)
+        {
+            action = actionsWithObjects.find {
+                getCodeMetaClass(it) == scriptData?.parent?.code
+            }
+        }
+
+        if (!action)
+        {
+            action = actionsWithObjects.find {
+                getCodeMetaClass(it) == codeSystemObject.tokenize('$')?.first()
+            }
+        }
+
+        if (!action)
+        {
+            codeParent = getCodeEditingForm(scriptData.parent)
+        }
+
+        return action ? action.codeEditingForm : codeParent
+    }
+
+    /**
+     * Метод получения кода метакласса из мастера настроек
+     * @param wizardSettingsElement - текущая вкладка настроек мастера
+     * @return код метакласса
+     */
+    String getCodeMetaClass(Object wizardSettingsElement)
+    {
+        return wizardSettingsElement?.metaClassObject?.caseId ? String.join(
+            '$',
+            wizardSettingsElement?.metaClassObject?.id,
+            wizardSettingsElement?.metaClassObject?.caseId
+        ) : wizardSettingsElement?.metaClassObject?.id
     }
 
     /**
@@ -482,6 +544,17 @@ class HierarchyCommunicationBuilder
      * Список возможных данных об объекте (для меню справа)
      */
     List<OptionSchemes> options = []
+
+    /**
+     * Код формы редактирования
+     */
+    String codeEditingForm
+
+    HierarchyCommunicationBuilder setCodeEditingForm(String codeEditingForm)
+    {
+        this.codeEditingForm = codeEditingForm
+        return this
+    }
 
     public HierarchyCommunicationBuilder setDesc(String desc)
     {
