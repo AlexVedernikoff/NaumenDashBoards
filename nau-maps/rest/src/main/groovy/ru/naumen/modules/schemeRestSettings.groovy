@@ -42,10 +42,9 @@ private String getSchemeData(String objectUuid, String contentUuid, LinkedTreeMa
         ['subject': subjectUuid, 'user': userObject]
     try
     {
-        Collection getData =
+        Collection<Collection<HierarchyCommunicationBuilder>> getData =
             modules.schemeParamsSettings.getDataDisplayScheme(contentUuid, bindings) ?: defaultValue
         aggregations = [entities: getData]
-
     }
     catch (Exception ex)
     {

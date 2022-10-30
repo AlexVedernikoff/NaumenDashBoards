@@ -24,7 +24,7 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
     String variableDescribingHierarchyCommunicationSettings = 'hierarchyCommunicationSettings'
     String variableDescribingObjectRelationshipsSettings = 'objecRelationshipsSettings'
     SchemesSettings settings = new SettingsProviderSchemes().getSettings()
-    Collection pointData = []
+    Collection<Collection<HierarchyCommunicationBuilder>> pointData = []
     if (checkingPlaceUseInSettingsWizard(
         variableDescribingHierarchyCommunicationSettings,
         settings,
@@ -39,7 +39,7 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
         nameContent
     ))
     {
-        pointData += dataForObjecRelationshipsSettings(settings, nameContent, bindings)
+        pointData += dataForObjectRelationshipsSettings(settings, nameContent, bindings)
     }
     return pointData
 }
@@ -51,9 +51,9 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
  * @param bindings - дополнительные параметры контекста выполнения скрипта
  * @return коллекция данных для отображения заданных на вкладке
  */
-Collection<HierarchyCommunicationBuilder> dataForHierarchyCommunicationSettings(SchemesSettings settings,
-                                                                                String nameContent,
-                                                                                LinkedHashMap<String, Object> bindings)
+Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicationSettings(SchemesSettings settings,
+                                                                                            String nameContent,
+                                                                                            LinkedHashMap<String, Object> bindings)
 {
     Collection<AbstractSchemesCharacteristics> abstractCharacteristicsData =
         settings?.abstractSchemesCharacteristics
@@ -128,9 +128,7 @@ Collection<HierarchyCommunicationBuilder> dataForHierarchyCommunicationSettings(
             }
         }
     }
-    return [pointData.collect {
-        return schemeHierarchy(it)
-    }]
+    return [pointData]
 }
 
 /**
@@ -140,9 +138,9 @@ Collection<HierarchyCommunicationBuilder> dataForHierarchyCommunicationSettings(
  * @param bindings - дополнительные параметры контекста выполнения скрипта
  * @return данные для отображения на схеме
  */
-Collection dataForObjectRelationshipsSettings(SchemesSettings settings,
-                                              String nameContent,
-                                              LinkedHashMap<String, Object> bindings)
+Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationshipsSettings(SchemesSettings settings,
+                                                                                         String nameContent,
+                                                                                         LinkedHashMap<String, Object> bindings)
 {
     Collection<AbstractSchemesCharacteristics> abstractCharacteristicsData =
         settings?.abstractSchemesCharacteristics
@@ -164,7 +162,7 @@ Collection dataForObjectRelationshipsSettings(SchemesSettings settings,
         }
     Collection<SchemaElement> allElementsScheme =
         getAllElementsScheme(scriptedBusinessObjectsSetupWizard, listPathCoordinateLongitude)
-    Collection pointData = []
+    Collection<Collection<HierarchyCommunicationBuilder>> pointData = []
     allElementsScheme.each {
         pointData << []
     }
@@ -182,7 +180,7 @@ Collection dataForObjectRelationshipsSettings(SchemesSettings settings,
  * @param idParent - идентификатор родительского элемента
  * @return преобразованные данные
  */
-void transformationDataDisplayFront(Collection pointData,
+void transformationDataDisplayFront(Collection<Collection<HierarchyCommunicationBuilder>> pointData,
                                     Object allElementsScheme,
                                     ElementsScheme elementsScheme,
                                     Integer idParent)
