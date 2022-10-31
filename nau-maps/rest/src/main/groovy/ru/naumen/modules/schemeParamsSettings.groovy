@@ -24,7 +24,7 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
     String variableDescribingHierarchyCommunicationSettings = 'hierarchyCommunicationSettings'
     String variableDescribingObjectRelationshipsSettings = 'objecRelationshipsSettings'
     SchemesSettings settings = new SettingsProviderSchemes().getSettings()
-    Collection<MapObjectBuilder> pointData = []
+    Collection<Collection<HierarchyCommunicationBuilder>> pointData = []
     if (checkingPlaceUseInSettingsWizard(
         variableDescribingHierarchyCommunicationSettings,
         settings,
@@ -39,7 +39,7 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
         nameContent
     ))
     {
-        pointData += dataForObjecRelationshipsSettings(settings, nameContent, bindings)
+        pointData += dataForObjectRelationshipsSettings(settings, nameContent, bindings)
     }
     return pointData
 }
@@ -51,9 +51,9 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
  * @param bindings - дополнительные параметры контекста выполнения скрипта
  * @return коллекция данных для отображения заданных на вкладке
  */
-Collection<HierarchyCommunicationBuilder> dataForHierarchyCommunicationSettings(SchemesSettings settings,
-                                                                                String nameContent,
-                                                                                LinkedHashMap<String, Object> bindings)
+Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicationSettings(SchemesSettings settings,
+                                                                                            String nameContent,
+                                                                                            LinkedHashMap<String, Object> bindings)
 {
     Collection<AbstractSchemesCharacteristics> abstractCharacteristicsData =
         settings?.abstractSchemesCharacteristics
@@ -128,9 +128,7 @@ Collection<HierarchyCommunicationBuilder> dataForHierarchyCommunicationSettings(
             }
         }
     }
-    return pointData.collect {
-        return schemeHierarchy(it)
-    }
+    return [pointData]
 }
 
 /**
@@ -140,17 +138,15 @@ Collection<HierarchyCommunicationBuilder> dataForHierarchyCommunicationSettings(
  * @param bindings - дополнительные параметры контекста выполнения скрипта
  * @return данные для отображения на схеме
  */
-Collection<HierarchyCommunicationBuilder> dataForObjecRelationshipsSettings(SchemesSettings settings,
-                                                                            String nameContent,
-                                                                            LinkedHashMap<String, Object> bindings)
+Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationshipsSettings(SchemesSettings settings,
+                                                                                         String nameContent,
+                                                                                         LinkedHashMap<String, Object> bindings)
 {
     Collection<AbstractSchemesCharacteristics> abstractCharacteristicsData =
         settings?.abstractSchemesCharacteristics
     Collection<String> pointScriptText = getListScript(abstractCharacteristicsData.last())
     ElementsScheme elementsScheme = new ElementsScheme()
     String scriptLineAttributeData = pointScriptText.first()
-    Collection result = []
-    Collection scriptedBusinessObjectsSetupWizard
     try
     {
         scriptedBusinessObjectsSetupWizard = api.utils.executeScript(scriptLineAttributeData)
@@ -160,22 +156,19 @@ Collection<HierarchyCommunicationBuilder> dataForObjecRelationshipsSettings(Sche
         logger.info("Передан неверный скрипт!")
         logger.error("#schemeParamsSettings ${ ex.message }", ex)
     }
-    Collection listPathCoordenadesLongitude =
+    Collection listPathCoordinateLongitude =
         abstractCharacteristicsData.last()?.strategies?.first().rulesLinkingSchemaObjects.collect {
             it.pathCoordinatLongitud
         }
     Collection<SchemaElement> allElementsScheme =
-        getAllElementsScheme(scriptedBusinessObjectsSetupWizard, listPathCoordenadesLongitude)
-    Integer id = 0
-    Collection<HierarchyCommunicationBuilder> pointData = []
+        getAllElementsScheme(scriptedBusinessObjectsSetupWizard, listPathCoordinateLongitude)
+    Collection<Collection<HierarchyCommunicationBuilder>> pointData = []
     allElementsScheme.each {
         pointData << []
     }
     transformationDataDisplayFront(pointData, allElementsScheme, elementsScheme, null)
     new SchemaWorkingElements().zeroingId()
-    return pointData.sort {
-        it.size()
-    }.last()
+    return pointData
 }
 
 /**
@@ -187,7 +180,7 @@ Collection<HierarchyCommunicationBuilder> dataForObjecRelationshipsSettings(Sche
  * @param idParent - идентификатор родительского элемента
  * @return преобразованные данные
  */
-void transformationDataDisplayFront(Collection<HierarchyCommunicationBuilder> pointData,
+void transformationDataDisplayFront(Collection<Collection<HierarchyCommunicationBuilder>> pointData,
                                     Object allElementsScheme,
                                     ElementsScheme elementsScheme,
                                     Integer idParent)
@@ -382,16 +375,18 @@ Boolean checkingPlaceUseInSettingsWizard(String usedTabSettingsWizard,
  */
 private LinkedHashMap<String, Object> schemeHierarchy(HierarchyCommunicationBuilder hierarchyCommunicationBuilder)
 {
-    return hierarchyCommunicationBuilder ? [desc   : hierarchyCommunicationBuilder.desc,
-                                            from   : hierarchyCommunicationBuilder.from,
-                                            id     : hierarchyCommunicationBuilder.id,
-                                            title  : hierarchyCommunicationBuilder.title,
-                                            to     : hierarchyCommunicationBuilder.to,
-                                            type   : hierarchyCommunicationBuilder.type,
-                                            actions: hierarchyCommunicationBuilder.actions,
-                                            header : hierarchyCommunicationBuilder.header,
-                                            options: hierarchyCommunicationBuilder.options,
-                                            uuid   : hierarchyCommunicationBuilder.UUID
+    return hierarchyCommunicationBuilder ? [desc           : hierarchyCommunicationBuilder.desc,
+                                            from           : hierarchyCommunicationBuilder.from,
+                                            id             : hierarchyCommunicationBuilder.id,
+                                            title          : hierarchyCommunicationBuilder.title,
+                                            to             : hierarchyCommunicationBuilder.to,
+                                            type           : hierarchyCommunicationBuilder.type,
+                                            codeEditingForm:
+                                                hierarchyCommunicationBuilder.codeEditingForm,
+                                            actions        : hierarchyCommunicationBuilder.actions,
+                                            header         : hierarchyCommunicationBuilder.header,
+                                            options        : hierarchyCommunicationBuilder.options,
+                                            uuid           : hierarchyCommunicationBuilder.UUID
     ] : [:]
 }
 
@@ -515,6 +510,14 @@ class SchemaElement
      * Список дочерних элементов
      */
     Collection<SchemaElement> childElements
+
+    SchemaElement(level, title, systemObject, childElements)
+    {
+        this.level = level
+        this.title = title
+        this.systemObject = systemObject
+        this.childElements = childElements
+    }
 
     void setChildElements(Collection<SchemaElement> childElements)
     {

@@ -96,6 +96,8 @@ class SchemesSettings
     Collection<AbstractSchemesCharacteristics> abstractSchemesCharacteristics = [new HierarchyCommunicationSettings(), new ObjecRelationshipsSettings()]
     @JsonSchemaMeta(title = 'Визуализация по умолчанию')
     Collection<DefaultVisualizationSchemes> defaultVisualizationSchemes = [new DefaultVisualizationSchemes()]
+    @JsonSchemaMeta(title = 'Действия с объектами')
+    Collection<ActionsWithObjects> actionsWithObjects = [new ActionsWithObjects()]
 }
 
 /**
@@ -236,6 +238,20 @@ class DefaultVisualizationSchemes
     String icon = ''
 }
 
+/**
+ * Настройки для владки 'Действия с объектами'
+ */
+@JsonSchemaMeta(title = 'Действия с объектами')
+class ActionsWithObjects
+{
+    @UiSchemaMeta(widget = 'metaClass-select')
+    @JsonSchemaMeta(title = 'Метакласс')
+    MetaClassObject metaClassObject = new MetaClassObject('', '')
+
+    @JsonSchemaMeta(title = 'Код формы редактирования')
+    String codeEditingForm = ''
+}
+
 @JsonSchemaMeta(title = ' ')
 class RulesLinkingSchemaObjects
 {
@@ -372,8 +388,8 @@ String getContentTitle()
         api.apps.listContents(ConstantSchemes.EMBEDDED_APPLICATION_CODE)
     Collection<LinkedHashMap> argum = []
     contentInfo.collect {
-        argum << [selectable : true, title: it.contentTitle, uuid:
-            it.tabUuid, level: 0, extra: 'тест']
+        argum << [selectable     : true, title: it.contentTitle, uuid:
+            it.contentUuid, level: 0, extra: it.contentUuid]
     }
     return Jackson.toJsonString(argum)
 }
