@@ -28,12 +28,11 @@ const getDataEntity = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
 /**
  * Запрашивает форму редактирования для элемента и обновляет данные
  * @param {string} objectUUID - uuid обьекта
- * @returns {ThunkAction}
+ * @param {string} codeEditingForm - код формы
  */
-const showEditForm = (objectUUID: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {editFormCode} = getState();
+const showEditForm = (objectUUID: string, codeEditingForm: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const uuid = await getEditForm(objectUUID, editFormCode);
+		const uuid = await getEditForm(objectUUID, codeEditingForm);
 
 		if (uuid) {
 			dispatch(getDataEntity);

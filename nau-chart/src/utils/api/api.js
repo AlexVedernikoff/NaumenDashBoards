@@ -7,7 +7,6 @@ export default class Api {
 
 		this.jsApi = window.jsApi;
 		this.appBaseUrl = top.appBaseUrl;
-		this.location = top.location;
 		window.SockJS = top.SockJS;
 		window.StompJs = top.StompJs;
 	}

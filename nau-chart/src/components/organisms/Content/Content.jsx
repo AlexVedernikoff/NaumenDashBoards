@@ -22,7 +22,6 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 	const [isDrag, setIsDrag] = useState(false);
 	const [hoverElement, setHoverElement] = useState(null);
 	const [offset, setOffset] = useState({x: 0, y: 0});
-	const [mousePosition, setMousePosition] = useState({x: 0, y: 0});
 	const [schemes, setSchemes] = useState([]);
 
 	useEffect(() => {
@@ -51,7 +50,7 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 	}, [exportTo]);
 
 	useEffect(() => {
-		data.forEach((entities: Entity[]) => {
+		(Array.isArray(data) ? data : [data]).forEach((entities: Entity[], index: number) => {
 			const filterPoints = entities.filter(e => e.type === 'point');
 			const filterLines = entities.filter(e => e.type === 'line');
 
@@ -60,6 +59,10 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 			const {connectors, customOptions} = conversionSearchPosition(bufferPoints, options); // корректировка выкладки для устранения пересечений
 
 			setSchemes(oldArray => [...oldArray, {lines: filterLines, options: customOptions, points: connectors}]);
+
+			if (index === 0) {
+				setOffset({x: 0, y: -customOptions.minY - window.innerHeight / 2});
+			}
 		});
 	}, [data]);
 
@@ -93,7 +96,6 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 				x: x - x / newScale - (position.x - position.x / newScale),
 				y: y - y / newScale - (position.y - position.y / newScale)
 			});
-			setMousePosition({x, y});
 		}
 	};
 

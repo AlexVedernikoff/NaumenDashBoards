@@ -1,4 +1,5 @@
 // @flow
+import cn from 'classnames';
 import {connect} from 'react-redux';
 import {props} from './selectors';
 import type {Props} from 'components/organisms/Content/types';
@@ -10,8 +11,9 @@ const ContextMenu = ({activeElement, contextMenu, showEditForm}: Props) => {
 		return null;
 	}
 
+	const {actions, codeEditingForm, uuid} = activeElement;
+
 	const handleOpenPage = () => {
-		const {actions} = activeElement;
 		const [action] = actions || [];
 
 		if (action) {
@@ -22,9 +24,13 @@ const ContextMenu = ({activeElement, contextMenu, showEditForm}: Props) => {
 	};
 
 	const handleEditForm = () => {
-		const {uuid} = activeElement;
-		showEditForm(uuid);
+		showEditForm(uuid, codeEditingForm);
 	};
+
+	const classNames = cn({
+		[styles.wrapMenuListItem]: true,
+		[styles.disabled]: !codeEditingForm
+	});
 
 	return (
 		<div
@@ -35,7 +41,7 @@ const ContextMenu = ({activeElement, contextMenu, showEditForm}: Props) => {
 			}}
 		>
 			<ul className={styles.wrapMenuList}>
-				<li className={styles.wrapMenuListItem} onClick={handleEditForm}>Редактировать</li>
+				<li className={classNames} onClick={handleEditForm}>Редактировать</li>
 				<li className={styles.wrapMenuListItem} onClick={handleOpenPage}>Перейти на карточку обьекта</li>
 			</ul>
 		</div>

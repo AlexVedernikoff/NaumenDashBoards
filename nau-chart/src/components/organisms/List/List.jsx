@@ -5,7 +5,7 @@ import Edit from 'icons/edit.svg';
 import {functions, props} from './selectors';
 import ListHide from 'icons/listHide.svg';
 import ListItem from 'components/organisms/ListItem';
-import type {Props} from 'components/organisms/Content/types';
+import type {Props, RenderTitleProps} from 'components/organisms/Content/types';
 import React, { useState } from 'react';
 import Scrollable from 'components/atoms/Scrollable';
 import styles from './styles.less';
@@ -23,8 +23,8 @@ const List = ({activeElement, data, showEditForm}: Props) => {
 		}
 	};
 
-	const handleOpenEdit = uuid => () => {
-		showEditForm(uuid);
+	const handleOpenEdit = (uuid: string, codeEditingForm: string) => () => {
+		showEditForm(uuid, codeEditingForm);
 	};
 
 	const handleChangeView = () => {
@@ -53,11 +53,16 @@ const List = ({activeElement, data, showEditForm}: Props) => {
 		);
 	};
 
-	const renderTitle = ({actions, title, uuid}) => {
+	const renderTitle = ({actions, codeEditingForm, title, uuid}: RenderTitleProps) => {
+		const classNames = cn({
+			[styles.itemEditButton]: true,
+			[styles.disabled]: !codeEditingForm
+		});
+
 		return (
 			<div className={styles.itemTitleContainer} >
 				<div className={styles.itemTitle} onClick={handleOpenLink(actions)}>{title}</div>
-				<Edit className={styles.itemEditButton} onClick={handleOpenEdit(uuid)} />
+				{<Edit className={classNames} onClick={handleOpenEdit(uuid, codeEditingForm)} />}
 			</div>
 		);
 	};
