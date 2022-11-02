@@ -1,4 +1,5 @@
 // @flow
+import type {AttrSetConditions} from 'utils/descriptorUtils/types';
 import type {Components} from './components/AttributeSelect/types';
 import type {OnSelectEvent} from 'components/types';
 import type {SourceData} from 'store/widgetForms/types';
@@ -26,6 +27,5 @@ export type Props = {
 };
 
 export type State = {
-	showDynamicAttributes: boolean,
-	showDynamicAttributesError: boolean
+	attrSetConditions: ?AttrSetConditions
 };

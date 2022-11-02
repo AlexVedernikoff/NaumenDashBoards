@@ -5,22 +5,39 @@ import {compose} from 'redux';
 import {connect} from 'react-redux';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import {functions, props} from './selectors';
-import memoize from 'memoize-one';
-import type {Node, Tree} from 'components/molecules/TreeSelect/types';
+import type {Node} from 'components/molecules/TreeSelect/types';
 import {parseAttrSetConditions} from 'store/widgetForms/helpers';
-import type {Props} from './types';
+import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import withValues from 'components/organisms/WidgetForm/HOCs/withValues';
 
-export class AttributeCreatingModalContainer extends PureComponent<Props> {
-	getOptions = memoize((values, attributes): Tree => {
-		const options = [];
+export class AttributeCreatingModalContainer extends PureComponent<Props, State> {
+	state = {
+		optionsTree: {}
+	};
+
+	componentDidMount () {
+		this.fetchOptionsTree();
+	}
+
+	componentDidUpdate (prevProps: Props) {
+		const {attributes, values} = this.props;
+
+		if (prevProps.attributes !== attributes || prevProps.values !== values) {
+			this.fetchOptionsTree();
+		}
+	}
+
+	fetchOptionsTree = async () => {
+		const {attributes, values} = this.props;
 		const mainIndex = values.data.findIndex(dataSet => !dataSet.sourceForCompute);
-		const parentClassFqn = values.data[mainIndex]?.source.value.value ?? null;
-		const attrSetConditions = parseAttrSetConditions(values.data[mainIndex]?.source);
+		const mainSource = values.data[mainIndex]?.source;
+		const parentClassFqn = mainSource.value?.value ?? null;
+		const attrSetConditions = await parseAttrSetConditions(mainSource);
+		const options = [];
 
 		values.data.forEach(dataSet => {
-			const {dataKey, source} = dataSet;
+			const {dataKey, source, sourceForCompute} = dataSet;
 			let {value: sourceValue} = source;
 
 			if (sourceValue) {
@@ -30,7 +47,7 @@ export class AttributeCreatingModalContainer extends PureComponent<Props> {
 				sourceValue = {
 					...sourceValue,
 					attrSetConditions,
-					parentClassFqn: dataSet.sourceForCompute ? parentClassFqn : null
+					parentClassFqn: sourceForCompute ? parentClassFqn : null
 				};
 
 				options.push({
@@ -42,7 +59,7 @@ export class AttributeCreatingModalContainer extends PureComponent<Props> {
 			}
 		});
 
-		return arrayToTree(options, {
+		const optionsTree = arrayToTree(options, {
 			keys: {
 				value: 'code'
 			},
@@ -53,7 +70,9 @@ export class AttributeCreatingModalContainer extends PureComponent<Props> {
 				value: (arrayNode, parent) => parent ? arrayNode : arrayNode.source
 			}
 		});
-	});
+
+		this.setState({optionsTree});
+	};
 
 	handleFetch = (node: Node) => {
 		const {fetchAttributes} = this.props;
@@ -64,8 +83,9 @@ export class AttributeCreatingModalContainer extends PureComponent<Props> {
 
 	render () {
 		const {attributes, fetchAttributes, values, ...props} = this.props;
+		const {optionsTree} = this.state;
 
-		return <AttributeCreatingModal {...props} onFetch={this.handleFetch} options={this.getOptions(values, attributes)} />;
+		return <AttributeCreatingModal {...props} onFetch={this.handleFetch} options={optionsTree} />;
 	}
 }
 
