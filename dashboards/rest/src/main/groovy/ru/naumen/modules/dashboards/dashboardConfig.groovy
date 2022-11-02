@@ -701,8 +701,11 @@ class DashboardConfigService
                    по нему было равно NULL, или такого ключа не было. */
                 logger.info("workerKeyValueStorage >>> update ${counter++}/${total}")
                 def query = String.format(CHECK_ON_EXIST_SQL, namespaceForUpdate, keyForUpdate);
-                def currentValue = api.tx.call { executeQuery(query).first() };
-                if (Proxy.isProxyClass(currentValue.class))
+                def currentValue = api.tx.call {
+                    def queryResult = executeQuery(query)
+                    return queryResult.size() ? queryResult.first() : null
+                };
+                if (currentValue && Proxy.isProxyClass(currentValue.class))
                 {
                     currentValue = currentValue.getSubString(1, (int) currentValue.length())
                 }
@@ -712,7 +715,7 @@ class DashboardConfigService
                     logger.info("workerKeyValueStorage >>> ERROR put new value = ${newValue} " +
                                 "by key = ${keyForUpdate} in namespace = ${namespaceForUpdate}");
                 }
-                if (resultPut && currentValue.size() != 0  && !currentValue.getAt(0).equals(newValue))
+                if (resultPut && currentValue?.size() != 0  && !currentValue?.getAt(0).equals(newValue))
                 {
                     logger.info("workerKeyValueStorage >>> In namespace = ${namespaceForUpdate} " +
                                 "by key = ${keyForUpdate} new value = ${newValue}")
