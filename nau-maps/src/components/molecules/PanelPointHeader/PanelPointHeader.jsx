@@ -1,4 +1,5 @@
 // @flow
+import cn from 'classnames';
 import {connect} from 'react-redux';
 import EditIcon from 'icons/EditIcon';
 import {functions} from './selectors';
@@ -17,8 +18,11 @@ export class PanelPointHeader extends Component<Props, State> {
 	};
 
 	handleEditForm = () => {
-		const {point: {data: {uuid}}, showEditForm} = this.props;
-		showEditForm(uuid);
+		const {point: {data: {codeEditingForm, uuid}}, showEditForm} = this.props;
+
+		if (codeEditingForm) {
+			showEditForm(uuid, codeEditingForm);
+		}
 	};
 
 	showSingle = () => {
@@ -32,8 +36,15 @@ export class PanelPointHeader extends Component<Props, State> {
 	};
 
 	renderIconEdit = () => {
+		const {point: {data: {codeEditingForm}}} = this.props;
+
+		const classNames = cn({
+			[styles.icon]: true,
+			[styles.disabled]: !codeEditingForm
+		});
+
 		return (
-			<div className={styles.icon} onClick={this.handleEditForm} title="Редактировать">
+			<div className={classNames} onClick={this.handleEditForm} title="Редактировать">
 				<EditIcon />
 			</div>
 		);

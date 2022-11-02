@@ -25,8 +25,10 @@ export const getScheme = async (contentCode: string, subjectUuid: string, curren
 
 /**
  * Вызывает форму для редактирования и возвращает Uuid редактируемого элемента
+ * @param {string} objectUUID - uuid обьекта
+ * @param {string} codeEditingForm - код формы
  * @returns {Promise<{uuid: string|null}>} - Uuid
  */
-export const getEditForm = async (objectUUID: string): Promise<string> => {
-	return api.getEditForm(objectUUID);
+export const getEditForm = async (objectUUID: string, codeEditingForm: string): Promise<string> => {
+	return api.getEditForm(objectUUID, codeEditingForm);
 };

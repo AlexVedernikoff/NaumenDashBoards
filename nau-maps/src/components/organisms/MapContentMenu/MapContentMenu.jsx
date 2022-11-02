@@ -1,4 +1,5 @@
 // @flow
+import cn from 'classnames';
 import {connect} from 'react-redux';
 import {functions, props} from './selectors';
 import type {Props} from './types';
@@ -25,9 +26,11 @@ export class MapContentMenu extends Component<Props> {
 	handleEditForm = () => {
 		const {showEditForm, singleObject} = this.props;
 
-		const {data: {uuid}} = singleObject;
+		const {data: {codeEditingForm, uuid}} = singleObject;
 
-		showEditForm(uuid);
+		if (codeEditingForm) {
+			showEditForm(uuid, codeEditingForm);
+		}
 	};
 
 	handleMouseMove = ({pageX, pageY}) => {
@@ -47,12 +50,17 @@ export class MapContentMenu extends Component<Props> {
 		const {mapContentMenuOpen, singleObject} = this.props;
 
 		if (mapContentMenuOpen) {
-			const {data: {actions: [action]}} = singleObject;
+			const {data: {actions: [action], codeEditingForm}} = singleObject;
 			const {name} = action;
+
+			const classNames = cn({
+				[styles.menuListItem]: true,
+				[styles.disabled]: !codeEditingForm
+			});
 
 			return (
 				<ul className={styles.menuList} style={{left: this.pageX, top: this.pageY}}>
-					<li className={styles.menuListItem} onClick={this.handleEditForm}>Редактировать</li>
+					<li className={classNames} onClick={this.handleEditForm}>Редактировать</li>
 					<li className={styles.menuListItem} onClick={this.handleActionClick}>{name}</li>
 				</ul>
 			);

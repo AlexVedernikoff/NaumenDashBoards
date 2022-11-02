@@ -64,28 +64,9 @@ const goToElementMap = () => ({
 	type: GEOLOCATION_EVENTS.GO_TO_ELEMENT
 });
 
-const showEditForm = (objectUUID: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {editFormCode} = getState().geolocation;
+const showEditForm = (objectUUID: string, codeEditingForm: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
-		const uuid = await getEditForm(objectUUID, editFormCode);
-
-		if (uuid) {
-			dispatch(fetchGeolocation);
-		}
-	} catch (error) {
-		notify('error', 'error');
-		dispatch(recordGeolocationdError(error));
-	}
-};
-
-const goToElementMap = () => ({
-	type: GEOLOCATION_EVENTS.GO_TO_ELEMENT
-});
-
-const showEditForm = (objectUUID: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {editFormCode} = getState();
-	try {
-		const uuid = await getEditForm(objectUUID, editFormCode);
+		const uuid = await getEditForm(objectUUID, codeEditingForm);
 
 		if (uuid) {
 			dispatch(fetchGeolocation);

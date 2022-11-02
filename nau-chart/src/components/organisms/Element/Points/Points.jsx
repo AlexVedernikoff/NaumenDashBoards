@@ -9,14 +9,18 @@ const Points = ({entity, handleContextMenu, onClick, onHover, x, y}: Props) => {
 	const tileH = 58;
 	const paddingText = 4;
 
-	const [image] = useImage('image/point.svg');
+	const [image] = useImage(entity.icon || 'image/point.svg');
 
 	const handleOnClick = () => {
-		onClick(entity);
+		if (entity.title || entity.desc) {
+			onClick(entity);
+		}
 	};
 
-	const handleOnHover = hover => () => {
-		onHover(hover);
+	const handleOnHover = (hover: boolean) => () => {
+		if (entity.title || entity.desc) {
+			onHover(hover);
+		}
 	};
 
 	return (
