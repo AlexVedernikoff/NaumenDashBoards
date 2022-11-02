@@ -1,24 +1,15 @@
 // @flow
+/* spell-checker: disable */
 import type {DTOValue} from 'api/types';
 import fakeExecMFFrame from 'api/fakeExecMFAPI/frame';
+// [imports]
 
-const fakeDataList = [
-	// {
-	// body: '',
-	// data: data['modules.dashboardSettings.getUserData'],
-	// url: 'func=modules.dashboardSettings.getUserData'
-	// },
-	// {
-	// body: '',
-	// data: data['modules.dashboards.getDataSources'],
-	// url: 'func=modules.dashboards.getDataSources'
-	// },
-	// {
-	// body: '"widgetKey":"root_DashbordyContent_"',
-	// data: data['data.root_DashbordyContent_'],
-	// url: 'modules.dashboardDataSet.getDataForCompositeDiagram'
-	// }
-];
+const fakeDataList = [];
+
+/**
+ * ! Не изменяйте строчки выше вручную.
+ * ! Эта структура необходима в parseHAR.js
+ */
 
 const fakeFetch = (url: string, options: DTOValue): Promise<DTOValue> | null => {
 	const data = fakeDataList.find(item => url.includes(item.url) && (options.body?.includes(item.body) ?? true));

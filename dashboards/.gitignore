@@ -31,4 +31,6 @@ bundle-stats.html
 # localization temp file
 .~lock*
 src/localization/json/keys.js
-src/api/fakeExecAPI/fakeData.json
+
+src/api/fakeExecAPI/request.har
+src/api/fakeExecAPI/*.json
