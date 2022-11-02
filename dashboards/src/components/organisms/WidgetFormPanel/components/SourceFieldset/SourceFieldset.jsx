@@ -190,7 +190,7 @@ export class SourceFieldset extends Component<Props, State> {
 		value: null
 	});
 
-	handleSelect = ({value: node}: OnSelectEvent) => {
+	handleSelect = async ({value: node}: OnSelectEvent) => {
 		const {onFetchAttributes, parentClassFqn, value} = this.props;
 		const {source} = value;
 		const {value: sourceValue} = source;
@@ -202,7 +202,7 @@ export class SourceFieldset extends Component<Props, State> {
 			: nodeValue;
 
 		if (newSourceValue?.value !== sourceValue?.value) {
-			const attrSetConditions = parseAttrSetConditions(nodeValue);
+			const attrSetConditions = await parseAttrSetConditions(nodeValue);
 
 			newSource = {
 				...newSource,

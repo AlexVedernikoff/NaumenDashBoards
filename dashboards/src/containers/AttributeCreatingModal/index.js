@@ -1,3 +1,3 @@
 // @flow
-import AttributeCreatingModal from './AttributeCreatingModal';
+import AttributeCreatingModal from './AttributeCreatingModalContainer';
 export default AttributeCreatingModal;

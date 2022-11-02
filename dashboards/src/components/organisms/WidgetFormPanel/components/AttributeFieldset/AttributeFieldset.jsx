@@ -1,14 +1,15 @@
 // @flow
-import type {Attribute, Props} from './types';
+import type {Attribute, Props, State} from './types';
 import {ATTRIBUTE_FIELDSET_CONTEXT} from './HOCs/withAttributeFieldset/constants';
 import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import deepEqual from 'fast-deep-equal';
 import MainSelect from 'containers/AttributeMainSelect';
 import type {OnSelectEvent} from 'components/types';
 import {parseAttrSetConditions} from 'store/widgetForms/helpers';
 import React, {PureComponent} from 'react';
 import RefSelect from 'containers/AttributeRefSelect';
 
-export class AttributeFieldset extends PureComponent<Props> {
+export class AttributeFieldset extends PureComponent<Props, State> {
 	static defaultProps = {
 		disabled: false,
 		index: 0,
@@ -16,7 +17,29 @@ export class AttributeFieldset extends PureComponent<Props> {
 		removable: false
 	};
 
-	getAttrSetConditions = () => parseAttrSetConditions(this.props.source);
+	state = {
+		attrSetConditions: null
+	};
+
+	componentDidMount () {
+		this.fetchAttrSetConditions();
+	}
+
+	componentDidUpdate (prevProps: Props) {
+		if (!deepEqual(this.props.source, prevProps.source)) {
+			this.fetchAttrSetConditions();
+		}
+	}
+
+	fetchAttrSetConditions = async () => {
+		const {source} = this.props;
+
+		if (source) {
+			const attrSetConditions = await parseAttrSetConditions(source);
+
+			this.setState({attrSetConditions});
+		}
+	};
 
 	getMainOptions = (options: Array<Attribute>): Array<Attribute> => {
 		const {dataSetIndex, getMainOptions} = this.props;
@@ -91,10 +114,11 @@ export class AttributeFieldset extends PureComponent<Props> {
 
 	renderMainSelect = () => {
 		const {components, disabled, removable, source, value} = this.props;
+		const {attrSetConditions} = this.state;
 
 		return (
 			<MainSelect
-				attrSetConditions={this.getAttrSetConditions()}
+				attrSetConditions={attrSetConditions}
 				components={components}
 				disabled={disabled}
 				getOptions={this.getMainOptions}
@@ -110,11 +134,12 @@ export class AttributeFieldset extends PureComponent<Props> {
 
 	renderRefSelect = () => {
 		const {components, disabled, refComponents, removable, value} = this.props;
+		const {attrSetConditions} = this.state;
 
 		if (value && value.type in ATTRIBUTE_SETS.REFERENCE) {
 			return (
 				<RefSelect
-					attrSetConditions={this.getAttrSetConditions()}
+					attrSetConditions={attrSetConditions}
 					components={refComponents ?? components}
 					disabled={disabled}
 					droppable={true}
