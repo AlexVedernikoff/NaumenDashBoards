@@ -1090,9 +1090,8 @@ class QueryWrapper implements CriteriaWrapper
             if(Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES && !attributeIsDynamic)
             {
                 //трехуровневый атрибут
-                attribute?.attrChains()?.last()?.ref = Attribute.getAttributeType(attribute) in AttributeType.LINK_TYPES_WITHOUT_CATALOG
-                    ? new Attribute(code: 'title', type: 'string')
-                    : new Attribute(code: 'code', type: 'string')
+                //для НЭС и ЭС, возможна, нужна будет дополнительная проверка для получения кода атрибута
+                attribute?.attrChains()?.last()?.ref = new Attribute(code: 'title', type: 'string')
             }
             if(attribute.type in AttributeType.LINK_TYPES && attribute?.ref?.code in ['title', 'code'])
             {
