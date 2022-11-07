@@ -21,6 +21,7 @@ import groovy.json.JsonSlurper
 import ru.naumen.core.server.script.api.ISelectClauseApi
 import ru.naumen.core.server.script.api.criteria.IApiCriteria
 import ru.naumen.core.server.script.spi.ScriptDtObject
+import sun.util.calendar.ZoneInfo
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 
@@ -41,6 +42,14 @@ interface GanttDataSetController
      * @return данные для построения диаграммы Ганта
      */
     String getGanttVersionDiagramData(Map<String, String> requestData, IUUIDIdentifiable user)
+
+    /**
+     * Метод получения работ при клике по чекбоксу отображения
+     * @param requestContent - тело запроса
+     * @param user - пользователь
+     * @return список работ
+     */
+    String getWorks(Map<String, String> requestContent, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
@@ -62,6 +71,14 @@ class GanttDataSetImpl implements GanttDataSetController
         return toJson(
             service.getGanttVersionDiagramData(requestData.versionKey, user, requestData.timezone)
         )
+    }
+
+    @Override
+    String getWorks(Map<String, String> requestContent, IUUIDIdentifiable user)
+    {
+        GetGanttWorks request = new ObjectMapper()
+            .convertValue(requestContent, GetGanttWorks)
+        return toJson(service.getWorks(request, user))
     }
 }
 
@@ -128,37 +145,52 @@ class GanttDataSetService
         }
         else
         {
-            data.tasks = buildDataListFromSettings(
-                settings.resourceAndWorkSettings,
-                null,
-                request.subjectUUID
+            addBasicListWork(settings, request, user, data)
+        }
+        return data
+    }
+
+    /**
+     * Метод добавления работ
+     * @param settings - настройки диаграммы из хранилища
+     * @param request - тело запроса
+     * @param user - пользователь
+     * @param data - данные о диаграмме
+     * @return список работ
+     */
+    void addBasicListWork(GanttSettingsClass settings,
+                          GetGanttSettingsRequest request,
+                          IUUIDIdentifiable user,
+                          GanttDiagramData data)
+    {
+        data.tasks = buildDataListFromSettings(
+            settings.resourceAndWorkSettings,
+            null,
+            request.subjectUUID
+        )
+        ZoneInfo timezone =
+            TimeZone.getTimeZone(
+                api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
             )
-            def timezone =
-                TimeZone.getTimeZone(
-                    api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: request.timezone
-                )
-            def workAttributeSettings = settings.resourceAndWorkSettings.find {
-                it.startWorkAttribute && it.endWorkAttribute
-            }
+        ResourceAndWorkSettings workAttributeSettings = settings.resourceAndWorkSettings.find {
+            it.startWorkAttribute && it.endWorkAttribute
+        }
+        data.tasks.each {
+            formatWorkDates(it, workAttributeSettings, timezone)
+            setWorkTypeToProjectIfItHasChildren(it, data.tasks)
+            setWorkProgress(it, settings)
+            setColumnDateFormats(it, timezone)
+        }
+        if (data.commonSettings)
+        {
+            ColumnSettings columnSettingsTitle = data.commonSettings?.columnSettings?.first()
             data.tasks.each {
-                formatWorkDates(it, workAttributeSettings, timezone)
-                setWorkTypeToProjectIfItHasChildren(it, data.tasks)
-                setWorkProgress(it, settings)
-                setColumnDateFormats(it, timezone)
-            }
-            data.tasks = filterTasksWithNoDateRanges(data.tasks)
-            if (data.commonSettings)
-            {
-                ColumnSettings columnSettingsTitle = data.commonSettings?.columnSettings?.first()
-                data.tasks.each {
-                    if (columnSettingsTitle)
-                    {
-                        it.name = it[columnSettingsTitle.code]
-                    }
+                if (columnSettingsTitle)
+                {
+                    it.name = it[columnSettingsTitle.code]
                 }
             }
         }
-        return data
     }
 
     /**
@@ -226,17 +258,12 @@ class GanttDataSetService
     {
         return tasks.findResults {
             Boolean startAndEndDateExist = it.start_date && it.end_date
-            Boolean start = it.start_date
-            Boolean end = !it.end_date
             Boolean type = it.type == SourceType.WORK
-            if (!startAndEndDateExist &&
-                it.type == SourceType.WORK || it.type == SourceType.RESOURCE)
+            if (it.type in [SourceType.RESOURCE, 'milestone', 'project'])
             {
-                it.datesStartDateAndEndDate = false
                 return it
             }
-
-            else
+            if (startAndEndDateExist && type)
             {
                 return it
             }
@@ -398,7 +425,7 @@ class GanttDataSetService
             Date.parse(dateFormat, attributeValue)
             return true
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             return false
         }
@@ -417,7 +444,9 @@ class GanttDataSetService
             def key = it.key
             if (value in Date && !(key in ['start_date', 'end_date']))
             {
-                workToMerge[key] = value.format("dd.MM.yyyy, HH:mm:ss", timezone)
+                workToMerge[key] =
+                    value.getHours() ? value.format('dd.MM.yyyy, HH:mm:ss', timezone) :
+                        value.format('dd.MM.yyyy')
             }
         }
 
@@ -832,5 +861,24 @@ class GanttDataSetService
             return toJson(res)
         }
         return descriptor && cardObjectUuid ? closure(descriptor) : descriptor
+    }
+
+    /**
+     * Метод получения работ в зависимости от наличия даты начала и окончания
+     * @param request - тело запроса
+     * @param user - пользователь
+     * @return список работ
+     */
+    Collection<Map<String, Object>> getWorks(GetGanttWorks request, IUUIDIdentifiable user)
+    {
+        GanttSettingsService service = GanttSettingsService.instance
+        GanttSettingsClass settings = service.getGanttSettings(request)
+        GanttDiagramData data = new GanttDiagramData()
+        addBasicListWork(settings, request, user, data)
+        if (!request.worksWithoutStartOrEndDateCheckbox)
+        {
+            data.tasks = filterTasksWithNoDateRanges(data.tasks)
+        }
+        return data.tasks
     }
 }

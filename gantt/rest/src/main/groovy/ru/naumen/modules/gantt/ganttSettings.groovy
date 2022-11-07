@@ -428,7 +428,6 @@ class GanttSettingsService
      */
     void changingSettingsForNonTextTypes(GanttSettingsClass ganttSettings)
     {
-        Set newOptionsColumnSetting = []
         ganttSettings.commonSettings?.columnSettings?.each { columnSetting ->
             if (!columnSetting.editor)
             {
@@ -459,10 +458,11 @@ class GanttSettingsService
                                     columnSetting.editor.type = TYPE_SELECT
                                     Set elementsDirectory = []
                                     api.utils.find(attributeCode, [:]).findAll().each {
-                                            elementsDirectory.add(
-                                                ['label': it.title, 'key': it.title, 'value':
-                                                    it.UUID]
-                                            )
+                                        elementsDirectory.add(
+                                            ['label': it.title,
+                                             'key'  : it.title,
+                                             'value': it.UUID]
+                                        )
                                     }
                                     columnSetting.editor.options = elementsDirectory
                                     break
@@ -471,25 +471,29 @@ class GanttSettingsService
                                     columnSetting.editor.type = 'number'
                                     columnSetting.editor.map_to = 'integer'
                                     break
+                                case AttributeType.DATE_TYPE:
                                 case AttributeType.DATE_TIME_TYPE:
                                     columnSetting.editor.options = null
                                     columnSetting.editor.type = 'date'
                                     break
                                 case AttributeType.OBJECT_TYPE:
+                                    Set newOptionsColumnSetting = []
                                     columnSetting.editor.type = TYPE_SELECT
                                     String referenceClass =
                                         api.metainfo.getMetaClass(metaClassFqn)
                                            .getAttribute(attributeCode)
                                            .getType().getRelatedMetaClass().toString()
                                     api.utils.find(referenceClass, [:]).findAll().each {
-                                            newOptionsColumnSetting.add(
-                                                ['label': it.title, 'key': it.title, 'value':
-                                                    it.UUID]
-                                            )
+                                        newOptionsColumnSetting.add(
+                                            ['label': it.title,
+                                             'key': it.title,
+                                             'value': it.UUID]
+                                        )
                                     }
                                     columnSetting.editor.options = newOptionsColumnSetting
                                     break
                                 case AttributeType.BOOL_TYPE:
+                                    Set newOptionsColumnSetting = []
                                     columnSetting.editor.type = TYPE_SELECT
                                     newOptionsColumnSetting
                                         .add(['label': 'да', 'key': 'да', 'value': true])
@@ -498,6 +502,7 @@ class GanttSettingsService
                                     columnSetting.editor.options = newOptionsColumnSetting
                                     break
                                 case AttributeType.STATE_TYPE:
+                                    Set newOptionsColumnSetting = []
                                     columnSetting.editor.type = TYPE_SELECT
                                     api.metainfo.getMetaClass(metaClassFqn).workflow.states.each {
                                         newOptionsColumnSetting.add(
@@ -639,7 +644,7 @@ class GanttSettingsService
                     SequenceChartElements elements = new SequenceChartElements()
                     elements.parentUuid = it.parent
                     elements.workUuid = it.id
-                    elements.idLocations = it.positionElement
+                    elements.idLocations = it.positionElement ?: null
                     sequenceWorks.add(elements)
                 }
             }
@@ -698,7 +703,7 @@ class GanttSettingsService
             entity.editable = it.editable
             entity.name = it.name
             entity.level = it.level
-            entity.positionElement = it.positionElement
+            entity.positionElement = it.positionElement ?: null
 
             if (it?.containsKey('completed'))
             {
@@ -761,7 +766,7 @@ class GanttSettingsService
             if (metaObjectWork[communicationResourceAttribute].UUID != task.parent)
             {
                 editableDataInSystem << [(communicationResourceAttribute):
-                                             api.utils.get(task.parent)]
+                                         api.utils.get(task.parent)]
             }
             editableDataInSystem << [(startWorkAttribute): getDateToSave(task.start_date)]
             editableDataInSystem << [(endWorkAttribute): getDateToSave(task.end_date)]
