@@ -768,14 +768,9 @@ class DashboardUtils
     {
         def res
 
-        if (code.contains('@'))
-        {
-            code = code.split('@').last()
-        }
-
+        def sc = getApi().selectClause
         if(descriptor)
         {
-            def sc = getApi().selectClause
             def apiDescr = getApi().listdata.createListDescriptor(descriptor)
             def dateCriteria = getApi().listdata.createCriteria(apiDescr)
                                        .addColumn(sc.min(sc.property(code)))
@@ -783,7 +778,9 @@ class DashboardUtils
         }
         else
         {
-            res = getApi().db.query("select min(${code}) from ${classFqn}").list().head()
+            def criteria = getApi().db.createCriteria().addSource(classFqn)
+                                   .addColumn(sc.min(sc.property(code)))
+            res = getApi().db.query(criteria).list().head()
         }
         return res instanceof Long ? new Date(res) : res as Date
     }

@@ -4238,6 +4238,7 @@
                         minDate = dashboardQueryWrapperUtils.getMinDateDynamic(tempAttr, source)
                     }else
                     {
+                        parameter.attribute = dashboardQueryWrapperUtils.updateRefAttributeCode(parameter.attribute)
                         minDate = DashboardUtils.getMinDate(
                             parameter.attribute.attrChains().code.join('.'),
                             parameter.attribute.sourceCode,
