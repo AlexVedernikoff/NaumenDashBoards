@@ -466,8 +466,6 @@ class ElementsMap
     {
         Object defaultSettingsWizardSettings = new SettingsProvider()
             .getSettings()?.defVisualization
-        CharacteristicsDisplayListObjects settings = new SettingsProvider()
-            .getSettings()?.defVisualization?.points?.first()
         String tooltip =
             equipment.hasProperty(strategie?.tooltip) && equipment[strategie?.tooltip] ?
                 equipment[strategie?.tooltip] : null
@@ -492,7 +490,7 @@ class ElementsMap
                     : MapObjectType.PASSIVE, equipment
             )
                 .setHeader(equipment.title)
-                .setIcon(equipment)
+                .setIcon(dataDisplayPoint)
                 .setTooltip(tooltip)
                 .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(equipment)))
                 .setGeopositions(equipment, strategie)
