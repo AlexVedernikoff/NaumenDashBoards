@@ -2652,7 +2652,7 @@
                             value: value,
                             title: title,
                             id: id,
-                            type: Comparison.NOT_EQUAL_AND_NOT_NULL,
+                            type: Comparison.NOT_EQUAL,
                             attribute: attribute
                         )
                     case Condition.IN:
