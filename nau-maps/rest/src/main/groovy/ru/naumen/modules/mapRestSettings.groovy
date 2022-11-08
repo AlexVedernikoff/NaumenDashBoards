@@ -163,14 +163,20 @@ class ElementsMap
 
         if (strategie.displayingLinesDots)
         {
+            String basisForLinkIcon = "${ api.web.getBaseUrl() }${ 'download?uuid=' }"
+            String linkDefaultIcons =
+                api.utils.findFirst('root', [:]).hasProperty('defPointIcon') &&
+                api.utils.findFirst('root', [:])?.defPointIcon ?
+                    "${ basisForLinkIcon }${ api.utils.findFirst('root', [:])?.defPointIcon?.UUID?.first() }" :
+                    null
             dataDisplayPointA =
                 dbTrail.hasProperty(strategie?.pathToIconA) && dbTrail[strategie?.pathToIconA] ?
-                    "${ api.web.getBaseUrl() }${ 'download?uuid=' }${ dbTrail[strategie?.pathToIconA].UUID.first() }" :
-                    null
+                    "${ basisForLinkIcon }${ dbTrail[strategie?.pathToIconA].UUID.first() }" :
+                    linkDefaultIcons
             dataDisplayPointB =
                 dbTrail.hasProperty(strategie?.pathToIconB) && dbTrail[strategie?.pathToIconB] ?
                     "${ api.web.getBaseUrl() }${ 'download?uuid=' }${ dbTrail[strategie?.pathToIconB].UUID.first() }" :
-                    null
+                    linkDefaultIcons
         }
 
         TrailBuilder trailBuilder =
@@ -465,8 +471,15 @@ class ElementsMap
         String tooltip =
             equipment.hasProperty(strategie?.tooltip) && equipment[strategie?.tooltip] ?
                 equipment[strategie?.tooltip] : null
-        String codeAttributeGroup = settings?.attributeGroup
-        String codeMetaClass = settings?.metaClassObject.id
+        String basisForLinkIcon = "${ api.web.getBaseUrl() }${ 'download?uuid=' }"
+        String linkDefaultIcons = api.utils.findFirst('root', [:]).hasProperty('defPointIcon') &&
+                                  api.utils.findFirst('root', [:])?.defPointIcon ?
+            "${ basisForLinkIcon }${ api.utils.findFirst('root', [:])?.defPointIcon?.UUID?.first() }" :
+            null
+        String dataDisplayPoint =
+            equipment.hasProperty(strategie?.pathIcon) && equipment[strategie?.pathIcon] ?
+                "${ basisForLinkIcon }${ equipment[strategie?.pathIcon].UUID.first() }" :
+                linkDefaultIcons
         if (equipment &&
             equipment.title &&
             equipment[strategie.pathLatitudeCoordinates] &&
@@ -1212,6 +1225,12 @@ class BasePointBuilder extends MapObjectBuilder
     {
         String fileUuid = dbEquip?.classification?.icon?.find()?.UUID ?: ''
         this.icon = fileUuid ? "/sd/operator/download?uuid=${ fileUuid }" : ''
+        return this
+    }
+
+    BasePointBuilder setIcon(String iconSecond)
+    {
+        this.icon = iconSecond
         return this
     }
 
