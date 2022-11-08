@@ -4152,7 +4152,7 @@
                                 }
                             }
                         value = (value == null || value.equals('')) ? getNullValue(diagramType, fromBreakdown) : value
-                            return value.toString().replaceAll("\\<.*?>","")
+                            return value.toString().replaceAll("\\.*?","")
                     }
                 case GroupType.DAY:
                     if(!value)
