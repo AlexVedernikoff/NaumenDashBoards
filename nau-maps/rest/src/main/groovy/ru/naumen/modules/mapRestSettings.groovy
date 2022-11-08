@@ -149,7 +149,8 @@ class ElementsMap
         DefaultVisualization defaultSettingsWizardSettings = new SettingsProvider()
             .getSettings()?.defVisualization
         String color = dbTrail.hasProperty(strategie?.color) && dbTrail[strategie?.color] ?
-            dbTrail[strategie?.color] : defaultSettingsWizardSettings?.colorLineMap
+            getColorCorrectFormat(dbTrail[strategie?.color]) :
+            defaultSettingsWizardSettings?.colorLineMap
         String width = dbTrail.hasProperty(strategie?.weight) && dbTrail[strategie?.weight] ?
             dbTrail[strategie?.weight] : defaultSettingsWizardSettings?.width
         String opacity = dbTrail.hasProperty(strategie?.opacity) && dbTrail[strategie?.opacity] ?
@@ -199,6 +200,25 @@ class ElementsMap
             strategie.metaClassObject
         )
         return trailBuilder
+    }
+
+    /**
+     * Получение цвета в правильном формате
+     * @param colorInformation - цвет по атрибуту из мастера
+     * @return код цвета
+     */
+    String getColorCorrectFormat(Object colorInformation)
+    {
+        String colorInHexFormat
+        if (colorInformation in String)
+        {
+            colorInHexFormat = colorInformation
+        }
+        else if (colorInformation && colorInformation in ScriptDtObject)
+        {
+            colorInHexFormat = "#${ colorInformation.color.string }"
+        }
+        return colorInHexFormat
     }
 
     /**
