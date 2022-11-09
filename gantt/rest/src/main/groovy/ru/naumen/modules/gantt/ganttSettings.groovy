@@ -261,7 +261,7 @@ class GanttSettingsService
 {
     private static final String GANTT_VERSION_DATE_PATTERN = "dd.MM.yyyy, HH:mm:ss"
     private static final String MAIN_FQN = 'abstractBO'
-    private static final String OLD_GROUP_MASTER_DASHBOARD = 'MasterDashbordov'
+    private static final String GROUP_GANT_MASTER = 'GanttMaster'
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
     static final String GANTT_NAMESPACE = 'gantts'
     static final String TYPE_SELECT = 'select'
@@ -705,6 +705,13 @@ class GanttSettingsService
             entity.level = it.level
             entity.positionElement = it.positionElement ?: null
 
+            request.commonSettings.columnSettings.each { column ->
+                if (it[column.code])
+                {
+                    entity.dataTableColumns[column.code] = it[column.code]
+                }
+            }
+
             if (it?.containsKey('completed'))
             {
                 entity.completed = it.completed
@@ -722,6 +729,13 @@ class GanttSettingsService
         }
 
         ganttVersionSettings.workRelations = request.workRelations
+        ganttVersionSettings.commonSettings = request.commonSettings
+
+        Map attributesForColumns = [:]
+        request.commonSettings.columnSettings.each {
+            attributesForColumns << [(it.code): (request.tasks.find { task -> task[it.code]
+            }[it.code])]
+        }
 
         if (saveJsonSettings(
             versionKey,
@@ -966,7 +980,7 @@ class GanttSettingsService
         }
         else if (checkUserOnMasterDashboard(user))
         {
-            return "MASTER"
+            return "ganttMaster"
         }
         else
         {
@@ -982,7 +996,7 @@ class GanttSettingsService
     private boolean checkUserOnMasterDashboard(IUUIDIdentifiable user)
     {
         return user?.UUID
-            ? ((OLD_GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code) ||
+            ? ((GROUP_GANT_MASTER in api.utils.get(user.UUID).all_Group*.code) ||
                (GROUP_MASTER_DASHBOARD in api.utils.get(user.UUID).all_Group*.code))
             : true
     }
@@ -1347,6 +1361,11 @@ class SaveGanttVersionSettingsRequest extends BaseGanttSettingsRequest
      * Связи между работами
      */
     Collection workRelations
+
+    /**
+     * Настройки для столбцов бокового меню
+     */
+    CommonSettings commonSettings
 }
 
 /**
@@ -1488,6 +1507,11 @@ class GanttVersionsSettingsClass
      * Настройки связей между работами
      */
     Collection workRelations = []
+
+    /**
+     * Настройки для столбцов
+     */
+    CommonSettings commonSettings
 }
 
 /**
@@ -1545,6 +1569,12 @@ class DiagramEntity
      * Данные атрибутов сущности
      */
     Map<String, Object> attributesData = [:]
+
+    /**
+     * Данные для столбцов таблицы
+     */
+    Map<String, Object> dataTableColumns = [:]
+
     /**
      * Состояние сущности
      */

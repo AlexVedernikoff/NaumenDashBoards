@@ -208,7 +208,7 @@ class GanttDataSetService
         GanttVersionsSettingsClass ganttVersionsSettings =
             service.getGanttVersionsSettings(versionKey)
         GanttDiagramData data = new GanttDiagramData()
-        data.commonSettings = ganttVersionsSettings.ganttSettings.commonSettings
+        data.commonSettings = ganttVersionsSettings.commonSettings
         data.diagramKey = ganttVersionsSettings.ganttSettings.diagramKey
         data.workRelations = ganttVersionsSettings.workRelations
         data.workRelationCheckbox = ganttVersionsSettings.ganttSettings.workRelationCheckbox
@@ -244,7 +244,6 @@ class GanttDataSetService
                 setWorkProgressVersion(it, ganttVersionsSettings)
                 setColumnDateFormats(it, timeZone)
             }
-            data.tasks = filterTasksWithNoDateRanges(data.tasks)
         }
         return data
     }
@@ -330,7 +329,9 @@ class GanttDataSetService
                 task.level = entity.level
                 task.name = entity.name
                 task.workOfLink = entity.workOfLink
-
+                entity.dataTableColumns.each { key, value ->
+                    task.put(key, value)
+                }
                 mapAttributes.keySet().each { fieldCode ->
                     task[fieldCode] =
                         getAttributeValueForVersionEntity(
