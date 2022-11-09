@@ -402,13 +402,13 @@ class StrategiesDisplayingObjectsSchemas
      */
     Collection<String> placesOfUse
 
-    OutputObjectStrategies setScriptText(String scriptText)
+    StrategiesDisplayingObjectsSchemas setScriptText(String scriptText)
     {
         this.scriptText = scriptText
         return this
     }
 
-    OutputObjectStrategies setPlacesOfUse(Collection<String> placesOfUse)
+    StrategiesDisplayingObjectsSchemas setPlacesOfUse(Collection<String> placesOfUse)
     {
         Collection<String> setPlaces = []
         placesOfUse.each {
@@ -419,7 +419,7 @@ class StrategiesDisplayingObjectsSchemas
     }
 }
 
-class CommunicationSettingsHierarchy extends OutputObjectStrategies
+class CommunicationSettingsHierarchy extends OutputObjectStrategiesSchema
 {
     /**
      * Цвет элемента
@@ -438,32 +438,32 @@ class CommunicationSettingsHierarchy extends OutputObjectStrategies
      */
     String lineStyle
 
-    StrategiesLine setColor(String color)
+    CommunicationSettingsHierarchy setColor(String color)
     {
         this.color = color
         return this
     }
 
-    StrategiesLine setOpacity(String opacity)
+    CommunicationSettingsHierarchy setOpacity(String opacity)
     {
         this.opacity = opacity
         return this
     }
 
-    StrategiesLine setWeight(String weight)
+    CommunicationSettingsHierarchy setWeight(String weight)
     {
         this.weight = weight
         return this
     }
 
-    StrategiesLine setLineStyle(String lineStyle)
+    CommunicationSettingsHierarchy setLineStyle(String lineStyle)
     {
         this.lineStyle = lineStyle
         return this
     }
 }
 
-class RelationshipsObjectSettings extends OutputObjectStrategies
+class RelationshipsObjectSettings extends OutputObjectStrategiesSchema
 {
     /**
      * Путь к координатам широты
@@ -475,13 +475,13 @@ class RelationshipsObjectSettings extends OutputObjectStrategies
      */
     String pathLongitudeCoordinates
 
-    StrategiesPoint setPathLatitudeCoordinates(String pathLatitudeCoordinates)
+    RelationshipsObjectSettings setPathLatitudeCoordinates(String pathLatitudeCoordinates)
     {
         this.pathLatitudeCoordinates = pathLatitudeCoordinates
         return this
     }
 
-    StrategiesPoint setPathLongitudeCoordinates(String pathLongitudeCoordinates)
+    RelationshipsObjectSettings setPathLongitudeCoordinates(String pathLongitudeCoordinates)
     {
         this.pathLongitudeCoordinates = pathLongitudeCoordinates
         return this
@@ -522,6 +522,46 @@ class SchemaElement
     void setChildElements(Collection<SchemaElement> childElements)
     {
         this.childElements = childElements
+    }
+}
+
+@InjectApi
+class OutputObjectStrategiesSchema
+{
+    /**
+     * Текст скрипта
+     */
+    String scriptText
+    /**
+     * Места использования настроек из мастера
+     */
+    Collection<String> placesOfUse
+
+    /**
+     * Код используемого метакласса
+     */
+    String metaClassObject
+
+    OutputObjectStrategiesSchema setMetaClassObject(String metaClassObject)
+    {
+        this.metaClassObject = metaClassObject
+        return this
+    }
+
+    OutputObjectStrategiesSchema setScriptText(String scriptText)
+    {
+        this.scriptText = scriptText
+        return this
+    }
+
+    OutputObjectStrategiesSchema setPlacesOfUse(Collection<String> placesOfUse)
+    {
+        Collection<String> setPlaces = []
+        placesOfUse.each {
+            setPlaces.add(it)
+        }
+        this.placesOfUse = setPlaces
+        return this
     }
 }
 

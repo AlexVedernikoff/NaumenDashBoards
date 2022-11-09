@@ -76,7 +76,7 @@ class MetaClassObjectSchemes
         Collection<String> fqnParts = fqn.tokenize('$')
         String id = fqnParts[0]
         String caseId = fqnParts.size() > 1 ? fqnParts[1] : ''
-        return new MetaClassObject(id, caseId)
+        return new MetaClassObjectSchemes(id, caseId)
     }
 }
 
@@ -246,7 +246,7 @@ class ActionsWithObjects
 {
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс')
-    MetaClassObject metaClassObject = new MetaClassObject('', '')
+    MetaClassObjectSchemes metaClassObject = new MetaClassObjectSchemes('', '')
 
     @JsonSchemaMeta(title = 'Код формы редактирования')
     String codeEditingForm = ''

@@ -492,6 +492,19 @@ class ActionScheme
     }
 }
 
+@Canonical
+class OpenLinkActionScheme extends ActionScheme
+{
+    /**
+     * Ссылка
+     */
+    String link
+    /**
+     * Флаг на открытие в текущей вкладке
+     */
+    boolean inPlace
+}
+
 class HierarchyCommunicationBuilder
 {
     /**
@@ -597,7 +610,7 @@ class HierarchyCommunicationBuilder
                                                    boolean inPlace = false)
     {
         this.actions.add(
-            new OpenLinkAction(
+            new OpenLinkActionScheme(
                 name: name,
                 link: link,
                 inPlace: inPlace,
