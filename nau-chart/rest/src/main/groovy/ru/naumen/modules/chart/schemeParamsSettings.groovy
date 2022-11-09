@@ -12,6 +12,7 @@ import ru.naumen.core.server.script.spi.ScriptDtOList
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.Canonical
+import ru.naumen.core.shared.dto.ISDtObject
 
 /**
  * Метод по получению данных из БД через Мастер настроек
@@ -31,7 +32,15 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
         nameContent
     ))
     {
-        pointData += dataForHierarchyCommunicationSettings(settings, nameContent, bindings)
+        HierarchyCommunicationSettings settingsForTabHierarchyCommunication =
+            settings?.abstractSchemesCharacteristics.find {
+                it.typeSchemes == variableDescribingHierarchyCommunicationSettings
+            }
+        pointData += dataForHierarchyCommunicationSettings(
+            settingsForTabHierarchyCommunication,
+            nameContent,
+            bindings
+        )
     }
     if (checkingPlaceUseInSettingsWizard(
         variableDescribingObjectRelationshipsSettings,
@@ -39,7 +48,15 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
         nameContent
     ))
     {
-        pointData += dataForObjectRelationshipsSettings(settings, nameContent, bindings)
+        ObjecRelationshipsSettings settingsForObjecRelationshipsSettings =
+            settings?.abstractSchemesCharacteristics.find {
+                it.typeSchemes == variableDescribingObjectRelationshipsSettings
+            }
+        pointData += dataForObjectRelationshipsSettings(
+            settingsForObjecRelationshipsSettings,
+            nameContent,
+            bindings
+        )
     }
     return pointData
 }
@@ -51,84 +68,93 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
  * @param bindings - дополнительные параметры контекста выполнения скрипта
  * @return коллекция данных для отображения заданных на вкладке
  */
-Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicationSettings(SchemesSettings settings,
-                                                                                            String nameContent,
-                                                                                            LinkedHashMap<String, Object> bindings)
+Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicationSettings(
+    HierarchyCommunicationSettings settings,
+    String nameContent,
+    LinkedHashMap<String, Object> bindings)
 {
-    Collection<AbstractSchemesCharacteristics> abstractCharacteristicsData =
-        settings?.abstractSchemesCharacteristics
-    Collection<String> pointScriptText = getListScript(abstractCharacteristicsData.first())
-    String linkAttribute =
-        abstractCharacteristicsData.first()?.strategies?.pathCoordinatLongitud.first()
-    String pointA = abstractCharacteristicsData.first()?.strategies?.pointA.first()
-    String pointB = abstractCharacteristicsData.first()?.strategies?.pointB.first()
-    String scriptLineAttributeData = "${ pointScriptText.first() }.${ linkAttribute }"
-    String scriptPointAAttributeData = "${ pointScriptText.first() }.${ linkAttribute }.${ pointA }"
-    String scriptPointBAttributeData = "${ pointScriptText.first() }.${ linkAttribute }.${ pointB }"
-    ScriptDtOList dataLine
-    Collection dataPointA
-    Collection dataPointB
-    try
-    {
-        dataLine = api.utils.executeScript(scriptLineAttributeData, bindings)
-        dataPointA = api.utils.executeScript(scriptPointAAttributeData, bindings)
-        dataPointB = api.utils.executeScript(scriptPointBAttributeData, bindings)
-    }
-    catch (Exception ex)
-    {
-        logger.info("Передан неверный скрипт!")
-        logger.error("#schemeParamsSettings ${ ex.message }", ex)
-    }
-    Set<HierarchyCommunicationBuilder> pointData = []
+    Collection<Collection<HierarchyCommunicationBuilder>> allScheme = []
     ElementsScheme elementsScheme = new ElementsScheme()
     Integer id = 0
-    dataLine.eachWithIndex { num, idx ->
-        if (dataPointA[idx] && dataPointB[idx])
+    settings.strategies.each { currentStrategy ->
+        if (currentStrategy.listStrategy.find { strategy -> strategy == nameContent
+        })
         {
-            if (idx == 0)
+            Collection<HierarchyCommunicationBuilder> currentScheme = []
+            String scriptLineAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinatLongitud }"
+            String scriptPointAAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinatLongitud }.${ currentStrategy.pointA }"
+            String scriptPointBAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinatLongitud }.${ currentStrategy.pointB }"
+            ScriptDtOList dataLine
+            Collection<ISDtObject> dataPointA
+            Collection<ISDtObject> dataPointB
+            try
             {
-                pointData += elementsScheme.createHierarchyCommunicationPoint(dataPointA[idx], ++id)
+                dataLine = api.utils.executeScript(scriptLineAttributeData, bindings)
+                dataPointA = api.utils.executeScript(scriptPointAAttributeData, bindings)
+                dataPointB = api.utils.executeScript(scriptPointBAttributeData, bindings)
             }
-            if (!(pointData?.any {
-                it.UUID == dataPointA[idx].UUID
-            }))
+            catch (Exception ex)
             {
-                pointData += elementsScheme.createHierarchyCommunicationPoint(dataPointA[idx], ++id)
-                if (!(pointData?.any {
-                    it.UUID == dataPointB[idx].UUID
-                }))
-                {
-                    pointData +=
-                        elementsScheme.createHierarchyCommunicationLine(dataLine[idx], ++id, id - 1)
-                    pointData +=
-                        elementsScheme
-                            .createHierarchyCommunicationPoint(dataPointB[idx], ++id, id - 2)
-                }
+                logger.info("Передан неверный скрипт!")
+                logger.error("#schemeParamsSettings ${ ex.message }", ex)
             }
-            else
-            {
-                if (!(pointData?.any {
-                    it.UUID == dataPointB[idx].UUID
-                }))
+            dataLine.eachWithIndex { num, idx ->
+                if (dataPointA[idx] && dataPointB[idx])
                 {
-                    HierarchyCommunicationBuilder pointAInformation = pointData.find {
-                        it.UUID == dataPointA[idx].UUID
+                    if (idx == 0)
+                    {
+                        currentScheme +=
+                            elementsScheme.createHierarchyCommunicationPoint(dataPointA[idx], ++id)
                     }
-                    pointData += elementsScheme.createHierarchyCommunicationLine(
-                        dataLine[idx],
-                        ++id,
-                        pointAInformation?.id
-                    )
-                    pointData += elementsScheme.createHierarchyCommunicationPoint(
-                        dataPointB[idx],
-                        ++id,
-                        pointAInformation?.id
-                    )
+                    if (!(currentScheme?.any {
+                        it.UUID == dataPointA[idx].UUID
+                    }))
+                    {
+                        currentScheme +=
+                            elementsScheme.createHierarchyCommunicationPoint(dataPointA[idx], ++id)
+                        if (!(currentScheme?.any {
+                            it.UUID == dataPointB[idx].UUID
+                        }))
+                        {
+                            currentScheme +=
+                                elementsScheme
+                                    .createHierarchyCommunicationLine(dataLine[idx], ++id, id - 1)
+                            currentScheme +=
+                                elementsScheme
+                                    .createHierarchyCommunicationPoint(
+                                        dataPointB[idx],
+                                        ++id,
+                                        id - 2
+                                    )
+                        }
+                    }
+                    else
+                    {
+                        if (!(currentScheme?.any {
+                            it.UUID == dataPointB[idx].UUID
+                        }))
+                        {
+                            HierarchyCommunicationBuilder pointAInformation = currentScheme.find {
+                                it.UUID == dataPointA[idx].UUID
+                            }
+                            currentScheme += elementsScheme.createHierarchyCommunicationLine(
+                                dataLine[idx],
+                                ++id,
+                                pointAInformation?.id
+                            )
+                            currentScheme += elementsScheme.createHierarchyCommunicationPoint(
+                                dataPointB[idx],
+                                ++id,
+                                pointAInformation?.id
+                            )
+                        }
+                    }
                 }
             }
+            allScheme << currentScheme
         }
     }
-    return [pointData]
+    return allScheme
 }
 
 /**
@@ -138,37 +164,38 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
  * @param bindings - дополнительные параметры контекста выполнения скрипта
  * @return данные для отображения на схеме
  */
-Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationshipsSettings(SchemesSettings settings,
-                                                                                         String nameContent,
-                                                                                         LinkedHashMap<String, Object> bindings)
+Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationshipsSettings(
+    ObjecRelationshipsSettings settings,
+    String nameContent,
+    LinkedHashMap<String, Object> bindings)
 {
-    Collection<AbstractSchemesCharacteristics> abstractCharacteristicsData =
-        settings?.abstractSchemesCharacteristics
-    Collection<String> pointScriptText = getListScript(abstractCharacteristicsData.last())
-    ElementsScheme elementsScheme = new ElementsScheme()
-    String scriptLineAttributeData = pointScriptText.first()
-    try
-    {
-        scriptedBusinessObjectsSetupWizard = api.utils.executeScript(scriptLineAttributeData)
-    }
-    catch (Exception ex)
-    {
-        logger.info("Передан неверный скрипт!")
-        logger.error("#schemeParamsSettings ${ ex.message }", ex)
-    }
-    Collection listPathCoordinateLongitude =
-        abstractCharacteristicsData.last()?.strategies?.first().rulesLinkingSchemaObjects.collect {
-            it.pathCoordinatLongitud
+    Collection<Collection<HierarchyCommunicationBuilder>> allData = []
+    settings.strategies.each { currentStrategy ->
+        ElementsScheme elementsScheme = new ElementsScheme()
+        try
+        {
+            scriptedBusinessObjectsSetupWizard = api.utils.executeScript(currentStrategy.scriptText)
         }
-    Collection<SchemaElement> allElementsScheme =
-        getAllElementsScheme(scriptedBusinessObjectsSetupWizard, listPathCoordinateLongitude)
-    Collection<Collection<HierarchyCommunicationBuilder>> pointData = []
-    allElementsScheme.each {
-        pointData << []
+        catch (Exception ex)
+        {
+            logger.info("Передан неверный скрипт!")
+            logger.error("#schemeParamsSettings ${ ex.message }", ex)
+        }
+        Collection listPathCoordinateLongitude =
+            currentStrategy.rulesLinkingSchemaObjects.collect {
+                it.pathCoordinatLongitud
+            }
+        Collection<SchemaElement> allElementsScheme =
+            getAllElementsScheme(scriptedBusinessObjectsSetupWizard, listPathCoordinateLongitude)
+        Collection<Collection<HierarchyCommunicationBuilder>> pointData = []
+        allElementsScheme.each {
+            pointData << []
+        }
+        transformationDataDisplayFront(pointData, allElementsScheme, elementsScheme, null)
+        allData += pointData
+        new SchemaWorkingElements().zeroingId()
     }
-    transformationDataDisplayFront(pointData, allElementsScheme, elementsScheme, null)
-    new SchemaWorkingElements().zeroingId()
-    return pointData
+    return allData
 }
 
 /**
