@@ -58,6 +58,8 @@ const addNewWidget = (payload: NewWidget, relativeElement?: DivRef): ThunkAction
 		dispatch({type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE});
 		dispatch(addLayouts(NewWidget.id, payload.recommendedPosition));
 	});
+
+	dashboardResizer.resetHeight();
 };
 
 /**
