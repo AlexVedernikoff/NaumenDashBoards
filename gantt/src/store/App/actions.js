@@ -20,6 +20,7 @@ import {
 	getUserData,
 	getWorkAttributes,
 	getWorkDataForWork,
+	getWorks,
 	postChangedWorkInterval,
 	postChangedWorkProgress,
 	postChangedWorkRelations,
@@ -194,7 +195,7 @@ const editWorkDateRangesFromVersion = (versionKey: string, workDateInterval: wor
 /**
 * Добавляет новую работу в диаграмму версий
 * @param classFqn - метакласс работы,
-* @param timezone - таймзона устройства пользователя
+* @param timezone - часовой пояс пользователя
 * @param versionKey - ключ диаграммы версий
 * @param workData - данные работы
 */
@@ -214,7 +215,7 @@ const addNewWorkForVersion = (classFqn: string, timezone: string, versionKey: st
 * @param workUUID - индефекатор работы
 * @param versionKey - ключ диаграммы версий
 * @param workData - данные работы
-* @param timezone - таймзона устройства пользователя
+* @param timezone - часовой пояс пользователя
 */
 const editWorkDataFromVersion = (classFqn: string, workUUID: string, versionKey: string, workData: string, timezone: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
@@ -262,7 +263,7 @@ const deleteWorkFromVersionDiagram = (workUUID: string, versionKey: string): Thu
 /**
 * Получает данные для построения версий диаграммы Ганта
 * @param {string} workUUID - индефекатор работы
-* @param {string} timezone - таймзона устройства пользователя
+* @param {string} timezone - часовой пояс пользователя
 * @returns {ThunkAction}
 */
 const getGanttVersionDiagramDataCurrent = (workUUID: string, timezone: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
@@ -418,6 +419,32 @@ const saveChangedWorkRelations = (workRelations): ThunkAction => async (dispatch
 		dispatch(setSubjectUuid(subjectUuid));
 	} catch (error) {
 		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderData());
+	}
+};
+
+/**
+ * Обновляет работы
+ * @param {boolean} worksWithoutStartOrEndDateCheckbox - состояние флажка
+ * @param {string} timezone - часовой пояс пользователя
+ * @param {string} contentCode - ключ контента, на котором расположена диаграмма
+ * @param {string} subjectUUID - UUID объекта
+ * @return {ThunkAction}
+ */
+const updateWorks = (worksWithoutStartOrEndDateCheckbox: boolean): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const {contentCode, subjectUuid} = getContext();
+		const timeZone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+		const workData = await getWorks(contentCode, subjectUuid, timeZone, worksWithoutStartOrEndDateCheckbox);
+
+		dispatch(setWorkData(workData));
+		dispatch(setContentCode(contentCode));
+		dispatch(setSubjectUuid(subjectUuid));
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+		console.log(error);
 	} finally {
 		dispatch(hideLoaderData());
 	}
@@ -831,5 +858,6 @@ export {
 	switchProgressCheckbox,
 	switchStateMilestonesCheckbox,
 	switchWorkRelationCheckbox,
-	switchWorksWithoutStartOrEndDateCheckbox
+	switchWorksWithoutStartOrEndDateCheckbox,
+	updateWorks
 };

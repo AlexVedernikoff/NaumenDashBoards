@@ -6,7 +6,7 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {deepClone, normalizeDate, shiftTimeZone} from 'helpers';
 import {gantt} from 'naumen-gantt';
 import ModalTask from 'components/atoms/ModalTask';
-import {postEditedWorkData, savePositionOfWork, setColumnSettings, setColumnTask, setDiagramLinksData} from 'store/App/actions';
+import {postEditedWorkData, savePositionOfWork, setColumnSettings, setColumnTask, setDiagramLinksData, updateWorks} from 'store/App/actions';
 import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
@@ -215,6 +215,10 @@ const Gantt = (props: Props) => {
 				html: event => event.target.innerHTML,
 				selector: '.gantt_cell'
 			});
+
+			gantt.templates.tooltip_text = (_, __, task) => {
+				return '<br /><b>Название:</b> ' + task.text + '<br /><b>Начальная дата:</b> ' + dateToStr(task.start_date) + '<br /><b>Конечная дата:</b> ' + dateToStr(task.end_date);
+			};
 		}, 500);
 
 		gantt.templates.parse_date = dateStr => {
@@ -382,6 +386,15 @@ const Gantt = (props: Props) => {
 	useEffect(() => {
 		setRes(resources);
 	}, [props.resources]);
+
+	useEffect(() => {
+		const {worksWithoutStartOrEndDateCheckbox} = store.APP;
+
+		if (typeof worksWithoutStartOrEndDateCheckbox === 'boolean') {
+			dispatch(updateWorks(worksWithoutStartOrEndDateCheckbox));
+			gantt.render();
+		}
+	}, [store.APP.worksWithoutStartOrEndDateCheckbox]);
 
 	// Изменяет дефолтные настройки при изменения tasks
 	useEffect(() => {

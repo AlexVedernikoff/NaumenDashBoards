@@ -35,12 +35,31 @@ export default class Api {
 	/**
 	* Получает настройки версий
 	* @param {string} versionKey - ключ диаграммы версий
-	* @param {string} timezone - таймзона устройства пользователя
+	* @param {string} timezone - часовой пояс пользователя
 	* @return {ThunkAction}
 	*/
 	async getGanttVersionsSettings (versionKey: string, timezone: string) {
 		const url = `exec-post?func=modules.ganttDataSet.getGanttVersionDiagramData&params=requestContent,user`;
 		const body = {versionKey, timezone};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		return this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	 * Получает работы
+	 * @param {boolean} worksWithoutStartOrEndDateCheckbox - состояние флажка
+	 * @param {string} timezone - часовой пояс пользователя
+	 * @param {string} contentCode - ключ контента, на котором расположена диаграмма
+	 * @param {string} subjectUUID - UUID объекта
+	 * @return {Promise<Params>}
+	 */
+	async getWorks (contentCode: string, subjectUUID: string, timezone: string, worksWithoutStartOrEndDateCheckbox: boolean) {
+		const url = `exec-post?func=modules.ganttDataSet.getWorks&params=requestContent,user`;
+		const body = {contentCode, subjectUUID, timezone, worksWithoutStartOrEndDateCheckbox};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -102,7 +121,7 @@ export default class Api {
 	* Редактирукт диапазон дат работ диаграмм версий
 	* @param {string} subjectUUID - Uuid объекта
 	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
-	* @param {string} timezone - таймзона устройства пользователя
+	* @param {string} timezone - часовой пояс пользователя
 	* @param {string} versionKey - ключ диаграммы версий
 	* @param {workDateInterval} workDateInterval - объект временных рамок работы
 	*/
@@ -139,7 +158,7 @@ export default class Api {
 	/**
 	* Добавляет новую работу в диаграмму версий
 	* @param {string} classFqn - метакласс работы
-	* @param {string} timezone - таймзона устройства пользователя
+	* @param {string} timezone - часовой пояс пользователя
 	* @param {string} versionKey - ключ диаграммы версий
 	* @param {workData} workData - данные работы
 	*/
@@ -160,7 +179,7 @@ export default class Api {
 	* @param {string} workUUID - индефекатор работы
 	* @param {string} versionKey - ключ диаграммы версий
 	* @param {workData} workData - данные работы
-	* @param {string} timezone - таймзона устройства пользователя
+	* @param {string} timezone - часовой пояс пользователя
 	*/
 	async editWorkDataFromVersionRequest (classFqn: string, workUUID: string, versionKey: string, workData: string, timezone) {
 		const url = `exec-post?func=modules.ganttWorkHandler.editWorkDataFromVersion&params=requestContent,user,%27${versionKey}%27`;
@@ -342,9 +361,9 @@ export default class Api {
 	* Изменяет данные работы
 	* @param {WorkData} workData - данные работы
 	* @param {string} classFqn - метакласс работы
-	* @param {string} timezone - таймзона
+	* @param {string} timezone - часовой пояс пользователя
 	* @param {string} workUUID - идентификатор работы
-	* @param {string} contentCode - code объекта
+	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
 	* @param {string} subjectUuid - UUID объекта
 	*/
 	async editWorkData (workData: WorkData, classFqn: string, timezone: string, workUUID: string, contentCode: string, subjectUuid: string) {
@@ -376,9 +395,9 @@ export default class Api {
 
 	/**
 	* Отправляет данные изменения временных рамок работ
-	* @param  {string} timezone - таймзона
+	* @param  {string} timezone - часовой пояс пользователя
 	* @param  {workDateInterval} workDateInterval - объект временных рамок работы
-	* @param  {string} contentCode - code объекта
+	* @param  {string} contentCode - ключ контента, на котором расположена диаграмма
 	* @param  {string} subjectUUID - UUID объекта
 	*/
 	async postChangedWorkInterval (timezone: string, workDateInterval, contentCode: string, subjectUUID: string) {
@@ -395,7 +414,7 @@ export default class Api {
 	/**
 	* Отправляет данные изменненых рабочих связей
 	* @param {workRelations} workRelations - объект связи между работами
-	* @param {string} contentCode - code объекта
+	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
 	* @param {string} subjectUUID -  UUID объекта
 	*/
 	async postChangedWorkRelations (workRelations, contentCode: string, subjectUUID: string) {
@@ -466,7 +485,7 @@ export default class Api {
 	* Отправляет данные изменения прогресса работы
 	* @param {string} workUUID - идентификатор работы
 	* @param {number} progress - прогресс работы
-	* @param {string} contentCode - code объекта
+	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
 	* @param {string} subjectUUID - UUID объекта
 	*/
 	async postChangedWorkProgress (workUUID: string, progress: number, contentCode: string, subjectUUID) {

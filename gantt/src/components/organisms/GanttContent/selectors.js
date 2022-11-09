@@ -2,6 +2,7 @@
 import type {AppState} from 'store/types';
 import {
 	getVersionSettingsAll,
+	getWorks,
 	switchMilestonesCheckbox,
 	switchProgressCheckbox,
 	switchStateMilestonesCheckbox,
@@ -31,6 +32,7 @@ const props = (state: AppState) => {
 
 const functions = {
 	getVersionSettingsAll,
+	getWorks,
 	switchMilestonesCheckbox,
 	switchProgressCheckbox,
 	switchStateMilestonesCheckbox,

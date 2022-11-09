@@ -23,7 +23,7 @@ const getGanttVersionTitlesAndKeys = async (diagramKey: string, subjectUuid: str
 /**
 * Получает настройки версий
 * @param {string} versionKey - ключ диаграммы версий
-* @param {string} timezone - таймзона устройства пользователя
+* @param {string} timezone - часовой пояс пользователя
 * @return {Promise<Params>}
 */
 const getGanttVersionsSettings = async (versionKey: string, timezone: string): Promise<Params> => {
@@ -64,7 +64,7 @@ const deleteGanttVersionSettingsRequest = async (ganttVersionId: string): Promis
 * Редактирует диапазон дат работ диаграмм версий
 * @param {string} subjectUUID - UUID  объекта
 * @param {string} contentCode - ключ контента, на котором расположена диаграмма
-* @param {string} timezone - таймзона устройства пользователя
+* @param {string} timezone - часовой пояс пользователя
 * @param {string} versionKey - ключ диаграммы версий
 * @param {workDateInterval} workDateInterval - объект временных рамок работы
 */
@@ -89,7 +89,7 @@ const addNewWorkForVersionRequest = async (classFqn: string, timezone: string, v
 * @param {string} workUUID - индефекатор работы
 * @param {string} versionKey - ключ диаграммы версий
 * @param {workData} workData - данные работы
-* @param {string} timezone - таймзона устройства пользователя
+* @param {string} timezone - часовой пояс пользователя
 */
 const editWorkDataFromVersionRequest = async (classFqn: string, workUUID: string, versionKey: string, workData: string, timezone: string): Promise<Params> => {
 	api.editWorkDataFromVersionRequest(classFqn, timezone, workData, workUUID);
@@ -173,7 +173,7 @@ const getInitialParams = async (): Promise<Params> => {
 
 /**
  * Возвращает сохраненные настройки
- * @param contentCode - code объекта
+ * @param contentCode - ключ контента, на котором расположена диаграмма
  * @param subjectUuid - UUID  объекта
  * @returns {Promise<Params>} - настройки
  */
@@ -216,7 +216,7 @@ const getDataSourceAttributes = async (classFqn: string, parentClassFqn: string 
 * @param {WorkData} workData - данные работы
 * @param {string} classFqn - метакласс работы
 * @param {string} workUUID - идентификатор работы
-* @param {string} timezone - таймзона
+* @param {string} timezone - часовой пояс пользователя
 */
 const addNewWork = async (workData: WorkData, classFqn: string, timezone: string, attr): Promise<Source> => {
 	await api.addNewWork(workData, classFqn, timezone, attr);
@@ -237,9 +237,9 @@ const checkWorksOfResource = async (workId: string, resourceId: string, diagramK
 * Изменяет данные работы
 * @param {WorkData} workData - данные работы
 * @param {string} classFqn - метакласс работы
-* @param {string} timezone - таймзона
+* @param {string} timezone - часовой пояс пользователя
 * @param {string} workUUID - идентификатор работы
-* @param {string} contentCode - code объекта
+* @param {string} contentCode - ключ контента, на котором расположена диаграмма
 * @param {string} subjectUuid - UUID объекта
 */
 const editWorkData = async (workData: WorkData, classFqn: string, timezone: string, workUUID: string, contentCode, subjectUuid): Promise<Source> => {
@@ -256,9 +256,9 @@ const deleteWorkDateRanges = async (workUUID: string): Promise<Source> => {
 
 /**
 * Отправляет данные изменения временных рамок работ
-* @param  {string} timezone - таймзона
+* @param  {string} timezone - часовой пояс пользователя
 * @param  {workDateInterval} workDateInterval - объект временных рамок работы
-* @param  {string} contentCode - code объекта
+* @param  {string} contentCode - ключ контента, на котором расположена диаграмма
 * @param  {string} subjectUuid - UUID объекта
 */
 const postChangedWorkInterval = async (timezone: string, workDateInterval: workDateInterval, contentCode: string, subjectUuid: string): Promise<Source> => {
@@ -268,7 +268,7 @@ const postChangedWorkInterval = async (timezone: string, workDateInterval: workD
 /**
  * Отправляет изменение связей
  * @param {WorkRelations} workRelations - объект связи между работами
- * @param {string} contentCode - code объекта
+ * @param {string} contentCode - ключ контента, на котором расположена диаграмма
  * @param {string} subjectUuid -  UUID объекта
  */
 const postChangedWorkRelations = async (workRelations: WorkRelations, contentCode: string, subjectUuid: string) => {
@@ -289,7 +289,7 @@ const getDataSourceAttributesByTypes = async (classFqn: string, types: string = 
 /**
  * Отправляет сохраненные настройки
  * @param subjectUuid - UUID объекта
- * @param contentCode - code объекта
+ * @param contentCode - ключ контента, на котором расположена диаграмма
  * @param data - сохраняемые пользователем настройки
  * @returns {Promise<Params>} - новые настройки
  */
@@ -302,7 +302,7 @@ const saveData = async (subjectUuid: string, contentCode: string, data: Settings
  * Отправляет данные изменения прогресса работы
  * @param {string} workUUID - идентификатор работы
  * @param {number} progress - прогресс работы
- * @param {string} contentCode - code объекта
+ * @param {string} contentCode - ключ контента, на котором расположена диаграмма
  * @param {string} subjectUUID - UUID объекта
  */
 const postChangedWorkProgress = async (workUUID: string, progress: number, contentCode: string, subjectUUID: string): Promise<Task> => {
@@ -317,6 +317,19 @@ const postChangedWorkProgress = async (workUUID: string, progress: number, conte
  */
 const openFilterForm = (context: FilterFormDescriptorDTO): string => {
 	return api.openFilterForm(context);
+};
+
+/**
+ * Получает работы
+ * @param {boolean} worksWithoutStartOrEndDateCheckbox - состояние флажка
+ * @param {number} timezone - часовой пояс пользователя
+ * @param {string} contentCode - ключ контента, на котором расположена диаграмма
+ * @param {string} subjectUUID - UUID объекта
+ * @return {Promise<Params>}
+ */
+const getWorks = async (contentCode: string, subjectUUID: string, timezone: string, worksWithoutStartOrEndDateCheckbox: boolean) => {
+	const workData = await api.getWorks(contentCode, subjectUUID, timezone, worksWithoutStartOrEndDateCheckbox);
+	return workData;
 };
 
 /**
@@ -388,6 +401,7 @@ export {
 	getWorkDataForWork,
 	openFilterForm,
 	getUserData,
+	getWorks,
 	postChangedWorkRelations,
 	postChangedWorkProgress,
 	postChangedWorkInterval,
