@@ -1232,7 +1232,10 @@ class DashboardsService
             def(subjectFqn, dashboardUUID) = DashboardCodeMarshaller.unmarshal(dashboardCode)
 
             def db = apps.listContents(appCode).find {
-                it.contentUuid == dashboardUUID && it.subjectFqn == subjectFqn
+                it.contentUuid == dashboardUUID && (it.subjectFqn ==
+                                                    subjectFqn ||
+                                                    it.subjectFqn ==
+                                                    subjectFqn.tokenize('$').first())
             }
 
             def currentDashboardSubjectFqn = utils.get(subjectUUID)?.metaClass as String
