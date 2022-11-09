@@ -56,7 +56,7 @@ const FormPanel = (props: Props) => {
 	const [valueError, setValueError] = useState('');
 	const [inputMonthDays, setInputMonthDays] = useState('');
 	const [inputLastDays, setinputLastDays] = useState('');
-	const [currentInterval, setCurrentInterval] = useState({label: 'с ... по', value: 'INTERVAL'});
+	const [currentInterval, setCurrentInterval] = useState(props.currentInterval ? props.currentInterval : {label: 'c ... по', value: 'INTERVAL'});
 	const [diagramStartDate, setDiagramStartDate] = useState('');
 	const [diagramEndDate, setDiagramEndDate] = useState('');
 
@@ -168,7 +168,7 @@ const FormPanel = (props: Props) => {
 		handleUpdateCommonSettings('scale', value.value);
 	};
 
-	const [valueInterval, setValueInterval] = useState({label: 'c ... по', value: 'INTERVAL'});
+	const [valueInterval, setValueInterval] = useState(props.currentInterval ? props.currentInterval : {label: 'c ... по', value: 'INTERVAL'});
 	const handleIntervalChange = ({value}) => {
 		setValueInterval(value);
 		setCurrentInterval(value);
@@ -401,13 +401,22 @@ const FormPanel = (props: Props) => {
 				props.setRangeTime(date);
 			}
 		} else if (valueInterval.value === 'NEXTDAYS') {
+
+			const todayStartDate = new Date();
+			const todayEndDate = new Date();
+
+			const hoursDays = todayStartDate.getHours();
+
+			todayStartDate.setHours(hoursDays - +hoursDays);
+			todayEndDate.setHours(hoursDays - -(+3));
+
 			const date = {
-				endDate: new Date(),
-				startDate: new Date()
+				endDate: new Date(todayEndDate),
+				startDate: new Date(todayStartDate)
 			};
 
-			setDiagramStartDate(new Date());
-			setDiagramEndDate(new Date());
+			setDiagramStartDate(new Date(todayStartDate));
+			setDiagramEndDate(new Date(todayEndDate));
 
 			props.setRangeTime(date);
 		}

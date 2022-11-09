@@ -111,6 +111,25 @@ export default class FakeApi {
 		];
 	}
 
+	async getWorks (contentCode, subjectUUID, timezone, worksWithoutStartOrEndDateCheckbox) {
+		await new Promise(resolve => setTimeout(() => resolve(), 3000));
+
+		return [
+			{
+				'code': 'd951f9',
+				'label': 'Дата',
+				'title': 'Дата',
+				'value': 'd951f9'
+			},
+			{
+				'code': 'd951f10',
+				'label': 'Конечная Дата',
+				'title': 'Конечная Дата',
+				'value': 'd951f10'
+			}
+		];
+	}
+
 	async getDataAttributesControlPointStatus (classFqn, parentClassFqn) {
 		await new Promise(resolve => setTimeout(() => resolve(), 3000));
 
