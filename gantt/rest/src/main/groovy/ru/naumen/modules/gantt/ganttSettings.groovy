@@ -733,8 +733,9 @@ class GanttSettingsService
 
         Map attributesForColumns = [:]
         request.commonSettings.columnSettings.each {
-            attributesForColumns << [(it.code): (request.tasks.find { task -> task[it.code]
-            }[it.code])]
+            String elementCode = it.code
+            attributesForColumns << [elementCode : (request.tasks.find { task -> task?.elementCode
+            }?.elementCode)]
         }
 
         if (saveJsonSettings(
