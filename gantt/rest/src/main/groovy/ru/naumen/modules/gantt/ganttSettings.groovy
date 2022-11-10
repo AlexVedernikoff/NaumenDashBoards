@@ -1325,7 +1325,21 @@ class GetGanttSettingsRequestVersion extends BaseGanttSettingsRequest
      */
     String timezone
 
+    /**
+     * Версия ключа
+     */
     String versionKey
+}
+
+/**
+ * Тело запроса на получение работ диаграммы Ганта
+ */
+class GetGanttWorks extends GetGanttSettingsRequest
+{
+    /**
+     * Значение чекбокса работ с наличием дат начала и окончания
+     */
+    Boolean worksWithoutStartOrEndDateCheckbox
 }
 
 /**
