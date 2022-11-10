@@ -44,7 +44,7 @@ const parseDataForPivot = (data: NotPivotValuesDataSets): ParseDataForPivotResul
 	const indicatorGrouping = [];
 
 	data.forEach(dataSet => {
-		const {dataKey, indicators: oldIndicators, parameters = [], source} = dataSet;
+		const {dataKey, indicators: oldIndicators = [], parameters = [], source} = dataSet;
 		const newDataSet = createPivotDataSet(dataKey);
 		const indicators = oldIndicators.map(indicator => ({...indicator, key: uuid()}));
 
