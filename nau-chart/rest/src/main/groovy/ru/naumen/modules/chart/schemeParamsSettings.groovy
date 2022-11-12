@@ -77,16 +77,15 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
 {
     Collection<Collection<HierarchyCommunicationBuilder>> allSchemesAllStrategies = []
     ElementsScheme elementsScheme = new ElementsScheme()
-    Integer id = 0
+    Long id = 0
     settings.strategies.each { currentStrategy ->
-        Collection<Collection<HierarchyCommunicationBuilder>> allScheme = []
         if (currentStrategy.listStrategy.find { strategy -> strategy == nameContent
         })
         {
             String scriptLineAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinatLongitud }"
             String scriptPointAAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinatLongitud }.${ currentStrategy.pointA }"
             String scriptPointBAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinatLongitud }.${ currentStrategy.pointB }"
-            ScriptDtOList dataLine
+            Collection<ISDtObject> dataLine
             Collection<ISDtObject> dataPointA
             Collection<ISDtObject> dataPointB
             try
@@ -100,181 +99,120 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
                 logger.info("Передан неверный скрипт!")
                 logger.error("#schemeParamsSettings ${ ex.message }", ex)
             }
-            dataLine.eachWithIndex { num, idx ->
-                Collection<HierarchyCommunicationBuilder> currentScheme = []
-                if (dataPointA[idx] && dataPointB[idx])
+            Set<ISDtObject> allPoint = []
+            dataLine.eachWithIndex { region, idx ->
+                allPoint.add(dataPointA[idx])
+                allPoint.add(dataPointB[idx])
+            }
+            Collection<HierarchyCommunicationBuilder> allPointsScheme = []
+            allPoint.each {
+                allPointsScheme += elementsScheme.createHierarchyCommunicationPoint(it, ++id, null)
+            }
+
+            allPointsScheme.each { point ->
+                String attributeNameA = currentStrategy.pointA
+                String attributeNameB = currentStrategy.pointB
+                ISDtObject fromPoints = dataLine.find {
+                    it[attributeNameB].UUID == point.UUID
+                }
+                if (fromPoints)
                 {
-                    if (idx == 0)
-                    {
-                        currentScheme +=
-                            elementsScheme.createHierarchyCommunicationPoint(dataPointA[idx], ++id)
+                    Long from = allPointsScheme.find {
+                        it.UUID == fromPoints[attributeNameA].UUID
+                    }.id
+                    point.from = from != point.id ? from : null
+                }
+            }
+            //создаём все линии
+            Collection<HierarchyCommunicationBuilder> allLineScheme = []
+            dataLine.eachWithIndex { region, idx ->
+                Long from = allPointsScheme.find {
+                    dataPointA[idx].UUID == it.UUID
+                }.id
+                Long to = allPointsScheme.find {
+                    dataPointB[idx].UUID == it.UUID
+                }.id
+                allLineScheme +=
+                    elementsScheme.createHierarchyCommunicationLine(region, ++id, from, to)
+            }
+
+            //распределяем элементы по отдельным массивам со схемами
+            Collection<Collection<HierarchyCommunicationBuilder>> allScheme = []
+            allPointsScheme.findAll {
+                it.from == null
+            }.each {
+                allScheme.add([it])
+            }
+            Collection<HierarchyCommunicationBuilder> listRemoveIncorrectLine = []
+            allScheme.eachWithIndex { currentScheme, idx ->
+                getAllRelatedPoints(
+                    allScheme,
+                    currentScheme.first(),
+                    allPointsScheme,
+                    allLineScheme,
+                    idx
+                )
+
+                //перелопачивание старших id TODO
+                currentScheme.findAll {
+                    it.id < it.from
+                }.each {
+                    Long currentId = it.id
+                    Long newId = ++id
+                    it.id = newId
+                    currentScheme.findAll {
+                        it.from == currentId
+                    }.each {
+                        it.from = newId
                     }
-                    if (!(allScheme.flatten()?.any {
-                        it.UUID == dataPointA[idx].UUID
-                    }))
-                    {
-                        Collection<HierarchyCommunicationBuilder> newScheme = []
-                        newScheme +=
-                            elementsScheme
-                                .createHierarchyCommunicationPoint(dataPointA[idx], ++id, null)
-                        if (!(newScheme?.any {
-                            it.UUID == dataPointB[idx].UUID
-                        }))
-                        {
-                            newScheme +=
-                                elementsScheme
-                                    .createHierarchyCommunicationLine(dataLine[idx], ++id, id - 1)
-                            newScheme +=
-                                elementsScheme
-                                    .createHierarchyCommunicationPoint(
-                                        dataPointB[idx],
-                                        ++id,
-                                        id - 2
-                                    )
-                        }
-                        allScheme << newScheme
+                    currentScheme.findAll {
+                        it.to == currentId
+                    }.each {
+                        it.to = newId
                     }
-                    else
+                }
+                listRemoveIncorrectLine += currentScheme.findAll {
+                    it.type == 'line' && !(it.to in currentScheme.findAll {
+                        it.type == 'point'
+                    }.id)
+                }
+            }
+            listRemoveIncorrectLine.each { removeLine ->
+                allScheme.each { currentScheme ->
+                    if (currentScheme.indexOf(removeLine) != -1)
                     {
-                        HierarchyCommunicationBuilder presencePointA = allScheme.flatten()?.find {
-                            it.UUID == dataPointA[idx].UUID
-                        }
-                        HierarchyCommunicationBuilder presencePointB = allScheme.flatten()?.find {
-                            it.UUID == dataPointB[idx].UUID
-                        }
-                        if (!(allScheme.flatten()?.any {
-                            it.UUID == dataPointB[idx].UUID
-                        }))
-                        {
-                            currentScheme = allScheme.find { current ->
-                                current.find {
-                                    it.UUID == dataPointA[idx].UUID
-                                }
-                            }
-                            HierarchyCommunicationBuilder pointAInformation = currentScheme.find {
-                                it.UUID == dataPointA[idx].UUID
-                            }
-                            currentScheme += elementsScheme.createHierarchyCommunicationLine(
-                                dataLine[idx],
-                                ++id,
-                                pointAInformation?.id
-                            )
-                            currentScheme += elementsScheme.createHierarchyCommunicationPoint(
-                                dataPointB[idx],
-                                ++id,
-                                pointAInformation?.id
-                            )
-                            allScheme[
-                                allScheme.indexOf(
-                                    allScheme.find { current ->
-                                        current.find {
-                                            it.UUID == dataPointA[idx].UUID
-                                        }
-                                    }
-                                )
-                            ] = currentScheme
-                        }
-                        else if (presencePointA && presencePointB)
-                        {
-                            // находим перую схему
-                            currentScheme = allScheme.find { current ->
-                                current.find {
-                                    it.UUID == dataPointA[idx].UUID
-                                }
-                            }
-
-                            // находим вторую схему
-                            Collection<HierarchyCommunicationBuilder> currentSchemeTwo =
-                                allScheme.find { current ->
-                                    current.find {
-                                        it.UUID == dataPointB[idx].UUID
-                                    }
-                                }
-
-                            if (currentScheme == currentSchemeTwo)
-                            {
-                                HierarchyCommunicationBuilder newConnectionWithinScheme =
-                                    elementsScheme.createHierarchyCommunicationLine(
-                                        dataLine[idx],
-                                        ++id,
-                                        presencePointA.id,
-                                        presencePointB.id
-                                    )
-                                currentScheme.add(newConnectionWithinScheme)
-                            }
-                            else
-                            {
-                                // определяем новое значение from для точки B
-                                presencePointB.from = presencePointA.id
-
-                                // изменение направление from точек у всех элементов второй схемы
-                                changingOrientationPointsSecondCollection(
-                                    currentSchemeTwo,
-                                    presencePointB
-                                )
-
-                                //добавляем элементы второй схемы в первую
-                                currentScheme += currentSchemeTwo
-
-                                //добавляем линию которая объеденит схемы
-                                currentScheme += elementsScheme.createHierarchyCommunicationLine(
-                                    dataLine[idx],
-                                    ++id,
-                                    presencePointA.id,
-                                    presencePointB.id
-                                )
-
-                                // добавляем слитые схемы в общий массив со схемами
-                                allScheme[
-                                    allScheme.indexOf(
-                                        allScheme.find { current ->
-                                            current.find {
-                                                it.UUID == dataPointA[idx].UUID
-                                            }
-                                        }
-                                    )
-                                ] = currentScheme
-
-                                // удаляем вторую схему которую сливаем с первой
-                                allScheme.remove(
-                                    allScheme.indexOf(
-                                        allScheme.find { current ->
-                                            current.find {
-                                                it.UUID == dataPointB[idx].UUID
-                                            }
-                                        }
-                                    )
-                                )
-
-                            }
-
-                        }
+                        currentScheme.remove(currentScheme.indexOf(removeLine))
                     }
                 }
             }
+
+            allSchemesAllStrategies += allScheme
         }
-        allSchemesAllStrategies += allScheme
     }
     return allSchemesAllStrategies
 }
 
-void changingOrientationPointsSecondCollection(Collection<HierarchyCommunicationBuilder> currentSchemeTwo,
-                                               HierarchyCommunicationBuilder presencePointB)
+void getAllRelatedPoints(Collection<Collection<HierarchyCommunicationBuilder>> allScheme,
+                         HierarchyCommunicationBuilder currentPoint,
+                         Collection<HierarchyCommunicationBuilder> allPointsScheme,
+                         Collection<HierarchyCommunicationBuilder> allLineScheme,
+                         Integer idx)
 {
-    Collection<HierarchyCommunicationBuilder> allRelatedLines = currentSchemeTwo.findAll {
-        it.to == presencePointB.id
+    Collection<HierarchyCommunicationBuilder> childLines = allLineScheme.findAll {
+        it.from == currentPoint.id
     }
-    allRelatedLines.each { currentLines ->
-        HierarchyCommunicationBuilder childPoint = currentSchemeTwo.find {
-            it.id == currentLines.from
-        }
-        if (childPoint && currentSchemeTwo.find {
-            it.type == 'line' && it.from == childPoint.id
-        })
-        {
-            changingOrientationPointsSecondCollection(currentSchemeTwo, childPoint)
-            childPoint.from = presencePointB?.id
-        }
+    if (!childLines)
+    {
+        return
+    }
+    Collection<HierarchyCommunicationBuilder> childPoint = allPointsScheme.findAll {
+        it.from == currentPoint.id
+    }
+    allScheme[idx].addAll(childLines)
+    allScheme[idx].addAll(childPoint)
+    childPoint.each { currentChildPoint
+        ->
+        getAllRelatedPoints(allScheme, currentChildPoint, allPointsScheme, allLineScheme, idx)
     }
 }
 
