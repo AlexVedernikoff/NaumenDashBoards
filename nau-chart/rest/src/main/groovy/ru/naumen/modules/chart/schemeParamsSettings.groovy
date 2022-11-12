@@ -58,7 +58,9 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
             bindings
         )
     }
-    return pointData
+    return pointData.sort {
+        it.size()
+    }.reverse()
 }
 
 /**
@@ -174,7 +176,7 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
                         }
                         else if (presencePointA && presencePointB)
                         {
-                            // находим первую схему
+                            // находим перую схему
                             currentScheme = allScheme.find { current ->
                                 current.find {
                                     it.UUID == dataPointA[idx].UUID
@@ -243,7 +245,9 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
                                         }
                                     )
                                 )
+
                             }
+
                         }
                     }
                 }
