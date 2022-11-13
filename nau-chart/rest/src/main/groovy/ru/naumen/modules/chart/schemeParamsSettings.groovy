@@ -228,7 +228,8 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationships
     String nameContent,
     LinkedHashMap<String, Object> bindings)
 {
-    Collection<Collection<HierarchyCommunicationBuilder>> allData = []
+    Collection<Collection<HierarchyCommunicationBuilder>> allSchemeToDisplay = []
+    Collection<ISDtObject> scriptedBusinessObjectsSetupWizard = []
     settings.strategies.each { currentStrategy ->
         ElementsScheme elementsScheme = new ElementsScheme()
         try
@@ -240,23 +241,96 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationships
             logger.info("Передан неверный скрипт!")
             logger.error("#schemeParamsSettings ${ ex.message }", ex)
         }
-        Collection listPathCoordinateLongitude =
+        Collection attributesBindingRules =
             currentStrategy.rulesLinkingSchemaObjects.collect {
                 it.pathCoordinatLongitud
             }
-        Collection<SchemaElement> allElementsScheme =
-            getAllElementsScheme(scriptedBusinessObjectsSetupWizard, listPathCoordinateLongitude)
-        Collection<Collection<HierarchyCommunicationBuilder>> pointData = []
-        allElementsScheme.each {
-            pointData << []
+        Set<HierarchyCommunicationBuilder> currentScheme = []
+        Set<ISDtObject> allPointsOnTab = []
+        Long id = 0
+
+        scriptedBusinessObjectsSetupWizard.eachWithIndex { objectsByScritp, idx ->
+            Long idPerentObject = ++id
+            currentScheme +=
+                elementsScheme
+                    .createHierarchyCommunicationPoint(objectsByScritp, idPerentObject, null)
+            allPointsOnTab.add(objectsByScritp)
+            attributesBindingRules.each { attribute ->
+                if (objectsByScritp.hasProperty(attribute))
+                {
+                    objectsByScritp[attribute].each { scritpObject ->
+                        if (!(currentScheme.find {
+                            it.UUID == scritpObject.UUID
+                        }))
+                        {
+                            HierarchyCommunicationBuilder lineCurrentElements =
+                                elementsScheme.createHierarchyCommunicationLine(null, ++id, null)
+                            Long idСhildObject = ++id
+                            lineCurrentElements.from = idСhildObject
+                            currentScheme += elementsScheme.createHierarchyCommunicationPoint(
+                                scritpObject,
+                                idСhildObject,
+                                idPerentObject
+                            )
+                            lineCurrentElements.to = idPerentObject
+                            currentScheme += lineCurrentElements
+                        }
+                        else
+                        {
+                            Long toLine = currentScheme.find {
+                                it.UUID == scritpObject.UUID
+                            }.id
+                            Long fromLine = currentScheme.findAll {
+                                it.to == null && it.from == null
+                            }.last().id
+                            currentScheme +=
+                                elementsScheme
+                                    .createHierarchyCommunicationLine(null, ++id, fromLine, toLine)
+                            if (scritpObject.hasProperty(attribute))
+                            {
+                                scritpObject[attribute].each { relationshipsWithinChildElement ->
+                                    Long toLineAdditional = currentScheme.find {
+                                        it.type == 'point' && it.UUID == scritpObject.UUID
+                                    }?.id
+                                    Long fromLineAdditional = currentScheme.find {
+                                        it.type == 'point' &&
+                                        it.UUID == relationshipsWithinChildElement.UUID
+                                    }?.id
+                                    Boolean noConnectingLine = currentScheme.find {
+                                        it.type == 'line' &&
+                                        it.to == fromLineAdditional && it.from == toLineAdditional
+                                    }
+                                    if (toLineAdditional &&
+                                        fromLineAdditional && !noConnectingLine &&
+                                        toLineAdditional != fromLineAdditional)
+                                    {
+                                        currentScheme +=
+                                            elementsScheme.createHierarchyCommunicationLine(
+                                                null,
+                                                ++id,
+                                                fromLineAdditional,
+                                                toLineAdditional
+                                            )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        transformationDataDisplayFront(pointData, allElementsScheme, elementsScheme, null)
-        allData += pointData
+        HierarchyCommunicationBuilder unfilledParent = currentScheme.findAll {
+            it.to == null && it.from == null
+        }.last()
+        unfilledParent.from = currentScheme.find {
+            it.type == 'line' && it.from == unfilledParent.id
+        }?.to
+
+        allSchemeToDisplay += [currentScheme]
         new SchemaWorkingElements().zeroingId()
     }
-    return allData
+    return allSchemeToDisplay
 }
-
 /**
  * Преобразование данных в формат для отображения на фронт
  * @param pointData - список данных для отображения
