@@ -6863,6 +6863,7 @@
             }
             return total
         }
+    }
 
     /**
      * Модель данных для диаграмм BAR, BAR_STACKED, COLUMN, COLUMN_STACKED, LINE
@@ -7137,4 +7138,3 @@
          */
         Integer countTotals = 0
     }
-}
