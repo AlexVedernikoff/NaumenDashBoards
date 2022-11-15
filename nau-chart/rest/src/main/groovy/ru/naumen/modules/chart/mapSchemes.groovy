@@ -22,19 +22,19 @@ import groovy.transform.Canonical
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import ru.naumen.metainfo.shared.ClassFqn
 
+class ConstantSchemes
+{
+    final static String NAME_MECHANISM_SETTINGS = 'schemes'
+    final static String EMBEDDED_APPLICATION_CODE = 'testScheme'
+    final static String ACTUAL_VERSION = 'actualVersion'
+    final static String FIRST_PART_STRATEGY_CODE = 'schemesStrategy'
+}
+
 @MechanismSettings(name = 'schemes-initial')
 @JsonSchemaMeta(
     title = 'Нажмите "Сохранить", чтобы продолжить',
     description = 'Нажмите "Сохранить", чтобы продолжить'
 )
-
-class ConstantSchemes
-{
-    public static final String NAME_MECHANISM_SETTINGS = 'schemes'
-    public static final String EMBEDDED_APPLICATION_CODE = 'testScheme'
-    public static final String ACTUAL_VERSION = 'actualVersion'
-    public static final String FIRST_PART_STRATEGY_CODE = 'schemesStrategy'
-}
 
 /**
  * Артефакт от портала, обязательно нужны какие-то инициирующие настройки
@@ -167,7 +167,7 @@ class ContentHierarchyCommunicationSettings
     String groupingAttribute = ""
 
     @JsonSchemaMeta(title = 'Не выводить объекты без связи')
-    Boolean displayingEndLineDots = null
+    Boolean displayingEndLineDots = false
 
     @JsonSchemaMeta(title = 'Характеристики для вывода на схеме')
     Collection<CharacteristicsOutputDiagram> characteristicsOutputDiagram = [new CharacteristicsOutputDiagram()]
@@ -205,7 +205,7 @@ class ContentObjecRelationshipsSettings
     Collection<RulesLinkingSchemaObjects> rulesLinkingSchemaObjects = [new RulesLinkingSchemaObjects()]
 
     @JsonSchemaMeta(title = 'Не выводить объекты без связи')
-    Boolean displayingEndLineDots = null
+    Boolean displayingEndLineDots = false
 
     @JsonSchemaMeta(title = 'Характеристики для вывода на схеме')
     Collection<CharacteristicsOutputDiagram> characteristicsOutputDiagram = [new CharacteristicsOutputDiagram()]
@@ -246,7 +246,7 @@ class ActionsWithObjects
 {
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс')
-    MetaClassObjectSchemes metaClassObject = new MetaClassObjectSchemes('', '')
+    MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
 
     @JsonSchemaMeta(title = 'Код формы редактирования')
     String codeEditingForm = ''
