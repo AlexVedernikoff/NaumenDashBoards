@@ -65,7 +65,7 @@ export const getParameterStyle = (width: number, level: number, style: PivotBody
 		fontStyle: fontStyle === FONT_STYLES.ITALIC ? 'italic' : '',
 		fontWeight: fontStyle === FONT_STYLES.BOLD || isTotal ? '500' : 'normal',
 		paddingLeft: `${padding}px`,
-		textDecoration: fontStyle === FONT_STYLES.UNDERLINE || !isTotal ? 'underline' : ''
+		textDecoration: fontStyle === FONT_STYLES.UNDERLINE && !isTotal ? 'underline' : ''
 	};
 };
 
@@ -89,6 +89,6 @@ export const getCellStyle = (width: number, level: number, style: PivotBodySetti
 		fontStyle: fontStyle === FONT_STYLES.ITALIC ? 'italic' : '',
 		fontWeight: fontStyle === FONT_STYLES.BOLD || isTotal ? '500' : 'normal',
 		textAlign,
-		textDecoration: fontStyle === FONT_STYLES.UNDERLINE || !isTotal ? 'underline' : ''
+		textDecoration: fontStyle === FONT_STYLES.UNDERLINE && !isTotal ? 'underline' : ''
 	};
 };
