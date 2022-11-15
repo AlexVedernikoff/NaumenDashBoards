@@ -116,14 +116,15 @@ const getHARFile = () => JSON.parse(
 /**
  * Базовое формирование объекта импорта.
  * @param {string} method - название функции вызова.
+ * @param {string} module - название модуля функции вызова.
  * @param {HARFileResponse} response - объект ответа из "HAR" файла.
  * @returns {ImportItem} - объект для мока данных.
  */
-const makeBaseImport = (method, response) => ({
+const makeBaseImport = (method, module, response) => ({
 	body: '',
 	filename: method,
 	text: response.content.text,
-	url: `func=modules.dashboardSettings.${method}`
+	url: `func=${module}.${method}`
 });
 
 /**
@@ -246,17 +247,17 @@ const main = () => {
 		let item = null;
 
 		if (request.queryString.some(qs => qs.name === 'func' && qs.value === 'modules.dashboardSettings.getSettings')) {
-			item = makeBaseImport('getSettings', response);
+			item = makeBaseImport('getSettings', 'modules.dashboardSettings', response);
 			allNeeded.usedSettings = true;
 		}
 
 		if (request.queryString.some(qs => qs.name === 'func' && qs.value === 'modules.dashboards.getDataSources')) {
-			item = makeBaseImport('getDataSources', response);
+			item = makeBaseImport('getDataSources', 'modules.dashboards', response);
 			allNeeded.usedDataSource = true;
 		}
 
 		if (request.queryString.some(qs => qs.name === 'func' && qs.value === 'modules.dashboardSettings.getUserData')) {
-			item = makeBaseImport('getUserData', response);
+			item = makeBaseImport('getUserData', 'modules.dashboardSettings', response);
 			allNeeded.usedUserData = true;
 		}
 
