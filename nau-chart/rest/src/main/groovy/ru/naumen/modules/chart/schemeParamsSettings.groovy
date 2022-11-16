@@ -75,7 +75,6 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
     String nameContent,
     LinkedHashMap<String, Object> bindings)
 {
-    Long id = 0
     Collection<Collection<HierarchyCommunicationBuilder>> allSchemesAllStrategies = []
 
     settings.strategies.each { currentStrategy ->
@@ -104,7 +103,6 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
                     dataLine,
                     dataPointA,
                     dataPointB,
-                    id,
                     currentStrategy
                 )
             Collection<HierarchyCommunicationBuilder> allLineScheme = createLinesAllElementsScheme(
@@ -112,11 +110,10 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
                 dataPointA,
                 dataPointB,
                 allPointsScheme,
-                id,
                 currentStrategy
             )
             Collection<Collection<HierarchyCommunicationBuilder>> schemesCurrentStrategies =
-                distributeElementsIntoSeparateSchemes(allPointsScheme, allLineScheme, id)
+                distributeElementsIntoSeparateSchemes(allPointsScheme, allLineScheme)
             checkWhetherPointsWithoutLinks(currentStrategy, schemesCurrentStrategies)
             allSchemesAllStrategies += schemesCurrentStrategies
         }
@@ -160,18 +157,14 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationships
 
             Collection<Set<ISDtObject>> allObjectsToScheme =
                 breakRelatedObjectsIntoBlocks(scriptedBusinessObjectsSetupWizard, listAttributes)
-
             Collection<Collection<HierarchyCommunicationBuilder>> currentSchemeToDisplay =
-                addPointsByRelatedObjects(allObjectsToScheme, id, currentStrategy)
-
+                addPointsByRelatedObjects(allObjectsToScheme, currentStrategy)
             checkWhetherPointsWithoutLinks(currentStrategy, currentSchemeToDisplay)
-
             addLineByRelatedObjects(
                 currentStrategy,
                 currentSchemeToDisplay,
                 listAttributes,
-                allSchemeToDisplay,
-                id
+                allSchemeToDisplay
             )
         }
     }
@@ -203,8 +196,7 @@ void checkWhetherPointsWithoutLinks(Object currentStrategy,
  */
 Collection<Collection<HierarchyCommunicationBuilder>> distributeElementsIntoSeparateSchemes(
     Collection<HierarchyCommunicationBuilder> allPointsScheme,
-    Collection<HierarchyCommunicationBuilder> allLineScheme,
-    Long id)
+    Collection<HierarchyCommunicationBuilder> allLineScheme)
 {
     Collection<Collection<HierarchyCommunicationBuilder>> allScheme = []
     allPointsScheme.findAll {
@@ -215,29 +207,30 @@ Collection<Collection<HierarchyCommunicationBuilder>> distributeElementsIntoSepa
     Collection<HierarchyCommunicationBuilder> listRemoveIncorrectLine = []
     allScheme.eachWithIndex { currentScheme, idx ->
         getAllRelatedPoints(allScheme, currentScheme.first(), allPointsScheme, allLineScheme, idx)
-        currentScheme.findAll {
-            it.id < it.from
-        }.each {
-            Long currentId = it.id
-            Long newId = ++id
-            it.id = newId
-            currentScheme.findAll {
-                it.from == currentId
-            }.each {
-                it.from = newId
-            }
-            currentScheme.findAll {
-                it.to == currentId
-            }.each {
-                it.to = newId
-            }
-        }
         listRemoveIncorrectLine += currentScheme.findAll {
             it.type == 'line' && !(it.to in currentScheme.findAll {
                 it.type == 'point'
             }.id)
         }
     }
+    allScheme.flatten().findAll {
+        it.type == 'point' && it.id < it.from
+    }.each {
+        Long currentId = it.id
+        Long newId = SchemaWorkingElements.incrementId()
+        it.id = newId
+        allScheme.flatten().findAll {
+            it.from == currentId
+        }.each {
+            it.from = newId
+        }
+        allScheme.flatten().findAll {
+            it.to == currentId
+        }.each {
+            it.to = newId
+        }
+    }
+    SchemaWorkingElements.zeroingId()
     listRemoveIncorrectLine.each { removeLine ->
         allScheme.each { currentScheme ->
             if (currentScheme.indexOf(removeLine) != -1)
@@ -263,7 +256,6 @@ Collection<Collection<HierarchyCommunicationBuilder>> distributeElementsIntoSepa
 Collection<HierarchyCommunicationBuilder> createPointsForStrategyHierarchyLink(Collection<ISDtObject> dataLine,
                                                                                Collection<ISDtObject> dataPointA,
                                                                                Collection<ISDtObject> dataPointB,
-                                                                               Long id,
                                                                                ContentHierarchyCommunicationSettings currentStrategy)
 {
     ElementsScheme elementsScheme = new ElementsScheme()
@@ -275,12 +267,17 @@ Collection<HierarchyCommunicationBuilder> createPointsForStrategyHierarchyLink(C
             allPoint.add(dataPointB[idx])
         }
     }
+
     Collection<HierarchyCommunicationBuilder> allPointsScheme = []
     allPoint.each {
         if (it)
         {
-            allPointsScheme +=
-                elementsScheme.createHierarchyCommunicationPoint(it, currentStrategy, ++id, null)
+            allPointsScheme += elementsScheme.createHierarchyCommunicationPoint(
+                it,
+                currentStrategy,
+                SchemaWorkingElements.incrementId(),
+                null
+            )
         }
     }
     allPointsScheme.each { point ->
@@ -313,7 +310,6 @@ Collection<HierarchyCommunicationBuilder> createLinesAllElementsScheme(Collectio
                                                                        Collection<ISDtObject> dataPointA,
                                                                        Collection<ISDtObject> dataPointB,
                                                                        Collection<HierarchyCommunicationBuilder> allPointsScheme,
-                                                                       Long id,
                                                                        ContentHierarchyCommunicationSettings currentStrategy)
 {
     ElementsScheme elementsScheme = new ElementsScheme()
@@ -327,9 +323,13 @@ Collection<HierarchyCommunicationBuilder> createLinesAllElementsScheme(Collectio
             Long to = allPointsScheme.find {
                 dataPointB[idx].UUID == it.UUID
             }.id
-            allLineScheme +=
-                elementsScheme
-                    .createHierarchyCommunicationLine(region, currentStrategy, ++id, from, to)
+            allLineScheme += elementsScheme.createHierarchyCommunicationLine(
+                region,
+                currentStrategy,
+                SchemaWorkingElements.incrementId(),
+                from,
+                to
+            )
         }
     }
     return allLineScheme
@@ -449,7 +449,6 @@ Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject>
  * @return все лини по соответствующей стратегии
  */
 Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>> allObjectsToScheme,
-                                                      Long id,
                                                       Object currentStrategy)
 {
     ElementsScheme elementsScheme = new ElementsScheme()
@@ -463,7 +462,7 @@ Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>
                 currentScheme << elementsScheme.createHierarchyCommunicationPoint(
                     elementsCurrentScheme,
                     currentStrategy,
-                    ++id,
+                    SchemaWorkingElements.incrementId(),
                     null
                 )
             }
@@ -471,11 +470,11 @@ Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>
             {
                 if (idx == 0)
                 {
-                    indexFirstElementSet = id + 1
+                    indexFirstElementSet = SchemaWorkingElements.getId() + 1
                     currentScheme += elementsScheme.createHierarchyCommunicationPoint(
                         elementsCurrentScheme,
                         currentStrategy,
-                        ++id,
+                        SchemaWorkingElements.incrementId(),
                         null
                     )
                 }
@@ -486,17 +485,17 @@ Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>
                         currentScheme += elementsScheme.createHierarchyCommunicationPoint(
                             elementsCurrentScheme,
                             currentStrategy,
-                            ++id,
+                            SchemaWorkingElements.incrementId(),
                             indexFirstElementSet
                         )
-                        indexFirstElementSet = id
+                        indexFirstElementSet = SchemaWorkingElements.getId()
                     }
                     else
                     {
                         currentScheme += elementsScheme.createHierarchyCommunicationPoint(
                             elementsCurrentScheme,
                             currentStrategy,
-                            ++id,
+                            SchemaWorkingElements.incrementId(),
                             indexFirstElementSet
                         )
                     }
@@ -521,8 +520,7 @@ Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>
 void addLineByRelatedObjects(Object currentStrategy,
                              Collection<Collection<HierarchyCommunicationBuilder>> currentSchemeToDisplay,
                              Collection listAttributes,
-                             Collection<Collection<HierarchyCommunicationBuilder>> allSchemeToDisplay,
-                             Long id)
+                             Collection<Collection<HierarchyCommunicationBuilder>> allSchemeToDisplay)
 {
     ElementsScheme elementsScheme = new ElementsScheme()
     currentSchemeToDisplay.each { scheme ->
@@ -543,7 +541,7 @@ void addLineByRelatedObjects(Object currentStrategy,
                             scheme += elementsScheme.createHierarchyCommunicationLine(
                                 null,
                                 currentStrategy,
-                                ++id,
+                                SchemaWorkingElements.incrementId(),
                                 elementScheme.id,
                                 currentElementsScheme.id
                             )
@@ -563,7 +561,7 @@ void addLineByRelatedObjects(Object currentStrategy,
                                 scheme += elementsScheme.createHierarchyCommunicationLine(
                                     null,
                                     currentStrategy,
-                                    ++id,
+                                    SchemaWorkingElements.incrementId(),
                                     elementScheme.id,
                                     currentElementsScheme.id
                                 )
@@ -573,6 +571,7 @@ void addLineByRelatedObjects(Object currentStrategy,
                 }
             }
         }
+        SchemaWorkingElements.zeroingId()
         allSchemeToDisplay << scheme
     }
 }
@@ -799,17 +798,17 @@ class SchemaWorkingElements
      */
     static Integer id = 0
 
-    Integer incrementId()
+    static Integer incrementId()
     {
         return ++id
     }
 
-    Integer getId()
+    static Integer getId()
     {
         return id
     }
 
-    void zeroingId()
+    static void zeroingId()
     {
         id = 0
     }
