@@ -132,39 +132,32 @@ class HierarchyCommunicationSettings extends AbstractSchemesCharacteristics
     Collection<ContentHierarchyCommunicationSettings> strategies = [new ContentHierarchyCommunicationSettings()]
 }
 
-@JsonSchemaMeta(requiredFields = ['hierarchyNameStrategy', 'hierarchyCodeStrategy'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['hierarchyNameStrategy', 'hierarchyCodeStrategy', 'scriptText', 'metaclassObjects', 'pathCoordinatLongitud', 'pointA', 'pointB'], title = ' ')
 class ContentHierarchyCommunicationSettings
 {
-    @JsonSchemaMeta(title = 'Название стратегии')
+    @JsonSchemaMeta(title = 'Название стратегии', nullable = false)
     String hierarchyNameStrategy = ''
     @UiSchemaMeta(disabled = true)
-    @JsonSchemaMeta(title = 'Код стратегии')
+    @JsonSchemaMeta(title = 'Код стратегии', nullable = false)
     String hierarchyCodeStrategy = 'schemesStrategy'
 
     @UiSchemaMeta(widget = 'textarea')
-    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Применяется только при стратегии "Скрипт"')
+    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Скрипт возвращает объект для построения иерархической связи. Возможно использование переменной subject, которая содержит объект, на карточке которого размещен контент с приложением', nullable = false)
     String scriptText = ''
 
     @UiSchemaMeta(widget = 'metaClass-select')
-    @JsonSchemaMeta(title = 'Метакласс')
+    @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
 
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
-    @JsonSchemaMeta(title = 'Атрибут связи')
+    @JsonSchemaMeta(title = 'Атрибут связи', nullable = false)
     String pathCoordinatLongitud = ""
     @UiSchemaMeta(widget = 'abstract-select', source = 'getAttributesChildMetaclass')
-    @JsonSchemaMeta(title = 'Точка А')
+    @JsonSchemaMeta(title = 'Точка А', nullable = false)
     String pointA = ""
     @UiSchemaMeta(widget = 'abstract-select', source = 'getAttributesChildMetaclass')
-    @JsonSchemaMeta(title = 'Точка Б')
+    @JsonSchemaMeta(title = 'Точка Б', nullable = false)
     String pointB = ""
-
-    @JsonSchemaMeta(title = 'Групировать')
-    Boolean group = null
-
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
-    @JsonSchemaMeta(title = 'Атрибут групировки')
-    String groupingAttribute = ""
 
     @JsonSchemaMeta(title = 'Не выводить объекты без связи')
     Boolean displayingEndLineDots = false
@@ -191,14 +184,14 @@ class ObjecRelationshipsSettings extends AbstractSchemesCharacteristics
 @JsonSchemaMeta(requiredFields = ['objectNameStrategy', 'objectCodeStrategy', 'scriptText'], title = ' ')
 class ContentObjecRelationshipsSettings
 {
-    @JsonSchemaMeta(title = 'Название стратегии')
+    @JsonSchemaMeta(title = 'Название стратегии', nullable = false)
     String objectNameStrategy = ''
     @UiSchemaMeta(disabled = true)
-    @JsonSchemaMeta(title = 'Код стратегии')
+    @JsonSchemaMeta(title = 'Код стратегии', nullable = false)
     String objectCodeStrategy = 'schemesStrategy'
 
     @UiSchemaMeta(widget = 'textarea')
-    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Применяется только при стратегии "Скрипт"')
+    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Скрипт должен возвращать единый список объектов для построения связи', nullable = false)
     String scriptText = ''
 
     @JsonSchemaMeta(title = 'Правила связывания объектов схемы')
@@ -218,11 +211,11 @@ class ContentObjecRelationshipsSettings
 /**
  * Настройки для владки 'Визуализация по умолчанию'
  */
-@JsonSchemaMeta(title = ' ')
+@JsonSchemaMeta(requiredFields = ['metaclassObjects'], title = ' ')
 class DefaultVisualizationSchemes
 {
     @UiSchemaMeta(widget = 'metaClass-select')
-    @JsonSchemaMeta(title = 'Метакласс')
+    @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
     @JsonSchemaMeta(title = 'Главный текст')
@@ -252,27 +245,22 @@ class ActionsWithObjects
     String codeEditingForm = ''
 }
 
-@JsonSchemaMeta(title = ' ')
+@JsonSchemaMeta(requiredFields = ['metaclassObjects', 'pathCoordinatLongitud'], title = ' ')
 class RulesLinkingSchemaObjects
 {
     @UiSchemaMeta(widget = 'metaClass-select')
-    @JsonSchemaMeta(title = 'Метакласс')
+    @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
-    @JsonSchemaMeta(title = 'Атрибут связи')
+    @JsonSchemaMeta(title = 'Атрибут связи', nullable = false)
     String pathCoordinatLongitud = ""
-    @JsonSchemaMeta(title = 'Групировать объекты выбранного метакласса')
-    Boolean groupObjectsSelectedMetaclass = null
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
-    @JsonSchemaMeta(title = 'Атрибут групировки')
-    String pointB = ""
 }
 
-@JsonSchemaMeta(title = ' ')
+@JsonSchemaMeta(requiredFields = ['metaclassObjects'], title = ' ')
 class CharacteristicsOutputDiagram
 {
     @UiSchemaMeta(widget = 'metaClass-select')
-    @JsonSchemaMeta(title = 'Метакласс')
+    @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
     @JsonSchemaMeta(title = 'Главный текст')
@@ -288,20 +276,15 @@ class CharacteristicsOutputDiagram
     String icon = ''
 }
 
-@JsonSchemaMeta(requiredFields = ['metaclassObjects'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['metaclassObjects', 'pathCoordinatLongitud'], title = ' ')
 class RulesLinkingObjects
 {
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс')
     MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
-    @JsonSchemaMeta(title = 'Атрибут связи')
+    @JsonSchemaMeta(title = 'Атрибут связи', nullable = false)
     String pathCoordinatLongitud = ""
-    @JsonSchemaMeta(title = 'Групировать объекты выбранного метакласса')
-    Boolean groupObjectsSelectedMetaclass = null
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
-    @JsonSchemaMeta(title = 'Атрибут групировки')
-    String pointB = ""
 }
 
 /**
