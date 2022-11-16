@@ -387,7 +387,7 @@ Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject>
                     listObject.find { object
                         ->
                         object.UUID ==
-                        objectsByScript.UUID || object.UUID in objectsByScript[attributesName].UUID
+                        objectsByScript.UUID || object.UUID in objectsByScript[attributesName]?.UUID
                     }
                 }
                 if (arrayContainingCurrentObject)
