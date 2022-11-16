@@ -82,6 +82,7 @@ class ElementsScheme
     /**
      * Метод для получения данных о точках на схеме
      * @param scriptData - данные из скрипта
+     * @param currentStrategy - текущая вкладка настроек из мастера
      * @param id - уникальный номер сущности
      * @param from - точка, к которой привязывается текущий элемент
      * @return сформированный объект оборудования
@@ -129,6 +130,7 @@ class ElementsScheme
     /**
      * Метод для получения данных о связях между точками
      * @param scriptData - оборудование из БД
+     * @param currentStrategy - текущая вкладка настроек из мастера
      * @param id -Уникальный номер сущности
      * @param from - точка, к которой привязывается текущий элемент
      * @return данные по линиям между точками
@@ -169,7 +171,12 @@ class ElementsScheme
         return hierarchyCommunicationBuilder
     }
 
-    //TO DO
+    /**
+     * Получить данные с информацие о группе атрибутов
+     * @param scriptData - оборудование из БД
+     * @param currentStrategy - текущая вкладка настроек из мастера
+     * @return информация о группе атрибутов
+     */
     MetaclassNameAndAttributeListSchemes getAttributesFromGroup(ISDtObject scriptData,
                                                                 Object currentStrategy)
     {
@@ -189,7 +196,12 @@ class ElementsScheme
         return attributesFromGroup
     }
 
-    //TO DO
+    /**
+     * Получить данные о главном и дополнительном тексте
+     * @param attributesFromGroup - информация о группе атрибутов
+     * @param scriptData - оборудование из БД
+     * @return данные о главном и дополнительном тексте
+     */
     Map getTextToElement(MetaclassNameAndAttributeListSchemes attributesFromGroup,
                          ISDtObject scriptData)
     {
@@ -209,7 +221,12 @@ class ElementsScheme
         return ['mainText': mainText, 'additionalText': additionalText]
     }
 
-    //TO DO
+    /**
+     * Получить ссылку на иконку
+     * @param attributesFromGroup - информация о группе атрибутов
+     * @param scriptData - оборудование из БД
+     * @return ссылка на иконку
+     */
     String getIconToPoint(MetaclassNameAndAttributeListSchemes attributesFromGroup,
                           ISDtObject scriptData)
     {
@@ -283,7 +300,6 @@ class ElementsScheme
         if (attributesFromGroup)
         {
             attributesFromGroup.listAttributes.each { currentAttribute ->
-                logger.info("LOGGER254 ${ currentAttribute }")
                 String valueLabel
                 String linkElement
                 Collection<ValueSchemes> boLinkTypeAttribute = []
@@ -345,7 +361,6 @@ class ElementsScheme
                         }
                         else
                         {
-                            logger.info("LOGGER304 ${ currentAttribute }")
                             builder
                                 .addOption(
                                     currentAttribute.title,
@@ -376,7 +391,6 @@ class ElementsScheme
             characteristics
         )
         MetaclassNameAndAttributeListSchemes attributesFromGroup
-        logger.info("LOGGER355 ${ dataCharacteristicDisplay }")
         if (dataCharacteristicDisplay)
         {
             String metaClassData =
@@ -386,7 +400,6 @@ class ElementsScheme
                     dataCharacteristicDisplay?.metaclassObjects?.caseId
                 ) :
                     dataCharacteristicDisplay?.metaclassObjects?.id
-            logger.info("LOGGER349 ${ toJson(dataCharacteristicDisplay) }")
             Collection listAttributes = []
             if (dataCharacteristicDisplay?.attributeGroup)
             {
@@ -415,18 +428,14 @@ class ElementsScheme
     Object findingMetaclassMatches(MetaClassWrapper metaClassInfo,
                                    Collection characteristicsForOutput)
     {
-        logger.info("LOGGER389 ${ metaClassInfo }")
         Object characteristicsDisplay
         if (!metaClassInfo)
         {
             return null
         }
-        logger
-            .info("LOGGER395 ${ toJson(characteristicsForOutput) }  ${ characteristicsForOutput.first().getClass() }")
         characteristicsDisplay = characteristicsForOutput.find {
             metaClassInfo?.code == getCodeMetaClass(it)
         }
-        logger.info("LOGGER398 ${ characteristicsDisplay }")
         if (!characteristicsDisplay)
         {
             characteristicsForOutput.each {

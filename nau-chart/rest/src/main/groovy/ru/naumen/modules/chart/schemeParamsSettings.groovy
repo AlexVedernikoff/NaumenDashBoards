@@ -64,7 +64,7 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
 }
 
 /**
- * Метод сохранения данных о линиях и точках для отображения на карте
+ * Метод получения данных для вкладки мастера 'Иерархия связи'
  * @param settings - данные из мастера настроек
  * @param nameContent - имя контента
  * @param bindings - дополнительные параметры контекста выполнения скрипта
@@ -75,9 +75,9 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
     String nameContent,
     LinkedHashMap<String, Object> bindings)
 {
-    Collection<Collection<HierarchyCommunicationBuilder>> allSchemesAllStrategies = []
-    ElementsScheme elementsScheme = new ElementsScheme()
     Long id = 0
+    Collection<Collection<HierarchyCommunicationBuilder>> allSchemesAllStrategies = []
+
     settings.strategies.each { currentStrategy ->
         if (currentStrategy.listStrategy.find { strategy -> strategy == nameContent
         })
@@ -99,110 +99,250 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
                 logger.info("Передан неверный скрипт!")
                 logger.error("#schemeParamsSettings ${ ex.message }", ex)
             }
-            Set<ISDtObject> allPoint = []
-            dataLine.eachWithIndex { region, idx ->
-                allPoint.add(dataPointA[idx])
-                allPoint.add(dataPointB[idx])
-            }
-            Collection<HierarchyCommunicationBuilder> allPointsScheme = []
-            allPoint.each {
-                allPointsScheme +=
-                    elementsScheme
-                        .createHierarchyCommunicationPoint(it, currentStrategy, ++id, null)
-            }
-
-            allPointsScheme.each { point ->
-                String attributeNameA = currentStrategy.pointA
-                String attributeNameB = currentStrategy.pointB
-                ISDtObject fromPoints = dataLine.find {
-                    it[attributeNameB].UUID == point.UUID
-                }
-                if (fromPoints)
-                {
-                    Long from = allPointsScheme.find {
-                        it.UUID == fromPoints[attributeNameA].UUID
-                    }.id
-                    point.from = from != point.id ? from : null
-                }
-            }
-            //создаём все линии
-            Collection<HierarchyCommunicationBuilder> allLineScheme = []
-            dataLine.eachWithIndex { region, idx ->
-                Long from = allPointsScheme.find {
-                    dataPointA[idx].UUID == it.UUID
-                }.id
-                Long to = allPointsScheme.find {
-                    dataPointB[idx].UUID == it.UUID
-                }.id
-                allLineScheme +=
-                    elementsScheme
-                        .createHierarchyCommunicationLine(region, currentStrategy, ++id, from, to)
-            }
-
-            //распределяем элементы по отдельным массивам со схемами
-            Collection<Collection<HierarchyCommunicationBuilder>> allScheme = []
-            allPointsScheme.findAll {
-                it.from == null
-            }.each {
-                allScheme.add([it])
-            }
-            Collection<HierarchyCommunicationBuilder> listRemoveIncorrectLine = []
-            allScheme.eachWithIndex { currentScheme, idx ->
-                getAllRelatedPoints(
-                    allScheme,
-                    currentScheme.first(),
-                    allPointsScheme,
-                    allLineScheme,
-                    idx
+            Collection<HierarchyCommunicationBuilder> allPointsScheme =
+                createPointsForStrategyHierarchyLink(
+                    dataLine,
+                    dataPointA,
+                    dataPointB,
+                    id,
+                    currentStrategy
                 )
-
-                //перелопачивание старших id TODO
-                currentScheme.findAll {
-                    it.id < it.from
-                }.each {
-                    Long currentId = it.id
-                    Long newId = ++id
-                    it.id = newId
-                    currentScheme.findAll {
-                        it.from == currentId
-                    }.each {
-                        it.from = newId
-                    }
-                    currentScheme.findAll {
-                        it.to == currentId
-                    }.each {
-                        it.to = newId
-                    }
-                }
-                listRemoveIncorrectLine += currentScheme.findAll {
-                    it.type == 'line' && !(it.to in currentScheme.findAll {
-                        it.type == 'point'
-                    }.id)
-                }
-            }
-            listRemoveIncorrectLine.each { removeLine ->
-                allScheme.each { currentScheme ->
-                    if (currentScheme.indexOf(removeLine) != -1)
-                    {
-                        currentScheme.remove(currentScheme.indexOf(removeLine))
-                    }
-                }
-            }
-            allSchemesAllStrategies += allScheme
-            if (currentStrategy.displayingEndLineDots)
-            {
-                allSchemesAllStrategies = allSchemesAllStrategies.findAll {
-                    it.size() != 1
-                }
-            }
+            Collection<HierarchyCommunicationBuilder> allLineScheme = createLinesAllElementsScheme(
+                dataLine,
+                dataPointA,
+                dataPointB,
+                allPointsScheme,
+                id,
+                currentStrategy
+            )
+            Collection<Collection<HierarchyCommunicationBuilder>> schemesCurrentStrategies =
+                distributeElementsIntoSeparateSchemes(allPointsScheme, allLineScheme, id)
+            checkWhetherPointsWithoutLinks(currentStrategy, schemesCurrentStrategies)
+            allSchemesAllStrategies += schemesCurrentStrategies
         }
-
     }
-    //убираем все одиночные точки при соответствующей настройке в мастере
-
     return allSchemesAllStrategies
 }
 
+/**
+ * Метод получения данных для вкладки мастера 'Связь выбранных объектов'
+ * @param settings - данные из мастера настроек
+ * @param nameContent - имя контента
+ * @param bindings - дополнительные параметры контекста выполнения скрипта
+ * @return данные для отображения на схеме
+ */
+Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationshipsSettings(
+    ObjecRelationshipsSettings settings,
+    String nameContent,
+    LinkedHashMap<String, Object> bindings)
+{
+    Long id = 0
+    Collection<Collection<HierarchyCommunicationBuilder>> allSchemeToDisplay = []
+    settings.strategies.each { currentStrategy ->
+        if (currentStrategy.listStrategy.find { strategy -> strategy == nameContent
+        })
+        {
+            Collection<ISDtObject> scriptedBusinessObjectsSetupWizard = []
+            try
+            {
+                scriptedBusinessObjectsSetupWizard =
+                    api.utils.executeScript(currentStrategy.scriptText)
+            }
+            catch (Exception ex)
+            {
+                logger.info("Передан неверный скрипт!")
+                logger.error("#schemeParamsSettings ${ ex.message }", ex)
+            }
+            Collection listAttributes =
+                currentStrategy.rulesLinkingSchemaObjects.collect {
+                    it.pathCoordinatLongitud
+                }
+
+            Collection<Set<ISDtObject>> allObjectsToScheme =
+                breakRelatedObjectsIntoBlocks(scriptedBusinessObjectsSetupWizard, listAttributes)
+
+            Collection<Collection<HierarchyCommunicationBuilder>> currentSchemeToDisplay =
+                addPointsByRelatedObjects(allObjectsToScheme, id, currentStrategy)
+
+            checkWhetherPointsWithoutLinks(currentStrategy, currentSchemeToDisplay)
+
+            addLineByRelatedObjects(
+                currentStrategy,
+                currentSchemeToDisplay,
+                listAttributes,
+                allSchemeToDisplay,
+                id
+            )
+        }
+    }
+    return allSchemeToDisplay
+}
+
+/**
+ * Метод проверки чекбокса в мастере и удаления объектов без связей
+ * @param currentStrategy - текущая вкладка настроек из мастера
+ * @param schemesCurrentStrategies - коллекция схем по текущей стратегии
+ */
+void checkWhetherPointsWithoutLinks(Object currentStrategy,
+                                    Collection<Collection<HierarchyCommunicationBuilder>> schemesCurrentStrategies)
+{
+    if (currentStrategy.displayingEndLineDots)
+    {
+        schemesCurrentStrategies = schemesCurrentStrategies.findAll {
+            it.size() != 1
+        }
+    }
+}
+
+/**
+ * Метод распределения элементов по соответствующим схемам
+ * @param allPointsScheme - все точки для схемы
+ * @param allLineScheme -  все линии для схемы
+ * @param id - идентификатор элемента на схеме
+ * @return данные для отображения на схеме
+ */
+Collection<Collection<HierarchyCommunicationBuilder>> distributeElementsIntoSeparateSchemes(
+    Collection<HierarchyCommunicationBuilder> allPointsScheme,
+    Collection<HierarchyCommunicationBuilder> allLineScheme,
+    Long id)
+{
+    Collection<Collection<HierarchyCommunicationBuilder>> allScheme = []
+    allPointsScheme.findAll {
+        it.from == null
+    }.each {
+        allScheme.add([it])
+    }
+    Collection<HierarchyCommunicationBuilder> listRemoveIncorrectLine = []
+    allScheme.eachWithIndex { currentScheme, idx ->
+        getAllRelatedPoints(allScheme, currentScheme.first(), allPointsScheme, allLineScheme, idx)
+        currentScheme.findAll {
+            it.id < it.from
+        }.each {
+            Long currentId = it.id
+            Long newId = ++id
+            it.id = newId
+            currentScheme.findAll {
+                it.from == currentId
+            }.each {
+                it.from = newId
+            }
+            currentScheme.findAll {
+                it.to == currentId
+            }.each {
+                it.to = newId
+            }
+        }
+        listRemoveIncorrectLine += currentScheme.findAll {
+            it.type == 'line' && !(it.to in currentScheme.findAll {
+                it.type == 'point'
+            }.id)
+        }
+    }
+    listRemoveIncorrectLine.each { removeLine ->
+        allScheme.each { currentScheme ->
+            if (currentScheme.indexOf(removeLine) != -1)
+            {
+                currentScheme.remove(currentScheme.indexOf(removeLine))
+            }
+        }
+    }
+    Collection<Collection<HierarchyCommunicationBuilder>> schemesCurrentStrategies = []
+    schemesCurrentStrategies += allScheme
+    return schemesCurrentStrategies
+}
+
+/**
+ * Метод создания всех точек по стратегии 'Иерархия связи'
+ * @param dataLine - данные о всех отрезках на схеме
+ * @param dataPointA -  данные по начальной точке
+ * @param dataPointB - данные по конечной точке
+ * @param id - идентификатор элемента на схеме
+ * @param currentStrategy - текущая вкладка настроек из мастера
+ * @return все точки по соответствующей стратегии
+ */
+Collection<HierarchyCommunicationBuilder> createPointsForStrategyHierarchyLink(Collection<ISDtObject> dataLine,
+                                                                               Collection<ISDtObject> dataPointA,
+                                                                               Collection<ISDtObject> dataPointB,
+                                                                               Long id,
+                                                                               ContentHierarchyCommunicationSettings currentStrategy)
+{
+    ElementsScheme elementsScheme = new ElementsScheme()
+    Set<ISDtObject> allPoint = []
+    dataLine.eachWithIndex { region, idx ->
+        if (dataPointA[idx] && dataPointB[idx])
+        {
+            allPoint.add(dataPointA[idx])
+            allPoint.add(dataPointB[idx])
+        }
+    }
+    Collection<HierarchyCommunicationBuilder> allPointsScheme = []
+    allPoint.each {
+        if (it)
+        {
+            allPointsScheme +=
+                elementsScheme.createHierarchyCommunicationPoint(it, currentStrategy, ++id, null)
+        }
+    }
+    allPointsScheme.each { point ->
+        String attributeNameA = currentStrategy.pointA
+        String attributeNameB = currentStrategy.pointB
+        ISDtObject fromPoints = dataLine.find {
+            it[attributeNameB] && it[attributeNameB].UUID == point.UUID
+        }
+        if (fromPoints && fromPoints[attributeNameA])
+        {
+            Long from = allPointsScheme.find {
+                it.UUID == fromPoints[attributeNameA].UUID
+            }.id
+            point.from = from != point.id ? from : null
+        }
+    }
+    return allPointsScheme
+}
+
+/**
+ * Метод создания всех линий по стратегии 'Иерархия связи'
+ * @param dataLine - данные о всех отрезках на схеме
+ * @param dataPointA -  данные по начальной точке
+ * @param dataPointB - данные по конечной точке
+ * @param allPointsScheme - все точки для схемы
+ * @param currentStrategy - текущая вкладка настроек из мастера
+ * @return все лини по соответствующей стратегии
+ */
+Collection<HierarchyCommunicationBuilder> createLinesAllElementsScheme(Collection<ISDtObject> dataLine,
+                                                                       Collection<ISDtObject> dataPointA,
+                                                                       Collection<ISDtObject> dataPointB,
+                                                                       Collection<HierarchyCommunicationBuilder> allPointsScheme,
+                                                                       Long id,
+                                                                       ContentHierarchyCommunicationSettings currentStrategy)
+{
+    ElementsScheme elementsScheme = new ElementsScheme()
+    Collection<HierarchyCommunicationBuilder> allLineScheme = []
+    dataLine.eachWithIndex { region, idx ->
+        if (dataPointA[idx] && dataPointB[idx])
+        {
+            Long from = allPointsScheme.find {
+                dataPointA[idx].UUID == it.UUID
+            }.id
+            Long to = allPointsScheme.find {
+                dataPointB[idx].UUID == it.UUID
+            }.id
+            allLineScheme +=
+                elementsScheme
+                    .createHierarchyCommunicationLine(region, currentStrategy, ++id, from, to)
+        }
+    }
+    return allLineScheme
+}
+
+/**
+ * Метод привязке к точке всех связанных с ней элементов схемы
+ * @param allScheme - все схемы
+ * @param currentPoint -  текущая точка
+ * @param allPointsScheme - все точки для схемы
+ * @param allLineScheme -  все линии для схемы
+ * @param idx -  индекс элемента
+ */
 void getAllRelatedPoints(Collection<Collection<HierarchyCommunicationBuilder>> allScheme,
                          HierarchyCommunicationBuilder currentPoint,
                          Collection<HierarchyCommunicationBuilder> allPointsScheme,
@@ -228,369 +368,213 @@ void getAllRelatedPoints(Collection<Collection<HierarchyCommunicationBuilder>> a
 }
 
 /**
- * Метод получения данных для вкладки мастера 'Связь выбранных объектов'
- * @param settings - данные из мастера настроек
- * @param nameContent - имя контента
- * @param bindings - дополнительные параметры контекста выполнения скрипта
- * @return данные для отображения на схеме
+ * Метод добавления всех точек по стратегии 'Связь выбранных объектов
+ * @param scriptedBusinessObjectsSetupWizard - информация о всех точках из мастера настроек
+ * @param listAttributes -  список атрибутов
+ * @return все лини по соответствующей стратегии
  */
-Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationshipsSettings(
-    ObjecRelationshipsSettings settings,
-    String nameContent,
-    LinkedHashMap<String, Object> bindings)
+Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject> scriptedBusinessObjectsSetupWizard,
+                                                          Collection listAttributes)
 {
-    Collection<Collection<HierarchyCommunicationBuilder>> allSchemeToDisplay = []
-    Collection<Collection<HierarchyCommunicationBuilder>> newAllSchemeToDisplay = []
-    Collection<ISDtObject> scriptedBusinessObjectsSetupWizard = []
-    settings.strategies.each { currentStrategy ->
-        if (currentStrategy.listStrategy.find { strategy -> strategy == nameContent
-        })
-        {
-            ElementsScheme elementsScheme = new ElementsScheme()
-            try
+    Collection<Set<ISDtObject>> allObjectsToScheme = []
+    scriptedBusinessObjectsSetupWizard.each { objectsByScript ->
+        listAttributes.each { attributesName ->
+            if (objectsByScript.hasProperty(attributesName))
             {
-                scriptedBusinessObjectsSetupWizard =
-                    api.utils.executeScript(currentStrategy.scriptText)
-            }
-            catch (Exception ex)
-            {
-                logger.info("Передан неверный скрипт!")
-                logger.error("#schemeParamsSettings ${ ex.message }", ex)
-            }
-            Collection listAttributes =
-                currentStrategy.rulesLinkingSchemaObjects.collect {
-                    it.pathCoordinatLongitud
-                }
-            Set<ISDtObject> allPointsOnTab = []
-            Long id = 0
 
-            Collection<Set<ISDtObject>> allObjectsToScheme = []
-            scriptedBusinessObjectsSetupWizard.each { objectsByScritp ->
-                listAttributes.each { attributesName ->
-                    if (objectsByScritp.hasProperty(attributesName))
-                    {
-
-                        Collection<String> uuidHierarchicalObjects = []
-
-                        // получаем все коды объектов которые связанные по атриубу с текущим обхектом
-                        uuidHierarchicalObjects += objectsByScritp[attributesName].UUID
-
-                        //получение всех объектов и распределие их по массивам
-                        // проверяем есть ли уже в каком либо из массивов текущий объект
-                        if (!(allObjectsToScheme.flatten().find {
-                            it.UUID == objectsByScritp.UUID
-                        }))
-                        {
-                            Set<ISDtObject> listObjects =
-                                scriptedBusinessObjectsSetupWizard
-                                    .findAll { objects -> objects.UUID in uuidHierarchicalObjects
-                                    }
-                            Set<ISDtObject> allListObjects = []
-                            listObjects.each { relatedObjects ->
-                                if (relatedObjects.hasProperty(attributesName))
-                                {
-                                    listObjects += relatedObjects[attributesName].findAll { objects
-                                        ->
-                                        objects.UUID in scriptedBusinessObjectsSetupWizard.UUID
-                                    }
-                                }
-                            }
-                            allObjectsToScheme.each { objectsToScheme ->
-                                objectsToScheme.find {
-                                    it.UUID in listObjects
-                                }
-
-                            }
-                            if (listObjects)
-                            {
-                                listObjects.each { objects ->
-                                    if (objects.hasProperty(attributesName))
-                                    {
-                                        Collection<String> uuidHierarchicalObjectsLevelTwo =
-                                            objects[attributesName].UUID
-                                        if (uuidHierarchicalObjectsLevelTwo)
-                                        {
-                                            listObjects += scriptedBusinessObjectsSetupWizard.find {
-                                                itElement
-                                                    ->
-                                                    itElement.UUID in
-                                                    uuidHierarchicalObjectsLevelTwo
-                                            }
-                                        }
-
-                                    }
-                                }
-                                allObjectsToScheme << listObjects
-                            }
-                        }
-
+                Set<ISDtObject> arrayContainingCurrentObject = allObjectsToScheme.find { listObject
+                    ->
+                    listObject.find { object
+                        ->
+                        object.UUID ==
+                        objectsByScript.UUID || object.UUID in objectsByScript[attributesName].UUID
                     }
                 }
-                if (!(objectsByScritp in allObjectsToScheme.flatten()))
+                if (arrayContainingCurrentObject)
                 {
-                    allObjectsToScheme << [objectsByScritp]
-                }
-            }
-
-            logger.info("LOGGER247 ${ allObjectsToScheme.flatten().size() }")
-
-            allObjectsToScheme.each { currentObjects ->
-                Collection<HierarchyCommunicationBuilder> currentScheme = []
-                Long indexFirstElementSet
-                currentObjects.eachWithIndex { elementsCurrentScheme, idx ->
-                    if (currentObjects.size() == 1)
+                    arrayContainingCurrentObject += objectsByScript
+                    if (objectsByScript[attributesName] in ISDtObject)
                     {
-                        currentScheme << elementsScheme.createHierarchyCommunicationPoint(
-                            elementsCurrentScheme,
-                            currentStrategy,
-                            ++id,
-                            null
-                        )
+                        if (objectsByScript[attributesName].UUID in
+                            scriptedBusinessObjectsSetupWizard.UUID)
+                        {
+                            arrayContainingCurrentObject += objectsByScript[attributesName]
+                        }
                     }
                     else
                     {
-                        if (idx == 0)
-                        {
-                            indexFirstElementSet = id + 1
-                            currentScheme += elementsScheme.createHierarchyCommunicationPoint(
-                                elementsCurrentScheme,
-                                currentStrategy,
-                                ++id,
-                                null
-                            )
+                        arrayContainingCurrentObject += objectsByScript[attributesName].findAll {
+                            scriptObject
+                                ->
+                                scriptObject.UUID in scriptedBusinessObjectsSetupWizard.UUID
                         }
-                        else
+                    }
+                    Collection<Set<ISDtObject>> temporaryAllObjectsToScheme = []
+                    temporaryAllObjectsToScheme += allObjectsToScheme.findAll { listObject
+                        ->
+                        !listObject.findAll { object
+                            ->
+                            arrayContainingCurrentObject.UUID.find { et -> et == object.UUID
+                            }
+                        }
+                    }
+                    temporaryAllObjectsToScheme << arrayContainingCurrentObject
+                    allObjectsToScheme = temporaryAllObjectsToScheme
+                }
+                else
+                {
+                    Set<ISDtObject> listObjects = []
+                    listObjects += objectsByScript
+                    listObjects += objectsByScript[attributesName].findAll { scritpObject
+                        ->
+                        scritpObject.UUID in scriptedBusinessObjectsSetupWizard.UUID
+                    }
+                    allObjectsToScheme << listObjects
+                }
+            }
+
+        }
+        if (!(objectsByScript.UUID in allObjectsToScheme.flatten().UUID))
+        {
+            allObjectsToScheme << [objectsByScript]
+        }
+    }
+    return allObjectsToScheme
+}
+
+/**
+ * Метод добавления всех точек по стратегии 'Связь выбранных объектов
+ * @param allObjectsToScheme - все объекты для отображения на схеме
+ * @param currentStrategy - текущая вкладка настроек из мастера
+ * @return все лини по соответствующей стратегии
+ */
+Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>> allObjectsToScheme,
+                                                      Long id,
+                                                      Object currentStrategy)
+{
+    ElementsScheme elementsScheme = new ElementsScheme()
+    Collection<Collection<HierarchyCommunicationBuilder>> allSchemeToDisplay = []
+    allObjectsToScheme.each { currentObjects ->
+        Collection<HierarchyCommunicationBuilder> currentScheme = []
+        Long indexFirstElementSet
+        currentObjects.eachWithIndex { elementsCurrentScheme, idx ->
+            if (currentObjects.size() == 1)
+            {
+                currentScheme << elementsScheme.createHierarchyCommunicationPoint(
+                    elementsCurrentScheme,
+                    currentStrategy,
+                    ++id,
+                    null
+                )
+            }
+            else
+            {
+                if (idx == 0)
+                {
+                    indexFirstElementSet = id + 1
+                    currentScheme += elementsScheme.createHierarchyCommunicationPoint(
+                        elementsCurrentScheme,
+                        currentStrategy,
+                        ++id,
+                        null
+                    )
+                }
+                else
+                {
+                    if (idx % 12 == 0)
+                    {
+                        currentScheme += elementsScheme.createHierarchyCommunicationPoint(
+                            elementsCurrentScheme,
+                            currentStrategy,
+                            ++id,
+                            indexFirstElementSet
+                        )
+                        indexFirstElementSet = id
+                    }
+                    else
+                    {
+                        currentScheme += elementsScheme.createHierarchyCommunicationPoint(
+                            elementsCurrentScheme,
+                            currentStrategy,
+                            ++id,
+                            indexFirstElementSet
+                        )
+                    }
+                }
+            }
+        }
+        allSchemeToDisplay << currentScheme
+    }
+    return allSchemeToDisplay
+}
+
+/**
+ * Метод добавления всех линий по стратегии 'Связь выбранных объектов'
+ * @param currentStrategy - текущая вкладка настроек из мастера
+ * @param currentSchemeToDisplay - текущая схема
+ * @param listAttributes -  список атрибутов
+ * @param allSchemeToDisplay - все схемы
+ * @param allPointsScheme - все точки для схемы
+ * @param id - идентификатор элемента на схеме
+ * @return все лини по соответствующей стратегии
+ */
+void addLineByRelatedObjects(Object currentStrategy,
+                             Collection<Collection<HierarchyCommunicationBuilder>> currentSchemeToDisplay,
+                             Collection listAttributes,
+                             Collection<Collection<HierarchyCommunicationBuilder>> allSchemeToDisplay,
+                             Long id)
+{
+    ElementsScheme elementsScheme = new ElementsScheme()
+    currentSchemeToDisplay.each { scheme ->
+        scheme.each { elementScheme ->
+            listAttributes.each { attributesName ->
+                ISDtObject objectSystem = api.utils.get(elementScheme.UUID)
+                if (objectSystem.hasProperty(attributesName))
+                {
+                    if (objectSystem[attributesName] in ISDtObject)
+                    {
+                        HierarchyCommunicationBuilder currentElementsScheme = scheme.find { objects
+                            ->
+                            objects?.UUID ==
+                            objectSystem[attributesName].UUID && objects?.UUID != elementScheme
+                        }
+                        if (currentElementsScheme)
                         {
-                            currentScheme += elementsScheme.createHierarchyCommunicationPoint(
-                                elementsCurrentScheme,
+                            scheme += elementsScheme.createHierarchyCommunicationLine(
+                                null,
                                 currentStrategy,
                                 ++id,
-                                indexFirstElementSet
+                                elementScheme.id,
+                                currentElementsScheme.id
                             )
                         }
                     }
-                }
-                allSchemeToDisplay << currentScheme
-            }
-            allSchemeToDisplay.each { scheme ->
-                Collection<HierarchyCommunicationBuilder> newSetScheme = []
-                scheme.each { elementScheme ->
-                    listAttributes.each { attributesName ->
-                        ISDtObject objectSystem = api.utils.get(elementScheme.UUID)
-                        if (objectSystem.hasProperty(attributesName))
-                        {
-                            objectSystem[attributesName].each { objectsAttributes ->
-                                HierarchyCommunicationBuilder currentElementsScheme = scheme.find {
-                                    objects
-                                        ->
-                                        objects?.UUID ==
-                                        objectsAttributes?.UUID && objects?.UUID != elementScheme
-                                }
-                                if (currentElementsScheme)
-                                {
-                                    scheme += elementsScheme.createHierarchyCommunicationLine(
-                                        null,
-                                        currentStrategy,
-                                        ++id,
-                                        elementScheme.id,
-                                        currentElementsScheme.id
-                                    )
-                                }
+                    else
+                    {
+                        objectSystem[attributesName].each { objectsAttributes ->
+                            HierarchyCommunicationBuilder currentElementsScheme = scheme.find {
+                                objects
+                                    ->
+                                    objects?.UUID ==
+                                    objectsAttributes?.UUID && objects?.UUID != elementScheme
+                            }
+                            if (currentElementsScheme)
+                            {
+                                scheme += elementsScheme.createHierarchyCommunicationLine(
+                                    null,
+                                    currentStrategy,
+                                    ++id,
+                                    elementScheme.id,
+                                    currentElementsScheme.id
+                                )
                             }
                         }
                     }
                 }
-                newAllSchemeToDisplay << scheme
-            }
-            if (currentStrategy.displayingEndLineDots)
-            {
-                newAllSchemeToDisplay = newAllSchemeToDisplay.findAll {
-                    it.size() != 1
-                }
             }
         }
+        allSchemeToDisplay << scheme
     }
-
-    return newAllSchemeToDisplay
-}
-
-/**
- * Преобразование данных в формат для отображения на фронт
- * @param pointData - список данных для отображения
- * @param id - идентификатор элемента схемы
- * @param allElementsScheme - все элементы для схем в бэковом формате
- * @param elementsScheme - элемент схемы
- * @param idParent - идентификатор родительского элемента
- * @return преобразованные данные
- */
-void transformationDataDisplayFront(Collection<Collection<HierarchyCommunicationBuilder>> pointData,
-                                    Object allElementsScheme,
-                                    ElementsScheme elementsScheme,
-                                    Integer idParent)
-{
-    if (!allElementsScheme)
-    {
-        return
-    }
-    SchemaWorkingElements idSchemaElement = new SchemaWorkingElements()
-    pointData.eachWithIndex { currentScheme, ind ->
-        if (allElementsScheme[ind] && allElementsScheme[ind].level == 0)
-        {
-            currentScheme.add(
-                elementsScheme.createHierarchyCommunicationPoint(
-                    allElementsScheme[ind].systemObject,
-                    idSchemaElement.incrementId(),
-                    null
-                )
-            )
-            transformationDataDisplayFront(
-                pointData,
-                allElementsScheme[ind].childElements,
-                elementsScheme,
-                ind
-            )
-        }
-        else
-        {
-            Integer from
-            allElementsScheme.eachWithIndex { schemaElement, indElementsScheme ->
-                if (schemaElement && ind == idParent)
-                {
-                    if (!from)
-                    {
-                        from = idSchemaElement.getId()
-                    }
-                    currentScheme.add(
-                        elementsScheme.createHierarchyCommunicationLine(
-                            schemaElement.systemObject,
-                            idSchemaElement.incrementId(),
-                            from
-                        )
-                    )
-                    currentScheme.add(
-                        elementsScheme.createHierarchyCommunicationPoint(
-                            schemaElement.systemObject,
-                            idSchemaElement.incrementId(),
-                            from
-                        )
-                    )
-                    transformationDataDisplayFront(
-                        pointData,
-                        schemaElement.childElements,
-                        elementsScheme,
-                        idParent
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Получение данных для работы на бэке
- * @param scriptedBusinessObjectsSetupWizard - список скриптовых элементов из мастера
- * @param linkAttributes - ссылочные атрибуты, по которым будут получаться данные
- * @return список данных для работы на бэке
- */
-Collection<SchemaElement> getAllElementsScheme(Collection scriptedBusinessObjectsSetupWizard,
-                                               Collection linkAttributes)
-{
-    Collection<SchemaElement> allElementsScheme = []
-    linkAttributes.eachWithIndex { linkAttribute, idAttribute ->
-        if (idAttribute == 0)
-        {
-            scriptedBusinessObjectsSetupWizard.each { firstLevelElement ->
-                Object systemObject = api.utils.get(firstLevelElement.UUID)
-                Collection<SchemaElement> childElements = firstLevelElement[linkAttribute] ?
-                    listChildElements(
-                        firstLevelElement[linkAttribute],
-                        idAttribute + 1,
-                        ) : null
-                String title = systemObject ? systemObject.title : null
-                allElementsScheme
-                    .add(new SchemaElement(idAttribute, title, systemObject, childElements))
-            }
-        }
-        else
-        {
-            Collection<SchemaElement> elementsPreviousIteration = []
-            elementsPreviousIteration =
-                getAllBusinessObjectsCurrentLevel(allElementsScheme, idAttribute)
-            elementsPreviousIteration.each { firstLevelElement ->
-                if (firstLevelElement)
-                {
-                    Object systemObject = firstLevelElement.systemObject
-                    Collection<SchemaElement> childElements = systemObject[linkAttribute] ?
-                        listChildElements(
-                            systemObject[linkAttribute],
-                            idAttribute + 1,
-                            ) : null
-                    firstLevelElement.setChildElements(childElements)
-                }
-            }
-        }
-    }
-    return allElementsScheme
-}
-
-/**
- * Метод формирования списка дочерних элементов объекта
- * @param attribute - атрибут
- * @param level - уровень элемента
- * @return список дочерних элементов
- */
-Collection<SchemaElement> listChildElements(Object attribute, Integer level)
-{
-    Collection<SchemaElement> childElements = []
-    if (attribute in Collection)
-    {
-        attribute.each {
-            String title = it ? it.title : null
-            childElements.add(new SchemaElement(level, title, api.utils.get(it.UUID), null))
-        }
-    }
-    else
-    {
-        String title = attribute ? attribute.title : null
-        childElements.add(new SchemaElement(level, title, api.utils.get(attribute.UUID), null))
-    }
-    return childElements
-}
-
-/**
- * Метод формирования списка дочерних элементов объекта
- * @param elements - элемент схемы
- * @param level - уровень элемента
- * @return список дочерних элементов
- */
-Collection<SchemaElement> getAllBusinessObjectsCurrentLevel(Collection<SchemaElement> elements,
-                                                            Integer level)
-{
-    Collection flatten = elements?.childElements?.flatten()
-    if (flatten && flatten?.first()?.level != level)
-    {
-        return getAllBusinessObjectsCurrentLevel(flatten, level)
-    }
-    else
-    {
-        return flatten
-    }
-}
-
-/**
- * Метод получения коллекции всех скриптов
- * @param data данные из мастера настроек
- * @return коллекция скриптов
- */
-Collection<String> getListScript(AbstractSchemesCharacteristics data)
-{
-    Collection<String> dataScriptText = []
-    data?.strategies?.each
-        {
-            String currentScript = it?.scriptText
-            dataScriptText.add(currentScript)
-        }
-    return dataScriptText
 }
 
 /**
