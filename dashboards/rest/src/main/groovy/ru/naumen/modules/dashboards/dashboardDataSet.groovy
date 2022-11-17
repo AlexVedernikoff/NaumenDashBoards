@@ -893,7 +893,11 @@
                         }
                         else
                         {
-                            total = res?.find()?.transpose()?.find()?.sum { it as Integer }
+                            //В качестве аргументов может прийти неправильной формы число, типа "14 5.0909".
+                            // Для всех остальных случаев ничего не меняется. Возможно потребуется округление для Integer.
+                            List totalList =res?.find()?.transpose()?.find()?.collect {elem ->elem.split(" ")}
+                                               .transpose()?.find()
+                            total = totalList?.sum { it as Float }
                         }
                     }
                 }
