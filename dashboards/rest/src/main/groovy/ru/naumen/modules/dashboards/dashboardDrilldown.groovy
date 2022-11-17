@@ -178,7 +178,7 @@ class DashboardDrilldownService
 
         if(requestContent.filterId)
         {
-            requestContent.descriptor = dashboardUtils.getSourceFiltersFromStorage([[key:'id', value: source.filterId]]).find()
+            requestContent.descriptor = dashboardUtils.getSourceFiltersFromStorage([[key:'id', value: requestContent.filterId]]).find()
         }
         if(requestContent.widgetDescriptor)
         {
