@@ -172,7 +172,7 @@ class ElementsScheme
     }
 
     /**
-     * Получить данные с информацие о группе атрибутов
+     * Получить данные с информацией о группе атрибутов
      * @param scriptData - оборудование из БД
      * @param currentStrategy - текущая вкладка настроек из мастера
      * @return информация о группе атрибутов
@@ -380,7 +380,8 @@ class ElementsScheme
 
     /**
      * Получение списка характеристик для вывода в списке объектов
-     * @param listCharacteristics - настройки из мастера настроек
+     * @param scriptData - данные из скрипта
+     * @param characteristics - характеристик из мастера
      * @return список характеристик
      */
     MetaclassNameAndAttributeListSchemes characteristicsOutputDiagram(ISDtObject scriptData,
@@ -394,12 +395,12 @@ class ElementsScheme
         if (dataCharacteristicDisplay)
         {
             String metaClassData =
-                dataCharacteristicDisplay?.metaclassObjects?.caseId ? String.join(
+                dataCharacteristicDisplay?.metaClassObjects?.caseId ? String.join(
                     '$',
-                    dataCharacteristicDisplay?.metaclassObjects?.id,
-                    dataCharacteristicDisplay?.metaclassObjects?.caseId
+                    dataCharacteristicDisplay?.metaClassObjects?.id,
+                    dataCharacteristicDisplay?.metaClassObjects?.caseId
                 ) :
-                    dataCharacteristicDisplay?.metaclassObjects?.id
+                    dataCharacteristicDisplay?.metaClassObjects?.id
             Collection listAttributes = []
             if (dataCharacteristicDisplay?.attributeGroup)
             {
@@ -441,7 +442,7 @@ class ElementsScheme
             characteristicsForOutput.each {
                 if (metaClassInfo?.parent?.code ==
                     getCodeMetaClass(it) &&
-                    it?.metaclassObjects?.id == metaClassInfo?.code?.tokenize('$')?.first())
+                    it?.metaClassObjects?.id == metaClassInfo?.code?.tokenize('$')?.first())
                 {
                     characteristicsDisplay = it
                 }
@@ -466,11 +467,11 @@ class ElementsScheme
      */
     String getCodeMetaClass(Object wizardSettingsElement)
     {
-        return wizardSettingsElement?.metaclassObjects?.caseId ? String.join(
+        return wizardSettingsElement?.metaClassObjects?.caseId ? String.join(
             '$',
-            wizardSettingsElement?.metaclassObjects?.id,
-            wizardSettingsElement?.metaclassObjects?.caseId
-        ) : wizardSettingsElement?.metaclassObjects?.id
+            wizardSettingsElement?.metaClassObjects?.id,
+            wizardSettingsElement?.metaClassObjects?.caseId
+        ) : wizardSettingsElement?.metaClassObjects?.id
     }
 
     /**

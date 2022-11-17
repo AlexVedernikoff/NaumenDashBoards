@@ -58,9 +58,7 @@ Object getDataDisplayScheme(String nameContent, LinkedHashMap<String, Object> bi
             bindings
         )
     }
-    return pointData.sort {
-        it?.size()
-    }?.reverse()
+    return pointData.sort { it?.size() }?.reverse()
 }
 
 /**
@@ -81,9 +79,9 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
         if (currentStrategy.listStrategy.find { strategy -> strategy == nameContent
         })
         {
-            String scriptLineAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinatLongitud }"
-            String scriptPointAAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinatLongitud }.${ currentStrategy.pointA }"
-            String scriptPointBAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinatLongitud }.${ currentStrategy.pointB }"
+            String scriptLineAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinateLongitude }"
+            String scriptPointAAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinateLongitude }.${ currentStrategy.pointA }"
+            String scriptPointBAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinateLongitude }.${ currentStrategy.pointB }"
             Collection<ISDtObject> dataLine
             Collection<ISDtObject> dataPointA
             Collection<ISDtObject> dataPointB
@@ -152,7 +150,7 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationships
             }
             Collection listAttributes =
                 currentStrategy.rulesLinkingSchemaObjects.collect {
-                    it.pathCoordinatLongitud
+                    it.pathCoordinateLongitude
                 }
 
             Collection<Set<ISDtObject>> allObjectsToScheme =
@@ -239,9 +237,7 @@ Collection<Collection<HierarchyCommunicationBuilder>> distributeElementsIntoSepa
             }
         }
     }
-    Collection<Collection<HierarchyCommunicationBuilder>> schemesCurrentStrategies = []
-    schemesCurrentStrategies += allScheme
-    return schemesCurrentStrategies
+    return allScheme
 }
 
 /**
@@ -249,7 +245,6 @@ Collection<Collection<HierarchyCommunicationBuilder>> distributeElementsIntoSepa
  * @param dataLine - данные о всех отрезках на схеме
  * @param dataPointA -  данные по начальной точке
  * @param dataPointB - данные по конечной точке
- * @param id - идентификатор элемента на схеме
  * @param currentStrategy - текущая вкладка настроек из мастера
  * @return все точки по соответствующей стратегии
  */
@@ -304,7 +299,7 @@ Collection<HierarchyCommunicationBuilder> createPointsForStrategyHierarchyLink(C
  * @param dataPointB - данные по конечной точке
  * @param allPointsScheme - все точки для схемы
  * @param currentStrategy - текущая вкладка настроек из мастера
- * @return все лини по соответствующей стратегии
+ * @return все линии по соответствующей стратегии
  */
 Collection<HierarchyCommunicationBuilder> createLinesAllElementsScheme(Collection<ISDtObject> dataLine,
                                                                        Collection<ISDtObject> dataPointA,
@@ -336,7 +331,7 @@ Collection<HierarchyCommunicationBuilder> createLinesAllElementsScheme(Collectio
 }
 
 /**
- * Метод привязке к точке всех связанных с ней элементов схемы
+ * Метод привязки к точке всех связанных с ней элементов схемы
  * @param allScheme - все схемы
  * @param currentPoint -  текущая точка
  * @param allPointsScheme - все точки для схемы
@@ -368,10 +363,10 @@ void getAllRelatedPoints(Collection<Collection<HierarchyCommunicationBuilder>> a
 }
 
 /**
- * Метод добавления всех точек по стратегии 'Связь выбранных объектов
+ * Осуществляет распределение элементов схемы по соответствующим массивам по связи объектов
  * @param scriptedBusinessObjectsSetupWizard - информация о всех точках из мастера настроек
  * @param listAttributes -  список атрибутов
- * @return все лини по соответствующей стратегии
+ * @return коллекции наборов со схемами
  */
 Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject> scriptedBusinessObjectsSetupWizard,
                                                           Collection listAttributes)
@@ -381,7 +376,6 @@ Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject>
         listAttributes.each { attributesName ->
             if (objectsByScript.hasProperty(attributesName))
             {
-
                 Set<ISDtObject> arrayContainingCurrentObject = allObjectsToScheme.find { listObject
                     ->
                     listObject.find { object
@@ -414,7 +408,9 @@ Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject>
                         ->
                         !listObject.findAll { object
                             ->
-                            arrayContainingCurrentObject.UUID.find { et -> et == object.UUID
+                            arrayContainingCurrentObject.UUID.find { currentUuid
+                                ->
+                                currentUuid == object.UUID
                             }
                         }
                     }
@@ -443,10 +439,10 @@ Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject>
 }
 
 /**
- * Метод добавления всех точек по стратегии 'Связь выбранных объектов
+ * Метод добавления всех точек по стратегии 'Связь выбранных объектов'
  * @param allObjectsToScheme - все объекты для отображения на схеме
  * @param currentStrategy - текущая вкладка настроек из мастера
- * @return все лини по соответствующей стратегии
+ * @return все линии по соответствующей стратегии
  */
 Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>> allObjectsToScheme,
                                                       Object currentStrategy)
@@ -513,9 +509,7 @@ Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>
  * @param currentSchemeToDisplay - текущая схема
  * @param listAttributes -  список атрибутов
  * @param allSchemeToDisplay - все схемы
- * @param allPointsScheme - все точки для схемы
- * @param id - идентификатор элемента на схеме
- * @return все лини по соответствующей стратегии
+ * @return все линии по соответствующей стратегии
  */
 void addLineByRelatedObjects(Object currentStrategy,
                              Collection<Collection<HierarchyCommunicationBuilder>> currentSchemeToDisplay,

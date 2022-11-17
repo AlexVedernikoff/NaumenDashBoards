@@ -132,7 +132,7 @@ class HierarchyCommunicationSettings extends AbstractSchemesCharacteristics
     Collection<ContentHierarchyCommunicationSettings> strategies = [new ContentHierarchyCommunicationSettings()]
 }
 
-@JsonSchemaMeta(requiredFields = ['hierarchyNameStrategy', 'hierarchyCodeStrategy', 'scriptText', 'metaclassObjects', 'pathCoordinatLongitud', 'pointA', 'pointB'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['hierarchyNameStrategy', 'hierarchyCodeStrategy', 'scriptText', 'metaClassObjects', 'pathCoordinateLongitude', 'pointA', 'pointB'], title = ' ')
 class ContentHierarchyCommunicationSettings
 {
     @JsonSchemaMeta(title = 'Название стратегии', nullable = false)
@@ -147,11 +147,11 @@ class ContentHierarchyCommunicationSettings
 
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
-    MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
+    MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
 
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Атрибут связи', nullable = false)
-    String pathCoordinatLongitud = ""
+    String pathCoordinateLongitude = ""
     @UiSchemaMeta(widget = 'abstract-select', source = 'getAttributesChildMetaclass')
     @JsonSchemaMeta(title = 'Точка А', nullable = false)
     String pointA = ""
@@ -211,22 +211,22 @@ class ContentObjecRelationshipsSettings
 /**
  * Настройки для владки 'Визуализация по умолчанию'
  */
-@JsonSchemaMeta(requiredFields = ['metaclassObjects'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['metaClassObjects'], title = ' ')
 class DefaultVisualizationSchemes
 {
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
-    MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Главный текст')
     String mainText = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Дополнительный текст')
     String additionalText = ''
-    @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Иконка')
     String icon = ''
 }
@@ -239,52 +239,52 @@ class ActionsWithObjects
 {
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс')
-    MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
+    MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
 
     @JsonSchemaMeta(title = 'Код формы редактирования')
     String codeEditingForm = ''
 }
 
-@JsonSchemaMeta(requiredFields = ['metaclassObjects', 'pathCoordinatLongitud'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['metaClassObjects', 'pathCoordinateLongitude'], title = ' ')
 class RulesLinkingSchemaObjects
 {
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
-    MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Атрибут связи', nullable = false)
-    String pathCoordinatLongitud = ""
+    String pathCoordinateLongitude = ""
 }
 
-@JsonSchemaMeta(requiredFields = ['metaclassObjects'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['metaClassObjects'], title = ' ')
 class CharacteristicsOutputDiagram
 {
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
-    MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Главный текст')
     String mainText = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Дополнительный текст')
     String additionalText = ''
-    @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Иконка')
     String icon = ''
 }
 
-@JsonSchemaMeta(requiredFields = ['metaclassObjects', 'pathCoordinatLongitud'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['metaClassObjects', 'pathCoordinateLongitude'], title = ' ')
 class RulesLinkingObjects
 {
     @UiSchemaMeta(widget = 'metaClass-select')
     @JsonSchemaMeta(title = 'Метакласс')
-    MetaClassObjectSchemes metaclassObjects = new MetaClassObjectSchemes('', '')
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaclassObjects')
+    MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Атрибут связи', nullable = false)
-    String pathCoordinatLongitud = ""
+    String pathCoordinateLongitude = ""
 }
 
 /**
@@ -346,10 +346,10 @@ String getAttributesChildMetaclass()
     Collection listAttributes = []
     hierarchyCommunicationSettings.each {
         it.strategies.each { code ->
-            if (code.metaclassObjects && code.pathCoordinatLongitud)
+            if (code.metaClassObjects && code.pathCoordinateLongitude)
             {
-                String nameMetaclass = "${ code.metaclassObjects.id }\$${ code.metaclassObjects.caseId }"
-                String attributeName = code.pathCoordinatLongitud
+                String nameMetaclass = "${ code.metaClassObjects.id }\$${ code.metaClassObjects.caseId }"
+                String attributeName = code.pathCoordinateLongitude
                 ClassFqn metaclass =
                     api.metainfo.getMetaClass(nameMetaclass)
                        .getAttribute(attributeName).type.relatedMetaClass
