@@ -1,6 +1,6 @@
 // @flow
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {showEditForm} from 'store/entity/actions';
+import {goToPoint, showEditForm} from 'store/entity/actions';
 import type {State} from 'store/types';
 
 /**
@@ -13,5 +13,6 @@ export const props = (state: State): ConnectedProps => ({
 });
 
 export const functions: ConnectedFunctions = {
+	goToPoint,
 	showEditForm
 };

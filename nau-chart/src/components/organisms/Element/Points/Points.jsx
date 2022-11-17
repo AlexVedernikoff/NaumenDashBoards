@@ -1,25 +1,54 @@
 // @flow
 import {Group, Image, Rect, Text} from 'react-konva';
-import type {Props} from 'components/organisms/Element/types';
-import React from 'react';
+import type {Props} from './types';
+import React, {useEffect, useRef, useState} from 'react';
 import useImage from 'use-image';
 
-const Points = ({entity, handleContextMenu, onClick, onHover, x, y}: Props) => {
+const Points = ({centerPointUuid, entity, handleContextMenu, onClick, onHover, scale, x, y}: Props) => {
 	const tileW = 108;
 	const tileH = 58;
 	const paddingText = 4;
-
 	const [image] = useImage(entity.icon || 'image/point.svg');
+	const refTitle = useRef(null);
+	const refDesc = useRef(null);
+	const [titleHeight, setTitleHeight] = useState(tileH / 2);
+	const [descHeight, setDescHeight] = useState(tileH / 2);
+	const [titleHeightTrim, setTitleHeightTrim] = useState('auto');
+	const [descHeightTrim, setDescHeightTrim] = useState('auto');
+	const sizeImage = entity.uuid && centerPointUuid === entity.uuid ? 66 / scale : 44;
+	const [action] = entity.actions || [];
+
+	useEffect(() => {
+		if (refTitle.current && refTitle.current.height() < tileH / 2) {
+			setTitleHeight(refTitle.current.height());
+		} else {
+			setTitleHeightTrim(tileH / 2);
+		}
+
+		if (refDesc.current && refDesc.current.height() < tileH / 2) {
+			setDescHeight(refDesc.current.height());
+		} else {
+			setDescHeightTrim(tileH / 2);
+		}
+	}, [refTitle, refDesc]);
 
 	const handleOnClick = () => {
-		if (entity.title || entity.desc) {
-			onClick(entity);
+		if (action) {
+			const {link} = action;
+
+			if (link) {
+				onClick(entity);
+			}
 		}
 	};
 
 	const handleOnHover = (hover: boolean) => () => {
-		if (entity.title || entity.desc) {
-			onHover(hover);
+		if (action) {
+			const {link} = action;
+
+			if (link) {
+				onHover(hover);
+			}
 		}
 	};
 
@@ -33,58 +62,60 @@ const Points = ({entity, handleContextMenu, onClick, onHover, x, y}: Props) => {
 			onTouchStart={handleOnHover(true)}
 		>
 			<Image
+				height={sizeImage}
 				image={image}
-
-				x={x - 22}
-				y={y - 22}
+				width={sizeImage}
+				x={x - sizeImage / 2}
+				y={y - sizeImage / 2}
 			/>
 			<Group
 				x={x - tileW / 2}
-				y={y + 22}
+				y={y + sizeImage / 2}
 			>
-				<Rect
+				{entity.header && <Rect
 					cornerRadius={[paddingText, paddingText, 0, 0]}
-					fill="#fff"
-					height={tileH / 2}
-					opacity={entity.title ? 0.9 : 0}
+					fill='#fff'
+					height={titleHeight}
+					opacity={0.9}
 					width={tileW}
-				/>
-				<Rect
+				/>}
+				{entity.desc && <Rect
 					cornerRadius={[0, 0, paddingText, paddingText]}
-					fill="#fff"
-					height={tileH / 2}
-					opacity={entity.desc ? 0.9 : 0}
+					fill='#fff'
+					height={descHeight}
+					opacity={0.9}
 					width={tileW}
-					y={entity.title ? tileH / 2 : 0}
-				/>
-				<Text
+					y={titleHeight}
+				/>}
+				{entity.header && <Text
 					align="center"
 					fill="#323232"
 					fontFamily="Roboto"
 					fontSize={10}
 					fontStyle="bold"
-					height={tileH / 2 - paddingText * 3}
-					opacity={entity.title ? 1 : 0}
-					text={entity.title}
-					verticalAlign="top"
-					width={tileW - paddingText * 2}
-					x={paddingText}
-					y={paddingText}
-				/>
-				<Text
+					height={titleHeightTrim}
+					padding={paddingText}
+					ref={refTitle}
+					text={entity.header}
+					width={tileW}
+					x={0}
+					y={0}
+				/>}
+				{entity.desc && <Text
 					align="center"
 					fill="#737373"
 					fontFamily="Roboto"
 					fontSize={10}
 					fontStyle="bold"
-					height={tileH / 2 - paddingText * 3}
-					opacity={entity.desc ? 1 : 0}
+					height={descHeightTrim}
+					padding={paddingText}
+					ref={refDesc}
 					text={entity.desc}
-					verticalAlign="top"
-					width={tileW - paddingText * 2}
-					x={paddingText}
-					y={entity.title ? tileH / 2 + paddingText * 2 : paddingText}
-				/>
+					width={tileW}
+					x={0}
+					y={titleHeight}
+				/>}
+
 			</Group>
 		</Group>
 	);

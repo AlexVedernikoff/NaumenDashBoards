@@ -16,15 +16,15 @@ const reducer = (state: EntityState = initialVerifyState, action: defaultVerifyA
 				...state,
 				loading: false
 			};
+		case VERIFY_EVENTS.SET_CENTER_POINT_UUID:
+			return {
+				...state,
+				centerPointUuid: action.uuid
+			};
 		case VERIFY_EVENTS.SET_DATA:
 			return {
 				...state,
 				data: action.payload
-			};
-		case VERIFY_EVENTS.SET_EDIT_FORM:
-			return {
-				...state,
-				editFormCode: action.editFormCode
 			};
 		case VERIFY_EVENTS.SET_ERROR_DATA:
 			return {
@@ -39,6 +39,7 @@ const reducer = (state: EntityState = initialVerifyState, action: defaultVerifyA
 		case VERIFY_EVENTS.SET_SCALE:
 			return {
 				...state,
+				// centerPointUuid: null,
 				scale: action.payload
 			};
 		case VERIFY_EVENTS.SET_EXPORT_TO:
@@ -49,6 +50,7 @@ const reducer = (state: EntityState = initialVerifyState, action: defaultVerifyA
 		case VERIFY_EVENTS.SET_POSITION:
 			return {
 				...state,
+				// centerPointUuid: null,
 				position: action.payload
 			};
 		default:

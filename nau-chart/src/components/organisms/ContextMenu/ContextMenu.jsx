@@ -1,7 +1,7 @@
 // @flow
 import cn from 'classnames';
 import {connect} from 'react-redux';
-import {props} from './selectors';
+import {functions, props} from './selectors';
 import type {Props} from 'components/organisms/Content/types';
 import React from 'react';
 import styles from './styles.less';
@@ -48,4 +48,4 @@ const ContextMenu = ({activeElement, contextMenu, showEditForm}: Props) => {
 	);
 };
 
-export default connect(props)(ContextMenu);
+export default connect(props, functions)(ContextMenu);

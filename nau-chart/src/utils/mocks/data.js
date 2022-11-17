@@ -10,8 +10,9 @@ export default {
 						type: 'open_link'
 					}
 				],
-				desc: '222222',
+				desc: 'desc first',
 				from: null,
+				header: 'start point 22222 22222222222222222222222222222222222222222222222222222222222',
 				id: 0,
 				options: [
 					{
@@ -19,7 +20,8 @@ export default {
 						presentation: 'right_of_label',
 						value: [
 							{
-								label: 'TT 120',
+								label: 'TT 120 vsgddsgdf gdfg dfgf g gggggggggggggg gggggggggggggggggggggg gggggggggggggggggggggggggg ggggggggggggggggggggggggg gggggggggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg'
+									+ ' gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg',
 								url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4402'
 							}
 						]
@@ -39,49 +41,67 @@ export default {
 						]
 					}
 				],
-				title: '1111',
+				title: 'start point 22222 22222222222222222222222222222222222222222222222222222222222',
 				to: null,
-				type: 'point'
+				type: 'point',
+				uuid: 0
 			},
 			{
-				desc: '222222',
+				desc: '222222 is uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl',
 				from: 0,
+				header: 'title s uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl',
 				id: 1,
-				title: '1111',
+				title: 'title s uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl',
 				to: 2,
-				type: 'line'
+				type: 'line',
+				uuid: 1
 			},
 			{
-				desc: '222222',
+				desc: '',
 				from: 0,
+				header: 'is uuid 2 hyfrt',
 				id: 2,
-				title: '1111',
+				title: 'is uuid 2 hyfrt',
 				to: null,
-				type: 'point'
+				type: 'point',
+				uuid: 2
 			},
 			{
-				desc: '222222',
+				desc: '',
 				from: 2,
+				header: 'is uuid 3 hdfh is uuid 3 hdfh is uuid 3 hdfh is uuid 3 hdfh is uuid 3 hdfh',
 				id: 3,
-				title: '76смпсна',
+				title: 'is uuid 3 hdfh',
 				to: 4,
-				type: 'line'
+				type: 'line',
+				uuid: 3
 			},
 			{
 				desc: '222222',
 				from: 2,
 				id: 4,
-				title: '4234234',
+				title: '4234234 first',
 				to: null,
-				type: 'point'
+				type: 'point',
+				uuid: 4234234
 			},
 			{
-				desc: '222222',
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
+				desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ultricies',
 				from: 2,
+				header: 'опропро',
 				id: 5,
 				title: 'опропро',
 				to: 6,
-				type: 'line'
+				type: 'line',
+				uuid: 243423
 			},
 			{
 				desc: '222222',
@@ -279,9 +299,10 @@ export default {
 				desc: '222222',
 				from: 26,
 				id: 30,
-				title: '1111',
+				title: 'triple uuid 4234234, max top',
 				to: null,
-				type: 'point'
+				type: 'point',
+				uuid: 4234234
 			},
 			{
 				desc: '222222',
@@ -616,7 +637,7 @@ export default {
 				],
 				desc: '222222',
 				from: null,
-				id: 0,
+				id: 100,
 				options: [
 					{
 						label: 'Модель',
@@ -643,38 +664,39 @@ export default {
 						]
 					}
 				],
-				title: '1111',
+				title: '4234234 double',
 				to: null,
-				type: 'point'
+				type: 'point',
+				uuid: 4234234
 			},
 			{
 				desc: '222222',
-				from: 0,
-				id: 1,
+				from: 100,
+				id: 101,
 				title: '1111',
-				to: 2,
+				to: 102,
 				type: 'line'
 			},
 			{
 				desc: '222222',
-				from: 0,
-				id: 2,
+				from: 100,
+				id: 102,
 				title: '1111',
 				to: null,
 				type: 'point'
 			},
 			{
 				desc: '222222',
-				from: 2,
-				id: 3,
+				from: 102,
+				id: 103,
 				title: '1111',
-				to: 4,
+				to: 104,
 				type: 'line'
 			},
 			{
 				desc: '222222',
-				from: 2,
-				id: 4,
+				from: 102,
+				id: 104,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -684,7 +706,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 769130,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -694,7 +716,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 7583940,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -704,7 +726,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 7720,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -714,7 +736,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 7520,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -724,7 +746,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 7290,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -734,7 +756,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 75350,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -744,7 +766,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 77205345,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -754,7 +776,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 71220,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -764,7 +786,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 73930,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -774,7 +796,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 793270,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -784,7 +806,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 7460,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -794,7 +816,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 7750,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -804,7 +826,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 770,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -814,7 +836,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 735470,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -824,7 +846,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 7980,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -834,7 +856,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 7412460,
 				title: 'rt7dfh',
 				to: null,
 				type: 'point'
@@ -844,7 +866,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 545,
 				title: '34tsd5',
 				to: null,
 				type: 'point'
@@ -854,7 +876,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 834,
 				title: ';kl;jk;',
 				to: null,
 				type: 'point'
@@ -864,7 +886,7 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
+				id: 42342,
 				title: 'gdr6tdhs',
 				to: null,
 				type: 'point'
@@ -874,10 +896,11 @@ export default {
 			{
 				desc: 'start',
 				from: null,
-				id: 70,
-				title: 'олщдпанг',
+				id: 4234234,
+				title: 'is uuid 4234234',
 				to: null,
-				type: 'point'
+				type: 'point',
+				uuid: 4234234
 			}
 		]
 	]
