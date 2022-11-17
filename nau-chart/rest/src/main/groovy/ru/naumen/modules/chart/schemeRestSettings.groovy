@@ -24,6 +24,7 @@ import org.jsoup.nodes.Document
 import ru.naumen.core.shared.dto.ISDtObject
 import groovy.transform.Canonical
 import ru.naumen.core.server.script.api.metainfo.MetaClassWrapper
+import org.jsoup.Jsoup
 
 /**
  * Метод для получения данных об объектах для вывода на cхему
@@ -64,6 +65,7 @@ class ElementsScheme
     public static final String DATA_TYPE_BOOLEAN = 'bool'
     public static final String DATA_TYPE_DT_INTERVAL = 'dtInterval'
     public static final String DATA_TYPE_RICHTEXT = 'richtext'
+    public static final String DATA_TYPE_METACLASS = 'metaClass'
 
     public HierarchyCommunicationBuilder createPointObjectBuilder()
     {
@@ -80,36 +82,18 @@ class ElementsScheme
     /**
      * Метод для получения данных о точках на схеме
      * @param scriptData - данные из скрипта
+     * @param currentStrategy - текущая вкладка настроек из мастера
      * @param id - уникальный номер сущности
      * @param from - точка, к которой привязывается текущий элемент
      * @return сформированный объект оборудования
      */
-    HierarchyCommunicationBuilder createHierarchyCommunicationPoint(ScriptDtObject scriptData,
-                                                                    Integer id,
+    HierarchyCommunicationBuilder createHierarchyCommunicationPoint(ISDtObject scriptData,
+                                                                    Object currentStrategy,
+                                                                    Long id,
                                                                     Long from = id)
     {
-        String mainText
-        String additionalText
-        if (settingsCharacteristicsCommunicationHierarchy?.first()?.mainText &&
-            settingsCharacteristicsCommunicationHierarchy.first()?.additionalText)
-        {
-            mainText = settingsCharacteristicsCommunicationHierarchy?.first()?.mainText?.first()
-            additionalText =
-                settingsCharacteristicsCommunicationHierarchy.first()?.additionalText?.first()
-        }
-
-        String descData = 'Не заполнено'
-        String titleData = 'Не заполнено'
-        if (mainText && scriptData.hasProperty(mainText))
-        {
-            descData = scriptData[mainText]
-        }
-        if (additionalText && scriptData.hasProperty(additionalText))
-        {
-            titleData = scriptData[additionalText]
-        }
         HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
-        hierarchyCommunicationBuilder.setDesc(descData)
+        hierarchyCommunicationBuilder.setTitle(scriptData.title)
         if (id == 1)
         {
             hierarchyCommunicationBuilder.setFrom(null)
@@ -119,17 +103,21 @@ class ElementsScheme
             hierarchyCommunicationBuilder.setFrom(from)
         }
         hierarchyCommunicationBuilder.setId(id)
-        hierarchyCommunicationBuilder.setTitle(titleData)
         hierarchyCommunicationBuilder.setType('point')
         hierarchyCommunicationBuilder
             .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
         hierarchyCommunicationBuilder.setUUID(scriptData.UUID)
-        hierarchyCommunicationBuilder.setHeader(scriptData.title)
+
         hierarchyCommunicationBuilder
             .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
-        Collection attributesFromGroup = settingsCharacteristicsCommunicationHierarchy.first() ?
-            characteristicsOutputDiagram(settingsCharacteristicsCommunicationHierarchy.first()) :
-            characteristicsOutputDiagram(settingsDefaultVisualization)
+
+        MetaclassNameAndAttributeListSchemes attributesFromGroup =
+            getAttributesFromGroup(scriptData, currentStrategy)
+        hierarchyCommunicationBuilder
+            .setDesc(getTextToElement(attributesFromGroup, scriptData).additionalText)
+        hierarchyCommunicationBuilder
+            .setHeader(getTextToElement(attributesFromGroup, scriptData).mainText)
+        hierarchyCommunicationBuilder.setIcon(getIconToPoint(attributesFromGroup, scriptData))
         gettingDataForValueAndLinkElement(
             hierarchyCommunicationBuilder,
             scriptData,
@@ -142,37 +130,118 @@ class ElementsScheme
     /**
      * Метод для получения данных о связях между точками
      * @param scriptData - оборудование из БД
+     * @param currentStrategy - текущая вкладка настроек из мастера
      * @param id -Уникальный номер сущности
      * @param from - точка, к которой привязывается текущий элемент
      * @return данные по линиям между точками
      */
-    HierarchyCommunicationBuilder createHierarchyCommunicationLine(ScriptDtObject scriptData,
-                                                                   Integer id,
-                                                                   Long from = id)
+    HierarchyCommunicationBuilder createHierarchyCommunicationLine(ISDtObject scriptData,
+                                                                   Object currentStrategy,
+                                                                   Long id,
+                                                                   Long from = id,
+                                                                   Long to = id + 1)
     {
         HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
-        hierarchyCommunicationBuilder.setDesc(scriptData?.title)
         hierarchyCommunicationBuilder.setUUID(scriptData?.UUID)
-        hierarchyCommunicationBuilder.setHeader(scriptData?.title)
         hierarchyCommunicationBuilder.setTitle(scriptData?.title)
         hierarchyCommunicationBuilder
             .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
         hierarchyCommunicationBuilder.setFrom(from)
-        hierarchyCommunicationBuilder.setTo(id + 1)
+        hierarchyCommunicationBuilder.setTo(to)
         hierarchyCommunicationBuilder.setId(id)
         hierarchyCommunicationBuilder.setType('line')
-        hierarchyCommunicationBuilder
-            .addAction('Перейти на карточку', api.web.open(scriptData?.UUID))
+        if (scriptData)
+        {
+            hierarchyCommunicationBuilder
+                .addAction('Перейти на карточку', api.web.open(scriptData?.UUID))
+        }
 
-        Collection attributesFromGroup = settingsCharacteristicsCommunicationHierarchy.first() ?
-            characteristicsOutputDiagram(settingsCharacteristicsCommunicationHierarchy.first()) :
-            characteristicsOutputDiagram(settingsDefaultVisualization)
+        MetaclassNameAndAttributeListSchemes attributesFromGroup =
+            getAttributesFromGroup(scriptData, currentStrategy)
+        hierarchyCommunicationBuilder
+            .setDesc(getTextToElement(attributesFromGroup, scriptData).additionalText)
+        hierarchyCommunicationBuilder
+            .setHeader(getTextToElement(attributesFromGroup, scriptData).mainText)
+        hierarchyCommunicationBuilder.setIcon(getIconToPoint(attributesFromGroup, scriptData))
         gettingDataForValueAndLinkElement(
             hierarchyCommunicationBuilder,
             scriptData,
             attributesFromGroup
         )
         return hierarchyCommunicationBuilder
+    }
+
+    /**
+     * Получить данные с информацией о группе атрибутов
+     * @param scriptData - оборудование из БД
+     * @param currentStrategy - текущая вкладка настроек из мастера
+     * @return информация о группе атрибутов
+     */
+    MetaclassNameAndAttributeListSchemes getAttributesFromGroup(ISDtObject scriptData,
+                                                                Object currentStrategy)
+    {
+        MetaclassNameAndAttributeListSchemes attributesFromGroup
+        if (scriptData && currentStrategy?.characteristicsOutputDiagram)
+        {
+            attributesFromGroup = characteristicsOutputDiagram(
+                scriptData,
+                currentStrategy?.characteristicsOutputDiagram
+            )
+        }
+        if (!attributesFromGroup && settingsDefaultVisualization)
+        {
+            attributesFromGroup =
+                characteristicsOutputDiagram(scriptData, settingsDefaultVisualization)
+        }
+        return attributesFromGroup
+    }
+
+    /**
+     * Получить данные о главном и дополнительном тексте
+     * @param attributesFromGroup - информация о группе атрибутов
+     * @param scriptData - оборудование из БД
+     * @return данные о главном и дополнительном тексте
+     */
+    Map getTextToElement(MetaclassNameAndAttributeListSchemes attributesFromGroup,
+                         ISDtObject scriptData)
+    {
+        String mainText
+        String additionalText
+        if (attributesFromGroup && scriptData.hasProperty(attributesFromGroup.mainTextAttribute))
+        {
+            mainText = scriptData[attributesFromGroup.mainTextAttribute] ?
+                scriptData[attributesFromGroup.mainTextAttribute].toString() : null
+        }
+        if (attributesFromGroup &&
+            scriptData.hasProperty(attributesFromGroup.additionalTextAttribute))
+        {
+            additionalText = scriptData[attributesFromGroup.additionalTextAttribute] ?
+                scriptData[attributesFromGroup.additionalTextAttribute].toString() : null
+        }
+        return ['mainText': mainText, 'additionalText': additionalText]
+    }
+
+    /**
+     * Получить ссылку на иконку
+     * @param attributesFromGroup - информация о группе атрибутов
+     * @param scriptData - оборудование из БД
+     * @return ссылка на иконку
+     */
+    String getIconToPoint(MetaclassNameAndAttributeListSchemes attributesFromGroup,
+                          ISDtObject scriptData)
+    {
+        String basisForLinkIcon = "${ api.web.getBaseUrl() }${ 'download?uuid=' }"
+        String linkToIcon = api.utils.findFirst('root', [:]).hasProperty('defPointIcon') &&
+                            api.utils.findFirst('root', [:])?.defPointIcon ?
+            "${ basisForLinkIcon }${ api.utils.findFirst('root', [:])?.defPointIcon?.UUID?.first() }" :
+            null
+        if (attributesFromGroup &&
+            scriptData.hasProperty(attributesFromGroup.iconAttribute) &&
+            scriptData[attributesFromGroup.iconAttribute])
+        {
+            linkToIcon = "${ basisForLinkIcon }${ scriptData[attributesFromGroup.iconAttribute].UUID.first() }"
+        }
+        return linkToIcon
     }
 
     /**
@@ -219,20 +288,6 @@ class ElementsScheme
     }
 
     /**
-     * Метод получения кода метакласса из мастера настроек
-     * @param wizardSettingsElement - текущая вкладка настроек мастера
-     * @return код метакласса
-     */
-    String getCodeMetaClass(Object wizardSettingsElement)
-    {
-        return wizardSettingsElement?.metaClassObject?.caseId ? String.join(
-            '$',
-            wizardSettingsElement?.metaClassObject?.id,
-            wizardSettingsElement?.metaClassObject?.caseId
-        ) : wizardSettingsElement?.metaClassObject?.id
-    }
-
-    /**
      * Добавление опций для вывода списка атрибутов на схеме
      * @param builder - объект с данными об элементе на карте
      * @param dbTrail - объект трассы из БД
@@ -240,20 +295,11 @@ class ElementsScheme
      */
     void gettingDataForValueAndLinkElement(Object builder,
                                            ISDtObject dbTrail,
-                                           Collection attributesFromGroup)
+                                           MetaclassNameAndAttributeListSchemes attributesFromGroup)
     {
-        MetaclassNameAndAttributeListSchemes metaclassNameAndAttributeList =
-            attributesFromGroup.find { characteristicsDisplayObjects ->
-                characteristicsDisplayObjects.metaclassName == dbTrail.getMetainfo().toString()
-                if (builder in HierarchyCommunicationBuilder)
-                {
-                    builder.setTitle(dbTrail[characteristicsDisplayObjects.mainTextAttribute])
-                    builder.setDesc(dbTrail[characteristicsDisplayObjects.additionalTextAttribute])
-                }
-            }
-        if (metaclassNameAndAttributeList)
+        if (attributesFromGroup)
         {
-            metaclassNameAndAttributeList.listAttribute.each { currentAttribute ->
+            attributesFromGroup.listAttributes.each { currentAttribute ->
                 String valueLabel
                 String linkElement
                 Collection<ValueSchemes> boLinkTypeAttribute = []
@@ -296,11 +342,25 @@ class ElementsScheme
                         else if (currentAttribute.type.code in [DATA_TYPE_BO_LINKS,
                                                                 DATA_TYPE_BACK_BO_LINKS])
                         {
+                            if (!boLinkTypeAttribute)
+                            {
+                                boLinkTypeAttribute
+                                    .add(new ValueSchemes(label: NOT_SPECIFIED, url: null))
+                            }
                             builder.addOption(currentAttribute.title, boLinkTypeAttribute)
+                        }
+                        else if (currentAttribute.type.code in DATA_TYPE_METACLASS)
+                        {
+                            builder.addOption(
+                                currentAttribute.title,
+                                new ValueSchemes(
+                                    label: api.metainfo.getMetaClass(dbTrail).title,
+                                    url: null
+                                )
+                            )
                         }
                         else
                         {
-
                             builder
                                 .addOption(
                                     currentAttribute.title,
@@ -320,33 +380,98 @@ class ElementsScheme
 
     /**
      * Получение списка характеристик для вывода в списке объектов
-     * @param listCharacteristics - настройки из мастера настроек
+     * @param scriptData - данные из скрипта
+     * @param characteristics - характеристик из мастера
      * @return список характеристик
      */
-    Collection<MetaclassNameAndAttributeListSchemes> characteristicsOutputDiagram(Collection listCharacteristics)
+    MetaclassNameAndAttributeListSchemes characteristicsOutputDiagram(ISDtObject scriptData,
+                                                                      Object characteristics)
     {
-        Collection<MetaclassNameAndAttributeListSchemes> attributesFromGroup = []
-        listCharacteristics.each {
-            if (it.metaclassObjects && it.attributeGroup)
+        Object dataCharacteristicDisplay = findingMetaclassMatches(
+            api.metainfo.getMetaClass(scriptData),
+            characteristics
+        )
+        MetaclassNameAndAttributeListSchemes attributesFromGroup
+        if (dataCharacteristicDisplay)
+        {
+            String metaClassData =
+                dataCharacteristicDisplay?.metaClassObjects?.caseId ? String.join(
+                    '$',
+                    dataCharacteristicDisplay?.metaClassObjects?.id,
+                    dataCharacteristicDisplay?.metaClassObjects?.caseId
+                ) :
+                    dataCharacteristicDisplay?.metaClassObjects?.id
+            Collection listAttributes = []
+            if (dataCharacteristicDisplay?.attributeGroup)
             {
-                String metaClassData = !it.metaclassObjects.caseId ? it.metaclassObjects.id :
-                    String.join('$', it.metaclassObjects.id, it.metaclassObjects.caseId)
-                Collection listAttributes =
-                    api.metainfo.getMetaClass(metaClassData)
-                       .getAttributeGroup(it.attributeGroup).attributes
-                attributesFromGroup
-                    .add(
-                        new MetaclassNameAndAttributeListSchemes(
-                            metaClassData,
-                            it.mainText,
-                            it.additionalText,
-                            listAttributes,
-                            it.icon
-                        )
-                    )
+                listAttributes =
+                    api.metainfo.getMetaClass(api.metainfo.getMetaClass(scriptData).code)
+                       .getAttributeGroup(dataCharacteristicDisplay?.attributeGroup).attributes
+            }
+            attributesFromGroup = new MetaclassNameAndAttributeListSchemes(
+                metaClassData,
+                dataCharacteristicDisplay.mainText,
+                dataCharacteristicDisplay.additionalText,
+                listAttributes,
+                dataCharacteristicDisplay.icon
+            )
+        }
+
+        return attributesFromGroup
+    }
+
+    /**
+     * Получение соответствующего объекту набора характеристик для вывода в списке объектов
+     * @param metaClassInfo - метаинформация об объекте
+     * @param characteristicsForOutput - список всех характеристик из мастера
+     * @return характеристика для объекта
+     */
+    Object findingMetaclassMatches(MetaClassWrapper metaClassInfo,
+                                   Collection characteristicsForOutput)
+    {
+        Object characteristicsDisplay
+        if (!metaClassInfo)
+        {
+            return null
+        }
+        characteristicsDisplay = characteristicsForOutput.find {
+            metaClassInfo?.code == getCodeMetaClass(it)
+        }
+        if (!characteristicsDisplay)
+        {
+            characteristicsForOutput.each {
+                if (metaClassInfo?.parent?.code ==
+                    getCodeMetaClass(it) &&
+                    it?.metaClassObjects?.id == metaClassInfo?.code?.tokenize('$')?.first())
+                {
+                    characteristicsDisplay = it
+                }
+                else if (metaClassInfo?.code == getCodeMetaClass(it))
+                {
+                    characteristicsDisplay = it
+                }
+                else
+                {
+                    characteristicsDisplay =
+                        findingMetaclassMatches(metaClassInfo.parent, characteristicsForOutput)
+                }
             }
         }
-        return attributesFromGroup
+        return characteristicsDisplay
+    }
+
+    /**
+     * Метод получения кода метакласса из мастера настроек
+     * @param wizardSettingsElement - текущая вкладка настроек мастера
+     * @return код метакласса
+     */
+    String getCodeMetaClass(Object wizardSettingsElement)
+    {
+        return wizardSettingsElement?.metaClassObjects?.caseId ? String.join(
+            '$',
+            wizardSettingsElement?.metaClassObjects?.id,
+            wizardSettingsElement?.metaClassObjects?.caseId
+        ) : wizardSettingsElement?.metaClassObjects?.id
     }
 
     /**
@@ -444,7 +569,7 @@ class OptionSchemes
     /**
      * Значение
      */
-    ValueSchemes value
+    Collection<ValueSchemes> value
     /**
      * Формат отображения
      */
@@ -492,6 +617,20 @@ class ActionScheme
     }
 }
 
+@Canonical
+class OpenLinkActionScheme extends ActionScheme
+{
+    /**
+     * Ссылка
+     */
+    String link
+    /**
+     * Флаг на открытие в текущей вкладке
+     */
+    boolean inPlace
+}
+
+@Canonical
 class HierarchyCommunicationBuilder
 {
     /**
@@ -549,6 +688,11 @@ class HierarchyCommunicationBuilder
      */
     String codeEditingForm
 
+    /**
+     * Ссылка на иконку
+     */
+    String icon
+
     HierarchyCommunicationBuilder setCodeEditingForm(String codeEditingForm)
     {
         this.codeEditingForm = codeEditingForm
@@ -580,13 +724,13 @@ class HierarchyCommunicationBuilder
         return this
     }
 
-    public HierarchyCommunicationBuilder setId(id)
+    public HierarchyCommunicationBuilder setId(Long id)
     {
         this.id = id
         return this
     }
 
-    public HierarchyCommunicationBuilder setTo(to)
+    public HierarchyCommunicationBuilder setTo(Long to)
     {
         this.to = to
         return this
@@ -597,7 +741,7 @@ class HierarchyCommunicationBuilder
                                                    boolean inPlace = false)
     {
         this.actions.add(
-            new OpenLinkAction(
+            new OpenLinkActionScheme(
                 name: name,
                 link: link,
                 inPlace: inPlace,
@@ -624,11 +768,30 @@ class HierarchyCommunicationBuilder
         this.options.add(
             new OptionSchemes(
                 label: label,
+                value: [value],
+                presentation: 'RIGHT_OF_LABEL'
+            )
+        )
+
+        return this
+    }
+
+    public HierarchyCommunicationBuilder addOption(String label, Collection<ValueSchemes> value)
+    {
+        this.options.add(
+            new OptionSchemes(
+                label: label,
                 value: value,
                 presentation: 'RIGHT_OF_LABEL'
             )
         )
 
+        return this
+    }
+
+    public HierarchyCommunicationBuilder setIcon(String icon)
+    {
+        this.icon = icon
         return this
     }
 }
@@ -654,7 +817,7 @@ class MetaclassNameAndAttributeListSchemes
     /**
      *  Список атрибутов
      */
-    Collection listAttribute
+    Collection listAttributes
 
     /**
      *  Атрибут иконки
