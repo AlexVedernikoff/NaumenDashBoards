@@ -1,7 +1,8 @@
 // @flow
-import type {Connector, OptionsSizeCanvas} from './types';
+import type {Connector, OptionsSizeCanvas, Scheme} from './types';
 import type {Entity} from 'store/entity/types';
 import {jsPDF} from 'jspdf';
+
 /**
  * Сохранение графического файла.
  * @param {object} canvas - холст
@@ -22,12 +23,12 @@ function downloadUri (canvas: HTMLCanvasElement, exportTo: string) {
 	}
 
 	const imgData = element.toDataURL({
-		mimeType: `image/${exportTo}`,
 		quality: 1.0
 	});
+
 	const link = document.createElement('a');
 	link.download = `scheme.${exportTo}`;
-	link.href = imgData;
+	link.href = imgData.replace('image/png', `image/${exportTo}`);
 	link.click();
 }
 
@@ -197,7 +198,13 @@ function searchCross (x1, y1, x2, y2, x3, y3, x4, y4) {
 	let n;
 	let isCross;
 
-	if (y2 - y1 !== 0) { // a(y)
+	if (y2 - y1 === 0) {
+		if (y3 - y4 === 0) { // линии паралельны
+			isCross = false;
+		}
+
+		n = (y3 - y1) / (y3 - y4); // c(y)/b(y)
+	} else { // a(y)
 		const q = (x2 - x1) / (y1 - y2);
 		const sn = (x3 - x4) + (y3 - y4) * q;
 
@@ -207,12 +214,6 @@ function searchCross (x1, y1, x2, y2, x3, y3, x4, y4) {
 
 		const fn = (x3 - x1) + (y3 - y1) * q; // b(x) + b(y)*q
 		n = fn / sn;
-	} else {
-		if (y3 - y4 === 0) { // линии паралельны
-			isCross = false;
-		}
-
-		n = (y3 - y1) / (y3 - y4); // c(y)/b(y)
 	}
 
 	const x = x3 + (x4 - x3) * n; // x3 + (-b(x))*n
@@ -427,17 +428,94 @@ const getBigConnectAngle = (initialAngle: number, parentAngle: number) => {
 	return angle;
 };
 
+/**
+ * Изменение позиций списка схем, (сдвиг вниз и перестроение) для вывода списка схем друг за другом в низ на холсте
+ * @param schemes {Scheme[]} схемы
+ * @returns {Scheme[]} - схемы
+ */
+const convertSchemesPositions = (schemes: Scheme[]) => {
+	const bufferSchemes = [];
+	let widthMax = 0;
+	let offsetX = 0;
+	let offsetY = 0;
+	let isIndividual = false;
+
+	schemes.forEach(({lines, options, points}) => {
+		const bufferLines = [];
+		const bufferPoints = [];
+
+		if (widthMax < options.maxX) { // максимальная ширина схем
+			widthMax = options.maxX;
+		}
+
+		if (points.length === 1) { // одинарный элемент
+			if (isIndividual) {
+				offsetX += 150;
+			}
+
+			isIndividual = true;
+		} else {
+			isIndividual = false;
+			offsetX = 0;
+		}
+
+		if (!isIndividual) { // сдвиг вниз на холсте для отрисовки схем
+			offsetY += -options.minY + 25;
+		} else if (offsetX > widthMax) { // если не помещаются одинарные в линию
+			offsetX = 0;
+			offsetY += 180;
+		}
+
+		lines.forEach(line => {
+			const from = points.find(s => s.id === line.from);
+			const to = points.find(s => s.id === line.to);
+
+			if (from && to) {
+				const fromX = from.x + offsetX;
+				const fromY = from.y + offsetY;
+				const toX = to.x + offsetX;
+				const toY = to.y + offsetY;
+				const x = fromX + (to.x - from.x) / 2;
+				const y = fromY + (to.y - from.y) / 2;
+
+				bufferLines.push({...line, fromX, fromY, toX, toY, x, y});
+			}
+		});
+		points.forEach(point => {
+			bufferPoints.push({...point, x: point.x + offsetX, y: point.y + offsetY});
+		});
+
+		if (!isIndividual) { // если многомерная схема то сдвигаем вниз на 350
+			offsetY += options.maxY + 350;
+		}
+
+		bufferSchemes.push({lines: bufferLines, options, points: bufferPoints});
+	});
+
+	return bufferSchemes;
+};
+
+/**
+ * Помещается ли на экран точками с заданными дистанциями
+ * @param distanceX {number} дистанция между точками по x
+ * @param distanceY {number} дистанция между точками по y
+ * @returns {boolean} - результирующее значение
+ */
+const isFitsPointsOnScreen = (distanceX: number, distanceY: number) => window.innerWidth > distanceX && window.innerHeight > distanceY;
+
 export {
-	downloadUri,
-	downloadPdf,
 	checkAngleStartLine,
 	conversionSearchPosition,
 	convertY,
 	conversionTreePosition,
+	convertSchemesPositions,
 	countToStartPoints,
+	downloadUri,
+	downloadPdf,
 	getSmallConnectAngle,
 	getBigConnectAngle,
+	isFitsPointsOnScreen,
+	pointsCreateCoordinate,
 	sortPointCorrect,
-	searchCross,
-	pointsCreateCoordinate
+	searchCross
 };

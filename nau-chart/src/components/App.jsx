@@ -11,12 +11,12 @@ import Startup from 'components/organisms/Startup';
 export const App = () => {
 	const [contextMenu, setContextMenu] = useState(null);
 	const openContextMenu = (e: KonvaEventObject) => {
-		if (!e) {
-			setContextMenu(null);
-		} else {
+		if (e) {
 			e.evt.preventDefault(true);
 			const mousePosition = e.target.getStage().getPointerPosition();
 			setContextMenu(mousePosition);
+		} else {
+			setContextMenu(null);
 		}
 	};
 

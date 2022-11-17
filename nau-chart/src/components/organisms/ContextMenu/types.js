@@ -4,7 +4,7 @@ import type {Connector} from 'components/organisms/Content/types';
 export type ContextMenuPosition = {
 	scale: number,
 	setExportTo: (format: string) => {},
-	setScale: (scale: number) => {},
+	setScale: (scale: ?boolean) => {},
 };
 
 export type OwnProps = {

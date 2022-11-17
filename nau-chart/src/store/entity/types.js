@@ -25,18 +25,22 @@ export type Option = {
 export type Entity = {
 	actions?: Array<Action>,
 	desc: string,
+	editFormCode: string,
 	from: string | null,
+	header: string,
+	icon: string,
 	id: string,
 	options?: Array<Option>,
 	title: string,
 	to: string | null,
 	type: string,
+	uuid: string | null
 };
 
 export type EntityState = {
 	activeElement: Entity,
+	centerPointUuid: string,
 	data: Entity[],
-	editFormCode: string,
 	error: boolean,
 	exportTo: string,
 	loading: boolean,

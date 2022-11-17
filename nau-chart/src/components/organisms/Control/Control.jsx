@@ -8,7 +8,6 @@ import type {Props} from 'components/organisms/Content/types';
 import React from 'react';
 import Reload from 'icons/reload.svg';
 import Reset from 'icons/reset.svg';
-
 import styles from './styles.less';
 
 const Control = ({getDataEntity, position, scale, setExportTo, setPosition, setScale}: Props) => {

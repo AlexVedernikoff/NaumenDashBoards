@@ -1,29 +1,39 @@
 // @flow
-import type {Action, Entity} from 'store/entity/types';
+import type {Entity} from 'store/entity/types';
 
 export type ConnectedProps = {
+	centerPointUuid: string,
+	data: Array<Entity[]>,
+	exportTo: string,
+	openContextMenu: (e: Event) => {},
+	position: {x: number, y: number},
+	scale: number,
 };
 
 export type ConnectedFunctions = {
+	goToPoint: (uuid: string) => {},
+	setActiveElement: (payload: Entity) => {},
+	setExportTo: (payload: string) => {},
+	setPosition: (payload: {x: number, y: number}) => {},
+	setScale: (delta: ?boolean) => {},
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;
 
-export interface Connector extends Entity {
-	angle: string,
-	x: string,
-	y: string,
-}
+export type Connector = Entity & {
+	angle: number,
+	fromX: number,
+	fromY: number,
+	toX: number,
+	toY: number,
+	x: number,
+	y: number,
+};
 
 export type OptionsSizeCanvas = {
-	maxX: string,
-	maxY: string,
-	minY: string,
+	maxX: number,
+	maxY: number,
+	minY: number,
 };
 
-export type RenderTitleProps = {
-	actions: Array<Action>,
-	codeEditingForm: string,
-	title: string,
-	uuid: string,
-};
+export type Scheme = {lines: Connector[], options: OptionsSizeCanvas, points: Connector[]};

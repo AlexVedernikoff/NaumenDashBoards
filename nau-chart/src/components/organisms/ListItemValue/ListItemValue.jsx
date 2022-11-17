@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import styles from './styles.less';
 
 const ListItemValue = ({label, url}: Props) => {
-	const [viewTextFull, setViewTextFull] = useState(false);
+	const [viewTextFull, setViewTextFull] = useState(true);
 
 	const truncate = (str, n) => {
 		return str.length > n && viewTextFull ? str.substr(0, n - 1) : str;
@@ -16,7 +16,7 @@ const ListItemValue = ({label, url}: Props) => {
 		setViewTextFull(!viewTextFull);
 	};
 
-	const renderValue = value => {
+	const renderValue = () => {
 		const text = truncate(label, 255);
 
 		if (url) {
@@ -30,11 +30,11 @@ const ListItemValue = ({label, url}: Props) => {
 			return <a {...props}>{text}</a>;
 		}
 
-		return <div className={styles.itemDesc}>{label}</div>;
+		return <div className={styles.itemDesc}>{text}</div>;
 	};
 
 	const renderTextFull = () => {
-		return <div onClick={changeViewText}>{viewTextFull ? 'Показать подробнее' : 'Скрыть' }</div>;
+		return <div className={styles.textFull} onClick={changeViewText}>{viewTextFull ? 'Показать подробнее...' : 'Скрыть' }</div>;
 	};
 
 	return (

@@ -11,13 +11,9 @@ const getDataEntity = (): ThunkAction => async (dispatch: Dispatch): Promise<voi
 	try {
 		dispatch(showLoaderData());
 		const {contentCode, currentUser, subjectUuid} = await getContext();
-		const {entities, formCode} = await getScheme(contentCode, subjectUuid, currentUser);
+		const {entities} = await getScheme(contentCode, subjectUuid, currentUser);
 
 		dispatch(setEntityData(entities));
-
-		if (formCode) {
-			dispatch(setEditForm(formCode));
-		}
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -35,12 +31,21 @@ const showEditForm = (objectUUID: string, codeEditingForm: string): ThunkAction 
 		const uuid = await getEditForm(objectUUID, codeEditingForm);
 
 		if (uuid) {
-			dispatch(getDataEntity);
+			getDataEntity();
 		}
 	} catch (error) {
 		dispatch(setErrorData(error));
 	}
 };
+
+/**
+ * Центрует схему по выбранному элементу
+ * @param {string} uuid - uuid обьекта
+ */
+const goToPoint = (uuid: string) => ({
+	type: VERIFY_EVENTS.SET_CENTER_POINT_UUID,
+	uuid
+});
 
 /**
  * Показывает индикатор загрузки данных
@@ -86,9 +91,9 @@ const setActiveElement = (payload: Entity) => ({
 /**
  * Установка зума
  * @param {boolean | undefined} delta - направление изменения зума, при отсутствии сброс к дефолту
- * @returns {ThunkAction<number>} значение зума
+ * @returns {number} значение зума
  */
-const setScale = (delta: boolean | undefined): ThunkAction => (dispatch: Dispatch, getState: GetState): number => {
+const setScale = (delta: boolean | undefined): number => (dispatch: Dispatch, getState: GetState): number => {
 	const {scale} = getState().entity;
 
 	let newScale = scale;
@@ -97,7 +102,7 @@ const setScale = (delta: boolean | undefined): ThunkAction => (dispatch: Dispatc
 		newScale = 1;
 	} else if (delta) {
 		if (scale === 2) {
-			return;
+			return scale;
 		}
 
 		if (scale >= 1) {
@@ -107,7 +112,7 @@ const setScale = (delta: boolean | undefined): ThunkAction => (dispatch: Dispatc
 		}
 	} else {
 		if (scale === 0.25) {
-			return;
+			return scale;
 		}
 
 		if (scale >= 1) {
@@ -143,20 +148,12 @@ const setPosition = (payload: {x: number, y: number}) => ({
 	type: VERIFY_EVENTS.SET_POSITION
 });
 
-/**
- * Установка кода для вызова формы редактирования
- * @param {string} editFormCode - код
- */
-const setEditForm = (editFormCode: string) => ({
-	editFormCode,
-	type: VERIFY_EVENTS.SET_EDIT_FORM
-});
-
 export {
 	setActiveElement,
 	setScale,
 	setExportTo,
 	showEditForm,
+	goToPoint,
 	setPosition,
 	getDataEntity
 };

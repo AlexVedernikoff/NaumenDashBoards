@@ -1,9 +1,9 @@
 // @flow
 import {Group, Line, Rect, Text} from 'react-konva';
-import type {Props} from 'components/organisms/Element/types';
-import React from 'react';
+import type {Props} from './types';
+import React, {useEffect, useRef, useState} from 'react';
 
-const Lines = ({entity, handleContextMenu, onClick, onHover, points}: Props) => {
+const Lines = ({centerPointUuid, entity, handleContextMenu, onClick, onHover, points, scale}: Props) => {
 	const {fromX, fromY, toX, toY} = points;
 	const catetX = toX - fromX;
 	const catetY = toY - fromY;
@@ -21,13 +21,47 @@ const Lines = ({entity, handleContextMenu, onClick, onHover, points}: Props) => 
 	const hypotenuse2 = tileH / 2;
 	const a2 = hypotenuse2 * Math.sin((90 - rotation) * Math.PI / 180); // катет а, угол разница от 90
 	const b2 = hypotenuse2 * -Math.cos((90 - rotation) * Math.PI / 180); // катет б, угол разница от 90 и реверс знака
+	const sizeLine = entity.uuid && centerPointUuid === entity.uuid ? 4 / scale : 2;
+	const [action] = entity.actions || [];
+	const refTitle = useRef(null);
+	const refDesc = useRef(null);
+	const [titleHeight, setTitleHeight] = useState(tileH / 2);
+	const [descHeight, setDescHeight] = useState(tileH / 2);
+	const [titleHeightTrim, setTitleHeightTrim] = useState('auto');
+	const [descHeightTrim, setDescHeightTrim] = useState('auto');
+
+	useEffect(() => {
+		if (refTitle.current && refTitle.current.height() < tileH / 2) {
+			setTitleHeight(refTitle.current.height());
+		} else {
+			setTitleHeightTrim(tileH / 2);
+		}
+
+		if (refDesc.current && refDesc.current.height() < tileH / 2) {
+			setDescHeight(refDesc.current.height());
+		} else {
+			setDescHeightTrim(tileH / 2);
+		}
+	}, [refTitle, refDesc]);
 
 	const handleOnClick = () => {
-		onClick(entity);
+		if (action) {
+			const {link} = action;
+
+			if (link) {
+				onClick(entity);
+			}
+		}
 	};
 
 	const handleOnHover = hover => () => {
-		onHover(hover);
+		if (action) {
+			const {link} = action;
+
+			if (link) {
+				onHover(hover);
+			}
+		}
 	};
 
 	return (
@@ -44,55 +78,58 @@ const Lines = ({entity, handleContextMenu, onClick, onHover, points}: Props) => 
 				x={fromX + catetX / 2 - b1 - b2}
 				y={fromY + catetY / 2 - a1 - a2}
 			>
-				<Rect
+				{entity.header && <Rect
 					cornerRadius={[paddingText, paddingText, 0, 0]}
-					fill="#fff"
-					height={tileH / 2}
-					opacity={entity.title ? 0.9 : 0}
+					fill='#fff'
+					height={titleHeight}
+					opacity={0.9}
 					width={tileW}
-				/>
-				<Rect
+					y={tileH / 2 - titleHeight}
+				/>}
+				{entity.desc && <Rect
 					cornerRadius={[0, 0, paddingText, paddingText]}
-					fill="#fff"
-					height={tileH / 2}
-					opacity={entity.desc ? 0.9 : 0}
+					fill='#fff'
+					height={descHeight}
+					opacity={0.9}
 					width={tileW}
 					y={tileH / 2}
-				/>
-				<Text
+				/>}
+				{entity.header && <Text
 					align="center"
 					fill="#323232"
 					fontFamily="Roboto"
 					fontSize={10}
 					fontStyle="bold"
-					height={tileH / 2 - paddingText * 3}
-					opacity={entity.title ? 1 : 0}
-					text={entity.title}
+					height={titleHeightTrim}
+					padding={paddingText}
+					ref={refTitle}
+					text={entity.header}
 					verticalAlign="middle"
-					width={tileW - paddingText * 2}
-					x={paddingText}
-					y={paddingText}
-				/>
-				<Text
+					width={tileW}
+					x={0}
+					y={tileH / 2 - titleHeight}
+				/>}
+				{entity.desc && <Text
 					align="center"
 					fill="#737373"
 					fontFamily="Roboto"
 					fontSize={10}
 					fontStyle="bold"
-					height={tileH / 2 - paddingText * 3}
-					opacity={entity.desc ? 1 : 0}
+					height={descHeightTrim}
+					padding={paddingText}
+					ref={refDesc}
 					text={entity.desc}
 					verticalAlign="middle"
-					width={tileW - paddingText * 2}
-					x={paddingText}
-					y={tileH / 2 + paddingText * 2}
-				/>
+					width={tileW}
+					x={0}
+					y={tileH / 2}
+				/>}
 			</Group>
 			<Line
 				key={entity.id}
 				points={[fromX, fromY, toX, toY]}
 				stroke="#595959"
-				strokeWidth={2}
+				strokeWidth={sizeLine}
 			/>
 		</Group>
 	);

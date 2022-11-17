@@ -3,8 +3,10 @@ import cn from 'classnames';
 import {connect} from 'react-redux';
 import {
 	conversionSearchPosition,
+	convertSchemesPositions,
 	downloadPdf,
 	downloadUri,
+	isFitsPointsOnScreen,
 	pointsCreateCoordinate,
 	sortPointCorrect
 } from './helpers';
@@ -17,12 +19,47 @@ import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.less';
 
-const Content = ({data, exportTo, openContextMenu, position, scale, setActiveElement, setExportTo, setPosition, setScale}: Props) => {
+const Content = ({centerPointUuid, data, exportTo, goToPoint, openContextMenu, position, scale, setActiveElement, setExportTo, setPosition, setScale}: Props) => {
 	const stageRef = useRef(null);
 	const [isDrag, setIsDrag] = useState(false);
 	const [hoverElement, setHoverElement] = useState(null);
 	const [offset, setOffset] = useState({x: 0, y: 0});
 	const [schemes, setSchemes] = useState([]);
+
+	useEffect(() => {
+		const points = schemes.flat().reduce((accumulator, {lines, points}) => {
+			const filterLines = lines.filter(({uuid}) => centerPointUuid && centerPointUuid === uuid);
+			const filterPoints = points.filter(({uuid}) => centerPointUuid && centerPointUuid === uuid);
+			return [...accumulator, ...filterLines, ...filterPoints];
+		}, []);
+
+		if (points.length) { // найдена хотя бы одна совпадающая точка или линия
+			const fromX = Math.min(...points.map(o => o.x)); // нахождение максимально отдаленных координат
+			const toX = Math.max(...points.map(o => o.x));
+			const fromY = Math.min(...points.map(o => o.y));
+			const toY = Math.max(...points.map(o => o.y));
+			let x = window.innerWidth / 2 - (fromX + (toX - fromX) / 2) * scale;
+			let y = (offset.y - (fromY + (toY - fromY) / 2)) * scale + window.innerHeight / 2;
+
+			if (points.length > 1) { // если найдено несколько точек, подстраиваем зум чтобы были видны все
+				let distanceX = (toX - fromX) * scale;
+				let distanceY = (toY - fromY) * scale;
+				let isShowFull = isFitsPointsOnScreen(distanceX, distanceY);
+				let newScale = scale;
+
+				while (!isShowFull && newScale > 0.25) {
+					newScale = setScale(false); // уменьшаем зум
+					distanceX = (toX - fromX) * newScale;
+					distanceY = (toY - fromY) * newScale;
+					isShowFull = isFitsPointsOnScreen(distanceX, distanceY);
+					x = window.innerWidth / 2 - (fromX + (toX - fromX) / 2) * newScale;
+					y = (offset.y - (fromY + (toY - fromY) / 2)) * newScale + window.innerHeight / 2;
+				}
+			}
+
+			setPosition({x, y: y});
+		}
+	}, [centerPointUuid, scale]);
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -50,6 +87,8 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 	}, [exportTo]);
 
 	useEffect(() => {
+		const bufferSchemes = [];
+
 		(Array.isArray(data) ? data : [data]).forEach((entities: Entity[], index: number) => {
 			const filterPoints = entities.filter(e => e.type === 'point');
 			const filterLines = entities.filter(e => e.type === 'line');
@@ -58,16 +97,23 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 			const {bufferPoints, options} = pointsCreateCoordinate(filterPoints); // первичная выкладка элементов на схеме
 			const {connectors, customOptions} = conversionSearchPosition(bufferPoints, options); // корректировка выкладки для устранения пересечений
 
-			setSchemes(oldArray => [...oldArray, {lines: filterLines, options: customOptions, points: connectors}]);
+			bufferSchemes.push({lines: filterLines, options: customOptions, points: connectors});
 
 			if (index === 0) {
 				setOffset({x: 0, y: -customOptions.minY - window.innerHeight / 2});
 			}
 		});
+
+		setSchemes(convertSchemesPositions(bufferSchemes));
 	}, [data]);
 
 	const handleCloseContextMenu = () => {
 		openContextMenu(null);
+
+		if (!isDrag) {
+			goToPoint(null);
+		}
+
 		setIsDrag(false);
 	};
 
@@ -100,63 +146,33 @@ const Content = ({data, exportTo, openContextMenu, position, scale, setActiveEle
 	};
 
 	const renderSchemeItems = () => {
-		let widthMax = 0;
-		let offsetX = 0;
-		let offsetY = 0;
-		let isIndividual = false;
-
-		return schemes.map(({lines, options, points}) => {
-			if (widthMax < options.maxX) { // максимальная ширина схем
-				widthMax = options.maxX;
-			}
-
-			if (points.length === 1) { // одинарный элемент
-				if (isIndividual) {
-					offsetX += 150;
-				}
-
-				isIndividual = true;
-			} else {
-				isIndividual = false;
-				offsetX = 0;
-			}
-
-			if (!isIndividual) { // сдвиг в низ на холсте для отрисовки схем
-				offsetY += -options.minY + 25;
-			} else if (offsetX > widthMax) { // если не помещаются одинарные в линию
-				offsetX = 0;
-				offsetY += 180;
-			}
-
+		return schemes.map(({lines, points}) => {
 			const schemeItems = [];
-			lines.forEach(line => {
-				const from = points.find(s => s.id === line.from);
-				const to = points.find(s => s.id === line.to);
+			const props = {
+				centerPointUuid,
+				handleContextMenu,
+				onClick: setActiveElement,
+				onHover: setHoverElement,
+				scale
+			};
 
+			lines.forEach(line => {
 				schemeItems.push(<Lines
+					{...props}
 					entity={line}
-					handleContextMenu={handleContextMenu}
 					key={line.id}
-					onClick={setActiveElement}
-					onHover={setHoverElement}
-					points={{fromX: from.x + offsetX, fromY: from.y + offsetY, toX: to.x + offsetX, toY: to.y + offsetY}} />);
+					points={{fromX: line.fromX, fromY: line.fromY, toX: line.toX, toY: line.toY}}
+				/>);
 			});
 			points.forEach(point => {
 				schemeItems.push(<Points
+					{...props}
 					className={styles.hover}
 					entity={point}
-					handleContextMenu={handleContextMenu}
 					key={point.id}
-					onClick={setActiveElement}
-					onHover={setHoverElement}
-					x={point.x + offsetX}
-					y={point.y + offsetY} />);
+					x={point.x}
+					y={point.y} />);
 			});
-
-			if (!isIndividual) { // если многомерная схема то сдвигаем вниз на 350
-				offsetY += options.maxY + 350;
-			}
-
 			return schemeItems;
 		});
 	};
