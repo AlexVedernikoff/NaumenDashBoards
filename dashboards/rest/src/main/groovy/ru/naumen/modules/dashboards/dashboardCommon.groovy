@@ -1088,7 +1088,8 @@ class DashboardUtils
                     tooltip: oldFormatWidget?.tooltip,
                     links: oldFormatWidget?.links,
                     indicatorGrouping: oldFormatWidget?.indicatorGrouping,
-                    parametersOrder: oldFormatWidget?.parametersOrder
+                    parametersOrder: oldFormatWidget?.parametersOrder,
+                    showTotalRowAmount: oldFormatWidget?.showTotalRowAmount
                 )
             case TablePrevAndCurrentAndNew:
                 return new TablePrevAndCurrentAndNew(
