@@ -476,24 +476,15 @@ Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>
                 }
                 else
                 {
+                    currentScheme += elementsScheme.createHierarchyCommunicationPoint(
+                        elementsCurrentScheme,
+                        currentStrategy,
+                        SchemaWorkingElements.incrementId(),
+                        indexFirstElementSet
+                    )
                     if (idx % 12 == 0)
                     {
-                        currentScheme += elementsScheme.createHierarchyCommunicationPoint(
-                            elementsCurrentScheme,
-                            currentStrategy,
-                            SchemaWorkingElements.incrementId(),
-                            indexFirstElementSet
-                        )
                         indexFirstElementSet = SchemaWorkingElements.getId()
-                    }
-                    else
-                    {
-                        currentScheme += elementsScheme.createHierarchyCommunicationPoint(
-                            elementsCurrentScheme,
-                            currentStrategy,
-                            SchemaWorkingElements.incrementId(),
-                            indexFirstElementSet
-                        )
                     }
                 }
             }
