@@ -4567,6 +4567,16 @@ class PivotTable extends TablePrevAndCurrentAndNew
      * Настройки стилей таблицы
      */
     PivotTableObject pivot
+
+    /**
+     * Флаг - показывать ли сумму по показателям
+     */
+    Boolean showTotalAmount
+
+    /**
+     * Флаг - показывать ли сумму по параметрам
+     */
+    Boolean showTotalRowAmount
 }
 
 /**
