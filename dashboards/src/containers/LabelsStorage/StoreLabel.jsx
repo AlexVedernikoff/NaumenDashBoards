@@ -1,4 +1,5 @@
 // @flow
+import {calculateStringsSize} from 'src/utils/recharts';
 import type {Context, StoreLabelProps as Props} from './types';
 import {generateLabelKey} from './helpers';
 import {LABELS_STORAGE_CONTEXT} from './constants';
@@ -10,6 +11,7 @@ export class StoreLabel extends PureComponent<Props> {
 		dataKey: '',
 		fontFamily: 'Roboto',
 		fontSize: 12,
+		force: false,
 		height: 0,
 		name: '',
 		value: 0,
@@ -20,10 +22,26 @@ export class StoreLabel extends PureComponent<Props> {
 	};
 
 	registerLabel = (context: Context) => {
-		const {height, width} = this.props;
+		const {fontFamily, fontSize, force, formatter, height, value, width} = this.props;
 		const key = generateLabelKey(this.props);
+		let register = false;
 
 		if (height >= 1 && width >= 1) { // Проверка на нулевые области
+			if (force) {
+				register = true;
+			} else {
+				const text = formatter ? formatter(value) : value.toString();
+
+				const sizes = calculateStringsSize([[text]], fontFamily, fontSize);
+				const {height: heightText, width: widthText} = sizes[0];
+
+				if (height > heightText && width > widthText) {
+					register = true;
+				}
+			}
+		}
+
+		if (register) {
 			context.registerLabel(key, this.props);
 		} else {
 			context.unregisterLabel(key);

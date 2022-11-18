@@ -21,7 +21,9 @@ export type Label = {
 	y: number,
 };
 
-export type StoreLabelProps = Label & { };
+export type StoreLabelProps = Label & {
+	force: boolean
+};
 
 export type Context = {
 	clearLabels: () => void,
