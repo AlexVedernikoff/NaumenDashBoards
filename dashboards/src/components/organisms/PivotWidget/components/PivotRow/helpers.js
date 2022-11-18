@@ -75,11 +75,19 @@ export const getParameterStyle = (width: number, level: number, style: PivotBody
  * @param {number} level - уровень вложенности
  * @param {PivotBodySettings} style - стиль таблицы
  * @param {boolean} isTotal - ячейка находится в строке Итого
+ * @param {boolean} isTotalColumn - ячейка находится в столбце Итого
  * @returns {ParameterStyle}
  */
-export const getCellStyle = (width: number, level: number, style: PivotBodySettings, isTotal: boolean): CellStyle => {
+export const getCellStyle = (width: number, level: number, style: PivotBodySettings, isTotal: boolean, isTotalColumn: boolean): CellStyle => {
 	const {indicatorSettings, parameterRowColor, textAlign} = style;
-	const backgroundColor = level === 0 && parameterRowColor ? parameterRowColor : 'transparent';
+	let backgroundColor = 'transparent';
+
+	if (level === 0 && parameterRowColor) {
+		backgroundColor = parameterRowColor ?? 'white';
+	} else if (isTotalColumn) {
+		backgroundColor = 'white';
+	}
+
 	const {fontColor, fontStyle} = indicatorSettings;
 
 	return {
