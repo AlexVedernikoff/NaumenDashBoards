@@ -170,7 +170,7 @@ export class Summary extends Component<Props, State> {
 	};
 
 	renderValue = (fontSize: number) => {
-		const {onClickValue, options: {data: {tooltip}}} = this.props;
+		const {onClickValue, options: {data: {tooltip} = {}}} = this.props;
 		const {height: textHeight} = this.state;
 		const style = {
 			height: textHeight > 0 ? `${textHeight}px` : 'auto'
