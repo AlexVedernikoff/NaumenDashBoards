@@ -1,4 +1,7 @@
 // @flow
+import {NAME_POINT_TYPE} from 'types/equipment';
+import {NAME_SECTION_TYPE} from 'types/part';
+import {NAME_TRAIL_TYPE} from 'types/trail';
 import type {Point, PointData, StaticGroup} from 'types/point';
 
 const filterPointData = (pointData: Array<PointData>, staticGroups: Array<StaticGroup>): Array<PointData> => {
@@ -87,10 +90,30 @@ export const filterInSingleObject = (singleObject: Point, staticGroups: Array<St
 	return [singleObject];
 };
 
-export const checkActivePoint = (point: Point, singleObject: Point) => {
-	if (point && singleObject) {
+export const checkActivePoint = (point: Point, singleObject: Point, showSingleObject: boolean, searchObjects: Point[]) => {
+	if (point && showSingleObject && singleObject) {
 		const {data} = point;
-		return point && data.uuid === singleObject.data.uuid;
+		return data.uuid === singleObject.data.uuid;
+	}
+
+	if (point && searchObjects && searchObjects.length) {
+		const trails = searchObjects.filter(point => point.type === NAME_TRAIL_TYPE);
+		const trailsObject = trails.reduce((accum, trail) => {
+			const {parts = [], equipments = []} = trail;
+			return [
+				...accum,
+				...parts,
+				...equipments
+			];
+		}, []);
+
+		const objects = [
+			...trailsObject,
+			...searchObjects.filter(point => point.type === NAME_POINT_TYPE),
+			...searchObjects.filter(point => point.type === NAME_SECTION_TYPE)
+		];
+
+		return objects.some(object => object.data.uuid === point.data.uuid);
 	}
 
 	return false;

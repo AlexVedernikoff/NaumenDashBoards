@@ -7,8 +7,8 @@ import {setSingleObject, toggleMapContextMenu} from 'store/geolocation/actions';
 const props = (state: AppState, props: OwnProps): ConnectedProps => {
 	const {geolocation} = state;
 	const {point} = props;
-	const {showSingleObject, singleObject} = geolocation;
-	const active = (showSingleObject && singleObject) ? checkActivePoint(point, singleObject) : false;
+	const {searchObjects, showSingleObject, singleObject} = geolocation;
+	const active = checkActivePoint(point, singleObject, showSingleObject, searchObjects);
 
 	return {
 		active

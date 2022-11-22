@@ -15,7 +15,7 @@ const Points = ({centerPointUuid, entity, handleContextMenu, onClick, onHover, s
 	const [descHeight, setDescHeight] = useState(tileH / 2);
 	const [titleHeightTrim, setTitleHeightTrim] = useState('auto');
 	const [descHeightTrim, setDescHeightTrim] = useState('auto');
-	const sizeImage = entity.uuid && centerPointUuid === entity.uuid ? 66 / scale : 44;
+	const sizeImage = entity.uuid && centerPointUuid === entity.uuid ? 66 / (scale < 1 ? scale * 2 : 1) : 44;
 	const [action] = entity.actions || [];
 
 	useEffect(() => {

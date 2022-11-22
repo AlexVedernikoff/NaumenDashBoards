@@ -1,5 +1,4 @@
 // @flow
-
 import type {Props} from './types';
 import React, {Component} from 'react';
 import styles from './TooltipPoint.less';
@@ -15,7 +14,7 @@ export class TooltipPoint extends Component<Props> {
 		const offset = [0, 30];
 
 		return (
-			<Tooltip className={styles.tolltipLabel} interactive={true} offset={offset} opacity={1} sticky={sticky}>
+			<Tooltip className={styles.tooltipLabel} interactive={true} offset={offset} opacity={1} sticky={sticky}>
 				{title}
 			</Tooltip>
 		);

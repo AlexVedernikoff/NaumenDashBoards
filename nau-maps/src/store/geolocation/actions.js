@@ -77,6 +77,11 @@ const showEditForm = (objectUUID: string, codeEditingForm: string): ThunkAction 
 	}
 };
 
+const setSearchText = (payload: string) => ({
+	payload,
+	type: GEOLOCATION_EVENTS.SET_SEARCH_TEXT
+});
+
 const zoomIn = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		const {controls: {zoom}} = getState().geolocation;
@@ -128,6 +133,11 @@ const setTab = (payload: PointType) => ({
 const setSingleObject = (data: Point) => ({
 	payload: data,
 	type: GEOLOCATION_EVENTS.SET_SINGLE_POINT
+});
+
+const setSearchObjects = (data: Point[]) => ({
+	payload: data,
+	type: GEOLOCATION_EVENTS.SET_SEARCH_POINTS
 });
 
 const setMapPanel = (map: string) => ({
@@ -196,9 +206,11 @@ export {
 	resetAllGroups,
 	resetSingleObject,
 	selectAllGroups,
+	setSearchObjects,
 	setSingleObject,
 	setMapPanel,
 	setTab,
+	setSearchText,
 	showEditForm,
 	toggleFilter,
 	toggleGroup,

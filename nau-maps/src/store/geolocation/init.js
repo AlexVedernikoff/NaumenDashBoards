@@ -32,6 +32,8 @@ export const initialGeolocationState: GeolocationState = {
 		trailsMethodName: 'trailsMethodName',
 		updatePointsMode: 'getMapObjects'
 	},
+	searchObjects: [],
+	searchText: '',
 	showSingleObject: false,
 	singleObject: null,
 	staticGroups: [],

@@ -32,7 +32,7 @@ const defaultIconMarker = (type: string, isActive: boolean) => {
 	const url = URL.createObjectURL(blob);
 
 	const iconData = {
-		className: `${type}-type ${isActive && 'active'}`,
+		className: `${type}-type ${isActive ? 'active' : ''}`,
 		iconRetinaUrl: url,
 		iconUrl: url
 	};
@@ -42,7 +42,7 @@ const defaultIconMarker = (type: string, isActive: boolean) => {
 
 const customIconMarker = (iconName: string, isActive: boolean) => {
 	const iconData = {
-		className: `custom-type ${isActive && 'active'}`,
+		className: `custom-type ${isActive ? 'active' : ''}`,
 		iconRetinaUrl: iconName,
 		iconUrl: iconName
 	};

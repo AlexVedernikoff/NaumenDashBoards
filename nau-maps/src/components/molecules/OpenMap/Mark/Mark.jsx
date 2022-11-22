@@ -23,7 +23,6 @@ export class Mark extends Component<Props, State> {
 		const {data, geopositions: [positions], icon, tooltip} = point;
 		const {equipType, header = '', type} = data;
 		const iconMarker = getCustomOrDefaultIconMarker(equipType || type, active, icon);
-
 		return (
 			<Marker
 				icon={iconMarker}

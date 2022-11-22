@@ -35,5 +35,4 @@ export type OptionsSizeCanvas = {
 	maxY: number,
 	minY: number,
 };
-
 export type Scheme = {lines: Connector[], options: OptionsSizeCanvas, points: Connector[]};
