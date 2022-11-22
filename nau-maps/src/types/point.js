@@ -16,7 +16,7 @@ export type PointData = {
 };
 
 export type Point = {
-	data: Array<PointData>,
+	data: PointData,
 	geopositions: Array<Geoposition>,
 	type: string
 };

@@ -7,9 +7,8 @@ import {NAME_SECTION_TYPE} from 'types/part';
 import {NAME_TRAIL_TYPE} from 'types/trail';
 
 const props = (state: AppState): ConnectedProps => {
-	const {mapObjects, params, staticGroups, timeUpdate} = state.geolocation;
-	const {groupingMethodName} = params;
-	const points = filterByGroup(mapObjects, staticGroups, groupingMethodName).filter(point => point.geopositions !== null);
+	const {mapObjects, staticGroups, timeUpdate} = state.geolocation;
+	const points = filterByGroup(mapObjects, staticGroups).filter(point => point.geopositions !== null);
 
 	return {
 		points: points.filter(point => point.type === NAME_POINT_TYPE),

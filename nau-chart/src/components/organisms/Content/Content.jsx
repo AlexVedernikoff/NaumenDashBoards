@@ -27,6 +27,10 @@ const Content = ({centerPointUuid, data, exportTo, goToPoint, openContextMenu, p
 	const [schemes, setSchemes] = useState([]);
 
 	useEffect(() => {
+		if (!centerPointUuid) {
+			return;
+		}
+
 		const points = schemes.flat().reduce((accumulator, {lines, points}) => {
 			const filterLines = lines.filter(({uuid}) => centerPointUuid && centerPointUuid === uuid);
 			const filterPoints = points.filter(({uuid}) => centerPointUuid && centerPointUuid === uuid);
@@ -59,7 +63,7 @@ const Content = ({centerPointUuid, data, exportTo, goToPoint, openContextMenu, p
 
 			setPosition({x, y: y});
 		}
-	}, [centerPointUuid, scale]);
+	}, [centerPointUuid, scale, offset]);
 
 	useEffect(() => {
 		const handleResize = () => {

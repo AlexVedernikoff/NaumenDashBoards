@@ -31,10 +31,15 @@ const showEditForm = (objectUUID: string, codeEditingForm: string): ThunkAction 
 		const uuid = await getEditForm(objectUUID, codeEditingForm);
 
 		if (uuid) {
-			getDataEntity();
+			const {contentCode, currentUser, subjectUuid} = await getContext();
+			const {entities} = await getScheme(contentCode, subjectUuid, currentUser);
+
+			dispatch(setEntityData(entities));
 		}
 	} catch (error) {
 		dispatch(setErrorData(error));
+	} finally {
+		dispatch(hideLoaderData());
 	}
 };
 

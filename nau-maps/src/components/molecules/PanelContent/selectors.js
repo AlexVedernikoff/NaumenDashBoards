@@ -5,12 +5,14 @@ import {filterInSingleObject} from 'helpers/marker';
 
 const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {mapObjects, params, showSingleObject, singleObject, staticGroups, timeUpdate} = geolocation;
+	const {mapObjects, params, searchObjects, searchText, showSingleObject, singleObject, staticGroups, timeUpdate} = geolocation;
 	const {groupingMethodName} = params;
 	const points = (showSingleObject && singleObject) ? filterInSingleObject(singleObject, staticGroups, groupingMethodName) : mapObjects;
 
 	return {
 		points,
+		searchObjects,
+		searchText,
 		showSingleObject,
 		singleObject,
 		timeUpdate

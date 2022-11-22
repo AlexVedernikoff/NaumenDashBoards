@@ -5,6 +5,7 @@ import {functions, props} from './selectors';
 import PanelContent from 'components/molecules/PanelContent';
 import PanelHeader from 'components/molecules/PanelHeader';
 import PanelIcon from 'icons/PanelIcon';
+import PanelSearch from 'components/molecules/PanelSearch';
 import type {Props} from './types';
 import React, {Component} from 'react';
 import Scrollable from 'components/atoms/Scrollable';
@@ -44,6 +45,10 @@ export class Panel extends Component<Props> {
 		return <PanelHeader />;
 	};
 
+	renderPanelSearch = () => {
+		return <PanelSearch />;
+	};
+
 	renderPanelToggle = panelOpen => {
 		const {togglePanel} = this.props;
 
@@ -67,6 +72,7 @@ export class Panel extends Component<Props> {
 				<div className={styles.panelWrap}>
 					<div className={styles.panelContainer}>
 						{this.renderPanelHeader()}
+						{this.renderPanelSearch()}
 						{this.renderPanelContent()}
 					</div>
 					{this.renderPanelToggle(panelOpen)}

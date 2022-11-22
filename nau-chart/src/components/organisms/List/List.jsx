@@ -27,7 +27,9 @@ const List = ({activeElement, data, goToPoint, showEditForm}: Props) => {
 	};
 
 	const handleOpenEdit = (uuid: string, codeEditingForm: string) => () => {
-		showEditForm(uuid, codeEditingForm);
+		if (codeEditingForm) {
+			showEditForm(uuid, codeEditingForm);
+		}
 	};
 
 	const handleGoToPoint = (uuid: string) => () => {

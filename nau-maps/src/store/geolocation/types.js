@@ -111,6 +111,8 @@ export type GeolocationState = {
 	mapSelect: string,
 	mapsKeyList: {[k: string]: string | boolean},
 	params: Params,
+	searchObjects: Point[],
+	searchText: string,
 	showSingleObject: boolean,
 	singleObject: Point | null,
 	staticGroups: Array<StaticGroup>,

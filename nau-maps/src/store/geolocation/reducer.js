@@ -90,6 +90,8 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 		case GEOLOCATION_EVENTS.SET_TAB:
 			return {
 				...state,
+				searchObjects: [],
+				searchText: '',
 				showSingleObject: false
 			};
 		case GEOLOCATION_EVENTS.SET_SINGLE_POINT:
@@ -113,7 +115,7 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 				},
 				goToElement: false,
 				showSingleObject: false,
-				singleObject: initialGeolocationState.singleObject
+				singleObject: null
 			};
 		case GEOLOCATION_EVENTS.GO_TO_ELEMENT:
 			return {
@@ -150,6 +152,19 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 					...state.controls,
 					zoom: action.payload
 				}
+			};
+		case GEOLOCATION_EVENTS.SET_SEARCH_TEXT:
+			return {
+				...state,
+				searchText: action.payload
+			};
+		case GEOLOCATION_EVENTS.SET_SEARCH_POINTS:
+			return {
+				...state,
+				goToElement: false,
+				searchObjects: action.payload,
+				showSingleObject: false,
+				singleObject: null
 			};
 		default:
 			return state;
