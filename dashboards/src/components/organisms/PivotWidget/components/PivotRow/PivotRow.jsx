@@ -45,7 +45,7 @@ export class PivotRow extends PureComponent<Props, State> {
 		});
 		const formatter = isTotal ? formatters.total : formatters.value;
 		const formatValue = getValueForColumn(column, data, formatter);
-		const cellStyle = getCellStyle(columnsWidth[index + 1], level, style, isTotal);
+		const cellStyle = getCellStyle(columnsWidth[index + 1], level, style, isTotal, isTotalColumn);
 
 		return (
 			<div className={className} key={column.key} onClick={this.handleClickCell(column)} style={cellStyle}>
