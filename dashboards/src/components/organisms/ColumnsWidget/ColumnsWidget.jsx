@@ -155,7 +155,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 			return (
 				<LabelList
 					className={showClassName}
-					content={<StoreLabel dataKey={key} />}
+					content={<StoreLabel dataKey={key} force={true} />}
 					dataKey={key}
 					fill={fontColor}
 					fontFamily={fontFamily}
