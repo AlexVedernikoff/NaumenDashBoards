@@ -142,7 +142,7 @@ class ContentHierarchyCommunicationSettings
     String hierarchyCodeStrategy = 'schemesStrategy'
 
     @UiSchemaMeta(widget = 'textarea')
-    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Скрипт возвращает объект для построения иерархической связи. Возможно использование переменной subject, которая содержит объект, на карточке которого размещен контент с приложением', nullable = false)
+    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Скрипт возвращает объект для построения иерархической связи. Возможно использование переменной subject, которая содержит объект, на карточке которого размещен контент с приложением.', nullable = false)
     String scriptText = ''
 
     @UiSchemaMeta(widget = 'metaClass-select')
@@ -191,7 +191,7 @@ class ContentObjecRelationshipsSettings
     String objectCodeStrategy = 'schemesStrategy'
 
     @UiSchemaMeta(widget = 'textarea')
-    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Скрипт должен возвращать единый список объектов для построения связи', nullable = false)
+    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Скрипт должен возвращать единый список объектов для построения связи.  Возможно использование переменной subject, которая содержит объект, на карточке которого размещен контент с приложением.', nullable = false)
     String scriptText = ''
 
     @JsonSchemaMeta(title = 'Правила связывания объектов схемы')
