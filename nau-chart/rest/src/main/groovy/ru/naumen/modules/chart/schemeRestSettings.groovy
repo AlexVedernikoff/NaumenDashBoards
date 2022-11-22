@@ -40,7 +40,7 @@ private String getSchemeData(String objectUuid, String contentUuid, LinkedTreeMa
     Object subjectObject = api.utils.get(objectUuid)
     Object userObject = userUuid['admin'] ?: api.utils.get(userUuid['uuid'])
     LinkedHashMap<String, Object> bindings = userUuid['admin'] ? ['subject': subjectObject] :
-        ['subject': subjectUuid, 'user': userObject]
+        ['subject': subjectObject, 'user': userObject]
     try
     {
         Collection<Collection<HierarchyCommunicationBuilder>> getData =

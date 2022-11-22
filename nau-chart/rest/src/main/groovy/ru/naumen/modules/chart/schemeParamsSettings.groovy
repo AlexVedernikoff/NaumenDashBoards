@@ -141,7 +141,7 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationships
             try
             {
                 scriptedBusinessObjectsSetupWizard =
-                    api.utils.executeScript(currentStrategy.scriptText)
+                    api.utils.executeScript(currentStrategy.scriptText, bindings)
             }
             catch (Exception ex)
             {
