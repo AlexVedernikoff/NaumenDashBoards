@@ -193,7 +193,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 			// класс rechart_dataLabels_shadow объявлен глобально в стилях ReChartWidget
 			const showClassName = showShadow ? 'rechart_dataLabels_shadow' : '';
 			const position = isBar ? 'center' : 'top';
-			const label = isBar ? (<StoreLabel dataKey={id} />) : null;
+			const label = isBar ? (<StoreLabel dataKey={id} force={isBar} />) : null;
 
 			return (
 				<LabelList
