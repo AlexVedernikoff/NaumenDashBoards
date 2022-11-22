@@ -157,7 +157,8 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationships
                 breakRelatedObjectsIntoBlocks(scriptedBusinessObjectsSetupWizard, listAttributes)
             Collection<Collection<HierarchyCommunicationBuilder>> currentSchemeToDisplay =
                 addPointsByRelatedObjects(allObjectsToScheme, currentStrategy)
-            checkWhetherPointsWithoutLinks(currentStrategy, currentSchemeToDisplay)
+            currentSchemeToDisplay =
+                checkWhetherPointsWithoutLinks(currentStrategy, currentSchemeToDisplay)
             addLineByRelatedObjects(
                 currentStrategy,
                 currentSchemeToDisplay,
@@ -174,8 +175,8 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationships
  * @param currentStrategy - текущая вкладка настроек из мастера
  * @param schemesCurrentStrategies - коллекция схем по текущей стратегии
  */
-void checkWhetherPointsWithoutLinks(Object currentStrategy,
-                                    Collection<Collection<HierarchyCommunicationBuilder>> schemesCurrentStrategies)
+Collection<Collection<HierarchyCommunicationBuilder>> checkWhetherPointsWithoutLinks(Object currentStrategy,
+                                                                                     Collection<Collection<HierarchyCommunicationBuilder>> schemesCurrentStrategies)
 {
     if (currentStrategy.displayingEndLineDots)
     {
@@ -183,6 +184,7 @@ void checkWhetherPointsWithoutLinks(Object currentStrategy,
             it.size() != 1
         }
     }
+    return schemesCurrentStrategies
 }
 
 /**
