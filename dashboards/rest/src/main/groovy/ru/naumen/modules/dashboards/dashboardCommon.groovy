@@ -596,7 +596,7 @@ class DashboardUtils
     static void correctWidgetsWithDescriptorError(Collection<String> widgetKeys)
     {
         JsonSlurper slurper = new JsonSlurper()
-        DashboardConfigService service = DashboardConfigService.instance
+        DashboardConfigService service = new Object()
 
         List allDashboardKeys = service.getDashboardKeys('widgets', DASHBOARD_NAMESPACE)
         allDashboardKeys += service.getDashboardKeys('widgetIds', DASHBOARD_NAMESPACE)
@@ -642,7 +642,7 @@ class DashboardUtils
     static Collection<Object> getWidgetsDataWithDescriptorError(Boolean getOnlyKeys = false)
     {
         JsonSlurper slurper = new JsonSlurper()
-        DashboardConfigService service = DashboardConfigService.instance
+        DashboardConfigService service = new Object()
 
         List allDashboardKeys = service.getDashboardKeys('widgets', DASHBOARD_NAMESPACE)
         allDashboardKeys += service.getDashboardKeys('widgetIds', DASHBOARD_NAMESPACE)
@@ -1253,7 +1253,7 @@ class DashboardUtils
             case AttributeType.DT_INTERVAL_TYPE:
                 return true
             case AttributeType.CATALOG_ITEM_TYPE:
-                return getApi().utils.findFirst(sourceCode, [(attributeCode): op.isNotNull()])?.get(attributeCode)?.code?.isNumber()
+                return getApi().utils.findFirst(sourceCode, [(attributeCode): getOp().isNotNull()])?.get(attributeCode)?.code?.isNumber()
             default: return false
         }
     }
