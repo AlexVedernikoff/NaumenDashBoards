@@ -560,11 +560,8 @@ class ElementsMap
         {
             dataToUse = objectByLastAttribute.first().UUID
         }
-        else if (objectByLastAttribute && objectByLastAttribute in String)
-        {
-            dataToUse = objectByLastAttribute
-        }
-        else if (objectByLastAttribute && objectByLastAttribute in Double)
+        else if (objectByLastAttribute && (
+            objectByLastAttribute in Double || objectByLastAttribute in String))
         {
             dataToUse = objectByLastAttribute
         }
@@ -1003,42 +1000,34 @@ class TrailBuilder extends MapObjectBuilder
     ElementsMap elementsMap = new ElementsMap()
     @JsonInclude(Include.NON_NULL)
     String color
-
     /**
      * Прозрачность элемента
      */
     String opacity
-
     /**
      * Толщина линии
      */
     String width
-
     /**
      * Тип линии
      */
     String lineStyle
-
     /**
      * Информация по отображению иконки
      */
     Boolean displayingLinesDots
-
     /**
      * Ссылка на иконку А
      */
     String iconFirst
-
     /**
      * Ссылка на иконку B
      */
     String iconSecond
-
     /**
      * Текст всплывающей подсказки
      */
     String tooltip
-
     /**
      * Код формы редактирования
      */
@@ -1258,18 +1247,15 @@ class BasePointBuilder extends MapObjectBuilder
      */
     @JsonInclude(Include.NON_NULL)
     EquipmentType equipType
-
     /**
      * Иконка для отображения (ссылкой)
      */
     @JsonIgnore
     String icon
-
     /**
      * Текст всплывающей подсказки
      */
     String tooltip
-
     /**
      * Код формы редактирования
      */
@@ -1351,7 +1337,6 @@ class MapObjectBuilder
      *  Название
      */
     String header
-
     /**
      * Список возможных действий с объектом (для меню справа)
      */
@@ -1360,7 +1345,6 @@ class MapObjectBuilder
      * Список возможных данных об объекте (для меню справа)
      */
     List<Option> options = []
-
     /**
      * Геопозиции начала и конца участка
      */
@@ -1447,7 +1431,6 @@ class MetaclassNameAndAttributeList
      *  Имя метакласса
      */
     String metaclassName
-
     /**
      *  Список атрибутов
      */
@@ -1471,7 +1454,6 @@ class OutputObjectStrategies
      * Места использования настроек из мастера
      */
     Collection<String> placesOfUse
-
     /**
      * Код используемого метакласса
      */
@@ -1518,42 +1500,34 @@ class StrategiesLine extends OutputObjectStrategies
      * Тип линии
      */
     String lineStyle
-
     /**
      * Путь к координатам широты А
      */
     String pathCoordinatesLatitudeA
-
     /**
      * Путь к координатам долготы А
      */
     String pathCoordinatesLongitudA
-
     /**
      * Путь к координатам широты Б
      */
     String pathCoordinatesLatitudeB
-
     /**
      * Путь к координатам долготы Б
      */
     String pathCoordinatesLongitudB
-
     /**
      * Признак отображения иконки
      */
     Boolean displayingLinesDots
-
     /**
      * Путь к иконке для точки А
      */
     String pathToIconA
-
     /**
      * Путь к иконке для точки B
      */
     String pathToIconB
-
     /**
      * Текст всплывающей подсказки
      */
@@ -1638,17 +1612,14 @@ class StrategiesPoint extends OutputObjectStrategies
      * Путь к координатам широты
      */
     String pathLatitudeCoordinates
-
     /**
      * Путь к координатам долготы
      */
     String pathLongitudeCoordinates
-
     /**
      * Текст всплывающей подсказки
      */
     String tooltip
-
     /**
      * Иконка для отображения
      */
