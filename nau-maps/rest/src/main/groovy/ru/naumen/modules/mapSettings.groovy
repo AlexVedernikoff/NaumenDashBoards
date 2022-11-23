@@ -21,13 +21,14 @@ import ru.naumen.core.server.script.api.ea.IAppContentInfo
 import groovy.transform.Canonical
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import groovy.json.JsonSlurper
+import ru.naumen.jsonschema.annotations.MechanismSettings
 
 class ConstantMap
 {
-    public static final String NAME_MECHANISM_SETTINGS = 'map'
-    public static final String EMBEDDED_APPLICATION_CODE = 'nauMaps'
-    public static final String ACTUAL_VERSION = 'actualVersion'
-    public static final String FIRST_PART_STRATEGY_CODE = 'mapStrategy'
+    final static String NAME_MECHANISM_SETTINGS = 'map'
+    final static String EMBEDDED_APPLICATION_CODE = 'nauMaps'
+    final static String ACTUAL_VERSION = 'actualVersion'
+    final static String FIRST_PART_STRATEGY_CODE = 'mapStrategy'
 }
 
 @MechanismSettings(name = 'map-initial')
@@ -137,7 +138,7 @@ class ContentPointSettings
     @UiSchemaMeta(disabled = true)
     @JsonSchemaMeta(title = 'Код стратегии')
     String codeStrategy = ''
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс объектов', nullable = false)
     MetaClassObject metaClassObject = new MetaClassObject('', '')
 
@@ -162,10 +163,10 @@ class ContentPointSettings
 @JsonSchemaMeta(requiredFields = ['pathCoordinatLatitude', 'pathCoordinatLongitud'])
 class CoordinatesSettings
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам широты')
     String pathCoordinatLatitude = ""
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам долготы')
     String pathCoordinatLongitud = ""
 }
@@ -176,7 +177,7 @@ class CoordinatesSettings
 @JsonSchemaMeta(requiredFields = ['pathIcon'], title = 'Характеристики точки')
 class PointCharacteristics
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к иконке')
     String pathIcon = ''
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
@@ -217,7 +218,7 @@ class ContentLinesSettings
     @UiSchemaMeta(disabled = true)
     @JsonSchemaMeta(title = 'Код стратегии')
     String codeStrategy = ''
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс объектов', nullable = false)
     MetaClassObject metaClassObject = new MetaClassObject('', '')
 
@@ -228,10 +229,10 @@ class ContentLinesSettings
 
     @JsonSchemaMeta(title = 'Отображение окончания линии точками')
     Boolean displayingEndLineDots = null
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к иконке А', description = 'Иконка для окончания линии. Если не указана, используется иконка по умолчанию для графического объекта Точка')
     String pathIconA = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к иконке Б', description = 'Иконка для окончания линии. Если не указана, используется иконка по умолчанию для графического объекта Точка')
     String pathIconB = ''
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObject')
@@ -254,13 +255,13 @@ class ContentLinesSettings
  */
 class CharacteristicsLine
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Цвет')
     String colour = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Толщина')
     String width = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Прозрачность (%)')
     String opacity = ''
 
@@ -274,16 +275,16 @@ class CharacteristicsLine
 @JsonSchemaMeta(requiredFields = ['pathCoordinatesLatitudeA', 'pathCoordinatesLongitudA', 'pathCoordinatesLatitudeB', 'pathCoordinatesLongitudB'])
 class CoordinatesLine
 {
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам широты А')
     String pathCoordinatesLatitudeA = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам долготы А')
     String pathCoordinatesLongitudA = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам широты Б')
     String pathCoordinatesLatitudeB = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../../metaClassObject')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../../metaClassObject')
     @JsonSchemaMeta(title = 'Путь к координатам долготы Б')
     String pathCoordinatesLongitudB = ''
 }
@@ -344,7 +345,7 @@ enum StrategyDisplayingMap
 @JsonSchemaMeta(requiredFields = ['metaClassObject', 'attributeGroup'], title = ' ')
 class CharacteristicsDisplayListObjects
 {
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс')
     MetaClassObject metaClassObject = new MetaClassObject('', '')
 
@@ -359,7 +360,7 @@ class CharacteristicsDisplayListObjects
 @JsonSchemaMeta(title = 'Действия с объектами')
 class ActionsWithObjects
 {
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс')
     MetaClassObject metaClassObject = new MetaClassObject('', '')
 

@@ -148,13 +148,12 @@ class ElementsMap
     {
         DefaultVisualization defaultSettingsWizardSettings = new SettingsProvider()
             .getSettings()?.defVisualization
-        String color = dbTrail.hasProperty(strategie?.color) && dbTrail[strategie?.color] ?
-            getColorCorrectFormat(dbTrail[strategie?.color]) :
+        String color = returnDataByAttributeHierarchy(strategie?.color, dbTrail) ?:
             defaultSettingsWizardSettings?.colorLineMap
-        String width = dbTrail.hasProperty(strategie?.weight) && dbTrail[strategie?.weight] ?
-            dbTrail[strategie?.weight] : defaultSettingsWizardSettings?.width
-        String opacity = dbTrail.hasProperty(strategie?.opacity) && dbTrail[strategie?.opacity] ?
-            dbTrail[strategie?.opacity] : defaultSettingsWizardSettings?.opacity
+        String width = returnDataByAttributeHierarchy(strategie?.weight, dbTrail) ?:
+            defaultSettingsWizardSettings?.width
+        String opacity = returnDataByAttributeHierarchy(strategie?.opacity, dbTrail) ?:
+            defaultSettingsWizardSettings?.opacity
         String tooltip = dbTrail.hasProperty(strategie?.tooltip) && dbTrail[strategie?.tooltip] ?
             dbTrail[strategie?.tooltip] : null
         String lineStyle = strategie.lineStyle ?: defaultSettingsWizardSettings.lineStyle
@@ -170,12 +169,12 @@ class ElementsMap
                     "${ basisForLinkIcon }${ api.utils.findFirst('root', [:])?.defPointIcon?.UUID?.first() }" :
                     null
             dataDisplayPointA =
-                dbTrail.hasProperty(strategie?.pathToIconA) && dbTrail[strategie?.pathToIconA] ?
-                    "${ basisForLinkIcon }${ dbTrail[strategie?.pathToIconA].UUID.first() }" :
+                returnDataByAttributeHierarchy(strategie?.pathToIconA, dbTrail) ?
+                    "${ basisForLinkIcon }${ returnDataByAttributeHierarchy(strategie?.pathToIconA, dbTrail) }" :
                     linkDefaultIcons
             dataDisplayPointB =
-                dbTrail.hasProperty(strategie?.pathToIconB) && dbTrail[strategie?.pathToIconB] ?
-                    "${ api.web.getBaseUrl() }${ 'download?uuid=' }${ dbTrail[strategie?.pathToIconB].UUID.first() }" :
+                returnDataByAttributeHierarchy(strategie?.pathToIconB, dbTrail) ?
+                    "${ api.web.getBaseUrl() }${ 'download?uuid=' }${ returnDataByAttributeHierarchy(strategie?.pathToIconB, dbTrail) }" :
                     linkDefaultIcons
         }
 
@@ -188,7 +187,12 @@ class ElementsMap
                 .setWidth(width)
                 .setLineStyle(lineStyle)
                 .setTooltip(tooltip)
-                .setGeopositions(dbTrail)
+                .setGeopositions(
+                    returnDataByAttributeHierarchy(strategie?.pathCoordinatesLatitudeA, dbTrail),
+                    returnDataByAttributeHierarchy(strategie?.pathCoordinatesLongitudA, dbTrail),
+                    returnDataByAttributeHierarchy(strategie?.pathCoordinatesLatitudeB, dbTrail),
+                    returnDataByAttributeHierarchy(strategie?.pathCoordinatesLongitudB, dbTrail)
+                )
                 .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(dbTrail)))
                 .setDisplayingLinesDots(strategie.displayingLinesDots)
                 .setIconFirst(dataDisplayPointA)
@@ -474,10 +478,9 @@ class ElementsMap
                                   api.utils.findFirst('root', [:])?.defPointIcon ?
             "${ basisForLinkIcon }${ api.utils.findFirst('root', [:])?.defPointIcon?.UUID?.first() }" :
             null
-        String dataDisplayPoint =
-            equipment.hasProperty(strategie?.pathIcon) && equipment[strategie?.pathIcon] ?
-                "${ basisForLinkIcon }${ equipment[strategie?.pathIcon].UUID.first() }" :
-                linkDefaultIcons
+        String dataDisplayPoint = returnDataByAttributeHierarchy(strategie?.pathIcon, equipment) ?
+            "${ basisForLinkIcon }${ returnDataByAttributeHierarchy(strategie?.pathIcon, equipment) }" :
+            linkDefaultIcons
         if (equipment &&
             equipment.title &&
             equipment[strategie.pathLatitudeCoordinates] &&
@@ -493,7 +496,10 @@ class ElementsMap
                 .setIcon(dataDisplayPoint)
                 .setTooltip(tooltip)
                 .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(equipment)))
-                .setGeopositions(equipment, strategie)
+                .setGeopositions(
+                    returnDataByAttributeHierarchy(strategie.pathLatitudeCoordinates, equipment),
+                    returnDataByAttributeHierarchy(strategie.pathLongitudeCoordinates, equipment)
+                )
                 .addAction(GO_TO_CARD, api.web.open(equipment.UUID))
 
             MetaclassNameAndAttributeList attributesFromGroup =
@@ -506,6 +512,64 @@ class ElementsMap
             )
             return formedEquipmentObject
         }
+    }
+
+    /**
+     * Метод получения данных при работе с атрибутами связанного объекта
+     * @param attribute - атрибут
+     * @param equipment - текущий объект для отображения на карте
+     * @return данные по атрибуту
+     */
+    Object returnDataByAttributeHierarchy(String attribute, ISDtObject equipment)
+    {
+        Object dataToUse
+        if (attribute.contains('/'))
+        {
+            attribute.tokenize('/').eachWithIndex { currentAttribute, idx ->
+                if (equipment.hasProperty(currentAttribute) &&
+                    equipment[currentAttribute] in ISDtObject)
+                {
+                    equipment = equipment[currentAttribute]
+                }
+                if (idx ==
+                    attribute.tokenize('/').size() - 1 && equipment.hasProperty(currentAttribute))
+                {
+                    dataToUse = checkingDataByAttribute(equipment[currentAttribute])
+                }
+            }
+        }
+        else
+        {
+            dataToUse =
+                equipment.hasProperty(attribute) ? checkingDataByAttribute(equipment[attribute]) :
+                    null
+        }
+        return dataToUse
+    }
+
+    /**
+     * Метод проверки типа данных который необходимо вернуть в зависимости от последнего атрибута
+     * @param objectByLastAttribute - данные полученные по последнему атрибуту
+     * @return данные для отображения элемента на карте
+     */
+    Object checkingDataByAttribute(Object objectByLastAttribute)
+    {
+        Object dataToUse
+        if (objectByLastAttribute &&
+            objectByLastAttribute in Collection && objectByLastAttribute.first() in ISDtObject)
+        {
+            dataToUse = objectByLastAttribute.first().UUID
+        }
+        else if (objectByLastAttribute && (
+            objectByLastAttribute in Double || objectByLastAttribute in String))
+        {
+            dataToUse = objectByLastAttribute
+        }
+        else
+        {
+            dataToUse = objectByLastAttribute ? objectByLastAttribute.toString() : null
+        }
+        return dataToUse
     }
 
     /**
@@ -936,42 +1000,34 @@ class TrailBuilder extends MapObjectBuilder
     ElementsMap elementsMap = new ElementsMap()
     @JsonInclude(Include.NON_NULL)
     String color
-
     /**
      * Прозрачность элемента
      */
     String opacity
-
     /**
      * Толщина линии
      */
     String width
-
     /**
      * Тип линии
      */
     String lineStyle
-
     /**
      * Информация по отображению иконки
      */
     Boolean displayingLinesDots
-
     /**
      * Ссылка на иконку А
      */
     String iconFirst
-
     /**
      * Ссылка на иконку B
      */
     String iconSecond
-
     /**
      * Текст всплывающей подсказки
      */
     String tooltip
-
     /**
      * Код формы редактирования
      */
@@ -1059,7 +1115,28 @@ class TrailBuilder extends MapObjectBuilder
                 )
             )
         }
+        this.geopositions = geopositions
+        return this
+    }
 
+    TrailBuilder setGeopositions(Double latitudeA,
+                                 Double longitudeA,
+                                 Double latitudeB,
+                                 Double longitudeB)
+    {
+        Collection<Geoposition> geopositions = []
+        geopositions.add(
+            new Geoposition(
+                latitude: latitudeA,
+                longitude: longitudeA
+            )
+        )
+        geopositions.add(
+            new Geoposition(
+                latitude: latitudeB,
+                longitude: longitudeB
+            )
+        )
         this.geopositions = geopositions
         return this
     }
@@ -1148,6 +1225,7 @@ class SectionBuilder extends MapObjectBuilder
 /**
  * Класс, описывающий билдер-объект оборудования
  */
+@InjectApi
 class BasePointBuilder extends MapObjectBuilder
 {
     protected BasePointBuilder()
@@ -1169,18 +1247,15 @@ class BasePointBuilder extends MapObjectBuilder
      */
     @JsonInclude(Include.NON_NULL)
     EquipmentType equipType
-
     /**
      * Иконка для отображения (ссылкой)
      */
     @JsonIgnore
     String icon
-
     /**
      * Текст всплывающей подсказки
      */
     String tooltip
-
     /**
      * Код формы редактирования
      */
@@ -1262,7 +1337,6 @@ class MapObjectBuilder
      *  Название
      */
     String header
-
     /**
      * Список возможных действий с объектом (для меню справа)
      */
@@ -1271,7 +1345,6 @@ class MapObjectBuilder
      * Список возможных данных об объекте (для меню справа)
      */
     List<Option> options = []
-
     /**
      * Геопозиции начала и конца участка
      */
@@ -1358,7 +1431,6 @@ class MetaclassNameAndAttributeList
      *  Имя метакласса
      */
     String metaclassName
-
     /**
      *  Список атрибутов
      */
@@ -1368,5 +1440,212 @@ class MetaclassNameAndAttributeList
     {
         this.metaclassName = metaclassName
         this.listAttribute = listAttribute
+    }
+}
+
+@InjectApi
+class OutputObjectStrategies
+{
+    /**
+     * Текст скрипта
+     */
+    String scriptText
+    /**
+     * Места использования настроек из мастера
+     */
+    Collection<String> placesOfUse
+    /**
+     * Код используемого метакласса
+     */
+    String metaClassObject
+
+    OutputObjectStrategies setMetaClassObject(String metaClassObject)
+    {
+        this.metaClassObject = metaClassObject
+        return this
+    }
+
+    OutputObjectStrategies setScriptText(String scriptText)
+    {
+        this.scriptText = scriptText
+        return this
+    }
+
+    OutputObjectStrategies setPlacesOfUse(Collection<String> placesOfUse)
+    {
+        Collection<String> setPlaces = []
+        placesOfUse.each {
+            setPlaces.add(it)
+        }
+        this.placesOfUse = setPlaces
+        return this
+    }
+}
+
+class StrategiesLine extends OutputObjectStrategies
+{
+    /**
+     * Цвет элемента
+     */
+    String color
+    /**
+     * Прозрачность элемента
+     */
+    String opacity
+    /**
+     * Толщина линии
+     */
+    String weight
+    /**
+     * Тип линии
+     */
+    String lineStyle
+    /**
+     * Путь к координатам широты А
+     */
+    String pathCoordinatesLatitudeA
+    /**
+     * Путь к координатам долготы А
+     */
+    String pathCoordinatesLongitudA
+    /**
+     * Путь к координатам широты Б
+     */
+    String pathCoordinatesLatitudeB
+    /**
+     * Путь к координатам долготы Б
+     */
+    String pathCoordinatesLongitudB
+    /**
+     * Признак отображения иконки
+     */
+    Boolean displayingLinesDots
+    /**
+     * Путь к иконке для точки А
+     */
+    String pathToIconA
+    /**
+     * Путь к иконке для точки B
+     */
+    String pathToIconB
+    /**
+     * Текст всплывающей подсказки
+     */
+    String tooltip
+
+    StrategiesLine setColor(String color)
+    {
+        this.color = color
+        return this
+    }
+
+    StrategiesLine setOpacity(String opacity)
+    {
+        this.opacity = opacity
+        return this
+    }
+
+    StrategiesLine setWeight(String weight)
+    {
+        this.weight = weight
+        return this
+    }
+
+    StrategiesLine setLineStyle(String lineStyle)
+    {
+        this.lineStyle = lineStyle
+        return this
+    }
+
+    StrategiesLine setPathCoordinatesLatitudeA(String pathCoordinatesLatitudeA)
+    {
+        this.pathCoordinatesLatitudeA = pathCoordinatesLatitudeA
+        return this
+    }
+
+    StrategiesLine setPathCoordinatesLongitudA(String pathCoordinatesLongitudA)
+    {
+        this.pathCoordinatesLongitudA = pathCoordinatesLongitudA
+        return this
+    }
+
+    StrategiesLine setPathCoordinatesLatitudeB(String pathCoordinatesLatitudeB)
+    {
+        this.pathCoordinatesLatitudeB = pathCoordinatesLatitudeB
+        return this
+    }
+
+    StrategiesLine setPathCoordinatesLongitudB(String pathCoordinatesLongitudB)
+    {
+        this.pathCoordinatesLongitudB = pathCoordinatesLongitudB
+        return this
+    }
+
+    StrategiesLine setDisplayingLinesDots(Boolean displayingLinesDots)
+    {
+        this.displayingLinesDots = displayingLinesDots
+        return this
+    }
+
+    StrategiesLine setPathToIconA(String pathToIconA)
+    {
+        this.pathToIconA = pathToIconA
+        return this
+    }
+
+    StrategiesLine setPathToIconB(String pathToIconB)
+    {
+        this.pathToIconB = pathToIconB
+        return this
+    }
+
+    StrategiesLine setTooltip(String tooltip)
+    {
+        this.tooltip = tooltip
+        return this
+    }
+}
+
+class StrategiesPoint extends OutputObjectStrategies
+{
+    /**
+     * Путь к координатам широты
+     */
+    String pathLatitudeCoordinates
+    /**
+     * Путь к координатам долготы
+     */
+    String pathLongitudeCoordinates
+    /**
+     * Текст всплывающей подсказки
+     */
+    String tooltip
+    /**
+     * Иконка для отображения
+     */
+    String pathIcon
+
+    StrategiesPoint setPathLatitudeCoordinates(String pathLatitudeCoordinates)
+    {
+        this.pathLatitudeCoordinates = pathLatitudeCoordinates
+        return this
+    }
+
+    StrategiesPoint setPathLongitudeCoordinates(String pathLongitudeCoordinates)
+    {
+        this.pathLongitudeCoordinates = pathLongitudeCoordinates
+        return this
+    }
+
+    StrategiesPoint setTooltip(String tooltip)
+    {
+        this.tooltip = tooltip
+        return this
+    }
+
+    StrategiesPoint setPathIcon(String pathIcon)
+    {
+        this.pathIcon = pathIcon
+        return this
     }
 }
