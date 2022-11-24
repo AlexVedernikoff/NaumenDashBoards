@@ -95,7 +95,7 @@ const getValueFormatter = (widget: PivotWidget): ValuePivotFormatter => {
 	const formatters = {};
 
 	widget.data.forEach(dataSet => {
-		dataSet.indicators.forEach(indicator => {
+		dataSet.indicators && dataSet.indicators.forEach(indicator => {
 			const {aggregation, attribute, breakdown, key} = indicator;
 			let formatter = breakdown
 				? getPivotFormatterForAttribute(breakdown.attribute, DEFAULT_AGGREGATION.COUNT)

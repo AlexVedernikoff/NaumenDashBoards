@@ -40,6 +40,10 @@ export const withBaseWidget = <Config: WidgetProps>(
 
 					return {options, updateError: false};
 				} catch (ex) {
+					if (process.env.NODE_ENV === 'development') {
+						console.error(ex);
+					}
+
 					return {updateError: true};
 				}
 			}
