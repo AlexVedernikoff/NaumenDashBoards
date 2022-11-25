@@ -596,7 +596,7 @@ class DashboardUtils
     static void correctWidgetsWithDescriptorError(Collection<String> widgetKeys)
     {
         JsonSlurper slurper = new JsonSlurper()
-        DashboardConfigService service = new Object()
+        DashboardConfigService service = DashboardConfigService.instance
 
         List allDashboardKeys = service.getDashboardKeys('widgets', DASHBOARD_NAMESPACE)
         allDashboardKeys += service.getDashboardKeys('widgetIds', DASHBOARD_NAMESPACE)
@@ -642,7 +642,7 @@ class DashboardUtils
     static Collection<Object> getWidgetsDataWithDescriptorError(Boolean getOnlyKeys = false)
     {
         JsonSlurper slurper = new JsonSlurper()
-        DashboardConfigService service = new Object()
+        DashboardConfigService service = DashboardConfigService.instance
 
         List allDashboardKeys = service.getDashboardKeys('widgets', DASHBOARD_NAMESPACE)
         allDashboardKeys += service.getDashboardKeys('widgetIds', DASHBOARD_NAMESPACE)
