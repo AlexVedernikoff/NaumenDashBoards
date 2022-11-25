@@ -37,8 +37,8 @@ const getOptions = (
 			}
 
 			const legend = getLegendOptions(container, axisWidget.legend);
-			const yaxis = getYAxisCategory(axisWidget, container, labels, formatters.parameter, xAxisName);
-			const xaxis = getXAxisNumber(axisWidget, container, [legend, yaxis], yAxisName, usesPercent);
+			const yAxis = getYAxisCategory(axisWidget, container, labels, formatters.parameter, xAxisName);
+			const xAxis = getXAxisNumber(axisWidget, container, [legend, yAxis], yAxisName, usesPercent);
 
 			return {
 				data: seriesData,
@@ -52,8 +52,8 @@ const getOptions = (
 				stacked: true,
 				subTotalGetter,
 				type: 'AxisChartOptions',
-				xaxis,
-				yaxis
+				xAxis,
+				yAxis
 			};
 		}
 	}

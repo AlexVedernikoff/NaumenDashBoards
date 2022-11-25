@@ -172,8 +172,8 @@ export type AxisChartOptions = {
 	stackOffset: ?string,
 	subTotalGetter: ?SubTotalGetter,
 	type: 'AxisChartOptions',
-	xaxis: AxisOptions,
-	yaxis: AxisOptions
+	xAxis: AxisOptions,
+	yAxis: AxisOptions
 };
 
 export type CircleChartOptions = {
@@ -225,8 +225,8 @@ export type ComboChartOptions = {
 	legend: ReChartLegend,
 	series: ComboSeriesInfo,
 	type: 'ComboChartOptions',
-	xaxis: AxisOptions,
-	yaxis: ComboAxisOptions[]
+	xAxis: AxisOptions,
+	yAxis: ComboAxisOptions[]
 };
 
 export type SummaryData = {

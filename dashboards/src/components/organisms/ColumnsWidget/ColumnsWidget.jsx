@@ -243,8 +243,8 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 	};
 
 	renderXAxis = () => {
-		const {formatters, xaxis} = this.state.options;
-		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xaxis;
+		const {formatters, xAxis} = this.state.options;
+		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xAxis;
 		const labelStyle = showName
 			? {fontFamily, fontSize, height, offset: -3, position: 'insideBottom', value}
 			: null;
@@ -268,8 +268,8 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 	};
 
 	renderXCategoryLabel = () => {
-		const {xaxis} = this.state.options;
-		const {fontFamily, fontSize, height, mode, multilineLabels, showName} = xaxis;
+		const {xAxis} = this.state.options;
+		const {fontFamily, fontSize, height, mode, multilineLabels, showName} = xAxis;
 		const tickHeight = height ? (height - (showName ? fontSize * 1.5 : 0)) : 0;
 
 		return (
@@ -284,8 +284,8 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 	};
 
 	renderYAxis = () => {
-		const {formatters, yaxis} = this.state.options;
-		const {axisName: value, domain, fontFamily, fontSize, show, showName, width} = yaxis;
+		const {formatters, yAxis} = this.state.options;
+		const {axisName: value, domain, fontFamily, fontSize, show, showName, width} = yAxis;
 		const label = showName
 			? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={value} />
 			: null;

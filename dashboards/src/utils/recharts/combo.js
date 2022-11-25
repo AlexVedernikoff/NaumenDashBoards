@@ -36,8 +36,8 @@ const getOptions = (
 				legend: getLegendOptions(container, comboWidget.legend),
 				series,
 				type: 'ComboChartOptions',
-				xaxis: getXAxisCategory(comboWidget, container, labels.map(formatters.parameter), xAxisName),
-				yaxis: getYAxisesNumber(comboWidget, rawData, series)
+				xAxis: getXAxisCategory(comboWidget, container, labels.map(formatters.parameter), xAxisName),
+				yAxis: getYAxisesNumber(comboWidget, rawData, series)
 			};
 		}
 	}

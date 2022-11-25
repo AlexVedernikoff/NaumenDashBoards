@@ -160,7 +160,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 
 	renderComboChart = () => {
 		const {widget} = this.props;
-		const {options: {data, series, yaxis}} = this.state;
+		const {options: {data, series, yAxis}} = this.state;
 		const margin = {bottom: 5, left: 30, right: 30, top: 5};
 		const {COLUMN, COLUMN_STACKED, LINE} = COMBO_TYPES;
 		const typesOrder = {[COLUMN]: 1, [COLUMN_STACKED]: 0, [LINE]: 2};
@@ -174,7 +174,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 					<Tooltip content={this.renderTooltipContent} />
 					<CartesianGrid strokeDasharray="3 3" />
 					{this.renderXAxis()}
-					{yaxis.map(this.renderYAxis)}
+					{yAxis.map(this.renderYAxis)}
 					{sortedSeries.map(this.renderSeries)}
 					<Customized component={<StoredLabels />} />
 					{this.renderLegend()}
@@ -287,8 +287,8 @@ export class ComboWidget extends PureComponent<Props, State> {
 	};
 
 	renderXAxis = () => {
-		const {options: {formatters, xaxis}} = this.state;
-		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xaxis;
+		const {options: {formatters, xAxis}} = this.state;
+		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xAxis;
 		const labelStyle = showName
 			? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
 			: null;
@@ -310,8 +310,8 @@ export class ComboWidget extends PureComponent<Props, State> {
 	};
 
 	renderXAxisTick = () => {
-		const {options: {xaxis}} = this.state;
-		const {fontFamily, fontSize, height, mode, multilineLabels, showName} = xaxis;
+		const {options: {xAxis}} = this.state;
+		const {fontFamily, fontSize, height, mode, multilineLabels, showName} = xAxis;
 		const tickHeight = height ? (height - (showName ? fontSize * 1.5 : 0)) : 0;
 
 		return (
@@ -325,9 +325,9 @@ export class ComboWidget extends PureComponent<Props, State> {
 		);
 	};
 
-	renderYAxis = (yaxis, idx) => {
+	renderYAxis = (yAxis, idx) => {
 		const {options: {formatters}} = this.state;
-		const {axisName: value, color, dataKey, fontFamily, fontSize, max, min, show, showName, width} = yaxis;
+		const {axisName: value, color, dataKey, fontFamily, fontSize, max, min, show, showName, width} = yAxis;
 		const orientation = idx === 0 ? 'left' : 'right';
 		const label = showName
 			? (

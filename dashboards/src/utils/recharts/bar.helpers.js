@@ -77,8 +77,7 @@ const getXAxisNumber = (
 ): AxisOptions => {
 	const settings = getRechartAxisSetting(widget.indicator);
 	const showSubTotalAmount = widget.showSubTotalAmount;
-	const {width: containerWidth} = container;
-	const graphWidth = containerWidth - subContainers.reduce((acc, subContainer) => acc + (subContainer.width ?? 0), 0);
+	const graphWidth = container.width - subContainers.reduce((acc, subContainer) => acc + (subContainer.width ?? 0), 0);
 	let domain = [0, 1];
 
 	if (!isNormalized) {
