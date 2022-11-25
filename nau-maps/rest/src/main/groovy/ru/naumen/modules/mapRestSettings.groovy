@@ -47,6 +47,7 @@ String getMapObjects(String subjectUuid, String contentUuid, LinkedTreeMap userU
     Object userObject = userUuid['admin'] ?: api.utils.get(userUuid['uuid'])
     LinkedHashMap<String, Object> bindings = userUuid['admin'] ? ['subject': subjectObject] :
         ['subject': subjectObject, 'user': userObject]
+    contentUuid = "${api.utils.get(subjectUuid).getMetainfo()}_${contentUuid}".toString()
     ISDtObject object = utils.get(subjectUuid)
     return getMapInfo(object, contentUuid, bindings)
 }
