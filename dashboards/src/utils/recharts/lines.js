@@ -26,18 +26,21 @@ const getOptions = (
 			const formatters = getAxisFormatter(axisWidget, labels, percentStore);
 			const {xAxisName, yAxisName} = buildDataSet;
 			const getDrillDownOptions = makeGeneratorAxisDrillDownOptions(axisWidget);
+			const legend = getLegendOptions(container, axisWidget.legend);
+			const xAxis = getXAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName);
+			const yAxis = getYAxisNumber(axisWidget, container, xAxis, legend, rawData, formatters.indicator, yAxisName);
 
 			return {
 				data,
 				dataLabels: getDataLabels(axisWidget),
 				formatters,
 				getDrillDownOptions,
-				legend: getLegendOptions(container, axisWidget.legend),
+				legend,
 				series: getSeriesInfo(axisWidget, rawData, globalColorsSettings),
 				stacked: false,
 				type: 'AxisChartOptions',
-				xaxis: getXAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName),
-				yaxis: getYAxisNumber(axisWidget, rawData, formatters.indicator, yAxisName)
+				xAxis,
+				yAxis
 			};
 		}
 	}

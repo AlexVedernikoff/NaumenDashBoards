@@ -192,8 +192,8 @@ export class LinesWidget extends PureComponent<Props, State> {
 	};
 
 	renderXAxis = () => {
-		const {options: {formatters, xaxis}} = this.state;
-		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xaxis;
+		const {options: {formatters, xAxis}} = this.state;
+		const {axisName: value, fontFamily, fontSize, height, interval, show, showName} = xAxis;
 		const labelStyle = showName
 			? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
 			: null;
@@ -215,8 +215,8 @@ export class LinesWidget extends PureComponent<Props, State> {
 	};
 
 	renderXAxisTick = () => {
-		const {options: {xaxis}} = this.state;
-		const {fontFamily, fontSize, height, mode, showName} = xaxis;
+		const {options: {xAxis}} = this.state;
+		const {fontFamily, fontSize, height, mode, showName} = xAxis;
 		const tickHeight = height ? (height - (showName ? fontSize * 1.5 : 0)) : 0;
 
 		return (
@@ -230,8 +230,8 @@ export class LinesWidget extends PureComponent<Props, State> {
 	};
 
 	renderYAxis = () => {
-		const {options: {formatters, yaxis}} = this.state;
-		const {axisName: value, fontFamily, fontSize, show, showName, width} = yaxis;
+		const {options: {formatters, yAxis}} = this.state;
+		const {axisName: value, fontFamily, fontSize, show, showName, width} = yAxis;
 		const label = showName
 			? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={value} />
 			: null;

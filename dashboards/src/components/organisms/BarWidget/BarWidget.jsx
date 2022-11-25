@@ -244,8 +244,8 @@ export class BarWidget extends PureComponent<Props, State> {
 	};
 
 	renderXAxis = () => {
-		const {options: {formatters, xaxis}} = this.state;
-		const {axisName: value, domain, fontFamily, fontSize, show, showName} = xaxis;
+		const {options: {formatters, xAxis}} = this.state;
+		const {axisName: value, domain, fontFamily, fontSize, show, showName} = xAxis;
 		const labelStyle = showName
 			? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
 			: null;
@@ -265,8 +265,8 @@ export class BarWidget extends PureComponent<Props, State> {
 	};
 
 	renderYAxis = () => {
-		const {options: {formatters, yaxis}} = this.state;
-		const {axisName, fontFamily, fontSize, show, showName, width} = yaxis;
+		const {options: {formatters, yAxis}} = this.state;
+		const {axisName, fontFamily, fontSize, show, showName, width} = yAxis;
 		const label = showName
 			? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={axisName} />
 			: null;
@@ -286,8 +286,8 @@ export class BarWidget extends PureComponent<Props, State> {
 	};
 
 	renderYAxisTick = () => {
-		const {options: {yaxis}} = this.state;
-		const {fontFamily, fontSize, mode, showName, width} = yaxis;
+		const {options: {yAxis}} = this.state;
+		const {fontFamily, fontSize, mode, showName, width} = yAxis;
 		const tickWidth = width ? (width - (showName ? fontSize * 1.5 : 0)) : 0;
 
 		return (

@@ -30,6 +30,9 @@ const getOptions = (
 			const {aggregation, attribute: indicatorAttribute} = indicators[0];
 			const usesPercent = hasPercent(indicatorAttribute, aggregation);
 			const subTotalGetter = makeSubTotalGetter(axisWidget, seriesData, usesPercent);
+			const legend = getLegendOptions(container, axisWidget.legend);
+			const xAxis = getXAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName);
+			const yAxis = getYAxisNumber(axisWidget, container, xAxis, legend, rawData, formatters.indicator, yAxisName, usesPercent);
 
 			if (usesPercent) {
 				seriesData = normalizeSeries(seriesData);
@@ -40,15 +43,15 @@ const getOptions = (
 				dataLabels: getDataLabels(axisWidget),
 				formatters,
 				getDrillDownOptions,
-				legend: getLegendOptions(container, axisWidget.legend),
+				legend,
 				series: getSeriesInfo(axisWidget, rawData, globalColorsSettings),
 				stackId: 'stacked',
 				stackOffset: usesPercent ? 'expand' : 'none',
 				stacked: true,
 				subTotalGetter,
 				type: 'AxisChartOptions',
-				xaxis: getXAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName),
-				yaxis: getYAxisNumber(axisWidget, rawData, formatters.indicator, yAxisName, usesPercent)
+				xAxis,
+				yAxis
 			};
 		}
 	}
