@@ -63,7 +63,7 @@ export const getParameterStyle = (width: number, level: number, style: PivotBody
 		color: fontColor,
 		flex: `0 0 ${Math.max(width, 0)}px`,
 		fontStyle: fontStyle === FONT_STYLES.ITALIC ? 'italic' : '',
-		fontWeight: fontStyle === FONT_STYLES.BOLD || isTotal ? '500' : 'normal',
+		fontWeight: fontStyle === FONT_STYLES.BOLD || isTotal ? '500' : '400',
 		paddingLeft: `${padding}px`,
 		textDecoration: fontStyle === FONT_STYLES.UNDERLINE && !isTotal ? 'underline' : ''
 	};
@@ -75,10 +75,18 @@ export const getParameterStyle = (width: number, level: number, style: PivotBody
  * @param {number} level - уровень вложенности
  * @param {PivotBodySettings} style - стиль таблицы
  * @param {boolean} isTotal - ячейка находится в строке Итого
+ * @param {boolean} isSumColumn - ячейка находится в столбце Сумм
  * @param {boolean} isTotalColumn - ячейка находится в столбце Итого
  * @returns {ParameterStyle}
  */
-export const getCellStyle = (width: number, level: number, style: PivotBodySettings, isTotal: boolean, isTotalColumn: boolean): CellStyle => {
+export const getCellStyle = (
+	width: number,
+	level: number,
+	style: PivotBodySettings,
+	isTotal: boolean,
+	isSumColumn: boolean,
+	isTotalColumn: boolean
+): CellStyle => {
 	const {indicatorSettings, parameterRowColor, textAlign} = style;
 	let backgroundColor = 'transparent';
 
@@ -89,14 +97,15 @@ export const getCellStyle = (width: number, level: number, style: PivotBodySetti
 	}
 
 	const {fontColor, fontStyle} = indicatorSettings;
+	const isUnderline = fontStyle === FONT_STYLES.UNDERLINE && !isSumColumn && !isTotal && !isTotalColumn;
 
 	return {
 		backgroundColor,
 		color: fontColor,
 		flex: `0 0 ${Math.max(width, 0)}px`,
 		fontStyle: fontStyle === FONT_STYLES.ITALIC ? 'italic' : '',
-		fontWeight: fontStyle === FONT_STYLES.BOLD || isTotal ? '500' : 'normal',
+		fontWeight: fontStyle === FONT_STYLES.BOLD || isTotal || isTotalColumn ? '500' : '400',
 		textAlign,
-		textDecoration: fontStyle === FONT_STYLES.UNDERLINE && !isTotal ? 'underline' : ''
+		textDecoration: isUnderline ? 'underline' : ''
 	};
 };
