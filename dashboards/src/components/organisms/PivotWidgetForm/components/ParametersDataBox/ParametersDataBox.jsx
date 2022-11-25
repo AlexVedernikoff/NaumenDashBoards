@@ -92,10 +92,16 @@ export class ParametersDataBox extends PureComponent<Props> {
 	};
 
 	renderRightControl = () => {
-		const {showTotal} = this.props;
+		const {disableShowTotal, showTotal} = this.props;
 		return (
 			<Fragment>
-				<IconButton active={showTotal} icon={ICON_NAMES.SUM} onClick={this.handleClickShowTotal} round={false} />
+				<IconButton
+					active={showTotal}
+					disable={disableShowTotal}
+					icon={ICON_NAMES.SUM}
+					onClick={this.handleClickShowTotal}
+					round={false}
+				/>
 				<IconButton icon={ICON_NAMES.PLUS} onClick={this.handleClickAddButton} round={false} />
 			</Fragment>
 		);
