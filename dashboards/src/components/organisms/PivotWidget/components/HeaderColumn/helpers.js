@@ -17,17 +17,18 @@ export const getHeaderColumnStyle = (columnWidth: number, style: PivotHeaderSett
  * Формирует стили для подписи ячейки заголовка сводной таблицы
  * @param {number} height - высота подписи
  * @param {PivotHeaderSettings} style - стиль заголовка
+ * @param {boolean} isTotal - ячейка находится в столбце Итого
  * @returns {HeaderColumnStyle}
  */
-export const getTitleStyle = (height: number, style: PivotHeaderSettings): TitleColumnStyle => {
+export const getTitleStyle = (height: number, style: PivotHeaderSettings, isTotal: boolean): TitleColumnStyle => {
 	const {fontColor, fontStyle, textAlign} = style;
 
 	return {
 		color: fontColor,
 		fontStyle: fontStyle === FONT_STYLES.ITALIC ? 'italic' : '',
-		fontWeight: fontStyle === FONT_STYLES.BOLD ? '500' : 'normal',
+		fontWeight: isTotal || fontStyle === FONT_STYLES.BOLD ? '500' : 'normal',
 		height: `${height * 2}em`,
 		textAlign,
-		textDecoration: fontStyle === FONT_STYLES.UNDERLINE ? 'underline' : ''
+		textDecoration: !isTotal && fontStyle === FONT_STYLES.UNDERLINE ? 'underline' : ''
 	};
 };

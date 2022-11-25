@@ -127,8 +127,9 @@ export class HeaderColumn extends PureComponent<Props, State> {
 
 	renderTitle = () => {
 		const {column, formatter, style} = this.props;
+		const isTotal = column.type === PIVOT_COLUMN_TYPE.TOTAL_SUM;
 		const title = column.type === PIVOT_COLUMN_TYPE.SUM ? t('PivotWidget::Sum') : formatter(column.title);
-		const titleStyle = getTitleStyle(column.height, style);
+		const titleStyle = getTitleStyle(column.height, style, isTotal);
 		const tooltip = column.tooltip || null;
 
 		return (

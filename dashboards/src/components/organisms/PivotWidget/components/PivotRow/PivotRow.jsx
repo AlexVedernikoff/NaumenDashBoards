@@ -39,13 +39,14 @@ export class PivotRow extends PureComponent<Props, State> {
 	renderCell = (column: PivotColumn, index: number) => {
 		const {columnsWidth, formatters, level, row: {data, isTotal}, style} = this.props;
 		const isTotalColumn = column.type === PIVOT_COLUMN_TYPE.TOTAL_SUM;
+		const isSumColumn = column.type === PIVOT_COLUMN_TYPE.SUM;
 		const className = cn(styles.valueCell, {
 			[styles.valueCellLast]: column.isLastColumnGroup,
 			[styles.totalColumn]: isTotalColumn
 		});
 		const formatter = isTotal ? formatters.total : formatters.value;
 		const formatValue = getValueForColumn(column, data, formatter);
-		const cellStyle = getCellStyle(columnsWidth[index + 1], level, style, isTotal, isTotalColumn);
+		const cellStyle = getCellStyle(columnsWidth[index + 1], level, style, isTotal, isSumColumn, isTotalColumn);
 
 		return (
 			<div className={className} key={column.key} onClick={this.handleClickCell(column)} style={cellStyle}>
