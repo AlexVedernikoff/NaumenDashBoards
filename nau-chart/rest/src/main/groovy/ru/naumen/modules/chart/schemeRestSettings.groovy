@@ -39,6 +39,7 @@ private String getSchemeData(String objectUuid, String contentUuid, LinkedTreeMa
     LinkedHashMap aggregations = []
     Object subjectObject = api.utils.get(objectUuid)
     Object userObject = userUuid['admin'] ?: api.utils.get(userUuid['uuid'])
+    contentUuid = "${api.utils.get(objectUuid).getMetainfo()}_${contentUuid}".toString()
     LinkedHashMap<String, Object> bindings = userUuid['admin'] ? ['subject': subjectObject] :
         ['subject': subjectObject, 'user': userObject]
     try

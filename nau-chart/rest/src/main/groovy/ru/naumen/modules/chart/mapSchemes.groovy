@@ -371,8 +371,9 @@ String getContentTitle()
         api.apps.listContents(ConstantSchemes.EMBEDDED_APPLICATION_CODE)
     Collection<LinkedHashMap> argum = []
     contentInfo.collect {
-        argum << [selectable     : true, title: it.contentTitle, uuid:
-            it.contentUuid, level: 0, extra: it.contentUuid]
+        String uuidData = "${ it.subjectFqn }_${ it.contentUuid }".toString()
+        argum << [selectable: true, title: it.contentTitle, uuid:
+            uuidData, level : 0, extra: uuidData]
     }
     return Jackson.toJsonString(argum)
 }
