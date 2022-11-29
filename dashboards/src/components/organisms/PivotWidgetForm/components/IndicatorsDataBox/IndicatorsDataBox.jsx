@@ -3,15 +3,16 @@ import {ATTRIBUTES_HELPERS_CONTEXT} from 'containers/DiagramWidgetForm/HOCs/with
 import type {Breakdown} from 'store/widgetForms/types';
 import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
 import {createPivotIndicator} from 'store/widgetForms/pivotForm/helpers';
-import type {DataSet, PivotIndicator} from 'store/widgetForms/pivotForm/types';
 import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
 import FormBox from 'components/molecules/FormBox';
-import {hasDisableTotal} from './helpers';
+import {getDataKeysWithChangedDataSourceValue, hasDisableTotal, isDataKeysChanged} from './helpers';
+import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import IndicatorFieldset from 'WidgetFormPanel/components/IndicatorFieldset';
 import type {IndicatorValue, Props, State} from './types';
 import memoize from 'memoize-one';
+import type {PivotIndicator} from 'store/widgetForms/pivotForm/types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import t from 'localization';
@@ -38,8 +39,14 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 	async componentDidUpdate (prevProps: Props) {
 		const {data} = this.props;
 
-		if (!this.compareDataKeys(data, prevProps.data)) {
+		if (!isDataKeysChanged(data, prevProps.data)) {
 			await this.calculateValues();
+		}
+
+		const changedSources = getDataKeysWithChangedDataSourceValue(data, prevProps.data);
+
+		if (changedSources.length > 0) {
+			await this.fetchValuesAttributes(changedSources);
 		}
 
 		if (prevProps.data === data) {
@@ -77,19 +84,51 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 		}
 	};
 
-	compareDataKeys = (data: Array<DataSet>, prevData: Array<DataSet>) => {
-		let result = false;
+	fetchValuesAttributes = async (dataKeys: Array<string>) => {
+		const {data, fetchAttributeByCode} = this.props;
+		const {values} = this.state;
+		const newValues: Array<IndicatorValue> = [];
 
-		if (data.length === prevData.length) {
-			const dataKeysSets = new Set(data.map(({dataKey}) => dataKey));
-			const prevDataKeysSets = new Set(prevData.map(({dataKey}) => dataKey));
+		// eslint-disable-next-line no-unused-vars
+		for (const item of values) {
+			let newItem: IndicatorValue = item;
 
-			result = [...dataKeysSets, ...prevDataKeysSets].every(
-				value => dataKeysSets.has(value) && prevDataKeysSets.has(value)
-			);
+			if (dataKeys.includes(item.dataKey)) {
+				const dataSet = data.find(({dataKey}) => dataKey === item.dataKey);
+
+				if (dataSet) {
+					const classFqn = dataSet.source.value?.value;
+
+					if (classFqn) {
+						let indicator: PivotIndicator = item.indicator;
+						const attribute = getSourceAttribute(indicator.attribute);
+						const breakdown = indicator.breakdown;
+
+						if (attribute && classFqn) {
+							const newAttribute = await fetchAttributeByCode(classFqn, attribute);
+
+							indicator = {...indicator, attribute: newAttribute};
+						}
+
+						if (breakdown) {
+							const breakdownAttribute = getSourceAttribute(breakdown.attribute ?? null);
+
+							if (breakdownAttribute) {
+								const newAttribute = await fetchAttributeByCode(classFqn, breakdownAttribute);
+
+								indicator = {...indicator, breakdown: {...breakdown, attribute: newAttribute}};
+							}
+						}
+
+						newItem = {...item, indicator};
+					}
+				}
+			}
+
+			newValues.push(newItem);
 		}
 
-		return result;
+		this.setState({values: newValues}, this.updateData);
 	};
 
 	getChangeBreakdownHandler = (valueIndex: number) => (breakdowns: Breakdown) => {

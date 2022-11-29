@@ -1,7 +1,9 @@
 // @flow
-import type {IndicatorGrouping, IndicatorInfo} from 'store/widgets/data/types';
+import deepEqual from 'fast-deep-equal';
+import type {IndicatorGrouping, IndicatorInfo, PivotLink} from 'store/widgets/data/types';
 import {INDICATOR_GROUPING_TYPE} from 'store/widgets/data/constants';
 import type {IndicatorsUpdate, PivotValueUpdate} from './types';
+import type {Parameter, ParameterOrder} from 'store/widgetForms/types';
 import type {Values} from 'components/organisms/PivotWidgetForm/types';
 
 /**
@@ -62,7 +64,7 @@ export const getAllKeysInIndicatorGrouping = (indicatorGrouping: IndicatorGroupi
  * Синхронизирует значения indicatorGrouping, links и parametersOrder по параметрам и показателям,
  * которые есть в data.
  * @param {Values} values - значение формы
- * @returns  {PivotValueUpdate} - очищенные значения indicatorGrouping, links и parametersOrder
+ * @returns {PivotValueUpdate} - очищенные значения indicatorGrouping, links и parametersOrder
  */
 export const getValuesDataUpdate = (values: Values): PivotValueUpdate => {
 	const {data, indicatorGrouping, links, parametersOrder} = values;
@@ -116,3 +118,40 @@ export const getUnusedIndicators = (values: Values): Array<IndicatorInfo> => {
 
 	return result;
 };
+
+/**
+ * Возвращает список связей, которые не связаны с указанным источником
+ * @param {Array<PivotLink>} links - массив связей
+ * @param {string} dataKey - идентификатор источника
+ * @returns {Array<PivotLink>} новый массив связей
+ */
+export const removeLinksForSource = (links: Array<PivotLink>, dataKey: string): Array<PivotLink> =>
+	links.filter(link => (link.dataKey1 !== dataKey && link.dataKey2 !== dataKey));
+
+/**
+ * Возвращает список, заменяя параметры с кодом источника dataKey так что,
+ * параметру из oldParameters соответствует параметр с тем же индексом в newParameters
+ * @param {Array<ParameterOrder>} parametersOrder - отсортированный список параметров
+ * @param {string} dataKey  - код источника
+ * @param {Array<Parameter>} oldParameters - старые параметры
+ * @param {Array<Parameter>} newParameters - новые параметры
+ * @returns {Array<ParameterOrder>} - новый список ParameterOrder
+ */
+export const fixParametersOrder = (
+	parametersOrder: Array<ParameterOrder>,
+	dataKey: string,
+	oldParameters: Array<Parameter>,
+	newParameters: Array<Parameter>
+): Array<ParameterOrder> => parametersOrder.map(param => {
+	let result = param;
+
+	if (param.dataKey === dataKey) {
+		const index = oldParameters.findIndex(parameter => deepEqual(parameter, param.parameter));
+
+		if (index >= 0) {
+			result = {dataKey, parameter: newParameters[index]};
+		}
+	}
+
+	return result;
+});
