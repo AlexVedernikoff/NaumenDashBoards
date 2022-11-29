@@ -4922,7 +4922,7 @@
                         }
                 return new Column(
                     footer: "",
-                    accessor: attrValue.key ?: accessorAndAtribut,
+                    accessor: attrValue.key ?: attrValue.aggregation? accessorAndAtribut + "#" + "${attrValue.aggregation}" : attrValue.name,
                     header: accessorAndAtribut,
                     attribute: attrValue.attribute,
                     type: attrValue.type,
@@ -5314,7 +5314,7 @@
                     if(secondAttribut != null){
                         return  attribut.name + " (" + attribut?.attribute?.ref?.title+ ")"
                     }
-                    return attribut.key ?:  attribut.name
+                    return attribut.key ?:  attribut.aggregation? attribut.name + "#" + "${attribut.aggregation}" : attribut.name
                 }
 
                 if (sourceRowNames && hasBreakdown) {
