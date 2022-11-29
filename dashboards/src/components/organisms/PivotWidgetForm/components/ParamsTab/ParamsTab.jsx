@@ -1,10 +1,11 @@
 // @flow
 import {createPivotDataSet} from 'store/widgetForms/pivotForm/helpers';
 import type {DataSet} from 'store/widgetForms/pivotForm/types';
+import deepEqual from 'fast-deep-equal';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import DisplayModeSelectBox from 'containers/DisplayModeSelectBox';
-import {getUnusedIndicators, getValuesDataUpdate} from './helpers';
-import IndicatorsDataBox from 'PivotWidgetForm/components/IndicatorsDataBox';
+import {fixParametersOrder, getUnusedIndicators, getValuesDataUpdate, removeLinksForSource} from './helpers';
+import IndicatorsDataBox from 'containers/PivotIndicatorsDataBox';
 import IndicatorsGroupBox from 'PivotWidgetForm/components/IndicatorsGroupBox';
 import NavigationBox from 'containers/NavigationBox';
 import type {ParameterOrder} from 'store/widgetForms/types';
@@ -37,9 +38,27 @@ export class ParamsTab extends Component<Props> {
 
 	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
+		const oldDataSet = values.data[index];
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
 
 		onChange(DIAGRAM_FIELDS.data, newData, callback);
+
+		if (!deepEqual(oldDataSet.parameters, newDataSet.parameters)) {
+			const newParametersOrder = fixParametersOrder(
+				values.parametersOrder,
+				oldDataSet.dataKey,
+				oldDataSet.parameters,
+				newDataSet.parameters
+			);
+
+			onChange(DIAGRAM_FIELDS.parametersOrder, newParametersOrder);
+		}
+
+		if (oldDataSet.source.value?.value !== newDataSet.source.value?.value) {
+			const newLinks = removeLinksForSource(values.links, oldDataSet.dataKey);
+
+			onChange(DIAGRAM_FIELDS.links, newLinks);
+		}
 	};
 
 	handleChangeIndicators = (data: Array<DataSet>) => {
