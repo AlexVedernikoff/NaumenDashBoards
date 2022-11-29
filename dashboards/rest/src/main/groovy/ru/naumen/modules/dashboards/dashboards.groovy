@@ -1155,8 +1155,8 @@ class DashboardsService
     List<DynamicGroup> getDynamicAttributeGroupsForUser(String descriptor)
     {
         JsonSlurper slurper = new JsonSlurper()
-        descriptor = slurper.parseText(descriptor)
-        List descriptorGroupsData = getDynamicAttributeGroupsDataForUser(descriptor)
+        Map parsedDescriptor = slurper.parseText(descriptor)
+        List descriptorGroupsData = getDynamicAttributeGroupsDataForUser(parsedDescriptor)
         List<DynamicGroup> result = descriptorGroupsData?.collect {
             Map<String, Object> dynamicSource = getDynamicGroupSource(it.group)
             List<String> templateUUIDS = getUUIDSForTemplates(it.group.UUID)
