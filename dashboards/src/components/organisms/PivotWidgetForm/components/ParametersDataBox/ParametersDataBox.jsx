@@ -1,16 +1,45 @@
 // @flow
 import {DEFAULT_PARAMETER} from 'store/widgetForms/constants';
 import FormBox from 'components/molecules/FormBox';
+import {hasDisableTotal} from './helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import type {Parameter, ParameterOrder} from 'store/widgetForms/types';
 import ParameterFieldset from 'WidgetFormPanel/components/ParameterFieldset';
-import type {Props} from './types';
+import type {Props, State} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import SortableList from 'TableWidgetForm/components/SortableList';
 import t from 'localization';
 
-export class ParametersDataBox extends PureComponent<Props> {
+export class ParametersDataBox extends PureComponent<Props, State> {
+	constructor (props) {
+		super(props);
+		this.state = {
+			disableTotalSum: hasDisableTotal(props.data ?? [])
+		};
+	}
+
+	componentDidUpdate (prevProps: Props) {
+		const {data} = this.props;
+
+		if (prevProps.data === data) {
+			this.checkDisableTotalSum();
+		} else {
+			const disableTotalSum = hasDisableTotal(data);
+
+			this.setState({disableTotalSum}, this.checkDisableTotalSum);
+		}
+	}
+
+	checkDisableTotalSum = () => {
+		const {onChangeShowTotal, showTotal} = this.props;
+		const {disableTotalSum} = this.state;
+
+		if (showTotal && disableTotalSum) {
+			onChangeShowTotal(false);
+		}
+	};
+
 	handleChange = (dataSetIndex: number, index: number, parameter: Parameter) => {
 		const {data, onChange, value} = this.props;
 		const newValue = [...value];
@@ -92,12 +121,13 @@ export class ParametersDataBox extends PureComponent<Props> {
 	};
 
 	renderRightControl = () => {
-		const {disableShowTotal, showTotal} = this.props;
+		const {showTotal} = this.props;
+		const {disableTotalSum} = this.state;
 		return (
 			<Fragment>
 				<IconButton
 					active={showTotal}
-					disable={disableShowTotal}
+					disable={disableTotalSum}
 					icon={ICON_NAMES.SUM}
 					onClick={this.handleClickShowTotal}
 					round={false}

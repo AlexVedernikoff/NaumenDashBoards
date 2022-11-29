@@ -2,16 +2,6 @@
 import type {DataSet} from 'store/widgetForms/pivotForm/types';
 
 /**
- * Проверяет на запрет формирования столбца Итого
- * @param {Array<DataSet>} data - источники
- * @returns {boolean}
- */
-export const hasDisableTotal = (data: Array<DataSet>): boolean => {
-	const aggregations = data.flatMap(dataSet => dataSet.indicators?.map(indicator => indicator.aggregation) ?? []);
-	return aggregations.length === 0 || !aggregations.every(aggregation => aggregation === aggregations[0]);
-};
-
-/**
  * Возвращает список ключей источников, в которых было изменено значение
  * @param {Array<DataSet>} data - текущий массив источников
  * @param {Array<DataSet>} prevData - начальный массив источников

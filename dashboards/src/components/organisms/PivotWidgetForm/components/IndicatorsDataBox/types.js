@@ -18,6 +18,5 @@ export type IndicatorValue = {
 };
 
 export type State = {
-	disableTotalSum: boolean,
 	values: Array<IndicatorValue>,
 };
