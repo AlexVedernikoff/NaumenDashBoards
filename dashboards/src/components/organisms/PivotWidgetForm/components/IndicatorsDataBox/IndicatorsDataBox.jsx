@@ -5,7 +5,7 @@ import BreakdownFieldset from 'WidgetFormPanel/components/BreakdownFieldset';
 import {createPivotIndicator} from 'store/widgetForms/pivotForm/helpers';
 import {DEFAULT_INDICATOR} from 'store/widgetForms/constants';
 import FormBox from 'components/molecules/FormBox';
-import {getDataKeysWithChangedDataSourceValue, hasDisableTotal, isDataKeysChanged} from './helpers';
+import {getDataKeysWithChangedDataSourceValue, isDataKeysChanged} from './helpers';
 import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
@@ -21,7 +21,6 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 	constructor (props) {
 		super();
 		this.state = {
-			disableTotalSum: hasDisableTotal(props.data ?? []),
 			values: []
 		};
 	}
@@ -48,14 +47,6 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 		if (changedSources.length > 0) {
 			await this.fetchValuesAttributes(changedSources);
 		}
-
-		if (prevProps.data === data) {
-			this.checkDisableTotalSum();
-		} else {
-			const disableTotalSum = hasDisableTotal(data);
-
-			this.setState({disableTotalSum}, this.checkDisableTotalSum);
-		}
 	}
 
 	calculateValues = async () => new Promise(resolve => {
@@ -74,15 +65,6 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 
 		this.setState({values}, resolve);
 	});
-
-	checkDisableTotalSum = () => {
-		const {onChangeShowTotal, showTotal} = this.props;
-		const {disableTotalSum} = this.state;
-
-		if (showTotal && disableTotalSum) {
-			onChangeShowTotal(false);
-		}
-	};
 
 	fetchValuesAttributes = async (dataKeys: Array<string>) => {
 		const {data, fetchAttributeByCode} = this.props;
@@ -302,13 +284,11 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 
 	renderRightControl = () => {
 		const {showTotal} = this.props;
-		const {disableTotalSum} = this.state;
 
 		return (
 			<Fragment>
 				<IconButton
 					active={showTotal}
-					disable={disableTotalSum}
 					icon={ICON_NAMES.SUM}
 					onClick={this.handleClickShowTotal}
 					round={false}

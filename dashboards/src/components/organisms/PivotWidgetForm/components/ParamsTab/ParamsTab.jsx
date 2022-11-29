@@ -150,9 +150,6 @@ export class ParamsTab extends Component<Props> {
 	render () {
 		const {onChange, values} = this.props;
 		const {data, displayMode, indicatorGrouping, links, navigation, parametersOrder, showTotalAmount, showTotalRowAmount} = values;
-		const disableShowTotal = values.data.length === 0
-			|| (values.data.length === 1 && values.data[0].indicators.length === 0)
-			|| (values.data.length === 1 && values.data[0].indicators.length === 1 && !values.data[0].indicators[0].breakdown);
 
 		return (
 			<Fragment>
@@ -162,7 +159,6 @@ export class ParamsTab extends Component<Props> {
 				<SourceLinksBox data={data} links={links} onChange={this.handleChangeLinks} />
 				<ParametersDataBox
 					data={data}
-					disableShowTotal={disableShowTotal}
 					onChange={this.handleChangeParameters}
 					onChangeShowTotal={this.handleChangeShowTotalRowAmount}
 					showTotal={showTotalRowAmount}
