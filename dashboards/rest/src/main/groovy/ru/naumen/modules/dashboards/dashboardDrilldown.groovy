@@ -353,7 +353,18 @@ class DashboardDrilldownService
     {
         if (descriptor)
         {
-            def iDescriptor = listdata.createListDescriptor(descriptor).wrapped
+            Object listDescriptor = listdata.createListDescriptor(descriptor)
+
+            Object iDescriptor
+            if (listDescriptor.hasProperty('wrapped'))
+            {
+                iDescriptor = listDescriptor.wrapped
+            }
+            else
+            {
+                iDescriptor = listDescriptor.context
+            }
+
             iDescriptor.listFilter.elements.collect { orFilter ->
                 orFilter.elements.collect { filter ->
                     String attribute = filter.getAttributeFqn() as String
