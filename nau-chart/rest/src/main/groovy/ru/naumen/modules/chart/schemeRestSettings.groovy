@@ -208,16 +208,14 @@ class ElementsScheme
     {
         String mainText
         String additionalText
-        if (attributesFromGroup && scriptData.hasProperty(attributesFromGroup.mainTextAttribute))
+        AttributeHandler attributeHandler = new AttributeHandler()
+        if (attributesFromGroup)
         {
-            mainText = scriptData[attributesFromGroup.mainTextAttribute] ?
-                scriptData[attributesFromGroup.mainTextAttribute].toString() : null
-        }
-        if (attributesFromGroup &&
-            scriptData.hasProperty(attributesFromGroup.additionalTextAttribute))
-        {
-            additionalText = scriptData[attributesFromGroup.additionalTextAttribute] ?
-                scriptData[attributesFromGroup.additionalTextAttribute].toString() : null
+            mainText = attributesFromGroup.mainTextAttribute && attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.mainTextAttribute, scriptData) ?
+                attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.mainTextAttribute, scriptData).toString() : null
+
+            additionalText = attributesFromGroup.additionalTextAttribute && attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.additionalTextAttribute, scriptData) ?
+                attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.additionalTextAttribute, scriptData).toString() : null
         }
         return ['mainText': mainText, 'additionalText': additionalText]
     }
@@ -231,16 +229,19 @@ class ElementsScheme
     String getIconToPoint(MetaclassNameAndAttributeListSchemes attributesFromGroup,
                           ISDtObject scriptData)
     {
+        AttributeHandler attributeHandler = new AttributeHandler()
         String basisForLinkIcon = "${ api.web.getBaseUrl() }${ 'download?uuid=' }"
         String linkToIcon = api.utils.findFirst('root', [:]).hasProperty('defPointIcon') &&
                             api.utils.findFirst('root', [:])?.defPointIcon ?
             "${ basisForLinkIcon }${ api.utils.findFirst('root', [:])?.defPointIcon?.UUID?.first() }" :
             null
-        if (attributesFromGroup &&
-            scriptData.hasProperty(attributesFromGroup.iconAttribute) &&
-            scriptData[attributesFromGroup.iconAttribute])
+        if (attributesFromGroup)
         {
-            linkToIcon = "${ basisForLinkIcon }${ scriptData[attributesFromGroup.iconAttribute].UUID.first() }"
+            Object iconData = attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.iconAttribute, scriptData)
+            if (iconData && iconData.first())
+            {
+                linkToIcon = "${ basisForLinkIcon }${ iconData.first().UUID }"
+            }
         }
         return linkToIcon
     }

@@ -79,23 +79,25 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForHierarchyCommunicat
         if (currentStrategy.listStrategy.find { strategy -> strategy == nameContent
         })
         {
-            String scriptLineAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinateLongitude }"
-            String scriptPointAAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinateLongitude }.${ currentStrategy.pointA }"
-            String scriptPointBAttributeData = "${ currentStrategy.scriptText }.${ currentStrategy.pathCoordinateLongitude }.${ currentStrategy.pointB }"
-            Collection<ISDtObject> dataLine
-            Collection<ISDtObject> dataPointA
-            Collection<ISDtObject> dataPointB
+            ISDtObject getObjectFromScript
             try
             {
-                dataLine = api.utils.executeScript(scriptLineAttributeData, bindings)
-                dataPointA = api.utils.executeScript(scriptPointAAttributeData, bindings)
-                dataPointB = api.utils.executeScript(scriptPointBAttributeData, bindings)
+                getObjectFromScript = api.utils.executeScript(currentStrategy.scriptText, bindings)
             }
             catch (Exception ex)
             {
                 logger.info("Передан неверный скрипт!")
                 logger.error("#schemeParamsSettings ${ ex.message }", ex)
             }
+            AttributeHandler attributeHandler = new AttributeHandler()
+            Collection<ISDtObject> dataLine = attributeHandler.returnDataByAttributeHierarchy(
+                currentStrategy.pathCoordinateLongitude,
+                getObjectFromScript
+            )
+            Collection<ISDtObject> dataPointA =
+                attributeHandler.returnDataByAttributeHierarchy(currentStrategy.pointA, dataLine)
+            Collection<ISDtObject> dataPointB =
+                attributeHandler.returnDataByAttributeHierarchy(currentStrategy.pointB, dataLine)
             Collection<HierarchyCommunicationBuilder> allPointsScheme =
                 createPointsForStrategyHierarchyLink(
                     dataLine,
@@ -168,6 +170,70 @@ Collection<Collection<HierarchyCommunicationBuilder>> dataForObjectRelationships
         }
     }
     return allSchemeToDisplay
+}
+
+@InjectApi
+class AttributeHandler
+{
+    /**
+     * Метод получения данных при работе с атрибутами связанного объекта
+     * @param attribute - атрибут
+     * @param equipment - текущий объект для отображения на карте
+     * @return данные по атрибуту
+     */
+    Object returnDataByAttributeHierarchy(String attribute, Object equipment)
+    {
+        Object dataToUse
+        if (attribute.contains('/'))
+        {
+            attribute.tokenize('/').eachWithIndex { currentAttribute, idx ->
+                if (equipment.hasProperty(currentAttribute) &&
+                    equipment[currentAttribute] in ISDtObject)
+                {
+                    equipment = equipment[currentAttribute]
+                }
+                if (idx ==
+                    attribute.tokenize('/').size() - 1 && equipment.hasProperty(currentAttribute))
+                {
+                    dataToUse = checkingDataByAttribute(equipment[currentAttribute])
+                }
+                if (true in
+                    equipment*.hasProperty(currentAttribute) &&
+                    equipment[currentAttribute] in Collection)
+                {
+                    dataToUse = equipment[currentAttribute]
+                }
+            }
+        }
+        else
+        {
+            dataToUse =
+                equipment.hasProperty(attribute) ? checkingDataByAttribute(equipment[attribute]) :
+                    null
+        }
+        return dataToUse
+    }
+
+    /**
+     * Метод проверки типа данных который необходимо вернуть в зависимости от последнего атрибута
+     * @param objectByLastAttribute - данные полученные по последнему атрибуту
+     * @return данные для отображения элемента на карте
+     */
+    Object checkingDataByAttribute(Object objectByLastAttribute)
+    {
+        Object dataToUse
+        if (objectByLastAttribute && (
+            objectByLastAttribute in
+            Double || objectByLastAttribute in String || objectByLastAttribute in Collection))
+        {
+            dataToUse = objectByLastAttribute
+        }
+        else
+        {
+            dataToUse = objectByLastAttribute ? objectByLastAttribute.toString() : null
+        }
+        return dataToUse
+    }
 }
 
 /**
@@ -278,17 +344,13 @@ Collection<HierarchyCommunicationBuilder> createPointsForStrategyHierarchyLink(C
         }
     }
     allPointsScheme.each { point ->
-        String attributeNameA = currentStrategy.pointA
-        String attributeNameB = currentStrategy.pointB
-        ISDtObject fromPoints = dataLine.find {
-            it[attributeNameB] && it[attributeNameB].UUID == point.UUID
-        }
-        if (fromPoints && fromPoints[attributeNameA])
-        {
-            Long from = allPointsScheme.find {
-                it.UUID == fromPoints[attributeNameA].UUID
-            }.id
-            point.from = from != point.id ? from : null
+        dataLine.eachWithIndex { currentLine, idx ->
+            if (dataPointA[idx].UUID == point.UUID)
+            {
+                allPointsScheme.find {
+                    it.UUID == dataPointB[idx].UUID
+                }.from = point.id
+            }
         }
     }
     return allPointsScheme

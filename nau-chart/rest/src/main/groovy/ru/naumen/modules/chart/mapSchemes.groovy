@@ -149,13 +149,13 @@ class ContentHierarchyCommunicationSettings
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
 
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Атрибут связи', nullable = false)
     String pathCoordinateLongitude = ""
-    @UiSchemaMeta(widget = 'abstract-select', source = 'getAttributesChildMetaclass')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Точка А', nullable = false)
     String pointA = ""
-    @UiSchemaMeta(widget = 'abstract-select', source = 'getAttributesChildMetaclass')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Точка Б', nullable = false)
     String pointB = ""
 
@@ -217,16 +217,16 @@ class DefaultVisualizationSchemes
     @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Главный текст')
     String mainText = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Дополнительный текст')
     String additionalText = ''
     @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Иконка')
     String icon = ''
 }
@@ -262,16 +262,16 @@ class CharacteristicsOutputDiagram
     @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Главный текст')
     String mainText = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Дополнительный текст')
     String additionalText = ''
     @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Иконка')
     String icon = ''
 }
