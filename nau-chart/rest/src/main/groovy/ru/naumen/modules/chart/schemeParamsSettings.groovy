@@ -423,9 +423,18 @@ Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject>
                 {
                     Set<ISDtObject> listObjects = []
                     listObjects += objectsByScript
-                    listObjects += objectsByScript[attributesName].findAll { scritpObject
-                        ->
-                        scritpObject.UUID in scriptedBusinessObjectsSetupWizard.UUID
+                    if (objectsByScript[attributesName] in ISDtObject)
+                    {
+                        ISDtObject currentObject = objectsByScript[attributesName].UUID in
+                                                   scriptedBusinessObjectsSetupWizard.UUID ?
+                            objectsByScript[attributesName] : null
+                        listObjects << currentObject
+                    }
+                    else
+                    {
+                        listObjects += objectsByScript[attributesName].findAll { scritpObject ->
+                            scritpObject.UUID in scriptedBusinessObjectsSetupWizard.UUID
+                        }
                     }
                     allObjectsToScheme << listObjects
                 }

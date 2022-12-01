@@ -25,7 +25,7 @@ import ru.naumen.metainfo.shared.ClassFqn
 class ConstantSchemes
 {
     final static String NAME_MECHANISM_SETTINGS = 'schemes'
-    final static String EMBEDDED_APPLICATION_CODE = 'testScheme'
+    final static String EMBEDDED_APPLICATION_CODE = 'nauScheme'  //testScheme
     final static String ACTUAL_VERSION = 'actualVersion'
     final static String FIRST_PART_STRATEGY_CODE = 'schemesStrategy'
 }
@@ -145,7 +145,7 @@ class ContentHierarchyCommunicationSettings
     @JsonSchemaMeta(title = 'Текст скрипта', description = 'Скрипт возвращает объект для построения иерархической связи. Возможно использование переменной subject, которая содержит объект, на карточке которого размещен контент с приложением.', nullable = false)
     String scriptText = ''
 
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
 
@@ -214,7 +214,7 @@ class ContentObjecRelationshipsSettings
 @JsonSchemaMeta(requiredFields = ['metaClassObjects'], title = ' ')
 class DefaultVisualizationSchemes
 {
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
@@ -237,7 +237,7 @@ class DefaultVisualizationSchemes
 @JsonSchemaMeta(title = 'Действия с объектами')
 class ActionsWithObjects
 {
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс')
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
 
@@ -248,7 +248,7 @@ class ActionsWithObjects
 @JsonSchemaMeta(requiredFields = ['metaClassObjects', 'pathCoordinateLongitude'], title = ' ')
 class RulesLinkingSchemaObjects
 {
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
@@ -259,7 +259,7 @@ class RulesLinkingSchemaObjects
 @JsonSchemaMeta(requiredFields = ['metaClassObjects'], title = ' ')
 class CharacteristicsOutputDiagram
 {
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
@@ -279,7 +279,7 @@ class CharacteristicsOutputDiagram
 @JsonSchemaMeta(requiredFields = ['metaClassObjects', 'pathCoordinateLongitude'], title = ' ')
 class RulesLinkingObjects
 {
-    @UiSchemaMeta(widget = 'metaClass-select')
+    @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс')
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
     @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
