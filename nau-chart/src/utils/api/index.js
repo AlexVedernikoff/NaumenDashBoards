@@ -1,6 +1,7 @@
 // @flow
 import Api from './api';
 import type {Context, UserData} from './types';
+import type {Entity} from 'src/store/entity/types';
 import FakeApi from './fakeApi';
 
 const api = process.env.NODE_ENV === 'development' ? new FakeApi() : new Api();
@@ -16,8 +17,12 @@ export const getContext = async (): Promise<Context> => {
 };
 
 /**
- * Возвращает Entity для вывода схемы
- * @returns {Promise<string>} - Uuid
+ * Возвращает массив данные для вывода на схему
+ *
+ * @param contentCode {string} - код контента
+ * @param subjectUuid {string} - Uuid встроки
+ * @param currentUser {UserData} - текущий пользователь
+ * @returns {Promise<[Entity]>} - Uuid
  */
 export const getScheme = async (contentCode: string, subjectUuid: string, currentUser: UserData): Promise<string> => {
 	return api.getScheme(contentCode, subjectUuid, currentUser);

@@ -153,12 +153,24 @@ const setPosition = (payload: {x: number, y: number}) => ({
 	type: VERIFY_EVENTS.SET_POSITION
 });
 
+const setSearchText = (text: string) => ({
+	text,
+	type: VERIFY_EVENTS.SET_SEARCH_TEXT
+});
+
+const setSearchObjects = (objects: Entity[]) => ({
+	objects,
+	type: VERIFY_EVENTS.SET_SEARCH_POINTS
+});
+
 export {
+	setPosition,
+	setSearchText,
+	setSearchObjects,
 	setActiveElement,
 	setScale,
 	setExportTo,
 	showEditForm,
 	goToPoint,
-	setPosition,
 	getDataEntity
 };

@@ -24,20 +24,36 @@
 
 	.wrapInputSearch {
 		align-items: center;
-		background: #FFFFFF;
-		box-shadow: 0 2px 8px rgba(95, 95, 95, 0.24);
-		border-radius: 4px;
-		display: none;
-		justify-content: center;
+		cursor: pointer;
+		display: flex;
+		overflow: hidden;
+		flex-direction: row;
+		padding: 12px 20px;
+
+		.iconSearch {
+			margin-right: 10px;
+
+			svg {
+				display: block;
+				fill: #4D92C8;
+			}
+		}
 
 		.inputSearch {
-			align-items: center;
-			background: #FFFFFF;
-			box-shadow: 0 2px 8px rgba(95, 95, 95, 0.24);
-			border-radius: 4px;
-			display: flex;
-			justify-content: center;
+			border: none;
+			color: #4D92C8;
+			outline: none;
+			font-size: 13px;
+			font-style: normal;
+			font-weight: 500;
+			flex: 1;
+			line-height: 20px;
 		}
+	}
+
+	.wrapInputSearchViewActive {
+		display: none;
+		padding: 0;
 	}
 
 	.buttonChangeView {
@@ -118,5 +134,18 @@
 	.disabled {
 		cursor: default !important;
 		opacity: 0.6;
+	}
+
+	.text {
+		color: #323232;
+		cursor: pointer;
+		display: flex;
+		font-size: 14px;
+		font-style: normal;
+		font-weight: 500;
+		flex: 1;
+		justify-content: center;
+		line-height: 16px;
+		padding: 10px;
 	}
 }

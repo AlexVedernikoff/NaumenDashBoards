@@ -11,7 +11,8 @@ export const props = (state: State): ConnectedProps => ({
 	data: state.entity.data,
 	exportTo: state.entity.exportTo,
 	position: state.entity.position,
-	scale: state.entity.scale
+	scale: state.entity.scale,
+	searchObjects: state.entity.searchObjects
 });
 
 export const functions: ConnectedFunctions = {

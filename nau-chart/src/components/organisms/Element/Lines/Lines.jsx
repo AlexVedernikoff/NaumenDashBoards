@@ -3,7 +3,11 @@ import {Group, Line, Rect, Text} from 'react-konva';
 import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 
-const Lines = ({centerPointUuid, entity, handleContextMenu, onClick, onHover, points, scale}: Props) => {
+const Lines = ({centerPointUuid, entity, handleContextMenu, onClick, onHover, points, scale, searchObjects}: Props) => {
+	const isSearch = searchObjects.some(point => entity.uuid === point.uuid);
+	const sizeLine = entity.uuid && (isSearch || centerPointUuid === entity.uuid) ? 4 / scale : 2;
+	const [action] = entity.actions || [];
+
 	const {fromX, fromY, toX, toY} = points;
 	const catetX = toX - fromX;
 	const catetY = toY - fromY;
@@ -14,15 +18,13 @@ const Lines = ({centerPointUuid, entity, handleContextMenu, onClick, onHover, po
 	// корректировка центровки плитки с описанием из за поворота вдоль линии
 	// смещение по центру линии, рисуем относительно линии снизу треугольник, катеты это сдвиг
 	const hypotenuse1 = tileW / 2 - rotation / 4;
-
 	const a1 = hypotenuse1 * Math.sin(rotation * Math.PI / 180); // катет а
 	const b1 = hypotenuse1 * Math.cos(rotation * Math.PI / 180); // катет б
 	// смешение по центру плитки с описанием, рисуем относительно линии сверху треугольник, катеты это сдвиг
 	const hypotenuse2 = tileH / 2;
 	const a2 = hypotenuse2 * Math.sin((90 - rotation) * Math.PI / 180); // катет а, угол разница от 90
 	const b2 = hypotenuse2 * -Math.cos((90 - rotation) * Math.PI / 180); // катет б, угол разница от 90 и реверс знака
-	const sizeLine = entity.uuid && centerPointUuid === entity.uuid ? 4 / scale : 2;
-	const [action] = entity.actions || [];
+
 	const refTitle = useRef(null);
 	const refDesc = useRef(null);
 	const [titleHeight, setTitleHeight] = useState(tileH / 2);

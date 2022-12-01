@@ -1,9 +1,9 @@
 // @flow
 import {defaultVerifyAction, initialVerifyState} from './init';
-import type {EntityState} from './types';
+import type {EntityAction, EntityState} from './types';
 import {VERIFY_EVENTS} from './constants';
 
-const reducer = (state: EntityState = initialVerifyState, action: defaultVerifyAction): EntityState => {
+const reducer = (state: EntityState = initialVerifyState, action: EntityAction = defaultVerifyAction): EntityState => {
 	switch (action.type) {
 		case VERIFY_EVENTS.SHOW_LOADER_DATA:
 			return {
@@ -52,6 +52,16 @@ const reducer = (state: EntityState = initialVerifyState, action: defaultVerifyA
 				...state,
 				// centerPointUuid: null,
 				position: action.payload
+			};
+		case VERIFY_EVENTS.SET_SEARCH_TEXT:
+			return {
+				...state,
+				searchText: action.text
+			};
+		case VERIFY_EVENTS.SET_SEARCH_POINTS:
+			return {
+				...state,
+				searchObjects: action.objects
 			};
 		default:
 			return state;

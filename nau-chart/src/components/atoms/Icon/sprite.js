@@ -4,7 +4,7 @@ import type {IconName, Symbol} from './types';
 class Sprite {
 	mounted = false;
 	sprite = null;
-	symbols: Array<Symbol> = [];
+	symbols: Symbol[] = [];
 
 	createSprite = () => {
 		this.sprite = this.parse(`

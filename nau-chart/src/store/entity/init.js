@@ -10,7 +10,9 @@ export const initialVerifyState: EntityState = {
 	exportTo: null,
 	loading: false,
 	position: {x: 0, y: 0},
-	scale: 1
+	scale: 1,
+	searchObjects: [],
+	searchText: ''
 };
 
 export const defaultVerifyAction = {
