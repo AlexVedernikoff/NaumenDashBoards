@@ -42,10 +42,8 @@ export class PanelSearch extends Component<Props> {
 	};
 
 	renderIcon = () => {
-		const {showSingleObject} = this.props;
-
 		return (
-			<div className={styles.icon} onClick={showSingleObject}>
+			<div className={styles.icon}>
 				<PointSearch />
 			</div>
 		);

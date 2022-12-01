@@ -19,7 +19,20 @@ import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.less';
 
-const Content = ({centerPointUuid, data, exportTo, goToPoint, openContextMenu, position, scale, setActiveElement, setExportTo, setPosition, setScale}: Props) => {
+const Content = ({
+	centerPointUuid,
+	data,
+	exportTo,
+	goToPoint,
+	openContextMenu,
+	position,
+	scale,
+	searchObjects,
+	setActiveElement,
+	setExportTo,
+	setPosition,
+	setScale
+}: Props) => {
 	const stageRef = useRef(null);
 	const [isDrag, setIsDrag] = useState(false);
 	const [hoverElement, setHoverElement] = useState(null);
@@ -27,10 +40,6 @@ const Content = ({centerPointUuid, data, exportTo, goToPoint, openContextMenu, p
 	const [schemes, setSchemes] = useState([]);
 
 	useEffect(() => {
-		if (!centerPointUuid) {
-			return;
-		}
-
 		const points = schemes.flat().reduce((accumulator, {lines, points}) => {
 			const filterLines = lines.filter(({uuid}) => centerPointUuid && centerPointUuid === uuid);
 			const filterPoints = points.filter(({uuid}) => centerPointUuid && centerPointUuid === uuid);
@@ -157,7 +166,8 @@ const Content = ({centerPointUuid, data, exportTo, goToPoint, openContextMenu, p
 				handleContextMenu,
 				onClick: setActiveElement,
 				onHover: setHoverElement,
-				scale
+				scale,
+				searchObjects
 			};
 
 			lines.forEach(line => {

@@ -1,20 +1,36 @@
 // @flow
+import {stringUnification, debounce, truncate} from './helpers';
 import cn from 'classnames';
 import {connect} from 'react-redux';
 import Edit from 'icons/edit.svg';
 import {functions, props} from './selectors';
-import ListHide from 'icons/listHide.svg';
+import ListHideIcon from 'icons/listHide.svg';
 import ListItem from 'components/organisms/ListItem';
 import Point from 'icons/point.svg';
 import type {Props, RenderTitleProps} from './types';
 import React, { useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 import Scrollable from 'components/atoms/Scrollable';
+import SearchIcon from 'icons/search.svg';
 import styles from './styles.less';
-import {truncate} from './helpers';
 
-const List = ({activeElement, data, goToPoint, showEditForm}: Props) => {
+const List = ({activeElement, data, goToPoint, searchObjects, searchText, setSearchObjects, setSearchText, showEditForm}: Props) => {
 	const [viewList, setViewList] = useState(true);
+	const [valueSearch, setValueSearch] = useState('');
+
+	const debounceSearch = debounce((value: string) => {
+		setSearchText(value);
+
+		if (value) {
+			const objectsSearch = data.flat().filter(point => {
+				return stringUnification(point.title).includes(stringUnification(value));
+			});
+
+			setSearchObjects(objectsSearch);
+		} else {
+			setSearchObjects([]);
+		}
+	});
 
 	const handleOpenLink = actions => () => {
 		const [action] = actions || [];
@@ -40,18 +56,28 @@ const List = ({activeElement, data, goToPoint, showEditForm}: Props) => {
 		setViewList(!viewList);
 	};
 
-	const handleSearch = () => {
-		setViewList(!viewList);
+	const handleSearch = (e: InputEvent) => {
+		const value = e.target.value;
+
+		if (value.length >= 2) {
+			setValueSearch(value);
+			debounceSearch(value);
+		}
 	};
 
 	const renderSearch = () => {
 		const classNames = cn({
-			[styles.inputSearch]: true
+			[styles.wrapInputSearch]: true,
+			[styles.wrapInputSearchViewActive]: !viewList
 		});
 
 		return (
-			<div className={styles.wrapInputSearch}>
-				<input className={classNames} onClick={handleSearch} type='text' />
+			<div className={classNames}>
+				<div className={styles.iconSearch}>
+					<SearchIcon />
+				</div>
+
+				<input className={styles.inputSearch} onInput={handleSearch} type='text' value={valueSearch} />
 			</div>
 		);
 	};
@@ -64,7 +90,7 @@ const List = ({activeElement, data, goToPoint, showEditForm}: Props) => {
 
 		return (
 			<button className={classNames} onClick={handleChangeView}>
-				<ListHide />
+				<ListHideIcon />
 			</button>
 		);
 	};
@@ -124,6 +150,22 @@ const List = ({activeElement, data, goToPoint, showEditForm}: Props) => {
 		return renderContainer(item);
 	};
 
+	const renderNoSearch = () => {
+		return <div className={styles.text}>По такому запросу ничего не найдено.</div>;
+	};
+
+	const renderContent = () => {
+		if (searchText) {
+			if (searchObjects.length) {
+				return searchObjects.map(renderList);
+			} else {
+				return renderNoSearch();
+			}
+		}
+
+		return data.flat().map(renderList);
+	};
+
 	const classNames = cn({
 		[styles.wrapList]: true,
 		[styles.wrapListHide]: !viewList
@@ -135,7 +177,7 @@ const List = ({activeElement, data, goToPoint, showEditForm}: Props) => {
 			{renderSearch()}
 			<Scrollable>
 				{activeElement && renderContainer(activeElement)}
-				{data.flat().map(renderList)}
+				{renderContent()}
 			</Scrollable>
 		</div>
 	);

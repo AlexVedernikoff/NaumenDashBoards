@@ -1,6 +1,6 @@
 // @flow
 import type {ConnectedFunctions, ConnectedProps} from './types';
-import {goToPoint, showEditForm} from 'store/entity/actions';
+import {goToPoint, setSearchObjects, setSearchText, showEditForm} from 'store/entity/actions';
 import type {State} from 'store/types';
 
 /**
@@ -9,10 +9,14 @@ import type {State} from 'store/types';
  */
 export const props = (state: State): ConnectedProps => ({
 	activeElement: state.entity.activeElement,
-	data: state.entity.data
+	data: state.entity.data,
+	searchObjects: state.entity.searchObjects,
+	searchText: state.entity.searchText
 });
 
 export const functions: ConnectedFunctions = {
 	goToPoint,
+	setSearchObjects,
+	setSearchText,
 	showEditForm
 };

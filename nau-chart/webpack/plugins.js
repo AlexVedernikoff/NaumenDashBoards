@@ -39,7 +39,7 @@ if (license === 'use') {
 	plugins.push(new GroovyWebpackPlugin({
 		editBySuperusers: false,
 		output: './dist/privateModules.xml',
-		paths: ['./rest/src/main/groovy/ru/naumen/modules/dashboards'],
+		paths: ['./rest/src/main/groovy/ru/naumen/modules/chart'],
 		replacers: [packageReplacer]
 	}));
 }

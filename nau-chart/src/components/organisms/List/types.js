@@ -2,7 +2,7 @@
 import type {Action, Entity} from 'store/entity/types';
 
 export type RenderTitleProps = {
-	actions: Array<Action>,
+	actions: Action[],
 	codeEditingForm: string,
 	title: string,
 	uuid: string,

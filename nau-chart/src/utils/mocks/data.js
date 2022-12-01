@@ -44,7 +44,7 @@ export default {
 				title: 'start point 22222 22222222222222222222222222222222222222222222222222222222222',
 				to: null,
 				type: 'point',
-				uuid: 100000000000000000000000000000
+				uuid: 100000000000
 			},
 			{
 				desc: '222222 is uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl',
