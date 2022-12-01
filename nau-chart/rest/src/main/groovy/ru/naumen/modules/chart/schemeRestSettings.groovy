@@ -238,7 +238,7 @@ class ElementsScheme
         if (attributesFromGroup)
         {
             Object iconData = attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.iconAttribute, scriptData)
-            if (iconData && iconData.first())
+            if (iconData?.first())
             {
                 linkToIcon = "${ basisForLinkIcon }${ iconData.first().UUID }"
             }

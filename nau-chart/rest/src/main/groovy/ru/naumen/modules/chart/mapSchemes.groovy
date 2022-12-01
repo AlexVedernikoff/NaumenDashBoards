@@ -25,7 +25,7 @@ import ru.naumen.metainfo.shared.ClassFqn
 class ConstantSchemes
 {
     final static String NAME_MECHANISM_SETTINGS = 'schemes'
-    final static String EMBEDDED_APPLICATION_CODE = 'nauScheme'  //testScheme
+    final static String EMBEDDED_APPLICATION_CODE = 'nauScheme'
     final static String ACTUAL_VERSION = 'actualVersion'
     final static String FIRST_PART_STRATEGY_CODE = 'schemesStrategy'
 }
