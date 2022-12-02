@@ -4905,7 +4905,7 @@
                             attribute:   attrValue.attribute,
                             type:        attrValue.type,
                             aggregation: attrValue.aggregation,
-                            columns: getBreakdownColumns(breakdownValues, breakdownAttributeValue, attrValue)
+                            columns: getBreakdownColumns(attrValue.aggregation, breakdownValues, breakdownAttributeValue, attrValue)
                         )
                     }
                 }
@@ -4941,12 +4941,12 @@
          * @param accessor - поле для сопоставления значения и колонки
          * @return - колонки со значениями разбивки
          */
-        List<AggregationBreakdownColumn> getBreakdownColumns(List breakdownValues, def breakdownAttributeValue, def aggregationAttributeValue, String accessor = null)
+        List<AggregationBreakdownColumn> getBreakdownColumns(def aggregation, List breakdownValues, def breakdownAttributeValue, def aggregationAttributeValue, String accessor = null)
         {
             return breakdownValues.collect { value ->
                 return new AggregationBreakdownColumn(
                     footer:      "",
-                    accessor:    "${accessor ?: aggregationAttributeValue.name}\$${value}",
+                    accessor:    "${accessor ?:  aggregationAttributeValue.name}"+"#"+"${aggregation}\$${value}",
                     header:      value,
                     attribute:   breakdownAttributeValue.attribute,
                     type:        breakdownAttributeValue.type,
@@ -5708,6 +5708,7 @@
                                           type: ColumnType.BREAKDOWN, group: group]
 
                     List<AggregationBreakdownColumn> breakdownColumns = getBreakdownColumns(
+                        breakdownAttributeValue.aggregation,
                         breakdownValues,
                         breakdownAttributeValue,
                         attributeValue,
