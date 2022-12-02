@@ -20,6 +20,7 @@ import ru.naumen.core.server.script.api.DbApi$Query
 import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 import ru.naumen.core.server.script.api.ISelectClauseApi
+import ru.naumen.core.shared.IUUIDIdentifiable
 
 @ru.naumen.core.server.script.api.injection.InjectApi
 trait CriteriaWrapper
@@ -529,7 +530,11 @@ class QueryWrapper implements CriteriaWrapper
      * @param sourceMetaClassCriteriaMap - маппинг метаклассов источников и критерий
      * @return текущий запрос в БД с добавленной группой
      */
-    QueryWrapper processGroup(QueryWrapper wrapper, IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, Source source, Map<String, Object> sourceMetaClassCriteriaMap = null)
+    QueryWrapper processGroup(QueryWrapper wrapper, IApiCriteria criteria,
+                              Boolean totalValueCriteria, GroupParameter parameter,
+                              DiagramType diagramType, Source source,
+                              IUUIDIdentifiable user,
+                              Map<String, Object> sourceMetaClassCriteriaMap = null)
     {
         IApiCriteria criteriaForColumn = criteria
         if (diagramType == DiagramType.PIVOT_TABLE && parameter.attribute.metaClassFqn != source.classFqn)
@@ -559,12 +564,19 @@ class QueryWrapper implements CriteriaWrapper
             else
             {
                 parameter.type = GroupType.OVERLAP
-                wrapper.group(criteria, totalValueCriteria, parameter, diagramType, criteria)
+                wrapper.group(criteria, totalValueCriteria, parameter, diagramType, criteria, user)
             }
         }
         else
         {
-            wrapper.group(criteria, totalValueCriteria, parameter, diagramType, criteriaForColumn)
+            wrapper.group(
+                criteria,
+                totalValueCriteria,
+                parameter,
+                diagramType,
+                criteriaForColumn,
+                user
+            )
         }
         return wrapper
     }
@@ -629,7 +641,9 @@ class QueryWrapper implements CriteriaWrapper
         }
     }
 
-    QueryWrapper group(IApiCriteria criteria, Boolean totalValueCriteria, GroupParameter parameter, DiagramType diagramType, IApiCriteria criteriaForColumn)
+    QueryWrapper group(IApiCriteria criteria, Boolean totalValueCriteria,
+                       GroupParameter parameter, DiagramType diagramType,
+                       IApiCriteria criteriaForColumn, IUUIDIdentifiable user)
     {
         def sc = api.selectClause
         GroupType groupType = parameter.type
@@ -637,6 +651,9 @@ class QueryWrapper implements CriteriaWrapper
                                            .with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(criteriaForColumn, attributeCodes)
         def attributeChains = parameter.attribute.attrChains()
+        def timeZone = (user?.UUID) ? api.employee.getTimeZone(user.UUID).code : TimeZone.getDefault().ID
+			//String timezoneString = api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
+        def columnAcrdngUTC
 
         //в цепочке атрибутов может прийти свыше 2-х только в случае, если выбран ссылочный атрибут,
         // его податрибут: ссылочный атрибут, и уже его податрибут либо такой же ссылочный, либо обычный (сейчас это title строкового типа, подставляется на бэке)
@@ -740,7 +757,8 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 break
             case GroupType.MINUTES:
-                def groupColumn = sc.extract(column, 'MINUTE')
+                columnAcrdngUTC = sc.atTimeZone(column, timeZone)
+                def groupColumn = sc.extract(columnAcrdngUTC, 'MINUTE')
                 criteria.addColumn(groupColumn)
                 criteria.addGroupColumn(groupColumn)
                 String sortingType = parameter.sortingType
@@ -752,10 +770,11 @@ class QueryWrapper implements CriteriaWrapper
                 break
             case GroupType.DAY:
                 String format = parameter.format
+                columnAcrdngUTC = sc.atTimeZone(column, timeZone)
                 switch (format)
                 {
                     case 'dd':
-                        def dayColumn = sc.day(column)
+                        def dayColumn = sc.day(columnAcrdngUTC)
                         criteria.addColumn(dayColumn)
                         criteria.addGroupColumn(dayColumn)
                         String sortingType = parameter.sortingType
@@ -770,9 +789,9 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'dd.mm.YY':
-                        def dayColumn = sc.day(column)
-                        def monthColumn = sc.month(column)
-                        def yearColumn = sc.year(column)
+                        def dayColumn = sc.day(columnAcrdngUTC)
+                        def monthColumn = sc.month(columnAcrdngUTC)
+                        def yearColumn = sc.year(columnAcrdngUTC)
                         criteria.addColumn(
                             sc.concat(
                                 sc.cast(dayColumn, 'string'), sc.constant('.'),
@@ -800,15 +819,19 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'dd.mm.YY hh':
-                        IApiCriteriaColumn hourColumn = sc.extract(column, 'HOUR')
-                        IApiCriteriaColumn dayColumn = sc.day(column)
-                        IApiCriteriaColumn monthColumn = sc.month(column)
-                        IApiCriteriaColumn yearColumn = sc.year(column)
+                        IApiCriteriaColumn hourColumn = sc.extract(columnAcrdngUTC, 'HOUR')
+                        IApiCriteriaColumn dayColumn = sc.day(columnAcrdngUTC)
+                        IApiCriteriaColumn monthColumn = sc.month(columnAcrdngUTC)
+                        IApiCriteriaColumn yearColumn = sc.year(columnAcrdngUTC)
 
-                        criteria.addColumn(sc.concat(sc.cast(dayColumn, 'string'),sc.constant('.'),
-                                                     sc.cast(monthColumn, 'string'), sc.constant('.'),
-                                                     sc.cast(yearColumn, 'string'), sc.constant(' '),
-                                                     sc.cast(hourColumn, 'string')))
+                        criteria.addColumn(
+                            sc.concat(
+                                sc.cast(dayColumn, 'string'), sc.constant('.'),
+                                sc.cast(monthColumn, 'string'), sc.constant('.'),
+                                sc.cast(yearColumn, 'string'), sc.constant(' '),
+                                sc.cast(hourColumn, 'string')
+                            )
+                        )
 
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(monthColumn)
@@ -833,17 +856,20 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'dd.mm.YY hh:ii':
-                        criteria.addGroupColumn(sc.truncDate(column, 'minute'))
-                        criteria.addColumn(sc.truncDate(column, 'minute'))
+                        criteria.addGroupColumn(sc.truncDate(columnAcrdngUTC, 'minute'))
+                        criteria.addColumn(sc.truncDate(columnAcrdngUTC, 'minute'))
                         String sortingType = parameter.sortingType
                         if (sortingType)
                         {
                             Closure sorting = getSorting(sortingType)
-                            sc.truncDate(column, 'minute').with(sorting).with(criteria.&addOrder)
+                            sc.truncDate(columnAcrdngUTC, 'minute').with(sorting)
+                              .with(criteria.&addOrder)
+                            sc.truncDate(columnAcrdngUTC, 'minute').with(sorting)
+                              .with(criteria.&addOrder)
                         }
                         break
                     case 'WD':
-                        def weekColumn = sc.dayOfWeek(column)
+                        def weekColumn = sc.dayOfWeek(columnAcrdngUTC)
                         criteria.addColumn(weekColumn)
                         criteria.addGroupColumn(weekColumn)
                         String sortingType = parameter.sortingType
@@ -858,8 +884,8 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     default:
-                        IApiCriteriaColumn dayColumn = sc.day(column)
-                        IApiCriteriaColumn monthColumn = sc.month(column)
+                        IApiCriteriaColumn dayColumn = sc.day(columnAcrdngUTC)
+                        IApiCriteriaColumn monthColumn = sc.month(columnAcrdngUTC)
                         criteria.addGroupColumn(dayColumn)
                         criteria.addGroupColumn(monthColumn)
                         def sortColumn = sc.concat(sc.cast(dayColumn, 'string'), sc.constant('/'), sc.cast(monthColumn, 'string'))
@@ -879,12 +905,13 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 break
             case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
+								columnAcrdngUTC = sc.atTimeZone(column, timeZone)
                 String format = parameter.format
                 switch (format)
                 {
                     case 'WW YY':
-                        def weekColumn = sc.week(column)
-                        def yearColumn = sc.year(column)
+                        def weekColumn = sc.week(columnAcrdngUTC)
+                        def yearColumn = sc.year(columnAcrdngUTC)
                         criteria.addColumn(sc.concat(sc.cast(weekColumn, 'string'),
                                                      sc.constant(' неделя '),
                                                      sc.cast(yearColumn, 'string')))
@@ -904,9 +931,15 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'MM YY':
-                        def monthColumn = sc.month(column)
-                        def yearColumn = sc.year(column)
-                        criteria.addColumn(sc.concat(sc.cast(monthColumn, 'string'), sc.constant('/'), sc.cast(yearColumn, 'string')))
+                        def monthColumn = sc.month(columnAcrdngUTC)
+                        def yearColumn = sc.year(columnAcrdngUTC)
+                        criteria.addColumn(
+                            sc.concat(
+                                sc.cast(monthColumn, 'string'),
+                                sc.constant('/'),
+                                sc.cast(yearColumn, 'string')
+                            )
+                        )
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(monthColumn)
                         String sortingType = parameter.sortingType
@@ -923,10 +956,14 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'QQ YY':
-                        def quarterColumn = getQuarterGroupColumn(column)
-                        def yearColumn = sc.year(column)
-                        criteria.addColumn(sc.concat(sc.cast(quarterColumn, 'string'), sc.constant(' кв-л '),
-                                                     sc.cast(yearColumn, 'string')))
+                        def quarterColumn = getQuarterGroupColumn(columnAcrdngUTC)
+                        def yearColumn = sc.year(columnAcrdngUTC)
+                        criteria.addColumn(
+                            sc.concat(
+                                sc.cast(quarterColumn, 'string'), sc.constant(' кв-л '),
+                                sc.cast(yearColumn, 'string')
+                            )
+                        )
                         criteria.addGroupColumn(yearColumn)
                         criteria.addGroupColumn(quarterColumn)
                         String sortingType = parameter.sortingType
@@ -946,11 +983,11 @@ class QueryWrapper implements CriteriaWrapper
                         IApiCriteriaColumn groupColumn
                         if(groupType == GroupType.QUARTER)
                         {
-                            groupColumn = getQuarterGroupColumn(column)
+                            groupColumn = getQuarterGroupColumn(columnAcrdngUTC)
                         }
                         else
                         {
-                            groupColumn = sc.(groupType.toString().toLowerCase())(column)
+                            groupColumn = sc.(groupType.toString().toLowerCase())(columnAcrdngUTC)
                         }
                         criteria.addGroupColumn(groupColumn)
                         criteria.addColumn(groupColumn)
@@ -971,17 +1008,18 @@ class QueryWrapper implements CriteriaWrapper
             case GroupType.HOUR_INTERVAL:
             case GroupType.DAY_INTERVAL:
             case GroupType.WEEK_INTERVAL:
-                criteria.addGroupColumn(column)
-                criteria.addColumn(column)
+                columnAcrdngUTC = sc.atTimeZone(column, timeZone)
+                criteria.addGroupColumn(columnAcrdngUTC)
+                criteria.addColumn(columnAcrdngUTC)
                 String sortingType = parameter.sortingType
                 if (sortingType)
                 {
                     Closure sorting = getSorting(sortingType)
-                    column.with(sorting).with(criteria.&addOrder)
+                    columnAcrdngUTC.with(sorting).with(criteria.&addOrder)
                 }
                 else
                 {
-                    criteria.addOrder(ApiCriteriaOrders.asc(column))
+                    criteria.addOrder(ApiCriteriaOrders.asc(columnAcrdngUTC))
                 }
                 break
             case GroupType.getTimerTypes():
@@ -989,12 +1027,12 @@ class QueryWrapper implements CriteriaWrapper
                 String statusCode = statusType?.toLowerCase().charAt(0)
                 String columnCode = attributeCodes.join('.')
                 criteria.add(api.filters.attrContains(columnCode, statusCode, false, false))
-                criteria.addColumn(column)
-                criteria.addGroupColumn(column)
+                criteria.addColumn(columnAcrdngUTC)
+                criteria.addGroupColumn(columnAcrdngUTC)
                 break
             case GroupType.HOURS:
                 String format = parameter.format
-                IApiCriteriaColumn hourColumn = sc.extract(column, 'HOUR')
+                IApiCriteriaColumn hourColumn = sc.extract(columnAcrdngUTC, 'HOUR')
                 switch (format)
                 {
                     case 'hh':
@@ -1012,8 +1050,14 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'hh:ii':
-                        IApiCriteriaColumn minuteColumn = sc.extract(column, 'MINUTE')
-                        criteria.addColumn(sc.concat(sc.cast(hourColumn, 'string'), sc.constant(':'), sc.cast(minuteColumn, 'string')))
+                        IApiCriteriaColumn minuteColumn = sc.extract(columnAcrdngUTC, 'MINUTE')
+                        criteria.addColumn(
+                            sc.concat(
+                                sc.cast(hourColumn, 'string'),
+                                sc.constant(':'),
+                                sc.cast(minuteColumn, 'string')
+                            )
+                        )
                         criteria.addGroupColumn(hourColumn)
                         criteria.addGroupColumn(minuteColumn)
                         String sortingType = parameter.sortingType
@@ -1375,8 +1419,16 @@ class DashboardQueryWrapperUtils
      * @param indicatorFiltration - настройки фильтрации на показателе
      * @return результат выборки
      */
-    List<List> getData(RequestData requestData, Integer top, String currentUserLocale, Boolean onlyFilled = true, DiagramType diagramType = DiagramType.DONUT,
-                       Boolean ignoreParameterLimit = false, String templateUUID = '', PaginationSettings paginationSettings = null, IndicatorFiltration indicatorFiltration = null)
+    List<List> getData(RequestData requestData,
+                       Integer top,
+                       String currentUserLocale,
+                       IUUIDIdentifiable user,
+                       Boolean onlyFilled = true,
+                       DiagramType diagramType = DiagramType.DONUT,
+                       Boolean ignoreParameterLimit = false,
+                       String templateUUID = '',
+                       PaginationSettings paginationSettings = null,
+                       IndicatorFiltration indicatorFiltration = null)
     {
         validate(requestData)
         validate(requestData.source)
@@ -1442,7 +1494,7 @@ class DashboardQueryWrapperUtils
 
         clonedGroups.each {
             prepareAttribute(it.attribute as Attribute)
-            if(templateUUID && it.attribute.code.contains(AttributeType.VALUE_TYPE))
+            if (templateUUID && it.attribute.code.contains(AttributeType.VALUE_TYPE))
             {
                 criteria = wrapper.totalValueCriteria
                 totalValueCriteria = true
@@ -1452,7 +1504,17 @@ class DashboardQueryWrapperUtils
                 criteria = wrapper.criteria
                 totalValueCriteria = false
             }
-            wrapper.processGroup(wrapper, criteria, totalValueCriteria, it as GroupParameter, diagramType, requestData.source, sourceMetaClassCriteriaMap)
+
+            wrapper.processGroup(
+                wrapper,
+                criteria,
+                totalValueCriteria,
+                it as GroupParameter,
+                diagramType,
+                requestData.source,
+                user,
+                sourceMetaClassCriteriaMap
+            )
         }
 
         Set filterAttributeSourceCodes = requestData.filters?.collectMany { filters ->
