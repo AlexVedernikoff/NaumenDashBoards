@@ -2888,6 +2888,15 @@ class NewSourceValue
 @Deprecated
 class SourceValue extends ValueWithLabel<String>
 {
+    SourceValue(String value)
+    {
+        this.value = value
+    }
+
+    SourceValue()
+    {
+    }
+
     /**
      * Дескриптор источника
      */
@@ -4022,7 +4031,7 @@ class AxisCurrentData extends DiagramNowData
     /**
      * Источник данных
      */
-    SourceValue source
+    NewSourceValue source
     /**
      * Параметр
      */
