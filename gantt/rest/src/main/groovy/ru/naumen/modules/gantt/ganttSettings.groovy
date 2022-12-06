@@ -550,6 +550,9 @@ class GanttSettingsService
         String contentCode = request.contentCode
         GanttSettingsClass ganttSettings = request.ganttSettings
 
+        ganttSettings.startDate = correctionErrorInDate(ganttSettings.startDate, request.timezone)
+        ganttSettings.endDate = correctionErrorInDate(ganttSettings.endDate, request.timezone)
+
         String ganttSettingsKey = generateDiagramKey(subjectUUID, contentCode)
         String currentGanttSettingsJSON = getJsonSettings(ganttSettingsKey)
 
@@ -571,6 +574,19 @@ class GanttSettingsService
         {
             throw new Exception('Настройки не были сохранены!')
         }
+    }
+
+    /**
+     * Метод корректировки даты по таймзоне
+     * @param timezoneInformation - информация о таймзоне
+     * @param dateForAdjustment - текущие данные о времени
+     * @return корректная дата
+     */
+    String correctionErrorInDate(String dateForAdjustment, String timezoneInformation){
+        String formatEditedTime = "yyyy-MM-dd'T'HH:mm:ss"
+        TimeZone timezone = TimeZone.getTimeZone(timezoneInformation)
+        Long dateInMilliseconds = Date.parse(formatEditedTime, dateForAdjustment).getTime() + timezone.getRawOffset()
+        return new Date(dateInMilliseconds).format(formatEditedTime).toString()
     }
 
     /**
