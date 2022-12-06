@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import ru.naumen.core.server.script.spi.ScriptDtOMap
 import ru.naumen.core.server.script.api.metainfo.*
 import ru.naumen.core.shared.dto.ISDtObject
+import ru.naumen.metainfo.shared.elements.sec.ISGroup
+import java.text.SimpleDateFormat
 
 import static groovy.json.JsonOutput.toJson
 
@@ -475,7 +477,21 @@ class GanttSettingsService
                                 case AttributeType.DATE_TIME_TYPE:
                                     columnSetting.editor.options = null
                                     columnSetting.editor.type = 'date'
-                                    break
+                                if (attributeSetting.attribute.code ==
+                                    resourceAndWorkSetting.startWorkAttribute.code)
+                                {
+                                    columnSetting.editor.map_to = "start_date"
+                                    columnSetting.code = "start_date"
+                                    attributeSetting.code = "start_date"
+                                }
+                                if (attributeSetting.attribute.code ==
+                                    resourceAndWorkSetting.endWorkAttribute.code)
+                                {
+                                    columnSetting.editor.map_to = "end_date"
+                                    columnSetting.code = "end_date"
+                                    attributeSetting.code = "end_date"
+                                }
+                                break
                                 case AttributeType.OBJECT_TYPE:
                                     Set newOptionsColumnSetting = []
                                     columnSetting.editor.type = TYPE_SELECT
@@ -1352,6 +1368,11 @@ class SaveGanttSettingsRequest extends BaseGanttSettingsRequest
      * Настройки диаграммы Ганта
      */
     GanttSettingsClass ganttSettings
+
+    /**
+     * Таймзона устройства пользователя
+     */
+    String timezone
 }
 
 /**
