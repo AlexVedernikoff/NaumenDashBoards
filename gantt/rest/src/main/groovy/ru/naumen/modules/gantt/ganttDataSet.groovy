@@ -22,6 +22,7 @@ import ru.naumen.core.server.script.api.ISelectClauseApi
 import ru.naumen.core.server.script.api.criteria.IApiCriteria
 import ru.naumen.core.server.script.spi.ScriptDtObject
 import sun.util.calendar.ZoneInfo
+import ru.naumen.core.server.script.spi.ScriptDate
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 
@@ -509,7 +510,12 @@ class GanttDataSetService
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         if (work['start_date'])
         {
-            if (workAttributeSettings?.startWorkAttribute?.type == 'date')
+            if (workAttributeSettings?.startWorkAttribute?.type == 'date' || (work['start_date'] in
+                                                                              ScriptDate && !
+                                                                                  work['start_date']
+                                                                                      .getMinutes() && !
+                                                                                  work['start_date']
+                                                                                      .getHours()))
             {
                 work['start_date'] = work['start_date'].format(dateFormat)
             }
