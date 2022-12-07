@@ -31,6 +31,10 @@ class UserDashboards extends Dashboards {
 	getDynamicAttributeGroups (descriptor: DTOValue) {
 		return this.transport('dashboards', 'getDynamicAttributeGroupsForUser', ['requestContent'], {descriptor});
 	}
+
+	searchDynamicAttributes (descriptor: DTOValue, word: string) {
+		return this.transport('dashboards', 'getDynamicAttributesWithGroupsForUser', ['requestContent'], {descriptor, word});
+	}
 }
 
 export default class ExecUserAPI extends ExecAPI {

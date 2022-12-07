@@ -16,22 +16,64 @@ import withAttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset/
 
 export class MainSelectList extends PureComponent<Props, State> {
 	components = null;
+	searchDebounce = null;
 	state = {
 		showDynamicAttributes: false,
 		showDynamicAttributesError: false
 	};
 
+	componentDidUpdate (prevProps: Props) {
+		const {searchValue} = this.props;
+
+		if (searchValue !== prevProps.searchValue) {
+			this.handleChangeSearchValue();
+		}
+	}
+
 	getNodeLabel = (node: Node) => this.props.getOptionLabel(node.value);
 
 	getNodeValue = (node: Node) => this.props.getOptionValue(node.value);
 
+	handleChangeSearchValue = () => {
+		const {dataKey, fetchDynamicAttributeGroups, fetchSearchDynamicAttributeGroups, searchValue, source} = this.props;
+		const {showDynamicAttributes: show} = this.state;
+		const {descriptor, filterId} = source;
+
+		if (this.searchDebounce !== null) {
+			clearTimeout(this.searchDebounce);
+		}
+
+		if (show) {
+			this.searchDebounce = setTimeout(() => {
+				if (searchValue) {
+					if (descriptor || filterId || show) {
+						fetchSearchDynamicAttributeGroups(dataKey, searchValue, descriptor, filterId);
+					}
+				} else {
+					fetchDynamicAttributeGroups(dataKey, descriptor, filterId);
+				}
+			}, 500);
+		}
+	};
+
 	handleChangeShowDynamicAttributes = ({value: show}: OnChangeEvent<boolean>) => {
-		const {dataKey, dynamicGroups, fetchDynamicAttributeGroups, source} = this.props;
+		const {
+			dataKey,
+			dynamicGroups,
+			fetchDynamicAttributeGroups,
+			fetchSearchDynamicAttributeGroups,
+			searchValue,
+			source
+		} = this.props;
 		const {descriptor, filterId} = source;
 
 		if (descriptor || filterId || show) {
 			if (!dynamicGroups[dataKey] && !dynamicGroups[dataKey]?.loading) {
-				fetchDynamicAttributeGroups(dataKey, descriptor, filterId);
+				if (searchValue) {
+					fetchSearchDynamicAttributeGroups(dataKey, searchValue, descriptor, filterId);
+				} else {
+					fetchDynamicAttributeGroups(dataKey, descriptor, filterId);
+				}
 			}
 
 			this.setState({showDynamicAttributes: !show});
@@ -41,9 +83,9 @@ export class MainSelectList extends PureComponent<Props, State> {
 	};
 
 	handleFetchDynamicAttributes = (node: DynamicGroupsNode | null) => {
-		const {dataKey, fetchDynamicAttributes, getOptionValue} = this.props;
+		const {dataKey, fetchDynamicAttributes, getOptionValue, searchValue} = this.props;
 
-		if (node) {
+		if (node && !searchValue) {
 			const {value} = node;
 
 			fetchDynamicAttributes(dataKey, getOptionValue ? getOptionValue((value: Object)) : value.title);
