@@ -64,7 +64,7 @@
     {
         /**
          * Получение данных для диаграмм. Нужен для обратной совместимости.
-         * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
+         * @param requestContent - тело запроса в формате @link RequestGetDataForDiagram
          * @param user - текущий пользователь системы
          * @return данные для построения диаграммы
          */
@@ -252,9 +252,10 @@
          * @param subjectUUID - идентификатор "текущего объекта"
          * @param widgetFilters - список пользовательских фильтров для виджета
          * @param frontOffsetMinutes - смещение в минутах относительно 0 часового пояса, полученное с фронта
+         * @param user - текущий пользователь системы
          * @param tableRequestSettings - настройки для запроса по таблице
          * @param requestContent - тело запроса
-         * @return Типизированниые данные для построения диаграмм
+         * @return Типизированные данные для построения диаграмм
          */
         def buildDiagram(String dashboardKey,
                          String widgetKey,
@@ -1211,7 +1212,7 @@
         {
             if(paginationSettings)
             {
-                if(groups instanceof Map)
+                if(groups in Map)
                 {
                     List keys = groups?.keySet()?.toList()
                     keys = sliceCollection(keys, paginationSettings)
@@ -2481,6 +2482,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировка
          * @param title - название группировки
+         * @param id - уникальный идентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> getDynamicFilter(List<List> data, Attribute attribute, String title, String id)
@@ -2504,6 +2506,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный идентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
@@ -2641,6 +2644,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный идентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
@@ -2833,6 +2837,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data, Attribute attribute, String title, String id)
@@ -2884,6 +2889,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title, String id)
@@ -2933,6 +2939,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title, String id)
@@ -2982,11 +2989,12 @@
 
         /**
          * Метод преодбразований настроек группировки для dateTime типов
-         * @param valueConverter - функция преодразования строки в число
+         * @param source - источник
          * @param offsetMinutes - смещение часового пояса пользователя относительно серверного времени
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingDateTypeFilters(Source source, Integer offsetMinutes, List<List> data, Attribute attribute, String title, String id)
@@ -3116,9 +3124,10 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
-        private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID,List<List> data, Attribute attribute, String title, String id)
+        private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
         {
             Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
             def dynamicFilter
@@ -3177,6 +3186,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingTimerTypeFilters(Source source, Boolean fromDD, List<List> data, Attribute attribute, String title, String id)
@@ -3349,6 +3359,15 @@
             return durationInMs
         }
 
+        /**
+         * Метод преодбразований настроек группировки для метакласса
+         * @param subjectUUID - идентификатор "текущего объекта"
+         * @param data - настройки группировки
+         * @param attribute - атрибут к которому привязана группировки
+         * @param title - название группировки
+         * @param id - уникальный индентификатор
+         * @return настройки группировки в удобном формате
+         */
         private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
         {
             Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
@@ -4041,7 +4060,6 @@
 
         /**
          * Метод приведения значений группировок к читаемому для человека виду
-         * @param data - данные запроса
          * @param tempList - результат выборки
          * @param data - данные запроса
          * @param listIdsOfNormalAggregations - список индексов нормальных агрегаций
@@ -4805,12 +4823,15 @@
          * @param rowCount - количество строк в полном запросе
          * @param tableTop - настройки топа для таблицы
          * @param pagingSettings - настройки пагинации
+         * @param sorting - настройки сортировки
+         * @param reverseRowCount - обратный порядок
          * @param requestContent - тело запроса с фронта
          * @param request - тело обработанного запроса
          * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
          * @param countTotals - итог по количеству данных на виджете
          * @param tableTotals - итоговые данные по таблице
          * @param sourceRowNames - список заголовков для источников
+         * @param diagramType - тип диаграммы
          * @param user - текущий пользователь системы
          * @return сформированная таблица
          */
@@ -5364,9 +5385,12 @@
          * @param aggregationCnt - количество агрегаций
          * @param allAggregationAttributes - названия всех атрибутов агрегации
          * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
-         * @param request тело обработанного запроса
+         * @param request - тело обработанного запроса
+         * @param countTotals - итоговое значение
+         * @param tableTotals - итоговые значения таблицы
          * @param sourceRowNames - список заголовков для источников
          * @param user - текущий пользователь системы
+         * @param diagramType - тип диаграммы
          * @return TableDiagram
          */
         private TableDiagram mappingTable(List resultDataSet,
@@ -6082,7 +6106,6 @@
          * @param row - строка мап
          * @param attributeNames - список названий атрибутов
          * @param aggregationCnt - количество агрегаций
-         * @param i - индекс
          * @return строка дерева
          */
         ResRow createResRow(Map map, List<Map> row, List<String> attributeNames, int aggregationCnt)
@@ -6228,7 +6251,7 @@
 
         /**
          * Метод получения названий внутренних групп из основных группировок
-         * @param request - запрос
+         * @param requestContent - запрос
          * @return список названий
          */
         private Set<Map> getInnerCustomGroupNames(def requestContent)
@@ -6602,7 +6625,7 @@
 
         /**
          * Метод получения списка фильтров
-         * @param customGroup - кастомная группировка для построения фильтра
+         * @param parameter - значение параметра
          * @param subjectUUID - идентификатор "текущего объекта"
          * @param place - место, откуда была создана кастомная группировка
          * @param source - источник запроса
@@ -6610,7 +6633,8 @@
          * @param sortingType - тип сортировки
          * @return - список фильтров
          */
-        private FilterList getFilterList(NewParameter parameter, String subjectUUID, String place, Source source, Integer offsetUTCMinutes, SortingType sortingType = null) {
+        private FilterList getFilterList(NewParameter parameter, String subjectUUID, String place, Source source, Integer offsetUTCMinutes, SortingType sortingType = null)
+        {
             if(parameter?.group)
             {
                 def customGroup = parameter?.group?.data
