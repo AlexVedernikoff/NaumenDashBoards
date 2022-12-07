@@ -1,14 +1,17 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {DYNAMIC_GROUPS_EVENTS} from './constants';
 import type {ThunkAction} from 'store/types';
 import type {TreeNode} from 'components/types';
 
-export type DynamicGroup = {
+export type DynamicGroupInfo = {
 	code: string,
+	title: string
+};
+
+export type DynamicGroup = {
+	...DynamicGroupInfo,
 	sourceName: string,
 	sourceValue: string,
-	title: string
 };
 
 export type DynamicGroupsNode = TreeNode<DynamicGroup | Attribute>;
@@ -25,23 +28,23 @@ export type DynamicGroupsMap = {
 
 type RequestDynamicAttributes = {
 	payload: string,
-	type: typeof DYNAMIC_GROUPS_EVENTS.REQUEST_DYNAMIC_ATTRIBUTES
+	type: 'sources/dynamicAttributes/requestDynamicAttributes'
 };
 
 type RequestDynamicAttributeGroups = {
 	payload: string,
-	type: typeof DYNAMIC_GROUPS_EVENTS.REQUEST_DYNAMIC_ATTRIBUTE_GROUPS
+	type: 'sources/dynamicAttributes/requestDynamicAttributeGroups'
 };
 
 export type ReceiveDynamicAttributesPayload = {
-	attributes: Attribute[],
+	attributes: Array<Attribute>,
 	dataKey: string,
 	groupCode: string
 };
 
 type ReceiveDynamicAttributes = {
 	payload: ReceiveDynamicAttributesPayload,
-	type: typeof DYNAMIC_GROUPS_EVENTS.RECEIVE_DYNAMIC_ATTRIBUTES
+	type: 'sources/dynamicAttributes/receiveDynamicAttributes'
 };
 
 export type ReceiveDynamicAttributeGroupsPayload = {
@@ -51,37 +54,55 @@ export type ReceiveDynamicAttributeGroupsPayload = {
 
 type ReceiveDynamicAttributeGroups = {
 	payload: ReceiveDynamicAttributeGroupsPayload,
-	type: typeof DYNAMIC_GROUPS_EVENTS.RECEIVE_DYNAMIC_ATTRIBUTE_GROUPS
+	type: 'sources/dynamicAttributes/receiveDynamicAttributeGroups'
 };
 
 type RecordDynamicAttributesError = {
 	payload: string,
-	type: typeof DYNAMIC_GROUPS_EVENTS.RECORD_DYNAMIC_ATTRIBUTES_ERROR
+	type: 'sources/dynamicAttributes/recordDynamicAttributesError'
 };
 
 type RecordDynamicAttributeGroupsError = {
 	payload: string,
-	type: typeof DYNAMIC_GROUPS_EVENTS.RECORD_DYNAMIC_ATTRIBUTE_GROUPS_ERROR
+	type: 'sources/dynamicAttributes/recordDynamicAttributeGroupsError'
+};
+
+export type DynamicAttributesSearchItem = {
+	attributes: Array<Attribute>,
+	dynamicGroup: DynamicGroupInfo
+};
+
+export type ReceiveDynamicAttributesSearchPayload = {
+	dataKey: string,
+	groups: Array<DynamicAttributesSearchItem>
+};
+
+type ReceiveDynamicAttributesSearch = {
+	payload: ReceiveDynamicAttributesSearchPayload,
+	type: 'sources/dynamicAttributes/receiveDynamicAttributesSearch'
+};
+
+type ClearDynamicAttributeGroups = {
+	payload: string,
+	type: 'sources/dynamicAttributes/clearDynamicAttributeGroups'
 };
 
 type UnknownDynamicAttributesAction = {
-	type: typeof DYNAMIC_GROUPS_EVENTS.UNKNOWN_DYNAMIC_GROUPS_ACTION
+	type: 'sources/dynamicAttributes/unknownDynamicGroupsAction'
 };
 
 export type DynamicGroupsAction =
+	| ClearDynamicAttributeGroups
 	| ReceiveDynamicAttributes
 	| ReceiveDynamicAttributeGroups
 	| RecordDynamicAttributesError
 	| RecordDynamicAttributeGroupsError
 	| RequestDynamicAttributeGroups
 	| RequestDynamicAttributes
+	| ReceiveDynamicAttributesSearch
 	| UnknownDynamicAttributesAction
 ;
 
 export type DynamicGroupsState = DynamicGroupsMap;
-
-export type FetchDynamicAttributeGroupsAction = (dataKey: string, descriptor: string, filterId: ?string) => ThunkAction;
-
-export type FetchDynamicAttributesAction = (dataKey: string, groupCode: string) => ThunkAction;
 
 export type ClearDynamicAttributeGroupsAction = (dataKey: string) => ThunkAction;

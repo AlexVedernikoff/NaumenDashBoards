@@ -1,7 +1,6 @@
 // @flow
 import api from 'api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {DYNAMIC_GROUPS_EVENTS} from './constants';
 import {findFilterById} from 'store/sources/sourcesFilters/selectors';
 
 /**
@@ -26,7 +25,7 @@ const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filter
 
 		dispatch({
 			payload: dataKey,
-			type: DYNAMIC_GROUPS_EVENTS.REQUEST_DYNAMIC_ATTRIBUTE_GROUPS
+			type: 'sources/dynamicAttributes/requestDynamicAttributeGroups'
 		});
 
 		try {
@@ -37,12 +36,12 @@ const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filter
 					dataKey,
 					groups
 				},
-				type: DYNAMIC_GROUPS_EVENTS.RECEIVE_DYNAMIC_ATTRIBUTE_GROUPS
+				type: 'sources/dynamicAttributes/receiveDynamicAttributeGroups'
 			});
 		} catch (error) {
 			dispatch({
 				payload: dataKey,
-				type: DYNAMIC_GROUPS_EVENTS.RECORD_DYNAMIC_ATTRIBUTE_GROUPS_ERROR
+				type: 'sources/dynamicAttributes/recordDynamicAttributeGroupsError'
 			});
 		}
 	};
@@ -56,7 +55,7 @@ const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filter
 const fetchDynamicAttributes = (dataKey: string, groupCode: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch({
 		payload: groupCode,
-		type: DYNAMIC_GROUPS_EVENTS.REQUEST_DYNAMIC_ATTRIBUTES
+		type: 'sources/dynamicAttributes/requestDynamicAttributes'
 	});
 
 	try {
@@ -68,15 +67,59 @@ const fetchDynamicAttributes = (dataKey: string, groupCode: string): ThunkAction
 				dataKey,
 				groupCode
 			},
-			type: DYNAMIC_GROUPS_EVENTS.RECEIVE_DYNAMIC_ATTRIBUTES
+			type: 'sources/dynamicAttributes/receiveDynamicAttributes'
 		});
 	} catch (error) {
 		dispatch({
 			payload: groupCode,
-			type: DYNAMIC_GROUPS_EVENTS.RECORD_DYNAMIC_ATTRIBUTES_ERROR
+			type: 'sources/dynamicAttributes/recordDynamicAttributesError'
 		});
 	}
 };
+
+/**
+ * Поиск по динамическим атрибутам
+ * @param {string} dataKey - ключ набора данных
+ * @param {string} searchValue - строка для поиска
+ * @param {string} descriptor - дескриптор источника
+ * @param {string} filterId - (optional) сохраненный фильтр источника
+ * @returns {ThunkAction}
+ */
+const fetchSearchDynamicAttributeGroups = (dataKey: string, searchValue: string, descriptor: string, filterId: ?string): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		let actualDescriptor = descriptor;
+
+		if (filterId) {
+			const state = getState();
+			const filter = findFilterById(state)(filterId);
+
+			if (filter) {
+				actualDescriptor = filter.descriptor;
+			}
+		}
+
+		dispatch({
+			payload: dataKey,
+			type: 'sources/dynamicAttributes/requestDynamicAttributeGroups'
+		});
+
+		try {
+			const groups = await api.instance.dashboards.searchDynamicAttributes(actualDescriptor, searchValue);
+
+			dispatch({
+				payload: {
+					dataKey,
+					groups
+				},
+				type: 'sources/dynamicAttributes/receiveDynamicAttributesSearch'
+			});
+		} catch (error) {
+			dispatch({
+				payload: dataKey,
+				type: 'sources/dynamicAttributes/recordDynamicAttributeGroupsError'
+			});
+		}
+	};
 
 /**
  * Очищает динамические атрибуты конкретной группы
@@ -85,11 +128,12 @@ const fetchDynamicAttributes = (dataKey: string, groupCode: string): ThunkAction
  */
 const clearDynamicAttributeGroups = (dataKey: string) => ({
 	payload: dataKey,
-	type: DYNAMIC_GROUPS_EVENTS.CLEAR_DYNAMIC_ATTRIBUTE_GROUPS
+	type: 'sources/dynamicAttributes/clearDynamicAttributeGroups'
 });
 
 export {
 	clearDynamicAttributeGroups,
 	fetchDynamicAttributeGroups,
-	fetchDynamicAttributes
+	fetchDynamicAttributes,
+	fetchSearchDynamicAttributeGroups
 };

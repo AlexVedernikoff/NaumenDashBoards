@@ -4,9 +4,9 @@ import type {
 	DynamicGroupsAction,
 	DynamicGroupsState,
 	ReceiveDynamicAttributeGroupsPayload,
-	ReceiveDynamicAttributesPayload
+	ReceiveDynamicAttributesPayload,
+	ReceiveDynamicAttributesSearchPayload
 } from './types';
-import {DYNAMIC_GROUPS_EVENTS} from './constants';
 import {omit} from 'helpers';
 
 const setDynamicGroups = (
@@ -83,16 +83,63 @@ const setDynamicAttributes = (
 	return result;
 };
 
+const setDynamicAttributesSearch = (
+	state: DynamicGroupsState,
+	payload: ReceiveDynamicAttributesSearchPayload
+): DynamicGroupsState => {
+	const {dataKey, groups} = payload;
+	const data = {};
+
+	groups.forEach(({attributes, dynamicGroup}) => {
+		const groupCode = dynamicGroup.code;
+		const children = [];
+
+		attributes.forEach(attribute => {
+			data[attribute.code] = {
+				children: null,
+				error: false,
+				id: attribute.code,
+				loading: false,
+				parent: groupCode,
+				uploaded: true,
+				value: attribute
+			};
+			children.push(attribute.code);
+		});
+
+		data[dynamicGroup.code] = {
+			children,
+			error: false,
+			id: dynamicGroup.code,
+			loading: false,
+			parent: null,
+			uploaded: true,
+			value: dynamicGroup
+		};
+	});
+
+	return {
+		...state,
+		[dataKey]: {
+			data,
+			error: false,
+			loading: false
+		}
+	};
+};
+
 const reducer = (
 	state: DynamicGroupsState = initialGroupsState,
 	action: DynamicGroupsAction = defaultGroupsAction
 ): DynamicGroupsState => {
 	switch (action.type) {
-		case DYNAMIC_GROUPS_EVENTS.RECEIVE_DYNAMIC_ATTRIBUTE_GROUPS:
+		case 'sources/dynamicAttributes/receiveDynamicAttributeGroups':
 			return setDynamicGroups(state, action.payload);
-		case DYNAMIC_GROUPS_EVENTS.RECEIVE_DYNAMIC_ATTRIBUTES:
+		case 'sources/dynamicAttributes/receiveDynamicAttributes':
 			return setDynamicAttributes(state, action.payload);
-		case DYNAMIC_GROUPS_EVENTS.RECORD_DYNAMIC_ATTRIBUTES_ERROR:
+		case 'sources/dynamicAttributes/receiveDynamicAttributesSearch':
+			return setDynamicAttributesSearch(state, action.payload);
+		case 'sources/dynamicAttributes/recordDynamicAttributesError':
 			return {
 				...state,
 				[action.payload]: {
@@ -104,7 +151,7 @@ const reducer = (
 					}
 				}
 			};
-		case DYNAMIC_GROUPS_EVENTS.RECORD_DYNAMIC_ATTRIBUTE_GROUPS_ERROR:
+		case 'sources/dynamicAttributes/recordDynamicAttributeGroupsError':
 			return {
 				...state,
 				[action.payload]: {
@@ -113,7 +160,7 @@ const reducer = (
 					loading: false
 				}
 			};
-		case DYNAMIC_GROUPS_EVENTS.REQUEST_DYNAMIC_ATTRIBUTE_GROUPS:
+		case 'sources/dynamicAttributes/requestDynamicAttributeGroups':
 			return {
 				...state,
 				[action.payload]: {
@@ -122,7 +169,7 @@ const reducer = (
 					loading: true
 				}
 			};
-		case DYNAMIC_GROUPS_EVENTS.REQUEST_DYNAMIC_ATTRIBUTES:
+		case 'sources/dynamicAttributes/requestDynamicAttributes':
 			return {
 				...state,
 				[action.payload]: {
@@ -131,7 +178,7 @@ const reducer = (
 					loading: true
 				}
 			};
-		case DYNAMIC_GROUPS_EVENTS.CLEAR_DYNAMIC_ATTRIBUTE_GROUPS:
+		case 'sources/dynamicAttributes/clearDynamicAttributeGroups':
 			return omit(state, action.payload);
 		default:
 			return state;

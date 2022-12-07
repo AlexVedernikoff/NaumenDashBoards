@@ -77,6 +77,10 @@ export default class Dashboards implements DashboardsAPI {
 		return this.transport('dashboards', 'getStates', ['classFqn'], metaClassFqn);
 	}
 
+	searchDynamicAttributes (descriptor: DTOValue, word: string) {
+		return this.transport('dashboards', 'getDynamicAttributesWithGroups', ['requestContent'], {descriptor, word});
+	}
+
 	searchValue (request: DTOValue) {
 		return this.transport('dashboards', 'searchValue', ['requestContent'], request);
 	}
