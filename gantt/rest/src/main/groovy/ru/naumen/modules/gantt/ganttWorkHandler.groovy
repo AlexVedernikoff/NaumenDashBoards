@@ -755,8 +755,8 @@ class GanttWorkHandlerService
                                          api.metainfo.getMetaClass(metaClassFqn)
                                             .getAttribute(endWorkAttribute).attribute.isEditable()]
         dataModalWindowOperation << ['disabledCompete':
-                                         api.metainfo.getMetaClass(metaClassFqn)
-                                            .getAttribute('state').attribute.isEditable()]
+                                         !api.metainfo.getMetaClass(metaClassFqn)
+                                             .getAttribute('state').attribute.isEditable()]
         return dataModalWindowOperation
     }
 
@@ -832,14 +832,14 @@ class GanttWorkHandlerService
         Map<String, Object> preparedWorkData = request.workData
         Collection<IAttributeWrapper> attributes =
             api.metainfo.getMetaClass(request.classFqn).getAttributes()
-        if (preparedWorkData*.key.get(0) == 'title' )
-        {
-            Map<String, Object> listAttributesEdits = [:]
-            preparedWorkData.each {
-                String attributeCode = it.key
-                Object attributeValue = it.value
-                IAttributeWrapper attribute
-                if (attributeCode != 'title')
+        Map<String, Object> listAttributesEdits = [:]
+        preparedWorkData.each {
+            String attributeCode = it.key
+            Object attributeValue = it.value
+            IAttributeWrapper attribute
+            if (attributeCode != 'title')
+            {
+                if (attributeCode.contains('@'))
                 {
                     attributes =
                         api.metainfo.getMetaClass(attributeCode.split('@').first())?.getAttributes()
@@ -849,84 +849,67 @@ class GanttWorkHandlerService
                 }
                 else
                 {
-                    attribute = attributes?.find {
+                    attribute = attributes.find {
                         it.code == attributeCode
                     }
-                    listAttributesEdits += [(attribute.code): request.workData.title]
                 }
-                if (attribute?.type?.code in AttributeType.DATE_TYPES)
-                {
-                    String timezoneString =
-                        api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
-                    TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-                    attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue, timezone)
-                    listAttributesEdits << [(attribute?.code): attributeValue]
-                }
-            }
-            Boolean editabilityStatus =
-                api.metainfo.getMetaClass(request.classFqn).getAttribute('state').editable
 
-            ResourceAndWorkSettings resourceWork = ganttSettings.resourceAndWorkSettings.find {
-                it.type == SourceType.WORK
             }
-            String checkpointStatusAttr = resourceWork.checkpointStatusAttr.code.split('@').last()
-
-            if (request.workData.completed)
+            else
             {
-                String dateData =
-                    listAttributesEdits.get(request.workData*.key.get(1).split('@').last())
-                listAttributesEdits = [(checkpointStatusAttr): (dateData)]
+                attribute = attributes?.find {
+                    it.code == attributeCode
+                }
+                listAttributesEdits += [(attribute.code): request.workData.title]
             }
-            if (request.workData.completed && editabilityStatus)
+            if (attribute?.type?.code in AttributeType.DATE_TYPES)
             {
-                ScriptDtObject milestoneMetaObject = api.utils.get(request.workUUID)
-                String endState =
-                    api.metainfo.getMetaClass(milestoneMetaObject).workflow.endState.code
-                String statusForTransitionFromEndState =
-                    api.metainfo.getMetaClass(milestoneMetaObject).workflow.states.code.find {
-                        api.metainfo.getMetaClass(milestoneMetaObject).workflow.isTransitionExists(
-                            endState,
-                            it
-                        )
-                    }
-                if (request.workData.completed.toBoolean())
-                {
-                    Integer statusChangeCounter = 0
-                    changeStatusToFinal(milestoneMetaObject, endState, statusChangeCounter)
-                    listAttributesEdits += [state: statusForTransitionFromEndState]
-                }
-                else
-                {
-                    api.utils.edit(milestoneMetaObject, [state: statusForTransitionFromEndState])
-                    listAttributesEdits += [state: statusForTransitionFromEndState]
-                }
-
+                String timezoneString =
+                    api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
+                TimeZone timezone = TimeZone.getTimeZone(timezoneString)
+                attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue) //, timezone
+                listAttributesEdits += [(attribute?.code): (attributeValue)]
             }
-            return listAttributesEdits
+            else if (attribute?.type?.code in AttributeType.LINK_TYPES)
+            {
+                listAttributesEdits += [(attribute?.code): (api.utils.get(attributeValue))]
+            }
+            else
+            {
+                listAttributesEdits += [(attribute?.code): (attributeValue)]
+            }
         }
-        else
+        Boolean editabilityStatus =
+            api.metainfo.getMetaClass(request.classFqn).getAttribute('state').editable
+        ResourceAndWorkSettings resourceWork = ganttSettings.resourceAndWorkSettings.find {
+            it.type == SourceType.WORK
+        }
+        String checkpointStatusAttr = resourceWork.checkpointStatusAttr.code.split('@').last()
+        if (request.workData.completed && editabilityStatus)
         {
-            GanttSettingsService service = GanttSettingsService.instance
-            Map<String, String> requestContent = [:]
-            requestContent << ["contentCode": request.contentCode, "subjectUUID":
-                request.subjectUuid]
-            GetGanttSettingsRequest requestGetGant = new ObjectMapper()
-                .convertValue(requestContent, GetGanttSettingsRequest)
-            GanttSettingsClass settings = service.getGanttSettings(requestGetGant)
-            Collection<AttributeSettings> codeColumns =
-                settings.resourceAndWorkSettings.get(0).attributeSettings
-            codeColumns.each {
-                if (it.code == preparedWorkData*.key.get(0))
-                {
-                    preparedWorkData = [(it.attribute.code.toString()): (
-                        preparedWorkData*.value.get(0))]
+            ScriptDtObject milestoneMetaObject = api.utils.get(request.workUUID)
+            String endState =
+                api.metainfo.getMetaClass(milestoneMetaObject).workflow.endState.code
+            String statusForTransitionFromEndState =
+                api.metainfo.getMetaClass(milestoneMetaObject).workflow.states.code.find {
+                    api.metainfo.getMetaClass(milestoneMetaObject).workflow.isTransitionExists(
+                        endState,
+                        it
+                    )
                 }
+            if (request.workData.completed.toBoolean())
+            {
+                Integer statusChangeCounter = 0
+                changeStatusToFinal(milestoneMetaObject, endState, statusChangeCounter)
+                listAttributesEdits += [state: statusForTransitionFromEndState]
             }
-            preparedWorkData =
-                checkingDateAttribute(preparedWorkData, attributes, user, request)
-
+            else
+            {
+                api.utils.edit(milestoneMetaObject, [state: statusForTransitionFromEndState])
+                listAttributesEdits += [state: statusForTransitionFromEndState]
+            }
         }
-        return preparedWorkData
+        return listAttributesEdits
     }
 
     /**
