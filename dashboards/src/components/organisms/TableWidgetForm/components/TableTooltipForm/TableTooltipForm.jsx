@@ -282,6 +282,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 			<FormField label={t('TableWidgetForm::TableTooltipForm::TooltipText')}>
 				<TextArea
 					focusOnMount={focus}
+					maxLength={null}
 					name={DIAGRAM_FIELDS.title}
 					onChange={this.getChangeIndicatorTextHandler(indicator)}
 					value={tooltip?.title ?? ''}
@@ -315,7 +316,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 		if (show) {
 			return (
 				<FormField>
-					<TextArea maxLength={1000} name={DIAGRAM_FIELDS.text} onChange={this.handleChangeTooltipText} value={text} />
+					<TextArea maxLength={null} name={DIAGRAM_FIELDS.text} onChange={this.handleChangeTooltipText} value={text} />
 				</FormField>
 			);
 		}
