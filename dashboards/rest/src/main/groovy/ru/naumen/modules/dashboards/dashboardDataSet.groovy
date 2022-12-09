@@ -4245,7 +4245,7 @@
                                 }
                             }
                         value = (value == null || value.equals('')) ? getNullValue(diagramType, fromBreakdown) : value
-                            return value.toString().replaceAll("\\.*?","")
+                            return value.toString().replaceAll("[^<a-zA-Z0-9А-Яа-я >]","")
                     }
                 case GroupType.DAY:
                     if(!value)
