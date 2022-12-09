@@ -941,7 +941,11 @@
                         }
                         else
                         {
-                            total = res?.find()?.transpose()?.find()?.sum { it as Integer }
+                            //В качестве аргументов может прийти неправильной формы число, типа "14 5.0909".
+                            // Для всех остальных случаев ничего не меняется. Возможно потребуется округление для Integer.
+                            List totalList =res?.find()?.transpose()?.find()?.collect {elem ->elem.split(" ")}
+                                               .transpose()?.find()
+                            total = totalList?.sum { it as Double }
                         }
                     }
                 }
@@ -2703,7 +2707,7 @@
                             value: value,
                             title: title,
                             id: id,
-                            type: Comparison.NOT_EQUAL_AND_NOT_NULL,
+                            type: Comparison.NOT_EQUAL,
                             attribute: attribute
                         )
                     case Condition.IN:
@@ -5014,7 +5018,7 @@
                         }
                 return new Column(
                     footer: "",
-                    accessor: attrValue.key ?: accessorAndAtribut,
+                    accessor: attrValue.key ?: attrValue.aggregation? accessorAndAtribut + "#" + "${attrValue.aggregation}" : attrValue.name,
                     header: accessorAndAtribut,
                     attribute: attrValue.attribute,
                     type: attrValue.type,
@@ -5436,7 +5440,7 @@
                     if(secondAttribut != null){
                         return  attribut.name + " (" + attribut?.attribute?.ref?.title+ ")"
                     }
-                    return attribut.key ?:  attribut.name
+                    return attribut.key ?:  attribut.aggregation? attribut.name + "#" + "${attribut.aggregation}" : attribut.name
                 }
 
                 if (sourceRowNames && hasBreakdown) {

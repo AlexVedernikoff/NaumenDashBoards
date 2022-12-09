@@ -1584,7 +1584,7 @@ class DashboardQueryWrapperUtils
 
             if (diagramType == DiagramType.PIVOT_TABLE)
             {
-                if (requestData.source.classFqn in [it.attribute.declaredMetaClass, it.attribute.metaClassFqn])
+                if (isMetaClassSameOrParent(requestData.source.classFqn, it.attribute.metaClassFqn))
                 {
                     criteriaToFilter = criteria
                 }
@@ -1602,6 +1602,31 @@ class DashboardQueryWrapperUtils
             it?.type == Aggregation.NOT_APPLICABLE
         } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0
         return wrapper.getResult(requestHasOneNoneAggregation, diagramType, hasBreakdown, ignoreParameterLimit, paginationSettings)
+    }
+
+    /**
+     * Метод для проверки, являются ли метаклассы одинаковыми, или один наследник другого
+     * @param parentClassFqn - родительский метакласс
+     * @param childClassFqn - дочерний метакласс
+     * @return флаг
+     */
+    static Boolean isMetaClassSameOrParent(String parentClassFqn, String childClassFqn)
+    {
+        if (parentClassFqn == childClassFqn)
+        {
+            return true
+        }
+
+        Boolean isParent = false
+
+        IMetaClassWrapper metaClass = getApi().metainfo.getMetaClass(childClassFqn)
+        while (metaClass.parent)
+        {
+            isParent = isParent || metaClass.parent.code == parentClassFqn
+            metaClass = metaClass.parent
+        }
+
+        return isParent
     }
 
     /**
