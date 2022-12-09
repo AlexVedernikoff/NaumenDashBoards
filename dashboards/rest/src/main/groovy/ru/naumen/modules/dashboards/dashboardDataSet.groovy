@@ -64,7 +64,7 @@
     {
         /**
          * Получение данных для диаграмм. Нужен для обратной совместимости.
-         * @param requestContent тело запроса в формате @link RequestGetDataForDiagram
+         * @param requestContent - тело запроса в формате @link RequestGetDataForDiagram
          * @param user - текущий пользователь системы
          * @return данные для построения диаграммы
          */
@@ -252,9 +252,10 @@
          * @param subjectUUID - идентификатор "текущего объекта"
          * @param widgetFilters - список пользовательских фильтров для виджета
          * @param frontOffsetMinutes - смещение в минутах относительно 0 часового пояса, полученное с фронта
+         * @param user - текущий пользователь системы
          * @param tableRequestSettings - настройки для запроса по таблице
          * @param requestContent - тело запроса
-         * @return Типизированниые данные для построения диаграмм
+         * @return Типизированные данные для построения диаграмм
          */
         def buildDiagram(String dashboardKey,
                          String widgetKey,
@@ -341,16 +342,34 @@
 							  Boolean isCodeState = widgetSettings.data?.parameters?.attribute?.code?.any {it.any {it == 'state'}}
 
                 Boolean noPaginationInSQL = requestHasBreakdown || innerCustomGroupNames || sortingValueIsComputationAttribute || tableTop || isCodeState
-                res = getDiagramData(request, diagramType, templateUUID, aggregationCnt, widgetSettings,
-                                     tableRequestSettings?.ignoreLimits, noPaginationInSQL ? null : paginationSettings)
-
+                res = getDiagramData(
+                    request,
+                    user,
+                    diagramType,
+                    templateUUID,
+                    aggregationCnt,
+                    widgetSettings,
+                    tableRequestSettings?.ignoreLimits,
+                    noPaginationInSQL ? null : paginationSettings
+                )
 
                 if (diagramType == DiagramType.PIVOT_TABLE)
                 {
                     String requestDataKey = request.data.keySet().first()
                     RequestData requestData = request.data[requestDataKey]
-                    res = applyIndicatorsFiltration(requestData, res)
-                    res = applyIndicatorsBreakdown(requestData, res, subjectUUID, offsetUTCMinutes, templateUUID, requestContent, dbSettings, aggregationCnt, widgetSettings)
+                    res = applyIndicatorsFiltration(requestData, res, user)
+                    res = applyIndicatorsBreakdown(
+                        requestData,
+                        res,
+                        user,
+                        subjectUUID,
+                        offsetUTCMinutes,
+                        templateUUID,
+                        requestContent,
+                        dbSettings,
+                        aggregationCnt,
+                        widgetSettings
+                    )
                 }
 
                 DashboardUtils.log('dashboardDataSet', 342, 'res', res, true)
@@ -362,21 +381,29 @@
 
                     if (!isSourceForEachRow)
                     {
-                        res = prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
+                        res =
+                            prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
+                        result = getDiagramData(
+                            request, user, diagramType, templateUUID,
+                            aggregationCnt, widgetSettings,
+                            tableRequestSettings?.ignoreLimits
+                        )
                         rowCount = requestHasBreakdown
                             ? rowCount
-                            : prepareDataSet(getDiagramData(request, diagramType, templateUUID,
-                                                            aggregationCnt, widgetSettings,
-                                                            tableRequestSettings?.ignoreLimits), widgetSettings,
-                                             showTableNulls, requestHasBreakdown)?.find()?.size()
+                            : prepareDataSet(
+                            result, widgetSettings,
+                            showTableNulls, requestHasBreakdown
+                        )?.find()?.size()
                     }
                 }
-                countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings,
-                                             tableRequestSettings?.ignoreLimits, isSourceForEachRow)
+                countTotals = getTotalAmount(
+                    request, res, diagramType, templateUUID, user, widgetSettings,
+                    tableRequestSettings?.ignoreLimits, isSourceForEachRow
+                )
                 if(!(requestHasBreakdown && computationInTableRequest))
                 {
                     def fullRes = getDiagramData(
-                        request, diagramType, templateUUID,
+                        request, user, diagramType, templateUUID,
                         aggregationCnt, widgetSettings,
                         tableRequestSettings?.ignoreLimits
                     )
@@ -441,14 +468,14 @@
             {
                 request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters, offsetUTCMinutes)
                 DashboardUtils.log('dashboardDataSet', 429, 'request', request, true)
-                res = getDiagramData(request, diagramType, templateUUID)
+                res = getDiagramData(request, user, diagramType, templateUUID)
                 replaceResultAttributeMetaClass(res.first(), request)
                 DashboardUtils.log('dashboardDataSet', 431, 'res', res, true)
-                countTotals = getTotalAmount(request, res, diagramType, templateUUID, widgetSettings)
+                countTotals = getTotalAmount(request, res, diagramType, templateUUID, user, widgetSettings)
                 if(diagramType == DiagramType.SPEEDOMETER)
                 {
-                    minValue = getValueForBorder(widgetSettings, subjectUUID, diagramType, widgetFilters, templateUUID,request, 'min')
-                    maxValue = getValueForBorder(widgetSettings, subjectUUID, diagramType, widgetFilters, templateUUID,request, 'max')
+                    minValue = getValueForBorder(widgetSettings, subjectUUID, diagramType, widgetFilters, templateUUID,request, 'min', user)
+                    maxValue = getValueForBorder(widgetSettings, subjectUUID, diagramType, widgetFilters, templateUUID,request, 'max', user)
                 }
             }
 
@@ -483,7 +510,7 @@
                                                showRowNum as boolean, rowCount, tableTop,
                                                paginationSettings, tableSorting, reverseRowCount,
                                                widgetSettings, request, tableRequestSettings?.ignoreLimits,
-                                               countTotals, tableTotals, widgetSettings.data.sourceRowName.findAll(), diagramType)
+                                               countTotals, tableTotals, widgetSettings.data.sourceRowName.findAll(), diagramType, user)
                 case COMBO:
                     Integer sortingDataIndex = getSortingDataIndex(widgetSettings)
                     //нашли источник, по которому должна быть сортировка
@@ -520,9 +547,10 @@
          * Метод применения фильтрации на показателях
          * @param requestData - данные запроса
          * @param res - результат первоначального запроса
-         * @return резульат с фильтрацией на показателях
+         * @param user - текущий пользователь системы
+         * @return результат с фильтрацией на показателях
          */
-        private List applyIndicatorsFiltration(RequestData requestData, List res)
+        private List applyIndicatorsFiltration(RequestData requestData, List res, IUUIDIdentifiable user)
         {
             Collection<AggregationParameter> allAggregations = requestData.aggregations
             Collection<AggregationParameter> aggregationsWithFiltration =
@@ -539,6 +567,7 @@
                     requestDataCopy,
                     null,
                     currentUserLocale,
+                    user,
                     false,
                     DiagramType.PIVOT_TABLE,
                     false,
@@ -600,6 +629,7 @@
          * Метод применения разбивки на показателях
          * @param requestData - данные запроса
          * @param res - результат первоначального запроса
+         * @param user - текущий пользователь системы
          * @param subjectUUID - идентификатор "текущего объекта"
          * @param offsetUTCMinutes - смещение в минутах относительно 0 часового пояса
          * @param templateUUID - uuid шаблона динамического атрибута
@@ -609,9 +639,16 @@
          * @param widgetSettings - тела запроса по метаданным из хранилища по ключу дашборда и виджета
          * @return результат с разбивкой на показателях
          */
-        private List applyIndicatorsBreakdown(RequestData requestData, List res, String subjectUUID, Integer offsetUTCMinutes,
-                                              String templateUUID, Map<String, Object> requestContent,
-                                              DashboardSettingsClass dbSettings, Integer aggregationCnt, Widget widgetSettings)
+        private List applyIndicatorsBreakdown(RequestData requestData,
+                                              List res,
+                                              IUUIDIdentifiable user,
+                                              String subjectUUID,
+                                              Integer offsetUTCMinutes,
+                                              String templateUUID,
+                                              Map<String, Object> requestContent,
+                                              DashboardSettingsClass dbSettings,
+                                              Integer aggregationCnt,
+                                              Widget widgetSettings)
         {
             Collection<AggregationParameter> allAggregations = requestData.aggregations
             Collection<AggregationParameter> aggregationsWithBreakdown =
@@ -644,6 +681,7 @@
                         requestDataCopy,
                         null,
                         currentUserLocale,
+                        user,
                         false,
                         DiagramType.PIVOT_TABLE,
                         false,
@@ -687,6 +725,7 @@
                             requestDataCopy,
                             null,
                             currentUserLocale,
+                            user,
                             false,
                             DiagramType.PIVOT_TABLE,
                             false,
@@ -765,6 +804,7 @@
          * @param templateUUID - уникальный идентификатор шаблона динамического атрибута
          * @param request - тело запроса
          * @param fieldName - название поля для обработки
+         * @param user - текущий пользователь системы
          * @return данные о  границах для спидометра
          */
         private String getValueForBorder(SpeedometerCurrentAndNew widgetSettings,
@@ -773,7 +813,8 @@
                                          Collection<WidgetFilterResponse> widgetFilters,
                                          String templateUUID,
                                          DiagramRequest request,
-                                         String fieldName)
+                                         String fieldName,
+                                         IUUIDIdentifiable user)
         {
 
             MinMaxBorder field = widgetSettings.borders[fieldName]
@@ -783,7 +824,7 @@
                 widgetSettings?.data?.find { !it.sourceForCompute }?.indicators = [fieldAggregation]
 
                 request =  mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters)
-                Double result = getDiagramData(request, diagramType, templateUUID).find().find().find() as Double ?: 0
+                Double result = getDiagramData(request, user, diagramType, templateUUID).find().find().find() as Double ?: 0
                 return DECIMAL_FORMAT.format(result)
             }
             return field.value
@@ -795,13 +836,20 @@
          * @param res - датасет по запросу
          * @param diagramType - тип диаграммы
          * @param templateUUID - код шаблона динамического атрибута
+         * @param user - текущий пользователь системы
          * @param widgetSettings - настройки виджета
          * @param ignoreLimits - объект с флагами игнорирования пределов
          * @param isSourceForEachRow - флаг на таблицу без параметра
          * @return итог по количеству данных на виджете
          */
-        Integer getTotalAmount(DiagramRequest request, def res, DiagramType diagramType, String templateUUID, Widget widgetSettings = null,
-                               IgnoreLimits ignoreLimits = null, Boolean isSourceForEachRow = false)
+        Integer getTotalAmount(DiagramRequest request,
+                               def res,
+                               DiagramType diagramType,
+                               String templateUUID,
+                               IUUIDIdentifiable user,
+                               Widget widgetSettings = null,
+                               IgnoreLimits ignoreLimits = null,
+                               Boolean isSourceForEachRow = false)
         {
             Integer total = 0
             if(widgetSettings.type in [*DiagramType.CountableTypes, DiagramType.TABLE] && widgetSettings.showTotalAmount)
@@ -863,8 +911,8 @@
                             value?.aggregations?.count { it.type != Aggregation.NOT_APPLICABLE }
                         }
                         res = diagramType in DiagramType.CountableTypes
-                            ? getDiagramData(request, diagramType, templateUUID)
-                            : getDiagramData(request, diagramType, templateUUID,
+                            ? getDiagramData(request, user, diagramType, templateUUID)
+                            : getDiagramData(request, user,  diagramType, templateUUID,
                                              aggregationCnt, widgetSettings,
                                              ignoreLimits)
                     }
@@ -893,11 +941,7 @@
                         }
                         else
                         {
-                            //В качестве аргументов может прийти неправильной формы число, типа "14 5.0909".
-                            // Для всех остальных случаев ничего не меняется. Возможно потребуется округление для Integer.
-                            List totalList =res?.find()?.transpose()?.find()?.collect {elem ->elem.split(" ")}
-                                               .transpose()?.find()
-                            total = totalList?.sum { it as Float }
+                            total = res?.find()?.transpose()?.find()?.sum { it as Integer }
                         }
                     }
                 }
@@ -1168,7 +1212,7 @@
         {
             if(paginationSettings)
             {
-                if(groups instanceof Map)
+                if(groups in Map)
                 {
                     List keys = groups?.keySet()?.toList()
                     keys = sliceCollection(keys, paginationSettings)
@@ -2438,6 +2482,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировка
          * @param title - название группировки
+         * @param id - уникальный идентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> getDynamicFilter(List<List> data, Attribute attribute, String title, String id)
@@ -2461,6 +2506,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный идентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingCatalogItemTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
@@ -2598,6 +2644,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный идентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingLinkTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
@@ -2656,7 +2703,7 @@
                             value: value,
                             title: title,
                             id: id,
-                            type: Comparison.NOT_EQUAL,
+                            type: Comparison.NOT_EQUAL_AND_NOT_NULL,
                             attribute: attribute
                         )
                     case Condition.IN:
@@ -2790,6 +2837,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingDTIntervalTypeFilters(List<List> data, Attribute attribute, String title, String id)
@@ -2841,6 +2889,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingStringTypeFilters(List<List> data, Attribute attribute, String title, String id)
@@ -2890,6 +2939,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingNumberTypeFilters(Closure valueConverter, List<List> data, Attribute attribute, String title, String id)
@@ -2939,11 +2989,12 @@
 
         /**
          * Метод преодбразований настроек группировки для dateTime типов
-         * @param valueConverter - функция преодразования строки в число
+         * @param source - источник
          * @param offsetMinutes - смещение часового пояса пользователя относительно серверного времени
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingDateTypeFilters(Source source, Integer offsetMinutes, List<List> data, Attribute attribute, String title, String id)
@@ -3073,9 +3124,10 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
-        private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID,List<List> data, Attribute attribute, String title, String id)
+        private List<List<FilterParameter>> mappingStateTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
         {
             Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
             def dynamicFilter
@@ -3134,6 +3186,7 @@
          * @param data - настройки группировки
          * @param attribute - атрибут к которому привязана группировки
          * @param title - название группировки
+         * @param id - уникальный индентификатор
          * @return настройки группировки в удобном формате
          */
         private List<List<FilterParameter>> mappingTimerTypeFilters(Source source, Boolean fromDD, List<List> data, Attribute attribute, String title, String id)
@@ -3306,6 +3359,15 @@
             return durationInMs
         }
 
+        /**
+         * Метод преодбразований настроек группировки для метакласса
+         * @param subjectUUID - идентификатор "текущего объекта"
+         * @param data - настройки группировки
+         * @param attribute - атрибут к которому привязана группировки
+         * @param title - название группировки
+         * @param id - уникальный индентификатор
+         * @return настройки группировки в удобном формате
+         */
         private List<List<FilterParameter>> mappingMetaClassTypeFilters(String subjectUUID, List<List> data, Attribute attribute, String title, String id)
         {
             Boolean attrIsDynamic = attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
@@ -3405,6 +3467,7 @@
         /**
          * Метод получения данных для диаграмм
          * @param request - запрос на получение данных
+         * @param user - текущий пользователь системы
          * @param diagramType - тип диаграммы
          * @param templateUUID - ключ шаблона для динамических атрибутов
          * @param aggregationCnt - количество агрегаций
@@ -3413,7 +3476,8 @@
          * @param paginationSettings - настройки для пагинации в таблице
          * @return сырые данные из Бд по запросу
          */
-        def getDiagramData(DiagramRequest request, DiagramType diagramType = DiagramType.DONUT,
+        def getDiagramData(DiagramRequest request, IUUIDIdentifiable user,
+                           DiagramType diagramType = DiagramType.DONUT,
                            String templateUUID = '',
                            Integer aggregationCnt = 1, def requestContent = null,
                            IgnoreLimits ignoreLimits = new IgnoreLimits(),
@@ -3470,9 +3534,21 @@
                                 String possibleBreakdownAttribute = attributes.last().name
                                 customInBreakTable = possibleBreakdownAttribute == attrInCustoms
                             }
-                            if(!filtering)
+                            if (!filtering)
                             {
-                                return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, onlyFilled, diagramType, requestContent, ignoreLimits, paginationSettings)
+                                return getNoFilterListDiagramData(
+                                    node,
+                                    request,
+                                    aggregationCnt,
+                                    top,
+                                    notBlank,
+                                    onlyFilled,
+                                    diagramType,
+                                    requestContent,
+                                    ignoreLimits,
+                                    user,
+                                    paginationSettings
+                                )
                             }
                             RequestData newRequestData = requestData.clone()
                             Closure formatAggregation = this.&formatAggregationSet.rcurry(
@@ -3485,9 +3561,19 @@
                             Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
                             def res = filtering?.withIndex()?.collectMany { filters, i ->
                                 newRequestData.filters = filters
-                                List res = dashboardQueryWrapperUtils.getData(newRequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits?.parameter ?: false, templateUUID, paginationSettings)
-                                                                    .with(formatGroup)
-                                                                    .with(formatAggregation)
+                                List res = dashboardQueryWrapperUtils.getData(
+                                    newRequestData,
+                                    top,
+                                    currentUserLocale,
+                                    user,
+                                    notBlank,
+                                    diagramType,
+                                    ignoreLimits?.parameter ?: false,
+                                    templateUUID,
+                                    paginationSettings
+                                )
+                                                                     .with(formatGroup)
+                                                                     .with(formatAggregation)
 
                                 if(!res && !onlyFilled && !customInBreakTable)
                                 {
@@ -3576,7 +3662,7 @@
                             if(filterListSize == 0)
                             {
                                 parameterSortingType = diagramType == DiagramType.TABLE ?  null : dataSet.values().head().groups.find()?.sortingType
-                                return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, onlyFilled, diagramType, requestContent, ignoreLimits, paginationSettings)
+                                return getNoFilterListDiagramData(node, request, aggregationCnt, top, notBlank, onlyFilled, diagramType, requestContent, ignoreLimits, user, paginationSettings)
                             }
 
                             List<Integer> listIdsOfNormalAggregations = [0]
@@ -3588,7 +3674,7 @@
                                     RequestData newData = data.clone()
                                     newData.filters = filters
                                     Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
-                                    def res = dashboardQueryWrapperUtils.getData(newData as RequestData, top,currentUserLocale, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
+                                    def res = dashboardQueryWrapperUtils.getData(newData as RequestData, top,currentUserLocale, user, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
                                     if(!res && !onlyFilled)
                                     {
                                         def tempRes = ['']*(newData.groups.size() + notAggregatedAttributes.size())
@@ -3974,7 +4060,6 @@
 
         /**
          * Метод приведения значений группировок к читаемому для человека виду
-         * @param data - данные запроса
          * @param tempList - результат выборки
          * @param data - данные запроса
          * @param listIdsOfNormalAggregations - список индексов нормальных агрегаций
@@ -4738,12 +4823,16 @@
          * @param rowCount - количество строк в полном запросе
          * @param tableTop - настройки топа для таблицы
          * @param pagingSettings - настройки пагинации
+         * @param sorting - настройки сортировки
+         * @param reverseRowCount - обратный порядок
          * @param requestContent - тело запроса с фронта
          * @param request - тело обработанного запроса
          * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
          * @param countTotals - итог по количеству данных на виджете
          * @param tableTotals - итоговые данные по таблице
          * @param sourceRowNames - список заголовков для источников
+         * @param diagramType - тип диаграммы
+         * @param user - текущий пользователь системы
          * @return сформированная таблица
          */
         private TableDiagram mappingTableDiagram(List list,
@@ -4760,7 +4849,8 @@
                                                  Integer countTotals = 0,
                                                  List tableTotals = [],
                                                  List sourceRowNames = [],
-                                                 DiagramType diagramType)
+                                                 DiagramType diagramType,
+                                                 IUUIDIdentifiable user)
         {
             Boolean hasBreakdown = checkForBreakdown(requestContent)
             List<List> resultDataSet
@@ -4844,23 +4934,25 @@
                     }
                 }
 
-                return mappingTable(resultDataSet,
-                                    transposeDataSet,
-                                    attributes,
-                                    totalColumn,
-                                    showRowNum,
-                                    rowCount,
-                                    tableTop,
-                                    paginationSettings,
-                                    sorting,
-                                    reverseRowCount,
-                                    innerCustomGroupNames,
-                                    hasBreakdown,
-                                    customValuesInBreakdown,
-                                    aggregationCnt,
-                                    allAggregationAttributes,
-                                    ignoreLimits,
-                                    request, countTotals, tableTotals, sourceRowNames, diagramType)
+                return mappingTable(
+                    resultDataSet,
+                    transposeDataSet,
+                    attributes,
+                    totalColumn,
+                    showRowNum,
+                    rowCount,
+                    tableTop,
+                    paginationSettings,
+                    sorting,
+                    reverseRowCount,
+                    innerCustomGroupNames,
+                    hasBreakdown,
+                    customValuesInBreakdown,
+                    aggregationCnt,
+                    allAggregationAttributes,
+                    ignoreLimits,
+                    request, countTotals, tableTotals, sourceRowNames, diagramType, user
+                )
             }
         }
 
@@ -4922,7 +5014,7 @@
                         }
                 return new Column(
                     footer: "",
-                    accessor: attrValue.key ?: attrValue.aggregation? accessorAndAtribut + "#" + "${attrValue.aggregation}" : attrValue.name,
+                    accessor: attrValue.key ?: accessorAndAtribut,
                     header: accessorAndAtribut,
                     attribute: attrValue.attribute,
                     type: attrValue.type,
@@ -5225,9 +5317,10 @@
          * Метод получения количества уникальных значений по атрибуту из БД
          * @param attributeValue - значение арибута с его группировкой и тд
          * @param classFqn - метакласс источника
+         * @param user - текущий пользователь системы
          * @return количество уникальных значений
          */
-        Integer countDistinct(def attributeValue, String classFqn)
+        Integer countDistinct(def attributeValue, String classFqn, IUUIDIdentifiable user)
         {
             Attribute attribute = attributeValue.attribute.deepClone()
             String attributeType = Attribute.getAttributeType(attribute)
@@ -5239,7 +5332,15 @@
                 def wrapper = QueryWrapper.build(source)
                 attribute = dashboardQueryWrapperUtils.updateRefAttributeCode(attribute)
                 def parameter = buildSystemGroup(attributeValue.group, attribute)
-                wrapper.processGroup(wrapper,wrapper.criteria, false, parameter, DiagramType.TABLE, source)
+                wrapper.processGroup(
+                    wrapper,
+                    wrapper.criteria,
+                    false,
+                    parameter,
+                    DiagramType.TABLE,
+                    source,
+                    user
+                )
 
                 return wrapper.getResult(true, DiagramType.TABLE, false)?.unique()?.size()
             }
@@ -5284,15 +5385,36 @@
          * @param aggregationCnt - количество агрегаций
          * @param allAggregationAttributes - названия всех атрибутов агрегации
          * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
-         * @param request тело обработанного запроса
+         * @param request - тело обработанного запроса
+         * @param countTotals - итоговое значение
+         * @param tableTotals - итоговые значения таблицы
          * @param sourceRowNames - список заголовков для источников
+         * @param user - текущий пользователь системы
+         * @param diagramType - тип диаграммы
          * @return TableDiagram
          */
-        private TableDiagram mappingTable(List resultDataSet, List transposeDataSet, List attributes, Boolean totalColumn,
-                                          Boolean showRowNum, Integer rowCount, Integer tableTop, PaginationSettings paginationSettings, Sorting sorting,
-                                          Boolean reverseRowCount, Set<Map> innerCustomGroupNames, Boolean hasBreakdown, List customValuesInBreakdown,
-                                          Integer aggregationCnt, List<String> allAggregationAttributes, IgnoreLimits ignoreLimits,
-                                          DiagramRequest request, Integer countTotals, List tableTotals = [], List sourceRowNames = [], DiagramType diagramType)
+        private TableDiagram mappingTable(List resultDataSet,
+                                          List transposeDataSet,
+                                          List attributes,
+                                          Boolean totalColumn,
+                                          Boolean showRowNum,
+                                          Integer rowCount,
+                                          Integer tableTop,
+                                          PaginationSettings paginationSettings,
+                                          Sorting sorting,
+                                          Boolean reverseRowCount,
+                                          Set<Map> innerCustomGroupNames,
+                                          Boolean hasBreakdown,
+                                          List customValuesInBreakdown,
+                                          Integer aggregationCnt,
+                                          List<String> allAggregationAttributes,
+                                          IgnoreLimits ignoreLimits,
+                                          DiagramRequest request,
+                                          Integer countTotals,
+                                          List tableTotals = [],
+                                          List sourceRowNames = [],
+                                          DiagramType diagramType,
+                                          IUUIDIdentifiable user)
         {
             List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
             Boolean valuesInBasicBreakdownExceedLimit = !customValuesInBreakdown && breakdownValues.size() > DashboardUtils.tableBreakdownLimit && !ignoreLimits.breakdown
@@ -5314,7 +5436,7 @@
                     if(secondAttribut != null){
                         return  attribut.name + " (" + attribut?.attribute?.ref?.title+ ")"
                     }
-                    return attribut.key ?:  attribut.aggregation? attribut.name + "#" + "${attribut.aggregation}" : attribut.name
+                    return attribut.key ?:  attribut.name
                 }
 
                 if (sourceRowNames && hasBreakdown) {
@@ -5574,7 +5696,7 @@
                                                                          parameterAttribute.attribute.code.tokenize('_').last()) >
                       DashboardUtils.tableParameterLimit
                     : countDistinct(parameterAttribute,
-                                    parameterAttribute.attribute.sourceCode) >
+                                    parameterAttribute.attribute.sourceCode, user) >
                       DashboardUtils.tableParameterLimit
                 if(isDynamicParameter)
                 {
@@ -5594,7 +5716,7 @@
                                                                          breakdownAttribute.attribute.code.tokenize('_').last()) >
                       DashboardUtils.tableBreakdownLimit
                     : countDistinct(breakdownAttribute,
-                                    breakdownAttribute.attribute.sourceCode) >
+                                    breakdownAttribute.attribute.sourceCode, user) >
                       DashboardUtils.tableBreakdownLimit
                 if(isDynamicBreakdown)
                 {
@@ -5985,7 +6107,6 @@
          * @param row - строка мап
          * @param attributeNames - список названий атрибутов
          * @param aggregationCnt - количество агрегаций
-         * @param i - индекс
          * @return строка дерева
          */
         ResRow createResRow(Map map, List<Map> row, List<String> attributeNames, int aggregationCnt)
@@ -6131,7 +6252,7 @@
 
         /**
          * Метод получения названий внутренних групп из основных группировок
-         * @param request - запрос
+         * @param requestContent - запрос
          * @return список названий
          */
         private Set<Map> getInnerCustomGroupNames(def requestContent)
@@ -6505,7 +6626,7 @@
 
         /**
          * Метод получения списка фильтров
-         * @param customGroup - кастомная группировка для построения фильтра
+         * @param parameter - значение параметра
          * @param subjectUUID - идентификатор "текущего объекта"
          * @param place - место, откуда была создана кастомная группировка
          * @param source - источник запроса
@@ -6513,7 +6634,8 @@
          * @param sortingType - тип сортировки
          * @return - список фильтров
          */
-        private FilterList getFilterList(NewParameter parameter, String subjectUUID, String place, Source source, Integer offsetUTCMinutes, SortingType sortingType = null) {
+        private FilterList getFilterList(NewParameter parameter, String subjectUUID, String place, Source source, Integer offsetUTCMinutes, SortingType sortingType = null)
+        {
             if(parameter?.group)
             {
                 def customGroup = parameter?.group?.data
@@ -6667,9 +6789,20 @@
          * @param diagramType  - тип диаграммы
          * @param requestContent - тело запроса
          * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
+         * @param user - текущий пользователь системы
          * @return сырые данные для построения диаграм
          */
-        private List getNoFilterListDiagramData(def node, DiagramRequest request, Integer aggregationCnt, Integer top, Boolean notBlank, Boolean onlyFilled,  DiagramType diagramType, def requestContent, IgnoreLimits ignoreLimits, PaginationSettings paginationSettings = null)
+        private List getNoFilterListDiagramData(Object node,
+                                                DiagramRequest request,
+                                                Integer aggregationCnt,
+                                                Integer top,
+                                                Boolean notBlank,
+                                                Boolean onlyFilled,
+                                                DiagramType diagramType,
+                                                Object requestContent,
+                                                IgnoreLimits ignoreLimits,
+                                                IUUIDIdentifiable user,
+                                                PaginationSettings paginationSettings = null)
         {
             Boolean isSourceForEachRow = requestContent?.data?.sourceRowName?.findAll() && diagramType == DiagramType.TABLE
             String nodeType = node.type
@@ -6710,7 +6843,7 @@
                         getPercentCntAggregationIndexes(request)
                     )
                     Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
-                    def res = dashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
+                    def res = dashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
                                                         .with(formatGroup)
                                                         .with(formatAggregation)
                     def total = res ? [(requisiteNode.title): res] : [:]
@@ -6764,7 +6897,7 @@
                     def variables = dataSet.collectEntries { key, data ->
                         Closure postProcess =
                             this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
-                        Collection result = dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
+                        Collection result = dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
                                                                 .with(postProcess)
 
                         if (result.size() == 0 || result.first() in Collection && result.first().size() == 0)
