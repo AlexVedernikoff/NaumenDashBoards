@@ -28,13 +28,8 @@ const data = {
 				"code":"5af9985a-79b4-42b9-9d0f-635f6d80561e",
 				"show":true,
 				"editor":{
-					"type": "select", 
-					"map_to": "priority", 
-					"options": [
-						{"label": "Сбор требований", "value": "PMProject$2449401"},
-						{"label": "Сбор требований", "value": "PMProject$2449401"},
-						{"label": "Разработка прототипа", "value": "PMProject$2460603"}
-					]
+					"type": "date", 
+					"map_to": "5af9985a-79b4-42b9-9d0f-635f6d80561e", 
 				}
 			},
 			{
@@ -81,89 +76,31 @@ const data = {
 	'milestonesCheckbox' : false,
 	'tasks': [
 		{
-			"id":"serviceCall$2361601_cf19df0a-b957-4d6a-95e4-e70f438d1a0a",
-			"text":"2021-11-11, 12:55:26",
-			"code1":"2021-11-11, 12:55:26",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
-			"start_date":"2021-11-11T12:55:26",
-			"end_date": "2021-11-13T12:55:26",
+			"id":"employee$75250",
+			"text":"1",
+			"code1":"1",
+			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"2020-11-13T12:55:26",
 			"level":0,
 			"progress":0.8,
 			"type":"RESOURCE",
-			"workOfLink":"1",
+			"workOfLink":"22",
 			"editable": true,
-			"name": "2021-11-11, 12:55:26"
+			"name": "1"
 		},
 		{
-			"id":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
-			"text":"SD111",
-			"code1":"SD111",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e": false,
-			"start_date":"2028-11-11T11:55:26",
-			"end_date": "2029-11-13T11:55:26",
-			"level": 0,
-			"type":"project",
-			"workOfLink":"1",
-			"editable": true,
-			"name": "SD111"
-		},
-		{
-			"id":"employee$752501_d63f121f-0c59-43a9-8b6a-145a0927041c",
-			"text":"\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d",
-			"code1":"\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0421\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a",
-			"parent":"serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
-			"start_date":"2021-11-11T11:55:26",
-			"end_date": "2021-11-13T11:55:26",
+			"id":"2",
+			"text":"1",
+			"code1":"1",
+			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"2020-11-13T12:55:26",
+			"start_date": "2015-11-13T12:55:26",
+			"end_date": "2022-11-13T12:55:26",
 			"level":1,
+			"progress":0.8,
 			"type":"WORK",
-			"workOfLink":"1",
+			"workOfLink":"12",
 			"editable": true,
-			"name": "\u0418\u0432\u0430\u043d\u043e\u0432 \u0418\u0432\u0430\u043d"
-		},
-		{
-			"id":"serviceCall$2419102_0c0310d7-f454-4baf-8eea-7f38066a317c",
-			"text":"112",
-			"code1":"112",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0417\u0430\u043f\u0440\u043e\u0441 \u043d\u0430 \u043e\u0431\u0441\u043b\u0443\u0436\u0438\u0432\u0430\u043d\u0438\u0435",
-			"level":0,
-			"type":"RESOURCE",
-			"editable": true
-		},
-		{
-			"id":"serviceCall$2418501_572397e3-0c6a-4ef9-bd45-c3d2cd64b99d",
-			"text":"INC109",
-			"code1":"INC109",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
-			"level":0,
-			"type":"RESOURCE",
-			"editable": true
-		},
-		{
-			"id":"serviceCall$2418501_572397e3-0c6a-4ef9-bd45-c3d2cd64b99d211",
-			"text":"Промежуточная точка",
-			"code1":"точка",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
-			"level":0,
-			"hide_bar": false,
-			"type":"milestone",
-			"completed": true,
-			"start_date":"2021-11-11T11:55:26",
-			"editable": true
-		},
-
-		{
-			"id":"serviceCall$2418501_572397e3-0c6a-4ef9-bd45-c3d2cd64b99d21",
-			"text":"Контрольная точка",
-			"code1":"точка2",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"\u0418\u043d\u0446\u0438\u0434\u0435\u043d\u0442",
-			"level":1,
-			"hide_bar": false,
-			"type":"milestone",
-			"completed" : true,
-			"start_date":"2021-11-13T12:55:26",
-			"parent": "serviceCall$2419101_d872205c-edbf-483c-83b2-3334df874887",
-			"editable": true
+			"name": "1",
+			"parent": 'employee$75250'
 		},
 	],
 	"workRelations":[
@@ -176,8 +113,8 @@ const data = {
     ],
 	"progressCheckbox": false,
 	"workRelationCheckbox": false,
-	"startDate": "2020-09-28, 17:57:45",
-	"endDate": "2024-09-07, 08:00:00",
+	"startDate": "2024-09-02, 00:00:00",
+	"endDate": "2024-09-07, 00:00:00",
 	"currentInterval": {"label": "сегодня", "value": "NEXTDAYS"},
 };
 

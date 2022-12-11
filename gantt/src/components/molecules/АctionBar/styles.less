@@ -79,23 +79,6 @@
 			margin-left: 12px;
 		}
 
-		&:nth-child(2) {
-			margin-right: 14px;
-			position: relative;
-
-			&:after {
-				background: #E4E4E4;
-				border-radius: 2px;
-				content: '';
-				height: 24px;
-				position: absolute;
-				right: -14px;
-				top: -4px;
-				width: 1px;
-				
-			}
-		}
-
 		&:hover {
 			border-radius: 0;
 			height: 24px;
@@ -146,9 +129,30 @@
 		}
 	}
 
+	.modalUsers {
+		width: 400px !important;
+	}
+
 	.modalVarsions {
 		button:last-child {
 			display: none;
+		}
+	}
+
+	.rightBorder {
+		margin-right: 14px;
+		position: relative;
+
+		&:after {
+			background: #E4E4E4;
+			border-radius: 2px;
+
+			content: '';
+			height: 24px;
+			position: absolute;
+			right: -14px;
+			top: -4px;
+			width: 1px;
 		}
 	}
 
@@ -159,6 +163,22 @@
 		
 		&:hover {
 			border: 1px solid #3578ad;;
+		}
+	}
+
+	.users {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.usersHeader {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+
+		& > div {
+			font-weight: 700;
 		}
 	}
 

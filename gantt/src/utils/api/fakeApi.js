@@ -36,7 +36,7 @@ export default class FakeApi {
 			return {groupUser: USER_ROLES.REGULAR};
 		}
 
-		return {email: 'test@d.ru', groupUser: USER_ROLES.MASTER, name: 'test'};
+		return {email: 'test@d.ru', groupUser: USER_ROLES.SUPER, name: 'test'};
 	}
 
 	async getDiagramData (contentCode, subjectUuid, user, timezone) {
@@ -73,6 +73,21 @@ export default class FakeApi {
 			{
 				'code': 'solveedByEmployee',
 				'title': 'Кем решен (сотрудник)'
+			}
+		];
+	}
+
+	async getUsers () {
+		return [
+			{
+				'code': 'Gromov Aleksey',
+				'ganttMaster': true,
+				'name': 'Громов Алексей'
+			},
+			{
+				'code': 'Nosov Aleksandr',
+				'ganttMaster': false,
+				'name': 'Носов Александр'
 			}
 		];
 	}
@@ -149,7 +164,7 @@ export default class FakeApi {
 		];
 	}
 
-	async postData (subjectUuid, contentCode, data) {
+	async postData (timezone, subjectUuid, contentCode, data) {
 		await new Promise(resolve => setTimeout(() => resolve(), 300));
 		return data;
 	}
@@ -217,5 +232,9 @@ export default class FakeApi {
 
 	deleteGanttVersionSettingsRequest () {
 		return 'root$101';
+	}
+
+	async postUsers (data) {
+		await new Promise(resolve => setTimeout(() => resolve(), 300));
 	}
 }

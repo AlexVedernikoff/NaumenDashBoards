@@ -20,19 +20,33 @@ import {defaultResourceSetting} from 'store/App/constants';
 import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
 import {gantt} from 'naumen-gantt';
-import {getChild, getIndexBottomNeighbor, getNeighbor, getUpdatedLevel, skipChildren} from './utils';
+import {
+	getChild,
+	getIndexBottomNeighbor,
+	getNeighbor,
+	getUpdatedLevel,
+	skipChildren
+} from './utils';
 import GridLayout from 'react-grid-layout';
 import {IntervalSelectionCriterion, ScaleNames} from './consts';
 import Modal from 'src/components/atoms/Modal';
 import type {Props} from './types';
 import React, {useEffect, useState} from 'react';
 import Resource from './components/Resource';
+import {
+	setColumnTask,
+	switchWorksWithoutStartOrEndDateCheckbox,
+	updateWorks
+} from 'store/App/actions';
 import ShowBox from 'src/components/atoms/ShowBox';
 import styles from './styles.less';
 import {v4 as uuidv4} from 'uuid';
 import Work from './components/Work';
+import {useDispatch, useSelector} from 'react-redux';
 
 const FormPanel = (props: Props) => {
+	const dispatch = useDispatch();
+	const store = useSelector(state => state);
 	const {endDate, errorSettings, loading, resources, settings, startDate} = props;
 	const {columnSettings} = settings;
 	const sd = startDate
@@ -57,11 +71,18 @@ const FormPanel = (props: Props) => {
 	const [inputMonthDays, setInputMonthDays] = useState('');
 	const [inputLastDays, setinputLastDays] = useState('');
 	const [currentInterval, setCurrentInterval] = useState(props.currentInterval ? props.currentInterval : {label: 'c ... по', value: 'INTERVAL'});
-	const [diagramStartDate, setDiagramStartDate] = useState('');
-	const [diagramEndDate, setDiagramEndDate] = useState('');
+	const [diagramStartDate, setDiagramStartDate] = useState(new Date(startDate));
+	const [diagramEndDate, setDiagramEndDate] = useState(new Date(endDate));
 
 	useEffect(() => {
 		setCurrentInterval(props.currentInterval);
+
+		const msStartDate = new Date(startDate).getTime();
+		const msEndTime = new Date(endDate).getTime();
+		const days = Math.round((msEndTime - msStartDate) / 86400000);
+
+		setinputLastDays(days);
+		setInputMonthDays(days);
 	}, [props.currentInterval]);
 
 	const handleAddNewBlock = (index: number, value: string) => {
@@ -359,7 +380,7 @@ const FormPanel = (props: Props) => {
 		} else if (valueInterval.value === 'MONTH') {
 			if (isNaN(inputMonthDays)) {
 				setValueError('Некорректное значение');
-			} else if (!inputMonthDays.length) {
+			} else if (!inputMonthDays) {
 				setValueError('Заполните поле');
 			} else {
 				const today = new Date();
@@ -381,7 +402,7 @@ const FormPanel = (props: Props) => {
 		} else if (valueInterval.value === 'LASTDAYS') {
 			if (isNaN(inputLastDays)) {
 				setValueError('Некорректное значение');
-			} else if (!inputLastDays.length) {
+			} else if (!inputLastDays) {
 				setValueError('Заполните поле');
 			} else {
 				const today = new Date();
@@ -396,19 +417,20 @@ const FormPanel = (props: Props) => {
 
 				setDiagramStartDate(new Date(monthDays));
 				setDiagramEndDate(today);
-				setValueError('');
 
 				props.setRangeTime(date);
+				setValueError('');
 			}
 		} else if (valueInterval.value === 'NEXTDAYS') {
-
 			const todayStartDate = new Date();
 			const todayEndDate = new Date();
 
 			const hoursDays = todayStartDate.getHours();
 
 			todayStartDate.setHours(hoursDays - +hoursDays);
-			todayEndDate.setHours(hoursDays - -(+3));
+			const day = 23 - hoursDays;
+
+			todayEndDate.setHours(hoursDays - -(+day));
 
 			const date = {
 				endDate: new Date(todayEndDate),
@@ -558,7 +580,7 @@ const FormPanel = (props: Props) => {
 
 	const renderCheckboxStateMilestoneBlock = () => {
 		return (
-			<div onClick={props.handleToggleStateMilestoneBlock}>
+			props.milestonesCheckbox && <div onClick={props.handleToggleStateMilestoneBlock}>
 				<FormControl className={cn(styles.checkbox)} label="Отображать состояние контрольных точек" small={true}>
 					<Checkbox checked={props.stateMilestonesCheckbox} name="Checkbox" onChange={props.handleToggleStateMilestoneBlock} value={props.stateMilestonesCheckbox} />
 				</FormControl>
@@ -566,11 +588,32 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
+	const handleOpenFilterForm = async () => {
+		try {
+			const {worksWithoutStartOrEndDateCheckbox} = store.APP;
+			const res = await updateWorks(!worksWithoutStartOrEndDateCheckbox)(dispatch);
+
+			dispatch(setColumnTask(res));
+			gantt.clearAll();
+			setTimeout(() => {
+				gantt.parse(JSON.stringify({data: res, links: store.APP.workRelations}));
+				gantt.render();
+			}, 500);
+		} catch (e) {
+			console.error(e);
+		}
+	};
+
+	const handleToggleWorksWithoutDates = (value) => {
+		switchWorksWithoutStartOrEndDateCheckbox(!value.value);
+		handleOpenFilterForm();
+	};
+
 	const renderCheckboxWorksWithoutDates = () => {
 		return (
 			<div onClick={props.handleToggleWorksWithoutDates}>
-				<FormControl className={cn(styles.checkbox)} label="Отображать работы без даты начала и даты завершения" small={true}>
-					<Checkbox checked={props.worksWithoutStartOrEndDateCheckbox} name="Checkbox" onChange={props.handleToggleWorksWithoutDates} value={props.worksWithoutStartOrEndDateCheckbox} />
+				<FormControl className={styles.checkbox} label="Отображать работы без даты начала и окончания даты" small={true}>
+					<Checkbox checked={props.worksWithoutStartOrEndDateCheckbox} name="Checkbox" onChange={handleToggleWorksWithoutDates} value={props.worksWithoutStartOrEndDateCheckbox} />
 				</FormControl>
 			</div>
 		);

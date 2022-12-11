@@ -2,13 +2,19 @@
 import {api} from './';
 import {arrayToTree} from 'utils/arrayToTree';
 import {FilterFormDescriptorDTO} from './types';
-import type {Params, Settings, Source, Task, Tasks, UserData, WorkRelations} from 'store/app/types';
+import type {Params, Settings, Source, Task, Tasks, UserData, Users, WorkRelations} from 'store/app/types';
 
 const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
 	hasDynamic,
 	label,
 	value
 });
+
+/**
+* Получает список пользователей
+* @return {Promise<Params>}
+*/
+const getUsers = async () => api.getUsers();
 
 /**
 * Получает названия и ключи версий
@@ -39,8 +45,8 @@ const getGanttVersionsSettings = async (versionKey: string, timezone: string): P
 * @param {Tasks} tasks - задачи на диаграмме
 * @param {WorkRelations} workRelations - объект связи между работами
 */
-const saveGanttVersionSettingsRequest = async (contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations): Promise<Params> => {
-	api.saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUUID, title, tasks, workRelations);
+const saveGanttVersionSettingsRequest = async (commonSettings, contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations): Promise<Params> => {
+	api.saveGanttVersionSettingsRequest(commonSettings, contentCode, createdDate, subjectUUID, title, tasks, workRelations);
 };
 
 /**
@@ -288,13 +294,14 @@ const getDataSourceAttributesByTypes = async (classFqn: string, types: string = 
 
 /**
  * Отправляет сохраненные настройки
+ * @param {string} timezone - часовой пояс пользователя
  * @param subjectUuid - UUID объекта
  * @param contentCode - ключ контента, на котором расположена диаграмма
  * @param data - сохраняемые пользователем настройки
  * @returns {Promise<Params>} - новые настройки
  */
-const saveData = async (subjectUuid: string, contentCode: string, data: Settings): Promise<Params> => {
-	const res = await api.postData(subjectUuid, contentCode, data);
+const saveData = async (timezone: string, subjectUuid: string, contentCode: string, data: Settings): Promise<Params> => {
+	const res = await api.postData(timezone, subjectUuid, contentCode, data);
 	return res;
 };
 
@@ -310,6 +317,14 @@ const postChangedWorkProgress = async (workUUID: string, progress: number, conte
 };
 
 /**
+* Отправляет пользователей
+* @param {Users} data - данные пользователей
+*/
+const postUsers = async (data: Users) => {
+	await api.postUsers(data);
+};
+
+/**
  * Открывает окно фильтрации
  *
  * @returns {string} - JSON объект с настройкой фильтрации
@@ -322,7 +337,7 @@ const openFilterForm = (context: FilterFormDescriptorDTO): string => {
 /**
  * Получает работы
  * @param {boolean} worksWithoutStartOrEndDateCheckbox - состояние флажка
- * @param {number} timezone - часовой пояс пользователя
+ * @param {string} timezone - часовой пояс пользователя
  * @param {string} contentCode - ключ контента, на котором расположена диаграмма
  * @param {string} subjectUUID - UUID объекта
  * @return {Promise<Params>}
@@ -401,10 +416,12 @@ export {
 	getWorkDataForWork,
 	openFilterForm,
 	getUserData,
+	getUsers,
 	getWorks,
 	postChangedWorkRelations,
 	postChangedWorkProgress,
 	postChangedWorkInterval,
+	postUsers,
 	saveGanttVersionSettingsRequest,
 	saveData,
 	updateGanttVersionSettingsRequest

@@ -121,13 +121,18 @@ const ModalTask = (props: Props) => {
 
 					const attrStartDate = resources[1].startWorkAttribute.code;
 					const attrEndDate = resources[1].endWorkAttribute.code;
+					const attrMilestone = resources[1].checkpointStatusAttr.code;
 					const workDate = {
 						title: currentValue
 					};
 
-					workDate[attrStartDate] = newFormatStartDate;
-					workDate[attrEndDate] = currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate;
-					workDate.completed = currentTask.type === 'milestone' ? active : null;
+					if (currentTask.type === 'milestone') {
+						workDate[attrMilestone] = newFormatStartDate;
+						workDate.completed = currentTask.type === 'milestone' ? active : null;
+					} else {
+						workDate[attrStartDate] = newFormatStartDate;
+						workDate[attrEndDate] = currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate;
+					}
 
 					dispatch(postEditedWorkData(workDate, currentMetaClassFqn, taskId));
 					task.start_date = newStartDate;
@@ -139,6 +144,9 @@ const ModalTask = (props: Props) => {
 				if (i.id === task.id) {
 					i.start_date = newStartDate;
 					i.end_date = currentTask.type === 'milestone' ? newStartDate : newEndDate;
+					i.text = currentValue;
+					i.name = currentValue;
+					i.code1 = currentValue;
 
 					if (currentTask.type === 'milestone') {
 						i.completed = active;

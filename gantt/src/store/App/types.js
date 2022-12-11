@@ -130,3 +130,11 @@ export type ConnectionItem = {
 };
 
 export type WorkRelations = ConnectionItem[];
+
+export type UserModalData = {
+	code: string,
+	ganttMaster: boolean,
+	name: string,
+};
+
+export type Users = UserModalData[];

@@ -76,7 +76,7 @@ const normalizeDate = date => {
 		[dateParts[0], dateParts[2]] = [dateParts[2], dateParts[0]];
 	}
 
-	const modifiedDateString = dateParts.join('/') + time;
+	const modifiedDateString = time ? dateParts.join('/') + time : dateParts.join('/');
 	const modifiedDate = new Date(modifiedDateString);
 
 	return modifiedDate;
@@ -88,16 +88,18 @@ const normalizeDate = date => {
  * @returns {string} - значение смещения
  */
 const shiftTimeZone = (date: Date) => {
-	const timezone = /(GMT.*\))/.exec(new Date(date));
-	const deviation = timezone[0].slice(5, 6);
-	const sign = timezone[0].slice(3, 4);
-	let deleteDeviation = `${deviation}`;
+	if (date) {
+		const timezone = /(GMT.*\))/.exec(new Date(date));
+		const deviation = timezone[0].slice(5, 6);
+		const sign = timezone[0].slice(3, 4);
+		let deleteDeviation = `${deviation}`;
 
-	if (sign === '-') {
-		deleteDeviation = `'-'${deviation}`;
+		if (sign === '-') {
+			deleteDeviation = `'-'${deviation}`;
+		}
+
+		return deleteDeviation;
 	}
-
-	return deleteDeviation;
 };
 
 /**

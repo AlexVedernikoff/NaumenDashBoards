@@ -19,9 +19,7 @@ const Gantt = (props: Props) => {
 		currentVersion,
 		getListOfWorkAttributes,
 		resources, rollUp, scale,
-		tasks,
-		workProgresses,
-		workRelations
+		tasks
 	} = props;
 	const [showMenu, setShowMenu] = useState(false);
 	const [initPage, setInitPage] = useState(false);
@@ -53,7 +51,7 @@ const Gantt = (props: Props) => {
 						const dateToStr = gantt.date.date_to_str('%d %M');
 						const endDate = gantt.date.add(date, 6, 'day');
 						const weekNum = gantt.date.date_to_str('%W')(date);
-						return '#' + weekNum + ', ' + dateToStr(date) + ' - ' + dateToStr(endDate);
+						return `#${weekNum}, ${dateToStr(date)} - ${dateToStr(endDate)}`;
 					},
 					step: 1,
 					unit: 'week'},
@@ -137,8 +135,8 @@ const Gantt = (props: Props) => {
 			const shiftedEndDate = shiftTimeZone(task.end_date);
 			const shiftedStartDate = shiftTimeZone(task.start_date);
 
-			startDate = gantt.date.add(new Date(task.start_date), +shiftedStartDate, 'hour');
-			endDate = gantt.date.add(new Date(task.end_date), +shiftedEndDate, 'hour');
+			startDate = gantt.date.add(new Date(task.start_date), shiftedStartDate, 'hour');
+			endDate = gantt.date.add(new Date(task.end_date), shiftedEndDate, 'hour');
 
 			return {endDate, startDate, workUUID: task.id};
 		});
@@ -217,7 +215,20 @@ const Gantt = (props: Props) => {
 			});
 
 			gantt.templates.tooltip_text = (_, __, task) => {
-				return '<br /><b>Название:</b> ' + task.text + '<br /><b>Начальная дата:</b> ' + dateToStr(task.start_date) + '<br /><b>Конечная дата:</b> ' + dateToStr(task.end_date);
+				const storeTask = store.APP.tasks.find(TASK => TASK.id === task.id);
+
+				if (task.type === 'milestone') {
+					return `<br /><b>Название:</b> ${task.text} <br /><b>Контрольная точка:</b> ${dateToStr(task.start_date)}`;
+				} else if (storeTask.end_date && storeTask.start_date) {
+					return `<br /><b>Название:</b> ${task.text} <br /><b>Начальная дата:</b> ${dateToStr(task.start_date)}
+						<br /><b>Конечная дата:</b> ${dateToStr(task.end_date)}`;
+				} else {
+					if (storeTask.end_date) {
+						return `<br /><b>Название:</b> ${task.text} <br /><b>Конечная дата:</b> ${dateToStr(task.end_date)}`;
+					} else if (storeTask.start_date) {
+						return `<br /><b>Название:</b> ${task.text} <br /><b>Начальная дата:</b> ${dateToStr(task.start_date)}`;
+					}
+				}
 			};
 		}, 500);
 
@@ -267,12 +278,12 @@ const Gantt = (props: Props) => {
 			editWorkInterval();
 		});
 
-		//Переход на карточку работы по клику на иконку
+		// Переход на карточку работы по клику на иконку
 		gantt.templates.grid_file = item => {
 			const task = tasks.find(task => task.id === item.id);
 
 			if (task?.workOfLink) {
-				return `<a href=${task.workOfLink} class='gantt_tree_icon gantt_file'></a>`;
+				return `<a href=${task.workOfLink} target="_blank" class="gantt_tree_icon gantt_file"></a>`;
 			}
 		};
 
@@ -358,7 +369,7 @@ const Gantt = (props: Props) => {
 		gantt.render();
 	}, [store.APP.workProgresses]);
 
-	const [firstUpdate, setFirstUpdate] = useState(true);
+	const [firstUpdate] = useState(true);
 
 	// Изменяет время и дату настроек диаграммы гантта при изменении [store.APP.startDate, store.APP.endDate]
 	useEffect(() => {
@@ -386,15 +397,6 @@ const Gantt = (props: Props) => {
 	useEffect(() => {
 		setRes(resources);
 	}, [props.resources]);
-
-	useEffect(() => {
-		const {worksWithoutStartOrEndDateCheckbox} = store.APP;
-
-		if (typeof worksWithoutStartOrEndDateCheckbox === 'boolean') {
-			dispatch(updateWorks(worksWithoutStartOrEndDateCheckbox));
-			gantt.render();
-		}
-	}, [store.APP.worksWithoutStartOrEndDateCheckbox]);
 
 	// Изменяет дефолтные настройки при изменения tasks
 	useEffect(() => {
@@ -517,10 +519,14 @@ const Gantt = (props: Props) => {
 
 	inlineEditors.attachEvent('onBeforeEditStart', state => {
 		const tasksGantt = gantt.getTaskByTime();
+		const columns = props.columns;
+		const column = columns.find(column => column.code === state.columnName);
 
 		tasksGantt.find(task => {
 			if (task.id === state.id) {
-				task.text = task[state.columnName];
+				if (column.editor.type === 'text') {
+					task.text = task[state.columnName];
+				}
 			}
 		});
 
@@ -541,16 +547,18 @@ const Gantt = (props: Props) => {
 		const newTask = newTasks.find(i => i.id === state.id);
 
 		if (newTask) {
-			for (const key in newTask) {
-				if (key === state.columnName) {
-					newTask[key] = state.newValue;
-					newTask.text = state.newValue;
-				}
-			}
-
 			const workDate = {};
 
-			workDate[attributeCode] = column.editor.type === 'select' ? columnOption.value : state.newValue;
+			if (column.editor.type === 'select') {
+				workDate[attributeCode] = columnOption.value;
+			} else if (column.editor.type === 'date') {
+				const hours = shiftTimeZone(state.newValue);
+				const newDate = gantt.date.add(new Date(state.newValue), +hours, 'hour');
+
+				workDate[attributeCode] = newDate;
+			} else {
+				workDate[attributeCode] = state.newValue;
+			}
 
 			if (newTask.id.includes('s')) {
 				const metaClassStr = 'serviceCall$PMTask';
@@ -559,10 +567,50 @@ const Gantt = (props: Props) => {
 
 				if (res) {
 					res.status === 500 ? setErrorAttr(true) : setErrorAttr(false);
+					const tasksGantt = gantt.getTaskByTime();
+
+					tasksGantt.forEach(task => {
+						if (task.id === state.id) {
+							task.text = state.oldValue;
+						}
+					});
+					gantt.render();
 					alert('Нередактируемый атрибут');
 					return false;
 				} else {
 					dispatch(postEditedWorkData(workDate, metaClassStr, newTask.id));
+					for (const key in newTask) {
+						if (key === state.columnName) {
+							newTask[key] = state.newValue;
+							newTask.text = state.newValue;
+						}
+					}
+					dispatch(setColumnTask(newTasks));
+
+					const tasksGantt = gantt.getTaskByTime();
+
+					tasksGantt.forEach(task => {
+						if (task.id === state.id) {
+							task[state.columnName] = state.newValue;
+
+							if (task.name === state.oldValue) {
+								if (column.editor.type === 'text') {
+									task.text = state.newValue;
+									task.name = state.newValue;
+								} else {
+									task.text = state.oldValue;
+								}
+							} else {
+								if (column.editor.type === 'text') {
+									task.text = task.name;
+								} else {
+									task.text = state.oldValue;
+								}
+							}
+
+							gantt.render();
+						}
+					});
 				}
 			} else {
 				const metaClassStr = 'employee';
@@ -571,30 +619,42 @@ const Gantt = (props: Props) => {
 
 				if (res) {
 					res.status === 500 ? setErrorAttr(true) : setErrorAttr(false);
+					const tasksGantt = gantt.getTaskByTime();
+
+					tasksGantt.forEach(task => {
+						task.text = state.oldValue;
+					});
+					gantt.render();
 					alert('Нередактируемый атрибут');
 					return false;
 				} else {
 					dispatch(postEditedWorkData(workDate, metaClassStr, newTask.id));
+					for (const key in newTask) {
+						if (key === state.columnName) {
+							newTask[key] = state.newValue;
+							newTask.text = state.newValue;
+						}
+					}
+					dispatch(setColumnTask(newTasks));
+
+					const tasksGantt = gantt.getTaskByTime();
+
+					tasksGantt.forEach(task => {
+						if (task.id === state.id) {
+							task[state.columnName] = state.newValue;
+
+							if (task.name === state.oldValue) {
+								task.text = state.newValue;
+								task.name = state.newValue;
+							} else {
+								task.text = task.name;
+							}
+						}
+					});
 				}
 			}
 		}
 
-		const tasksGantt = gantt.getTaskByTime();
-
-		tasksGantt.forEach(task => {
-			if (task.id === state.id) {
-				task[state.columnName] = state.newValue;
-
-				if (task.name === state.oldValue) {
-					task.text = state.newValue;
-					task.name = state.newValue;
-				} else {
-					task.text = task.name;
-				}
-			}
-		});
-
-		dispatch(setColumnTask(newTasks));
 		gantt.render();
 
 		return true;

@@ -1,5 +1,5 @@
 // @flow
-import {Settings, Tasks, WorkRelations} from 'src/store/App/types';
+import {Settings, Tasks, Users, WorkRelations} from 'src/store/App/types';
 
 export default class Api {
 	constructor () {
@@ -27,6 +27,19 @@ export default class Api {
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
+		};
+
+		return this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Получает список пользователей
+	* @return {ThunkAction}
+	*/
+	async getUsers () {
+		const url = `exec?func=modules.ganttSettings.getUsers&params=`;
+		const options = {
+			method: 'GET'
 		};
 
 		return this.jsApi.restCallAsJson(url, options);
@@ -77,9 +90,9 @@ export default class Api {
 	* @param {Tasks} tasks - задачи на диаграмме
 	* @param {WorkRelations} workRelations - объект связи между работами
 	*/
-	async saveGanttVersionSettingsRequest (contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations) {
+	async saveGanttVersionSettingsRequest (commonSettings, contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations) {
 		const url = `exec-post?func=modules.ganttSettings.saveGanttVersionSettings&params=requestContent`;
-		const body = {contentCode, createdDate, subjectUUID, tasks, title, workRelations};
+		const body = {commonSettings, contentCode, createdDate, subjectUUID, tasks, title, workRelations};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -466,12 +479,28 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
-	async postData (subjectUUID: string, contentCode: string, data: Settings) {
+	/**
+	* Отправляет пользователей
+	* @param {Users} data - данные пользователей
+	*/
+	async postUsers (data: Users) {
+		const url = `exec-post?func=modules.ganttSettings.postDataUsers&params=requestContent`;
+		const body = {data};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	async postData (timezone, subjectUUID: string, contentCode: string, data: Settings) {
 		const url = `exec-post?func=modules.ganttSettings.saveGanttSettings&params=requestContent`;
 		const body = {
 			contentCode: contentCode,
 			ganttSettings: data,
-			subjectUUID: subjectUUID
+			subjectUUID: subjectUUID,
+			timezone: timezone
 		};
 		const options = {
 			body: JSON.stringify(body),

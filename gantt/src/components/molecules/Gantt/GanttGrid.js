@@ -17,7 +17,7 @@ const GanttGrid = (props: Props) => {
 
 	return (
 		<div style={{height: '100vh', width: '100%'}}>
-			<div className="gantt-container" style={{height: '100%', position: 'absolute', width: '100%'}}>
+			<div className="gantt-container" style={{height: 'calc(100% - 40px)', position: 'absolute', width: '100%'}}>
 				<Gantt
 					allLinks={props.allLinks}
 					attributesMap={props.attributesMap}
