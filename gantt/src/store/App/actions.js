@@ -18,18 +18,20 @@ import {
 	getGanttVersionsSettings,
 	getInitialSettings,
 	getUserData,
+	getUsers,
 	getWorkAttributes,
 	getWorkDataForWork,
 	getWorks,
 	postChangedWorkInterval,
 	postChangedWorkProgress,
 	postChangedWorkRelations,
+	postUsers,
 	saveData,
 	saveGanttVersionSettingsRequest,
 	updateGanttVersionSettingsRequest
 } from 'utils/api';
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
-import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, Tasks, UserData, WorkRelations} from './types';
+import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, Tasks, UserData, Users, WorkRelations} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {v4 as uuidv4} from 'uuid';
 
@@ -82,6 +84,22 @@ const getVersionSettingsAll = (diagramKey: string): ThunkAction => async (dispat
 };
 
 /**
+* Получает список пользователей
+* @return {ThunkAction}
+*/
+const getUsersAll = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const users = await getUsers();
+
+		dispatch(setUsers(users));
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
 * Получает настройки версий
 * @param {string} versionKey - ключ диаграммы версий
 * @return {ThunkAction}
@@ -100,7 +118,6 @@ const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch:
 		dispatch(setDiagramLinksData(workRelations));
 		dispatch(setRangeTime({endDate, startDate}));
 		dispatch(saveMasterSettings());
-		console.log('раз');
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -115,11 +132,11 @@ const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch:
 * @param {Tasks} tasks - задачи на диаграмме
 * @param {WorkRelations} workRelations - объект связи между работами
 */
-const savedGanttVersionSettings = (title: string, createdDate: string, tasks: Tasks, workRelations: WorkRelations): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const savedGanttVersionSettings = (commonSettings, title: string, createdDate: string, tasks: Tasks, workRelations: WorkRelations): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const {contentCode, subjectUuid} = getContext();
 
-		await saveGanttVersionSettingsRequest(contentCode, createdDate, subjectUuid, title, tasks, workRelations);
+		await saveGanttVersionSettingsRequest(commonSettings, contentCode, createdDate, subjectUuid, title, tasks, workRelations);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -366,6 +383,20 @@ const saveChangedWorkProgress = (workUUID: string, progress: number): ThunkActio
 };
 
 /**
+* Отправляет данные пользователей
+* @param {Users} data - данные пользователей
+*/
+const postDataUsers = (data: Users): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		await postUsers(data);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderData());
+	}
+};
+
+/**
 * Сохраняет позицию работу
 * @param {string} workId - идентификатор работы
 * @param {string} resourceId - идентификатор ресурса
@@ -439,9 +470,10 @@ const updateWorks = (worksWithoutStartOrEndDateCheckbox: boolean): ThunkAction =
 
 		const workData = await getWorks(contentCode, subjectUuid, timeZone, worksWithoutStartOrEndDateCheckbox);
 
-		dispatch(setWorkData(workData));
+		// dispatch(setColumnTask(workData));
 		dispatch(setContentCode(contentCode));
 		dispatch(setSubjectUuid(subjectUuid));
+		return workData;
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 		console.log(error);
@@ -476,6 +508,7 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 			worksWithoutStartOrEndDateCheckbox
 		} = await getDiagramData(contentCode, subjectUuid, timeZone);
 
+		dispatch(getUsersAll());
 		dispatch(switchMilestonesCheckbox(milestonesCheckbox));
 		dispatch(switchStateMilestonesCheckbox(stateMilestonesCheckbox));
 		dispatch(switchWorksWithoutStartOrEndDateCheckbox(worksWithoutStartOrEndDateCheckbox));
@@ -504,8 +537,9 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
  */
 const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
+		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 		const {contentCode, subjectUuid} = getContext();
-		const {commonSettings, resourceAndWorkSettings} = await saveData(subjectUuid, contentCode, data);
+		const {commonSettings, resourceAndWorkSettings} = await saveData(timezone, subjectUuid, contentCode, data);
 
 		await dispatch(getGanttData());
 		dispatch(showLoaderSettings());
@@ -796,6 +830,14 @@ const setColumnSettings = payload => ({
 });
 
 /**
+ * Cохраняет пользователей в состояние приложения
+ */
+const setUsers = payload => ({
+	payload,
+	type: APP_EVENTS.SET_USERS
+});
+
+/**
  * Изменение колонки задачи
  */
 const setColumnTask = payload => ({
@@ -812,52 +854,54 @@ const changeWorkProgress = (payload: WorkProgress) => ({
 });
 
 export {
+	addNewWorkForVersion,
 	cancelSettings,
 	changeScale,
 	changeWorkProgress,
+	changeWorkProgressFromVersion,
+	deleteGanttVersionSettings,
 	deleteWork,
+	deleteWorkFromVersionDiagram,
+	editWorkDataFromVersion,
+	editWorkDateRangesFromVersion,
 	getAppConfig,
 	getGanttData,
 	getListOfWorkAttributes,
-	getVersionSettings,
 	getGanttVersionDiagramDataCurrent,
+	getUsersAll,
+	getVersionSettings,
 	getVersionSettingsAll,
 	getWorkData,
 	hideLoaderData,
 	hideLoaderSettings,
 	postEditedWorkData,
-	// postNewWorkData,
-	deleteWorkFromVersionDiagram,
-	changeWorkProgressFromVersion,
-	deleteGanttVersionSettings,
-	addNewWorkForVersion,
-	editWorkDataFromVersion,
-	editWorkDateRangesFromVersion,
-	savedGanttVersionSettings,
-	updateGanttVersionSettings,
+	postDataUsers,
 	setAttributesMap,
-	saveListOfAttributes,
-	saveChangedWorkRelations,
-	saveChangedWorkProgress,
 	saveChangedWorkInterval,
-	savePositionOfWork,
+	saveChangedWorkProgress,
+	saveChangedWorkRelations,
 	saveDataCurrentVersion,
 	saveSettings,
+	savedGanttVersionSettings,
+	saveListOfAttributes,
+	savePositionOfWork,
+	setColumnTask,
 	setColumnSettings,
 	setCommonSettings,
-	setColumnTask,
+	setDiagramData,
+	setDiagramLinksData,
 	setCurrentValueForInterval,
 	setCurrentVersion,
-	setDiagramLinksData,
-	setDiagramData,
 	setListVersions,
 	setRangeTime,
 	setResourceSettings,
+	setUsers,
 	showLoaderSettings,
 	switchMilestonesCheckbox,
 	switchProgressCheckbox,
 	switchStateMilestonesCheckbox,
 	switchWorkRelationCheckbox,
 	switchWorksWithoutStartOrEndDateCheckbox,
+	updateGanttVersionSettings,
 	updateWorks
 };

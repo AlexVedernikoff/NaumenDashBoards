@@ -22,6 +22,7 @@ import {
 	getInitialParams,
 	getInitialSettings,
 	getUserData,
+	getUsers,
 	getWorks,
 	getWorkAttributes,
 	getWorkDataForWork,
@@ -29,6 +30,7 @@ import {
 	postChangedWorkInterval,
 	postChangedWorkProgress,
 	postChangedWorkRelations,
+	postUsers,
 	saveData,
 	saveGanttVersionSettingsRequest
 } from './context';
@@ -54,6 +56,7 @@ export {
 	getInitialParams,
 	getInitialSettings,
 	getUserData,
+	getUsers,
 	getWorks,
 	getWorkAttributes,
 	getWorkDataForWork,
@@ -61,6 +64,7 @@ export {
 	postChangedWorkInterval,
 	postChangedWorkProgress,
 	postChangedWorkRelations,
+	postUsers,
 	saveData,
 	saveGanttVersionSettingsRequest
 };

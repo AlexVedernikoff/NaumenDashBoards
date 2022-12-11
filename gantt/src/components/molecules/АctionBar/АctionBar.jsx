@@ -1,5 +1,7 @@
 // @flow
 import {Button} from 'naumen-common-components';
+import CheckboxPrivilege from './CheckboxPrivilege';
+import cn from 'classnames';
 import {connect} from 'react-redux';
 import {Datepicker} from 'components/molecules/Datepicker/Datepicker.jsx';
 import {deepClone, normalizeDate} from 'helpers';
@@ -7,10 +9,11 @@ import {functions, props} from 'components/organisms/FormPanel/selectors';
 import {gantt} from 'naumen-gantt';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
+import Modal from 'components/atoms/Modal/Modal';
+import {postDataUsers} from 'store/App/actions';
 import React, {useEffect, useState} from 'react';
 import {ScaleNames} from 'components/organisms/FormPanel/consts';
 import styles from './styles.less';
-import Modal from 'components/atoms/Modal/Modal';
 import {TextInput} from 'components/atoms/TextInput/TextInput';
 import {useDispatch, useSelector} from 'react-redux';
 
@@ -55,6 +58,7 @@ const АctionBar = props => {
 	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
 	const [showModalConfirmation, setShowModalConfirmation] = useState(false);
 	const [showModalSave, setShowModalSave] = useState(false);
+	const [showModalUsers, setShowModalUsers] = useState(false);
 	const [valueError, setValueError] = useState('');
 	const [showListVersions, setShowListVersions] = useState(false);
 
@@ -63,15 +67,6 @@ const АctionBar = props => {
 	const panelButtons = [
 		{icon: ICON_NAMES.DOWNLOAD_FILE, key: 'DOWNLOAD_FILE', method: 'method'}
 	];
-	const iconButtonGroup = panelButtons.map(item =>
-		<IconButton
-			className={styles.icon}
-			icon={item.icon}
-			key={item.key}
-			tip="Экспорт"
-			onClick={props.onClick}
-		>{item.icon}
-		</IconButton>);
 	const {addNewTask, editMode, endDate, handleToggle, name, refresh, startDate, settings} = props;
 	const newSettings = deepClone(settings);
 	let indexScaleName;
@@ -248,8 +243,58 @@ const АctionBar = props => {
 		return null;
 	};
 
+	const renderHeader = () => {
+		return (
+			<div className={styles.usersHeader}>
+				<div>Список пользователей</div>
+				<div>Права на редактирование</div>
+			</div>
+		);
+	};
+
+	const renderUser = (user) => {
+		const {users} = store.APP;
+
+		return (
+			<div className={styles.users} key={user.code}>
+				<div>{user.name}</div>
+				<CheckboxPrivilege code={user.code} name="Checkbox" users={users} value={user.ganttMaster} />
+			</div>
+		);
+	};
+
+	const renderUsers = () => store.APP.users.map(renderUser);
+
+	const onSubModal = () => {
+		setShowModalUsers(!showModalUsers);
+		dispatch(postDataUsers(store.APP.users));
+	};
+
+	const renderModalUsers = () => {
+		if (showModalUsers) {
+			return (
+				<Modal
+					className={styles.modalUsers}
+					notice={true}
+					onClose={() => setShowModalUsers(!showModalUsers)}
+					onSubmit={onSubModal}
+					submitText="Сохранить"
+				>
+					{renderHeader()}
+					{renderUsers()}
+				</Modal>
+			);
+		}
+
+		return null;
+	};
+
 	const openSaveModal = () => {
 		setShowModalSave(!showModalSave);
+	};
+
+	const openUsersModal = () => {
+		setShowModalUsers(!showModalUsers);
 	};
 
 	const openConfirmationModal = () => {
@@ -262,9 +307,9 @@ const АctionBar = props => {
 
 	const submitSaveVersion = () => {
 		const title = deepClone(nameValue);
-		const {tasks, workRelations} = store.APP;
+		const {settings, tasks, workRelations} = store.APP;
 
-		props.savedGanttVersionSettings(title, new Date().toLocaleString(), tasks, workRelations);
+		props.savedGanttVersionSettings(settings, title, new Date().toLocaleString(), tasks, workRelations);
 		dispatch(props.setCurrentVersion(''));
 
 		setShowModalSave(!showModalSave);
@@ -317,9 +362,7 @@ const АctionBar = props => {
 		return () => document.removeEventListener('click', onCloseDateModal);
 	});
 
-	const renderButtonSettings = () => {
-		return editMode ? <IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} onClick={handleToggle} tip="Настройка" /> : null;
-	};
+	const renderButtonSettings = () => editMode ? <IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} onClick={handleToggle} tip="Настройка" /> : null;
 
 	const handleVersionButtonClick = () => {
 		const {diagramKey} = props;
@@ -394,24 +437,86 @@ const АctionBar = props => {
 		return null;
 	};
 
+	const renderButtonsVersion = () => {
+		const versionsCN = cn({
+			[styles.btn]: true,
+			[styles.btnVersions]: true,
+			[styles.unActive]: active
+		});
+
+		const currentCN = cn({
+			[styles.btn]: true,
+			[styles.btnCurrent]: true,
+			[styles.unActive]: !active
+		});
+
+		return (
+			<div className={styles.leftContainer}>
+				<Button className={versionsCN} onClick={handleVersionButtonClick}>Версии</Button>
+				<Button className={currentCN} onClick={handleCurrentButtonClick}>Текущий</Button>
+			</div>
+		);
+	};
+
+	const renderButtonUsers = () => {
+		const {role} = store.APP.user;
+
+		return role === 'SUPER' && <Button className={styles.btn} onClick={openUsersModal}>Пользователи</Button>;
+	};
+
+	const renderButtonsZoom = () => {
+		const className = cn({
+			[styles.icon]: true,
+			[styles.rightBorder]: true
+		});
+
+		return (
+			<>
+				<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_OUT} onClick={zoomIn} tip="Уменьшить масштаб" />
+				<IconButton className={className} icon={ICON_NAMES.ZOOM_IN} onClick={zoomOut} tip="Увеличить масштаб" />
+			</>
+		);
+	};
+
+	const renderButtonInterval = () => <IconButton className={styles.icon} icon={ICON_NAMES.CLOCK} onClick={openClockModal} tip="Интервал" />;
+
+	const renderButtonRefresh = () => <IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={refresh} tip="Обновить" />;
+
+	const renderButtonsEventVersion = () => (
+		<>
+			<Button className={styles.btn} onClick={openConfirmationModal}>Применить</Button>
+			<Button className={styles.btn} onClick={openSaveModal}>Сохранить вид</Button>
+		</>
+	);
+
+	const renderButtonExport = () => {
+		return (
+			panelButtons.map(item =>
+				<IconButton
+					className={styles.icon}
+					icon={item.icon}
+					key={item.key}
+					onClick={props.onClick}
+					tip="Экспорт"
+				>{item.icon}</IconButton>
+			)
+		);
+	};
+
 	const renderPanel = () => {
 		return (
 			<div className={styles.container}>
-				<div className={styles.leftContainer}>
-					<Button className={`${styles.btn} ${styles.btnVersions} ${active ? styles.unActive : ''}`} onClick={handleVersionButtonClick}>Версии</Button>
-					<Button className={` ${styles.btn} ${styles.btnCurrent} ${!active ? styles.unActive : ''}`} onClick={handleCurrentButtonClick } >Текущий</Button>
-				</div>
+				{renderButtonsVersion()}
 				<div className={styles.container}>
-					<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_OUT} onClick={zoomIn} tip="Уменьшить масштаб" />
-					<IconButton className={styles.icon} icon={ICON_NAMES.ZOOM_IN} onClick={zoomOut} tip="Увеличить масштаб" />
+					{renderButtonUsers()}
+					{renderButtonsZoom()}
 					{renderButtonSettings()}
-					<IconButton className={styles.icon} icon={ICON_NAMES.CLOCK} onClick={openClockModal} tip="Интервал" />
-					{iconButtonGroup}
+					{renderButtonInterval()}
+					{renderButtonExport()}
 					{/* следующая итерация */}
 					{/* <IconButton className={styles.icon} icon={ICON_NAMES.BIG_PLUS} onClick={addNewTask} tip="Добавить работу" /> */}
-					<IconButton className={styles.icon} icon={ICON_NAMES.FAST_REFRESH} onClick={refresh} tip="Обновить" />
-					<Button className={styles.btn} onClick={openConfirmationModal}>Применить</Button>
-					<Button className={styles.btn} onClick={openSaveModal}>Сохранить вид</Button>
+					{renderButtonRefresh()}
+					{renderButtonsEventVersion()}
 				</div>
 			</div>
 		);
@@ -422,7 +527,7 @@ const АctionBar = props => {
 			{renderPanel()}
 			{renderModal()}
 			{renderModalConfirmation()}
-			{renderModalSave()}
+			{renderModalUsers()}
 			{renderModalSecondLevel()}
 			{renderModalListVersions()}
 		</div>

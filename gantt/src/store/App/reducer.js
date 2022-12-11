@@ -6,6 +6,11 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SET_USERS:
+			return {
+				...state,
+				users: action.payload
+			};
 		case APP_EVENTS.SWITCH_STATE_MILESTONES_CHECKBOX:
 			return {
 				...state,

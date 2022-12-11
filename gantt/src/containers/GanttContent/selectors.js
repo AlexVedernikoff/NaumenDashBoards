@@ -8,7 +8,7 @@ export const props = (state: AppState): ConnectedProps => {
 	const {role} = user;
 
 	return {
-		editMode: role === USER_ROLES.MASTER || role === USER_ROLES.SUPER,
+		editMode: role === USER_ROLES.ganttMaster || role === USER_ROLES.SUPER,
 		errorData,
 		loading
 	};
