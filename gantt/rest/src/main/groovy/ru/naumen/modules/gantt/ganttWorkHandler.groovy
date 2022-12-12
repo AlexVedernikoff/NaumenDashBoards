@@ -20,6 +20,7 @@ import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.core.server.script.api.metainfo.*
 import static groovy.json.JsonOutput.toJson
 import ru.naumen.core.server.script.spi.ScriptDtObject
+import ru.naumen.core.server.script.api.metainfo.WorkflowWrapper
 
 @Field @Lazy @Delegate GanttWorkHandlerController ganttWorkHandler = new GanttWorkHandlerImpl()
 
@@ -867,7 +868,7 @@ class GanttWorkHandlerService
                 String timezoneString =
                     api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
                 TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-                attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue) //, timezone
+                attributeValue = Date.parse(WORK_DATE_PATTERN, attributeValue)
                 listAttributesEdits += [(attribute?.code): (attributeValue)]
             }
             else if (attribute?.type?.code in AttributeType.LINK_TYPES)
@@ -888,11 +889,12 @@ class GanttWorkHandlerService
         if (request.workData.completed && editabilityStatus)
         {
             ScriptDtObject milestoneMetaObject = api.utils.get(request.workUUID)
+            WorkflowWrapper workflow = api.metainfo.getMetaClass(milestoneMetaObject).workflow
             String endState =
-                api.metainfo.getMetaClass(milestoneMetaObject).workflow.endState.code
+                workflow.endState.code
             String statusForTransitionFromEndState =
-                api.metainfo.getMetaClass(milestoneMetaObject).workflow.states.code.find {
-                    api.metainfo.getMetaClass(milestoneMetaObject).workflow.isTransitionExists(
+                workflow.states.code.find {
+                    workflow.isTransitionExists(
                         endState,
                         it
                     )
@@ -901,13 +903,12 @@ class GanttWorkHandlerService
             {
                 Integer statusChangeCounter = 0
                 changeStatusToFinal(milestoneMetaObject, endState, statusChangeCounter)
-                listAttributesEdits += [state: statusForTransitionFromEndState]
             }
             else
             {
                 api.utils.edit(milestoneMetaObject, [state: statusForTransitionFromEndState])
-                listAttributesEdits += [state: statusForTransitionFromEndState]
             }
+            listAttributesEdits += [state: statusForTransitionFromEndState]
         }
         return listAttributesEdits
     }
