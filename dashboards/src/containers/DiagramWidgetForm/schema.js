@@ -64,10 +64,11 @@ addMethod(mixed, 'singleAttributeUse', function (skipDiffAggregation = false) {
 			if (targetAttribute) {
 				const {code: targetCode, sourceCode: targetSourceCode} = targetAttribute.ref || targetAttribute;
 
-				const checkMatchToTargetAttribute = skipDiffAggregation => ({aggregation, attribute}) => {
+				const checkMatchToTargetAttribute = skipDiffAggregation => compareValue => {
 					let checkerResult = false;
+					const {aggregation, attribute} = compareValue;
 
-					if (attribute && attribute !== targetAttribute) {
+					if (attribute && compareValue !== originalValue) {
 						const {code, sourceCode} = attribute.ref || attribute;
 
 						checkerResult = code === targetCode
