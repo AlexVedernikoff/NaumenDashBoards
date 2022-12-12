@@ -568,6 +568,13 @@ class GanttSettingsService
             toJson(ganttSettings)
         ))
         {
+            ganttSettings = getGanttSettings(
+                new ObjectMapper().convertValue(
+                    ['contentCode': request.contentCode,
+                     'subjectUUID': request.subjectUUID,
+                     'timezone': request.timezone], GetGanttSettingsRequest
+                )
+            )
             return ganttSettings
         }
         else
