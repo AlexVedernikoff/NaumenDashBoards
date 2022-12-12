@@ -32,8 +32,8 @@ class UserDashboards extends Dashboards {
 		return this.transport('dashboards', 'getDynamicAttributeGroupsForUser', ['requestContent'], {descriptor});
 	}
 
-	searchDynamicAttributes (descriptor: DTOValue, word: string) {
-		return this.transport('dashboards', 'getDynamicAttributesWithGroupsForUser', ['requestContent'], {descriptor, word});
+	searchDynamicAttributes (descriptor: DTOValue, query: string) {
+		return this.transport('dashboards', 'getDynamicAttributesWithGroupsForUser', ['requestContent'], {descriptor, query});
 	}
 }
 

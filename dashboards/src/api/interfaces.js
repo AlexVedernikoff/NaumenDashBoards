@@ -104,7 +104,7 @@ export interface DashboardsAPI {
 	getMetaClasses(metaClassFqn: string): Promise<DTOValue>;
 	getNonMetadataAttributesData(classFqn: string, attrGroupCode: string | null): Promise<DTOValue>;
 	getStates(metaClassFqn: string): Promise<DTOValue>;
-	searchDynamicAttributes(actualDescriptor: DTOValue, searchValue: string): Promise<DTOValue>;
+	searchDynamicAttributes(actualDescriptor: DTOValue, query: string): Promise<DTOValue>;
 	searchValue(request: DTOValue): Promise<DTOValue>;
 }
 
