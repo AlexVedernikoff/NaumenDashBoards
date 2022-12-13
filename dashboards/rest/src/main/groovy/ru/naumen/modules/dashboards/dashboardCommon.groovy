@@ -1635,6 +1635,14 @@ class DynamicGroup
     String title
 }
 
+class DynamicGroupWithAttributes extends DynamicGroup
+{
+    /**
+     * Список динамических атрибутов
+     */
+    List<Attribute> attributes
+}
+
 class DiagramRequest
 {
     Collection<Requisite> requisite
