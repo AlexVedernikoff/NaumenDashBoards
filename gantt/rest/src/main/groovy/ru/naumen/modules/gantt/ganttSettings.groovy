@@ -505,21 +505,21 @@ class GanttSettingsService
                                 case AttributeType.DATE_TIME_TYPE:
                                     columnSetting.editor.options = null
                                     columnSetting.editor.type = 'date'
-                                if (attributeSetting.attribute.code ==
-                                    resourceAndWorkSetting.startWorkAttribute.code)
-                                {
-                                    columnSetting.editor.map_to = "start_date"
-                                    columnSetting.code = "start_date"
-                                    attributeSetting.code = "start_date"
-                                }
-                                if (attributeSetting.attribute.code ==
-                                    resourceAndWorkSetting.endWorkAttribute.code)
-                                {
-                                    columnSetting.editor.map_to = "end_date"
-                                    columnSetting.code = "end_date"
-                                    attributeSetting.code = "end_date"
-                                }
-                                break
+                                    if (attributeSetting.attribute.code ==
+                                        resourceAndWorkSetting.startWorkAttribute.code)
+                                    {
+                                        columnSetting.editor.map_to = "start_date"
+                                        columnSetting.code = "start_date"
+                                        attributeSetting.code = "start_date"
+                                    }
+                                    if (attributeSetting.attribute.code ==
+                                        resourceAndWorkSetting.endWorkAttribute.code)
+                                    {
+                                        columnSetting.editor.map_to = "end_date"
+                                        columnSetting.code = "end_date"
+                                        attributeSetting.code = "end_date"
+                                    }
+                                    break
                                 case AttributeType.OBJECT_TYPE:
                                     Set newOptionsColumnSetting = []
                                     columnSetting.editor.type = TYPE_SELECT
@@ -578,6 +578,12 @@ class GanttSettingsService
         String contentCode = request.contentCode
         GanttSettingsClass ganttSettings = request.ganttSettings
 
+        ganttSettings.workProgresses = getGanttSettings(
+            new ObjectMapper().convertValue(
+                ['contentCode': request.contentCode, 'subjectUUID': request.subjectUUID, 'timezone':
+                    request.timezone], GetGanttSettingsRequest
+            )
+        ).workProgresses
         ganttSettings.startDate = correctionErrorInDate(ganttSettings.startDate, request.timezone)
         ganttSettings.endDate = correctionErrorInDate(ganttSettings.endDate, request.timezone)
 
@@ -1285,7 +1291,7 @@ class GanttSettingsService
             user.code = employee.UUID
             user.ganttMaster = employee.employeeSecGroups.code.find {
                 it == GROUP_GANT_MASTER
-            }
+            } ?: false
             user.name = employee.title
             userData.add(user)
         }
@@ -1306,13 +1312,13 @@ class GanttSettingsService
             Boolean whetherUserNecessaryRights = employee.employeeSecGroups.find { employeeGroups
                 ->
                 employeeGroups.code == GROUP_GANT_MASTER
-            }
+            } ?: false
             if (it.ganttMaster?.toBoolean() && !whetherUserNecessaryRights)
             {
                 userRole += it.name + ', '
                 api.security.addMemberToGroup(GROUP_GANT_MASTER, it.code)
             }
-            else if (whetherUserNecessaryRights)
+            else if (!(it.ganttMaster?.toBoolean()) && whetherUserNecessaryRights)
             {
                 userRole += it.name + ', '
                 api.security.removeMemberFromGroup(GROUP_GANT_MASTER, it.code)
