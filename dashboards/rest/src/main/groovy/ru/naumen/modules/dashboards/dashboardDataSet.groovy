@@ -4989,7 +4989,8 @@
                             header:      accessorAndAtribut,
                             attribute:   attrValue.attribute,
                             type:        attrValue.type,
-                            group:       attrValue.group
+                            group:       attrValue.group,
+                            tooltip: 	 attrValue?.tooltip
                         )
                     }
                     if (attrValue.type == ColumnType.INDICATOR)
@@ -5001,6 +5002,7 @@
                             attribute:   attrValue.attribute,
                             type:        attrValue.type,
                             aggregation: attrValue.aggregation,
+                            tooltip: 	 attrValue?.tooltip,
                             columns: getBreakdownColumns(attrValue.aggregation, breakdownValues, breakdownAttributeValue, attrValue)
                         )
                     }
