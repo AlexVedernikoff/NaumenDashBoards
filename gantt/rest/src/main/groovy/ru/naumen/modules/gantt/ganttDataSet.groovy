@@ -147,6 +147,10 @@ class GanttDataSetService
         else
         {
             addBasicListWork(settings, request, user, data)
+            if (!data.worksWithoutStartOrEndDateCheckbox)
+            {
+                data.tasks = filterTasksWithNoDateRanges(data.tasks)
+            }
         }
         return data
     }
@@ -257,7 +261,7 @@ class GanttDataSetService
     private Collection<Map<String, Object>> filterTasksWithNoDateRanges(Collection<Map<String, Object>> tasks)
     {
         return tasks.findResults {
-            Boolean startAndEndDateExist = it.start_date && it.end_date
+            Boolean startAndEndDateExist = it.start_date || it.end_date
             Boolean type = it.type == SourceType.WORK
             if (it.type in [SourceType.RESOURCE, 'milestone', 'project'])
             {
@@ -717,16 +721,26 @@ class GanttDataSetService
                     it << ['editable': true]
                     it << ['workOfLink': api.web.open(it.id)]
                     it << ['name': null]
+                    it << ['duration': null]
+                    it << ['unscheduled': null]
                     it << ['datesStartDateAndEndDate': true]
-                    if (settings.type == SourceType.WORK)
+                    if (it.type == SourceType.WORK)
                     {
-                        if (!isStartDate)
+                        if (!it?.start_date)
                         {
-                            it << ['start_date': null]
+                            it.start_date = ""
                         }
-                        if (!isEndDate)
+                        if (!it?.end_date)
                         {
-                            it << ['end_date': null]
+                            it.end_date = ""
+                        }
+                        if (!it?.start_date && !it?.end_date)
+                        {
+                            it.unscheduled = true
+                        }
+                        if (!it?.start_date || !it?.end_date)
+                        {
+                            it.duration = 1
                         }
                     }
                     ISDtObject currentObject = api.utils.get(it.id)
