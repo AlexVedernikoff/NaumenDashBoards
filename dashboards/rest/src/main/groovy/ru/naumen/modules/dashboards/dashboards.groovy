@@ -14,6 +14,8 @@ import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.transform.Field
 import groovy.transform.InheritConstructors
+import org.apache.groovy.groovysh.commands.SaveCommand
+import org.codehaus.groovy.runtime.StringBufferWriter
 import ru.naumen.core.server.script.api.IDbApi
 import ru.naumen.core.server.script.api.IListDataApi
 import ru.naumen.core.server.script.api.IMetainfoApi
@@ -159,6 +161,20 @@ interface Dashboards
      * @return список групп динамических атрибутов
      */
     String getDynamicAttributeGroupsForUser(Map<String, Object> requestContent)
+
+    /**
+     * Метод получения динамических атрибутов
+     * @param requestContent - [descriptor: дескриптор из виджета]
+     * @return список динамических атрибутов вместе с их атрибутами
+     */
+    String getDynamicAttributesWithGroups (Map<String, Object> requestContent)
+
+    /**
+     * Метод получения динамических атрибутов для пользовательского дашборда
+     * @param requestContent - [descriptor: дескриптор из виджета]
+     * @return список динамических атрибутов вместе с их атрибутами
+     */
+    String getDynamicAttributesWithGroupsForUser (Map<String, Object> requestContent)
 
     /**
      * Метод получения связанных источников
@@ -330,6 +346,22 @@ class DashboardsImpl extends BaseController implements Dashboards
     {
         String descriptor = requestContent.descriptor
         return toJson(service.getDynamicAttributeGroupsForUser(descriptor))
+    }
+
+    @Override
+    String getDynamicAttributesWithGroups (Map<String, Object> requestContent)
+    {
+        String descriptor = requestContent.descriptor
+        String query = requestContent.query
+        return toJson(service.getDynamicAttributesWithGroups(descriptor, query))
+    }
+
+    @Override
+    String getDynamicAttributesWithGroupsForUser (Map<String, Object> requestContent)
+    {
+        String descriptor = requestContent.descriptor
+        String query = requestContent.query
+        return toJson(service.getDynamicAttributesWithGroupsForUser(descriptor, query))
     }
 
     @Override
@@ -1140,7 +1172,7 @@ class DashboardsService
             if (dynamicSource && anyAttributes) {
                 return new DynamicGroup(
                     code: it.group.UUID,
-                    title: "${it.group.title} (${it.title})"
+                    title: "${it.group.title}"
                 )
             }
         }?.grep()?.toList()
@@ -1166,11 +1198,36 @@ class DashboardsService
             {
                 return new DynamicGroup(
                     code: it.group.UUID,
-                    title: "${ it.group.title } (${ it.title })"
+                    title: "${ it.group.title }"
                 )
             }
         }?.grep()?.toList()
         return result
+    }
+
+    /**
+     * Метод получения групп динамических атрибутов вместе с атрибутами
+     * @param descriptor - дескриптор из виджета
+     * @param query - слово для поиска динамических атрибутов
+     * @return список групп динамических атрибутов вместе с атрибутами в JSON-формате
+     */
+    List<DynamicGroupWithAttributes> getDynamicAttributesWithGroups(String descriptor, String query)
+    {
+        List<DynamicGroup> dynamicGroups = getDynamicAttributeGroups(descriptor)
+        getDynamicAttributesByDynamicGroups(dynamicGroups, query)
+    }
+
+    /**
+     * Метод получения групп динамических атрибутов вместе с атрибутами для пользовательских дашбордов
+     * @param descriptor - дескриптор из виджета
+     * @param query - слово для поиска динамических атрибутов
+     * @return список групп динамических атрибутов вместе с атрибутами в JSON-формате
+     */
+    List<DynamicGroupWithAttributes> getDynamicAttributesWithGroupsForUser(String descriptor,
+                                                                           String query)
+    {
+        List<DynamicGroup> dynamicGroups = getDynamicAttributeGroupsForUser(descriptor)
+        getDynamicAttributesByDynamicGroups(dynamicGroups, query)
     }
 
     /**
@@ -1330,6 +1387,47 @@ class DashboardsService
         }
 
         return mappingAttribute(platformAttributes, null, parentClassFqn)
+    }
+
+    /**
+     * Метод получения списка атрибутов по динамическим группам
+     * @param dynamicGroups - список динамических групп
+     * @param query - слово для поиска атрибутов
+     * @return список атрибутов вместе с динамическими группами
+     */
+    private List<DynamicGroupWithAttributes> getDynamicAttributesByDynamicGroups(List<DynamicGroup> dynamicGroups,
+                                                                                 String query)
+    {
+        List<DynamicGroupWithAttributes> dynamicAttributesWithGroups = dynamicGroups.findResults{
+            group ->
+                DynamicGroupWithAttributes groupWithAttributes = new DynamicGroupWithAttributes(
+                    code: null,
+                    title: null,
+                    attributes: []
+                )
+                List<Attribute> attributeList = getDynamicAttributes(group.code)
+                if (group.title.toLowerCase().contains(query.toLowerCase()))
+                {
+                    groupWithAttributes.attributes.addAll(attributeList)
+                }
+                else
+                {
+                    attributeList.each {
+                        it ->
+                            if (it.title.toLowerCase().contains(word.toLowerCase()))
+                            {
+                                groupWithAttributes.attributes << it
+                            }
+                    }
+                }
+                if (groupWithAttributes.attributes)
+                {
+                    groupWithAttributes.code = group.code
+                    groupWithAttributes.title = group.title
+                    return groupWithAttributes
+                }
+        }
+        return dynamicAttributesWithGroups
     }
 
     /**
