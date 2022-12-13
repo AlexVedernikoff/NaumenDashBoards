@@ -40,7 +40,9 @@ export class DashboardResizer {
 		let result = window.innerHeight ?? DEFAULT_HEIGHT;
 
 		if (window.frameElement) {
-			const attributeHeight = window.frameElement.getAttribute('height');
+			const initialHeight = window.frameElement.getAttribute('data-initial-height');
+			const oldHeight = window.frameElement.getAttribute('height');
+			const attributeHeight = initialHeight ?? oldHeight;
 
 			result = Number.parseInt(attributeHeight);
 
