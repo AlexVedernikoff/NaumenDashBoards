@@ -5042,7 +5042,9 @@
             return breakdownValues.collect { value ->
                 return new AggregationBreakdownColumn(
                     footer:      "",
-                    accessor:    "${accessor ?:  aggregationAttributeValue.name}"+"#"+"${aggregation}\$${value}",
+                    accessor: breakdownAttributeValue.type == ColumnType.INDICATOR ?
+                        "${ accessor ?: aggregationAttributeValue.name }\$${ value }" :
+                        "${ accessor ?: aggregationAttributeValue.name }#${ aggregation }\$${ value }", //Возможно надо будет добавить проверку для условия, когда ColumnType.PARAMETER
                     header:      value,
                     attribute:   breakdownAttributeValue.attribute,
                     type:        breakdownAttributeValue.type,
