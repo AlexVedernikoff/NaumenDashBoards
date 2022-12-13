@@ -27,6 +27,7 @@ import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.metainfo.shared.elements.sec.ISGroup
 import java.text.SimpleDateFormat
 
+
 import static groovy.json.JsonOutput.toJson
 
 @Field @Lazy @Delegate GanttSettingsController ganttSettings = new GanttSettingsImpl()
@@ -140,6 +141,19 @@ interface GanttSettingsController
      * @return возможность перемещения работы
      */
     String checkWorksOfResource(Map<String, Object> requestContent)
+
+    /**
+     * Метод получения информации о правах управления у пользователей
+     * @return информация о пользователях
+     */
+    String getUsers()
+
+    /**
+     * Метод сохранения изменений в правах для пользователя
+     * @param requestContent - тело запроса
+     * @return инофрмация о внесенных изменения в права доступа
+     */
+    String postDataUsers(Map requestContent)
 }
 
 @InheritConstructors
@@ -254,6 +268,20 @@ class GanttSettingsImpl implements GanttSettingsController
         CheckWorksOfResourceData requestData = new ObjectMapper()
             .convertValue(requestContent, CheckWorksOfResourceData)
         return toJson(service.checkWorksOfResource(requestData))
+    }
+
+    @Override
+    String getUsers()
+    {
+        return toJson(service.getUsers())
+    }
+
+    @Override
+    String postDataUsers(Map requestContent)
+    {
+        Map requestData = new ObjectMapper()
+            .convertValue(requestContent, Map)
+        return service.postDataUsers(requestData.data)
     }
 }
 
@@ -1243,6 +1271,54 @@ class GanttSettingsService
         {
             throw new Exception('Настройки не были сохранены!')
         }
+    }
+
+    /**
+     * Получение базовой информации о пользователях
+     * @return базовая информация о пользователях
+     */
+    Collection<BasicUserData> getUsers()
+    {
+        Collection<BasicUserData> userData = []
+        api.utils.find('employee', [:]).each { employee ->
+            BasicUserData user = new BasicUserData()
+            user.code = employee.UUID
+            user.ganttMaster = employee.employeeSecGroups.code.find {
+                it == GROUP_GANT_MASTER
+            }
+            user.name = employee.title
+            userData.add(user)
+        }
+        return userData
+    }
+
+    /**
+     * Метод изменения группы доступа Гантт мастер
+     * @param userData - информация о пользователях
+     * @return инофрмация о внесенных изменения в права доступа
+     */
+    String postDataUsers(Collection userData)
+    {
+        String userRole = ''
+        userData.each {
+            ISGroup group = api.security.getGroup(GROUP_GANT_MASTER)
+            ISDtObject employee = api.utils.get(it.code)
+            Boolean whetherUserNecessaryRights = employee.employeeSecGroups.find { employeeGroups
+                ->
+                employeeGroups.code == GROUP_GANT_MASTER
+            }
+            if (it.ganttMaster?.toBoolean() && !whetherUserNecessaryRights)
+            {
+                userRole += it.name + ', '
+                api.security.addMemberToGroup(GROUP_GANT_MASTER, it.code)
+            }
+            else if (whetherUserNecessaryRights)
+            {
+                userRole += it.name + ', '
+                api.security.removeMemberFromGroup(GROUP_GANT_MASTER, it.code)
+            }
+        }
+        return "The rights of users ${ userRole } have been"
     }
 }
 
@@ -2244,4 +2320,25 @@ class SequenceChartElements
      * Идентификатор расположения
      */
     Integer idLocations
+}
+
+/**
+ * Класс с базовой информацией о пользователях
+ */
+class BasicUserData
+{
+    /**
+     * Идентификатор пользователя
+     */
+    String code
+
+    /**
+     * Наличие прав администратора у пользователя
+     */
+    Boolean ganttMaster
+
+    /**
+     * Имя пользователя
+     */
+    String name
 }
