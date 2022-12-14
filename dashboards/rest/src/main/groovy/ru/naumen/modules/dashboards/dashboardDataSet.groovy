@@ -315,7 +315,7 @@
                     showTableNulls = true
                 }
                 tableSorting = tableRequestSettings?.sorting
-                if(tableSorting?.accessor == 'ID')
+                if(tableSorting?.accessor == 'ID' && !isSourceForEachRow)
                 {
                     tableSorting?.accessor = widgetSettings.data.find().parameters.find().attribute.title
                     reverseRowCount = tableSorting?.type == SortingType.DESC
@@ -339,7 +339,7 @@
                     sortingValueIsComputationAttribute = attrValue?.attribute instanceof ComputedAttr
                 }
 
-							  Boolean isCodeState = widgetSettings.data?.parameters?.attribute?.code?.any {it.any {it == 'state'}}
+                Boolean isCodeState = widgetSettings.data?.parameters?.attribute?.code?.any {it.any {it == 'state'}}
 
                 Boolean noPaginationInSQL = requestHasBreakdown || innerCustomGroupNames || sortingValueIsComputationAttribute || tableTop || isCodeState
                 res = getDiagramData(
@@ -1740,13 +1740,13 @@
                                     el?.group?.way != Way.CUSTOM
                                 }
                                 .collectEntries { el ->
-                                dynamicInBreakdown = el?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
-                                if(dynamicInBreakdown)
-                                {
-                                    dynamicGroup =  mappingDynamicAttributeCustomGroup(el.attribute)
+                                    dynamicInBreakdown = el?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
+                                    if(dynamicInBreakdown)
+                                    {
+                                        dynamicGroup =  mappingDynamicAttributeCustomGroup(el.attribute)
+                                    }
+                                    [(el.dataKey): buildSystemGroup(el.group, el.attribute, diagramType == DiagramType.COMBO ? 'usual_breakdown' : 'breakdown')]
                                 }
-                                [(el.dataKey): buildSystemGroup(el.group, el.attribute, diagramType == DiagramType.COMBO ? 'usual_breakdown' : 'breakdown')]
-                            }
                             commonBreakdown = isDiagramTypeTable && !hasTableNotOnlyBaseSources ? breakdownMap : [:]
                         }
                         else
@@ -2250,7 +2250,7 @@
          * @return обновленные данные запроса
          */
         private Map<String, RequestData> updateDiagramRequestDataForPercentCalculation(Collection<Requisite> requisites,
-                                                                   Map<String, RequestData> resultRequestData)
+                                                                                       Map<String, RequestData> resultRequestData)
         {
             Map<String, RequestData> updatedRequestData = [:]
 
@@ -3532,7 +3532,7 @@
                             Boolean customInBreakTable = false
                             if (requestContent)
                             {
-                                  List attributes = getAttributeNamesAndValuesFromRequest(requestContent)
+                                List attributes = getAttributeNamesAndValuesFromRequest(requestContent)
                                 notAggregatedAttributes = notAggregationAttributeNames(attributes)
                                 String attrInCustoms = getInnerCustomGroupNames(requestContent).find()?.attributeName
                                 String possibleBreakdownAttribute = attributes.last().name
@@ -3602,7 +3602,7 @@
 
                                 partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
                                 Boolean hasStateOrTimer = newRequestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] } ||
-                                                   newRequestData?.aggregations?.any { it?.type in Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE]  }
+                                                          newRequestData?.aggregations?.any { it?.type in Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE]  }
                                 if (hasStateOrTimer)
                                 {
                                     Boolean resWithPercentCnt
@@ -3694,7 +3694,7 @@
                             def aggregations = dataSet.values().head().aggregations
                             String aggregationSortingType = aggregations.find()?.sortingType
                             Boolean hasStateOrTimer = groups?.any { value -> Attribute.getAttributeType(value?.attribute) in [AttributeType.STATE_TYPE,  AttributeType.TIMER_TYPE]} ||
-                                               aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE,  AttributeType.TIMER_TYPE] }
+                                                      aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE,  AttributeType.TIMER_TYPE] }
                             def res = variables.withIndex().collectMany { totalVar, j ->
                                 def res = groups?.size() || notAggregatedAttributes.size() ?
                                     findUniqueGroups([0], totalVar).collect { group ->
@@ -4244,7 +4244,7 @@
                                     value = ObjectMarshaller.marshal(value, uuid)
                                 }
                             }
-                        value = (value == null || value.equals('')) ? getNullValue(diagramType, fromBreakdown) : value
+                            value = (value == null || value.equals('')) ? getNullValue(diagramType, fromBreakdown) : value
                             return value.toString().replaceAll("[^<a-zA-Z0-9А-Яа-я >]","")
                     }
                 case GroupType.DAY:
@@ -4973,15 +4973,17 @@
             {
                 def breakdownAttributeValue = attributes.find { it.type == ColumnType.BREAKDOWN }
                 Collection <Column> parameterColumns = attributes.findResults { attrValue ->
-                                def attributeSecondLevel = attrValue.attribute?.ref
-                                def accessorAndAtribut
-                                if(attributeSecondLevel != null){
-                                    accessorAndAtribut = attrValue.name +" (" + attributeSecondLevel?.title + ")"
-                                }
-                                else{
-                                    accessorAndAtribut = attrValue.name
-                                }
-                                if (attrValue.type == ColumnType.PARAMETER)
+                    def attributeSecondLevel = attrValue.attribute?.ref
+                    def accessorAndAtribut
+                    if(attributeSecondLevel != null)
+                    {
+                        accessorAndAtribut = attrValue.name +" (" + attributeSecondLevel?.title + ")"
+                    }
+                    else
+                    {
+                        accessorAndAtribut = attrValue.name
+                    }
+                    if (attrValue.type == ColumnType.PARAMETER)
                     {
                         return new Column(
                             footer:      "",
@@ -5008,14 +5010,16 @@
                 return parameterColumns
             }
             return attributes.collect { attrValue ->
-                        def attributeSecondLevel = attrValue.attribute?.ref
-                        def accessorAndAtribut
-                        if(attributeSecondLevel != null){
-                            accessorAndAtribut = attrValue.name +" (" + attributeSecondLevel?.title + ")"
-                        }
-                        else{
-                            accessorAndAtribut = attrValue.name
-                        }
+                def attributeSecondLevel = attrValue.attribute?.ref
+                def accessorAndAtribut
+                if(attributeSecondLevel != null)
+                {
+                    accessorAndAtribut = attrValue.name +" (" + attributeSecondLevel?.title + ")"
+                }
+                else
+                {
+                    accessorAndAtribut = attrValue.name
+                }
                 return new Column(
                     footer: "",
                     accessor: attrValue.key ?: attrValue.aggregation? accessorAndAtribut + "#" + "${attrValue.aggregation}" : attrValue.name,
@@ -5428,24 +5432,26 @@
                 ? breakdownValues[0..DashboardUtils.tableBreakdownLimit - 1]
                 : breakdownValues
 
-                Collection<Column> columns = collectColumns(attributes, hasBreakdown, customValuesInBreakdown ?: breakdownValues)
+            Collection<Column> columns = collectColumns(attributes, hasBreakdown, customValuesInBreakdown ?: breakdownValues)
 
-                if (diagramType == DiagramType.PIVOT_TABLE)
+            if (diagramType == DiagramType.PIVOT_TABLE)
+            {
+                String requestDataKey = request.data.keySet().first()
+                RequestData requestData = request.data[requestDataKey]
+                addIndicatorBreakdownColumns(resultDataSet, requestData, columns)
+            }
+
+            List<String> attributeNames = attributes.collect{ attribut ->
+                def secondAttribut = attribut?.attribute?.ref?.title
+                if(secondAttribut != null)
                 {
-                    String requestDataKey = request.data.keySet().first()
-                    RequestData requestData = request.data[requestDataKey]
-                    addIndicatorBreakdownColumns(resultDataSet, requestData, columns)
+                    return  attribut.name + " (" + attribut?.attribute?.ref?.title+ ")"
                 }
+                return attribut.key ?:  attribut.aggregation? attribut.name + "#" + "${attribut.aggregation}" : attribut.name
+            }
 
-                List<String> attributeNames = attributes.collect{ attribut ->
-                    def secondAttribut = attribut?.attribute?.ref?.title
-                    if(secondAttribut != null){
-                        return  attribut.name + " (" + attribut?.attribute?.ref?.title+ ")"
-                    }
-                    return attribut.key ?:  attribut.aggregation? attribut.name + "#" + "${attribut.aggregation}" : attribut.name
-                }
-
-                if (sourceRowNames && hasBreakdown) {
+            if (sourceRowNames && hasBreakdown)
+            {
                 attributeNames << attributeNames[attributeNames.size() - 1]
                 attributeNames[attributeNames.size() - 2] = 'Источник'
             }
@@ -5474,7 +5480,7 @@
                 Integer indexToFind = 2 //берём до предпоследнего значения в строке, на последнем месте - разбивка
                 def groups = tempMaps.groupBy { it[parameterIndex..-(indexToFind)] }//группируем данные по параметрам (их значениям)
                 data = formatDataForTableWithBreakdown(groups, valuesInBasicBreakdownExceedLimit, breakdownValues,
-                                                        aggregationCnt, notAggregatedAttributeNames, parameterIndex, showRowNum)
+                                                       aggregationCnt, notAggregatedAttributeNames, parameterIndex, showRowNum)
                 rowCount = data.size()
                 if(tableTop && tableTop < rowCount)
                 {
@@ -5546,7 +5552,33 @@
                     }
                 }
             }
-
+            if (sourceRowNames)
+            {
+                data = data.sort { a, b ->
+                    Object value1 = a[sorting.accessor]
+                    Object value2 = b[sorting.accessor]
+                    value1 = value1 ?: 0
+                    value2 = value2 ?: 0
+                    if (value1 in Integer || value1 in String && value1.isNumber())
+                    {
+                        value1 = value1 as Double
+                        value2 = value2 as Double
+                    }
+                    Integer sortingValue = value1 <=> value2
+                    if (sorting.type == SortingType.DESC)
+                    {
+                        sortingValue = -sortingValue
+                    }
+                    return sortingValue
+                }
+            }
+            if (sorting.accessor != 'ID')
+            {
+                int i = 0
+                data.each {
+                    it.ID = ++i
+                }
+            }
             Collection<Column> aggregationColumns
             if (!sourceRowNames)
             {
@@ -6042,7 +6074,7 @@
                     {
                         aggregation[1] = notAggregatedAttributeNames?.contains(aggregation[0]) ? "" : "0"
                     }
-                    return [("${aggregation[0]}\$${breakdownValue[1]}"): aggregation[1]]
+                    return [("${aggregation[0]}\$${breakdownValue[1]}".toString()): aggregation[1]]
                 }
             }
         }
@@ -6330,7 +6362,7 @@
             //максимальный размер транспонированных датасетов из всех, что пришли из БД
             Integer globalMaxSize = transposeSets.collect{ it?.size() }?.max()
             Closure getsSeries = { Set labelSet, List<List> dataSet, Map additionalData, Set labelDiagramSet, boolean customGroupFromBreak,
-                Integer listSize ->
+                                   Integer listSize ->
                 def transposeData = dataSet?.transpose() ?: []
                 switch (transposeData.size()) {
                     case 0:
@@ -6695,7 +6727,7 @@
             }
             if(parameterWithDate && aggregationOrderWithDates == 'ASC')
             {
-							Collections.reverse(tempResult)
+                Collections.reverse(tempResult)
             }
             tempResult = tempResult*.get(0)
 
@@ -6855,7 +6887,7 @@
                     def total = res ? [(requisiteNode.title): res] : [:]
                     total = formatResult(total, aggregationCnt)
                     Boolean hasStateOrTimer = requestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] } ||
-                                       requestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] }
+                                              requestData?.aggregations?.any { it?.type == Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] }
                     if (hasStateOrTimer)
                     {
                         Boolean resWithPercentCnt
@@ -6904,7 +6936,7 @@
                         Closure postProcess =
                             this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
                         Collection result = dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
-                                                                .with(postProcess)
+                                                                      .with(postProcess)
 
                         if (result.size() == 0 || result.first() in Collection && result.first().size() == 0)
                         {
