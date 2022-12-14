@@ -1414,7 +1414,7 @@ class DashboardsService
                 {
                     attributeList.each {
                         it ->
-                            if (it.title.toLowerCase().contains(word.toLowerCase()))
+                            if (it.title.toLowerCase().contains(query.toLowerCase()))
                             {
                                 groupWithAttributes.attributes << it
                             }
