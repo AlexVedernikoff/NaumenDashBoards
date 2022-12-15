@@ -14,7 +14,6 @@ import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.transform.Field
 import groovy.transform.InheritConstructors
-import org.apache.groovy.groovysh.commands.SaveCommand
 import org.codehaus.groovy.runtime.StringBufferWriter
 import ru.naumen.core.server.script.api.IDbApi
 import ru.naumen.core.server.script.api.IListDataApi

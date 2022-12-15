@@ -5574,7 +5574,7 @@
                     return sortingValue
                 }
             }
-            if (sorting.accessor != 'ID')
+            if (sorting?.accessor != 'ID')
             {
                 int i = 0
                 data.each {
