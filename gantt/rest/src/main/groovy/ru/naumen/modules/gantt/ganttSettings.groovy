@@ -83,6 +83,7 @@ interface GanttSettingsController
      * @return список названий и ключей диаграмм версий
      */
     String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent)
+    //, IUUIDIdentifiable user = null
 
     /**
      * Метод получения настроек из хранилища
@@ -97,6 +98,7 @@ interface GanttSettingsController
      * @return настройки, отправленные в хранилище
      */
     String saveGanttVersionSettings(Map<String, Object> requestContent)
+    //, IUUIDIdentifiable user = null
 
     /**
      * Метод применения версии на основную диаграмму
@@ -214,9 +216,10 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent)
+    String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent,
+                                        IUUIDIdentifiable user = null)
     {
-        return Jackson.toJsonString(service.getGanttVersionTitlesAndKeys(requestContent))
+        return Jackson.toJsonString(service.getGanttVersionTitlesAndKeys(requestContent, user))
     }
 
     @Override
@@ -226,11 +229,12 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String saveGanttVersionSettings(Map<String, Object> requestContent)
+    String saveGanttVersionSettings(Map<String, Object> requestContent,
+                                    IUUIDIdentifiable user = null)
     {
         SaveGanttVersionSettingsRequest request = new ObjectMapper()
             .convertValue(requestContent, SaveGanttVersionSettingsRequest)
-        return Jackson.toJsonString(service.saveGanttVersionSettings(request))
+        return Jackson.toJsonString(service.saveGanttVersionSettings(request, user))
     }
 
     @Override
@@ -277,11 +281,23 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String postDataUsers(Map requestContent)
+    String createPersonalDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        Map requestData = new ObjectMapper()
-            .convertValue(requestContent, Map)
-        return service.postDataUsers(requestData.data)
+        GetGanttSettingsRequest request = new ObjectMapper()
+            .convertValue(requestContent, GetGanttSettingsRequest)
+        return toJson(
+            service.createPersonalDiagram(request, user)
+        )
+    }
+
+    @Override
+    String deletePersonalDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
+    {
+        GetGanttSettingsRequest request = new ObjectMapper()
+            .convertValue(requestContent, GetGanttSettingsRequest)
+        return toJson(
+            service.deletePersonalDiagram(request, user)
+        )
     }
 }
 
@@ -435,12 +451,20 @@ class GanttSettingsService
      * @param request - тело запроса
      * @return настройки из хранилища
      */
-    GanttSettingsClass getGanttSettings(GetGanttSettingsRequest request)
+    GanttSettingsClass getGanttSettings(GetGanttSettingsRequest request,
+                                        IUUIDIdentifiable user = null)
     {
         String subjectUUID = request.subjectUUID
         String contentCode = request.contentCode
-
-        String diagramKey = generateDiagramKey(subjectUUID, contentCode)
+        String diagramKey
+        if (request.hasProperty('isPersonal') && request.isPersonal)
+        {
+            diagramKey = [user.UUID, request.contentCode, 'personalVersion'].join('_')
+        }
+        else
+        {
+            diagramKey = generateDiagramKey(subjectUUID, contentCode)
+        }
         String ganttSettingsFromKeyValue = getJsonSettings(diagramKey)
         GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
@@ -578,37 +602,35 @@ class GanttSettingsService
         String contentCode = request.contentCode
         GanttSettingsClass ganttSettings = request.ganttSettings
 
-        ganttSettings.workProgresses = getGanttSettings(
-            new ObjectMapper().convertValue(
-                ['contentCode': request.contentCode, 'subjectUUID': request.subjectUUID, 'timezone':
-                    request.timezone], GetGanttSettingsRequest
-            )
-        ).workProgresses
-        ganttSettings.startDate = correctionErrorInDate(ganttSettings.startDate, request.timezone)
-        ganttSettings.endDate = correctionErrorInDate(ganttSettings.endDate, request.timezone)
-
         String ganttSettingsKey = generateDiagramKey(subjectUUID, contentCode)
         String currentGanttSettingsJSON = getJsonSettings(ganttSettingsKey)
 
         GanttSettingsClass currentGanttSettings = currentGanttSettingsJSON
             ? Jackson.fromJsonString(currentGanttSettingsJSON, GanttSettingsClass)
             : new GanttSettingsClass()
-
+        String keyForVersions =
+            request?.ganttSettings?.diagramKey.split('_').last() == 'personalVersion' ?[
+                subjectUUID,
+                'personalVersion'
+            ].join('_')
+        : subjectUUID
         ganttSettings.workRelations = currentGanttSettings.workRelations
-
+        getGanttVersionTitlesAndKeys(
+            [
+                'diagramKey' : request.ganttSettings.diagramKey,
+                'subjectUuid': keyForVersions
+            ]
+        ).each {
+            ganttSettings.diagramVersionsKeys << it['diagramKey']
+        }
+        ganttSettings.isPersonal =
+            request?.ganttSettings?.diagramKey.split('_').last() == 'personalVersion' ? true : false
         ganttSettings.commonSettings = updateColumnsInCommonSettings(ganttSettings.commonSettings)
-        if (saveJsonSettings(subjectUUID, toJson(ganttSettings)) && saveJsonSettings(
+        if (saveJsonSettings(keyForVersions, toJson(ganttSettings)) && saveJsonSettings(
             request?.ganttSettings?.diagramKey,
             toJson(ganttSettings)
         ))
         {
-            ganttSettings = getGanttSettings(
-                new ObjectMapper().convertValue(
-                    ['contentCode': request.contentCode,
-                     'subjectUUID': request.subjectUUID,
-                     'timezone': request.timezone], GetGanttSettingsRequest
-                )
-            )
             return ganttSettings
         }
         else
@@ -635,9 +657,13 @@ class GanttSettingsService
      * @param requestContent - тело запроса
      * @return список названий и ключей версий диаграммы
      */
-    Collection<Map<String, String>> getGanttVersionTitlesAndKeys(Map<String, Object> requestContent)
+    Collection<Map<String, String>> getGanttVersionTitlesAndKeys(Map<String, Object> requestContent,
+                                                                 IUUIDIdentifiable user = null)
     {
-        String ganttSettingsJsonValue = getJsonSettings(requestContent.subjectUuid)
+        String keyForVersions =
+            requestContent['isPersonal'] && user ?[user.UUID, 'personalVersion'].join('_')
+        : requestContent.subjectUuid
+        String ganttSettingsJsonValue = getJsonSettings(keyForVersions)
 
         GanttSettingsClass ganttSettings = ganttSettingsJsonValue
             ? Jackson.fromJsonString(ganttSettingsJsonValue, GanttSettingsClass)
@@ -651,7 +677,7 @@ class GanttSettingsService
             if (ganttVersionSettings?.title &&
                 subjectUuidInKey ==
                 requestContent.subjectUuid &&
-                requestContent.diagramKey.split('_').last() == contentCode)
+                requestContent.diagramKey.split('_')[1] == contentCode)
             {
                 return [
                     'title'     : ganttVersionSettings.title,
@@ -690,19 +716,27 @@ class GanttSettingsService
      * @param request - тело запроса
      * @return настройки версии
      */
-    GanttVersionsSettingsClass saveGanttVersionSettings(SaveGanttVersionSettingsRequest request)
+    GanttVersionsSettingsClass saveGanttVersionSettings(SaveGanttVersionSettingsRequest request,
+                                                        IUUIDIdentifiable user = null)
     {
         GanttDataSetService ganttDataSetService = GanttDataSetService.instance
 
-        String subjectUUID = request.subjectUUID
+        String keyForVersions = request.hasProperty('isPersonal') &&
+                                request.isPersonal && user ?[user.UUID, 'personalVersion'].join('_')
+        : request.subjectUUID
         String contentCode = request.contentCode
-        String diagramKey = generateDiagramKey(subjectUUID, contentCode)
-
-        String ganttSettingsFromKeyValue = getJsonSettings(subjectUUID)
+        String diagramKey = generateDiagramKey(request.subjectUUID, contentCode)
+        String ganttSettingsFromKeyValue = getJsonSettings(keyForVersions)
         GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
-        String versionKey = [subjectUUID, contentCode, UUID.randomUUID().toString()].join('_')
+        String versionKey = request.hasProperty('isPersonal') && request.isPersonal ?[
+            request.subjectUUID,
+            contentCode,
+            'personalVersion',
+            UUID.randomUUID().toString()
+        ].join('_')
+        : [request.subjectUUID, contentCode, UUID.randomUUID().toString()].join('_')
 
         Date createdDate = Date.parse(GANTT_VERSION_DATE_PATTERN, request.createdDate)
 
@@ -725,7 +759,7 @@ class GanttSettingsService
             String.join('_', 'sequenceWorks', versionKey),
             toJson(sequenceWorks)
         )
-        if (!saveJsonSettings(subjectUUID, Jackson.toJsonString(ganttSettings)))
+        if (!saveJsonSettings(keyForVersions, Jackson.toJsonString(ganttSettings)))
         {
             throw new Exception('Настройки не были сохранены!')
         }
@@ -759,7 +793,12 @@ class GanttSettingsService
         )
 
         List<Map<String, Object>> data = ganttDataSetService
-            .buildDataListFromSettings(ganttSettings.resourceAndWorkSettings, null, subjectUUID)
+            .buildDataListFromSettings(
+                ganttSettings,
+                ganttSettings.resourceAndWorkSettings,
+                null,
+                request.subjectUUID
+            )
 
         request.tasks.each {
             DiagramEntity entity = new DiagramEntity()
@@ -1326,6 +1365,51 @@ class GanttSettingsService
         }
         return "The rights of users ${ userRole } have been"
     }
+
+    /**
+     * Метод создания персонального дашборда.
+     * @param requestContent - тело запроса (editable, classFqn, contentCode)
+     * @param user - текущий пользователь
+     * @return true|false
+     */
+    Boolean createPersonalDiagram(GetGanttSettingsRequest request, IUUIDIdentifiable user)
+    {
+        GanttSettingsClass ganttSettings = getGanttSettings(request)
+        String ganttSettingsKey = generateDiagramKey(user.UUID, request.contentCode)
+        ganttSettings.isPersonalDiagram = true
+        ganttSettings.isPersonal = false
+        String versionKey = [user.UUID, request.contentCode, 'personalVersion'].join('_')
+        if (!saveJsonSettings(versionKey, toJson(ganttSettings)))
+        {
+            throw new Exception('Настройки не были сохранены!')
+        }
+        else
+        {
+            return true
+        }
+    }
+
+    /**
+     * Метод создания персонального дашборда.
+     * @param requestContent - тело запроса (editable, classFqn, contentCode)
+     * @param user - текущий пользователь
+     * @return true|false
+     */
+    Boolean deletePersonalDiagram(GetGanttSettingsRequest request, IUUIDIdentifiable user)
+    {
+        GanttSettingsClass ganttSettings = getGanttSettings(request)
+        String ganttSettingsKey = generateDiagramKey(user.UUID, request.contentCode)
+        ganttSettings.isPersonalDiagram = false
+        ganttSettings.isPersonal = false
+        if (!saveJsonSettings(ganttSettingsKey, toJson(ganttSettings)))
+        {
+            throw new Exception('Настройки не были сохранены!')
+        }
+        else
+        {
+            return true
+        }
+    }
 }
 
 /**
@@ -1435,6 +1519,8 @@ class GetGanttSettingsRequest extends BaseGanttSettingsRequest
      * Таймзона устройства пользователя
      */
     String timezone
+
+    Boolean isPersonal
 }
 
 /**
@@ -1507,6 +1593,8 @@ class SaveGanttVersionSettingsRequest extends BaseGanttSettingsRequest
      * Настройки для столбцов бокового меню
      */
     CommonSettings commonSettings
+
+    Boolean isPersonal
 }
 
 /**
@@ -1616,6 +1704,10 @@ class GanttSettingsClass extends BaseGanttDiagramData
      * Настройки интервала
      */
     CurrentInterval currentInterval
+
+    Boolean isPersonalDiagram
+
+    Boolean isPersonal = false
 }
 
 /**
@@ -1831,6 +1923,10 @@ class GanttDiagramData extends BaseGanttDiagramData
      * Настройки интервала
      */
     CurrentInterval currentInterval
+
+    Boolean isPersonalDiagram
+
+    Boolean isPersonal = false
 }
 
 /**
