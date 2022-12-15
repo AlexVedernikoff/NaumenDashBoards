@@ -90,8 +90,7 @@ const setDynamicAttributesSearch = (
 	const {dataKey, groups} = payload;
 	const data = {};
 
-	groups.forEach(({attributes, dynamicGroup}) => {
-		const groupCode = dynamicGroup.code;
+	groups.forEach(({attributes, code, title}) => {
 		const children = [];
 
 		attributes.forEach(attribute => {
@@ -100,21 +99,21 @@ const setDynamicAttributesSearch = (
 				error: false,
 				id: attribute.code,
 				loading: false,
-				parent: groupCode,
+				parent: code,
 				uploaded: true,
 				value: attribute
 			};
 			children.push(attribute.code);
 		});
 
-		data[dynamicGroup.code] = {
+		data[code] = {
 			children,
 			error: false,
-			id: dynamicGroup.code,
+			id: code,
 			loading: false,
 			parent: null,
 			uploaded: true,
-			value: dynamicGroup
+			value: {code, title}
 		};
 	});
 

@@ -68,8 +68,8 @@ type RecordDynamicAttributeGroupsError = {
 };
 
 export type DynamicAttributesSearchItem = {
-	attributes: Array<Attribute>,
-	dynamicGroup: DynamicGroupInfo
+	...DynamicGroupInfo,
+	attributes: Array<Attribute>
 };
 
 export type ReceiveDynamicAttributesSearchPayload = {
