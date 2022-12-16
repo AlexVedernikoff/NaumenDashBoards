@@ -276,7 +276,8 @@ class TableTooltipForm extends PureComponent<Props, State> {
 
 	renderIndicatorTextArea = (indicator: Indicator) => {
 		const {tooltip = DEFAULT_TOOLTIP_SETTINGS} = indicator;
-		const focus = tooltip?.title === '';
+		const text = tooltip?.text ?? tooltip?.title ?? '';
+		const focus = text === '';
 
 		return (
 			<FormField label={t('TableWidgetForm::TableTooltipForm::TooltipText')}>
@@ -285,7 +286,7 @@ class TableTooltipForm extends PureComponent<Props, State> {
 					maxLength={null}
 					name={DIAGRAM_FIELDS.title}
 					onChange={this.getChangeIndicatorTextHandler(indicator)}
-					value={tooltip?.title ?? ''}
+					value={text}
 				/>
 			</FormField>
 		);
