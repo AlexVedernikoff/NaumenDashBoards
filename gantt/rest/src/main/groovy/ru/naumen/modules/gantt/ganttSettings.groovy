@@ -614,6 +614,15 @@ class GanttSettingsService
         String contentCode = request.contentCode
         GanttSettingsClass ganttSettings = request.ganttSettings
 
+        ganttSettings.workProgresses = getGanttSettings(
+            new ObjectMapper().convertValue(
+                ['contentCode': request.contentCode, 'subjectUUID': request.subjectUUID, 'timezone':
+                    request.timezone], GetGanttSettingsRequest
+            )
+        ).workProgresses
+        ganttSettings.startDate = correctionErrorInDate(ganttSettings.startDate, request.timezone)
+        ganttSettings.endDate = correctionErrorInDate(ganttSettings.endDate, request.timezone)
+
         String ganttSettingsKey = generateDiagramKey(subjectUUID, contentCode)
         String currentGanttSettingsJSON = getJsonSettings(ganttSettingsKey)
 
