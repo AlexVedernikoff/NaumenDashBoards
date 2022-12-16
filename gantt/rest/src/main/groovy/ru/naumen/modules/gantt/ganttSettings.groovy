@@ -154,6 +154,22 @@ interface GanttSettingsController
      * @return инофрмация о внесенных изменения в права доступа
      */
     String postDataUsers(Map requestContent)
+
+    /**
+     * Метод создания персональный диаграммы ганта для пользователя
+     * @param requestContent - тело запроса
+     * @param user - пользователь
+     * @return создание новой диаграммы для пользователя
+     */
+    String createPersonalDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
+
+    /**
+     * Метод удаления персональный диаграммы ганта для пользователя
+     * @param requestContent - тело запроса
+     * @param user - пользователь
+     * @return информация о удалении диаграммы для пользователя
+     */
+    String deletePersonalDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
@@ -1364,14 +1380,13 @@ class GanttSettingsService
 
     /**
      * Метод создания персонального дашборда.
-     * @param requestContent - тело запроса (editable, classFqn, contentCode)
+     * @param request - тело запроса
      * @param user - текущий пользователь
      * @return true|false
      */
     Boolean createPersonalDiagram(GetGanttSettingsRequest request, IUUIDIdentifiable user)
     {
         GanttSettingsClass ganttSettings = getGanttSettings(request)
-        String ganttSettingsKey = generateDiagramKey(user.UUID, request.contentCode)
         ganttSettings.isPersonalDiagram = true
         ganttSettings.isPersonal = false
         String versionKey = [user.UUID, request.contentCode, 'personalVersion'].join('_')
@@ -1386,8 +1401,8 @@ class GanttSettingsService
     }
 
     /**
-     * Метод создания персонального дашборда.
-     * @param requestContent - тело запроса (editable, classFqn, contentCode)
+     * Метод удаления персонального дашборда.
+     * @param request - тело запроса
      * @param user - текущий пользователь
      * @return true|false
      */
