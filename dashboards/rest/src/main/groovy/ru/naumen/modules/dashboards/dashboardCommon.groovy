@@ -1643,6 +1643,7 @@ class DynamicGroupWithAttributes extends DynamicGroup
     List<Attribute> attributes
 }
 
+@AutoClone
 class DiagramRequest
 {
     Collection<Requisite> requisite

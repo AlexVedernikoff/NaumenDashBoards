@@ -355,20 +355,17 @@
 
                 if (diagramType == DiagramType.PIVOT_TABLE)
                 {
-                    String requestDataKey = request.data.keySet().first()
-                    RequestData requestData = request.data[requestDataKey]
-                    res = applyIndicatorsFiltration(requestData, res, user)
-                    res = applyIndicatorsBreakdown(
-                        requestData,
+                    res = postProcessPivotTableResult(
+                        dbSettings,
+                        request,
+                        widgetSettings,
                         res,
-                        user,
+                        tableRequestSettings?.ignoreLimits,
+                        noPaginationInSQL ? null : paginationSettings,
+                        templateUUID,
                         subjectUUID,
                         offsetUTCMinutes,
-                        templateUUID,
-                        requestContent,
-                        dbSettings,
-                        aggregationCnt,
-                        widgetSettings
+                        user
                     )
                 }
 
@@ -544,255 +541,377 @@
         }
 
         /**
-         * Метод применения фильтрации на показателях
-         * @param requestData - данные запроса
-         * @param res - результат первоначального запроса
-         * @param user - текущий пользователь системы
-         * @return результат с фильтрацией на показателях
-         */
-        private List applyIndicatorsFiltration(RequestData requestData, List res, IUUIDIdentifiable user)
-        {
-            Collection<AggregationParameter> allAggregations = requestData.aggregations
-            Collection<AggregationParameter> aggregationsWithFiltration =
-                allAggregations.findAll {
-                    !it.breakdown && it.descriptor
-                }
-            Map<AggregationParameter, List> aggregationFiltrationResult = [:]
-
-            aggregationsWithFiltration.each { aggregation ->
-                RequestData requestDataCopy = requestData.clone()
-                requestDataCopy.aggregations = [aggregation]
-
-                List result = dashboardQueryWrapperUtils.getData(
-                    requestDataCopy,
-                    null,
-                    currentUserLocale,
-                    user,
-                    false,
-                    DiagramType.PIVOT_TABLE,
-                    false,
-                    '',
-                    null,
-                    new IndicatorFiltration(
-                        metaClassFqn: aggregation.attribute.sourceCode,
-                        descriptor: aggregation.descriptor
-                    )
-                )
-
-                List listIdsOfNormalAggregations =
-                    requestDataCopy.aggregations?.withIndex()?.findResults { val, i ->
-                        if (val.type != Aggregation.NOT_APPLICABLE)
-                        {
-                            return i
-                        }
-                    }
-                Closure formatGroup = this.&formatGroupSet.rcurry(requestDataCopy, listIdsOfNormalAggregations, DiagramType.PIVOT_TABLE)
-                result = formatGroup(result)
-
-                aggregationFiltrationResult[aggregation] = result
-            }
-
-
-            Integer groupsCount = requestData.groups.size()
-
-            aggregationFiltrationResult.eachWithIndex { aggregation, filtrationResult, index ->
-                Integer aggregationIndex = allAggregations.findIndexOf { it == aggregation }
-                res[0].each { resultItem ->
-                    Object value = 0
-
-                    filtrationResult.each { filtrationResultItem ->
-                        if (value == 0)
-                        {
-                            Boolean filtrationResultItemMatch = true
-                            for (int i = 1; i < groupsCount + 1; i++)
-                            {
-                                filtrationResultItemMatch = filtrationResultItemMatch &&
-                                                            resultItem[resultItem.size() - i] ==
-                                                            filtrationResultItem[filtrationResultItem.size() - i]
-                            }
-
-                            if (filtrationResultItemMatch)
-                            {
-                                value = filtrationResultItem[0]
-                            }
-                        }
-                    }
-
-                    resultItem[aggregationIndex] = value
-                }
-            }
-
-            return res
-        }
-
-        /**
-         * Метод применения разбивки на показателях
-         * @param requestData - данные запроса
-         * @param res - результат первоначального запроса
-         * @param user - текущий пользователь системы
-         * @param subjectUUID - идентификатор "текущего объекта"
-         * @param offsetUTCMinutes - смещение в минутах относительно 0 часового пояса
-         * @param templateUUID - uuid шаблона динамического атрибута
-         * @param requestContent - тело запроса
+         * Метод допольнительной обработки результата запроса для сводной таблицы
          * @param dbSettings - настройки дашборда
-         * @param aggregationCnt - количество агрегаций
-         * @param widgetSettings - тела запроса по метаданным из хранилища по ключу дашборда и виджета
-         * @return результат с разбивкой на показателях
+         * @param request - запрос
+         * @param widgetSettings - настройки виджета
+         * @param res - результат исходного запроса
+         * @param ignoreLimits - флаг, игнорировать лимит
+         * @param paginationSettings - настройки пагинации
+         * @param templateUUID - UUID шаблона
+         * @param subjectUUID - UUID объекта, на котором расположен дашборд
+         * @param offsetUTCMinutes - смещение часового пояса пользователя относительно серверного времени
+         * @param user - текущий пользователь
+         * @return результат с обработанными аггрегациями, содержащими фильтрацию или разбивку
          */
-        private List applyIndicatorsBreakdown(RequestData requestData,
-                                              List res,
-                                              IUUIDIdentifiable user,
-                                              String subjectUUID,
-                                              Integer offsetUTCMinutes,
-                                              String templateUUID,
-                                              Map<String, Object> requestContent,
-                                              DashboardSettingsClass dbSettings,
-                                              Integer aggregationCnt,
-                                              Widget widgetSettings)
+        private List postProcessPivotTableResult(DashboardSettingsClass dbSettings,
+                                                 DiagramRequest request,
+                                                 Widget widgetSettings,
+                                                 List res,
+                                                 IgnoreLimits ignoreLimits,
+                                                 PaginationSettings paginationSettings,
+                                                 String templateUUID,
+                                                 String subjectUUID,
+                                                 Integer offsetUTCMinutes,
+                                                 IUUIDIdentifiable user = null)
         {
-            Collection<AggregationParameter> allAggregations = requestData.aggregations
-            Collection<AggregationParameter> aggregationsWithBreakdown =
-                allAggregations.findAll {
-                    it.breakdown != null
-                }
+            DiagramRequest newRequest = request.clone()
+            String requestDataKey = newRequest.data.keySet().first()
+            RequestData requestData = newRequest.data[requestDataKey]
+            Requisite requisite = newRequest.requisite.first()
+            RequisiteNode node = requisite.nodes.first()
+            Boolean onlyFilled = !requisite.showNulls
+            Boolean notBlank = !requisite.showBlank
+            Integer top = requisite.top
 
-            Map<AggregationParameter, List> aggregationBreakdownResult = [:]
+            List<Map<String, Object>> aggregationsInfo = getPivotTableAggregationsInfo(requestData)
+            Map<String, Object> filterMap = getInfoAboutFilters(requestDataKey, request)
+            List filtering = getPivotTableFiltering(filterMap, widgetSettings)
 
-            aggregationsWithBreakdown.each { aggregation ->
-                RequestData requestDataCopy = requestData.clone()
-                requestDataCopy.aggregations = [aggregation]
-                requestDataCopy.groups = requestDataCopy.groups.collect()
-                List listIdsOfNormalAggregations =
-                    requestDataCopy.aggregations?.withIndex()?.findResults { val, i ->
-                        if (val.type != Aggregation.NOT_APPLICABLE)
-                        {
-                            return i
-                        }
-                    }
-                Closure formatGroup = this.&formatGroupSet.rcurry(requestDataCopy, listIdsOfNormalAggregations, DiagramType.PIVOT_TABLE)
-                List result = []
-                if (aggregation.breakdown.group?.way == Way.SYSTEM)
-                {
-                    GroupParameter breakdownGroup =
-                        buildSystemGroup(aggregation.breakdown.group, aggregation.breakdown.attribute)
-                    requestDataCopy.groups << breakdownGroup
+            Map<Map<String, Object>, List<List>> aggregationsInfoResult =
+                aggregationsInfo.collectEntries { aggregationInfo ->
+                    AggregationParameter aggregation = aggregationInfo['aggregation']
+                    RequestData newRequestData = requestData.clone()
+                    newRequest.data[requestDataKey] = newRequestData
+                    newRequestData.aggregations = [aggregation]
 
-                    result = dashboardQueryWrapperUtils.getData(
-                        requestDataCopy,
-                        null,
-                        currentUserLocale,
-                        user,
-                        false,
-                        DiagramType.PIVOT_TABLE,
-                        false,
-                        '',
-                        null,
+                    List<Integer> listIdsOfNormalAggregations = [0]
+                    List<Map<String, Object>> attributes = getAttributeNamesAndValuesFromRequest(widgetSettings)
+                    String attrInCustoms =
+                        getInnerCustomGroupNames(widgetSettings).find()?.attributeName
+                    String possibleBreakdownAttribute = attributes.last().name
+                    Boolean customInBreakTable = possibleBreakdownAttribute == attrInCustoms
+
+                    IndicatorFiltration indicatorFiltration =
                         aggregation.descriptor ? new IndicatorFiltration(
                             metaClassFqn: aggregation.attribute.sourceCode,
                             descriptor: aggregation.descriptor
                         ) : null
-                    )
-                    result = formatGroup(result)
-                } else
-                {
-                    Source source = requestData.source
-                    NewBreakdown breakdownAttribute = aggregation.breakdown
-                    breakdownAttribute.group =
-                        Group
-                            .mappingGroup(breakdownAttribute.group, dbSettings?.customGroups, false)
-                    NewParameter breakdownCustomGroup = new NewParameter(
-                        group: breakdownAttribute?.group,
-                        attribute: breakdownAttribute?.attribute
-                    )
-                    FilterList breakdownFilter = getFilterList(
-                        breakdownCustomGroup,
-                        subjectUUID,
-                        'breakdown',
-                        source,
-                        offsetUTCMinutes
-                    )
-                    List newParameterFilters = breakdownFilter.filters
-                    List filtering = prepareFilters(
-                        1,
+
+                    Closure formatAggregation = this.&formatAggregationSet.rcurry(
+                        listIdsOfNormalAggregations,
+                        newRequest,
                         DiagramType.PIVOT_TABLE,
-                        requestContent,
-                        [],
-                        newParameterFilters
+                        onlyFilled,
+                        getPercentCntAggregationIndexes(newRequest)
                     )
-                    result = filtering?.withIndex()?.collectMany { filters, i ->
-                        requestDataCopy.filters = filters
-                        result = dashboardQueryWrapperUtils.getData(
-                            requestDataCopy,
-                            null,
-                            currentUserLocale,
-                            user,
-                            false,
-                            DiagramType.PIVOT_TABLE,
-                            false,
-                            templateUUID,
-                            aggregation.descriptor ? new IndicatorFiltration(
-                                metaClassFqn: aggregation.attribute.sourceCode,
-                                descriptor: aggregation.descriptor
-                            ) : null
-                        )
-                                                           .with(formatGroup)
 
-                        List<String> notAggregatedAttributes = []
-                        List attributes = getAttributeNamesAndValuesFromRequest(widgetSettings)
-                        notAggregatedAttributes = notAggregationAttributeNames(attributes)
-                        Collection filtersTitle = requestDataCopy.filters.unique {
-                            it.id
-                        }.findResults {
-                            if (it.title)
-                            {
-                                String titleValue = (it.title).find()
-                                if (dbSettings.type in DiagramType.SortableTypes && titleValue)
-                                {
-                                    return "${ titleValue }#${ (it.id).find() }"
-                                }
-                                return titleValue
+                    List<List> result
+                    if (aggregation?.breakdown?.group?.way == Way.SYSTEM || aggregationInfo['processType'] == 'filtration')
+                    {
+
+                        if (aggregationInfo['processType'] == 'breakdown')
+                        {
+                            GroupParameter breakdownGroup =
+                                buildSystemGroup(
+                                    aggregation.breakdown.group,
+                                    aggregation.breakdown.attribute
+                                )
+                            newRequestData.groups << breakdownGroup
+                        }
+
+                        if (!filtering)
+                        {
+                            result = getNoFilterListDiagramData(
+                                node,
+                                newRequest,
+                                1,
+                                top,
+                                notBlank,
+                                onlyFilled,
+                                DiagramType.PIVOT_TABLE,
+                                widgetSettings,
+                                ignoreLimits,
+                                user,
+                                paginationSettings,
+                                indicatorFiltration
+                            )
+                        }
+                        else
+                        {
+                            Closure formatGroup = this.&formatGroupSet.rcurry(
+                                newRequestData,
+                                listIdsOfNormalAggregations,
+                                DiagramType.PIVOT_TABLE
+                            )
+                            result = getCustomGroupResult(
+                                newRequest,
+                                widgetSettings,
+                                newRequestData,
+                                filtering,
+                                formatGroup,
+                                formatAggregation,
+                                listIdsOfNormalAggregations,
+                                filterMap.parameterFilters,
+                                filterMap.breakdownFilters,
+                                [],
+                                paginationSettings,
+                                ignoreLimits,
+                                top,
+                                DiagramType.PIVOT_TABLE,
+                                templateUUID,
+                                customInBreakTable,
+                                onlyFilled,
+                                1,
+                                filterMap.filterListSize,
+                                false,
+                                notBlank,
+                                indicatorFiltration,
+                                user
+                            )
+                        }
+                    }
+                    else
+                    {
+                        Closure formatGroup = this.&formatGroupSet.rcurry(
+                            newRequestData,
+                            listIdsOfNormalAggregations,
+                            DiagramType.PIVOT_TABLE
+                        )
+
+                        NewBreakdown breakdownAttribute = aggregation.breakdown
+                        breakdownAttribute.group =
+                            Group
+                                .mappingGroup(
+                                    breakdownAttribute.group,
+                                    dbSettings?.customGroups
+                                )
+                        NewParameter breakdownCustomGroup = new NewParameter(
+                            group: breakdownAttribute?.group,
+                            attribute: breakdownAttribute?.attribute
+                        )
+                        FilterList newBreakdownFilter = getFilterList(
+                            breakdownCustomGroup,
+                            subjectUUID,
+                            'breakdown',
+                            newRequestData.source,
+                            offsetUTCMinutes
+                        )
+                        List newBreakdownFilters = newBreakdownFilter.filters
+
+                        if (!filtering)
+                        {
+                            List newFiltering = prepareFilters(
+                                1,
+                                DiagramType.PIVOT_TABLE,
+                                widgetSettings,
+                                [],
+                                newBreakdownFilters
+                            )
+
+                            result = getCustomGroupResult(
+                                newRequest,
+                                widgetSettings,
+                                newRequestData,
+                                newFiltering,
+                                formatGroup,
+                                formatAggregation,
+                                listIdsOfNormalAggregations,
+                                filterMap.parameterFilters,
+                                filterMap.breakdownFilters,
+                                [],
+                                paginationSettings,
+                                ignoreLimits,
+                                top,
+                                DiagramType.PIVOT_TABLE,
+                                templateUUID,
+                                customInBreakTable,
+                                onlyFilled,
+                                1,
+                                filterMap.filterListSize,
+                                false,
+                                notBlank,
+                                indicatorFiltration,
+                                user
+                            )
+
+                            Integer customGroupBreakdownIndex = 1
+                            result = moveEachCollectionElementAheadByIndex(customGroupBreakdownIndex, result)
+                        }
+                        else
+                        {
+                            result = filterMap.parameterFilters.collectMany { parameterFilter ->
+                                List newFiltering = prepareFilters(
+                                    2,
+                                    DiagramType.PIVOT_TABLE,
+                                    widgetSettings,
+                                    [parameterFilter],
+                                    newBreakdownFilters
+                                )
+
+                                return getCustomGroupResult(
+                                    newRequest,
+                                    widgetSettings,
+                                    newRequestData,
+                                    newFiltering,
+                                    formatGroup,
+                                    formatAggregation,
+                                    listIdsOfNormalAggregations,
+                                    filterMap.parameterFilters,
+                                    filterMap.breakdownFilters,
+                                    [],
+                                    paginationSettings,
+                                    ignoreLimits,
+                                    top,
+                                    DiagramType.PIVOT_TABLE,
+                                    templateUUID,
+                                    customInBreakTable,
+                                    onlyFilled,
+                                    1,
+                                    2,
+                                    false,
+                                    notBlank,
+                                    indicatorFiltration,
+                                    user
+                                )
                             }
+
+                            Integer allGroupsCount = result.head().size() - 1
+                            Integer customGroupBreakdownIndex = allGroupsCount - newRequestData.groups.size()
+                            // Выдвигаем элемент под индексом customGroupBreakdownIndex на последнее место
+                            result = moveEachCollectionElementAheadByIndex(customGroupBreakdownIndex, result)
                         }
-                        filtersTitle = filtersTitle.unique()
-                        Object partial = [(filtersTitle): result]
-                        partial = formatResult(
-                            partial,
-                            aggregationCnt + notAggregatedAttributes.size() + 1
-                        )
                     }
+                    return [(aggregationInfo): result]
                 }
-                replaceResultAttributeMetaClass(result, new DiagramRequest(data: [(requestDataCopy.source.dataKey): requestDataCopy]))
-                aggregationBreakdownResult[aggregation] = result
-            }
 
-            Integer groupsCount = requestData.groups.size()
-            Integer aggregationsCount = allAggregations.size()
-            aggregationBreakdownResult.eachWithIndex { aggregation, breakdownResult, index ->
-                Integer aggregationIndex = allAggregations.findIndexOf { it == aggregation }
+            return mergePivotTableAggregationResult(res, aggregationsInfoResult, requestData.aggregations.size())
+        }
 
-                res[0].eachWithIndex { resultItem, resIndex ->
-                    List matchBreakdownResultItems = []
-                    breakdownResult.each { breakdownResultItem ->
-                        Boolean breakdownResultItemMatch = true
-                        for (int i = breakdownResultItem.size() - 1; i > resultItem.size() - groupsCount - (aggregationsCount - 1); i--)
-                        {
-                            breakdownResultItemMatch =
-                                breakdownResultItemMatch && resultItem[i - 1 + (aggregationsCount - 1)] == breakdownResultItem[i - 1]
-                        }
+        /**
+         * Метод слияния результатов запроса аггрегаций и исходного результата запроса
+         * @param res - исходный результат запроса
+         * @param aggregationsInfoResult - результаты запросов аггрегаций
+         * @param allAggregationsCount - количество всех аггрегаций
+         * @return объединенный результат
+         */
+        private List mergePivotTableAggregationResult(List<List> res, Map<Map<String, Object>, List<List>> aggregationsInfoResult, Integer allAggregationsCount)
+        {
+            aggregationsInfoResult.each { aggregationInfo, postProcessResult ->
+                res[0] = res[0].collect { resultItem ->
+                    List<String> groupsValues = resultItem[allAggregationsCount..(resultItem.size() - 1)]
+                    Integer aggregationValueIndex = 0
 
-                        if (breakdownResultItemMatch)
-                        {
-                            matchBreakdownResultItems << breakdownResultItem
-                        }
+                    if (aggregationInfo['processType'] == 'breakdown')
+                    {
+                        resultItem[aggregationInfo['aggregationIndex']] =
+                            getPostProcessBreakdownResultMatchValues(postProcessResult, groupsValues, aggregationValueIndex)
+                    }
+                    else
+                    {
+                        resultItem[aggregationInfo['aggregationIndex']] =
+                            getPostProcessFiltrationResultMatchValue(postProcessResult, groupsValues, aggregationValueIndex)
                     }
 
-                    matchBreakdownResultItems = matchBreakdownResultItems.collect {
-                        return [it[index], it[it.size() - 1]]
-                    }
-                    res[0][resIndex][aggregationIndex] = matchBreakdownResultItems
+                    return resultItem
                 }
             }
             return res
+        }
+
+        /**
+         * Метод получения результатов фильтрации на показателе для некой комбинации групп
+         * @param postProcessResult - результат запроса аггрегации с разбивкой
+         * @param groupsValues - комбинация групп
+         * @param aggregationValueIndex - индекс значения аггрегации
+         * @return результат фильтрации на показателе
+         */
+        private Object getPostProcessFiltrationResultMatchValue(List<List> postProcessResult, List<String> groupsValues, Integer aggregationValueIndex)
+        {
+            List postProcessResultMatchItem = postProcessResult.find { postProcessResultItem ->
+                Integer postProcessResultItemLastGroupIndex = postProcessResultItem.size() - 1
+                List<String> postProcessResultItemGroupValues = postProcessResultItem[1..postProcessResultItemLastGroupIndex]
+                return groupsValues == postProcessResultItemGroupValues
+            }
+            return postProcessResultMatchItem ?
+                postProcessResultMatchItem[aggregationValueIndex] : 0
+        }
+
+        /**
+         * Метод получения результатов разбивки на показателе для некой комбинации групп
+         * @param postProcessResult - результат запроса аггрегации с разбивкой
+         * @param groupsValues - комбинация групп
+         * @param aggregationValueIndex - индекс значения аггрегации
+         * @return результаты разбивки на показателе
+         */
+        private List<List> getPostProcessBreakdownResultMatchValues(List<List> postProcessResult, List<String> groupsValues, Integer aggregationValueIndex)
+        {
+            List<List> postProcessResultMatchItems = postProcessResult.findAll { postProcessResultItem ->
+                Integer postProcessResultItemLastGroupIndex = postProcessResultItem.size() - 2
+                List<String> postProcessResultItemGroupValues = postProcessResultItem[1..postProcessResultItemLastGroupIndex]
+                return groupsValues == postProcessResultItemGroupValues
+            }
+
+            return postProcessResultMatchItems.collect { postProcessResultMatchItem ->
+                Integer postProcessBreakdownValueIndex = postProcessResultMatchItem.size() - 1
+                return [postProcessResultMatchItem[aggregationValueIndex], postProcessResultMatchItem[postProcessBreakdownValueIndex]]
+            }
+        }
+
+        /**
+         * Метод получения аггрегаций с фильтрацией или разбивкой для сводной таблицы
+         * @param requestData - данные запроса
+         * @return список аггрегаций
+         */
+        private List<Map<String, Object>> getPivotTableAggregationsInfo(RequestData requestData)
+        {
+            return requestData.aggregations.withIndex().findResults { aggregation, index ->
+                if (!(aggregation.breakdown || aggregation.descriptor))
+                {
+                    return null
+                }
+                return [
+                    'aggregation'     : aggregation,
+                    'aggregationIndex': index,
+                    'processType'     : aggregation.breakdown ? 'breakdown' : 'filtration'
+                ]
+            }
+        }
+
+        /**
+         * Метод получения фильтров пользовательских группировок для сводной таблицы
+         * @param filterMap - данные о фильтрах в запросе
+         * @param widgetSettings - настройки виджета
+         * @return фильтры
+         */
+        private List getPivotTableFiltering(Map<String, Object> filterMap, Widget widgetSettings)
+        {
+            return filterMap.filterListSize > 0
+                ? prepareFilters(
+                filterMap.filterListSize,
+                DiagramType.PIVOT_TABLE,
+                widgetSettings,
+                filterMap.parameterFilters,
+                []
+            )
+                : []
+        }
+
+        /**
+         * Метод для выдвижения элемента под определенным индексом на последнее место
+         * @param index - индекс
+         * @param result - список элементов
+         * @return список элементов с измененным порядком результатов
+         */
+        private List moveEachCollectionElementAheadByIndex(Integer index, List result)
+        {
+            return result.collect { resultItem ->
+                return [
+                    *resultItem[0..(index - 1)],
+                    *resultItem[(index + 1)..resultItem.size() - 1],
+                    resultItem[index]
+                ]
+            }
         }
 
         /**
@@ -3563,65 +3682,31 @@
                                 getPercentCntAggregationIndexes(request)
                             )
                             Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
-                            def res = filtering?.withIndex()?.collectMany { filters, i ->
-                                newRequestData.filters = filters
-                                List res = dashboardQueryWrapperUtils.getData(
-                                    newRequestData,
-                                    top,
-                                    currentUserLocale,
-                                    user,
-                                    notBlank,
-                                    diagramType,
-                                    ignoreLimits?.parameter ?: false,
-                                    templateUUID,
-                                    paginationSettings
-                                )
-                                                                     .with(formatGroup)
-                                                                     .with(formatAggregation)
+                            List<List> res = getCustomGroupResult(
+                                request,
+                                requestContent,
+                                newRequestData,
+                                filtering,
+                                formatGroup,
+                                formatAggregation,
+                                listIdsOfNormalAggregations,
+                                parameterFilters,
+                                breakdownFilters,
+                                notAggregatedAttributes,
+                                paginationSettings,
+                                ignoreLimits,
+                                top,
+                                diagramType,
+                                templateUUID,
+                                customInBreakTable,
+                                onlyFilled,
+                                aggregationCnt,
+                                filterListSize,
+                                isSourceForEachRow,
+                                notBlank,
+                                user
+                            )
 
-                                if(!res && !onlyFilled && !customInBreakTable)
-                                {
-                                    def tempRes = ['']*(newRequestData.groups.size() + notAggregatedAttributes.size())
-                                    listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
-                                    res = [tempRes].with(formatGroup)
-                                                   .with(formatAggregation)
-                                }
-                                def filtersTitle = filters.unique { it.id }.findResults {
-                                    if(it.title)
-                                    {
-                                        def titleValue = (it.title as Set).find()
-                                        if(diagramType in DiagramType.SortableTypes && titleValue)
-                                        {
-                                            return "${titleValue}#${(it.id as Set).find()}"
-                                        }
-                                        return titleValue
-                                    }
-                                }
-                                filtersTitle = filtersTitle.unique()
-                                def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filtersTitle): res]
-
-                                partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
-                                Boolean hasStateOrTimer = newRequestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] } ||
-                                                          newRequestData?.aggregations?.any { it?.type in Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE]  }
-                                if (hasStateOrTimer)
-                                {
-                                    Boolean resWithPercentCnt
-                                    Collection<Integer> percentCntAggregationIndexes
-                                    if (isSourceForEachRow)
-                                    {
-                                        percentCntAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT_CNT)
-                                    }
-                                    else
-                                    {
-                                        percentCntAggregationIndexes = getPercentCntAggregationIndexes(request)
-                                    }
-
-                                    resWithPercentCnt = i in percentCntAggregationIndexes
-                                    partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations, resWithPercentCnt)
-                                }
-                                filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
-                                return prepareResultListListForTop(partial, filterListSize, top, parameterFilters, breakdownFilters, i)
-                            }
                             def parameter = requestData.groups.find()
                             String parameterAttributeType = parameter?.attribute?.type
                             Boolean parameterWithDateOrDtInterval = parameterAttributeType in [*AttributeType.DATE_TYPES, AttributeType.DT_INTERVAL_TYPE]
@@ -3762,6 +3847,108 @@
         }
 
         /**
+         * Метод получения результата с учетом фильтров на пользовательской группировке
+         * @param request - весь запрос
+         * @param requestContent - настройки виджета
+         * @param newRequestData - данные запроса
+         * @param filtering - фильтры пользовательской группировки
+         * @param formatGroup - метод обработки групп
+         * @param formatAggregation - метод обработки аггрегаций
+         * @param listIdsOfNormalAggregations - список ID нормальных аггрегаций
+         * @param parameterFilters - фильтры на параметрах
+         * @param breakdownFilters - фильтры на разбивке
+         * @param notAggregatedAttributes - атрибуты с агрегацией N/A
+         * @param paginationSettings - настройки пагинации
+         * @param ignoreLimits - флаг, игнорировать лимиты
+         * @param top -лимит
+         * @param diagramType - тип диаграммы
+         * @param templateUUID - UUID шаблона
+         * @param customInBreakTable - флаг, используется пользовательская разбивка в таблице
+         * @param onlyFilled - флаг на отображение данных, в которых пришли/не пришли данные по агрегации
+         * @param aggregationCnt - количество аггрегаций
+         * @param filterListSize - количество разнообразных фильтров
+         * @param isSourceForEachRow - флаг, таблица без параметра
+         * @param notBlank - флаг на получение только заполненных данных, без null
+         * @param indicatorFiltration - фильтрация на показателе
+         * @param user - текущий пользователь
+         * @return результат с учетом фильтров на пользовательской группировке
+         */
+        List<List> getCustomGroupResult(DiagramRequest request,
+                                  Widget requestContent,
+                                  RequestData newRequestData,
+                                  List filtering,
+                                  Closure formatGroup,
+                                  Closure formatAggregation,
+                                  List listIdsOfNormalAggregations,
+                                  List parameterFilters,
+                                  List breakdownFilters,
+                                  List<String> notAggregatedAttributes,
+                                  PaginationSettings paginationSettings,
+                                  IgnoreLimits ignoreLimits,
+                                  Integer top,
+                                  DiagramType diagramType,
+                                  String templateUUID,
+                                  Boolean customInBreakTable,
+                                  Boolean onlyFilled,
+                                  Integer aggregationCnt,
+                                  Integer filterListSize,
+                                  Boolean isSourceForEachRow,
+                                  Boolean notBlank,
+                                  IndicatorFiltration indicatorFiltration = null,
+                                  IUUIDIdentifiable user = null)
+        {
+            filtering?.withIndex()?.collectMany { filters, i ->
+                newRequestData.filters = filters
+                List res = dashboardQueryWrapperUtils.getData(newRequestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits?.parameter ?: false, templateUUID, paginationSettings, indicatorFiltration)
+                                                     .with(formatGroup)
+                                                     .with(formatAggregation)
+
+                if(!res && !onlyFilled && !customInBreakTable)
+                {
+                    def tempRes = ['']*(newRequestData.groups.size() + notAggregatedAttributes.size())
+                    listIdsOfNormalAggregations.each { id-> tempRes.add(id, 0) }
+                    res = [tempRes].with(formatGroup)
+                                   .with(formatAggregation)
+                }
+                def filtersTitle = filters.unique { it.id }.findResults {
+                    if(it.title)
+                    {
+                        def titleValue = (it.title as Set).find()
+                        if(diagramType in DiagramType.SortableTypes && titleValue)
+                        {
+                            return "${titleValue}#${(it.id as Set).find()}"
+                        }
+                        return titleValue
+                    }
+                }
+                filtersTitle = filtersTitle.unique()
+                def partial = (customInBreakTable || onlyFilled) && !res ? [:] :[(filtersTitle): res]
+
+                partial = formatResult(partial, aggregationCnt + notAggregatedAttributes.size())
+                Boolean hasStateOrTimer = newRequestData?.groups?.any { value -> Attribute.getAttributeType(value?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE] } ||
+                                          newRequestData?.aggregations?.any { it?.type in Aggregation.NOT_APPLICABLE && Attribute.getAttributeType(it?.attribute) in [AttributeType.STATE_TYPE, AttributeType.TIMER_TYPE]  }
+                if (hasStateOrTimer)
+                {
+                    Boolean resWithPercentCnt
+                    Collection<Integer> percentCntAggregationIndexes
+                    if (isSourceForEachRow)
+                    {
+                        percentCntAggregationIndexes = getIndexesForTableWithNoParametersByAggregationType(request, Aggregation.PERCENT_CNT)
+                    }
+                    else
+                    {
+                        percentCntAggregationIndexes = getPercentCntAggregationIndexes(request)
+                    }
+
+                    resWithPercentCnt = i in percentCntAggregationIndexes
+                    partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations, resWithPercentCnt)
+                }
+                filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
+                return prepareResultListListForTop(partial, filterListSize, top, parameterFilters, breakdownFilters, i)
+            }
+        }
+
+        /**
          * Метод по подготовке фильтров в запросе
          * @param filterListSize - количество списков с фильтрами
          * @param diagramType - тип диаграммы
@@ -3775,7 +3962,7 @@
             filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
             Integer countOfCustomsInFirstSource
             Integer countOfCustomsInFullRequest
-            if (diagramType == DiagramType.TABLE)
+            if (diagramType in [DiagramType.TABLE, DiagramType.PIVOT_TABLE])
             {
                 countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(requestContent)
                 countOfCustomsInFullRequest = countDataForManyCustomGroupsInParameters(requestContent, false)
@@ -3787,7 +3974,7 @@
             }
             else
             {
-                if (diagramType == DiagramType.TABLE && (countOfCustomsInFirstSource > 1 || countOfCustomsInFullRequest > 1))
+                if (diagramType in [DiagramType.TABLE, DiagramType.PIVOT_TABLE] && (countOfCustomsInFirstSource > 1 || countOfCustomsInFullRequest > 1))
                 {
                     return breakdownFilters
                         ? parameterFilters.collectMany { parameterFilter ->
@@ -3872,7 +4059,7 @@
          */
         Integer checkTableForSize(Integer filterListSize, def requestContent, DiagramType diagramType)
         {
-            if (diagramType == DiagramType.TABLE)
+            if (diagramType in [DiagramType.TABLE, DiagramType.PIVOT_TABLE])
             {
                 Integer countOfCustomsInFirstSource = countDataForManyCustomGroupsInParameters(requestContent)
                 Integer countOfCustomsInFullRequest = countDataForManyCustomGroupsInParameters(requestContent, false)
@@ -4064,6 +4251,7 @@
 
         /**
          * Метод приведения значений группировок к читаемому для человека виду
+         * @param data - данные запроса
          * @param tempList - результат выборки
          * @param data - данные запроса
          * @param listIdsOfNormalAggregations - список индексов нормальных агрегаций
@@ -6830,6 +7018,8 @@
          * @param requestContent - тело запроса
          * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
          * @param user - текущий пользователь системы
+         * @param paginationSettings - настройки пагинации
+         * @param indicatorFiltration - фильтрация на показателе
          * @return сырые данные для построения диаграм
          */
         private List getNoFilterListDiagramData(Object node,
@@ -6842,7 +7032,8 @@
                                                 Object requestContent,
                                                 IgnoreLimits ignoreLimits,
                                                 IUUIDIdentifiable user,
-                                                PaginationSettings paginationSettings = null)
+                                                PaginationSettings paginationSettings = null,
+                                                IndicatorFiltration indicatorFiltration = null)
         {
             Boolean isSourceForEachRow = requestContent?.data?.sourceRowName?.findAll() && diagramType == DiagramType.TABLE
             String nodeType = node.type
@@ -6883,7 +7074,7 @@
                         getPercentCntAggregationIndexes(request)
                     )
                     Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
-                    def res = dashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
+                    def res = dashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings, indicatorFiltration)
                                                         .with(formatGroup)
                                                         .with(formatAggregation)
                     def total = res ? [(requisiteNode.title): res] : [:]
