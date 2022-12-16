@@ -39,6 +39,10 @@ const fetchDynamicAttributeGroups = (dataKey: string, descriptor: string, filter
 				type: 'sources/dynamicAttributes/receiveDynamicAttributeGroups'
 			});
 		} catch (error) {
+			if (process.env.NODE_ENV === 'development') {
+				console.error('fetch dynamic attribute groups error: ', error);
+			}
+
 			dispatch({
 				payload: dataKey,
 				type: 'sources/dynamicAttributes/recordDynamicAttributeGroupsError'
@@ -114,6 +118,10 @@ const fetchSearchDynamicAttributeGroups = (dataKey: string, searchValue: string,
 				type: 'sources/dynamicAttributes/receiveDynamicAttributesSearch'
 			});
 		} catch (error) {
+			if (process.env.NODE_ENV === 'development') {
+				console.error('search dynamic attribute groups error: ', error);
+			}
+
 			dispatch({
 				payload: dataKey,
 				type: 'sources/dynamicAttributes/recordDynamicAttributeGroupsError'

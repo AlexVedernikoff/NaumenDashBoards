@@ -203,9 +203,9 @@ export class Select extends Component<Props, State> {
 					<MenuContainer className={styles.menu} options={options}>
 						{this.renderMenuHeader()}
 						{this.renderSearchInput()}
+						{this.renderList()}
 						{this.renderNoOptionsMessage()}
 						{this.renderNotFoundMessage()}
-						{this.renderList()}
 						{this.renderLoadingMessage()}
 					</MenuContainer>
 				</OutsideClickDetector>
