@@ -18,6 +18,7 @@ import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
 import static com.amazonaws.util.json.Jackson.fromJsonString as fromJson
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 import com.fasterxml.jackson.annotation.JsonAutoDetect
@@ -80,6 +81,7 @@ interface GanttSettingsController
     /**
      * Метод получения названий и ключей версий диаграммы
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return список названий и ключей диаграмм версий
      */
     String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent, IUUIDIdentifiable user)
@@ -94,6 +96,7 @@ interface GanttSettingsController
     /**
      * Метод сохранения настроек версии диаграммы
      * @param requestContent - тело запроса
+     * @param user - текущий пользователь
      * @return настройки, отправленные в хранилище
      */
     String saveGanttVersionSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
@@ -232,7 +235,7 @@ class GanttSettingsImpl implements GanttSettingsController
     @Override
     String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
-        return Jackson.toJsonString(service.getGanttVersionTitlesAndKeys(requestContent, user))
+        return toJson(service.getGanttVersionTitlesAndKeys(requestContent, user))
     }
 
     @Override
@@ -246,7 +249,7 @@ class GanttSettingsImpl implements GanttSettingsController
     {
         SaveGanttVersionSettingsRequest request = new ObjectMapper()
             .convertValue(requestContent, SaveGanttVersionSettingsRequest)
-        return Jackson.toJsonString(service.saveGanttVersionSettings(request, user))
+        return toJson(service.saveGanttVersionSettings(request, user))
     }
 
     @Override
@@ -461,6 +464,7 @@ class GanttSettingsService
     /**
      * Метод получения настроек из хранилища
      * @param request - тело запроса
+     * @param user - пользователь
      * @return настройки из хранилища
      */
     GanttSettingsClass getGanttSettings(GetGanttSettingsRequest request,
@@ -676,13 +680,14 @@ class GanttSettingsService
     /**
      * Метод получения названий и ключей версий диаграммы
      * @param requestContent - тело запроса
+     * @param user - пользователь
      * @return список названий и ключей версий диаграммы
      */
     Collection<Map<String, String>> getGanttVersionTitlesAndKeys(Map<String, Object> requestContent,
                                                                  IUUIDIdentifiable user = null)
     {
         String keyForVersions =
-            requestContent['isPersonal'] && user ?[user.UUID, 'personalVersion'].join('_')
+            requestContent['isPersonal'] && user ? [user.UUID, 'personalVersion'].join('_')
         : requestContent.subjectUuid
         String ganttSettingsJsonValue = getJsonSettings(keyForVersions)
 
@@ -735,6 +740,7 @@ class GanttSettingsService
     /**
      * Сохраняет настройки версии диаграммы
      * @param request - тело запроса
+     * @param user - пользователь
      * @return настройки версии
      */
     GanttVersionsSettingsClass saveGanttVersionSettings(SaveGanttVersionSettingsRequest request,
@@ -743,7 +749,7 @@ class GanttSettingsService
         GanttDataSetService ganttDataSetService = GanttDataSetService.instance
 
         String keyForVersions = request.hasProperty('isPersonal') &&
-                                request.isPersonal && user ?[user.UUID, 'personalVersion'].join('_')
+                                request.isPersonal && user ? [user.UUID, 'personalVersion'].join('_')
         : request.subjectUUID
         String contentCode = request.contentCode
         String diagramKey = generateDiagramKey(request.subjectUUID, contentCode)
@@ -751,7 +757,7 @@ class GanttSettingsService
         GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
-        String versionKey = request.hasProperty('isPersonal') && request.isPersonal ?[
+        String versionKey = request.hasProperty('isPersonal') && request.isPersonal ? [
             request.subjectUUID,
             contentCode,
             'personalVersion',
@@ -1391,7 +1397,7 @@ class GanttSettingsService
      * Метод создания персонального дашборда.
      * @param request - тело запроса
      * @param user - текущий пользователь
-     * @return true|false
+     * @return true|Exception
      */
     Boolean createPersonalDiagram(GetGanttSettingsRequest request, IUUIDIdentifiable user)
     {
@@ -1413,7 +1419,7 @@ class GanttSettingsService
      * Метод удаления персонального дашборда.
      * @param request - тело запроса
      * @param user - текущий пользователь
-     * @return true|false
+     * @return true|Exception
      */
     Boolean deletePersonalDiagram(GetGanttSettingsRequest request, IUUIDIdentifiable user)
     {

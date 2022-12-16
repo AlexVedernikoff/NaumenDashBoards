@@ -121,10 +121,12 @@ class GanttDataSetService
         data.worksWithoutStartOrEndDateCheckbox = settings.worksWithoutStartOrEndDateCheckbox
 
         data.currentInterval = settings.currentInterval
-        if(user){
+        if (user)
+        {
             data.isPersonalDiagram = settings.isPersonalDiagram
         }
-        if(request.hasProperty('isPersonal') && request.isPersonal){
+        if (request.hasProperty('isPersonal') && request.isPersonal)
+        {
             data.isPersonal = true
         }
 
