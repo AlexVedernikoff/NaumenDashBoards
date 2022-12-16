@@ -82,8 +82,7 @@ interface GanttSettingsController
      * @param requestContent - тело запроса
      * @return список названий и ключей диаграмм версий
      */
-    String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent)
-    //, IUUIDIdentifiable user = null
+    String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод получения настроек из хранилища
@@ -97,8 +96,7 @@ interface GanttSettingsController
      * @param requestContent - тело запроса
      * @return настройки, отправленные в хранилище
      */
-    String saveGanttVersionSettings(Map<String, Object> requestContent)
-    //, IUUIDIdentifiable user = null
+    String saveGanttVersionSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод применения версии на основную диаграмму
@@ -216,8 +214,7 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent,
-                                        IUUIDIdentifiable user = null)
+    String getGanttVersionTitlesAndKeys(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         return Jackson.toJsonString(service.getGanttVersionTitlesAndKeys(requestContent, user))
     }
@@ -229,8 +226,7 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String saveGanttVersionSettings(Map<String, Object> requestContent,
-                                    IUUIDIdentifiable user = null)
+    String saveGanttVersionSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         SaveGanttVersionSettingsRequest request = new ObjectMapper()
             .convertValue(requestContent, SaveGanttVersionSettingsRequest)
@@ -717,7 +713,7 @@ class GanttSettingsService
      * @return настройки версии
      */
     GanttVersionsSettingsClass saveGanttVersionSettings(SaveGanttVersionSettingsRequest request,
-                                                        IUUIDIdentifiable user = null)
+                                                        IUUIDIdentifiable user)
     {
         GanttDataSetService ganttDataSetService = GanttDataSetService.instance
 
