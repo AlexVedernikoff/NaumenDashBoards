@@ -16,8 +16,25 @@
 		max-height: 324px;
 		padding: 16px;
 		position: absolute;
-		top: calc(100% + 8px);
 		width: 264px;
+
+		&.up {
+			bottom: calc(1em + 8px);
+			top: auto !important; // Обходим проблему автовыравнивания AbsolutePortal
+		}
+
+		&.down {
+			top: calc(100% + 8px) !important;  // Обходим проблему автовыравнивания AbsolutePortal
+		}
+
+		&.left {
+			left: auto !important;  // Обходим проблему автовыравнивания AbsolutePortal
+			right: 0;
+		}
+
+		&.right {
+			left: 0 !important;  // Обходим проблему автовыравнивания AbsolutePortal
+		}
 	}
 
 	.modalHeader {

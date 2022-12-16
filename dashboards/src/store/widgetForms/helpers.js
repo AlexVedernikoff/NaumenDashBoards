@@ -64,6 +64,19 @@ const fixIndicatorsAggregationDataSet = (dataSet: TableDataSet): TableDataSet =>
 		indicators: fixIndicatorsAggregation(dataSet.indicators)
 	});
 
+const fixIndicatorsTooltip = (needClearTooltip: boolean) => (indicators: ?Array<Indicator>): Array<Indicator> => {
+	let result = indicators || [];
+
+	if (needClearTooltip) {
+		result = result.map(indicator => ({
+			...indicator,
+			tooltip: {show: false}
+		}));
+	}
+
+	return result;
+};
+
 /**
  * Оставляет только один показатель в источнике
  * @param {TableDataSet | SpeedometerDataSet | SummaryDataSet} dataSet - изначальный источник данных
@@ -116,9 +129,10 @@ const fixLeaveOneIndicator = (dataSet: TableDataSet): TableDataSet => {
 export {
 	fixIndicatorsAggregation,
 	fixIndicatorsAggregationDataSet,
-	fixPivotIndicators,
+	fixIndicatorsTooltip,
 	fixLeaveOneIndicator,
 	fixLeaveOneParameters,
+	fixPivotIndicators,
 	fixRemoveParameters,
 	getDefaultBreakdown,
 	parseAttrSetConditions
