@@ -1540,6 +1540,9 @@ class GetGanttSettingsRequest extends BaseGanttSettingsRequest
      */
     String timezone
 
+    /**
+     * Работа из вкладки личной диаграммы
+     */
     Boolean isPersonal
 }
 
@@ -1614,6 +1617,9 @@ class SaveGanttVersionSettingsRequest extends BaseGanttSettingsRequest
      */
     CommonSettings commonSettings
 
+    /**
+     * Работа из вкладки личной диаграммы
+     */
     Boolean isPersonal
 }
 
@@ -1725,8 +1731,14 @@ class GanttSettingsClass extends BaseGanttDiagramData
      */
     CurrentInterval currentInterval
 
+    /**
+     * Наличие возможности создания личного вида
+     */
     Boolean isPersonalDiagram
 
+    /**
+     * Работа из вкладки личной диаграммы
+     */
     Boolean isPersonal = false
 }
 
@@ -1944,8 +1956,14 @@ class GanttDiagramData extends BaseGanttDiagramData
      */
     CurrentInterval currentInterval
 
+    /**
+     * Наличие возможности создания личного вида
+     */
     Boolean isPersonalDiagram
 
+    /**
+     * Работа из вкладки личной диаграммы
+     */
     Boolean isPersonal = false
 }
 
