@@ -1384,7 +1384,7 @@ class QueryWrapper implements CriteriaWrapper
     QueryWrapper setCases(String sourceClassFqn, List attrSourceCodes = [])
     {
         attrSourceCodes?.each { cases ->
-            if(cases && cases != sourceClassFqn && !(cases in String) && api.metainfo.checkAttributeExisting(sourceClassFqn, cases))
+            if(cases && cases != sourceClassFqn && cases in String && api.metainfo.checkAttributeExisting(sourceClassFqn, cases))
             {
                 criteria.add(
                     api.filters.inCases(
