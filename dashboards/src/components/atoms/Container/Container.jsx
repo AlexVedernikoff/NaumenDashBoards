@@ -4,14 +4,14 @@ import React, {PureComponent} from 'react';
 
 export class Container extends PureComponent<Props> {
 	render () {
-		const {children, className, onClick, style, title} = this.props;
+		const {children, className, forwardedRef, onClick, style, title} = this.props;
 
 		return (
-			<div className={className} onClick={onClick} style={style} title={title}>
+			<div className={className} onClick={onClick} ref={forwardedRef} style={style} title={title}>
 				{children}
 			</div>
 		);
 	}
 }
 
-export default Container;
+export default React.forwardRef((props, ref) => <Container {...props} forwardedRef={ref} />);

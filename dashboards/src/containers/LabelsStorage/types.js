@@ -9,6 +9,7 @@ export type Label = {
 	fill: string,
 	fontFamily: string,
 	fontSize: number,
+	force: boolean,
 	formatter?: Function,
 	height: number,
 	name: string,

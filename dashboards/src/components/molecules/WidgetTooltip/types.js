@@ -17,5 +17,7 @@ export type Props = {
 };
 
 export type State = {
+	isLeft: boolean,
+	isUp: boolean,
 	showModal: boolean,
 };

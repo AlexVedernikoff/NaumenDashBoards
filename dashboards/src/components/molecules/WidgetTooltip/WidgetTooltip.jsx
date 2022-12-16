@@ -3,12 +3,12 @@ import AbsolutePortal from 'components/molecules/AbsolutePortal';
 import cn from 'classnames';
 import Container from 'components/atoms/Container';
 import {DEFAULT_TOOLTIP_SETTINGS} from 'store/widgets/data/constants';
+import type {DivRef, Ref} from 'components/types';
 import IconButton, {VARIANTS} from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import memoize from 'memoize-one';
 import type {Props, State} from './types';
 import React, {createRef, forwardRef, Fragment, PureComponent} from 'react';
-import type {Ref} from 'components/types';
 import styles from './styles.less';
 import t from 'localization';
 
@@ -20,10 +20,44 @@ export class WidgetTooltip extends PureComponent<Props, State> {
 	};
 
 	state = {
+		isLeft: false,
+		isUp: false,
 		showModal: false
 	};
 
-	ref: Ref<'span'> = createRef();
+	iconRef: Ref<'span'> = createRef();
+	modalRef: DivRef = createRef();
+
+	componentDidMount () {
+		this.checkPosition();
+	}
+
+	componentDidUpdate () {
+		this.checkPosition();
+	}
+
+	checkPosition = () => {
+		const {current: icon} = this.iconRef;
+		const {current: content} = this.modalRef;
+
+		if (icon && content) {
+			let isUp = false;
+			let isLeft = false;
+			const {left, top} = icon.getBoundingClientRect();
+			const {height, width} = content.getBoundingClientRect();
+			const OFFSET = 100;
+
+			if (window.innerHeight < (top + height + OFFSET) && top > window.innerHeight / 2) {
+				isUp = true;
+			}
+
+			if (window.innerWidth < (left + width + OFFSET) && left > window.innerWidth / 2) {
+				isLeft = true;
+			}
+
+			this.setState({isLeft, isUp});
+		}
+	};
 
 	getComponents = memoize(() => {
 		const {components = {}} = this.props;
@@ -66,7 +100,7 @@ export class WidgetTooltip extends PureComponent<Props, State> {
 
 		if (showModal) {
 			return (
-				<AbsolutePortal elementRef={this.ref} isModal={false} onClickOutside={this.handleHideModal}>
+				<AbsolutePortal elementRef={this.iconRef} isModal={false} onClickOutside={this.handleHideModal}>
 					{this.renderModal()}
 				</AbsolutePortal>
 			);
@@ -81,17 +115,24 @@ export class WidgetTooltip extends PureComponent<Props, State> {
 		const {Icon} = this.getComponents();
 
 		return (
-			<Icon className={spanClassName} onClick={this.handleShowModal} ref={this.ref} title="">
+			<Icon className={spanClassName} onClick={this.handleShowModal} ref={this.iconRef} title="">
 				{text}
 			</Icon>
 		);
 	};
 
 	renderModal = () => {
+		const {isLeft, isUp} = this.state;
 		const {Modal} = this.getComponents();
+		const className = cn(styles.modal, {
+			[styles.down]: !isUp,
+			[styles.up]: isUp,
+			[styles.right]: !isLeft,
+			[styles.left]: isLeft
+		});
 
 		return (
-			<Modal className={styles.modal} onClick={this.handleModalClick}>
+			<Modal className={className} onClick={this.handleModalClick} ref={this.modalRef}>
 				{this.renderModalHeader()}
 				{this.renderModalBody()}
 			</Modal>
