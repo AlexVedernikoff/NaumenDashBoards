@@ -70,7 +70,10 @@ const fixIndicatorsTooltip = (needClearTooltip: boolean) => (indicators: ?Array<
 	if (needClearTooltip) {
 		result = result.map(indicator => ({
 			...indicator,
-			tooltip: {show: false}
+			tooltip: {
+				...(indicator.tooltip ?? {}),
+				show: false
+			}
 		}));
 	}
 
