@@ -108,7 +108,7 @@ class GanttDataSetService
     {
         // Получение настроек диаграммы из хранилища.
         GanttSettingsService service = GanttSettingsService.instance
-        GanttSettingsClass settings = service.getGanttSettings(request)
+        GanttSettingsClass settings = service.getGanttSettings(request, user)
 
         GanttDiagramData data = new GanttDiagramData()
         data.commonSettings = settings.commonSettings
@@ -121,6 +121,14 @@ class GanttDataSetService
         data.worksWithoutStartOrEndDateCheckbox = settings.worksWithoutStartOrEndDateCheckbox
 
         data.currentInterval = settings.currentInterval
+        if (user)
+        {
+            data.isPersonalDiagram = settings.isPersonalDiagram
+        }
+        if (request.hasProperty('isPersonal') && request.isPersonal)
+        {
+            data.isPersonal = true
+        }
 
         if (settings.startDate && settings.endDate)
         {
