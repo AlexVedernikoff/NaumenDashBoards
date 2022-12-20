@@ -1907,7 +1907,7 @@ class DashboardsService
 
         if (!attributeGroupsData)
         {
-            List dynamicAttributeGroups = utils.find('attrGroups', [:]).findResults {
+            List dynamicAttributeGroups = utils.find('attrGroups$attrGroups', [:]).findResults {
                 it.state == 'active' ? it : null
             }
             attributeGroupsData = dynamicAttributeGroups.collect {

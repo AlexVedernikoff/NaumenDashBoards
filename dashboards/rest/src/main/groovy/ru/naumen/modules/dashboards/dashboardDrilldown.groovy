@@ -606,7 +606,7 @@ class DashboardDrilldownService
                             checkValuesSize(objects)
                             attr.code = AttributeType.TOTAL_VALUE_TYPE
                             result << [filterBuilder.OR(attr.code, 'notNull', null)]
-                            result << [filterBuilder.OR(attr.code, 'containsInSet', objects.collect { it.UUID })]
+                            result << [filterBuilder.OR(attr.code, 'containsInSet', objects.collect  { UUID in it? it.UUID : it })]
                         }
                         else
                         {
