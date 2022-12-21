@@ -12,6 +12,7 @@ import {
 	setRangeTime,
 	switchProgressCheckbox
 } from 'store/App/actions';
+import {USER_ROLES} from 'store/App/constants';
 
 const props = (state: AppState) => {
 	const {
@@ -24,11 +25,13 @@ const props = (state: AppState) => {
 		resources,
 		settings,
 		tasks,
+		user,
 		workAttributes,
 		workData,
 		workRelationCheckbox,
 		workRelations
 	} = state.APP;
+	const {role} = user;
 	const {columnSettings, rollUp, scale} = settings;
 
 	return {
@@ -40,6 +43,7 @@ const props = (state: AppState) => {
 		mandatoryAttributes,
 		progressCheckbox,
 		resources,
+		roleSuper: role === USER_ROLES.SUPER,
 		rollUp,
 		scale,
 		tasks,

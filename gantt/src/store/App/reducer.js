@@ -6,6 +6,16 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SET_PERSONAL:
+			return {
+				...state,
+				isPersonal: action.payload
+			};
+		case APP_EVENTS.SET_PERSONAL_VIEW:
+			return {
+				...state,
+				isPersonalDiagram: action.payload
+			};
 		case APP_EVENTS.SET_USERS:
 			return {
 				...state,

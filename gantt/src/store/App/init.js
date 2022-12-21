@@ -17,6 +17,8 @@ export const initialAppState: AppState = {
 	errorSettings: false,
 	groupAttribute: [],
 	hideEditPanel: false,
+	isPersonal: false,
+	isPersonalDiagram: true,
 	loadingCommon: true,
 	loadingData: true,
 	loadingSettings: true,

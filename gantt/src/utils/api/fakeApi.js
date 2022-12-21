@@ -48,6 +48,14 @@ export default class FakeApi {
 		return getSources;
 	}
 
+	async createPersonalViewDiagram () {
+		return null;
+	}
+
+	async deletePersonalViewDiagram () {
+		return null;
+	}
+
 	async deleteWorkDateRanges () {
 		return 'Удалено';
 	}

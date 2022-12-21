@@ -18,12 +18,33 @@ const getUsers = async () => api.getUsers();
 
 /**
 * Получает названия и ключи версий
+* @param {boolean} isPersonal - личный вид
 * @param {string} diagramKey - ключ диаграммы
 * @param {string} subjectUuid - ключ текущей карточки объекта
 * @return {Promise<Params>}
 */
-const getGanttVersionTitlesAndKeys = async (diagramKey: string, subjectUuid: string): Promise<Params> => {
-	return api.getGanttVersionTitlesAndKeys(diagramKey, subjectUuid);
+const getGanttVersionTitlesAndKeys = async (isPersonal: boolean, diagramKey: string, subjectUuid: string): Promise<Params> => {
+	return api.getGanttVersionTitlesAndKeys(isPersonal, diagramKey, subjectUuid);
+};
+
+/**
+* Создает личный вид для диаграммы гантта
+* @param {string} contentCode - ключ диаграммы версий
+* @param {string} subjectUUID - название диаграммы
+* @param {string} timezone - название диаграммы
+*/
+const createPersonalViewDiagram = async (contentCode: string, subjectUUID: string, timezone: string): Promise<Params> => {
+	return api.createPersonalViewDiagram(contentCode, subjectUUID, timezone);
+};
+
+/**
+* Удаляет личный вид для диаграммы гантта
+* @param {string} contentCode - ключ диаграммы версий
+* @param {string} subjectUUID - название диаграммы
+* @param {string} timezone - название диаграммы
+*/
+const deletePersonalViewDiagram = async (contentCode: string, subjectUUID: string, timezone: string): Promise<Params> => {
+	return api.deletePersonalViewDiagram(contentCode, subjectUUID, timezone);
 };
 
 /**
@@ -38,6 +59,7 @@ const getGanttVersionsSettings = async (versionKey: string, timezone: string): P
 
 /**
 * Сохраняет настройки версий диаграммы в хранилище
+* @param {boolean} isPersonal - личный вид
 * @param {string} title - название версии
 * @param {string} createdDate - дата создания
 * @param {string} contentCode - ключ контента, на котором расположена диаграмма
@@ -45,8 +67,8 @@ const getGanttVersionsSettings = async (versionKey: string, timezone: string): P
 * @param {Tasks} tasks - задачи на диаграмме
 * @param {WorkRelations} workRelations - объект связи между работами
 */
-const saveGanttVersionSettingsRequest = async (commonSettings, contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations): Promise<Params> => {
-	api.saveGanttVersionSettingsRequest(commonSettings, contentCode, createdDate, subjectUUID, title, tasks, workRelations);
+const saveGanttVersionSettingsRequest = async (isPersonal: boolean, commonSettings, contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations): Promise<Params> => {
+	api.saveGanttVersionSettingsRequest(isPersonal, commonSettings, contentCode, createdDate, subjectUUID, title, tasks, workRelations);
 };
 
 /**
@@ -192,8 +214,8 @@ const getInitialSettings = async (contentCode: string, subjectUuid: string): Pro
  * Возвращает данные с учетом настроек
  * @returns {Promise<Params>} - данные
  */
-const getDiagramData = async (contentCode: string, subjectUuid: string, timezone: string): Promise<Params> => {
-	const data = await api.getDiagramData(contentCode, subjectUuid, timezone);
+const getDiagramData = async (contentCode: string, subjectUuid: string, timezone: string, isPersonal: boolean): Promise<Params> => {
+	const data = await api.getDiagramData(contentCode, subjectUuid, timezone, isPersonal);
 	return data;
 };
 
@@ -394,7 +416,9 @@ export {
 	applyVersion,
 	changeWorkProgressFromVersionRequest,
 	checkWorksOfResource,
+	createPersonalViewDiagram,
 	deleteGanttVersionSettingsRequest,
+	deletePersonalViewDiagram,
 	deleteWorkDateRanges,
 	deleteWorkFromVersionDiagramRequest,
 	editWorkData,
