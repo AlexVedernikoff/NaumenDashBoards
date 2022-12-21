@@ -309,7 +309,7 @@ const АctionBar = props => {
 		const title = deepClone(nameValue);
 		const {settings, tasks, workRelations} = store.APP;
 
-		props.savedGanttVersionSettings(settings, title, new Date().toLocaleString(), tasks, workRelations);
+		props.savedGanttVersionSettings(isPersonal, settings, title, new Date().toLocaleString(), tasks, workRelations);
 		dispatch(props.setCurrentVersion(''));
 
 		setShowModalSave(!showModalSave);
@@ -362,7 +362,9 @@ const АctionBar = props => {
 		return () => document.removeEventListener('click', onCloseDateModal);
 	});
 
-	const renderButtonSettings = () => editMode ? <IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} onClick={handleToggle} tip="Настройка" /> : null;
+	const {isPersonal} = store.APP;
+
+	const renderButtonSettings = () => (editMode || isPersonal) ? <IconButton className={styles.icon} icon={ICON_NAMES.SETTINGS} onClick={handleToggle} tip="Настройка" /> : null;
 
 	const handleVersionButtonClick = () => {
 		const {diagramKey} = props;
@@ -370,12 +372,12 @@ const АctionBar = props => {
 		setShowListVersions(true);
 		setActive(false);
 
-		props.getVersionSettingsAll(diagramKey);
+		props.getVersionSettingsAll(isPersonal, diagramKey);
 	};
 
 	const handleCurrentButtonClick = () => {
 		setActive(true);
-		props.getGanttData();
+		props.getGanttData(isPersonal);
 		dispatch(props.setCurrentVersion(''));
 	};
 

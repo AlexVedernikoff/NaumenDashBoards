@@ -17,13 +17,14 @@ export default class Api {
 
 	/**
 	* Получает названия и ключи версий
+	* @param {boolean} isPersonal - личный вид
 	* @param {string} diagramKey - ключ диаграммы
 	* @param {string} subjectUuid - ключ текущей карточки объекта
 	* @return {ThunkAction}
 	*/
-	async getGanttVersionTitlesAndKeys (diagramKey: string, subjectUuid: string) {
-		const url = `exec-post?func=modules.ganttSettings.getGanttVersionTitlesAndKeys&params=requestContent`;
-		const body = {diagramKey, subjectUuid};
+	async getGanttVersionTitlesAndKeys (isPersonal: boolean, diagramKey: string, subjectUuid: string) {
+		const url = `exec-post?func=modules.ganttSettings.getGanttVersionTitlesAndKeys&params=requestContent,user`;
+		const body = {diagramKey, isPersonal, subjectUuid};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -83,6 +84,7 @@ export default class Api {
 
 	/**
 	* Сохраняет настройки версий диаграммы в хранилище
+	* @param {boolean} isPersonal - личный вид
 	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
 	* @param {string} createdDate - дата создания
 	* @param {string} subjectUUID - UUID объекта
@@ -90,9 +92,9 @@ export default class Api {
 	* @param {Tasks} tasks - задачи на диаграмме
 	* @param {WorkRelations} workRelations - объект связи между работами
 	*/
-	async saveGanttVersionSettingsRequest (commonSettings, contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations) {
-		const url = `exec-post?func=modules.ganttSettings.saveGanttVersionSettings&params=requestContent`;
-		const body = {commonSettings, contentCode, createdDate, subjectUUID, tasks, title, workRelations};
+	async saveGanttVersionSettingsRequest (isPersonal: boolean, commonSettings, contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations) {
+		const url = `exec-post?func=modules.ganttSettings.saveGanttVersionSettings&params=requestContent,user`;
+		const body = {commonSettings, contentCode, createdDate, isPersonal, subjectUUID, tasks, title, workRelations};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -109,6 +111,40 @@ export default class Api {
 	async updateGanttVersionSettingsRequest (versionKey: string, title: string) {
 		const url = `exec-post?func=modules.ganttSettings.updateGanttVersionSettings&params=requestContent,%27${versionKey}%27`;
 		const body = {title, versionKey};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Создает личный вид для диаграммы гантта
+	* @param {string} contentCode - ключ диаграммы версий
+	* @param {string} subjectUUID - название диаграммы
+	* @param {string} timezone - название диаграммы
+	*/
+	async createPersonalViewDiagram (contentCode: string, subjectUUID: string, timezone: string) {
+		const url = `exec-post?func=modules.ganttSettings.createPersonalDiagram&params=requestContent,user`;
+		const body = {contentCode, subjectUUID, timezone};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCallAsJson(url, options);
+	}
+
+	/**
+	* Удаляет личный вид для диаграммы гантта
+	* @param {string} contentCode - ключ диаграммы версий
+	* @param {string} subjectUUID - название диаграммы
+	* @param {string} timezone - название диаграммы
+	*/
+	async deletePersonalViewDiagram (contentCode: string, subjectUUID: string, timezone: string) {
+		const url = `exec-post?func=modules.ganttSettings.deletePersonalDiagram&params=requestContent,user`;
+		const body = {contentCode, subjectUUID, timezone};
 		const options = {
 			body: JSON.stringify(body),
 			method: 'POST'
@@ -275,10 +311,11 @@ export default class Api {
 		return this.jsApi.restCallAsJson(url, options);
 	}
 
-	async getDiagramData (contentCode: string, subjectUUID: string, timezone: string) {
+	async getDiagramData (contentCode: string, subjectUUID: string, timezone: string, isPersonal: boolean) {
 		const url = `exec-post?func=modules.ganttDataSet.getGanttDiagramData&params=requestContent,user`;
 		const body = {
 			contentCode,
+			isPersonal,
 			subjectUUID,
 			timezone
 		};

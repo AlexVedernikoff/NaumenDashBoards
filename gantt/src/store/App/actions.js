@@ -4,7 +4,9 @@ import {
 	applyVersion,
 	changeWorkProgressFromVersionRequest,
 	checkWorksOfResource,
+	createPersonalViewDiagram,
 	deleteGanttVersionSettingsRequest,
+	deletePersonalViewDiagram,
 	deleteWorkDateRanges,
 	deleteWorkFromVersionDiagramRequest,
 	editWorkData,
@@ -66,14 +68,48 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 };
 
 /**
+ * Создает личный вид
+ * @returns {ThunkAction}
+ */
+const createPersonalView = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const {contentCode, subjectUuid} = getContext();
+		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+		await createPersonalViewDiagram(contentCode, subjectUuid, timezone);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
+ * Удаляет личный вид
+ * @returns {ThunkAction}
+ */
+const deletePersonalView = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const {contentCode, subjectUuid} = getContext();
+		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+		await deletePersonalViewDiagram(contentCode, subjectUuid, timezone);
+	} catch (error) {
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderSettings());
+	}
+};
+
+/**
 * Получает все настройки версий
 * @param {string} diagramKey - ключ диаграммы
 * @return {ThunkAction}
 */
-const getVersionSettingsAll = (diagramKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getVersionSettingsAll = (isPersonal: boolean, diagramKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const {subjectUuid} = getContext();
-		const versions = await getGanttVersionTitlesAndKeys(diagramKey, subjectUuid);
+		const versions = await getGanttVersionTitlesAndKeys(isPersonal, diagramKey, subjectUuid);
 
 		dispatch(setListVersions(versions));
 	} catch (error) {
@@ -132,11 +168,11 @@ const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch:
 * @param {Tasks} tasks - задачи на диаграмме
 * @param {WorkRelations} workRelations - объект связи между работами
 */
-const savedGanttVersionSettings = (commonSettings, title: string, createdDate: string, tasks: Tasks, workRelations: WorkRelations): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const savedGanttVersionSettings = (isPersonal: boolean, commonSettings, title: string, createdDate: string, tasks: Tasks, workRelations: WorkRelations): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const {contentCode, subjectUuid} = getContext();
 
-		await saveGanttVersionSettingsRequest(commonSettings, contentCode, createdDate, subjectUuid, title, tasks, workRelations);
+		await saveGanttVersionSettingsRequest(isPersonal, commonSettings, contentCode, createdDate, subjectUuid, title, tasks, workRelations);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -486,7 +522,7 @@ const updateWorks = (worksWithoutStartOrEndDateCheckbox: boolean): ThunkAction =
  * Получает данные, необходимые для отображения данных ВП
  * @returns {ThunkAction}
  */
-const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getGanttData = (personal): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		dispatch(showLoaderData());
 
@@ -498,6 +534,8 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 			currentInterval,
 			diagramKey,
 			endDate,
+			isPersonal,
+			isPersonalDiagram,
 			milestonesCheckbox,
 			progressCheckbox,
 			startDate,
@@ -506,7 +544,7 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 			workRelationCheckbox,
 			workRelations,
 			worksWithoutStartOrEndDateCheckbox
-		} = await getDiagramData(contentCode, subjectUuid, timeZone);
+		} = await getDiagramData(contentCode, subjectUuid, timeZone, personal);
 
 		dispatch(getUsersAll());
 		dispatch(switchMilestonesCheckbox(milestonesCheckbox));
@@ -517,6 +555,8 @@ const getGanttData = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(switchProgressCheckbox(progressCheckbox));
 		dispatch(switchWorkRelationCheckbox(workRelationCheckbox));
 		dispatch(setAttributesMap(attributesMap));
+		dispatch(setPersonalView(isPersonalDiagram));
+		dispatch(setPersonal(isPersonal));
 		dispatch(setContentCode(contentCode));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setSubjectUuid(subjectUuid));
@@ -539,9 +579,9 @@ const saveSettings = (data: Settings): ThunkAction => async (dispatch: Dispatch)
 	try {
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 		const {contentCode, subjectUuid} = getContext();
-		const {commonSettings, resourceAndWorkSettings} = await saveData(timezone, subjectUuid, contentCode, data);
+		const {isPersonal, commonSettings, resourceAndWorkSettings} = await saveData(timezone, subjectUuid, contentCode, data);
 
-		await dispatch(getGanttData());
+		await dispatch(getGanttData(isPersonal));
 		dispatch(showLoaderSettings());
 		dispatch(setCommonSettings(commonSettings || defaultCommonSettings));
 		dispatch(setResourceSettings(resourceAndWorkSettings || defaultResourceSettings));
@@ -853,13 +893,26 @@ const changeWorkProgress = (payload: WorkProgress) => ({
 	type: APP_EVENTS.SET_WORK_PROGRESS
 });
 
+const setPersonalView = (payload: boolean) => ({
+	payload,
+	type: APP_EVENTS.SET_PERSONAL_VIEW
+});
+
+const setPersonal = (payload: boolean) => ({
+	payload,
+	type: APP_EVENTS.SET_PERSONAL
+});
+
 export {
 	addNewWorkForVersion,
 	cancelSettings,
 	changeScale,
+	setPersonal,
 	changeWorkProgress,
 	changeWorkProgressFromVersion,
+	createPersonalView,
 	deleteGanttVersionSettings,
+	deletePersonalView,
 	deleteWork,
 	deleteWorkFromVersionDiagram,
 	editWorkDataFromVersion,
@@ -893,6 +946,7 @@ export {
 	setCurrentValueForInterval,
 	setCurrentVersion,
 	setListVersions,
+	setPersonalView,
 	setRangeTime,
 	setResourceSettings,
 	setUsers,

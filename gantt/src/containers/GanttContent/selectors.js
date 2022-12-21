@@ -10,6 +10,7 @@ export const props = (state: AppState): ConnectedProps => {
 	return {
 		editMode: role === USER_ROLES.ganttMaster || role === USER_ROLES.SUPER,
 		errorData,
-		loading
+		loading,
+		roleSuper: role === USER_ROLES.SUPER
 	};
 };

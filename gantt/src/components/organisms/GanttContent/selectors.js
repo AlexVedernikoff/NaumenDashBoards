@@ -13,6 +13,7 @@ import {
 const props = (state: AppState) => {
 	const {
 		diagramKey,
+		isPersonal,
 		milestonesCheckbox,
 		progressCheckbox,
 		stateMilestonesCheckbox,
@@ -22,6 +23,7 @@ const props = (state: AppState) => {
 
 	return {
 		diagramKey,
+		isPersonal,
 		milestonesCheckbox,
 		progressCheckbox,
 		stateMilestonesCheckbox,

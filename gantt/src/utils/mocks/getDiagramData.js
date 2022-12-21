@@ -13,6 +13,8 @@ const data = {
 			{"code": "11eaebc5-dd95-4ea0-88fc-7304c034d1a0", "title": "Для карточки команды-ответственной"}
 		]
 	},
+	"isPersonalDiagram": false,
+	"isPersonal": true,
 	"commonSettings":{
 		"columnSettings":[
 			{
@@ -20,16 +22,16 @@ const data = {
 				"code":"code1",
 				"show":true,
 				"editor":{
-					"type": "date"
+					"type": "date",
 				}
 			},
 			{
 				"title":"\u0422\u0438\u043f",
-				"code":"5af9985a-79b4-42b9-9d0f-635f6d80561e",
+				"code":"start_date",
 				"show":true,
 				"editor":{
 					"type": "date", 
-					"map_to": "5af9985a-79b4-42b9-9d0f-635f6d80561e", 
+					"map_to": "start_date", 
 				}
 			},
 			{
@@ -60,7 +62,7 @@ const data = {
 			// },
 		],
 		"rollUp":false,
-		"scale":"MONTH"
+		"scale":"YEAR"
 	},
 	"diagramKey":"root_gant2",
 	"mandatoryAttributes" : {
@@ -77,30 +79,63 @@ const data = {
 	'tasks': [
 		{
 			"id":"employee$75250",
-			"text":"1",
-			"code1":"1",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"2020-11-13T12:55:26",
+			"text":"Иванов Иван",
+			"code1":"Иванов Иван",
+			"start_date":"2020-11-13T12:55:26",
+			"end_date": "2024-01-01T12:55:26",
 			"level":0,
 			"progress":0.8,
 			"type":"RESOURCE",
 			"workOfLink":"22",
 			"editable": true,
-			"name": "1"
+			"name": "1",
+			// "render": "split",
+			"typeEntity": "RESOURCE"
 		},
 		{
 			"id":"2",
-			"text":"1",
-			"code1":"1",
-			"5af9985a-79b4-42b9-9d0f-635f6d80561e":"2020-11-13T12:55:26",
-			"start_date": "2015-11-13T12:55:26",
-			"end_date": "2022-11-13T12:55:26",
+			"text":"смена1",
+			"code1":"смена1",
+			"start_date":"2020-11-13T12:55:26",
+			"end_date": "2022-01-01T12:55:26",
 			"level":1,
 			"progress":0.8,
 			"type":"WORK",
 			"workOfLink":"12",
 			"editable": true,
 			"name": "1",
-			"parent": 'employee$75250'
+			"parent": 'employee$75250',
+			"typeEntity": "RESOURCE"
+		},
+		{
+			"id":"3",
+			"text":"смена2",
+			"code1":"смена2",
+			"start_date":"2020-11-13T12:55:26",
+			"end_date": "2024-01-01T12:55:26",
+			"level":1,
+			"progress":0.8,
+			"type":"WORK",
+			"workOfLink":"12",
+			"editable": true,
+			"name": "1",
+			"parent": 'employee$75250',
+			"typeEntity": "WORK"
+		},
+		{
+			"id":"4",
+			"text":"смена2",
+			"code1":"смена2",
+			"start_date":"2020-11-13T12:55:26",
+			"end_date": "2024-01-01T12:55:26",
+			"level":1,
+			"type":"WORK",
+			"editable": true,
+			"name": "4",
+			"parent": 'employee$75250',
+			"duration": "1",
+			"unscheduled": true,
+			"typeEntity": "WORK"
 		},
 	],
 	"workRelations":[
@@ -113,9 +148,9 @@ const data = {
     ],
 	"progressCheckbox": false,
 	"workRelationCheckbox": false,
-	"startDate": "2024-09-02, 00:00:00",
-	"endDate": "2024-09-07, 00:00:00",
-	"currentInterval": {"label": "сегодня", "value": "NEXTDAYS"},
+	"startDate": "2021-09-02, 00:00:00",
+	"endDate": "2025-09-07, 00:00:00",
+	"currentInterval": {"label": "с ... по", "value": "INTERVAL"},
 };
 
 export const getDiagramData = () => {

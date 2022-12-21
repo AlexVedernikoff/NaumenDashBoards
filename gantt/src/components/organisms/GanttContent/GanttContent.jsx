@@ -1,13 +1,15 @@
 // @flow
 import АctionBar from 'components/molecules/АctionBar';
+import {connect} from 'react-redux';
+import cn from 'classnames';
+import {functions, props} from './selectors';
 import GanttGrid from 'components/molecules/Gantt';
 import GanttPanel from 'containers/GanttPanel';
 import ErrorBoundary from 'src/components/organisms/ErrorBoundary/ErrorBoundary.jsx';
 import type {Props} from 'containers/GanttContent/types';
-import {connect} from 'react-redux';
 import React, {PureComponent} from 'react';
-import {functions, props} from './selectors';
 import styles from './styles.less';
+import ViewPanel from 'components/molecules/ViewPanel';
 
 export class GanttContent extends PureComponent<Props> {
 	constructor (props) {
@@ -88,9 +90,9 @@ export class GanttContent extends PureComponent<Props> {
 	};
 
 	renderPanel = () => {
-		const {editMode} = this.props;
+		const {editMode, isPersonal} = this.props;
 
-		return editMode
+		return (editMode || isPersonal)
 			? <GanttPanel
 				allLinks={this.state.allLinks}
 				handleToggle={this.handleToggle}
@@ -102,7 +104,14 @@ export class GanttContent extends PureComponent<Props> {
 				milestones={this.state.milestones}
 				progress={this.state.progress}
 				swiped={this.state.swiped}
+				isPersonal={this.props.isPersonal}
 			/> : null;
+	};
+
+	renderViewPanel = () => {
+		const {roleSuper} = this.props;
+
+		return !roleSuper ? <ViewPanel /> : null;
 	};
 
 	renderАctionBar = () => {
@@ -120,8 +129,15 @@ export class GanttContent extends PureComponent<Props> {
 	};
 
 	render () {
+		const panelCN = cn({
+			[styles.container]: true,
+			[styles.personal]: !this.props.isPersonal,
+			[styles.content]: true
+		});
+
 		return (
-			<div className={styles.content}>
+			<div className={panelCN}>
+				{this.renderViewPanel()}
 				{this.renderАctionBar()}
 				{this.renderPanel()}
 				{this.renderGanttGrid()}

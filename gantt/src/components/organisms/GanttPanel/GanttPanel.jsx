@@ -16,6 +16,7 @@ export class GanttPanel extends PureComponent<Props, State> {
 			handleToggleProgress={this.props.handleToggleProgress}
 			handleToggleStateMilestoneBlock={this.props.handleToggleStateMilestoneBlock}
 			handleToggleWorksWithoutDates={this.props.handleToggleWorksWithoutDates}
+			isPersonal={this.props.isPersonal}
 			milestones={this.props.milestones}
 			progress={this.props.progress}
 		/>;
@@ -52,6 +53,7 @@ export class GanttPanel extends PureComponent<Props, State> {
 	render () {
 		const CN = cn({
 			[styles.container]: true,
+			[styles.personal]: this.props.isPersonal,
 			[styles.swipedContainer]: this.props.swiped
 		});
 
