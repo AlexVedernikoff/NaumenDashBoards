@@ -3897,7 +3897,7 @@
                                   IndicatorFiltration indicatorFiltration = null,
                                   IUUIDIdentifiable user = null)
         {
-            filtering?.withIndex()?.collectMany { filters, i ->
+            List<List> filteringResult = filtering?.withIndex()?.collectMany { filters, i ->
                 newRequestData.filters = filters
                 List res = dashboardQueryWrapperUtils.getData(newRequestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits?.parameter ?: false, templateUUID, paginationSettings, indicatorFiltration)
                                                      .with(formatGroup)
@@ -3944,8 +3944,64 @@
                     partial = prepareRequestWithStates(partial, listIdsOfNormalAggregations, resWithPercentCnt)
                 }
                 filterListSize = checkTableForSize(filterListSize, requestContent, diagramType)
-                return prepareResultListListForTop(partial, filterListSize, top, parameterFilters, breakdownFilters, i)
+                return partial
             }
+
+            Boolean hasPercentCntAggregation = getPercentCntAggregationIndexes(request).size() != 0
+            return getFilteringResultForTop(filteringResult, top, diagramType, hasPercentCntAggregation)
+        }
+
+        /**
+         * Метод по обработке top-а
+         * @param filteringResult - исходные данные
+         * @param top - топ ограничитель
+         * @param diagramType - тип диаграммы
+         * @param hasPercentCntAggregation - флаг, есть ли у виджета аггрегация с типом PERCENT_CNT
+         * @return обработанные данные
+         */
+        private List<List> getFilteringResultForTop(List<List> filteringResult, Integer top, DiagramType diagramType, Boolean hasPercentCntAggregation)
+        {
+            if (top && !(diagramType in [DiagramType.TABLE, DiagramType.PIVOT_TABLE]))
+            {
+                Map<String, List<List>> resultGroupedByParameterValue = filteringResult.groupBy {
+                    return it[2]
+                }
+                Map<String, List<List>> resultSumGroupedByParameterValue = resultGroupedByParameterValue.collectEntries {
+                    Object valueToCastToDouble1 = it.value[0][0]
+                    if (hasPercentCntAggregation && !(valueToCastToDouble1 in Double))
+                    {
+                        valueToCastToDouble1 = valueToCastToDouble1.split(' ')[0]
+                    }
+                    Double customGroupValue1 = valueToCastToDouble1 as Double
+
+                    Double customGroupValue2 = 0
+                    if (it.value.size() == 2)
+                    {
+                        Object valueToCastToDouble2 = it.value[1][0]
+                        if (hasPercentCntAggregation && !(valueToCastToDouble2 in Double))
+                        {
+                            valueToCastToDouble2 = valueToCastToDouble2.split(' ')[0]
+                        }
+                        customGroupValue2 = valueToCastToDouble2 as Double
+                    }
+
+                    return [(it.key): customGroupValue1 + customGroupValue2]
+                }
+                resultSumGroupedByParameterValue = resultSumGroupedByParameterValue.sort { -it.value }
+                List<String> parameterValues = resultSumGroupedByParameterValue.keySet().toList()
+                if (parameterValues.size() < top)
+                {
+                    top = parameterValues
+                }
+
+                List<String> topParameterValues = parameterValues[0..(top - 1)]
+                filteringResult = topParameterValues.collectMany { parameterValue ->
+                    List<List> matchParameterValues = filteringResult.findAll { it[2] == parameterValue}
+                    return matchParameterValues
+                }
+
+            }
+            return filteringResult
         }
 
         /**
