@@ -1062,8 +1062,7 @@
                         {
                             //В качестве аргументов может прийти неправильной формы число, типа "14 5.0909".
                             // Для всех остальных случаев ничего не меняется. Возможно потребуется округление для Integer.
-                            List totalList =res?.find()?.transpose()?.find()?.collect {elem ->elem.split(" ")}
-                                               .transpose()?.find()
+                            List totalList = res?.find()?.transpose()?.find()?.collect { elem -> elem.split(" ") }?.transpose()?.find()
                             total = totalList?.sum { it as Double }
                         }
                     }
@@ -3991,10 +3990,10 @@
                 List<String> parameterValues = resultSumGroupedByParameterValue.keySet().toList()
                 if (parameterValues.size() < top)
                 {
-                    top = parameterValues
+                    top = parameterValues.size()
                 }
 
-                List<String> topParameterValues = parameterValues[0..(top - 1)]
+                List<String> topParameterValues = top ? parameterValues[0..(top - 1)] : []
                 filteringResult = topParameterValues.collectMany { parameterValue ->
                     List<List> matchParameterValues = filteringResult.findAll { it[2] == parameterValue}
                     return matchParameterValues
