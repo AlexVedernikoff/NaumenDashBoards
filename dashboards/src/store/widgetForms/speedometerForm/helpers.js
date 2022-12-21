@@ -50,7 +50,7 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 			const transformIndicators = compose(
 				fixPivotIndicators,
 				fixIndicatorsAggregation,
-				fixIndicatorsTooltip(tooltip.show)
+				fixIndicatorsTooltip(tooltip?.show ?? false)
 			);
 
 			return {
