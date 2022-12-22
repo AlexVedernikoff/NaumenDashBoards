@@ -1590,7 +1590,8 @@ class DashboardQueryWrapperUtils
                 }
                 else
                 {
-                    criteriaToFilter = sourceMetaClassCriteriaMap[it.attribute.metaClassFqn]
+                    criteriaToFilter = sourceMetaClassCriteriaMap ?
+                        sourceMetaClassCriteriaMap[it.attribute.metaClassFqn] : criteria
                 }
             }
 
