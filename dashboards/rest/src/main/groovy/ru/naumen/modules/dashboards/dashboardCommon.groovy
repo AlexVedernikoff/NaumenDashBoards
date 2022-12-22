@@ -1318,7 +1318,7 @@ class DashboardUtils
                         try
                         {
                             value = fieldToRemove == 'uuid'
-                                ? getApi().utils.get(obj.uuid)[fieldToAdd]
+                                ? getApi().utils.load(obj.uuid)[fieldToAdd]
                                 : getApi().utils.findFirst( fqn, [(fieldToRemove): obj[fieldToRemove]])[fieldToAdd == 'uuid' ? fieldToAdd.toUpperCase() : fieldToAdd]
                         }
                         catch (Exception ex)
