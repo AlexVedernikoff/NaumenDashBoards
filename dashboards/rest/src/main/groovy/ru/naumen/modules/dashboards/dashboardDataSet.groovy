@@ -416,7 +416,7 @@
                     if(fullRes?.find())
                     {
                         List transposeRes = []
-                        if (isSourceForEachRow)
+                        if (isSourceForEachRow && !transposeRes.isEmpty())
                         {
                             transposeRes = fullRes.collect {
                                 [it.head().head()]
