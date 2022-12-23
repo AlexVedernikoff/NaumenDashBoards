@@ -228,7 +228,11 @@ class GanttDataSetService
                 }
             if (workOnly)
             {
-                sortableElements.addAll(workOnly)
+                sortableElements.addAll(
+                    workOnly.sort {
+                        it.positionElement
+                    }
+                )
             }
         }
         return sortableElements
@@ -264,9 +268,14 @@ class GanttDataSetService
             LinkedListSequenceChartElements linkedListSequenceChartElements =
                 Jackson.fromJsonString(sequenceInformation, LinkedListSequenceChartElements)
             linkedListSequenceChartElements.elements.each { settingsSequenceChartElements ->
-                data.tasks.find {
+                if (data.tasks.find {
                     it.id == settingsSequenceChartElements.workUuid
-                }.positionElement = settingsSequenceChartElements.idLocations
+                })
+                {
+                    data.tasks.find {
+                        it.id == settingsSequenceChartElements.workUuid
+                    }.positionElement = settingsSequenceChartElements.idLocations
+                }
             }
         }
         else
@@ -294,6 +303,7 @@ class GanttDataSetService
                     sequenceChartElements.metaInformation =
                         api.utils.get(currentTask.id).getMetainfo().toString()
                     sequenceChartElements.parentUuid = parentChartElements.workUuid
+                    sequenceChartElements.titleElement = api.utils.get(currentTask.id).title
                     sequenceChartElements.idLocations = parentChartElements.idChainChildWorkItems
                     parentChartElements.idChainChildWorkItems++
                     sequenceElements.add(sequenceChartElements)
