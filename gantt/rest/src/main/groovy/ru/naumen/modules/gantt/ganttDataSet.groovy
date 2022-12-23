@@ -204,6 +204,131 @@ class GanttDataSetService
                 }
             }
         }
+        determiningCurrentPositionElement(request, data)
+        data.tasks = finalSortingElements(data.tasks)
+    }
+
+    /**
+     * Метод финальной сортировки элентов схемы
+     * @param tasks - список задач
+     * @return отсортированные элементы
+     */
+    Collection<Map<String, Object>> finalSortingElements(Collection<Map<String, Object>> tasks)
+    {
+        Collection<Map<String, Object>> resourcesOnly = tasks.findAll {
+            it.level == 0
+        }.sort {
+            it.positionElement
+        }
+        Collection<Map<String, Object>> sortableElements = []
+        resourcesOnly.each { resources ->
+            sortableElements.add(resources)
+            Collection<Map<String, Object>> workOnly =
+                tasks.findAll { currentWorks -> currentWorks.parent == resources.id
+                }
+            if (workOnly)
+            {
+                sortableElements.addAll(workOnly)
+            }
+        }
+        return sortableElements
+    }
+
+    /**
+     * Метод определения позиции элемента схемы
+     * @param request - тело запроса
+     * @param data - данные о диаграмме
+     * @return задачи с определенной позицией на схеме
+     */
+    void determiningCurrentPositionElement(GetGanttSettingsRequest request, GanttDiagramData data)
+    {
+        Integer position = 0
+        GanttSettingsService service = GanttSettingsService.instance
+        String keySequencesElements
+        if (request.hasProperty('isPersonal') && request.isPersonal)
+        {
+            keySequencesElements = [user.UUID, request.contentCode,
+                                    'personalVersion', 'sequencesElements'].join('_')
+        }
+        else
+        {
+            keySequencesElements = [service.generateDiagramKey(
+                request.subjectUUID,
+                request.contentCode
+            ), 'sequencesElements'].join('_')
+        }
+        String sequenceInformation = service.getJsonSettings(keySequencesElements)
+        Collection<SequenceChartElements> sequenceElements = []
+        if (sequenceInformation)
+        {
+            LinkedListSequenceChartElements linkedListSequenceChartElements =
+                Jackson.fromJsonString(sequenceInformation, LinkedListSequenceChartElements)
+            linkedListSequenceChartElements.elements.each { settingsSequenceChartElements ->
+                data.tasks.find {
+                    it.id == settingsSequenceChartElements.workUuid
+                }.positionElement = settingsSequenceChartElements.idLocations
+            }
+        }
+        else
+        {
+            data.tasks.eachWithIndex { currentTask, idx ->
+                if (currentTask.type == SourceType.RESOURCE || currentTask.type == 'project')
+                {
+                    SequenceChartElements sequenceChartElements = new SequenceChartElements()
+                    sequenceChartElements.workUuid = currentTask.id
+                    sequenceChartElements.idLocations = position
+                    sequenceChartElements.idChainChildWorkItems = 0
+                    sequenceChartElements.metaInformation =
+                        api.utils.get(currentTask.id).getMetainfo().toString()
+                    sequenceChartElements.titleElement = api.utils.get(currentTask.id).title
+                    position++
+                    sequenceElements.add(sequenceChartElements)
+                }
+                if (currentTask.type == SourceType.WORK)
+                {
+                    SequenceChartElements parentChartElements = sequenceElements.find {
+                        currentTask.parent == it.workUuid
+                    }
+                    SequenceChartElements sequenceChartElements = new SequenceChartElements()
+                    sequenceChartElements.workUuid = currentTask.id
+                    sequenceChartElements.metaInformation =
+                        api.utils.get(currentTask.id).getMetainfo().toString()
+                    sequenceChartElements.parentUuid = parentChartElements.workUuid
+                    sequenceChartElements.idLocations = parentChartElements.idChainChildWorkItems
+                    parentChartElements.idChainChildWorkItems++
+                    sequenceElements.add(sequenceChartElements)
+                }
+            }
+            sequenceElements.each { sequenceEl ->
+                if (sequenceEl.parentUuid == null)
+                {
+                    SequenceChartElements chartElements = sequenceElements.find {
+                        it.parentUuid == null && it.idLocations == (sequenceEl.idLocations + 1)
+                    }
+                    if (chartElements)
+                    {
+                        sequenceEl.uuidNextElement = chartElements.workUuid
+                    }
+                }
+                else
+                {
+                    SequenceChartElements chartElements = sequenceElements.find {
+                        sequenceEl.parentUuid ==
+                        it.parentUuid && it.idLocations == (sequenceEl.idLocations + 1)
+                    }
+                    if (chartElements)
+                    {
+                        sequenceEl.uuidNextElement = chartElements.workUuid
+                    }
+                }
+            }
+            LinkedListSequenceChartElements linkedListSequenceChartElements = new LinkedListSequenceChartElements()
+            linkedListSequenceChartElements.elements = sequenceElements
+            service.saveJsonSettings(
+                keySequencesElements,
+                Jackson.toJsonString(linkedListSequenceChartElements)
+            )
+        }
     }
 
     /**
