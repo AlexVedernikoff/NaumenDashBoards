@@ -293,7 +293,7 @@ class GanttDataSetService
                     position++
                     sequenceElements.add(sequenceChartElements)
                 }
-                if (currentTask.type == SourceType.WORK)
+                if (currentTask.type == SourceType.WORK || currentTask.type == 'milestone')
                 {
                     SequenceChartElements parentChartElements = sequenceElements.find {
                         currentTask.parent == it.workUuid
