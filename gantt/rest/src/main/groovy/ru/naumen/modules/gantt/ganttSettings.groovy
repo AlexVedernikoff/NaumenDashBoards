@@ -960,72 +960,150 @@ class GanttSettingsService
      */
     Boolean checkWorksOfResource(CheckWorksOfResourceData requestContent)
     {
-        String versionKey = requestContent.diagramKey
-        String ganttVersionSettingsJsonValue = getJsonSettings(requestContent.diagramKey)
-
-        GanttSettingsClass ganttVersionSettings = ganttVersionSettingsJsonValue
-            ? Jackson.fromJsonString(ganttVersionSettingsJsonValue, GanttSettingsClass)
-            : new GanttSettingsClass()
-        ResourceAndWorkSettings resourceWork = ganttVersionSettings.resourceAndWorkSettings.find {
-            it.type == SourceType.WORK
-        }
-        String communicationResourceAttribute =
-            resourceWork.communicationResourceAttribute.code.split('@').last()
-        String metaClassFqn = resourceWork.communicationResourceAttribute.metaClassFqn
-        Boolean movingWorkWithinCurrentResource
-        api.utils.edit(
-            api.utils.get(requestContent.workId),
-            [(communicationResourceAttribute): api.utils.get(requestContent.resourceId)]
+        String keySequencesElements = [requestContent.diagramKey, 'sequencesElements'].join('_')
+        LinkedListSequenceChartElements linkedListSequenceChartElements = Jackson.fromJsonString(
+            getJsonSettings(keySequencesElements),
+            LinkedListSequenceChartElements
         )
-        String getKeyData = requestContent.versionKey ?: requestContent.diagramKey
-        String keySequenceWork = String.join('_', 'sequenceWorks', getKeyData)
-        String dataChartElements = getJsonSettings(keySequenceWork)
-        Collection chartElements = dataChartElements
-            ? fromJson(dataChartElements, Collection)
-            : []
-        Collection listEditableObjects = chartElements.findAll {
-            it.parentUuid == requestContent.resourceId
-        }
-        Collection listEditable = []
-        Integer sequenceNumberLocations
-        listEditableObjects.eachWithIndex { num, idx ->
-            if (idx < requestContent.positionElement)
-            {
-                listEditable << num
+        Collection<SequenceChartElements> elementsForChangingSequence
+        if (requestContent.resourceId.isDouble() && requestContent.resourceId.toDouble() == 0)
+        {
+            elementsForChangingSequence = linkedListSequenceChartElements.elements.findAll {
+                it.parentUuid == null
             }
-            if (idx == requestContent.positionElement)
+        }
+        else
+        {
+            elementsForChangingSequence = linkedListSequenceChartElements.elements.findAll {
+                it.parentUuid == requestContent.resourceId
+            }
+        }
+        SequenceChartElements lastResource = elementsForChangingSequence.max {
+            it.idLocations
+        }
+        Integer idLastResource = elementsForChangingSequence.max {
+            it.idLocations
+        }.idLocations
+        SequenceChartElements positionTransferredElement = elementsForChangingSequence.find {
+            it.workUuid == requestContent.workId
+        }
+        String metaInformationMovedElement =
+            api.utils.get(positionTransferredElement.workUuid).getMetainfo().toString()
+        changingConnectivitySchemaElements(
+            positionTransferredElement,
+            elementsForChangingSequence,
+            requestContent,
+            idLastResource,
+            metaInformationMovedElement
+        )
+        SequenceChartElements sequenceChartElements = elementsForChangingSequence.find {
+            it.idLocations == 0
+        }
+        Integer orderArrangement = 1
+        while (sequenceChartElements)
+        {
+            if (!(elementsForChangingSequence.find {
+                it.workUuid == sequenceChartElements.uuidNextElement
+            }) || sequenceChartElements.idLocations >= idLastResource)
             {
-                listEditable << ['parentUuid' : requestContent.resourceId,
-                                 'workUuid'   : requestContent.workId,
-                                 'idLocations': idx]
-                sequenceNumberLocations = idx
-                listEditable << ['parentUuid' : num.parentUuid,
-                                 'workUuid'   : num.workUuid,
-                                 'idLocations': ++sequenceNumberLocations]
+                break
+            }
+            elementsForChangingSequence.find {
+                it.metaInformation ==
+                metaInformationMovedElement && it.workUuid == sequenceChartElements.uuidNextElement
+            }.idLocations = orderArrangement
+            sequenceChartElements = elementsForChangingSequence.find {
+                it.metaInformation ==
+                metaInformationMovedElement && it.workUuid == sequenceChartElements.uuidNextElement
+            }
+            orderArrangement++
+        }
+        linkedListSequenceChartElements.elements.each { allListElements ->
+            SequenceChartElements modifiedElement = elementsForChangingSequence.find {
+                it.workUuid == allListElements.workUuid
+            }
+            if (modifiedElement)
+            {
+                allListElements.idLocations = modifiedElement.idLocations
+                allListElements.uuidNextElement = modifiedElement.uuidNextElement
+            }
+        }
+        if (!saveJsonSettings(
+            keySequencesElements,
+            Jackson.toJsonString(linkedListSequenceChartElements)
+        ))
+        {
+            return false
+        }
+        else
+        {
+            return true
+        }
 
-            }
-            if (idx > requestContent.positionElement)
+    }
+
+    /**
+     * Метод изменения связанности элементов
+     * @param positionTransferredElement - элемент с новой позицией
+     * @param elements - элементы для редактирования последовательности
+     * @param requestContent - тело запроса
+     * @param idLastResource - id последнего элемента в списке
+     * @param metaInformationMovedElement - информация о классе и типе перемещаемого элемента
+     * @return измененные настройки версии диаграммы
+     */
+    void changingConnectivitySchemaElements(SequenceChartElements positionTransferredElement,
+                                            Collection<SequenceChartElements> elements,
+                                            CheckWorksOfResourceData requestContent,
+                                            Integer idLastResource,
+                                            String metaInformationMovedElement)
+    {
+        if (positionTransferredElement.idLocations)
+        {
+            if (!positionTransferredElement.uuidNextElement)
             {
-                if (requestContent.workId != num.workUuid)
-                {
-                    num.idLocations = ++sequenceNumberLocations
-                    listEditable << num
-                }
+                elements.find {
+                    it.metaInformation ==
+                    metaInformationMovedElement &&
+                    it.idLocations == (positionTransferredElement.idLocations - 1)
+                }.uuidNextElement = null
+            }
+            else
+            {
+                elements.find {
+                    it.metaInformation ==
+                    metaInformationMovedElement &&
+                    it.idLocations == (positionTransferredElement.idLocations - 1)
+                }.uuidNextElement = positionTransferredElement.uuidNextElement
             }
         }
-        String keyForGettingDataFromStorage = requestContent.versionKey ?: requestContent.diagramKey
-        GanttVersionsSettingsClass ganttVersionsSettings =
-            getGanttVersionsSettings(keyForGettingDataFromStorage)
-        ganttVersionsSettings.diagramEntities.each { ganttVer ->
-            Map elem = listEditable.find { editable ->
-                editable.workUuid == ganttVer.entityUUID
-            }
-            if (elem)
-            {
-                ganttVer.positionElement = elem.idLocations
-            }
+        if (requestContent.positionElement)
+        {
+            elements.find {
+                it.metaInformation ==
+                metaInformationMovedElement &&
+                it.idLocations == (requestContent.positionElement - 1)
+            }.uuidNextElement = positionTransferredElement.workUuid
         }
-        saveJsonSettings(requestContent.versionKey, toJson(ganttVersionsSettings))
+        if (requestContent.positionElement != idLastResource)
+        {
+            elements.find {
+                it.metaInformation ==
+                metaInformationMovedElement && it.workUuid == positionTransferredElement.workUuid
+            }.uuidNextElement = elements.find {
+                it.metaInformation ==
+                metaInformationMovedElement && it.idLocations == requestContent.positionElement
+            }.workUuid
+        }
+        elements.find {
+            it.metaInformation ==
+            metaInformationMovedElement && it.workUuid == requestContent.workId
+        }.idLocations = requestContent.positionElement
+        if (!requestContent.positionElement)
+        {
+            elements.find {
+                it.idLocations == 0
+            }.idLocations = 1
+        }
     }
 
     /**
@@ -2453,9 +2531,19 @@ class TitleAndCode
 class SequenceChartElements
 {
     /**
-     * Uuid родительского элемента
+     * Uuid следующие по очереди элемента
+     */
+    String uuidNextElement
+
+    /**
+     * Uuid родетельского элемента для работ
      */
     String parentUuid
+
+    /**
+     * идентификатор с информацией о расположении элемента
+     */
+    Integer idChainChildWorkItems
 
     /**
      * Uuid текущего элемента
@@ -2466,7 +2554,30 @@ class SequenceChartElements
      * Идентификатор расположения
      */
     Integer idLocations
+
+    /**
+     * Заглавие элемента
+     */
+    String titleElement
+
+    /**
+     * Метаинформация об элементе
+     */
+    String metaInformation
 }
+
+
+/**
+ * Список элементов с информацией о последовательности
+ */
+class LinkedListSequenceChartElements
+{
+    /**
+     * Список последовательностей
+     */
+    Collection <SequenceChartElements> elements
+}
+
 
 /**
  * Класс с базовой информацией о пользователях
