@@ -672,7 +672,11 @@ class QueryWrapper implements CriteriaWrapper
                                            .with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(criteriaForColumn, attributeCodes)
         def attributeChains = parameter.attribute.attrChains()
-        String timeZone = (user?.UUID) ? api.employee.getTimeZone(user.UUID).code : TimeZone.getDefault().ID
+        String timeZone = TimeZone.getDefault().ID
+        if (user?.UUID)
+        {
+            timeZone = api.employee.getTimeZone(user.UUID)?.code ?: timeZone
+        }
         Object columnAccordingToUTC
 
         //в цепочке атрибутов может прийти свыше 2-х только в случае, если выбран ссылочный атрибут,
@@ -1016,18 +1020,17 @@ class QueryWrapper implements CriteriaWrapper
             case GroupType.HOUR_INTERVAL:
             case GroupType.DAY_INTERVAL:
             case GroupType.WEEK_INTERVAL:
-                columnAccordingToUTC = sc.atTimeZone(column, timeZone)
-                criteria.addGroupColumn(columnAccordingToUTC)
-                criteria.addColumn(columnAccordingToUTC)
+                criteria.addGroupColumn(column)
+                criteria.addColumn(column)
                 String sortingType = parameter.sortingType
                 if (sortingType)
                 {
                     Closure sorting = getSorting(sortingType)
-                    columnAccordingToUTC.with(sorting).with(criteria.&addOrder)
+                    column.with(sorting).with(criteria.&addOrder)
                 }
                 else
                 {
-                    criteria.addOrder(ApiCriteriaOrders.asc(columnAccordingToUTC))
+                    criteria.addOrder(ApiCriteriaOrders.asc(column))
                 }
                 break
             case GroupType.getTimerTypes():
