@@ -1996,7 +1996,8 @@ class DashboardQueryWrapperUtils
      */
     static Attribute updateRefAttributeCode(Attribute attribute)
     {
-        Boolean attributeIsNotDynamic = !attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
+        Boolean attributeIsNotDynamic = !(attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
+            || attribute.property?.contains(AttributeType.TOTAL_VALUE_TYPE))
 
         Attribute attributeToUpdate = attribute.ref ?: attribute
         Boolean attrRefHasBaseValues = !attributeToUpdate.code?.contains('@')
