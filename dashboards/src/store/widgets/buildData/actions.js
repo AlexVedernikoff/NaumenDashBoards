@@ -234,7 +234,7 @@ const checkComputedFormat = (widgetId: string, data: DiagramBuildData, updateWid
 			}
 
 			if (chart.type in WIDGET_SETS.CIRCLE) {
-				useDecimal = data.series.some(val => !Number.isInteger(val));
+				useDecimal = data.series.some(val => !Number.isInteger(Number.parseFloat(val)));
 			}
 
 			const dataLabels = {
