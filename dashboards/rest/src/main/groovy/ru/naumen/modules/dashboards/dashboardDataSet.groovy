@@ -4225,7 +4225,16 @@
                 return listOfLists
             }
             return listOfLists.findResults { List list ->
-                if (exceptNulls && list[listIdsOfNormalAggregations*.toLong()].every { !it })
+                Boolean aggregationResultIsEmpty =
+                    list[listIdsOfNormalAggregations*.toLong()].withIndex().every { value, index ->
+                        Integer aggregationIndex = listIdsOfNormalAggregations[index]
+                        if (aggregationIndex in percentCntAggregationIndexes && value in String)
+                        {
+                            value = value.split(' ')[0] as Double
+                        }
+                        return !value
+                    }
+                if (exceptNulls && aggregationResultIsEmpty)
                 {
                     return null
                 }
