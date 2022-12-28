@@ -93,7 +93,7 @@ class TotalCustomLabel extends PureComponent<TotalCustomLabelProps, TotalCustomL
 			<g>
 				<rect fill="#fff" height={height} rx={PADDING} ry={PADDING} width={width} x={x} y={y} />
 				<text
-					alignmentBaseline="central"
+					dominantBaseline="central"
 					fill={fill}
 					fontFamily={fontFamily}
 					fontSize={fontSize * 0.8}
