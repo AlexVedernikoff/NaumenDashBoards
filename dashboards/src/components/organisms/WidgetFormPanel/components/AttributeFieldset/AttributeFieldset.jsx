@@ -1,7 +1,7 @@
 // @flow
 import type {Attribute, Props, State} from './types';
 import {ATTRIBUTE_FIELDSET_CONTEXT} from './HOCs/withAttributeFieldset/constants';
-import {ATTRIBUTE_SETS} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, DYNAMIC_ATTRIBUTE_PROPERTY} from 'store/sources/attributes/constants';
 import deepEqual from 'fast-deep-equal';
 import MainSelect from 'containers/AttributeMainSelect';
 import type {OnSelectEvent} from 'components/types';
@@ -136,7 +136,7 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		const {components, disabled, refComponents, removable, value} = this.props;
 		const {attrSetConditions} = this.state;
 
-		if (value && value.type in ATTRIBUTE_SETS.REFERENCE) {
+		if (value && (value.type in ATTRIBUTE_SETS.REFERENCE) && (value.property !== DYNAMIC_ATTRIBUTE_PROPERTY)) {
 			return (
 				<RefSelect
 					attrSetConditions={attrSetConditions}
