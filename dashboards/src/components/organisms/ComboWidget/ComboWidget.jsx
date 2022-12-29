@@ -292,10 +292,12 @@ export class ComboWidget extends PureComponent<Props, State> {
 		const labelStyle = showName
 			? {fontFamily, fontSize, offset: -3, position: 'insideBottom', value}
 			: null;
+		const yPadding = fontSize * 0.25;
 
 		return (
 			<XAxis
 				dataKey="name"
+				dy={yPadding}
 				fontFamily={fontFamily}
 				fontSize={fontSize}
 				height={height}
