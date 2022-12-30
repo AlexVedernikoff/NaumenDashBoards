@@ -11,10 +11,11 @@ import {
 	TextInput
 } from 'naumen-common-components';
 import cn from 'classnames';
+import ColorPanel from 'src/components/molecules/ColorPanel';
 import type {Column, ResourceSetting} from 'src/store/App/types';
 import {CommonSettings} from 'store/App/types';
 import {connect} from 'react-redux';
-import {deepClone, normalizeDate, shiftTimeZone} from 'src/helpers';
+import {deepClone, isEmpty, normalizeDate, shiftTimeZone} from 'src/helpers';
 import {defaultColumn} from 'src/store/App/constants';
 import {defaultResourceSetting} from 'store/App/constants';
 import Form from 'src/components/atoms/Form';
@@ -28,21 +29,27 @@ import {
 	skipChildren
 } from './utils';
 import GridLayout from 'react-grid-layout';
-import {IntervalSelectionCriterion, ScaleNames} from './consts';
+import {ERROR_MESSAGES, IntervalSelectionCriterion, JobTitleType, ScaleNames} from './consts';
 import Modal from 'src/components/atoms/Modal';
 import type {Props} from './types';
 import React, {useEffect, useState} from 'react';
 import Resource from './components/Resource';
+
 import {
 	setColumnTask,
+	setTextWork,
+	switchMultiplicityCheckbox,
+	switchTextPositionCheckbox,
+	switchVacationAndWeekendsCheckbox,
+	switchViewOfNestingCheckbox,
 	switchWorksWithoutStartOrEndDateCheckbox,
 	updateWorks
 } from 'store/App/actions';
 import ShowBox from 'src/components/atoms/ShowBox';
 import styles from './styles.less';
+import {useDispatch, useSelector} from 'react-redux';
 import {v4 as uuidv4} from 'uuid';
 import Work from './components/Work';
-import {useDispatch, useSelector} from 'react-redux';
 
 const FormPanel = (props: Props) => {
 	const dispatch = useDispatch();
@@ -70,20 +77,28 @@ const FormPanel = (props: Props) => {
 	const [valueError, setValueError] = useState('');
 	const [inputMonthDays, setInputMonthDays] = useState('');
 	const [inputLastDays, setinputLastDays] = useState('');
-	const [currentInterval, setCurrentInterval] = useState(props.currentInterval ? props.currentInterval : {label: 'c ... по', value: 'INTERVAL'});
+	const [currentInterval, setCurrentInterval] = useState(store.APP.currentInterval);
 	const [diagramStartDate, setDiagramStartDate] = useState(new Date(startDate));
 	const [diagramEndDate, setDiagramEndDate] = useState(new Date(endDate));
+	const [valueInterval, setValueInterval] = useState(store.APP.currentInterval);
+	const [href, setHref] = useState('#');
+	const [isErrorHref, setIsErrorHref] = useState(false);
+	const [viewWork, setViewWork] = useState(store.APP.viewWork);
 
 	useEffect(() => {
-		setCurrentInterval(props.currentInterval);
+		if (store.APP.currentInterval) {
+			setCurrentInterval(store.APP.currentInterval);
+			const newStartDate = typeof startDate === 'string' ? normalizeDate(startDate) : startDate;
+			const newEndDate = typeof endDate === 'string' ? normalizeDate(endDate) : endDate;
+			const msInOneDay = 86400000;
+			const msStartDate = new Date(newStartDate).getTime();
+			const msEndTime = new Date(newEndDate).getTime();
+			const days = Math.round((msEndTime - msStartDate) / msInOneDay);
 
-		const msStartDate = new Date(startDate).getTime();
-		const msEndTime = new Date(endDate).getTime();
-		const days = Math.round((msEndTime - msStartDate) / 86400000);
-
-		setinputLastDays(days);
-		setInputMonthDays(days);
-	}, [props.currentInterval]);
+			setinputLastDays(days);
+			setInputMonthDays(days);
+		}
+	}, [store.APP.currentInterval]);
 
 	const handleAddNewBlock = (index: number, value: string) => {
 		const {setResourceSettings} = props;
@@ -189,11 +204,11 @@ const FormPanel = (props: Props) => {
 		handleUpdateCommonSettings('scale', value.value);
 	};
 
-	const [valueInterval, setValueInterval] = useState(props.currentInterval ? props.currentInterval : {label: 'c ... по', value: 'INTERVAL'});
 	const handleIntervalChange = ({value}) => {
 		setValueInterval(value);
 		setCurrentInterval(value);
 		setValueError('');
+		setIsErrorHref(false);
 	};
 
 	const handleCheckboxChange = () => {
@@ -251,22 +266,37 @@ const FormPanel = (props: Props) => {
 		sibmitRange();
 		const {
 			diagramKey,
+			endDate,
 			milestonesCheckbox,
+			multiplicityCheckbox,
 			progressCheckbox,
 			saveSettings,
 			settings,
+			startDate,
 			stateMilestonesCheckbox,
-			workProgresses,
+			viewOfNestingCheckbox,
 			workRelationCheckbox,
 			worksWithoutStartOrEndDateCheckbox
 		} = props;
 		const newError = checkingSettings();
-		const shiftedEndDate = shiftTimeZone(diagramEndDate);
-		const shiftedStartDate = shiftTimeZone(diagramStartDate);
+
+		const shiftedEndDate = typeof startDate === 'string' ? shiftTimeZone(normalizeDate(startDate)) : shiftTimeZone(startDate);
+		const shiftedStartDate = typeof endDate === 'string' ? shiftTimeZone(normalizeDate(endDate)) : shiftTimeZone(endDate);
 
 		setError(newError);
 
-		if (!newError) {
+		if (valueInterval === null || isEmpty(valueInterval)) {
+			setHref('#interval');
+			setIsErrorHref(true);
+		} else {
+			setIsErrorHref(false);
+		}
+
+		if (!inputEndDate && !inputStartDate) {
+			setHref('#interval');
+		}
+
+		if (!newError && !isErrorHref && href === '#' && valueInterval && inputEndDate && inputStartDate) {
 			setDiagramEndDate(gantt.date.add(new Date(diagramEndDate), shiftedEndDate, 'hour'));
 			setDiagramStartDate(gantt.date.add(new Date(diagramStartDate), shiftedStartDate, 'hour'));
 
@@ -277,11 +307,13 @@ const FormPanel = (props: Props) => {
 					diagramKey,
 					endDate: diagramEndDate,
 					milestonesCheckbox,
+					multiplicityCheckbox,
 					progressCheckbox,
 					resourceAndWorkSettings: resources,
 					startDate: diagramStartDate,
 					stateMilestonesCheckbox,
-					workProgresses,
+					viewOfNestingCheckbox,
+					viewWork,
 					workRelationCheckbox,
 					worksWithoutStartOrEndDateCheckbox
 				}
@@ -355,9 +387,17 @@ const FormPanel = (props: Props) => {
 	};
 
 	const sibmitRange = () => {
-		if (valueInterval.value === 'INTERVAL') {
-			const newStartDate = normalizeDate(inputStartDate);
-			const newEndDate = normalizeDate(inputEndDate);
+		if (valueInterval?.value === 'INTERVAL') {
+			let newStartDate = '';
+			let newEndDate = '';
+
+			if (!inputStartDate || !inputEndDate) {
+				setValueError(ERROR_MESSAGES.emptyFields);
+				setHref('#interval');
+			} else {
+				newStartDate = normalizeDate(inputStartDate);
+				newEndDate = normalizeDate(inputEndDate);
+			}
 
 			if (Date.parse(newEndDate) >= Date.parse(newStartDate) && (inputStartDate.length && inputEndDate.length)) {
 				const date = {
@@ -370,77 +410,59 @@ const FormPanel = (props: Props) => {
 
 				props.setRangeTime(date);
 				setValueError('');
+				setHref('#');
 			} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
-				setValueError('Дата начала не может быть позднее даты завершения');
-			} else if (!inputStartDate.length || !inputEndDate.length) {
-				setValueError('Заполните все поля');
+				setValueError(ERROR_MESSAGES.wrongDate);
+				setHref('#interval');
+			} else if (!inputStartDate || !inputEndDate) {
+				setValueError(ERROR_MESSAGES.emptyFields);
+				setHref('#interval');
 			} else {
-				setValueError('Некорректная дата');
+				setValueError(ERROR_MESSAGES.incorrectDate);
+				setHref('#interval');
 			}
-		} else if (valueInterval.value === 'MONTH') {
-			if (isNaN(inputMonthDays)) {
-				setValueError('Некорректное значение');
-			} else if (!inputMonthDays) {
-				setValueError('Заполните поле');
-			} else {
-				const today = new Date();
-				const inWeek = new Date();
+		} else if (['MONTH', 'LASTDAYS'].includes(valueInterval.value)) {
+			const month = valueInterval.value === 'MONTH';
+			const inputValue = month ? parseInt(inputMonthDays, 10) : parseInt(inputLastDays, 10);
 
-				const monthDays = inWeek.setDate(today.getDate() + +inputMonthDays);
-
-				const date = {
-					endDate: new Date(monthDays),
-					startDate: today
-				};
-
-				setDiagramStartDate(today);
-				setDiagramEndDate(new Date(monthDays));
-
-				props.setRangeTime(date);
-				setValueError('');
-			}
-		} else if (valueInterval.value === 'LASTDAYS') {
-			if (isNaN(inputLastDays)) {
-				setValueError('Некорректное значение');
-			} else if (!inputLastDays) {
-				setValueError('Заполните поле');
+			if (isNaN(inputValue)) {
+				setValueError(ERROR_MESSAGES.incorrectValue);
+				setHref('#interval');
+			} else if (!inputValue) {
+				setValueError(ERROR_MESSAGES.emptyField);
+				setHref('#interval');
 			} else {
 				const today = new Date();
-				const inWeek = new Date();
+				const calculatedDate = new Date(today.setDate(today.getDate() + inputValue));
 
-				const monthDays = inWeek.setDate(today.getDate() - +inputLastDays);
+				const endDate = month ? new Date(calculatedDate) : today;
+				const startDate = month ? today : new Date(calculatedDate);
 
-				const date = {
-					endDate: today,
-					startDate: new Date(monthDays)
-				};
+				setDiagramStartDate(startDate);
+				setDiagramEndDate(endDate);
 
-				setDiagramStartDate(new Date(monthDays));
-				setDiagramEndDate(today);
-
-				props.setRangeTime(date);
+				props.setRangeTime({endDate, startDate});
 				setValueError('');
+				setHref('#');
 			}
-		} else if (valueInterval.value === 'NEXTDAYS') {
+		} else if (valueInterval?.value === 'NEXTDAYS') {
 			const todayStartDate = new Date();
 			const todayEndDate = new Date();
 
-			const hoursDays = todayStartDate.getHours();
+			const hours = todayStartDate.getHours();
 
-			todayStartDate.setHours(hoursDays - +hoursDays);
-			const day = 23 - hoursDays;
+			todayStartDate.setHours(0);
+			const balanceHours = 23 - hours;
 
-			todayEndDate.setHours(hoursDays - -(+day));
+			todayEndDate.setHours(hours + balanceHours);
 
-			const date = {
-				endDate: new Date(todayEndDate),
-				startDate: new Date(todayStartDate)
-			};
+			const endDate = new Date(todayEndDate);
+			const startDate = new Date(todayStartDate);
 
-			setDiagramStartDate(new Date(todayStartDate));
-			setDiagramEndDate(new Date(todayEndDate));
+			setDiagramStartDate(startDate);
+			setDiagramEndDate(endDate);
 
-			props.setRangeTime(date);
+			props.setRangeTime({endDate, startDate});
 		}
 	};
 
@@ -530,29 +552,51 @@ const FormPanel = (props: Props) => {
 	};
 
 	const renderIntervalFromTo = () => {
-		switch (valueInterval.value) {
-			case 'INTERVAL':
-				return (
-					<div>
-						{listDataInterval}
-						<div className={styles.error}>{valueError}</div>
-						<button onClick={sibmitRange}>Применить</button>
-					</div>
-				);
-			case 'LASTDAYS':
-				return listDataMonthAndLastDays[0];
-			case 'MONTH':
-				return listDataMonthAndLastDays[1];
-			case 'NEXTDAYS':
-				return renderFormNextdays();
+		if (valueInterval) {
+			switch (valueInterval.value) {
+				case 'INTERVAL':
+					return (
+						<div>
+							{listDataInterval}
+							<div className={styles.error}>{valueError}</div>
+							<button onClick={sibmitRange}>Применить</button>
+						</div>
+					);
+				case 'LASTDAYS':
+					return listDataMonthAndLastDays[0];
+				case 'MONTH':
+					return listDataMonthAndLastDays[1];
+				case 'NEXTDAYS':
+					return renderFormNextdays();
+			}
 		}
 	};
 
+	const renderHrefError = () => {
+		if (isErrorHref) {
+			return (
+				<div className={styles.errorInterval}>
+					Выберите интервал
+				</div>
+			);
+		}
+
+		return null;
+	};
+
 	const renderSelectInterval = () => (
-		<div className={styles.select}>
+		<div className={styles.select} id='interval'>
 			<span className={styles.label}>Критерий</span>
-			<Select className={cn(styles.selectIcon, styles.top)} icon={'CHEVRON'} onSelect={handleIntervalChange} options={IntervalSelectionCriterion} placeholder="Критерий" value={valueInterval.label} />
+			<Select
+				className={cn(styles.selectIcon, styles.top)}
+				icon={'CHEVRON'}
+				onSelect={handleIntervalChange}
+				options={IntervalSelectionCriterion}
+				placeholder="Критерий"
+				value={valueInterval?.label || ''}
+			/>
 			{renderIntervalFromTo()}
+			{renderHrefError()}
 		</div>
 	);
 
@@ -619,6 +663,58 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
+	const handleToggleSplitTasks = () => {
+		const tasks = gantt.getTaskByTime();
+
+		tasks.forEach(item => {
+			if (!props.viewOfNestingCheckbox) {
+				if (item.type === 'RESOURCE' || item.type === 'project') {
+					item.render = 'split';
+				}
+			} else {
+				delete item.render;
+			}
+		});
+		gantt.render();
+		dispatch(switchViewOfNestingCheckbox(!props.viewOfNestingCheckbox));
+	};
+
+	const handleToggleMultiplicityTasks = () => {
+		dispatch(switchMultiplicityCheckbox(!props.multiplicityCheckbox));
+
+		gantt.config.round_dnd_dates = !props.multiplicityCheckbox;
+	};
+
+	const renderCheckboxSplitTasks = () => {
+		return (
+			<div onClick={handleToggleSplitTasks}>
+				<FormControl className={styles.checkbox} label="Выстроить работы в одну линию ресурса" small={true}>
+					<Checkbox
+						checked={props.viewOfNestingCheckbox}
+						name="Checkbox"
+						onChange={handleToggleSplitTasks}
+						value={props.viewOfNestingCheckbox}
+					/>
+				</FormControl>
+			</div>
+		);
+	};
+
+	const renderCheckboxMultiplicityTasks = () => {
+		return (
+			<div onClick={handleToggleMultiplicityTasks}>
+				<FormControl className={styles.checkbox} label="Включить кратность календарной сетки для работ" small={true}>
+					<Checkbox
+						checked={props.multiplicityCheckbox}
+						name="Checkbox"
+						onChange={handleToggleMultiplicityTasks}
+						value={props.multiplicityCheckbox}
+					/>
+				</FormControl>
+			</div>
+		);
+	};
+
 	const renderButtonCommonBlock = () => (
 		<Button className={styles.button} variant="ADDITIONAL">
 			<div className={styles.bigButton} onClick={handleOpenColumnSettingsModal}> </div>
@@ -635,18 +731,52 @@ const FormPanel = (props: Props) => {
 		return null;
 	};
 
+	const toggleModal = (value: boolean) => () => {
+		setIsColorsModal(value);
+	};
+
+	const renderButtonColorPanel = () => (
+		<div>
+			<Button className={styles.button} onClick={toggleModal(true)} variant="ADDITIONAL">
+				<div className={styles.bigButton}> </div>
+				Открыть панель цветов
+			</Button>
+		</div>
+	);
+
+	const [isColorsModal, setIsColorsModal] = useState(false);
+
+	const renderColorPanel = () => {
+		if (isColorsModal) {
+			return (
+				<Modal
+					className={styles.modalColors}
+					onClose={toggleModal(false)}
+					onSubmit={toggleModal(false)}
+					submitText="Сохранить"
+				>
+					<ColorPanel isColorsModal={isColorsModal} setIsColorsModal={setIsColorsModal} />
+				</Modal>
+			);
+		}
+	};
+
 	const renderCommonBlock = () => {
 		return (
 			<div className={styles.field}>
 				{renderHeaderCommonBlock()}
 				{renderSelectCommonBlock()}
 				{renderSelectInterval()}
+				{renderButtonColorPanel()}
+				{renderViewWork()}
 				{renderCheckboxProgress()}
 				{renderCheckboxСonnections()}
 				{renderCheckboxCommonBlock()}
 				{renderCheckboxMilestoneBlock()}
 				{renderCheckboxStateMilestoneBlock()}
 				{renderCheckboxWorksWithoutDates()}
+				{renderCheckboxSplitTasks()}
+				{renderCheckboxMultiplicityTasks()}
 				<div className={styles.form} id='panelSettingsButton'>
 					{renderButtonCommonBlock()}
 					{renderForm()}
@@ -658,9 +788,11 @@ const FormPanel = (props: Props) => {
 	const renderBottom = () => {
 		return (
 			<div className={styles.bottom}>
-				<Button onClick={handleSave} variant="INFO">
-					Сохранить
-				</Button>
+				<a className={styles.href} href={href}>
+					<Button onClick={handleSave} variant="INFO">
+						Сохранить
+					</Button>
+				</a>
 				<Button onClick={handleCancel} variant="GREY">
 					Отменить
 				</Button>
@@ -775,6 +907,45 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
+	const changeViewWork = ({value}) => {
+		setViewWork(value);
+
+		dispatch(setTextWork(value));
+	};
+
+	const renderViewWork = () => {
+		return (
+			<div className={styles.select}>
+				<span className={styles.label}>Вывод названий на диаграмме</span>
+				<Select
+					className={cn(styles.selectIcon, styles.top)}
+					icon={'CHEVRON'}
+					onSelect={changeViewWork}
+					options={JobTitleType}
+					placeholder='Вывод названий работ'
+					value={viewWork} />
+			</div>
+		);
+	};
+
+	useEffect(() => {
+		setViewWork(store.APP.viewWork);
+
+		if (store.APP.viewWork.value === 'about') {
+			gantt.templates.rightside_text = (start, end, task) => task.text;
+			gantt.templates.task_text = () => '';
+			gantt.render();
+		} else if (store.APP.viewWork.value === 'work') {
+			gantt.templates.rightside_text = () => '';
+			gantt.templates.task_text = (start, end, task) => task.text;
+			gantt.render();
+		} else {
+			gantt.templates.rightside_text = () => '';
+			gantt.templates.task_text = () => '';
+			gantt.render();
+		}
+	}, [store.APP.viewWork]);
+
 	const renderCheckboxСonnections = () => {
 		return (
 			<div onClick={props.handleToggleLinks}>
@@ -798,6 +969,7 @@ const FormPanel = (props: Props) => {
 			{renderCommonBlock()}
 			{resources.map((item, index) => getFormByType(item, index))}
 			{renderError()}
+			{renderColorPanel()}
 			{renderBottom()}
 		</div>
 	);

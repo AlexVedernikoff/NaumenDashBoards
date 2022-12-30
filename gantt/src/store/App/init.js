@@ -8,6 +8,7 @@ export const initialAppState: AppState = {
 		serviceCall$PMTask: []
 	},
 	contentCode: '',
+	currentColorSettings: [],
 	currentInterval: {},
 	currentVersion: '',
 	diagramKey: '',
@@ -27,6 +28,7 @@ export const initialAppState: AppState = {
 	masterSettings: {},
 	metaClass: '',
 	milestonesCheckbox: false,
+	multiplicityCheckbox: false,
 	progressCheckbox: false,
 	resourceAndWorkSettings: [],
 	resources: [],
@@ -36,13 +38,17 @@ export const initialAppState: AppState = {
 	stateMilestonesCheckbox: false,
 	subjectUuid: '',
 	tasks: [],
+	textPositionCheckbox: false,
 	user: {
 		email: '',
 		name: '',
-		role: USER_ROLES.REGULAR
+		role: ''
 	},
 	users: [],
+	vacationAndWeekendsCheckbox: false,
 	versions: [],
+	viewOfNestingCheckbox: false,
+	viewWork: {},
 	workAttributes: [],
 	workData: {},
 	workProgresses: {},

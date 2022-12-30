@@ -29,11 +29,24 @@ import {
 	postChangedWorkRelations,
 	postUsers,
 	saveData,
+	saveGanttColorSettings,
 	saveGanttVersionSettingsRequest,
 	updateGanttVersionSettingsRequest
 } from 'utils/api';
 import {APP_EVENTS, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings} from './constants';
-import type {CommonSettings, DiagramData, ResourceSettings, Settings, Source, Tasks, UserData, Users, WorkRelations} from './types';
+import type {
+	CurrentColorSettings,
+	CommonSettings,
+	DiagramData,
+	ResourceSettings,
+	Settings,
+	Source,
+	Tasks,
+	UserData,
+	Users,
+	ViewWork,
+	WorkRelations
+} from './types';
 import type {Dispatch, ThunkAction} from 'store/types';
 import {v4 as uuidv4} from 'uuid';
 
@@ -103,6 +116,7 @@ const deletePersonalView = (): ThunkAction => async (dispatch: Dispatch): Promis
 
 /**
 * Получает все настройки версий
+* @param {boolean} isPersonal - личный вид
 * @param {string} diagramKey - ключ диаграммы
 * @return {ThunkAction}
 */
@@ -144,7 +158,18 @@ const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch:
 	try {
 		dispatch(showLoaderData());
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const {workRelations, workProgresses, diagramKey, commonSettings, endDate, startDate, tasks} = await getGanttVersionsSettings(versionKey, timezone);
+		const {
+			commonSettings,
+			diagramKey,
+			endDate,
+			multiplicityCheckbox,
+			startDate,
+			tasks,
+			viewOfNestingCheckbox,
+			viewWork,
+			workProgresses,
+			workRelations
+		} = await getGanttVersionsSettings(versionKey, timezone);
 
 		dispatch(setColumnTask(tasks));
 		dispatch(setCurrentVersion(versionKey));
@@ -154,6 +179,9 @@ const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch:
 		dispatch(setDiagramLinksData(workRelations));
 		dispatch(setRangeTime({endDate, startDate}));
 		dispatch(saveMasterSettings());
+		dispatch(switchMultiplicityCheckbox(multiplicityCheckbox));
+		dispatch(switchViewOfNestingCheckbox(viewOfNestingCheckbox));
+		dispatch(setTextWork(viewWork));
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -163,16 +191,37 @@ const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch:
 
 /**
 * Сохраняет настройки версий диаграммы в хранилище
+* @param {string} isPersonal - личный вид
+* @param {CommonSettings} - общие настройки
 * @param {string} title - название версии
 * @param {string} createdDate - дата создания
 * @param {Tasks} tasks - задачи на диаграмме
 * @param {WorkRelations} workRelations - объект связи между работами
+* @param {ViewWork} viewWork - вид работы
 */
-const savedGanttVersionSettings = (isPersonal: boolean, commonSettings, title: string, createdDate: string, tasks: Tasks, workRelations: WorkRelations): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const savedGanttVersionSettings = (
+	isPersonal: boolean,
+	commonSettings: CommonSettings,
+	title: string,
+	createdDate: string,
+	tasks: Tasks,
+	workRelations: WorkRelations,
+	viewWork: ViewWork
+): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		const {contentCode, subjectUuid} = getContext();
 
-		await saveGanttVersionSettingsRequest(isPersonal, commonSettings, contentCode, createdDate, subjectUuid, title, tasks, workRelations);
+		await saveGanttVersionSettingsRequest(
+			isPersonal,
+			commonSettings,
+			contentCode,
+			createdDate,
+			subjectUuid,
+			title,
+			tasks,
+			workRelations,
+			viewWork
+		);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -185,12 +234,18 @@ const savedGanttVersionSettings = (isPersonal: boolean, commonSettings, title: s
 * @param {string} diagramKey - ключ диаграммы
 * @param {Tasks} tasksClone - копия задач на диаграмме
 * @param {WorkRelations} workRelations - объект связи между работами
+* @param {ViewWork} viewWork - вид работы
 */
-const saveDataCurrentVersion = (diagramKey: string, tasksClone: Tasks, workRelations: WorkRelations) => async (dispatch) => {
+const saveDataCurrentVersion = (
+	diagramKey: string,
+	tasksClone: Tasks,
+	workRelations: WorkRelations,
+	viewWork: ViewWork
+) => async (dispatch) => {
 	try {
 		const {contentCode, subjectUuid} = getContext();
 
-		await applyVersion(diagramKey, tasksClone, workRelations, contentCode, subjectUuid);
+		await applyVersion(diagramKey, tasksClone, workRelations, contentCode, subjectUuid, viewWork);
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -519,10 +574,29 @@ const updateWorks = (worksWithoutStartOrEndDateCheckbox: boolean): ThunkAction =
 };
 
 /**
+ * Обновляет настройки цветов
+ * @param {CurrentColorSettings} currentColorSettings - список настроек цветов
+ * @return {ThunkAction}
+ */
+const updateGanttColorSettings = (currentColorSettings: CurrentColorSettings): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+	try {
+		const {contentCode, subjectUuid} = getContext();
+
+		await saveGanttColorSettings(currentColorSettings, contentCode, subjectUuid);
+	} catch (error) {
+		console.log(error);
+		dispatch(setErrorCommon(error));
+	} finally {
+		dispatch(hideLoaderData());
+	}
+};
+
+/**
  * Получает данные, необходимые для отображения данных ВП
+ * @param {boolean} personalView - личный вид
  * @returns {ThunkAction}
  */
-const getGanttData = (personal): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
+const getGanttData = (personalView: boolean): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		dispatch(showLoaderData());
 
@@ -531,23 +605,29 @@ const getGanttData = (personal): ThunkAction => async (dispatch: Dispatch): Prom
 		const {
 			attributesMap,
 			commonSettings,
+			currentColorSettings,
 			currentInterval,
 			diagramKey,
 			endDate,
 			isPersonal,
 			isPersonalDiagram,
 			milestonesCheckbox,
+			multiplicityCheckbox,
 			progressCheckbox,
 			startDate,
 			stateMilestonesCheckbox,
 			tasks,
+			textPositionCheckbox,
+			viewOfNestingCheckbox,
+			viewWork,
 			workRelationCheckbox,
 			workRelations,
 			worksWithoutStartOrEndDateCheckbox
-		} = await getDiagramData(contentCode, subjectUuid, timeZone, personal);
+		} = await getDiagramData(contentCode, subjectUuid, timeZone, personalView);
 
 		dispatch(getUsersAll());
 		dispatch(switchMilestonesCheckbox(milestonesCheckbox));
+		dispatch(setEntityList(currentColorSettings));
 		dispatch(switchStateMilestonesCheckbox(stateMilestonesCheckbox));
 		dispatch(switchWorksWithoutStartOrEndDateCheckbox(worksWithoutStartOrEndDateCheckbox));
 		dispatch(setCurrentValueForInterval(currentInterval));
@@ -558,11 +638,15 @@ const getGanttData = (personal): ThunkAction => async (dispatch: Dispatch): Prom
 		dispatch(setPersonalView(isPersonalDiagram));
 		dispatch(setPersonal(isPersonal));
 		dispatch(setContentCode(contentCode));
+		dispatch(setTextWork(viewWork));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setSubjectUuid(subjectUuid));
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
 		dispatch(setDiagramData(tasks || []));
 		dispatch(setDiagramLinksData(workRelations));
+		dispatch(switchMultiplicityCheckbox(multiplicityCheckbox));
+		dispatch(switchTextPositionCheckbox(textPositionCheckbox));
+		dispatch(switchViewOfNestingCheckbox(viewOfNestingCheckbox));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -893,14 +977,44 @@ const changeWorkProgress = (payload: WorkProgress) => ({
 	type: APP_EVENTS.SET_WORK_PROGRESS
 });
 
+const switchMultiplicityCheckbox = (payload: boolean) => ({
+	payload,
+	type: APP_EVENTS.SWITCH_MULTIPLICITY_CHECKBOX
+});
+
+const switchVacationAndWeekendsCheckbox = (payload: boolean) => ({
+	payload,
+	type: APP_EVENTS.SWITCH_VACATION_AND_WEEKENDS_CHECKBOX
+});
+
+const switchViewOfNestingCheckbox = (payload: boolean) => ({
+	payload,
+	type: APP_EVENTS.SWITCH_VIEW_OF_NESTING_CHECKBOX
+});
+
+const switchTextPositionCheckbox = (payload: boolean) => ({
+	payload,
+	type: APP_EVENTS.SWITCH_TEXT_POSITION_CHECKBOX
+});
+
 const setPersonalView = (payload: boolean) => ({
 	payload,
 	type: APP_EVENTS.SET_PERSONAL_VIEW
 });
 
+const setTextWork = (payload: boolean) => ({
+	payload,
+	type: APP_EVENTS.SET_TEXT_WORK
+});
+
 const setPersonal = (payload: boolean) => ({
 	payload,
 	type: APP_EVENTS.SET_PERSONAL
+});
+
+const setEntityList = (payload: boolean) => ({
+	payload,
+	type: APP_EVENTS.SET_ENTITY_LIST
 });
 
 export {
@@ -945,17 +1059,24 @@ export {
 	setDiagramLinksData,
 	setCurrentValueForInterval,
 	setCurrentVersion,
+	setEntityList,
 	setListVersions,
 	setPersonalView,
 	setRangeTime,
 	setResourceSettings,
 	setUsers,
+	setTextWork,
 	showLoaderSettings,
 	switchMilestonesCheckbox,
+	switchMultiplicityCheckbox,
 	switchProgressCheckbox,
 	switchStateMilestonesCheckbox,
+	switchTextPositionCheckbox,
+	switchVacationAndWeekendsCheckbox,
+	switchViewOfNestingCheckbox,
 	switchWorkRelationCheckbox,
 	switchWorksWithoutStartOrEndDateCheckbox,
+	updateGanttColorSettings,
 	updateGanttVersionSettings,
 	updateWorks
 };

@@ -17,7 +17,11 @@
 .gantt_grid .gantt_grid_scale .gantt_grid_column_resize_wrap {
 	width: 1px;
     margin-left: 0;
-} 
+}
+
+.gantt_side_content.gantt_link_crossing {
+	bottom: 0 !important;
+}
 
 .gantt-container,
 .gantt_grid,
@@ -121,19 +125,13 @@
 	}
 }
 
-.gantt_task_content {
-	display: none;
-}
-
-
-
 @supports (-moz-appearance:none) {
 	.gantt_hor_scroll {
 		height: 17px !important
 	}
 
 	.gantt_layout_cell_border_right {
-		height: 94vh !important;
+		height: calc(100vh - 12px) !important;
 	}
 
 	.gantt_layout_x {
@@ -141,8 +139,8 @@
 	}
 
 	.gantt_layout_cell.scrollHor_cell {
-		bottom: -7px;
-		position: absolute !important;
+		bottom: 10px;
+		position: fixed !important;
 		top: auto;
 	}
 

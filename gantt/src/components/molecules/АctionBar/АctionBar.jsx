@@ -149,7 +149,7 @@ const АctionBar = props => {
 			setValueError('');
 		} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
 			setValueError('Дата начала не может быть позднее даты завершения');
-		} else if (!inputStartDate.length || !inputEndDate.length) {
+		} else if (!inputStartDate || !inputEndDate) {
 			setValueError('Заполните все поля');
 		} else {
 			setValueError('Некорректная дата');
@@ -194,12 +194,12 @@ const АctionBar = props => {
 
 	const submitConfirmation = () => {
 		const {diagramKey, saveDataCurrentVersion, versionKey} = props;
-		const {tasks} = store.APP;
+		const {tasks, viewWork} = store.APP;
 		const tasksClone = deepClone(tasks);
 
 		const links = gantt.getLinks();
 
-		saveDataCurrentVersion(diagramKey, tasksClone, links);
+		saveDataCurrentVersion(diagramKey, tasksClone, links, viewWork);
 		setShowModalConfirmation(!showModalConfirmation);
 	};
 
@@ -307,9 +307,9 @@ const АctionBar = props => {
 
 	const submitSaveVersion = () => {
 		const title = deepClone(nameValue);
-		const {settings, tasks, workRelations} = store.APP;
+		const {settings, tasks, viewWork, workRelations} = store.APP;
 
-		props.savedGanttVersionSettings(isPersonal, settings, title, new Date().toLocaleString(), tasks, workRelations);
+		props.savedGanttVersionSettings(isPersonal, settings, title, new Date().toLocaleString(), tasks, workRelations, viewWork);
 		dispatch(props.setCurrentVersion(''));
 
 		setShowModalSave(!showModalSave);

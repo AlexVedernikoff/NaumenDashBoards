@@ -56,6 +56,10 @@ export default class FakeApi {
 		return null;
 	}
 
+	async saveGanttColorSettings () {
+		return null;
+	}
+
 	async deleteWorkDateRanges () {
 		return 'Удалено';
 	}

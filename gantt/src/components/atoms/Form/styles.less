@@ -11,8 +11,12 @@
 		background-color: white;
 		border-radius: 0 0 @border-radius @border-radius;
 		font-size: 13px;
+		max-height: 326px;
+		min-height: 249px;
 		padding: 4px 0 10px 4px;
 		position: relative;
+		overflow-y: scroll;
+		overflow-x: visible;
 
 		& input {
 			font-size: 13px;
@@ -21,10 +25,10 @@
 
 	.form {
 		color: #323232;
-		overflow-y: scroll;
+		overflow-y: hidden !important;
 		position: absolute;
 		right: calc(100% + 20px);
-		top: 30% !important;
+		top: 10% !important;
 		width: 600px;
 		z-index: 30;
 	}

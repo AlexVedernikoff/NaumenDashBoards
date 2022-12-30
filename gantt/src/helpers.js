@@ -109,6 +109,12 @@ const shiftTimeZone = (date: Date) => {
 const isMacOS = () => ['MacIntel', 'Mac68K', 'MacPPC'].includes(navigator.platform);
 
 /**
+ * Проверяет объект на пустоту
+ * @returns {boolean}
+ */
+const isEmpty = obj => Object.keys(obj).length === 0;
+
+/**
  * На текущий момент у окружения метода нет полифилов к es6. Для стабильной работы на старых браузерах все ответы
  * перепарсиваются согласно окружению внутреннего приложения.
  * @param {Function} restCallModule - метод для осуществления запросов к модулям
@@ -155,6 +161,7 @@ export {
 	escapeString,
 	extend,
 	getMapValues,
+	isEmpty,
 	isMacOS,
 	isObject,
 	normalizeDate,

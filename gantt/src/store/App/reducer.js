@@ -6,6 +6,26 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SET_TEXT_WORK:
+			return {
+				...state,
+				viewWork: action.payload
+			};
+		case APP_EVENTS.SET_ENTITY_LIST:
+			return {
+				...state,
+				currentColorSettings: action.payload
+			};
+		case APP_EVENTS.SWITCH_TEXT_POSITION_CHECKBOX:
+			return {
+				...state,
+				textPositionCheckbox: action.payload
+			};
+		case APP_EVENTS.SET_TEXT:
+			return {
+				...state,
+				textWork: action.payload
+			};
 		case APP_EVENTS.SET_PERSONAL:
 			return {
 				...state,
@@ -15,6 +35,21 @@ const reducer = (state: AppState = initialAppState, action: AppAction = defaultA
 			return {
 				...state,
 				isPersonalDiagram: action.payload
+			};
+		case APP_EVENTS.SWITCH_MULTIPLICITY_CHECKBOX:
+			return {
+				...state,
+				multiplicityCheckbox: action.payload
+			};
+		case APP_EVENTS.SWITCH_VACATION_AND_WEEKENDS_CHECKBOX:
+			return {
+				...state,
+				vacationAndWeekendsCheckbox: action.payload
+			};
+		case APP_EVENTS.SWITCH_VIEW_OF_NESTING_CHECKBOX:
+			return {
+				...state,
+				viewOfNestingCheckbox: action.payload
 			};
 		case APP_EVENTS.SET_USERS:
 			return {

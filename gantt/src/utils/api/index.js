@@ -34,6 +34,7 @@ import {
 	postChangedWorkRelations,
 	postUsers,
 	saveData,
+	saveGanttColorSettings,
 	saveGanttVersionSettingsRequest
 } from './context';
 
@@ -70,6 +71,7 @@ export {
 	postChangedWorkRelations,
 	postUsers,
 	saveData,
+	saveGanttColorSettings,
 	saveGanttVersionSettingsRequest
 };
 
