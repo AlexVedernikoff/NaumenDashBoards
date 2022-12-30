@@ -160,7 +160,7 @@ const ModalTask = (props: Props) => {
 			setShowModal(false);
 		} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
 			setValueError('Дата начала не может быть позднее даты завершения');
-		} else if (!inputStartDate.length || !inputEndDate.length) {
+		} else if (!inputStartDate || !inputEndDate) {
 			setValueError('Заполните все поля');
 		} else {
 			setValueError('Некорректная дата');

@@ -1,8 +1,19 @@
 // @flow
 import {api} from './';
 import {arrayToTree} from 'utils/arrayToTree';
-import {FilterFormDescriptorDTO} from './types';
-import type {Params, Settings, Source, Task, Tasks, UserData, Users, WorkRelations} from 'store/app/types';
+import type {
+	CommonSettings,
+	CurrentColorSettings,
+	Params,
+	Settings,
+	Source,
+	Task,
+	Tasks,
+	UserData,
+	Users,
+	WorkRelations
+} from 'store/App/types';
+import type {FilterFormDescriptorDTO} from 'utils/api/types'
 
 const getDataSourceValue = ({classFqn: value, hasDynamic, title: label}) => ({
 	hasDynamic,
@@ -60,6 +71,7 @@ const getGanttVersionsSettings = async (versionKey: string, timezone: string): P
 /**
 * Сохраняет настройки версий диаграммы в хранилище
 * @param {boolean} isPersonal - личный вид
+* @param {CommonSettings} - общие настройки
 * @param {string} title - название версии
 * @param {string} createdDate - дата создания
 * @param {string} contentCode - ключ контента, на котором расположена диаграмма
@@ -67,8 +79,26 @@ const getGanttVersionsSettings = async (versionKey: string, timezone: string): P
 * @param {Tasks} tasks - задачи на диаграмме
 * @param {WorkRelations} workRelations - объект связи между работами
 */
-const saveGanttVersionSettingsRequest = async (isPersonal: boolean, commonSettings, contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations): Promise<Params> => {
-	api.saveGanttVersionSettingsRequest(isPersonal, commonSettings, contentCode, createdDate, subjectUUID, title, tasks, workRelations);
+const saveGanttVersionSettingsRequest = async (
+	isPersonal: boolean,
+	commonSettings: CommonSettings,
+	contentCode: string,
+	createdDate: string,
+	subjectUUID: string,
+	title: string,
+	tasks: Tasks,
+	workRelations: WorkRelations
+): Promise<Params> => {
+	api.saveGanttVersionSettingsRequest(
+		isPersonal,
+		commonSettings,
+		contentCode,
+		createdDate,
+		subjectUUID,
+		title,
+		tasks,
+		workRelations
+	);
 };
 
 /**
@@ -217,6 +247,17 @@ const getInitialSettings = async (contentCode: string, subjectUuid: string): Pro
 const getDiagramData = async (contentCode: string, subjectUuid: string, timezone: string, isPersonal: boolean): Promise<Params> => {
 	const data = await api.getDiagramData(contentCode, subjectUuid, timezone, isPersonal);
 	return data;
+};
+
+/**
+* Сохраняет настройки цветов
+* @param {CurrentColorSettings} currentColorSettings - список настроек цветов
+* @param {string} contentCode - список настроек цветов
+* @param {string} subjectUuid - список настроек цветов
+* @returns {ThunkAction}
+*/
+const saveGanttColorSettings = async (currentColorSettings: CurrentColorSettings, contentCode: string, subjectUuid: string): Promise<Source> => {
+	await api.saveGanttColorSettings(currentColorSettings, contentCode, subjectUuid);
 };
 
 /**
@@ -406,8 +447,15 @@ const getWorkAttributes = async (attributeGroupCode: string, metaClassFqn: strin
 * @param {string} subjectUUID - Uuid объекта
 * @param {string} contentCode - ключ контента, на котором расположена диаграмма
 */
-const applyVersion = async (diagramKey: string, tasksClone: Tasks, workRelations: WorkRelations, contentCode: string, subjectUuid: string) => {
-	await api.applyVersion(diagramKey, tasksClone, workRelations, contentCode, subjectUuid);
+const applyVersion = async (
+	diagramKey: string,
+	tasksClone: Tasks,
+	workRelations: WorkRelations,
+	contentCode: string,
+	subjectUuid: string,
+	viewWork
+) => {
+	await api.applyVersion(diagramKey, tasksClone, workRelations, contentCode, subjectUuid, viewWork);
 };
 
 export {
@@ -448,5 +496,6 @@ export {
 	postUsers,
 	saveGanttVersionSettingsRequest,
 	saveData,
+	saveGanttColorSettings,
 	updateGanttVersionSettingsRequest
 };

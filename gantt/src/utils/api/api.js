@@ -1,5 +1,5 @@
 // @flow
-import {Settings, Tasks, Users, WorkRelations} from 'src/store/App/types';
+import {CurrentColorSettings, Settings, Tasks, Users, WorkRelations} from 'src/store/App/types';
 
 export default class Api {
 	constructor () {
@@ -85,6 +85,7 @@ export default class Api {
 	/**
 	* Сохраняет настройки версий диаграммы в хранилище
 	* @param {boolean} isPersonal - личный вид
+	* @param {CommonSettings} - общие настройки
 	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
 	* @param {string} createdDate - дата создания
 	* @param {string} subjectUUID - UUID объекта
@@ -92,7 +93,16 @@ export default class Api {
 	* @param {Tasks} tasks - задачи на диаграмме
 	* @param {WorkRelations} workRelations - объект связи между работами
 	*/
-	async saveGanttVersionSettingsRequest (isPersonal: boolean, commonSettings, contentCode: string, createdDate: string, subjectUUID: string, title: string, tasks: Tasks, workRelations: WorkRelations) {
+	async saveGanttVersionSettingsRequest (
+		isPersonal: boolean,
+		commonSettings: CommonSettings,
+		contentCode: string,
+		createdDate: string,
+		subjectUUID: string,
+		title: string,
+		tasks: Tasks,
+		workRelations: WorkRelations
+	) {
 		const url = `exec-post?func=modules.ganttSettings.saveGanttVersionSettings&params=requestContent,user`;
 		const body = {commonSettings, contentCode, createdDate, isPersonal, subjectUUID, tasks, title, workRelations};
 		const options = {
@@ -364,6 +374,28 @@ export default class Api {
 		};
 
 		return this.jsApi.restCall(url, options);
+	}
+
+	/**
+	* Сохраняет настройки цветов
+	* @param {CurrentColorSettings} currentColorSettings - список сущностей
+	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
+	* @param {string} subjectUuid - UUID объекта
+	* @returns {ThunkAction}
+	*/
+	async saveGanttColorSettings (currentColorSettings: CurrentColorSettings, contentCode: string, subjectUUID: string) {
+		const url = `exec-post?func=modules.ganttSettings.saveGanttColorSettings&params=requestContent`;
+		const body = {
+			contentCode,
+			currentColorSettings,
+			subjectUUID
+		};
+		const options = {
+			body: JSON.stringify(body),
+			method: 'POST'
+		};
+
+		this.jsApi.restCall(url, options);
 	}
 
 	async getDataSources () {

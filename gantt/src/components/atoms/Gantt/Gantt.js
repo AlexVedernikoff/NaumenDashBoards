@@ -120,11 +120,36 @@ const Gantt = (props: Props) => {
 	};
 
 	const editWorkInterval = () => {
-		const tasks = gantt.getTaskByTime();
+		const {tasks} = store.APP;
+		const tasksGantt = gantt.getTaskByTime();
 		const keys = ['end_date', 'start_date', 'id'];
 
-		const tasksWithoutExcess = tasks.map(task => keys.reduce((acc, key) => {
-			acc[key] = task[key];
+		const tasksWithoutExcess = tasksGantt.map(task => keys.reduce((acc, key) => {
+			if (task[key]) {
+				if (typeof task[key] === 'object') {
+					const minutes = task[key].getMinutes();
+
+					if (task.unscheduled) {
+						acc.end_date = '';
+						acc.start_date = '';
+					} else if (minutes === 1 && key === 'end_date') {
+						acc.end_date = '';
+					} else {
+						for (let item = 0; item < tasks.length; item++) {
+							if (task.id === tasks[item].id) {
+								if (tasks[item].start_date === '') {
+									acc.start_date = '';
+								} else {
+									acc[key] = task[key];
+								}
+							}
+						}
+					}
+				} else {
+					acc[key] = task[key];
+				}
+			}
+
 			return acc;
 		}, {}));
 
@@ -180,12 +205,18 @@ const Gantt = (props: Props) => {
 		gantt.config.resize_rows = true;
 		gantt.config.scale_offset_minimal = false;
 		gantt.config.scroll_size = 6;
-		gantt.config.round_dnd_dates = false;
 		gantt.config.order_branch = true;
 		gantt.config.readonly = true;
+		gantt.config.show_unscheduled = true;
+		gantt.config.sort = true;
+
+		gantt.config.round_dnd_dates = !!store.APP.multiplicityCheckbox;
+
+		gantt.config.date_grid = '%d.%m.%Y %H:%i';
 
 		gantt.templates.progress_text = (start, end, task) => Math.round(task.progress * 100) + '%';
-		gantt.templates.rightside_text = (start, end, task) => task.text;
+
+		gantt.templates.task_unscheduled_time = () => '';
 
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
@@ -219,13 +250,13 @@ const Gantt = (props: Props) => {
 
 				if (task.type === 'milestone') {
 					return `<br /><b>Название:</b> ${task.text} <br /><b>Контрольная точка:</b> ${dateToStr(task.start_date)}`;
-				} else if (storeTask.end_date && storeTask.start_date) {
+				} else if (storeTask?.end_date && storeTask?.start_date) {
 					return `<br /><b>Название:</b> ${task.text} <br /><b>Начальная дата:</b> ${dateToStr(task.start_date)}
 						<br /><b>Конечная дата:</b> ${dateToStr(task.end_date)}`;
 				} else {
-					if (storeTask.end_date) {
+					if (storeTask?.end_date) {
 						return `<br /><b>Название:</b> ${task.text} <br /><b>Конечная дата:</b> ${dateToStr(task.end_date)}`;
-					} else if (storeTask.start_date) {
+					} else if (storeTask?.start_date) {
 						return `<br /><b>Название:</b> ${task.text} <br /><b>Начальная дата:</b> ${dateToStr(task.start_date)}`;
 					}
 				}
@@ -582,7 +613,6 @@ const Gantt = (props: Props) => {
 					for (const key in newTask) {
 						if (key === state.columnName) {
 							newTask[key] = state.newValue;
-							newTask.text = state.newValue;
 						}
 					}
 					dispatch(setColumnTask(newTasks));
@@ -592,6 +622,9 @@ const Gantt = (props: Props) => {
 					tasksGantt.forEach(task => {
 						if (task.id === state.id) {
 							task[state.columnName] = state.newValue;
+							task.unscheduled = false;
+							gantt.updateTask(state.id);
+							gantt.updateTask(task.id);
 
 							if (task.name === state.oldValue) {
 								if (column.editor.type === 'text') {
@@ -604,7 +637,16 @@ const Gantt = (props: Props) => {
 								if (column.editor.type === 'text') {
 									task.text = task.name;
 								} else {
-									task.text = state.oldValue;
+									task.text = task.name;
+									store.APP.tasks.forEach(item => {
+										if (item.id === task.id) {
+											if (state.columnName === 'end_date' && item.start_date === '' && item.end_date === '') {
+												task.start_date = task.end_date;
+												task.duration = 0;
+												gantt.updateTask(task.id);
+											}
+										}
+									});
 								}
 							}
 

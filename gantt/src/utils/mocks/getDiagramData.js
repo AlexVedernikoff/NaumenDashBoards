@@ -64,6 +64,36 @@ const data = {
 		"rollUp":false,
 		"scale":"YEAR"
 	},
+	"currentColorSettings": [
+		{
+		   "type": "WORK",
+		   "color":"red",
+		   "id": "WORKCOLOR",
+		   "label": "Текст работы"
+		 },
+		 {
+			"type": "WORK",
+			"background": "green",
+			"id": "WORKBACKGROUND",
+			"label": "Прямоугольник работы"
+		 },
+		 {
+			"type": "WORK",
+			"color":"red",
+			"id": "WORKCOLOR",
+			"label": "Текст работы"
+		  },
+		  {
+			 "type": "WORK",
+			 "background": "green",
+			 "id": "WORKBACKGROUND",
+			 "label": "Прямоугольник работы"
+		  }
+	],
+	"textWork": {
+		"label": 'рядом с работами',
+		"value": 'about'
+	},
 	"diagramKey":"root_gant2",
 	"mandatoryAttributes" : {
 		"employee": [
@@ -76,6 +106,7 @@ const data = {
 		]
 	},
 	'milestonesCheckbox' : false,
+	'textPositionCheckbox': false,
 	'tasks': [
 		{
 			"id":"employee$75250",
@@ -105,7 +136,7 @@ const data = {
 			"editable": true,
 			"name": "1",
 			"parent": 'employee$75250',
-			"typeEntity": "RESOURCE"
+			"typeEntity": "WORK"
 		},
 		{
 			"id":"3",
@@ -122,21 +153,6 @@ const data = {
 			"parent": 'employee$75250',
 			"typeEntity": "WORK"
 		},
-		{
-			"id":"4",
-			"text":"смена2",
-			"code1":"смена2",
-			"start_date":"2020-11-13T12:55:26",
-			"end_date": "2024-01-01T12:55:26",
-			"level":1,
-			"type":"WORK",
-			"editable": true,
-			"name": "4",
-			"parent": 'employee$75250',
-			"duration": "1",
-			"unscheduled": true,
-			"typeEntity": "WORK"
-		},
 	],
 	"workRelations":[
         { 
@@ -146,11 +162,16 @@ const data = {
 			"editable": true
 		}
     ],
+	"viewOfNestingCheckbox": false,
+	"viewWork":{
+		"label": "в работах",
+		"value": "work"
+	},
 	"progressCheckbox": false,
 	"workRelationCheckbox": false,
 	"startDate": "2021-09-02, 00:00:00",
 	"endDate": "2025-09-07, 00:00:00",
-	"currentInterval": {"label": "с ... по", "value": "INTERVAL"},
+	"currentInterval": null,
 };
 
 export const getDiagramData = () => {

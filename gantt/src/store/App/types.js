@@ -137,4 +137,18 @@ export type UserModalData = {
 	name: string,
 };
 
+export type ViewWork = {
+	label: string,
+	value: string
+};
+
+export type ItemColorSettings = {
+	color: string,
+	id: string,
+	label: string,
+	type: string
+};
+
+export type CurrentColorSettings = ItemColorSettings[];
+
 export type Users = UserModalData[];

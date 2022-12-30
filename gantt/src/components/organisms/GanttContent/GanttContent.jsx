@@ -109,9 +109,11 @@ export class GanttContent extends PureComponent<Props> {
 	};
 
 	renderViewPanel = () => {
-		const {roleSuper} = this.props;
+		const {role} = this.props;
 
-		return !roleSuper ? <ViewPanel /> : null;
+		return role !== 'SUPER' && !!role
+			? <ViewPanel />
+			: null;
 	};
 
 	renderАctionBar = () => {
