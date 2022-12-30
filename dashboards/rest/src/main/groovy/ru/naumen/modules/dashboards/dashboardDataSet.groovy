@@ -380,7 +380,7 @@
                     {
                         res =
                             prepareDataSet(res, widgetSettings, showTableNulls, requestHasBreakdown)
-                        result = getDiagramData(
+                        Object result = getDiagramData(
                             request, user, diagramType, templateUUID,
                             aggregationCnt, widgetSettings,
                             tableRequestSettings?.ignoreLimits
