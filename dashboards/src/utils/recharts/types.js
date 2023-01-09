@@ -213,6 +213,7 @@ export type SpeedometerOptions = {
 export type ComboAxisOptions = AxisOptions & {
 	color: string,
 	dataKey: string,
+	depended: boolean,
 	max: number,
 	min: number,
 };

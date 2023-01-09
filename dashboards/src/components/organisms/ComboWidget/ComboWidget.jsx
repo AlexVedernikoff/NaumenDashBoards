@@ -329,7 +329,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 
 	renderYAxis = (yAxis, idx) => {
 		const {options: {formatters}} = this.state;
-		const {axisName: value, color, dataKey, fontFamily, fontSize, max, min, show, showName, width} = yAxis;
+		const {axisName: value, color, dataKey, depended, fontFamily, fontSize, max, min, show, showName, width} = yAxis;
 		const orientation = idx === 0 ? 'left' : 'right';
 		const label = showName
 			? (
@@ -343,10 +343,17 @@ export class ComboWidget extends PureComponent<Props, State> {
 				/>
 			)
 			: null;
+		const numberMin = typeof min === 'number' ? min : 0;
+		const numberMax = typeof max === 'number' ? max : 0;
+
+		const domain = [
+			(dataMin: number): number => !depended && dataMin < numberMin ? dataMin : numberMin,
+			(dataMax: number): number => !depended && dataMax > numberMax ? dataMax : numberMax
+		];
 
 		return (
 			<YAxis
-				domain={[min, max]}
+				domain={domain}
 				fontFamily={fontFamily}
 				fontSize={fontSize}
 				hide={!show}

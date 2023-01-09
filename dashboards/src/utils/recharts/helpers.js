@@ -66,7 +66,7 @@ import {SEPARATOR} from 'store/widgets/buildData/constants';
  * @param {boolean} additiveLow - флаг, определяющий, дополнять ли до 5 значения меньше 100
  * @returns {number} - округленное число
  */
-const getNiceScale = (value: number, additiveLow: boolean = false) => {
+const getNiceScale = (value: number, additiveLow: boolean = false): number => {
 	let result = value;
 
 	if (additiveLow && value < 100) {

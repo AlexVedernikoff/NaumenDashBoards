@@ -60,6 +60,7 @@ const makeDependedYAxis = (axises: Array<ComboAxisOptions>) => {
 	axises.forEach(axis => {
 		axis.max = maxValue;
 		axis.width = maxWidth;
+		axis.depended = true;
 	});
 };
 
@@ -113,13 +114,16 @@ const getYAxisesNumber = (
 		if (!dataSet.sourceForCompute) {
 			const {dataKey, type, yAxisName} = dataSet;
 			const isStacked = type === 'COLUMN_STACKED';
-			let dataSetMax = max;
+			let niceValue = 0;
 
-			if (dataSetMax == null) {
-				dataSetMax = isStacked ? getRangeStacked(dataKey, data.series) : getRangeSeries(dataKey, data.series);
+			if (typeof max === 'number') {
+				niceValue = max;
+			} else {
+				const dataSetMax = isStacked ? getRangeStacked(dataKey, data.series) : getRangeSeries(dataKey, data.series);
+
+				niceValue = getNiceScale(dataSetMax * 1.25);
 			}
 
-			const niceValue = getNiceScale(dataSetMax * 1.25);
 			const width = calculateYAxisNumberWidth(niceValue.toString(), settings, yAxisName);
 
 			result.push({
@@ -127,8 +131,9 @@ const getYAxisesNumber = (
 				axisName: yAxisName,
 				color: isStacked ? '#000' : colors[dataKey],
 				dataKey,
+				depended: false,
 				max: niceValue,
-				min: min || 0,
+				min: typeof min === 'number' ? min : 0,
 				width
 			});
 		}
