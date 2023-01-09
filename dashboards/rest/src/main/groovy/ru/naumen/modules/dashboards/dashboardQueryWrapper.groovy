@@ -654,7 +654,7 @@ class QueryWrapper implements CriteriaWrapper
         }
         else if (parameter.type == Aggregation.NOT_APPLICABLE)
         {
-            wrapper.noneAggregate(criteria, totalValueCriteria, parameter, diagramType)
+            wrapper.noneAggregate(criteria, totalValueCriteria, parameter)
         }
         else
         {
@@ -1043,7 +1043,7 @@ class QueryWrapper implements CriteriaWrapper
                 break
             case GroupType.HOURS:
                 String format = parameter.format
-                IApiCriteriaColumn hourColumn = sc.extract(columnAccordingToUTC, 'HOUR')
+                IApiCriteriaColumn hourColumn = sc.extract(column, 'HOUR')
                 switch (format)
                 {
                     case 'hh':
@@ -1061,7 +1061,7 @@ class QueryWrapper implements CriteriaWrapper
                         }
                         break
                     case 'hh:ii':
-                        IApiCriteriaColumn minuteColumn = sc.extract(columnAccordingToUTC, 'MINUTE')
+                        IApiCriteriaColumn minuteColumn = sc.extract(column, 'MINUTE')
                         criteria.addColumn(
                             sc.concat(
                                 sc.cast(hourColumn, 'string'),

@@ -1494,7 +1494,7 @@
                         return group
                     }
                 }
-                return groups || []
+                return groups ?: []
             }
 
             List fullAggregations = requestData?.aggregations?.collectMany {
@@ -3703,6 +3703,7 @@
                                 filterListSize,
                                 isSourceForEachRow,
                                 notBlank,
+                                null,
                                 user
                             )
 
