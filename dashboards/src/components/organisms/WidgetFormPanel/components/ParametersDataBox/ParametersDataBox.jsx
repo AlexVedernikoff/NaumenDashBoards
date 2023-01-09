@@ -56,21 +56,17 @@ export class ParametersDataBox extends PureComponent<Props> {
 		const mainParameter = this.props.value[this.mainIndex].parameters?.[this.mainIndex];
 		const {attribute: mainAttribute, group: mainGroup} = mainParameter;
 		const {attribute} = parameter;
-		let newParameter = parameter;
+		const result = {...parameter, group: mainGroup};
 
 		if (isEqualSource) {
-			newParameter = mainParameter;
-		} else if (mainAttribute?.type !== attribute?.type) {
-			newParameter = {
-				...newParameter,
-				attribute: null
-			};
+			result.attribute = mainParameter.attribute;
+		} else if (attribute) {
+			const filterAttributes = filterByAttribute([attribute], mainAttribute, !!mainAttribute?.ref);
+
+			result.attribute = filterAttributes.length > 0 ? filterAttributes[0] : null;
 		}
 
-		return {
-			...newParameter,
-			group: mainGroup
-		};
+		return result;
 	};
 
 	filterOptions = (options: Array<Attribute>, index: number, filterByRef: boolean): Array<Attribute> => {
