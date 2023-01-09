@@ -5,7 +5,7 @@ import FormControl from 'components/molecules/FormControl';
 import List from 'components/molecules/Select/components/List';
 import type {Node} from 'components/molecules/TreeSelect/types';
 import type {OnChangeEvent, TreeNode} from 'components/types';
-import type {Props, State} from './types';
+import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import styles from './styles.less';
 import T from 'components/atoms/Translation';
@@ -13,14 +13,19 @@ import t from 'localization';
 import Toggle from 'components/atoms/Toggle';
 import TreeList from 'components/molecules/TreeSelect/components/Tree';
 import withAttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withAttributeFieldset';
+import withShowDynamicAttributes from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withShowDynamicAttributes';
 
-export class MainSelectList extends PureComponent<Props, State> {
+export class MainSelectList extends PureComponent<Props> {
 	components = null;
 	searchDebounce = null;
-	state = {
-		showDynamicAttributes: false,
-		showDynamicAttributesError: false
-	};
+
+	componentDidMount () {
+		const {searchValue} = this.props;
+
+		if (searchValue.trim()) {
+			this.handleChangeSearchValue();
+		}
+	}
 
 	componentDidUpdate (prevProps: Props) {
 		const {searchValue} = this.props;
@@ -35,18 +40,24 @@ export class MainSelectList extends PureComponent<Props, State> {
 	getNodeValue = (node: Node) => this.props.getOptionValue(node.value);
 
 	handleChangeSearchValue = () => {
-		const {dataKey, fetchDynamicAttributeGroups, fetchSearchDynamicAttributeGroups, searchValue, source} = this.props;
-		const {showDynamicAttributes: show} = this.state;
+		const {
+			dataKey,
+			dynamicAttributesMode,
+			fetchDynamicAttributeGroups,
+			fetchSearchDynamicAttributeGroups,
+			searchValue,
+			source
+		} = this.props;
 		const {descriptor, filterId} = source;
 
 		if (this.searchDebounce !== null) {
 			clearTimeout(this.searchDebounce);
 		}
 
-		if (show) {
+		if (dynamicAttributesMode === 'show') {
 			this.searchDebounce = setTimeout(() => {
 				if (searchValue) {
-					if (descriptor || filterId || show) {
+					if (descriptor || filterId) {
 						fetchSearchDynamicAttributeGroups(dataKey, searchValue, descriptor, filterId);
 					}
 				} else {
@@ -63,22 +74,25 @@ export class MainSelectList extends PureComponent<Props, State> {
 			fetchDynamicAttributeGroups,
 			fetchSearchDynamicAttributeGroups,
 			searchValue,
+			setDynamicAttributesMode,
 			source
 		} = this.props;
 		const {descriptor, filterId} = source;
 
-		if (descriptor || filterId || show) {
-			if (!dynamicGroups[dataKey] && !dynamicGroups[dataKey]?.loading) {
-				if (searchValue) {
-					fetchSearchDynamicAttributeGroups(dataKey, searchValue, descriptor, filterId);
-				} else {
-					fetchDynamicAttributeGroups(dataKey, descriptor, filterId);
+		if (this.searchDebounce === null) {
+			if (descriptor || filterId || show) {
+				if (!dynamicGroups[dataKey] && !dynamicGroups[dataKey]?.loading) {
+					if (searchValue) {
+						fetchSearchDynamicAttributeGroups(dataKey, searchValue, descriptor, filterId);
+					} else {
+						fetchDynamicAttributeGroups(dataKey, descriptor, filterId);
+					}
 				}
-			}
 
-			this.setState({showDynamicAttributes: !show});
-		} else {
-			this.setState({showDynamicAttributesError: true});
+				setDynamicAttributesMode(show ? 'hide' : 'show');
+			} else {
+				setDynamicAttributesMode('error');
+			}
 		}
 	};
 
@@ -97,10 +111,19 @@ export class MainSelectList extends PureComponent<Props, State> {
 	isDisabledDynamicNode = (node: TreeNode<Object>) => !node.parent;
 
 	renderDynamicAttributeList = () => {
-		const {dataKey, dynamicGroups, getOptionLabel, getOptionValue, onSelect, searchValue, source, value} = this.props;
-		const {showDynamicAttributes} = this.state;
+		const {
+			dataKey,
+			dynamicAttributesMode,
+			dynamicGroups,
+			getOptionLabel,
+			getOptionValue,
+			onSelect,
+			searchValue,
+			source,
+			value
+		} = this.props;
 
-		if ((source.descriptor || source.filterId) && showDynamicAttributes) {
+		if ((source.descriptor || source.filterId) && dynamicAttributesMode === 'show') {
 			const initialSelected = [getOptionValue(value ?? {})];
 			const {[dataKey]: sourceData = {
 				data: {},
@@ -131,10 +154,10 @@ export class MainSelectList extends PureComponent<Props, State> {
 	};
 
 	renderDynamicAttributesError = () => {
-		const {descriptor, filterId} = this.props.source;
-		const {showDynamicAttributesError} = this.state;
+		const {dynamicAttributesMode, source} = this.props;
+		const {descriptor, filterId} = source;
 
-		if (!descriptor && !filterId && showDynamicAttributesError) {
+		if (!descriptor && !filterId && dynamicAttributesMode === 'error') {
 			return (
 				<div className={styles.dynamicError}>
 					<T text="MainSelectList::DynamicAttributesError" />
@@ -144,10 +167,10 @@ export class MainSelectList extends PureComponent<Props, State> {
 	};
 
 	renderToggleShowingDynAttr = () => {
-		const {source, sources} = this.props;
-		const {showDynamicAttributes} = this.state;
+		const {dynamicAttributesMode, source, sources} = this.props;
 		const {value: sourceValue} = source;
 		const hasDynamic = sourceValue && sources[sourceValue.value] && sources[sourceValue.value].value.hasDynamic;
+		const showDynamicAttributes = dynamicAttributesMode === 'show';
 
 		if (hasDynamic) {
 			return (
@@ -181,4 +204,4 @@ export class MainSelectList extends PureComponent<Props, State> {
 	}
 }
 
-export default withAttributeFieldset(MainSelectList);
+export default withShowDynamicAttributes(withAttributeFieldset(MainSelectList));

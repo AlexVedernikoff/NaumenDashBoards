@@ -9,6 +9,7 @@ import FormField from 'WidgetFormPanel/components/FormField';
 import {getDefaultSystemGroup} from 'store/widgets/helpers';
 import {getErrorPath} from 'WidgetFormPanel/helpers';
 import type {Group} from 'store/widgets/data/types';
+import memoize from 'memoize-one';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import type {Parameter} from 'store/widgetForms/types';
 import type {Props} from './types';
@@ -52,14 +53,14 @@ export class ParameterFieldset extends Component<Props> {
 		}
 	};
 
-	getMainComponents = () => ({
+	getMainComponents = memoize(() => ({
 		Field: this.renderGroupWithContext,
 		MenuContainer: this.renderMenuContainer
-	});
+	}));
 
-	getRefComponents = () => ({
+	getRefComponents = memoize(() => ({
 		Field: this.renderGroupWithContext
-	});
+	}));
 
 	handleChangeGroup = (group: Group, attribute: Attribute) => this.change({
 		...this.props.value,

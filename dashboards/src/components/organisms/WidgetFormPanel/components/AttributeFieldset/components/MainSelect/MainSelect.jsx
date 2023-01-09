@@ -1,16 +1,22 @@
 // @flow
 import AttributeSelect from 'WidgetFormPanel/components/AttributeFieldset/components/AttributeSelect';
 import cn from 'classnames';
+import type {DynamicAttributesMode} from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withShowDynamicAttributes/types';
 import Label from 'components/atoms/Label';
-import List from 'containers/AttributeMainSelectList';
+import MainSelectList from 'containers/AttributeMainSelectList';
 import memoize from 'memoize-one';
-import type {Props} from './types';
 import type {Props as ValueProps} from 'components/molecules/Select/components/Value/types';
+import type {Props, State} from './types';
 import React, {Component} from 'react';
+import {SHOW_DYNAMIC_ATTRIBUTES_CONTEXT} from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withShowDynamicAttributes';
 import styles from './styles.less';
 import withParentClassFqn from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withParentClassFqn';
 
-export class MainSelect extends Component<Props> {
+export class MainSelect extends Component<Props, State> {
+	state = {
+		dynamicAttributesMode: 'hide'
+	};
+
 	getComponents = memoize(components => {
 		const {Field, ...rest} = components;
 
@@ -54,6 +60,9 @@ export class MainSelect extends Component<Props> {
 		};
 	};
 
+	handleSetShowDynamicAttributesMode = (dynamicAttributesMode: DynamicAttributesMode) =>
+		this.setState({dynamicAttributesMode});
+
 	renderField = () => {
 		const {components, value} = this.props;
 
@@ -64,7 +73,12 @@ export class MainSelect extends Component<Props> {
 		return null;
 	};
 
-	renderList = props => <List {...props} />;
+	renderList = props => (
+		<MainSelectList
+			{...props}
+			setShowDynamicAttributesMode={this.handleSetShowDynamicAttributesMode}
+		/>
+	);
 
 	renderValue = (props: ValueProps) => {
 		const {className, label, onClick} = props;
@@ -91,22 +105,25 @@ export class MainSelect extends Component<Props> {
 
 	render () {
 		const {components, getOptions, name, onChangeLabel, onRemove, onSelect, removable, value} = this.props;
+		const {dynamicAttributesMode} = this.state;
 		const {loading, options} = this.getOptionsData();
 
 		return (
-			<AttributeSelect
-				components={this.getComponents(components)}
-				fetchOptions={this.fetchAttributes}
-				getOptions={getOptions}
-				loading={loading}
-				name={name}
-				onChangeLabel={onChangeLabel}
-				onRemove={onRemove}
-				onSelect={onSelect}
-				options={options}
-				removable={removable}
-				value={value}
-			/>
+			<SHOW_DYNAMIC_ATTRIBUTES_CONTEXT.Provider value={{dynamicAttributesMode}}>
+				<AttributeSelect
+					components={this.getComponents(components)}
+					fetchOptions={this.fetchAttributes}
+					getOptions={getOptions}
+					loading={loading}
+					name={name}
+					onChangeLabel={onChangeLabel}
+					onRemove={onRemove}
+					onSelect={onSelect}
+					options={options}
+					removable={removable}
+					value={value}
+				/>
+			</SHOW_DYNAMIC_ATTRIBUTES_CONTEXT.Provider>
 		);
 	}
 }

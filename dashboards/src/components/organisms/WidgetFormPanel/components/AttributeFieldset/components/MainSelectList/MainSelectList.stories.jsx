@@ -11,7 +11,7 @@ export default {
 
 const Template = args => {
 	const [{value}, updateArgs] = useArgs();
-	const onSelect = (newValue) => {
+	const onSelect = newValue => {
 		action('onSelect')(newValue);
 		updateArgs({
 			value: newValue
