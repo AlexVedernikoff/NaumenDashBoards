@@ -342,8 +342,8 @@ export type CircleWidget = {
 
 export type ComboIndicatorSettings = $Shape<{
 	...AxisSettings,
-	max: number,
-	min: number,
+	max: number | string,
+	min: number | string,
 	showDependent: boolean
 }>;
 
