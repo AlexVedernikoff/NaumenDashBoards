@@ -60,7 +60,7 @@ export class MainSelect extends Component<Props, State> {
 		};
 	};
 
-	handleSetShowDynamicAttributesMode = (dynamicAttributesMode: DynamicAttributesMode) =>
+	handleSetDynamicAttributesMode = (dynamicAttributesMode: DynamicAttributesMode) =>
 		this.setState({dynamicAttributesMode});
 
 	renderField = () => {
@@ -76,7 +76,7 @@ export class MainSelect extends Component<Props, State> {
 	renderList = props => (
 		<MainSelectList
 			{...props}
-			setShowDynamicAttributesMode={this.handleSetShowDynamicAttributesMode}
+			setDynamicAttributesMode={this.handleSetDynamicAttributesMode}
 		/>
 	);
 

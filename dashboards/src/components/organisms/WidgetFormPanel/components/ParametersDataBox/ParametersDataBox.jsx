@@ -52,7 +52,7 @@ export class ParametersDataBox extends PureComponent<Props> {
 		onChange(value.map(this.changeAdditionalDataset));
 	};
 
-	changeAdditionalParameters = (isEqualSource: boolean) => (parameter: Parameter) => {
+	changeAdditionalParameters = (isEqualSource: boolean) => (parameter: Parameter): Parameter => {
 		const mainParameter = this.props.value[this.mainIndex].parameters?.[this.mainIndex];
 		const {attribute: mainAttribute, group: mainGroup} = mainParameter;
 		const {attribute} = parameter;
