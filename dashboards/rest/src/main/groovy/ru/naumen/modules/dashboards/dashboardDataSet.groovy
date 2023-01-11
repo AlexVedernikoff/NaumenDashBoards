@@ -2227,9 +2227,18 @@
         private List<String> getAttributesFqnFromDescriptor(String descriptor)
         {
             List descriptorAttributes = []
-            def iDesciptor = listdata.createListDescriptor(descriptor).wrapped
+            Object listDescriptor = listdata.createListDescriptor(descriptor)
+            Object iDescriptor
+            if (listDescriptor.hasProperty('wrapped'))
+            {
+                iDescriptor = listDescriptor.wrapped
+            }
+            else
+            {
+                iDescriptor = listDescriptor.context
+            }
 
-            iDesciptor.listFilter.elements.each { orFilter ->
+            iDescriptor.listFilter.elements.each { orFilter ->
                 orFilter.elements.each { filter ->
                     descriptorAttributes << filter.getAttributeFqn() as String
                 }
@@ -2900,7 +2909,16 @@
                         }
                         String uuid = condition.data.uuid
                         def value = utils.get(uuid)
-                        def nestedVaues =  utils.getNested(value)
+
+                        Collection<IUUIDIdentifiable> nestedVaues
+                        try
+                        {
+                            nestedVaues =  utils.getNested(value)
+                        }
+                        catch (Exception e)
+                        {
+                            nestedVaues = []
+                        }
                         return new FilterParameter(
                             value: [value, *nestedVaues],
                             title: title,
