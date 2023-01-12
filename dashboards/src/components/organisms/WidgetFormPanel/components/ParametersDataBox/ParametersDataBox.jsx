@@ -116,10 +116,10 @@ export class ParametersDataBox extends PureComponent<Props> {
 	};
 
 	renderParameterFieldset = (dataSet: DataSet, index: number) => (parameter: Parameter, parameterIndex: number) => {
-		const {value} = this.props;
-		const {group: mainGroup} = value[this.mainIndex].parameters[this.mainIndex];
-		const disabledGroup = index !== this.mainIndex && (mainGroup.way === GROUP_WAYS.SYSTEM
-			|| this.isEqualMainAttribute(parameter.attribute));
+		// const {value} = this.props;
+		// const {group: mainGroup} = value[this.mainIndex].parameters[this.mainIndex];
+		const disabledGroup = index !== this.mainIndex;
+		// && (mainGroup.way === GROUP_WAYS.SYSTEM || this.isEqualMainAttribute(parameter.attribute));
 		const {dataKey, source} = dataSet;
 		const key = `${dataKey}-${parameterIndex}`;
 
