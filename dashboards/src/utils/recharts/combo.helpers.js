@@ -116,10 +116,20 @@ const getYAxisesNumber = (
 			const isStacked = type === 'COLUMN_STACKED';
 			let niceValue = 0;
 
-			if (typeof max === 'number') {
-				niceValue = max;
+			if (process.env.TASK === 'EXT-13824') {
+				if (typeof max === 'number') {
+					niceValue = max;
+				} else {
+					const dataSetMax = isStacked ? getRangeStacked(dataKey, data.series) : getRangeSeries(dataKey, data.series);
+
+					niceValue = getNiceScale(dataSetMax * 1.25);
+				}
 			} else {
-				const dataSetMax = isStacked ? getRangeStacked(dataKey, data.series) : getRangeSeries(dataKey, data.series);
+				let dataSetMax = max;
+
+				if (typeof dataSetMax !== 'number') {
+					dataSetMax = isStacked ? getRangeStacked(dataKey, data.series) : getRangeSeries(dataKey, data.series);
+				}
 
 				niceValue = getNiceScale(dataSetMax * 1.25);
 			}

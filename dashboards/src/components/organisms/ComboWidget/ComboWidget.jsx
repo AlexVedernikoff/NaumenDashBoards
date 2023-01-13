@@ -343,13 +343,18 @@ export class ComboWidget extends PureComponent<Props, State> {
 				/>
 			)
 			: null;
-		const numberMin = typeof min === 'number' ? min : 0;
-		const numberMax = typeof max === 'number' ? max : 0;
 
-		const domain = [
-			(dataMin: number): number => !depended && dataMin < numberMin ? dataMin : numberMin,
-			(dataMax: number): number => !depended && dataMax > numberMax ? dataMax : numberMax
-		];
+		let domain = [min, max];
+
+		if (process.env.TASK === 'EXT-13824') {
+			const numberMin = typeof min === 'number' ? min : 0;
+			const numberMax = typeof max === 'number' ? max : 0;
+
+			domain = [
+				(dataMin: number): number => !depended && dataMin < numberMin ? dataMin : numberMin,
+				(dataMax: number): number => !depended && dataMax > numberMax ? dataMax : numberMax
+			];
+		}
 
 		return (
 			<YAxis
