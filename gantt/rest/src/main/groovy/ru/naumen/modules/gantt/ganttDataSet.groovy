@@ -11,12 +11,14 @@
 package ru.naumen.modules.gantt
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import groovy.transform.Canonical
 import groovy.transform.Field
 import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.injection.InjectApi
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.shared.dto.ISDtObject
+import com.amazonaws.util.json.Jackson
 import groovy.json.JsonSlurper
 import ru.naumen.core.server.script.api.ISelectClauseApi
 import ru.naumen.core.server.script.api.criteria.IApiCriteria
@@ -87,6 +89,11 @@ class GanttDataSetImpl implements GanttDataSetController
 @Singleton
 class GanttDataSetService
 {
+    /**
+     * Стандартные настройки цветов сущностей
+     */
+    private static final Collection<Map<String, String>> DEFAULT_COLOR_SETTINGS = initDefaultColors()
+
     private static final String GANTT_DATE_PATTERN = "yyyy-MM-dd, HH:mm:ss"
     /**
      * Максимальный размер выборки из БД.
@@ -119,8 +126,13 @@ class GanttDataSetService
         data.stateMilestonesCheckbox = settings.stateMilestonesCheckbox
         data.milestonesCheckbox = settings.milestonesCheckbox
         data.worksWithoutStartOrEndDateCheckbox = settings.worksWithoutStartOrEndDateCheckbox
-
         data.currentInterval = settings.currentInterval
+        data.viewOfNestingCheckbox = settings.viewOfNestingCheckbox
+        data.multiplicityCheckbox = settings.multiplicityCheckbox
+        data.viewWork = settings.viewWork
+        data.currentColorSettings = settings.currentColorSettings
+        data.isPersonalDiagram = settings.isPersonalDiagram
+
         if (user)
         {
             data.isPersonalDiagram = settings.isPersonalDiagram
@@ -177,6 +189,7 @@ class GanttDataSetService
                           GanttDiagramData data)
     {
         data.tasks = buildDataListFromSettings(
+            settings,
             settings.resourceAndWorkSettings,
             null,
             request.subjectUUID
@@ -204,7 +217,7 @@ class GanttDataSetService
                 }
             }
         }
-        determiningCurrentPositionElement(request, data)
+        determiningCurrentPositionElement(request, data, user)
         data.tasks = finalSortingElements(data.tasks)
     }
 
@@ -242,9 +255,12 @@ class GanttDataSetService
      * Метод определения позиции элемента схемы
      * @param request - тело запроса
      * @param data - данные о диаграмме
+     * @param user - данные о пользователе
      * @return задачи с определенной позицией на схеме
      */
-    void determiningCurrentPositionElement(GetGanttSettingsRequest request, GanttDiagramData data)
+    void determiningCurrentPositionElement(GetGanttSettingsRequest request,
+                                           GanttDiagramData data,
+                                           IUUIDIdentifiable user)
     {
         Integer position = 0
         GanttSettingsService service = GanttSettingsService.instance
@@ -361,6 +377,15 @@ class GanttDataSetService
         data.workRelations = ganttVersionsSettings.workRelations
         data.workRelationCheckbox = ganttVersionsSettings.ganttSettings.workRelationCheckbox
         data.progressCheckbox = ganttVersionsSettings.ganttSettings.progressCheckbox
+        data.stateMilestonesCheckbox = ganttVersionsSettings.ganttSettings.stateMilestonesCheckbox
+        data.milestonesCheckbox = ganttVersionsSettings.ganttSettings.milestonesCheckbox
+        data.worksWithoutStartOrEndDateCheckbox =
+            ganttVersionsSettings.ganttSettings.worksWithoutStartOrEndDateCheckbox
+        data.viewOfNestingCheckbox = ganttVersionsSettings.ganttSettings.viewOfNestingCheckbox
+        data.multiplicityCheckbox = ganttVersionsSettings.ganttSettings.multiplicityCheckbox
+        data.viewWork = ganttVersionsSettings.ganttSettings.viewWork
+        data.currentColorSettings = ganttVersionsSettings.ganttSettings.currentColorSettings
+
         if (ganttVersionsSettings.ganttSettings.startDate &&
             ganttVersionsSettings.ganttSettings.endDate)
         {
@@ -377,21 +402,7 @@ class GanttDataSetService
         }
         else
         {
-            data.tasks = generateTasksForDiagramVersion(ganttVersionsSettings)
-            TimeZone timeZone =
-                TimeZone.getTimeZone(
-                    api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?: timezone
-                )
-            ResourceAndWorkSettings workAttributeSettings =
-                ganttVersionsSettings.ganttSettings.resourceAndWorkSettings.find {
-                    it.startWorkAttribute && it.endWorkAttribute
-                }
-            data.tasks.each {
-                formatWorkDates(it, workAttributeSettings, timeZone)
-                setWorkTypeToProjectIfItHasChildren(it, data.tasks)
-                setWorkProgressVersion(it, ganttVersionsSettings)
-                setColumnDateFormats(it, timeZone)
-            }
+            data.tasks = ganttVersionsSettings.tasks
         }
         return data
     }
@@ -404,7 +415,7 @@ class GanttDataSetService
     private Collection<Map<String, Object>> filterTasksWithNoDateRanges(Collection<Map<String, Object>> tasks)
     {
         return tasks.findResults {
-            Boolean startAndEndDateExist = it.start_date || it.end_date
+            Boolean startAndEndDateExist = it.start_date && it.end_date
             Boolean type = it.type == SourceType.WORK
             if (it.type in [SourceType.RESOURCE, 'milestone', 'project'])
             {
@@ -462,7 +473,7 @@ class GanttDataSetService
 
             diagramEntities.each { entity ->
                 Map<String, Object> task = [:]
-                if (entity.sourceType == 'WORK' || entity.sourceType == 'milestone')
+                if (entity.sourceType in ['WORK', 'milestone', 'project'])
                 {
                     task.parent = entity.parent
                     task.datesStartDateAndEndDate = entity.datesStartDateAndEndDate
@@ -493,8 +504,50 @@ class GanttDataSetService
                         task[fieldCode] = Date.parse("yyyy-MM-dd'T'HH:mm:ss", task[fieldCode])
                     }
                 }
-                if (task.type == 'milestone')
+
+                if (task.type == 'WORK')
                 {
+                    task << ['typeEntity': task.type]
+                    task << ['textColor':
+                                 ganttVersionsSettings.ganttSettings?.currentColorSettings[0]?.color
+                                     ?: DEFAULT_COLOR_SETTINGS[0].color]
+                    task << ['color':
+                                 ganttVersionsSettings
+                                     .ganttSettings?.currentColorSettings[1]?.background ?:
+                                     DEFAULT_COLOR_SETTINGS[1].color]
+                }
+                else if (task.type == 'RESOURCE')
+                {
+                    task << ['typeEntity': task.type]
+                    task << ['textColor':
+                                 ganttVersionsSettings.ganttSettings?.currentColorSettings[2]?.color
+                                     ?: DEFAULT_COLOR_SETTINGS[2].color]
+                    task << ['color':
+                                 ganttVersionsSettings
+                                     .ganttSettings?.currentColorSettings[3]?.background ?:
+                                     DEFAULT_COLOR_SETTINGS[3].color]
+                }
+                else if (task.type == 'project')
+                {
+                    task << ['typeEntity': task.type]
+                    task << ['textColor':
+                                 ganttVersionsSettings.ganttSettings?.currentColorSettings[4]?.color
+                                     ?: DEFAULT_COLOR_SETTINGS[4].color]
+                    task << ['color':
+                                 ganttVersionsSettings
+                                     .ganttSettings?.currentColorSettings[5]?.background ?:
+                                     DEFAULT_COLOR_SETTINGS[5].color]
+                }
+                else if (task.type == 'milestone')
+                {
+                    task << ['typeEntity': task.type]
+                    task << ['textColor':
+                                 ganttVersionsSettings.ganttSettings?.currentColorSettings[6]?.color
+                                     ?: DEFAULT_COLOR_SETTINGS[6].color]
+                    task << ['color':
+                                 ganttVersionsSettings
+                                     .ganttSettings?.currentColorSettings[7]?.background ?:
+                                     DEFAULT_COLOR_SETTINGS[7].color]
                     task.completed = entity.completed
                     task.remove('end_date')
                 }
@@ -707,12 +760,14 @@ class GanttDataSetService
 
     /**
      * Метод получения данных для построения диаграммы Ганта, вызывается рекурсивно
-     * @param settingsList - иерархический список настроек
+     * @param generalSettings - общие данные для настроек и построения диаграммы Ганта
+     * @param settingsList - иерархический список настроек (подтип generalSettings)
      * @param parentUUID - уникальный идентификатор записи в БД о родителе
      * @param subjectUUID - уникальный идентификатор объекта, на карточке которого расположена диаграмма
      * @return список List<String, String> параметров для построения диаграммы
      */
-    private List<Map<String, String>> buildDataListFromSettings(Collection<ResourceAndWorkSettings> settingsList,
+    private List<Map<String, String>> buildDataListFromSettings(GanttSettingsClass generalSettings,
+                                                                Collection<ResourceAndWorkSettings> settingsList,
                                                                 String parentUUID,
                                                                 String subjectUUID)
     {
@@ -726,13 +781,18 @@ class GanttDataSetService
            Метод возвращает список словарей вида:
            ['id' : 'UUID',
             'text' : 'title',
-            'код_поля_формы_0' : значение из БД по коду атрибута 0 .....
+            'render' : 'split'/null,
+            'код_поля_формы_0' : значение из БД по коду атрибута 0 .....,
             'код_поля_формы_n' : значение из БД по коду атрибута n,
             'parent' : значение из БД по коду атрибута для связи,
             'start_date' : значение из БД по коду атрибута начала работы (для работ),
             'end_date' : значение из БД по коду атрибута окончания работы (для работ),
             'level' : уровень_вложенности,
             'type' : RESOURSE/WORK
+            'entityType' : вторичный тип данных (RESOURSE, WORK, project, milestone etc...)
+            'textColor' : цвет текста сущности
+            'text' : цвет сущности
+            'positionElement' : позиция элемента в списке
            ] */
 
         // Closure для подготовки кодов аттрибутов для запроса в БД.
@@ -867,16 +927,22 @@ class GanttDataSetService
                     it << ['duration': null]
                     it << ['unscheduled': null]
                     it << ['datesStartDateAndEndDate': true]
-                    if (it.type == SourceType.WORK)
+                    it << ['positionElement': null]
+                    if (settings.type == SourceType.WORK)
                     {
-                        if (!it?.start_date)
+                        it << ['typeEntity': settings.type]
+                        if (!isStartDate)
                         {
-                            it.start_date = ""
+                            it << ['start_date': null]
                         }
-                        if (!it?.end_date)
+                        if (!isEndDate)
                         {
-                            it.end_date = ""
+                            it << ['end_date': null]
                         }
+                        it << ['textColor': generalSettings?.currentColorSettings[0]?.color ?:
+                            DEFAULT_COLOR_SETTINGS[0].color]
+                        it << ['color': generalSettings?.currentColorSettings[1]?.background ?:
+                            DEFAULT_COLOR_SETTINGS[1].background]
                         if (!it?.start_date && !it?.end_date)
                         {
                             it.unscheduled = true
@@ -886,6 +952,28 @@ class GanttDataSetService
                             it.duration = 1
                         }
                     }
+
+                    else if ((settings.type == SourceType.RESOURCE) && (
+                        settings.id in settingsList.parent))
+                    {
+                        it << ['render': (generalSettings?.viewOfNestingCheckbox) ? 'split' : null]
+                        it << ['typeEntity': 'project']
+                        it << ['textColor': generalSettings?.currentColorSettings[4]?.color ?:
+                            DEFAULT_COLOR_SETTINGS[4].color]
+                        it << ['color': generalSettings?.currentColorSettings[5]?.background ?:
+                            DEFAULT_COLOR_SETTINGS[5].background]
+                    }
+
+                    else if (settings.type == SourceType.RESOURCE)
+                    {
+                        it << ['render': (generalSettings?.viewOfNestingCheckbox) ? 'split' : null]
+                        it << ['typeEntity': settings.type]
+                        it << ['textColor': generalSettings?.currentColorSettings[2]?.color ?:
+                            DEFAULT_COLOR_SETTINGS[2].color]
+                        it << ['color': generalSettings?.currentColorSettings[3]?.background ?:
+                            DEFAULT_COLOR_SETTINGS[3].background]
+                    }
+
                     ISDtObject currentObject = api.utils.get(it.id)
                     if (milestoneAttributeName && currentObject.hasProperty(milestoneAttributeName) &&
                         currentObject[milestoneAttributeName])
@@ -896,7 +984,12 @@ class GanttDataSetService
                             ).code
                         String currentElementStatus =
                             api.metainfo.getMetaClass(currentObject).workflow.endState.code
-                        it.type = 'milestone'
+                        it << ['type': 'milestone']
+                        it << ['typeEntity': 'milestone']
+                        it << ['textColor': generalSettings?.currentColorSettings[6]?.color ?:
+                            DEFAULT_COLOR_SETTINGS[6].color]
+                        it << ['color': generalSettings?.currentColorSettings[7]?.background ?:
+                            DEFAULT_COLOR_SETTINGS[7].background]
                         it << ['completed': elementWithFinalStatus == currentElementStatus]
                         it.start_date = currentObject[milestoneAttributeName]
                         it.remove('end_date')
@@ -920,6 +1013,7 @@ class GanttDataSetService
                         // Рекурсивный вызов для "потомков". Список с настройками передается со второго элемента.
                         result.addAll(
                             buildDataListFromSettings(
+                                generalSettings,
                                 settingsList[(i + 1)..-1],
                                 it['id'],
                                 subjectUUID
@@ -1045,4 +1139,83 @@ class GanttDataSetService
         }
         return data.tasks
     }
+
+    /**
+     * Приватный метод инициализации стандартных настроек цветов
+     * @return список объектов класса EntityColorSettings
+     */
+    private static Collection<EntityColorSettings> initDefaultColors()
+    {
+        return [
+            new EntityColorSettings("#000000", "WORK", "WORKCOLOR", "Цвет текста работ"),
+            new EntityColorSettings("#3db9d3", "WORK", "WORKBACKGROUND", "Цвет полос работ"),
+            new EntityColorSettings(
+                "#000000",
+                "RESOURCE",
+                "RESOURCECOLOR",
+                "Цвет текста ресурсов"
+            ),
+            new EntityColorSettings(
+                "#65c16f",
+                "RESOURCE",
+                "RESOURCEBACKGROUND",
+                "Цвет полос ресурсов"
+            ),
+            new EntityColorSettings(
+                "#000000",
+                "project",
+                "PROJECTCOLOR",
+                "Цвет текста проектов"
+            ),
+            new EntityColorSettings(
+                "#ffd700",
+                "project",
+                "PROJECTBACKGROUND",
+                "Цвет полос проектов"
+            ),
+            new EntityColorSettings(
+                "#000000",
+                "milestone",
+                "MILESTONECOLOR",
+                "Цвет текста вех"
+            ),
+            new EntityColorSettings(
+                "#ffffff",
+                "milestone",
+                "MILESTONEBACKGROUND",
+                "Цвет полос вех"
+            )]
+    }
+}
+
+/**
+ * Класс, содержащий информацию о типе сущности и настройке цветов сущности
+ */
+@Canonical
+class EntityColorSettings
+{
+    /**
+     * Цвет текста сущности
+     */
+    String color
+
+    /**
+     * Цвет отображения сущности
+     */
+    String background
+
+    /**
+     * Тип сущности
+     */
+    String type
+
+    /**
+     * Идентификатор сущности
+     */
+    String id
+
+    /**
+     * Название сущности
+     */
+    String label
 }

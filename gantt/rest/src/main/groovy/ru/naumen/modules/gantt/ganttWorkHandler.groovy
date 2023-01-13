@@ -322,8 +322,8 @@ class GanttWorkHandlerService
                     String timezoneString =
                         api.employee.getTimeZone(user?.UUID)?.code ?: request.timezone
                     TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-                    Date newDateToUpdate =
-                        Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone)
+                    Date newDateToUpdate = (workDateData.value) ?
+                        Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone) : null
 
                     List<ISDtObject> relatedEntities =
                         getWorkRelatedEntitiesWithExceededDeadline(work, work, newDateToUpdate)
@@ -521,7 +521,7 @@ class GanttWorkHandlerService
 
     /**
      * Метод редактирования диапазона дат работ диаграмм версий
-     * @param requestContent - тело запроса
+     * @param request - тело запроса
      * @param user - пользователь
      * @param versionKey - ключ диаграммы версий
      * @return результат обновления
@@ -542,8 +542,8 @@ class GanttWorkHandlerService
                     api.employee.getPersonalSettings(user?.UUID).getTimeZone() ?:
                         request.timezone
                 TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-                Date newDateToUpdate =
-                    Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone)
+                Date newDateToUpdate = (workDateData.value) ?
+                    Date.parse(WORK_DATE_PATTERN, workDateData.value, timezone) : null
 
                 String attributeCode = null
                 Object metaClass = api.metainfo.getMetaClass(work.getMetaClass())
@@ -756,8 +756,8 @@ class GanttWorkHandlerService
                                          api.metainfo.getMetaClass(metaClassFqn)
                                             .getAttribute(endWorkAttribute).attribute.isEditable()]
         dataModalWindowOperation << ['disabledCompete':
-                                         !api.metainfo.getMetaClass(metaClassFqn)
-                                             .getAttribute('state').attribute.isEditable()]
+                                         api.metainfo.getMetaClass(metaClassFqn)
+                                            .getAttribute('state').attribute.isEditable()]
         return dataModalWindowOperation
     }
 
@@ -1195,7 +1195,7 @@ class GanttWorkHandlerService
             }
         }
 
-        return newDateToUpdate.compareTo(entityDeadline) == 1
+        return newDateToUpdate?.compareTo(entityDeadline) == 1
     }
 }
 
