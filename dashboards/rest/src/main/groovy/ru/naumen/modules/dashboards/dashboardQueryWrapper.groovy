@@ -319,6 +319,10 @@ class QueryWrapper implements CriteriaWrapper
         //атрибут связанного типа
         if(attribute.type in [AttributeType.STRING_TYPE, *AttributeType.NUMBER_TYPES, AttributeType.CATALOG_ITEM_TYPE])
         {
+            if (attribute.type in AttributeType.NUMBER_TYPES)
+            {
+                column = sc.cast(column, 'string')
+            }
             column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property(DashboardQueryWrapperUtils.UUID_CODE))
             criteria.addGroupColumn(sc.property(DashboardQueryWrapperUtils.UUID_CODE))
         }
