@@ -65,12 +65,13 @@ exports[`NumberInput component default renders 1`] = `
     placeholder=""
     value={0}
   />
-  <Container
+  <ForwardRef
     className="contolsContainer"
   >
     <IconButton
       active={false}
       className="button"
+      disable={false}
       icon="MINUS"
       onClick={[Function]}
       round={false}
@@ -80,12 +81,13 @@ exports[`NumberInput component default renders 1`] = `
     <IconButton
       active={false}
       className="button"
+      disable={false}
       icon="PLUS"
       onClick={[Function]}
       round={false}
       tip=""
       variant="INFO"
     />
-  </Container>
+  </ForwardRef>
 </div>
 `;

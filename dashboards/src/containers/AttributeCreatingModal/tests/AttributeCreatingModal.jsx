@@ -1,4 +1,4 @@
-import {AttributeCreatingModalContainer} from 'containers/AttributeCreatingModal/AttributeCreatingModal';
+import {AttributeCreatingModalContainer} from 'containers/AttributeCreatingModal/AttributeCreatingModalContainer';
 import React from 'react';
 import {shallow} from 'enzyme';
 import {getAttribute} from 'components/organisms/AttributeCreatingModal/components/SourceControl/tests/helpers';

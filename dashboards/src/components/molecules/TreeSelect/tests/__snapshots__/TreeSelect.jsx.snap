@@ -4,7 +4,7 @@ exports[`TreeSelect renders menu when "showMenu" property is changing 1`] = `
 <div
   className="select"
 >
-  <Container
+  <ForwardRef
     className="valueContainer"
     disabled={false}
     onClick={[Function]}
@@ -12,14 +12,14 @@ exports[`TreeSelect renders menu when "showMenu" property is changing 1`] = `
     <div
       className="value"
     >
-      <Container
+      <ForwardRef
         className="label placeholder"
         title="Выберите значение"
       >
         Выберите значение
-      </Container>
+      </ForwardRef>
     </div>
-  </Container>
+  </ForwardRef>
 </div>
 `;
 
@@ -27,7 +27,7 @@ exports[`TreeSelect renders menu when "showMenu" property is changing 2`] = `
 <div
   className="select"
 >
-  <Container
+  <ForwardRef
     className="valueContainer"
     disabled={false}
     onClick={[Function]}
@@ -35,18 +35,18 @@ exports[`TreeSelect renders menu when "showMenu" property is changing 2`] = `
     <div
       className="value"
     >
-      <Container
+      <ForwardRef
         className="label placeholder"
         title="Выберите значение"
       >
         Выберите значение
-      </Container>
+      </ForwardRef>
     </div>
-  </Container>
+  </ForwardRef>
   <OutsideClickDetector
     onClickOutside={[Function]}
   >
-    <Container
+    <ForwardRef
       className="menu"
     >
       <SearchInput
@@ -58,13 +58,25 @@ exports[`TreeSelect renders menu when "showMenu" property is changing 2`] = `
       <Tree
         components={
           Object {
-            "IndicatorsContainer": [Function],
-            "LabelContainer": [Function],
-            "MenuContainer": [Function],
+            "IndicatorsContainer": Object {
+              "$$typeof": Symbol(react.forward_ref),
+              "render": [Function],
+            },
+            "LabelContainer": Object {
+              "$$typeof": Symbol(react.forward_ref),
+              "render": [Function],
+            },
+            "MenuContainer": Object {
+              "$$typeof": Symbol(react.forward_ref),
+              "render": [Function],
+            },
             "Node": [Function],
             "SearchInput": [Function],
             "Tree": [Function],
-            "ValueContainer": [Function],
+            "ValueContainer": Object {
+              "$$typeof": Symbol(react.forward_ref),
+              "render": [Function],
+            },
           }
         }
         getNodeLabel={[Function]}
@@ -156,7 +168,7 @@ exports[`TreeSelect renders menu when "showMenu" property is changing 2`] = `
         value={null}
         values={Array []}
       />
-    </Container>
+    </ForwardRef>
   </OutsideClickDetector>
 </div>
 `;
@@ -165,7 +177,7 @@ exports[`TreeSelect renders when "removable" property is set to "true" 1`] = `
 <div
   className="select"
 >
-  <Container
+  <ForwardRef
     className="valueContainer"
     disabled={false}
     onClick={[Function]}
@@ -173,26 +185,27 @@ exports[`TreeSelect renders when "removable" property is set to "true" 1`] = `
     <div
       className="value"
     >
-      <Container
+      <ForwardRef
         className="label"
         title=""
       />
-      <Container
+      <ForwardRef
         className="indicators"
         onClick={[Function]}
       >
         <IconButton
           active={false}
           className=""
+          disable={false}
           icon="REMOVE"
           onClick={[Function]}
           round={true}
           tip=""
           variant="INFO"
         />
-      </Container>
+      </ForwardRef>
     </div>
-  </Container>
+  </ForwardRef>
 </div>
 `;
 
@@ -200,7 +213,7 @@ exports[`TreeSelect renders when no options provided 1`] = `
 <div
   className="select"
 >
-  <Container
+  <ForwardRef
     className="valueContainer"
     disabled={false}
     onClick={[Function]}
@@ -208,13 +221,13 @@ exports[`TreeSelect renders when no options provided 1`] = `
     <div
       className="value"
     >
-      <Container
+      <ForwardRef
         className="label placeholder"
         title="Выберите значение"
       >
         Выберите значение
-      </Container>
+      </ForwardRef>
     </div>
-  </Container>
+  </ForwardRef>
 </div>
 `;

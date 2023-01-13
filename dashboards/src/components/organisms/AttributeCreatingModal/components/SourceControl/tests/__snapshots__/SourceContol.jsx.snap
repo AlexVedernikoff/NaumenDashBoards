@@ -125,6 +125,7 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is n
                     </div>
                     <Icon
                       className=""
+                      fill="currentColor"
                       height={16}
                       name="CHEVRON"
                       title=""
@@ -228,6 +229,7 @@ exports[`AttributeCreatingModal SourceControl renders when property "value" is s
           >
             <Icon
               className=""
+              fill="currentColor"
               height={16}
               name="ELLIPSIS"
               title=""

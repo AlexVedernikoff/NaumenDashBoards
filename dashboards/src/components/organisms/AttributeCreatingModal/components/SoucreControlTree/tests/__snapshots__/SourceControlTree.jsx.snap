@@ -5,13 +5,25 @@ exports[`AttributeCreatingModal SourceControlTree renders when "searchValue" pro
   <Tree
     components={
       Object {
-        "IndicatorsContainer": [Function],
-        "LabelContainer": [Function],
-        "MenuContainer": [Function],
+        "IndicatorsContainer": Object {
+          "$$typeof": Symbol(react.forward_ref),
+          "render": [Function],
+        },
+        "LabelContainer": Object {
+          "$$typeof": Symbol(react.forward_ref),
+          "render": [Function],
+        },
+        "MenuContainer": Object {
+          "$$typeof": Symbol(react.forward_ref),
+          "render": [Function],
+        },
         "Node": [Function],
         "SearchInput": [Function],
         "Tree": [Function],
-        "ValueContainer": [Function],
+        "ValueContainer": Object {
+          "$$typeof": Symbol(react.forward_ref),
+          "render": [Function],
+        },
       }
     }
     getNodeLabel={[Function]}
@@ -49,13 +61,25 @@ exports[`AttributeCreatingModal SourceControlTree renders when "searchValue" pro
   <Tree
     components={
       Object {
-        "IndicatorsContainer": [Function],
-        "LabelContainer": [Function],
-        "MenuContainer": [Function],
+        "IndicatorsContainer": Object {
+          "$$typeof": Symbol(react.forward_ref),
+          "render": [Function],
+        },
+        "LabelContainer": Object {
+          "$$typeof": Symbol(react.forward_ref),
+          "render": [Function],
+        },
+        "MenuContainer": Object {
+          "$$typeof": Symbol(react.forward_ref),
+          "render": [Function],
+        },
         "Node": [Function],
         "SearchInput": [Function],
         "Tree": [Function],
-        "ValueContainer": [Function],
+        "ValueContainer": Object {
+          "$$typeof": Symbol(react.forward_ref),
+          "render": [Function],
+        },
       }
     }
     getNodeLabel={[Function]}
