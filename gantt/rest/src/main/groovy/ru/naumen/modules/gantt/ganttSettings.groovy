@@ -173,6 +173,13 @@ interface GanttSettingsController
      * @return информация о удалении диаграммы для пользователя
      */
     String deletePersonalDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
+
+    /**
+     * Метод проверки возможности перемещения работы к новому ресурсу
+     * @param requestContent - тело запроса, содержащее информацию о цветах сущностей
+     * @return настройки, содержащие информацию о цветах сущностей, отправленные в хранилище
+     */
+    String saveGanttColorSettings(Map<String, Object> requestContent)
 }
 
 @InheritConstructors
@@ -296,6 +303,12 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
+    String postDataUsers(Map requestContent)
+    {
+        return toJson(service.postDataUsers(requestContent))
+    }
+
+    @Override
     String createPersonalDiagram(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         GetGanttSettingsRequest request = new ObjectMapper()
@@ -313,6 +326,14 @@ class GanttSettingsImpl implements GanttSettingsController
         return toJson(
             service.deletePersonalDiagram(request, user)
         )
+    }
+
+    @Override
+    String saveGanttColorSettings(Map<String, Object> requestContent)
+    {
+        SaveGanttColorSettingsRequest request = new ObjectMapper()
+            .convertValue(requestContent, SaveGanttColorSettingsRequest)
+        return toJson(service.saveGanttColorSettings(request))
     }
 }
 
@@ -486,7 +507,7 @@ class GanttSettingsService
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
         ganttSettings.diagramKey = diagramKey
-        changingSettingsForNonTextTypes(ganttSettings)
+        ganttSettings.isPersonalDiagram = changingSettingsForNonTextTypes(ganttSettings)
         transformGanttSettings(ganttSettings)
 
         return ganttSettings
@@ -634,12 +655,13 @@ class GanttSettingsService
             ? Jackson.fromJsonString(currentGanttSettingsJSON, GanttSettingsClass)
             : new GanttSettingsClass()
         String keyForVersions =
-            request?.ganttSettings?.diagramKey.split('_').last() == 'personalVersion' ?[
-                subjectUUID,
-                'personalVersion'
+            request?.ganttSettings?.diagramKey?.split('_').last() == 'personalVersion' ?[
+                subjectUUID, 'personalVersion'
             ].join('_')
         : subjectUUID
         ganttSettings.workRelations = currentGanttSettings.workRelations
+        ganttSettings.currentColorSettings = currentGanttSettings.currentColorSettings
+
         getGanttVersionTitlesAndKeys(
             [
                 'diagramKey' : request.ganttSettings.diagramKey,
@@ -656,6 +678,19 @@ class GanttSettingsService
             toJson(ganttSettings)
         ))
         {
+            ganttSettings = getGanttSettings(
+                new ObjectMapper().convertValue(
+                    ['contentCode': request.contentCode,
+                     'subjectUUID': request.subjectUUID,
+                     'timezone'   : request.timezone], GetGanttSettingsRequest
+                )
+            )
+            //TODO временное решение - костыль
+            if (request.ganttSettings.isPersonal)
+            {
+                ganttSettings.isPersonal = true
+            }
+
             return ganttSettings
         }
         else
@@ -670,7 +705,13 @@ class GanttSettingsService
      * @param dateForAdjustment - текущие данные о времени
      * @return корректная дата
      */
-    String correctionErrorInDate(String dateForAdjustment, String timezoneInformation){
+    String correctionErrorInDate(String dateForAdjustment, String timezoneInformation)
+    {
+        if (!dateForAdjustment)
+        {
+            return null
+        }
+
         String formatEditedTime = "yyyy-MM-dd'T'HH:mm:ss"
         TimeZone timezone = TimeZone.getTimeZone(timezoneInformation)
         Long dateInMilliseconds = Date.parse(formatEditedTime, dateForAdjustment).getTime() + timezone.getRawOffset()
@@ -699,6 +740,8 @@ class GanttSettingsService
         Collection<Map<String, String>> result = ganttSettings.diagramVersionsKeys.findResults {
             String subjectUuidInKey = it.split('_').first()
             String contentCode = it.split('_')[1]
+            Boolean itPersonalVersion = requestContent.diagramKey.split('_').size() == 3 &&
+                                        requestContent.diagramKey.split('_')[2] == 'personalVersion'
             GanttVersionsSettingsClass ganttVersionSettings = getGanttVersionsSettings(it)
             if (ganttVersionSettings?.title &&
                 subjectUuidInKey ==
@@ -768,6 +811,7 @@ class GanttSettingsService
         Date createdDate = Date.parse(GANTT_VERSION_DATE_PATTERN, request.createdDate)
 
         ganttSettings.diagramVersionsKeys << versionKey
+        ganttSettings.currentColorSettings = ganttSettings.currentColorSettings
         ganttSettings.diagramVersionsKeys = ganttSettings.diagramVersionsKeys.unique()
         ganttSettings.diagramKey = diagramKey
         Collection<SequenceChartElements> sequenceWorks = []
@@ -796,7 +840,7 @@ class GanttSettingsService
          */
         Map<String, Map<String, String>> mapAttributes = [:]
         ganttSettings.resourceAndWorkSettings.each {
-            if (it.type == SourceType.WORK)
+            if (it.typeEntity == 'WORK' || it.typeEntity == 'project')
             {
                 String startAttributeCode = it.startWorkAttribute.code
                 String endAttributeCode = it.endWorkAttribute.code
@@ -869,6 +913,7 @@ class GanttSettingsService
 
         ganttVersionSettings.workRelations = request.workRelations
         ganttVersionSettings.commonSettings = request.commonSettings
+        ganttVersionSettings.tasks = request.tasks
 
         Map attributesForColumns = [:]
         request.commonSettings.columnSettings.each {
@@ -899,19 +944,19 @@ class GanttSettingsService
     {
         String versionKey = diagramData.diagramKey
         Collection<Map<String, Object>> tasks = diagramData.tasksClone
-        String ganttVersionSettingsJsonValue = getJsonSettings(diagramData.diagramKey)
+        String ganttVersionSettingsJsonValue = getJsonSettings(versionKey)
 
         GanttSettingsClass ganttVersionSettings = ganttVersionSettingsJsonValue
-            ? Jackson.fromJsonString(ganttVersionSettingsJsonValue, GanttSettingsClass)
+            ? fromJson(ganttVersionSettingsJsonValue, GanttSettingsClass)
             : new GanttSettingsClass()
 
         ResourceAndWorkSettings resourceWork = ganttVersionSettings.resourceAndWorkSettings.find {
             it.type == SourceType.WORK
         }
-        String communicationResourceAttribute = resourceWork.communicationResourceAttribute.code
-        String startWorkAttribute = resourceWork.startWorkAttribute.code.split('@').last()
-        String endWorkAttribute = resourceWork.endWorkAttribute.code.split('@').last()
-        String checkpointStatusAttr = resourceWork.checkpointStatusAttr.code.split('@').last()
+        String communicationResourceAttribute = resourceWork?.communicationResourceAttribute?.code
+        String startWorkAttribute = resourceWork?.startWorkAttribute?.code?.split('@')?.last()
+        String endWorkAttribute = resourceWork?.endWorkAttribute?.code?.split('@')?.last()
+        String checkpointStatusAttr = resourceWork?.checkpointStatusAttr?.code?.split('@')?.last()
         Map editableDataInSystem = [:]
         ISDtObject metaObjectWork
         tasks.findAll { it -> it.type == 'WORK'
@@ -933,7 +978,7 @@ class GanttSettingsService
             api.utils.edit(metaObjectWork, editableDataInSystem)
         }
         ganttVersionSettings.workRelations = diagramData.workRelations
-        if (!saveJsonSettings(diagramData.diagramKey, toJson(ganttVersionSettings)))
+        if (!saveJsonSettings(versionKey, toJson(ganttVersionSettings)))
         {
             throw new Exception('Настройки не были сохранены!')
         }
@@ -946,6 +991,10 @@ class GanttSettingsService
      */
     Date getDateToSave(String attributeValue)
     {
+        if (!attributeValue)
+        {
+            return null
+        }
         String formatEditedTime = "yyyy-MM-dd'T'HH:mm:ss"
         String timezoneString = 'Europe/Moscow'
         TimeZone timezone = TimeZone.getTimeZone(timezoneString)
@@ -1011,7 +1060,7 @@ class GanttSettingsService
             elementsForChangingSequence.find {
                 it.metaInformation ==
                 metaInformationMovedElement && it.workUuid == sequenceChartElements.uuidNextElement
-            }.idLocations = orderArrangement
+            }?.idLocations = orderArrangement
             sequenceChartElements = elementsForChangingSequence.find {
                 it.metaInformation ==
                 metaInformationMovedElement && it.workUuid == sequenceChartElements.uuidNextElement
@@ -1030,10 +1079,10 @@ class GanttSettingsService
         }
         if (!saveJsonSettings(
             keySequencesElements,
-            Jackson.toJsonString(linkedListSequenceChartElements)
+            toJson(linkedListSequenceChartElements)
         ))
         {
-            return false
+            throw new Exception('Настройки не были сохранены!')
         }
         else
         {
@@ -1065,7 +1114,7 @@ class GanttSettingsService
                     it.metaInformation ==
                     metaInformationMovedElement &&
                     it.idLocations == (positionTransferredElement.idLocations - 1)
-                }.uuidNextElement = null
+                }?.uuidNextElement = null
             }
             else
             {
@@ -1073,7 +1122,7 @@ class GanttSettingsService
                     it.metaInformation ==
                     metaInformationMovedElement &&
                     it.idLocations == (positionTransferredElement.idLocations - 1)
-                }.uuidNextElement = positionTransferredElement.uuidNextElement
+                }?.uuidNextElement = positionTransferredElement.uuidNextElement
             }
         }
         if (requestContent.positionElement)
@@ -1082,27 +1131,27 @@ class GanttSettingsService
                 it.metaInformation ==
                 metaInformationMovedElement &&
                 it.idLocations == (requestContent.positionElement - 1)
-            }.uuidNextElement = positionTransferredElement.workUuid
+            }?.uuidNextElement = positionTransferredElement.workUuid
         }
         if (requestContent.positionElement != idLastResource)
         {
             elements.find {
                 it.metaInformation ==
                 metaInformationMovedElement && it.workUuid == positionTransferredElement.workUuid
-            }.uuidNextElement = elements.find {
+            }?.uuidNextElement = elements.find {
                 it.metaInformation ==
                 metaInformationMovedElement && it.idLocations == requestContent.positionElement
-            }.workUuid
+            }?.workUuid
         }
         elements.find {
             it.metaInformation ==
             metaInformationMovedElement && it.workUuid == requestContent.workId
-        }.idLocations = requestContent.positionElement
+        }?.idLocations = requestContent.positionElement
         if (!requestContent.positionElement)
         {
             elements.find {
                 it.idLocations == 0
-            }.idLocations = 1
+            }?.idLocations = 1
         }
     }
 
@@ -1435,7 +1484,7 @@ class GanttSettingsService
             user.code = employee.UUID
             user.ganttMaster = employee.employeeSecGroups.code.find {
                 it == GROUP_GANT_MASTER
-            } ?: false
+            }
             user.name = employee.title
             userData.add(user)
         }
@@ -1462,7 +1511,7 @@ class GanttSettingsService
                 userRole += it.name + ', '
                 api.security.addMemberToGroup(GROUP_GANT_MASTER, it.code)
             }
-            else if (!(it.ganttMaster?.toBoolean()) && whetherUserNecessaryRights)
+            else if (whetherUserNecessaryRights)
             {
                 userRole += it.name + ', '
                 api.security.removeMemberFromGroup(GROUP_GANT_MASTER, it.code)
@@ -1512,6 +1561,24 @@ class GanttSettingsService
         else
         {
             return true
+        }
+    }
+    /**
+     * Сохраняет настройки цвета отрисовки сущностей
+     * @param request - тело запроса, содержащее информацию о цветах сущностей
+     */
+    void saveGanttColorSettings(SaveGanttColorSettingsRequest request)
+    {
+        String ganttSettingsKey = generateDiagramKey(request.subjectUUID, request.contentCode)
+        String currentGanttSettingsJSON = getJsonSettings(ganttSettingsKey)
+        GanttSettingsClass currentGanttSettings = currentGanttSettingsJSON
+            ? fromJson(currentGanttSettingsJSON, GanttSettingsClass)
+            : new GanttSettingsClass()
+        currentGanttSettings.currentColorSettings = request.currentColorSettings
+
+        if (!saveJsonSettings(ganttSettingsKey, toJson(currentGanttSettings)))
+        {
+            throw new Exception('Настройки не были сохранены!')
         }
     }
 }
@@ -1787,6 +1854,31 @@ class BaseGanttDiagramData
      * Отображение работы с открытыми датами
      */
     Boolean worksWithoutStartOrEndDateCheckbox
+
+    /**
+     * Отображение вида вложенности работ
+     */
+    Boolean viewOfNestingCheckbox
+
+    /**
+     * Вид отображения работ (рядом/в ресурса/не отображать)
+     */
+    Map<String, String> viewWork
+
+    /**
+     * Чтобы работы не накладывались друг на друга
+     */
+    Boolean multiplicityCheckbox
+
+    /**
+     * Настройки цветов отображения сущностей
+     */
+    Collection<Map<String, String>> currentColorSettings = GanttDataSetService.DEFAULT_COLOR_SETTINGS
+
+    /**
+     * Работа из вкладки личной диаграммы
+     */
+    Boolean isPersonal
 }
 
 /**
@@ -1819,11 +1911,6 @@ class GanttSettingsClass extends BaseGanttDiagramData
      * Наличие возможности создания личного вида
      */
     Boolean isPersonalDiagram
-
-    /**
-     * Работа из вкладки личной диаграммы
-     */
-    Boolean isPersonal = false
 }
 
 /**
@@ -1861,6 +1948,11 @@ class GanttVersionsSettingsClass
      * Настройки для столбцов
      */
     CommonSettings commonSettings
+
+    /**
+     * Список задач
+     */
+    Collection<Map<String, Object>> tasks
 }
 
 /**
@@ -2044,11 +2136,6 @@ class GanttDiagramData extends BaseGanttDiagramData
      * Наличие возможности создания личного вида
      */
     Boolean isPersonalDiagram
-
-    /**
-     * Работа из вкладки личной диаграммы
-     */
-    Boolean isPersonal = false
 }
 
 /**
@@ -2370,9 +2457,19 @@ class ResourceAndWorkSettings
     String parent
 
     /**
+     * Тип размещения работ
+     */
+    String render
+
+    /**
      * Тип источника - работа/ресурс
      */
     SourceType type
+
+    /**
+     * Вторичный (временный) тип источника (работа, ресурс, проект...)
+     */
+    String typeEntity
 
     /**
      * Настройки для метакласса и фильтрации (работа/ресурс)
@@ -2393,6 +2490,16 @@ class ResourceAndWorkSettings
      * Связь с вышестоящим ресурсом
      */
     Attribute communicationResourceAttribute
+
+    /**
+     * Цвет поля сущности
+     */
+    String color
+
+    /**
+     * Цвет текста сущности
+     */
+    String textColor
 
     /**
      * Связь с вышестоящей работой
@@ -2598,4 +2705,12 @@ class BasicUserData
      * Имя пользователя
      */
     String name
+}
+
+/**
+ * Класс, описывающий запрос на обновления настроек цветов сущностей
+ */
+class SaveGanttColorSettingsRequest extends BaseGanttSettingsRequest
+{
+    Collection<Map<String, String>> currentColorSettings
 }
