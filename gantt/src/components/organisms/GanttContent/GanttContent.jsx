@@ -105,15 +105,14 @@ export class GanttContent extends PureComponent<Props> {
 				progress={this.state.progress}
 				swiped={this.state.swiped}
 				isPersonal={this.props.isPersonal}
+				role={this.props.user.role}
 			/> : null;
 	};
 
 	renderViewPanel = () => {
-		const {role} = this.props;
+		const {role} = this.props.user;
 
-		return role !== 'SUPER' && !!role
-			? <ViewPanel />
-			: null;
+		return (role !== 'SUPER' && role !== '') ? <ViewPanel /> : null;
 	};
 
 	renderАctionBar = () => {

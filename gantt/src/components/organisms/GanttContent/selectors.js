@@ -18,7 +18,8 @@ const props = (state: AppState) => {
 		progressCheckbox,
 		stateMilestonesCheckbox,
 		workRelationCheckbox,
-		worksWithoutStartOrEndDateCheckbox
+		worksWithoutStartOrEndDateCheckbox,
+		user
 	} = state.APP;
 
 	return {
@@ -28,6 +29,7 @@ const props = (state: AppState) => {
 		progressCheckbox,
 		stateMilestonesCheckbox,
 		workRelationCheckbox,
+		user,
 		worksWithoutStartOrEndDateCheckbox
 	};
 };

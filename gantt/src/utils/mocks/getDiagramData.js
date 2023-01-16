@@ -13,18 +13,18 @@ const data = {
 			{"code": "11eaebc5-dd95-4ea0-88fc-7304c034d1a0", "title": "Для карточки команды-ответственной"}
 		]
 	},
-	"isPersonalDiagram": false,
+	"isPersonalDiagram": true,
 	"isPersonal": true,
 	"commonSettings":{
 		"columnSettings":[
-			{
-				"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
-				"code":"code1",
-				"show":true,
-				"editor":{
-					"type": "date",
-				}
-			},
+			// {
+			// 	"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
+			// 	"code":"code1",
+			// 	"show":true,
+			// 	"editor":{
+			// 		"type": "date",
+			// 	}
+			// },
 			{
 				"title":"\u0422\u0438\u043f",
 				"code":"start_date",
@@ -55,11 +55,6 @@ const data = {
 				"show":false
 			},
 			// Необходимо для следующей итерации
-			// {
-			// 	"title":"Добавить работу",
-			// 	"code":"add",
-			// 	"show":true
-			// },
 		],
 		"rollUp":false,
 		"scale":"YEAR"
@@ -95,16 +90,6 @@ const data = {
 		"value": 'about'
 	},
 	"diagramKey":"root_gant2",
-	"mandatoryAttributes" : {
-		"employee": [
-			{code: "parent", title: "Отдел"},
-			{code: "creationDate", title: "Дата создания"}
-		],
-		"serviceCall": [
-			{code: "metaClass", title: "Тип объекта"},
-			{code: "creationDate", title: "Дата создания"}
-		]
-	},
 	'milestonesCheckbox' : false,
 	'textPositionCheckbox': false,
 	'tasks': [
@@ -121,7 +106,8 @@ const data = {
 			"editable": true,
 			"name": "1",
 			// "render": "split",
-			"typeEntity": "RESOURCE"
+			"typeEntity": "RESOURCE",
+			'add_tasks': '+'
 		},
 		{
 			"id":"2",
@@ -171,7 +157,10 @@ const data = {
 	"workRelationCheckbox": false,
 	"startDate": "2021-09-02, 00:00:00",
 	"endDate": "2025-09-07, 00:00:00",
-	"currentInterval": null,
+	"currentInterval": {
+		"label": "в работах",
+		"value": "work"
+	}
 };
 
 export const getDiagramData = () => {

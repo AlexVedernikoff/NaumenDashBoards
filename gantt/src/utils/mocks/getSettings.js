@@ -2,12 +2,12 @@
 
 export default {
 	'commonSettings': {
+		'fixedColumn': {
+			"title":"Название",
+			"code":"d951f959-640b-4b47-b7ed-2f0daf7867",
+			"show":true
+		},
 		'columnSettings': [
-			{
-				"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
-				"code":"d951f959-640b-4b47-b7ed-2f0daf7867",
-				"show":true
-			},
 			{
 				"title":"\u0422\u0438\u043f",
 				"code":"start_date",

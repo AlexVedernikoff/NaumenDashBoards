@@ -5,9 +5,9 @@ import styles from './styles.less';
 
 export class Startup extends Component<Props> {
 	componentDidMount () {
-		const {getAppConfig, getGanttData} = this.props;
+		const {getAppConfig} = this.props;
+
 		getAppConfig();
-		getGanttData();
 	}
 
 	render () {

@@ -36,7 +36,7 @@ export default class FakeApi {
 			return {groupUser: USER_ROLES.REGULAR};
 		}
 
-		return {email: 'test@d.ru', groupUser: USER_ROLES.SUPER, name: 'test'};
+		return {email: 'test@d.ru', groupUser: USER_ROLES.REGULAR, name: 'test'};
 	}
 
 	async getDiagramData (contentCode, subjectUuid, user, timezone) {

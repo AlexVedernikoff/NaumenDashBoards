@@ -6,10 +6,9 @@ import CheckedMenu from 'components/atoms/CheckedMenu';
 import {deepClone, normalizeDate, shiftTimeZone} from 'helpers';
 import {gantt} from 'naumen-gantt';
 import ModalTask from 'components/atoms/ModalTask';
-import {postEditedWorkData, savePositionOfWork, setColumnSettings, setColumnTask, setDiagramLinksData, updateWorks} from 'store/App/actions';
+import {postEditedWorkData, savePositionOfWork, setColumnSettings, setColumnTask, setDiagramLinksData} from 'store/App/actions';
 import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-
 const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
@@ -209,6 +208,7 @@ const Gantt = (props: Props) => {
 		gantt.config.readonly = true;
 		gantt.config.show_unscheduled = true;
 		gantt.config.sort = true;
+		gantt.config.grid_elastic_columns = 'min-width';
 
 		gantt.config.round_dnd_dates = !!store.APP.multiplicityCheckbox;
 
@@ -375,6 +375,95 @@ const Gantt = (props: Props) => {
 
 		saveChangedWorkProgress(task.id, task.progress);
 		dispatch(setColumnTask(newTasks));
+
+		const {fixedColumn} = deepClone(store.APP.settings);
+
+		fixedColumn.name = fixedColumn.code;
+		fixedColumn.tree = true;
+		fixedColumn.label = fixedColumn.title;
+
+		const newFixedColumn = {
+			columns: [
+				fixedColumn
+			]
+		};
+
+		gantt.config.layout = {
+			cols: [
+				{
+					min_width: 600,
+					rows: [
+						{
+							cols: [
+								{
+									min_width: 200,
+									rows: [
+										{
+											bind: 'task',
+											config: newFixedColumn,
+											scrollY: 'gridScrollY',
+											view: 'grid'
+										}
+									],
+									width: 250
+								},
+								{
+									min_width: 250,
+									rows: [
+										{
+											bind: 'task',
+											scrollX: 'gridScrollX',
+											scrollY: 'gridScrollY',
+											scrollable: true,
+											view: 'grid'
+										},
+										{
+											id: 'gridScrollX',
+											view: 'scrollbar'
+										}
+									]
+								},
+								{
+									id: 'gridScrollY',
+									view: 'scrollbar'
+								}
+							],
+							group: 'gantt'
+						}
+					],
+					width: 600
+				},
+				{ resizer: true, width: 1 },
+				{
+					rows: [
+						{
+							cols: [
+								{
+									rows: [
+										{
+											scrollX: 'scrollHor',
+											scrollY: 'scrollVer',
+											view: 'timeline'
+										},
+										{
+											id: 'scrollHor',
+											view: 'scrollbar'
+										}
+									]
+								},
+								{
+									id: 'scrollVer',
+									view: 'scrollbar'
+								}
+							],
+							group: 'gantt'
+						}
+					]
+				}
+			],
+			css: 'gantt_container'
+		};
+
 		gantt.render();
 	}, 100));
 
@@ -434,7 +523,8 @@ const Gantt = (props: Props) => {
 		const dateToStr = gantt.date.date_to_str('%d.%m.%Y %H:%i');
 
 		tasks.forEach(task => {
-			for (let key in task) {
+			// eslint-disable-next-line no-unused-vars
+			for (const key in task) {
 				if (task[key] === true && key !== 'completed') {
 					task[key] = 'да';
 				} else if (task[key] === false && key !== 'completed') {
@@ -546,6 +636,7 @@ const Gantt = (props: Props) => {
 		});
 	};
 
+
 	const inlineEditors = gantt.ext.inlineEditors;
 
 	inlineEditors.attachEvent('onBeforeEditStart', state => {
@@ -610,6 +701,8 @@ const Gantt = (props: Props) => {
 					return false;
 				} else {
 					dispatch(postEditedWorkData(workDate, metaClassStr, newTask.id));
+
+					// eslint-disable-next-line no-unused-vars
 					for (const key in newTask) {
 						if (key === state.columnName) {
 							newTask[key] = state.newValue;
@@ -671,6 +764,8 @@ const Gantt = (props: Props) => {
 					return false;
 				} else {
 					dispatch(postEditedWorkData(workDate, metaClassStr, newTask.id));
+
+					// eslint-disable-next-line no-unused-vars
 					for (const key in newTask) {
 						if (key === state.columnName) {
 							newTask[key] = state.newValue;
@@ -711,17 +806,17 @@ const Gantt = (props: Props) => {
 				editor: item.editor,
 				hide: !item.show,
 				label: item.title + `<div id="${item.code}"></div>`,
-				minWidth: 100,
+				max_width: 300,
+				min_width: 250,
 				name: item.code,
 				resize: true,
 				width: '*'
 			}));
 
-			adaptedColumns[0].tree = true;
 			adaptedColumns.push({hide: !columns.find(item => !item.show), name: 'button', width: 50});
 			adaptedColumns[0].template = task => {
 				if (!task.parent || task.type === 'RESOURCE') {
-					return '<b>' + task[adaptedColumns[0].name] + '</b>';
+					return task[adaptedColumns[0].name];
 				}
 
 				return task[adaptedColumns[0].name];
