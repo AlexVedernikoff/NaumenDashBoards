@@ -13,7 +13,6 @@ import styles from './styles.less';
 import T from 'components/atoms/Translation';
 import t from 'localization';
 import TimerButton from 'components/atoms/TimerButton';
-import {USER_ROLES} from 'store/context/constants';
 
 export class AutoUpdateButton extends PureComponent<Props, State> {
 	state = {
@@ -133,9 +132,9 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	};
 
 	renderForm = () => {
-		const {className, personalDashboard, role} = this.props;
+		const {canChangeConfiguration, className} = this.props;
 
-		if (personalDashboard || role !== USER_ROLES.REGULAR) {
+		if (canChangeConfiguration) {
 			return (
 				<form className={cn([styles.form, className])} onSubmit={this.handleSubmit}>
 					{this.renderTitle()}
@@ -143,6 +142,8 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 				</form>
 			);
 		}
+
+		return null;
 	};
 
 	renderInput = () => {
@@ -191,7 +192,7 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 	renderText = () => <span className={styles.text}> <T text="AutoUpdateButton::Minutes" /></span>;
 
 	renderTimerButton = () => {
-		const {editMode, personalDashboard, role, settings} = this.props;
+		const {settings} = this.props;
 		const {remainder} = this.state;
 		const {enabled} = settings;
 		const buttonCN = enabled ? styles.enabledAutoUpdateButton : '';
@@ -200,25 +201,21 @@ export class AutoUpdateButton extends PureComponent<Props, State> {
 			return (
 				<TimerButton
 					duration={remainder}
-					editMode={editMode}
+					editMode={true}
 					onChangeDuration={this.handleChangeRemainder}
 					tip={t('AutoUpdateButton::AutoRefreshOn')}
 				/>
 			);
 		}
 
-		if (personalDashboard || role !== USER_ROLES.REGULAR) {
-			return (
-				<IconButton
-					className={buttonCN}
-					name={ICON_NAMES.TIMER_OFF}
-					outline
-					tip={t('AutoUpdateButton::AutoRefreshOff')}
-				/>
-			);
-		}
-
-		return null;
+		return (
+			<IconButton
+				className={buttonCN}
+				name={ICON_NAMES.TIMER_OFF}
+				outline
+				tip={t('AutoUpdateButton::AutoRefreshOff')}
+			/>
+		);
 	};
 
 	renderTitle = () => {
