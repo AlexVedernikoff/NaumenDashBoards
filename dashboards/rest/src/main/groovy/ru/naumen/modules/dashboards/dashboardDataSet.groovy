@@ -15,6 +15,7 @@
     import com.fasterxml.jackson.databind.ObjectMapper
     import groovy.json.JsonOutput
     import groovy.json.JsonSlurper
+    import groovy.transform.Canonical
     import groovy.transform.Field
     import groovy.transform.TupleConstructor
     import ru.naumen.core.server.script.api.IAuthenticationApi
@@ -487,7 +488,7 @@
                     String format = getValueFromParameter(widgetSettings, 'format')
                     String groupFormat =  getValueFromParameter(widgetSettings, 'data')
 
-                    return mappingStandardDiagram(res, legend, reverseGroups, changeLabels, reverseLabels, format, groupFormat, countTotals)
+                    return mappingStandardDiagram(res, legend, reverseGroups, changeLabels, reverseLabels, format, groupFormat, countTotals, widgetSettings)
                 case DiagramType.RoundTypes:
                     Collection<Integer> percentCntAggregationIndexes = getPercentCntAggregationIndexes(request)
                     Integer percentCntAggregationIndex = percentCntAggregationIndexes ? percentCntAggregationIndexes.first() : null
@@ -4925,12 +4926,14 @@
          * @param reverseLabels - флаг на обратный порядок
          * @param format - формат дат
          * @param groupFormat - формат группировки для дат
+         * @param countTotals - итоговое значение
+         * @param widgetSettings - настройки виджета
          * @return StandardDiagram
          */
         private StandardDiagram mappingStandardDiagram(List list, String legendName,
                                                        Boolean reverseGroups, Boolean changeLabels,
                                                        Boolean reverseLabels, String format, String groupFormat,
-                                                       Integer countTotals)
+                                                       Integer countTotals, Widget widgetSettings)
         {
             def resultDataSet = list.head() as List<List>
             def transposeDataSet = resultDataSet.transpose()
@@ -4962,10 +4965,11 @@
                             new Series(name: labelsValue, data: data)
                         }
                         labelsForDiagram = getTotalLabelsForDiagram(labelsForDiagram, groupFormat, format, changeLabels, reverseLabels)
-                        standardDiagram = new StandardDiagram(
-                            labels: labelsForDiagram,
-                            series: seriesForDiagram
-                        )
+                        standardDiagram = new StandardDiagram(labels: labelsForDiagram, series: seriesForDiagram)
+                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR)
+                        {
+                            seriesSort(seriesForDiagram, widgetSettings)
+                        }
                     }
                     else
                     {
@@ -4982,11 +4986,54 @@
                         }
                         labels = getTotalLabelsForDiagram(labels, groupFormat, format, changeLabels, reverseLabels)
                         standardDiagram = new StandardDiagram(labels: labels, series: series, countTotals: countTotals)
+
+                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR && widgetSettings?.sorting?.type == SortingType.ASC)
+                        {
+                            List<ItemWrapper> arrWrapper = series.findResult {it.data}.withIndex().collect { value, index ->
+                                new ItemWrapper(value, labels[index])
+                            }
+                            arrWrapper.sort { a, b ->
+                                a.indicatorValue <=> b.indicatorValue
+                            }
+                            seriesSort(series, widgetSettings)
+                            standardDiagram = new StandardDiagram(labels: arrWrapper.parameterValue, series: series, countTotals: countTotals)
+                            return standardDiagram
+                        }
+                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR && widgetSettings?.sorting?.type == SortingType.DESC)
+                        {
+                            seriesSort(series, widgetSettings)
+                        }
                     }
                     return standardDiagram
                 default:
                     String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
                     utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
+            }
+        }
+
+        /**
+         * Метод сортировки по показателю с разбивкой
+         * @param series - данные показателя
+         * @param widgetSettings - настройки виджета
+         * @return результат отсортированных данных по показателю с разбивкой
+         */
+        private Collection<Series> seriesSort(Collection<Series> series, Widget widgetSettings)
+        {
+            series.each { it ->
+                it.data.sort { a, b ->
+                    Object value1 = a as Double
+                    Object value2 = b as Double
+                    Integer sortingValue = value1 <=> value2
+                    if (widgetSettings?.sorting?.type == SortingType.DESC)
+                    {
+                        sortingValue = -sortingValue
+                    }
+                    else
+                    {
+                        sortingValue
+                    }
+                    return sortingValue
+                }
             }
         }
 
@@ -7331,6 +7378,21 @@
          * список значений Series
          */
         Collection<Series> series = []
+    }
+
+    /**
+     * Модель данных для сортировки по показателю
+     */
+    @Canonical
+    class ItemWrapper
+    {   /**
+        * Значение показателя
+        */
+        Object indicatorValue
+        /**
+         * Значение параметра
+         */
+        Object parameterValue
     }
 
     /**
