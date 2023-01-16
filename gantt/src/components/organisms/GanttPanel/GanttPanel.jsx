@@ -18,6 +18,7 @@ export class GanttPanel extends PureComponent<Props, State> {
 			handleToggleWorksWithoutDates={this.props.handleToggleWorksWithoutDates}
 			isPersonal={this.props.isPersonal}
 			milestones={this.props.milestones}
+			role = {this.props.role}
 			progress={this.props.progress}
 		/>;
 		return (
@@ -51,9 +52,11 @@ export class GanttPanel extends PureComponent<Props, State> {
 	};
 
 	render () {
+		const {role} = this.props;
+
 		const CN = cn({
 			[styles.container]: true,
-			[styles.personal]: this.props.isPersonal,
+			[styles.personal]: this.props.isPersonal && role !== 'SUPER',
 			[styles.swipedContainer]: this.props.swiped
 		});
 

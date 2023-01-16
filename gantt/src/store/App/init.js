@@ -19,7 +19,7 @@ export const initialAppState: AppState = {
 	groupAttribute: [],
 	hideEditPanel: false,
 	isPersonal: false,
-	isPersonalDiagram: true,
+	isPersonalDiagram: false,
 	loadingCommon: true,
 	loadingData: true,
 	loadingSettings: true,

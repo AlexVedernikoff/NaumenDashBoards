@@ -54,6 +54,10 @@
 	opacity: 1 !important;
 }
 
+.gantt_sell {
+	align-items: center;
+}
+
 .gantt_tree_content,
 .gantt_grid_head_cell {
 	overflow: hidden;
@@ -126,6 +130,12 @@
 }
 
 @supports (-moz-appearance:none) {
+
+	.gantt_layout_cell.gantt_ver_scroll {
+		width: 25px !important;
+		right: 0;
+	}
+	
 	.gantt_hor_scroll {
 		height: 17px !important
 	}

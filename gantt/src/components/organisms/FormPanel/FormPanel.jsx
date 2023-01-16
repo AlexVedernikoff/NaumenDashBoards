@@ -87,6 +87,7 @@ const FormPanel = (props: Props) => {
 
 	useEffect(() => {
 		if (store.APP.currentInterval) {
+			setValueInterval(store.APP.currentInterval);
 			setCurrentInterval(store.APP.currentInterval);
 			const newStartDate = typeof startDate === 'string' ? normalizeDate(startDate) : startDate;
 			const newEndDate = typeof endDate === 'string' ? normalizeDate(endDate) : endDate;
@@ -300,12 +301,15 @@ const FormPanel = (props: Props) => {
 			setDiagramEndDate(gantt.date.add(new Date(diagramEndDate), shiftedEndDate, 'hour'));
 			setDiagramStartDate(gantt.date.add(new Date(diagramStartDate), shiftedStartDate, 'hour'));
 
+			const {isPersonal} = store.APP;
+
 			saveSettings(
 				{
 					commonSettings: settings,
 					currentInterval,
 					diagramKey,
 					endDate: diagramEndDate,
+					isPersonal,
 					milestonesCheckbox,
 					multiplicityCheckbox,
 					progressCheckbox,
@@ -855,21 +859,34 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
-	const lastIndex = columnSettingsModal.length - 1;
-
-	const editColumn = (index, method) => () => {
-		return (index !== 0) ? method(index) : false;
-	};
+	const editColumn = (index, method) => () => method(index);
 
 	const getContentModal = () => {
 		return (
-			<GridLayout className="layout" cols={1} layouts={layout} onLayoutChange={layout => setLayout(layout)} rowHeight={35} width={300}>
+			<GridLayout
+				className="layout"
+				cols={1}
+				layouts={layout}
+				onLayoutChange={layout => setLayout(layout)}
+				rowHeight={35}
+				width={300}>
 				{columnSettingsModal.map((item, index) => (
 					<div className={styles.item} data-grid={{h: 1, static: !index, w: 1, x: 0, y: index}} key={item.code}>
 						<Icon className={styles.kebab} name="KEBAB" />
-						<ShowBox checked={item.show} className={index === 0 && styles.disabled} name={item.code} onChange={() => editColumn(index, handleColumnShowChange)} value={item.show} />
-						<TextInput className={styles.input} maxLength={30} name={item.code} onChange={target => handleColumnNameChange(target, index)} onlyNumber={false} placeholder="Введите название столбца" value={item.title} />
-						<IconButton className={index === 0 ? styles.disabled : styles.basket} icon="BASKET"onClick={editColumn(index, handleDeleteColumn)} />
+						<ShowBox
+							checked={item.show}
+							name={item.code}
+							onChange={editColumn(index, handleColumnShowChange)}
+							value={item.show} />
+						<TextInput
+							className={styles.input}
+							maxLength={30}
+							name={item.code}
+							onChange={target => handleColumnNameChange(target, index)}
+							onlyNumber={false}
+							placeholder="Введите название столбца"
+							value={item.title} />
+						<IconButton className={styles.basket} icon="BASKET"onClick={editColumn(index, handleDeleteColumn)} />
 					</div>
 				))}
 			</GridLayout>
@@ -931,11 +948,11 @@ const FormPanel = (props: Props) => {
 	useEffect(() => {
 		setViewWork(store.APP.viewWork);
 
-		if (store.APP.viewWork.value === 'about') {
+		if (store.APP.viewWork?.value === 'about') {
 			gantt.templates.rightside_text = (start, end, task) => task.text;
 			gantt.templates.task_text = () => '';
 			gantt.render();
-		} else if (store.APP.viewWork.value === 'work') {
+		} else if (store.APP.viewWork?.value === 'work') {
 			gantt.templates.rightside_text = () => '';
 			gantt.templates.task_text = (start, end, task) => task.text;
 			gantt.render();
