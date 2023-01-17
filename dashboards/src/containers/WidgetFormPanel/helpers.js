@@ -14,15 +14,17 @@ const filterByAttribute = (options: Array<Attribute>, attribute: ?Attribute, fil
 	const targetAttribute = filterByRef ? attribute?.ref : attribute;
 
 	return targetAttribute ? options.filter(option => {
+		const optionAttribute = filterByRef && option.ref ? option.ref : option;
+
 		if (targetAttribute.type in OBJECT) {
-			return option.property === targetAttribute.property;
+			return optionAttribute.property === targetAttribute.property;
 		}
 
 		if (targetAttribute.type in DATE) {
-			return option.type in DATE;
+			return optionAttribute.type in DATE;
 		}
 
-		return option.type === targetAttribute.type;
+		return optionAttribute.type === targetAttribute.type;
 	}) : options;
 };
 

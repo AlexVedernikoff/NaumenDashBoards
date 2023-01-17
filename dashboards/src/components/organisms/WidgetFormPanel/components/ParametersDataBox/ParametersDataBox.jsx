@@ -5,7 +5,6 @@ import type {DataSet, Props} from './types';
 import {filterByAttribute} from 'containers/WidgetFormPanel/helpers';
 import FormBox from 'components/molecules/FormBox';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
-import {GROUP_WAYS} from 'store/widgets/constants';
 import type {Parameter} from 'store/widgetForms/types';
 import ParameterFieldset from 'WidgetFormPanel/components/ParameterFieldset';
 import React, {PureComponent} from 'react';
