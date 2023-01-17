@@ -773,7 +773,7 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 break
             case GroupType.MINUTES:
-                columnAccordingToUTC = sc.atTimeZone(column, timeZone)
+                columnAccordingToUTC = methodAtTimeZone(sc, column, timeZone)
                 IApiCriteriaColumn groupColumn = sc.extract(columnAccordingToUTC, 'MINUTE')
                 criteria.addColumn(groupColumn)
                 criteria.addGroupColumn(groupColumn)
@@ -786,7 +786,7 @@ class QueryWrapper implements CriteriaWrapper
                 break
             case GroupType.DAY:
                 String format = parameter.format
-                columnAccordingToUTC = sc.atTimeZone(column, timeZone)
+                columnAccordingToUTC = methodAtTimeZone(sc, column, timeZone)
                 switch (format)
                 {
                     case 'dd':
@@ -921,7 +921,7 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 break
             case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
-                columnAccordingToUTC = sc.atTimeZone(column, timeZone)
+                columnAccordingToUTC = methodAtTimeZone(sc, column, timeZone)
                 String format = parameter.format
                 switch (format)
                 {
@@ -1106,6 +1106,29 @@ class QueryWrapper implements CriteriaWrapper
             this.criteria = criteria
         }
         return this
+    }
+
+    /**
+     * Метод для проверки на наличие метода
+     * @param sc - сокращение от selectClause
+     * @param IApiCriteriaColumn column - значения колонки
+     * @param timeZone - значение часового пояса
+     * @return columnAccordingToUTC - результат проверки метода
+     */
+    private IApiCriteriaColumn methodAtTimeZone(sc, IApiCriteriaColumn column, String timeZone)
+    {
+        Boolean conditionAtTimeZone = sc.class.metaClass.methods*.name.any {it == 'atTimeZone'}
+        Object columnAccordingToUTC
+        if (conditionAtTimeZone)
+        {
+            columnAccordingToUTC = sc.atTimeZone(column, timeZone)
+        }
+        else
+        {
+            columnAccordingToUTC = column
+        }
+
+        return columnAccordingToUTC
     }
 
     //Костыльный метод. Потому что логика выходит за пределы стандартного алгоритма
