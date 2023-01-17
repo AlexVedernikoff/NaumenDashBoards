@@ -934,7 +934,7 @@ class QueryWrapper implements CriteriaWrapper
                         }
                 }
                 break
-                case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
+            case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
                 if (sc.class.metaClass.methods*.name.any{it=='atTimeZone'})
                 {
                     columnAccordingToUTC = sc.atTimeZone(column, timeZone)
