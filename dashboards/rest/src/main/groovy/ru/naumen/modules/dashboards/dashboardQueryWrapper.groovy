@@ -773,14 +773,7 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 break
             case GroupType.MINUTES:
-                if (sc.class.metaClass.methods*.name.any{it=='atTimeZone'})
-                {
                 columnAccordingToUTC = sc.atTimeZone(column, timeZone)
-                }
-                else
-                {
-                columnAccordingToUTC = column
-                }
                 IApiCriteriaColumn groupColumn = sc.extract(columnAccordingToUTC, 'MINUTE')
                 criteria.addColumn(groupColumn)
                 criteria.addGroupColumn(groupColumn)
@@ -793,14 +786,7 @@ class QueryWrapper implements CriteriaWrapper
                 break
             case GroupType.DAY:
                 String format = parameter.format
-                if (sc.class.metaClass.methods*.name.any{it=='atTimeZone'})
-                {
-                    columnAccordingToUTC = sc.atTimeZone(column, timeZone)
-                }
-                else
-                {
-                    columnAccordingToUTC = column
-                }
+                columnAccordingToUTC = sc.atTimeZone(column, timeZone)
                 switch (format)
                 {
                     case 'dd':
@@ -934,15 +920,8 @@ class QueryWrapper implements CriteriaWrapper
                         }
                 }
                 break
-                case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
-                if (sc.class.metaClass.methods*.name.any{it=='atTimeZone'})
-                {
-                    columnAccordingToUTC = sc.atTimeZone(column, timeZone)
-                }
-                else
-                {
-                    columnAccordingToUTC = column
-                }
+            case GroupType.with { [WEEK, MONTH, QUARTER, YEAR] }:
+                columnAccordingToUTC = sc.atTimeZone(column, timeZone)
                 String format = parameter.format
                 switch (format)
                 {
