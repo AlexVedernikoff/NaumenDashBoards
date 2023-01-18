@@ -4943,8 +4943,40 @@
                     return new StandardDiagram()
                 case 2:
                     def (aggregationResult, groupResult) = transposeDataSet
-                    def series = [new Series(name: legendName, data: aggregationResult as List)]
-                    return new StandardDiagram(labels: groupResult, series: series, countTotals: countTotals)
+                    StandardDiagram standardDiagram
+                    List<Series> series = [new Series(
+                        name: legendName,
+                        data: aggregationResult as List
+                    )]
+                    standardDiagram = new StandardDiagram(
+                        labels: groupResult,
+                        series: series,
+                        countTotals: countTotals
+                    )
+                    if (widgetSettings?.sorting?.value == SortingValue.INDICATOR)
+                    {
+                        List<ItemWrapper> arrWrapper = series.findResult {
+                            it.data
+                        }.withIndex().collect { value, index ->
+                            new ItemWrapper(value, groupResult[index])
+                        }
+                        Integer sortingValue
+                        arrWrapper.sort { a, b ->
+                            sortingValue = a.indicatorValue as Double <=> b.indicatorValue as Double
+                            if (widgetSettings?.sorting?.type == SortingType.DESC)
+                            {
+                                sortingValue = -sortingValue
+                            }
+                            return sortingValue
+                        }
+                        seriesSort(series, widgetSettings)
+                        standardDiagram = new StandardDiagram(
+                            labels: arrWrapper.parameterValue,
+                            series: series,
+                            countTotals: countTotals
+                        )
+                    }
+                    return standardDiagram
                 case 3:
                     def (groupResult, breakdownResult) = transposeDataSet.tail()
                     checkAggregationAndBreakdownListSize(groupResult as Set, breakdownResult as Set)
