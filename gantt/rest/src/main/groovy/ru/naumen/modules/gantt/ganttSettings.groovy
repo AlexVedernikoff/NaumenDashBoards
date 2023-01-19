@@ -1203,8 +1203,8 @@ class GanttSettingsService
     /**
      * Метод по удалению версии диаграммы
      * @param versionKey - ключ версии диаграммы
-     * @param namespace - пространство имён для удалении версии
-     * @return true/false успешное/провалльное сохранение
+     * @param namespace - пространство имён для удаления версии
+     * @return true/false успешное/провальное удаление
      */
     Boolean deleteGanttVersionSettings(String versionKey,
                                        String namespace = GANTT_VERSION_NAMESPACE)
@@ -1544,15 +1544,15 @@ class GanttSettingsService
      */
     Boolean createPersonalDiagram(GetGanttSettingsRequest request, IUUIDIdentifiable user)
     {
-        GanttSettingsClass ganttSettingsPersona = getGanttSettings(request)
+        GanttSettingsClass ganttSettingsPersonal = getGanttSettings(request)
         GanttSettingsClass ganttSettingsCommon = getGanttSettings(request)
-        ganttSettingsPersona.isPersonalDiagram = true
-        ganttSettingsPersona.isPersonal = true
+        ganttSettingsPersonal.isPersonalDiagram = true
+        ganttSettingsPersonal.isPersonal = true
         ganttSettingsCommon.isPersonalDiagram = true
         ganttSettingsCommon.isPersonal = false
         String diagramKey = generateDiagramKey(request.subjectUUID, request.contentCode)
         String versionKey = [user.UUID, request.contentCode, 'personalVersion'].join('_')
-        if (!saveJsonSettings(versionKey, toJson(ganttSettingsPersona)) || !
+        if (!saveJsonSettings(versionKey, toJson(ganttSettingsPersonal)) || !
             saveJsonSettings(diagramKey, toJson(ganttSettingsCommon)))
         {
             throw new Exception('Настройки не были сохранены!')
