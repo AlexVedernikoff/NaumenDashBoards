@@ -864,6 +864,13 @@ class DashboardUtils
                         {
                             it.indicators = []
                         }
+                        else if (it instanceof  DiagramNewData && it.indicator)
+                        {
+                            it.indicators = [new NewIndicator(aggregation: it.aggregation, attribute: it.indicator)]
+                            it.breakdown = getNewFormatBreakdownOrNull(it.breakdown, it.breakdownGroup, it.dataKey)
+                            it.indicator = null
+                            it.aggregation = null
+                        }
                         return it
                     }
             case [TablePrevAndCurrentAndNew, PivotTable]:
@@ -4079,7 +4086,6 @@ class DiagramNewData extends DiagramNowData
      * Источник данных нового формата
      */
     NewSourceValue source
-
     /**
      * Название параметра (для осевых графиков
      */
@@ -4090,12 +4096,26 @@ class DiagramNewData extends DiagramNowData
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String yAxisName
-
+    /**
+     * Тип комбо диаграммы
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     ComboType type
-
+    /**
+     * Дескриптор
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String descriptor
+    /**
+     * Показатель виджета для сочетания виджетами старых версий
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Attribute indicator
+    /**
+     * Тип агрегации виджета для сочетания с виджетами старых версий
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Aggregation aggregation
 }
 
 /**

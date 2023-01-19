@@ -480,7 +480,7 @@
             switch (diagramType)
             {
                 case [*DiagramType.StandardTypes]:
-                    String legend = widgetSettings?.data?.find()?.source?.value?.label
+                    String legend = widgetSettings?.data?.find()?.source?.value?.label ?: ''
                     Boolean reverseGroups = isCustomGroupFromBreakdown(widgetSettings)
                     Boolean changeLabels = widgetSettings?.sorting?.value == SortingValue.PARAMETER
                     Boolean reverseLabels = widgetSettings?.sorting?.type == SortingType.DESC && changeLabels
@@ -5374,7 +5374,7 @@
                 }
                 return new Column(
                     footer: "",
-                    accessor: attrValue.key ?: attrValue.aggregation? accessorAndAtribut + "#" + "${attrValue.aggregation}" : attrValue.name,
+                    accessor: attrValue.key ?: (attrValue.aggregation ? (accessorAndAtribut + "#" + attrValue.aggregation) : accessorAndAtribut),
                     header: accessorAndAtribut,
                     attribute: attrValue.attribute,
                     type: attrValue.type,
@@ -5529,7 +5529,7 @@
                         {
                             BaseAttribute attribute = indicator?.attribute
                             String currentSource = value.source.value.value
-                            String currentSourceName = currentSource != mainSource ? value.source.value.label.trim() : mainSourceValue.label.trim()
+                            String currentSourceName = currentSource != mainSource ? value.source.value.label?.trim() : mainSourceValue.label?.trim()
 
                             if((fullIndicatorsList.count { it?.attribute?.title == attribute?.title } > 1) && !attribute?.title?.contains(currentSourceName))
                             {
@@ -5794,12 +5794,17 @@
             }
 
             List<String> attributeNames = attributes.collect{ attribut ->
+                String attributeName
                 def secondAttribut = attribut?.attribute?.ref?.title
                 if(secondAttribut != null)
                 {
-                    return  attribut.name + " (" + attribut?.attribute?.ref?.title+ ")"
+                    attributeName = attribut.name + " (" + attribut?.attribute?.ref?.title + ")"
                 }
-                return attribut.key ?:  attribut.aggregation? attribut.name + "#" + "${attribut.aggregation}" : attribut.name
+                else
+                {
+                    attributeName = attribut.name
+                }
+                return attribut.key ?:  (attribut.aggregation ? (attributeName + "#" + attribut.aggregation) : attributeName)
             }
 
             if (sourceRowNames && hasBreakdown)
@@ -6551,7 +6556,7 @@
                 if (!value.sourceForCompute)
                 {
                     String currentSource = value.source.value.value
-                    String currentSourceName = currentSource != mainSource ? value.source.value.label.trim() : mainSourceValue.label.trim()
+                    String currentSourceName = currentSource != mainSource ? value.source.value.label?.trim() : mainSourceValue.label?.trim()
 
                     value.parameters.collect { parameter ->
                         if(fullParametersList.count { it?.attribute?.title == parameter?.attribute?.title } > 1)
