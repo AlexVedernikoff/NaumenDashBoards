@@ -1496,10 +1496,10 @@ class GanttSettingsService
      * @param userData - информация о пользователях
      * @return инофрмация о внесенных изменения в права доступа
      */
-    String postDataUsers(Collection userData)
+    String postDataUsers(Map userData)
     {
         String userRole = ''
-        userData.each {
+        userData.data.each {
             ISGroup group = api.security.getGroup(GROUP_GANT_MASTER)
             ISDtObject employee = api.utils.get(it.code)
             Boolean whetherUserNecessaryRights = employee.employeeSecGroups.find { employeeGroups
