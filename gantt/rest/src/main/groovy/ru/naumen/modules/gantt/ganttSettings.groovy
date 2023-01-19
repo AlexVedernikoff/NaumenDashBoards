@@ -222,7 +222,7 @@ class GanttSettingsImpl implements GanttSettingsController
     {
         GetGanttSettingsRequest request = new ObjectMapper()
             .convertValue(requestContent, GetGanttSettingsRequest)
-        return Jackson.toJsonString(service.getGanttSettings(request))
+        return Jackson.toJsonString(service.getGanttSettings(request, user))
     }
 
     @Override
@@ -494,20 +494,32 @@ class GanttSettingsService
         String subjectUUID = request.subjectUUID
         String contentCode = request.contentCode
         String diagramKey
+        Boolean isPersonalDiagram
         if (request.hasProperty('isPersonal') && request.isPersonal)
         {
+            isPersonalDiagram = true
             diagramKey = [user.UUID, request.contentCode, 'personalVersion'].join('_')
         }
         else
         {
             diagramKey = generateDiagramKey(subjectUUID, contentCode)
+            if (user &&
+                getJsonSettings([user.UUID, request.contentCode, 'personalVersion'].join('_')))
+            {
+                isPersonalDiagram = true
+            }
+            else
+            {
+                isPersonalDiagram = false
+            }
+
         }
         String ganttSettingsFromKeyValue = getJsonSettings(diagramKey)
         GanttSettingsClass ganttSettings = ganttSettingsFromKeyValue
             ? Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
             : new GanttSettingsClass()
         ganttSettings.diagramKey = diagramKey
-        ganttSettings.isPersonalDiagram = changingSettingsForNonTextTypes(ganttSettings)
+        ganttSettings.isPersonalDiagram = isPersonalDiagram
         transformGanttSettings(ganttSettings)
 
         return ganttSettings
@@ -672,6 +684,7 @@ class GanttSettingsService
         }
         ganttSettings.isPersonal =
             request?.ganttSettings?.diagramKey.split('_').last() == 'personalVersion' ? true : false
+        ganttSettings.isPersonalDiagram = ganttSettings.isPersonal ? true : false
         ganttSettings.commonSettings = updateColumnsInCommonSettings(ganttSettings.commonSettings)
         if (saveJsonSettings(keyForVersions, toJson(ganttSettings)) && saveJsonSettings(
             request?.ganttSettings?.diagramKey,
@@ -1190,10 +1203,13 @@ class GanttSettingsService
     /**
      * Метод по удалению версии диаграммы
      * @param versionKey - ключ версии диаграммы
+     * @param namespace - пространство имён для удалении версии
+     * @return true/false успешное/провалльное сохранение
      */
-    void deleteGanttVersionSettings(String versionKey)
+    Boolean deleteGanttVersionSettings(String versionKey,
+                                       String namespace = GANTT_VERSION_NAMESPACE)
     {
-        api.keyValue.delete(GANTT_VERSION_NAMESPACE, versionKey)
+        return api.keyValue.delete(namespace, versionKey)
     }
 
     /**
@@ -1528,11 +1544,16 @@ class GanttSettingsService
      */
     Boolean createPersonalDiagram(GetGanttSettingsRequest request, IUUIDIdentifiable user)
     {
-        GanttSettingsClass ganttSettings = getGanttSettings(request)
-        ganttSettings.isPersonalDiagram = true
-        ganttSettings.isPersonal = false
+        GanttSettingsClass ganttSettingsPersona = getGanttSettings(request)
+        GanttSettingsClass ganttSettingsCommon = getGanttSettings(request)
+        ganttSettingsPersona.isPersonalDiagram = true
+        ganttSettingsPersona.isPersonal = true
+        ganttSettingsCommon.isPersonalDiagram = true
+        ganttSettingsCommon.isPersonal = false
+        String diagramKey = generateDiagramKey(request.subjectUUID, request.contentCode)
         String versionKey = [user.UUID, request.contentCode, 'personalVersion'].join('_')
-        if (!saveJsonSettings(versionKey, toJson(ganttSettings)))
+        if (!saveJsonSettings(versionKey, toJson(ganttSettingsPersona)) || !
+            saveJsonSettings(diagramKey, toJson(ganttSettingsCommon)))
         {
             throw new Exception('Настройки не были сохранены!')
         }
@@ -1551,10 +1572,13 @@ class GanttSettingsService
     Boolean deletePersonalDiagram(GetGanttSettingsRequest request, IUUIDIdentifiable user)
     {
         GanttSettingsClass ganttSettings = getGanttSettings(request)
-        String ganttSettingsKey = generateDiagramKey(user.UUID, request.contentCode)
+        String ganttSettingsKey = generateDiagramKey(request.subjectUUID, request.contentCode)
         ganttSettings.isPersonalDiagram = false
         ganttSettings.isPersonal = false
-        if (!saveJsonSettings(ganttSettingsKey, toJson(ganttSettings)))
+        if (!saveJsonSettings(ganttSettingsKey, toJson(ganttSettings)) || !
+            deleteGanttVersionSettings(
+                [user.UUID, request.contentCode, 'personalVersion'].join('_'), GANTT_NAMESPACE
+            ))
         {
             throw new Exception('Настройки не были сохранены!')
         }

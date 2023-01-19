@@ -132,7 +132,7 @@ class GanttDataSetService
         data.viewWork = settings.viewWork
         data.currentColorSettings = settings.currentColorSettings
         data.isPersonalDiagram = settings.isPersonalDiagram
-
+        data.isPersonal = settings.isPersonal
         if (user)
         {
             data.isPersonalDiagram = settings.isPersonalDiagram
