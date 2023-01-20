@@ -24,6 +24,7 @@ import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.ISelectClauseApi
 import ru.naumen.core.server.script.api.ITypesApi
 import ru.naumen.core.server.script.api.IWebApi
+import ru.naumen.core.server.script.spi.ScriptConditionsApi
 import ru.naumen.core.server.script.api.IWhereClauseApi
 import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
@@ -51,6 +52,7 @@ import static DashboardMarshallerClass.*
                                                                                                                         api.db,
                                                                                                                         api.date,
                                                                                                                         api.web,
+                                                                                                                        api.op,
                                                                                                                         new DashboardUtils(),
                                                                                                                         new DashboardDataSetService(api.utils,
                                                                                                                                                     api.metainfo,
@@ -119,6 +121,7 @@ class DashboardDrilldownService
     private final IDbApi db
     private final IDateApi date
     private final IWebApi web
+    private final ScriptConditionsApi op
     private final DashboardUtils dashboardUtils
     private final DashboardDataSetService dashboardDataSetService
     private final DashboardSettingsService dashboardSettingsService
@@ -139,6 +142,7 @@ class DashboardDrilldownService
                               IDbApi db,
                               IDateApi date,
                               IWebApi web,
+                              ScriptConditionsApi op,
                               DashboardUtils dashboardUtils,
                               DashboardDataSetService dashboardDataSetService,
                               DashboardSettingsService dashboardSettingsService,
@@ -155,6 +159,7 @@ class DashboardDrilldownService
         this.filters = filters
         this.date = date
         this.web = web
+        this.op = op
         this.dashboardUtils = dashboardUtils
         this.dashboardDataSetService = dashboardDataSetService
         this.dashboardSettingsService = dashboardSettingsService
