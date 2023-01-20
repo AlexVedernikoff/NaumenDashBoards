@@ -2232,14 +2232,14 @@ class CommonSettings
      * Настройки столбцов таблицы
      */
     Collection<ColumnSettings> columnSettings = [new ColumnSettings(
-        'code': DEFAULT_COLUMN_CODE,
+        'code': GanttSettingsService.DEFAULT_COLUMN_CODE,
         'title': 'Default column',
         show: true,
         editor: new EditorTextData()
     )]
 
     ColumnSettings fixedColumn = new ColumnSettings(
-        'code': FIRST_COLUMN_TITLE_ELEMENTS,
+        'code': GanttSettingsService.FIRST_COLUMN_TITLE_ELEMENTS,
         'title': 'Название',
         show: true,
         editor: new EditorTextData()
