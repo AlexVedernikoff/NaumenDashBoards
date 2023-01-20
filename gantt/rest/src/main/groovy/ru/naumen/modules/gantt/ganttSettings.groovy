@@ -345,6 +345,8 @@ class GanttSettingsService
     private static final String MAIN_FQN = 'abstractBO'
     private static final String GROUP_GANT_MASTER = 'GanttMaster'
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
+    private static final String DEFAULT_COLUMN_CODE = 'defaultColumnCode'
+    private static final String FIRST_COLUMN_TITLE_ELEMENTS = 'firstColumnWithTitleOfElements'
     static final String GANTT_NAMESPACE = 'gantts'
     static final String TYPE_SELECT = 'select'
     static final String GANTT_VERSION_NAMESPACE = 'ganttVersions'
@@ -520,6 +522,7 @@ class GanttSettingsService
             : new GanttSettingsClass()
         ganttSettings.diagramKey = diagramKey
         ganttSettings.isPersonalDiagram = isPersonalDiagram
+        changingSettingsForNonTextTypes(ganttSettings)
         transformGanttSettings(ganttSettings)
 
         return ganttSettings
@@ -552,6 +555,7 @@ class GanttSettingsService
                             switch (columnSetting.editor.type)
                             {
                                 case AttributeType.STRING_TYPE:
+                                    columnSetting.editor.map_to = 'text'
                                     columnSetting.editor.options = null
                                     columnSetting.editor.type = 'text'
                                     break
@@ -633,6 +637,25 @@ class GanttSettingsService
                                     columnSetting.editor.type = 'text'
                                     break
                             }
+                            if (attributeSetting.code == 'start_date' &&
+                                attributeSetting.attribute.code !=
+                                resourceAndWorkSetting.startWorkAttribute.code)
+                            {
+                                String randomUUID = java.util.UUID.randomUUID().toString()
+                                columnSetting.code = randomUUID
+                                attributeSetting.code = randomUUID
+                                columnSetting.editor.map_to = attributeSetting.attribute.type
+                            }
+                            if (attributeSetting.code == 'end_date' &&
+                                attributeSetting.attribute.code !=
+                                resourceAndWorkSetting.endWorkAttribute.code)
+                            {
+                                String randomUUID = java.util.UUID.randomUUID().toString()
+                                columnSetting.code = randomUUID
+                                attributeSetting.code = randomUUID
+                                columnSetting.editor.map_to = attributeSetting.attribute.type
+                            }
+
                         }
                     }
                 }
@@ -686,30 +709,58 @@ class GanttSettingsService
             request?.ganttSettings?.diagramKey.split('_').last() == 'personalVersion' ? true : false
         ganttSettings.isPersonalDiagram = ganttSettings.isPersonal ? true : false
         ganttSettings.commonSettings = updateColumnsInCommonSettings(ganttSettings.commonSettings)
+        changingSettingsForNonTextTypes(ganttSettings)
+        adjustingColumnSettings(ganttSettings)
         if (saveJsonSettings(keyForVersions, toJson(ganttSettings)) && saveJsonSettings(
             request?.ganttSettings?.diagramKey,
             toJson(ganttSettings)
         ))
         {
-            ganttSettings = getGanttSettings(
-                new ObjectMapper().convertValue(
-                    ['contentCode': request.contentCode,
-                     'subjectUUID': request.subjectUUID,
-                     'timezone'   : request.timezone], GetGanttSettingsRequest
-                )
-            )
-            //TODO временное решение - костыль
-            if (request.ganttSettings.isPersonal)
-            {
-                ganttSettings.isPersonal = true
-            }
-
             return ganttSettings
         }
         else
         {
             throw new Exception('Настройки не были сохранены!')
         }
+    }
+
+    /**
+     * Метод корректировки настроек для колонок
+     * @param ganttSettings - текущие настроки диаграммы
+     */
+    void adjustingColumnSettings(GanttSettingsClass ganttSettings)
+    {
+        Collection codesAttributesUsedDiagram = []
+        ganttSettings.commonSettings.columnSettings.each {
+            codesAttributesUsedDiagram.add(it.code)
+        }
+        ResourceAndWorkSettings resourceAndWorkSettings =
+            ganttSettings.resourceAndWorkSettings.find {
+                it.communicationResourceAttribute
+            }
+        Collection<AttributeSettings> attributeSettings =
+            resourceAndWorkSettings.attributeSettings.findAll {
+                it.code in codesAttributesUsedDiagram
+            }
+        if (!(DEFAULT_COLUMN_CODE in attributeSettings.code) &&
+            DEFAULT_COLUMN_CODE in codesAttributesUsedDiagram)
+        {
+            AttributeSettings firstColumn = new AttributeSettings()
+            firstColumn.attribute = new Attribute()
+            firstColumn.attribute.code = "title"
+            firstColumn.code = DEFAULT_COLUMN_CODE
+            attributeSettings.add(firstColumn)
+        }
+        if (!(FIRST_COLUMN_TITLE_ELEMENTS in attributeSettings.code) &&
+            ganttSettings.commonSettings.fixedColumn.code == FIRST_COLUMN_TITLE_ELEMENTS)
+        {
+            AttributeSettings attributeFixedColumn = new AttributeSettings()
+            attributeFixedColumn.attribute = new Attribute()
+            attributeFixedColumn.attribute.code = "title"
+            attributeFixedColumn.code = FIRST_COLUMN_TITLE_ELEMENTS
+            attributeSettings.add(attributeFixedColumn)
+        }
+        resourceAndWorkSettings.attributeSettings = attributeSettings
     }
 
     /**
@@ -1837,7 +1888,7 @@ class BaseGanttDiagramData
     /**
      * Настройки общего блока
      */
-    CommonSettings commonSettings
+    CommonSettings commonSettings = new CommonSettings()
 
     /**
      * Ключ диаграммы
@@ -2170,17 +2221,29 @@ class CommonSettings
     /**
      * Масштаб
      */
-    ScaleEnum scale
+    ScaleEnum scale = ScaleEnum.MONTH
 
     /**
      * Свернуть работы по умолчанию
      */
-    Boolean rollUp
+    Boolean rollUp = true
 
     /**
      * Настройки столбцов таблицы
      */
-    Collection<ColumnSettings> columnSettings
+    Collection<ColumnSettings> columnSettings = [new ColumnSettings(
+        'code': DEFAULT_COLUMN_CODE,
+        'title': 'Default column',
+        show: true,
+        editor: new EditorTextData()
+    )]
+
+    ColumnSettings fixedColumn = new ColumnSettings(
+        'code': FIRST_COLUMN_TITLE_ELEMENTS,
+        'title': 'Название',
+        show: true,
+        editor: new EditorTextData()
+    )
 }
 
 /**
@@ -2256,7 +2319,7 @@ class Editor
     /**
      * Название атрибута для колонки
      */
-    String type
+    String type = 'text'
 
 }
 
