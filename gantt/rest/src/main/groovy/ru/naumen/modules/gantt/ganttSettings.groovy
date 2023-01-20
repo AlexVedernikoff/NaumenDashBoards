@@ -726,7 +726,7 @@ class GanttSettingsService
 
     /**
      * Метод корректировки настроек для колонок
-     * @param ganttSettings - текущие настроки диаграммы
+     * @param ganttSettings - текущие настройки диаграммы
      */
     void adjustingColumnSettings(GanttSettingsClass ganttSettings)
     {
@@ -747,7 +747,7 @@ class GanttSettingsService
         {
             AttributeSettings firstColumn = new AttributeSettings()
             firstColumn.attribute = new Attribute()
-            firstColumn.attribute.code = "title"
+            firstColumn.attribute.code = 'title'
             firstColumn.code = DEFAULT_COLUMN_CODE
             attributeSettings.add(firstColumn)
         }
@@ -756,7 +756,7 @@ class GanttSettingsService
         {
             AttributeSettings attributeFixedColumn = new AttributeSettings()
             attributeFixedColumn.attribute = new Attribute()
-            attributeFixedColumn.attribute.code = "title"
+            attributeFixedColumn.attribute.code = 'title'
             attributeFixedColumn.code = FIRST_COLUMN_TITLE_ELEMENTS
             attributeSettings.add(attributeFixedColumn)
         }
