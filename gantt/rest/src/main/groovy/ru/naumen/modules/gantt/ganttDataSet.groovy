@@ -928,6 +928,7 @@ class GanttDataSetService
                     it << ['unscheduled': null]
                     it << ['datesStartDateAndEndDate': true]
                     it << ['positionElement': null]
+                    it << ['firstColumnWithTitleOfElements': it.text]
                     if (settings.type == SourceType.WORK)
                     {
                         it << ['typeEntity': settings.type]
