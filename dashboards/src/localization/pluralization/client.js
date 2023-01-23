@@ -17,24 +17,8 @@ class Pluralization implements IPluralization {
 		return ['%', '$', '€'];
 	}
 
-	axiosLocales () {
-		return {
-			name: 'en',
-			options: {
-				days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-				months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-				shortDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Th', 'Fr', 'Sa'],
-				shortMonths: ['Jan', 'Feb', 'Маr', 'Ape', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-				toolbar: {
-					download: 'Download SVG',
-					pan: 'Pan',
-					reset: 'Reset',
-					selectionZoom: 'Selection zoom',
-					zoomIn: 'Zoom in',
-					zoomOut: 'Zoom out'
-				}
-			}
-		};
+	customRange (data: {end: Date, start: Date}) {
+		return `for ${this.date(data.start)}-${this.date(data.end)}`;
 	}
 }
 

@@ -55,6 +55,7 @@ class Localization implements ILocalization {
 				default:
 					throw new Error('Undefined language');
 			}
+
 			this.status = FETCH_STATUS.SUCCESS;
 			this.subscribers.forEach(func => func(this.locale));
 		} catch (exception) {

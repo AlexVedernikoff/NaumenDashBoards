@@ -56,6 +56,10 @@ sprite.add(ICON_NAMES.ASC, `
 	<path d="M14 13V11H2V13H14Z" />
 `);
 
+sprite.add(ICON_NAMES.BACK_ARROW, `
+    <path d="M8.17 11.3a1 1 0 0 1 0 1.4 1 1 0 0 1-1.43 0L2 8l4.74-4.7a1 1 0 0 1 1.43 0 1 1 0 0 1 0 1.4L5.86 7h7.13A1 1 0 0 1 14 8a1 1 0 0 1-1 1H5.85l2.3 2.3Z"/>
+`);
+
 sprite.add(ICON_NAMES.BAR_CHART, `
 	<path fill-rule="evenodd" clip-rule="evenodd" d="M19 11L19 9L5 9L5 11L19 11ZM13 7L13 5L5 5L5 7L13 7ZM9 13L9 15L5 15L5 13L9 13ZM17 19L17 17L5 17L5 19L17 19Z" fill="${WIDGET_SUB_COLOR}"/>
 `);

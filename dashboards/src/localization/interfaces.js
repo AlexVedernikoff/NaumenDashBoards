@@ -8,7 +8,7 @@ export interface ILocalization {
 }
 
 export interface IPluralization {
-	axiosLocales(): Object;
+	customRange(data: {end: Date, start: Date}): string;
 	date(val: Date): string;
 	number(val: number): string;
 	numberAdditional(): Array<string>;

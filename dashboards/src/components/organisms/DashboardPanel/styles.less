@@ -1,4 +1,4 @@
-@import "/styles/variables.less";
+@import '/styles/variables.less';
 
 :local {
 	.container {
@@ -9,20 +9,34 @@
 		z-index: 1;
 
 		&.leftPosition {
-			box-shadow: 2px 2px 12px rgba(129, 146, 161, 0.2);
-			left: 0
+			box-shadow: 2px 2px 12px rgba(129, 146, 161, .2);
+			left: 0;
 		}
 
 		&.rightPosition {
-			box-shadow: -2px 2px 12px rgba(129, 146, 161, 0.2);
+			box-shadow: -2px 2px 12px rgba(129, 146, 161, .2);
 			right: 0;
+		}
+	}
+
+	.backButton {
+		color: @info;
+		padding: 8px 0 9px;
+
+		&:hover {
+			color: @black;
+		}
+
+		svg {
+			color: inherit;
+			margin-right: 5px;
 		}
 	}
 
 	.swipedContainer {
 		&.leftPosition {
-			right: 100%;
 			left: auto;
+			right: 100%;
 		}
 		&.rightPosition {
 			left: 100%;
@@ -32,7 +46,7 @@
 	.drawerControl {
 		background-color: @white;
 		border-radius: 4px;
-		box-shadow: 0px 2px 8px rgba(95, 95, 95, 0.2);
+		box-shadow: 0 2px 8px rgba(95, 95, 95, .2);
 		cursor: pointer;
 		height: 20px;
 		padding: 3px 3px;
@@ -46,7 +60,7 @@
 		}
 
 		&.drawerControlRight {
-			left: -36px
+			left: -36px;
 		}
 	}
 
@@ -123,8 +137,8 @@
 	}
 
 	.content {
-		bottom: 0;
 		background-color: @gainsboro;
+		bottom: 0;
 		display: flex;
 		flex-direction: column;
 		left: 0;

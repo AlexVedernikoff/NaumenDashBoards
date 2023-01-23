@@ -9,6 +9,7 @@ import type {InputValue, OnChangeInputEvent} from 'components/types';
 import NumberInput from 'components/atoms/NumberInput';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import t from 'localization';
 
 export class ComparePeriodStyle extends PureComponent<Props> {
 	static defaultProps = {
@@ -42,14 +43,14 @@ export class ComparePeriodStyle extends PureComponent<Props> {
 		if (show && allow) {
 			const {down, symbolCount = 0, up} = format;
 			return (
-				<CollapsableFormBox title="Сравнение с периодом">
+				<CollapsableFormBox title={t('ComparePeriodStyle::CompareWithPeriod')}>
 					<FormField row>
 						<Icon name={ICON_NAMES.ARROW_FULL_DOWN} />
 						<ColorInput name={DIAGRAM_FIELDS.down} onChange={this.handleChangeColorInput} portable={true} value={down} />
 						<Icon name={ICON_NAMES.ARROW_FULL_UP} />
 						<ColorInput name={DIAGRAM_FIELDS.up} onChange={this.handleChangeColorInput} portable={true} value={up} />
 					</FormField>
-					<FormField label="Количество знаков после запятой" small>
+					<FormField label={t('ComparePeriodStyle::NumberSymbolsAfterComma')} small>
 						<NumberInput max={5} min={0} onChange={this.handleChangeSymbolCount} value={symbolCount} />
 					</FormField>
 				</CollapsableFormBox>

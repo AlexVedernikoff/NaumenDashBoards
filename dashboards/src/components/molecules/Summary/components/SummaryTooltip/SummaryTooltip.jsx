@@ -3,6 +3,7 @@ import {createPortal} from 'react-dom';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 
 export class SummaryTooltip extends PureComponent<Props> {
 	container: HTMLDivElement | null;
@@ -32,7 +33,9 @@ export class SummaryTooltip extends PureComponent<Props> {
 		const css = {left: x + 10, top: y + 10};
 		return (
 			<div className={styles.tooltip} style={css}>
-				<div className={styles.title}>Выбор детализации</div>
+				<div className={styles.title}>
+					<T text="SummaryTooltip::ChoosingDetails" />
+				</div>
 				<div className={styles.indicator}>{indicator} {value}</div>
 				<div className={styles.period}>{period}</div>
 			</div>

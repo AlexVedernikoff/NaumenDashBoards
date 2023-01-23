@@ -10,6 +10,7 @@ import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
+import t from 'localization';
 import ToggableFormBox from 'components/molecules/ToggableFormBox';
 
 export class ComparePeriodBox extends PureComponent<Props> {
@@ -45,7 +46,7 @@ export class ComparePeriodBox extends PureComponent<Props> {
 		if (period === COMPARE_PERIOD.CUSTOM) {
 			return (
 				<Fragment>
-					<FormField label='Начало периода' small>
+					<FormField label={t('ComparePeriodBox::StartPeriod')} small>
 						<Datepicker
 							availableFormats={AVAILABLE_DATE_FORMATS}
 							className={styles.datapicker}
@@ -55,7 +56,7 @@ export class ComparePeriodBox extends PureComponent<Props> {
 							value={startDate}
 						/>
 					</FormField>
-					<FormField label='Конец периода' small>
+					<FormField label={t('ComparePeriodBox::EndPeriod')} small>
 						<Datepicker
 							availableFormats={AVAILABLE_DATE_FORMATS}
 							className={styles.datapicker}
@@ -80,6 +81,7 @@ export class ComparePeriodBox extends PureComponent<Props> {
 		return (
 			<FormField>
 				<Select
+					getOptionLabel={option => t(option.label)}
 					name={DIAGRAM_FIELDS.period}
 					onSelect={this.handleSelect}
 					options={SELECT_OPTIONS}
@@ -100,7 +102,7 @@ export class ComparePeriodBox extends PureComponent<Props> {
 					name={DIAGRAM_FIELDS.show}
 					onToggle={this.handleToggle}
 					showContent={show}
-					title="Сравнение с периодом"
+					title={t('ComparePeriodBox::CompareWithPeriod')}
 				>
 					{this.renderPeriodSelect()}
 					{this.renderCustomPeriodData()}
