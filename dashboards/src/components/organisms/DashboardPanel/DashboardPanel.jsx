@@ -1,4 +1,5 @@
 // @flow
+import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import cn from 'classnames';
 import {EDIT_PANEL_POSITION} from 'store/dashboard/settings/constants';
 import type {EditPanelPosition} from 'store/dashboard/settings/types';
@@ -12,6 +13,7 @@ import styles from './styles.less';
 import T from 'components/atoms/Translation';
 
 const WidgetAddPanel = React.lazy(() => import('containers/WidgetAddPanel'));
+const WidgetCopyPanel = React.lazy(() => import('containers/WidgetCopyPanel'));
 const WidgetFormPanel = React.lazy(() => import('containers/WidgetFormPanel'));
 
 export class DashboardPanel extends PureComponent<Props, State> {
@@ -87,7 +89,15 @@ export class DashboardPanel extends PureComponent<Props, State> {
 	};
 
 	renderContent = () => {
-		const content = this.props.selectedWidgetId ? (<WidgetFormPanel key={this.props.selectedWidgetId} />) : (<WidgetAddPanel />);
+		let content = null;
+
+		if (this.props.selectedWidgetId) {
+			content = (<WidgetFormPanel key={this.props.selectedWidgetId} />);
+		} else if (this.props.showCopyPanel) {
+			content = (<WidgetCopyPanel />);
+		} else {
+			content = (<WidgetAddPanel />);
+		}
 
 		return (
 			<div className={styles.contentPlace} ref={this.contentRef}>
@@ -117,17 +127,42 @@ export class DashboardPanel extends PureComponent<Props, State> {
 	renderFallback = () => <div className={styles.fallback}><T text="DashboardPanel::LoadingContent" /></div>;
 
 	renderHeader = () => {
-		const {position, title} = this.props;
+		const {position} = this.props;
 		const {LEFT, RIGHT} = EDIT_PANEL_POSITION;
 		const rightClassName = position === RIGHT ? cn(styles.active, styles.positionButton) : null;
 		const leftClassName = position === LEFT ? cn(styles.active, styles.positionButton) : null;
 		return (
 			<div className={styles.title}>
-				<div>{title}</div>
-				<IconButton className={leftClassName} icon={ICON_NAMES.PANEL_TO_LEFT} onClick={this.handleChangePosition(LEFT)} round={false} />
-				<IconButton className={rightClassName} icon={ICON_NAMES.PANEL_TO_RIGHT} onClick={this.handleChangePosition(RIGHT)} round={false} />
+				<div>{this.renderHeaderTitle()}</div>
+				<IconButton
+					className={leftClassName}
+					icon={ICON_NAMES.PANEL_TO_LEFT}
+					onClick={this.handleChangePosition(LEFT)}
+					round={false}
+				/>
+				<IconButton
+					className={rightClassName}
+					icon={ICON_NAMES.PANEL_TO_RIGHT}
+					onClick={this.handleChangePosition(RIGHT)}
+					round={false}
+				/>
 			</div>
 		);
+	};
+
+	renderHeaderTitle = () => {
+		const {goBack, showBackButton, showCopyPanel, title} = this.props;
+
+		if (showBackButton || showCopyPanel) {
+			return (
+				<Button className={styles.backButton} onClick={goBack} variant={BUTTON_VARIANTS.SIMPLE}>
+					<Icon name={ICON_NAMES.BACK_ARROW} />
+					<T text="DashboardPanel::Back" />
+				</Button>
+			);
+		}
+
+		return title;
 	};
 
 	renderResizer = () => {
