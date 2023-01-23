@@ -2278,7 +2278,7 @@ class ColumnSettings extends TitleAndCode
     /**
      * Флаг на отображение
      */
-    Boolean show
+    Boolean show  = true
 
     /**
      * Настройки для редактирования атрибута
