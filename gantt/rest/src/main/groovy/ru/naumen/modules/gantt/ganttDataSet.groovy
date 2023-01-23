@@ -207,16 +207,7 @@ class GanttDataSetService
             setWorkProgress(it, settings)
             setColumnDateFormats(it, timezone)
         }
-        if (data.commonSettings)
-        {
-            ColumnSettings columnSettingsTitle = data.commonSettings?.columnSettings?.first()
-            data.tasks.each {
-                if (columnSettingsTitle)
-                {
-                    it.name = it[columnSettingsTitle.code]
-                }
-            }
-        }
+
         determiningCurrentPositionElement(request, data, user)
         data.tasks = finalSortingElements(data.tasks)
     }
@@ -928,7 +919,6 @@ class GanttDataSetService
                     it << ['unscheduled': null]
                     it << ['datesStartDateAndEndDate': true]
                     it << ['positionElement': null]
-                    it << ['firstColumnWithTitleOfElements': it.text]
                     if (settings.type == SourceType.WORK)
                     {
                         it << ['typeEntity': settings.type]

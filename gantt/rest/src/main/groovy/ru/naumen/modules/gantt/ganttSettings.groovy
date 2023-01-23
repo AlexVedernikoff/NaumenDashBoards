@@ -345,7 +345,6 @@ class GanttSettingsService
     private static final String MAIN_FQN = 'abstractBO'
     private static final String GROUP_GANT_MASTER = 'GanttMaster'
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
-    private static final String DEFAULT_COLUMN_CODE = 'defaultColumnCode'
     private static final String FIRST_COLUMN_TITLE_ELEMENTS = 'firstColumnWithTitleOfElements'
     static final String GANTT_NAMESPACE = 'gantts'
     static final String TYPE_SELECT = 'select'
@@ -742,23 +741,22 @@ class GanttSettingsService
             resourceAndWorkSettings.attributeSettings.findAll {
                 it.code in codesAttributesUsedDiagram
             }
-        if (!(DEFAULT_COLUMN_CODE in attributeSettings.code) &&
-            DEFAULT_COLUMN_CODE in codesAttributesUsedDiagram)
+        if (!attributeSettings)
         {
             AttributeSettings firstColumn = new AttributeSettings()
             firstColumn.attribute = new Attribute()
             firstColumn.attribute.code = 'title'
-            firstColumn.code = DEFAULT_COLUMN_CODE
+            firstColumn.attribute.title = 'Название'
+            firstColumn.code = codesAttributesUsedDiagram.first()
             attributeSettings.add(firstColumn)
-        }
-        if (!(FIRST_COLUMN_TITLE_ELEMENTS in attributeSettings.code) &&
-            ganttSettings.commonSettings.fixedColumn.code == FIRST_COLUMN_TITLE_ELEMENTS)
-        {
-            AttributeSettings attributeFixedColumn = new AttributeSettings()
-            attributeFixedColumn.attribute = new Attribute()
-            attributeFixedColumn.attribute.code = 'title'
-            attributeFixedColumn.code = FIRST_COLUMN_TITLE_ELEMENTS
-            attributeSettings.add(attributeFixedColumn)
+            ganttSettings.resourceAndWorkSettings.attributeSettings.each {
+                if (!(it.code in codesAttributesUsedDiagram))
+                {
+                    it*.attribute*.code = 'title'
+                    it*.attribute*.title = 'Название'
+                    it*.code = codesAttributesUsedDiagram.first()
+                }
+            }
         }
         resourceAndWorkSettings.attributeSettings = attributeSettings
     }
@@ -2231,19 +2229,7 @@ class CommonSettings
     /**
      * Настройки столбцов таблицы
      */
-    Collection<ColumnSettings> columnSettings = [new ColumnSettings(
-        'code': GanttSettingsService.DEFAULT_COLUMN_CODE,
-        'title': 'Default column',
-        show: true,
-        editor: new EditorTextData()
-    )]
-
-    ColumnSettings fixedColumn = new ColumnSettings(
-        'code': GanttSettingsService.FIRST_COLUMN_TITLE_ELEMENTS,
-        'title': 'Название',
-        show: true,
-        editor: new EditorTextData()
-    )
+    Collection<ColumnSettings> columnSettings = [new ColumnSettings()]
 }
 
 /**
@@ -2597,7 +2583,7 @@ class ResourceAndWorkSettings
     /**
      * Настройки атрибутов для таблицы
      */
-    Collection<AttributeSettings> attributeSettings
+    Collection<AttributeSettings> attributeSettings = [new AttributeSettings()]
 
     /**
      * Атрибут начала работ
@@ -2711,7 +2697,7 @@ class TitleAndCode
     /**
      * Название
      */
-    String title
+    String title = 'Название'
 
     /**
      * Код

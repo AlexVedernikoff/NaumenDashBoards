@@ -885,7 +885,6 @@ class GanttWorkHandlerService
         ResourceAndWorkSettings resourceWork = ganttSettings.resourceAndWorkSettings.find {
             it.type == SourceType.WORK
         }
-        String checkpointStatusAttr = resourceWork.checkpointStatusAttr.code.split('@').last()
         if (request.workData.completed && editabilityStatus)
         {
             ScriptDtObject milestoneMetaObject = api.utils.get(request.workUUID)
