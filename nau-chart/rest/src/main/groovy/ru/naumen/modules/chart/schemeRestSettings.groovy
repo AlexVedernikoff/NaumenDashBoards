@@ -55,6 +55,17 @@ private String getSchemeData(String objectUuid, String contentUuid, LinkedTreeMa
     return new ObjectMapper().writeValueAsString(aggregations)
 }
 
+/**
+ * Метод для выполнения поиска объектов на стенде по совпадению в строке
+ * @param stringForFindingMatches - строка для выполнения поиска
+ * @return список объектов содержащих переданную строку
+ */
+String getUuidObjects(String stringForFindingMatches)
+{
+    return new ObjectMapper()
+        .writeValueAsString(api.fts.simpleSearch(stringForFindingMatches, "all", 999))
+}
+
 @InjectApi
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class ElementsScheme
