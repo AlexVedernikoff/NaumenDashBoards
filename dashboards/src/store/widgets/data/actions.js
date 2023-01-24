@@ -4,10 +4,9 @@ import type {AnyWidget, Chart, SetWidgetWarning, ValidateWidgetToCopyResult, Wid
 import api from 'api';
 import {ApiError} from 'api/errors';
 import {batch} from 'react-redux';
-import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGET_TYPES, WIDGETS_EVENTS} from './constants';
+import {CHART_COLORS_SETTINGS_TYPES, LIMITS, WIDGET_TYPES} from './constants';
 import {confirmDialog} from 'store/commonDialogs/actions';
 import {createToast} from 'store/toasts/actions';
-import {DASHBOARD_EVENTS} from 'store/dashboard/settings/constants';
 import {deepClone} from 'helpers';
 import {DEFAULT_BUTTONS, FOOTER_POSITIONS, SIZES} from 'components/molecules/Modal/constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
@@ -54,8 +53,8 @@ const addNewWidget = (payload: NewWidget, relativeElement?: DivRef): ThunkAction
 
 	batch(() => {
 		dispatch(focusWidget(payload.id));
-		dispatch({payload, type: WIDGETS_EVENTS.ADD_WIDGET});
-		dispatch({type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE});
+		dispatch({payload, type: 'widgets/data/addWidget'});
+		dispatch({type: 'dashboard/settings/switchOnEditMode'});
 		dispatch(addLayouts(NewWidget.id, payload.recommendedPosition));
 	});
 
@@ -63,10 +62,10 @@ const addNewWidget = (payload: NewWidget, relativeElement?: DivRef): ThunkAction
 };
 
 /**
- * Сбрасывает выбранный виджет
+ * Сбрасывает редактирование нового виджета
  * @returns {ThunkAction}
  */
-const cancelForm = (): ThunkAction => (dispatch: Dispatch, getState: GetState): void => {
+const cancelNewWidgetCreate = () => (dispatch: Dispatch, getState: GetState): void => {
 	const {selectedWidget} = getState().widgets.data;
 
 	if (selectedWidget === NewWidget.id) {
@@ -76,10 +75,18 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch, getState: GetState): 
 		});
 	}
 
-	dispatch({
-		type: DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE
-	});
 	dispatch(resetWidget());
+};
+
+/**
+ * Сбрасывает выбранный виджет
+ * @returns {ThunkAction}
+ */
+const cancelForm = (): ThunkAction => (dispatch: Dispatch, getState: GetState): void => {
+	dispatch(cancelNewWidgetCreate());
+	dispatch({
+		type: 'dashboard/settings/switchOffEditMode'
+	});
 };
 
 /**
@@ -298,7 +305,7 @@ const copyWidget = (
 ): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 		dispatch({
-			type: WIDGETS_EVENTS.REQUEST_WIDGET_COPY
+			type: 'widgets/data/requestWidgetCopy'
 		});
 
 		try {
@@ -322,11 +329,15 @@ const copyWidget = (
 			dispatch(fetchCustomGroups());
 			dispatch(fetchBuildData(widget));
 			dispatch({
-				type: WIDGETS_EVENTS.RESPONSE_WIDGET_COPY
+				type: 'widgets/data/responseWidgetCopy'
+			});
+			dispatch({
+				payload: false,
+				type: 'dashboard/settings/setShowCopyPanel'
 			});
 		} catch (e) {
 			dispatch({
-				type: WIDGETS_EVENTS.RECORD_WIDGET_COPY_ERROR
+				type: 'widgets/data/recordWidgetCopyError'
 			});
 		}
 	};
@@ -404,9 +415,13 @@ const selectWidget = (widgetId: string): ThunkAction => (dispatch: Dispatch, get
 		}
 	}
 
+	dispatch({
+		payload: false,
+		type: 'dashboard/settings/setShowCopyPanel'
+	});
 	dispatch(setSelectedWidget(widgetId));
 	dispatch({
-		type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE
+		type: 'dashboard/settings/switchOnEditMode'
 	});
 
 	dashboardResizer.resetHeight();
@@ -424,7 +439,7 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 		let reasons = [];
 
 		dispatch({
-			type: WIDGETS_EVENTS.REQUEST_VALIDATE_TO_COPY
+			type: 'widgets/data/requestValidateToCopy'
 		});
 
 		try {
@@ -434,11 +449,11 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 			isValid = !result;
 
 			dispatch({
-				type: WIDGETS_EVENTS.RESPONSE_VALIDATE_TO_COPY
+				type: 'widgets/data/responseValidateToCopy'
 			});
 		} catch (e) {
 			dispatch({
-				type: WIDGETS_EVENTS.RECORD_VALIDATE_TO_COPY_ERROR
+				type: 'widgets/data/recordValidateToCopyError'
 			});
 		}
 
@@ -508,74 +523,75 @@ const setSelectedWidget = (widgetId: string) => (dispatch: Dispatch, getState: G
 
 	dispatch({
 		payload: widgetId,
-		type: WIDGETS_EVENTS.SET_SELECTED_WIDGET
+		type: 'widgets/data/setSelectedWidget'
 	});
 };
 
 const deleteWidget = (payload: string) => ({
 	payload,
-	type: WIDGETS_EVENTS.DELETE_WIDGET
+	type: 'widgets/data/deleteWidget'
 });
 
 const focusWidget = (payload: string) => ({
 	payload,
-	type: WIDGETS_EVENTS.SET_FOCUSED_WIDGET
+	type: 'widgets/data/setFocusedWidget'
 });
 
 const recordDeleteError = () => ({
-	type: WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR
+	type: 'widgets/data/recordWidgetDeleteError'
 });
 
 const resetFocusedWidget = () => ({
-	type: WIDGETS_EVENTS.RESET_FOCUSED_WIDGET
+	type: 'widgets/data/resetFocusedWidget'
 });
 
 const recordSaveError = () => ({
-	type: WIDGETS_EVENTS.RECORD_WIDGET_SAVE_ERROR
+	type: 'widgets/data/recordWidgetSaveError'
 });
 
 const requestWidgetDelete = () => ({
-	type: WIDGETS_EVENTS.REQUEST_WIDGET_DELETE
+	type: 'widgets/data/requestWidgetDelete'
 });
 
 const requestWidgetSave = () => ({
-	type: WIDGETS_EVENTS.REQUEST_WIDGET_SAVE
+	type: 'widgets/data/requestWidgetSave'
 });
 
 const resetWidget = () => ({
-	type: WIDGETS_EVENTS.RESET_WIDGET
+	type: 'widgets/data/resetWidget'
 });
 
 const setCreatedWidget = (payload: AnyWidget) => ({
 	payload,
-	type: WIDGETS_EVENTS.SET_CREATED_WIDGET
+	type: 'widgets/data/setCreatedWidget'
 });
 
 const setWidgets = (payload: Array<AnyWidget>) => ({
 	payload,
-	type: WIDGETS_EVENTS.SET_WIDGETS
+	type: 'widgets/data/setWidgets'
 });
 
 const setWarningMessage = (payload: SetWidgetWarning) => ({
 	payload,
-	type: WIDGETS_EVENTS.WIDGET_SET_WARNING
+	type: 'widgets/data/widgetSetWarning'
 });
 
 const clearWarningMessage = (payload: string) => ({
 	payload,
-	type: WIDGETS_EVENTS.WIDGET_CLEAR_WARNING
+	type: 'widgets/data/widgetClearWarning'
 });
 
 const updateWidget = (payload: AnyWidget) => ({
 	payload,
-	type: WIDGETS_EVENTS.UPDATE_WIDGET
+	type: 'widgets/data/updateWidget'
 });
 
 export {
 	addNewWidget,
 	cancelForm,
-	copyWidget,
+	cancelNewWidgetCreate,
 	clearWarningMessage,
+	copyWidget,
 	createWidget,
 	editWidgetChunkData,
 	focusWidget,
