@@ -1,5 +1,5 @@
 // @flow
-import {DASHBOARD_EVENTS, DEFAULT_INTERVAL, EDIT_PANEL_POSITION} from './constants';
+import {DEFAULT_INTERVAL, EDIT_PANEL_POSITION} from './constants';
 import {getLayoutMode} from 'helpers';
 import isMobile from 'ismobilejs';
 import type {SettingsAction, SettingsState} from './types';
@@ -28,11 +28,12 @@ export const initialDashboardState: SettingsState = {
 	personal: false,
 	personalCreating: false,
 	personalDeleting: false,
+	showCopyPanel: false,
 	showHeader: true,
 	widthEditPanel: 320
 };
 
 export const defaultDashboardAction: SettingsAction = {
 	payload: null,
-	type: DASHBOARD_EVENTS.UNKNOWN_DASHBOARD_ACTION
+	type: 'dashboard/settings/unknownDashboardAction'
 };

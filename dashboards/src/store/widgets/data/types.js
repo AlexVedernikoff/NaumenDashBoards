@@ -22,8 +22,7 @@ import {
 	TEXT_ALIGNS,
 	TEXT_HANDLERS,
 	WIDGET_SETS,
-	WIDGET_TYPES,
-	WIDGETS_EVENTS
+	WIDGET_TYPES
 } from './constants';
 import type {DashboardItem, WidgetItem} from 'store/dashboards/types';
 import type {DivRef} from 'components/types';
@@ -680,100 +679,100 @@ export type CallWidgetFiltersAction = (widget: Widget, dataSetIndex: number, fil
 
 export type AddWidget = {
 	payload: NewWidget,
-	type: typeof WIDGETS_EVENTS.ADD_WIDGET
+	type: 'widgets/data/addWidget'
 };
 
 export type UpdateWidget = {
 	payload: Widget,
-	type: typeof WIDGETS_EVENTS.UPDATE_WIDGET
+	type: 'widgets/data/updateWidget'
 };
 
 export type SetCreatedWidget = {
 	payload: Widget,
-	type: typeof WIDGETS_EVENTS.SET_CREATED_WIDGET
+	type: 'widgets/data/setCreatedWidget'
 };
 
 export type DeleteWidget = {
 	payload: string,
-	type: typeof WIDGETS_EVENTS.DELETE_WIDGET
+	type: 'widgets/data/deleteWidget'
 };
 
 export type SelectWidget = {
 	payload: string,
-	type: typeof WIDGETS_EVENTS.SET_SELECTED_WIDGET
+	type: 'widgets/data/setSelectedWidget'
 };
 
 export type ResetWidget = {
-	type: typeof WIDGETS_EVENTS.RESET_WIDGET,
+	type: 'widgets/data/resetWidget',
 };
 
 export type RecordValidateToCopyError = {
-	type: typeof WIDGETS_EVENTS.RECORD_VALIDATE_TO_COPY_ERROR,
+	type: 'widgets/data/recordValidateToCopyError',
 };
 
 export type RecordWidgetCopyError = {
-	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_COPY_ERROR,
+	type: 'widgets/data/recordWidgetCopyError',
 };
 
 export type RecordWidgetSaveError = {
-	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_SAVE_ERROR,
+	type: 'widgets/data/recordWidgetSaveError',
 };
 
 export type RequestValidateToCopy = {
-	type: typeof WIDGETS_EVENTS.REQUEST_VALIDATE_TO_COPY,
+	type: 'widgets/data/requestValidateToCopy',
 };
 
 export type RequestWidgetCopy = {
-	type: typeof WIDGETS_EVENTS.REQUEST_WIDGET_COPY,
+	type: 'widgets/data/requestWidgetCopy',
 };
 
 export type RequestWidgetDelete = {
-	type: typeof WIDGETS_EVENTS.REQUEST_WIDGET_DELETE,
+	type: 'widgets/data/requestWidgetDelete',
 };
 
 export type RequestWidgetSave = {
-	type: typeof WIDGETS_EVENTS.REQUEST_WIDGET_SAVE,
+	type: 'widgets/data/requestWidgetSave',
 };
 
 export type ResponseValidateToCopy = {
-	type: typeof WIDGETS_EVENTS.RESPONSE_VALIDATE_TO_COPY,
+	type: 'widgets/data/responseValidateToCopy',
 };
 
 export type ResponseWidgetCopy = {
-	type: typeof WIDGETS_EVENTS.RESPONSE_WIDGET_COPY,
+	type: 'widgets/data/responseWidgetCopy',
 };
 
 export type RecordWidgetDeleteError = {
-	type: typeof WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR
+	type: 'widgets/data/recordWidgetDeleteError'
 };
 
 export type ResetFocusedWidgetAction = {
-	type: typeof WIDGETS_EVENTS.RESET_FOCUSED_WIDGET
+	type: 'widgets/data/resetFocusedWidget'
 };
 
 export type SetFocusedWidget = {
 	payload: string,
-	type: typeof WIDGETS_EVENTS.SET_FOCUSED_WIDGET
+	type: 'widgets/data/setFocusedWidget'
 };
 
 export type SetWidgets = {
 	payload: Array<Widget>,
-	type: typeof WIDGETS_EVENTS.SET_WIDGETS
+	type: 'widgets/data/setWidgets'
 };
 
 type UnknownWidgetsAction = {
 	payload: null,
-	type: typeof WIDGETS_EVENTS.UNKNOWN_WIDGETS_ACTION
+	type: 'widgets/data/unknownWidgetsAction'
 };
 
 export type SetMessageWarning = {
 	payload: SetWidgetWarning,
-	type: typeof WIDGETS_EVENTS.WIDGET_SET_WARNING
+	type: 'widgets/data/widgetSetWarning'
 };
 
 export type ClearMessageWarning = {
 	payload: string,
-	type: typeof WIDGETS_EVENTS.WIDGET_CLEAR_WARNING
+	type: 'widgets/data/widgetClearWarning'
 };
 
 export type WidgetsAction =
