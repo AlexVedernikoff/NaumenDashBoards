@@ -1,6 +1,6 @@
 // @flow
 import type {ChangingState, ThunkAction} from 'store/types';
-import {DASHBOARD_EVENTS, EDIT_PANEL_POSITION, LAYOUT_BREAKPOINTS, LAYOUT_MODE} from './constants';
+import {EDIT_PANEL_POSITION, LAYOUT_BREAKPOINTS, LAYOUT_MODE} from './constants';
 import type {User} from 'store/users/types';
 
 export type LayoutMode = $Keys<typeof LAYOUT_MODE>;
@@ -19,132 +19,144 @@ export type EditPanelPosition = $Keys<typeof EDIT_PANEL_POSITION>;
 
 type ChangeAutoUpdateSettings = {
 	payload: $Shape<AutoUpdateSettings>,
-	type: typeof DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
+	type: 'dashboard/settings/changeAutoUpdateSettings'
 };
 
 type ChangeShowHeader = {
 	payload: boolean,
-	type: typeof DASHBOARD_EVENTS.CHANGE_SHOW_HEADER
+	type: 'dashboard/settings/changeShowHeader'
 };
 
 type CreatePersonalDashboard = {
-	type: typeof DASHBOARD_EVENTS.CREATE_PERSONAL_DASHBOARD
+	type: 'dashboard/settings/createPersonalDashboard'
 };
 
 type CreatedPersonalDashboard = {
-	type: typeof DASHBOARD_EVENTS.CREATED_PERSONAL_DASHBOARD
+	type: 'dashboard/settings/createdPersonalDashboard'
 };
 
 type DeletePersonalDashboard = {
-	type: typeof DASHBOARD_EVENTS.DELETE_PERSONAL_DASHBOARD
+	type: 'dashboard/settings/deletePersonalDashboard'
 };
 
 type DeletedPersonalDashboard = {
-	type: typeof DASHBOARD_EVENTS.DELETED_PERSONAL_DASHBOARD
+	type: 'dashboard/settings/deletedPersonalDashboard'
 };
 
 type ErrorCreatePersonalDashboard = {
-	type: typeof DASHBOARD_EVENTS.ERROR_CREATE_PERSONAL_DASHBOARD
+	type: 'dashboard/settings/errorCreatePersonalDashboard'
 };
 
 type ErrorDeletePersonalDashboard = {
-	type: typeof DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD
+	type: 'dashboard/settings/errorDeletePersonalDashboard'
 };
 
 type RecordDashboardError = {
 	payload: string,
-	type: typeof DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
+	type: 'dashboard/settings/recordDashboardError'
 };
 
 type RecordExportingFileToEmailError = {
 	payload: null,
-	type: typeof DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR
+	type: 'dashboard/settings/recordExportingFileToEmailError'
 };
 
 type RequestExportingFileToEmail = {
-	type: typeof DASHBOARD_EVENTS.REQUEST_EXPORTING_FILE_TO_EMAIL
+	type: 'dashboard/settings/requestExportingFileToEmail'
 };
 
 type RequestDashboard = {
 	payload: null,
-	type: typeof DASHBOARD_EVENTS.REQUEST_DASHBOARD
+	type: 'dashboard/settings/requestDashboard'
 };
 
 export type ReceiveDashboard = {
 	payload: null,
-	type: typeof DASHBOARD_EVENTS.RECEIVE_DASHBOARD
+	type: 'dashboard/settings/receiveDashboard'
 };
 
 export type ResponseExportingFileToEmail = {
-	type: typeof DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
+	type: 'dashboard/settings/responseExportingFileToEmail'
 };
 
 type ChangeLayoutMode = {
 	payload: LayoutMode,
-	type: typeof DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE,
+	type: 'dashboard/settings/changeLayoutMode'
 };
 
 type SetCode = {
 	payload: string,
-	type: typeof DASHBOARD_EVENTS.SET_CODE
+	type: 'dashboard/settings/setCode'
+};
+
+type SetDashboardUUID = {
+	payload: string,
+	type: 'dashboard/settings/setDashboardUUID'
 };
 
 type SetEditPanelPosition = {
 	payload: EditPanelPosition,
-	type: typeof DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION
+	type: 'dashboard/settings/setEditPanelPosition'
 };
 
 type SetHideEditPanel = {
 	payload: boolean,
-	type: typeof DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL
+	type: 'dashboard/settings/setHideEditPanel'
+};
+
+type SetShowCopyPanel = {
+	payload: boolean,
+	type: 'dashboard/settings/setShowCopyPanel'
 };
 
 type SetPersonal = {
 	payload: boolean,
-	type: typeof DASHBOARD_EVENTS.SET_PERSONAL
+	type: 'dashboard/settings/setPersonal'
 };
 
 type SetWidthEditPanel = {
 	payload: number,
-	type: typeof DASHBOARD_EVENTS.SET_WIDTH_EDIT_PANEL
+	type: 'dashboard/settings/setWidthEditPanel'
 };
 
 type SwitchOnEditMode = {
-	type: typeof DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE
+	type: 'dashboard/settings/switchOnEditMode'
 };
 
 type SwitchOffEditMode = {
-	type: typeof DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE
+	type: 'dashboard/settings/switchOffEditMode'
 };
 
 type UnknownDashboardAction = {
 	payload: null,
-	type: typeof DASHBOARD_EVENTS.UNKNOWN_DASHBOARD_ACTION
+	type: 'dashboard/settings/unknownDashboardAction'
 };
 
 export type SettingsAction =
 	| ChangeAutoUpdateSettings
 	| ChangeLayoutMode
 	| ChangeShowHeader
-	| CreatePersonalDashboard
 	| CreatedPersonalDashboard
-	| DeletePersonalDashboard
+	| CreatePersonalDashboard
 	| DeletedPersonalDashboard
+	| DeletePersonalDashboard
 	| ErrorCreatePersonalDashboard
 	| ErrorDeletePersonalDashboard
-	| RequestDashboard
 	| ReceiveDashboard
 	| RecordDashboardError
 	| RecordExportingFileToEmailError
+	| RequestDashboard
 	| RequestExportingFileToEmail
 	| ResponseExportingFileToEmail
 	| SetCode
+	| SetDashboardUUID
 	| SetEditPanelPosition
 	| SetHideEditPanel
 	| SetPersonal
+	| SetShowCopyPanel
 	| SetWidthEditPanel
-	| SwitchOnEditMode
 	| SwitchOffEditMode
+	| SwitchOnEditMode
 	| UnknownDashboardAction
 ;
 
@@ -164,6 +176,7 @@ export type SettingsState = {
 	personalCreating: boolean,
 	personalDeleting: boolean,
 	reloadInterval?: number,
+	showCopyPanel: boolean,
 	showHeader: boolean,
 	widthEditPanel: number
 };

@@ -14,7 +14,6 @@ import type {
 import api from 'api';
 import {ApiError} from 'api/errors';
 import type {AppState, Dispatch, GetState, ThunkAction} from 'store/types';
-import {BUILD_DATA_EVENTS} from './constants';
 import {compose} from 'redux';
 import {DEFAULT_NUMBER_AXIS_FORMAT, LIMITS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {DiagramBuildData, ReceiveBuildDataPayload, TableBuildData} from './types';
@@ -73,8 +72,8 @@ const getDataForTableDiagram = async (
 const fetchTableBuildData = (widget: TableWidget, pageNumber: number = 1, update: boolean = false): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 		update
-			? dispatch({payload: widget.id, type: BUILD_DATA_EVENTS.UPDATE_BUILD_DATA})
-			: dispatch({payload: widget, type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA});
+			? dispatch({payload: widget.id, type: 'widgets/buildData/updateBuildData'})
+			: dispatch({payload: widget, type: 'widgets/buildData/requestBuildData'});
 
 		try {
 			const state = getState();
@@ -297,17 +296,17 @@ const fetchBuildData = (
 
 const receiveBuildData = (payload: ReceiveBuildDataPayload) => ({
 	payload,
-	type: BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA
+	type: 'widgets/buildData/receiveBuildData'
 });
 
 const recordBuildDataError = (widgetId: string, message: string) => ({
 	payload: {message, widgetId},
-	type: BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR
+	type: 'widgets/buildData/recordBuildDataError'
 });
 
 const requestBuildData = (payload: AnyWidget) => ({
 	payload,
-	type: BUILD_DATA_EVENTS.REQUEST_BUILD_DATA
+	type: 'widgets/buildData/requestBuildData'
 });
 
 export {

@@ -5,12 +5,11 @@ import api from 'api';
 import {ApiError, PersonalDashboardNotFound} from 'api/errors';
 import {batch} from 'react-redux';
 import {changeAxisChartFormValues} from 'store/widgetForms/actions';
-import {CONTEXT_EVENTS} from 'src/store/context/constants';
+import {CONTEXT_EVENTS, DASHBOARD_EDIT_MODE} from 'store/context/constants';
 import {createToast} from 'store/toasts/actions';
-import {DASHBOARD_EDIT_MODE} from 'store/context/constants';
-import {DASHBOARD_EVENTS, EDIT_PANEL_POSITION, MAX_AUTO_UPDATE_INTERVAL} from './constants';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import type {EditPanelPosition, LayoutMode} from './types';
+import type {EditPanelPosition, LayoutMode, SettingsAction} from './types';
+import {EDIT_PANEL_POSITION, MAX_AUTO_UPDATE_INTERVAL} from './constants';
 import {fetchBuildData} from 'store/widgets/actions';
 import {getAllWidgets} from 'store/widgets/data/selectors';
 import {
@@ -28,7 +27,6 @@ import {getValueFromDescriptor} from 'utils/descriptorUtils';
 import {isPersonalDashboard, isRestrictUserModeDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
-import {resetState, switchState} from 'store/actions';
 import {resizer as dashboardResizer} from 'app.constants';
 import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSettings/actions';
 import StorageSettings from 'utils/storageSettings';
@@ -69,7 +67,7 @@ const getAutoUpdateSettings = (): ThunkAction => async (dispatch: Dispatch): Pro
  */
 const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	dispatch({
-		type: DASHBOARD_EVENTS.REQUEST_DASHBOARD
+		type: 'dashboard/settings/requestDashboard'
 	});
 
 	try {
@@ -93,7 +91,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 		dispatch(updateUserSourceMode());
 		dispatch(initStorageSettings());
 		dispatch({
-			type: DASHBOARD_EVENTS.RECEIVE_DASHBOARD
+			type: 'dashboard/settings/receiveDashboard'
 		});
 	} catch (exception) {
 		let error = t('store::dashboard::settings::FetchDashboardErrorText');
@@ -104,7 +102,7 @@ const fetchDashboard = (): ThunkAction => async (dispatch: Dispatch): Promise<vo
 
 		dispatch({
 			payload: error,
-			type: DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR
+			type: 'dashboard/settings/recordDashboardError'
 		});
 	}
 };
@@ -185,7 +183,7 @@ const getSettings = (refresh: boolean = false): ThunkAction => async (dispatch: 
  */
 const editDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 	dispatch({
-		type: DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE
+		type: 'dashboard/settings/switchOnEditMode'
 	});
 
 	dashboardResizer.resetHeight();
@@ -198,7 +196,7 @@ const editDashboard = (): ThunkAction => (dispatch: Dispatch) => {
 const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		dispatch({
-			type: DASHBOARD_EVENTS.CREATE_PERSONAL_DASHBOARD
+			type: 'dashboard/settings/createPersonalDashboard'
 		});
 
 		const {context} = getState();
@@ -208,12 +206,12 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 
 		dispatch(setUserData({...user, hasPersonalDashboard: true}));
 		dispatch({
-			type: DASHBOARD_EVENTS.CREATED_PERSONAL_DASHBOARD
+			type: 'dashboard/settings/createdPersonalDashboard'
 		});
 		dispatch(switchDashboard());
 	} catch (e) {
 		dispatch({
-			type: DASHBOARD_EVENTS.ERROR_CREATE_PERSONAL_DASHBOARD
+			type: 'dashboard/settings/errorCreatePersonalDashboard'
 		});
 
 		const errorMessage = e instanceof ApiError ? e.message : t('store::dashboard::settings::ErrorSavingPersonalDashboard');
@@ -232,7 +230,7 @@ const createPersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
 		dispatch({
-			type: DASHBOARD_EVENTS.DELETE_PERSONAL_DASHBOARD
+			type: 'dashboard/settings/deletePersonalDashboard'
 		});
 
 		const {context} = getState();
@@ -244,11 +242,11 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
 		dispatch(setUserData({...user, hasPersonalDashboard: false}));
 		dispatch(setPersonalValue(false));
 		dispatch({
-			type: DASHBOARD_EVENTS.DELETED_PERSONAL_DASHBOARD
+			type: 'dashboard/settings/deletedPersonalDashboard'
 		});
 	} catch (e) {
 		dispatch({
-			type: DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD
+			type: 'dashboard/settings/errorDeletePersonalDashboard'
 		});
 
 		const errorMessage = e instanceof ApiError ? e.message : t('store::dashboard::settings::DeleteError');
@@ -266,11 +264,8 @@ const removePersonalDashboard = (): ThunkAction => async (dispatch: Dispatch, ge
  */
 const seeDashboard = (): ThunkAction => async (dispatch: Dispatch) => {
 	dispatch(resetWidget());
-
-	dispatch({
-		type: DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE
-	});
-
+	dispatch({type: 'dashboard/settings/switchOffEditMode'});
+	dispatch(hideCopyPanel());
 	dashboardResizer.resize();
 };
 
@@ -319,7 +314,7 @@ const uploadFile = async (file: Blob, name: string): Promise<string> => {
  */
 const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>): ThunkAction => async (dispatch: Dispatch) => {
 	dispatch({
-		type: DASHBOARD_EVENTS.REQUEST_EXPORTING_FILE_TO_EMAIL
+		type: 'dashboard/settings/requestExportingFileToEmail'
 	});
 
 	try {
@@ -328,7 +323,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 		await api.instance.fileToMail.send(key, type, name, users);
 
 		dispatch({
-			type: DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL
+			type: 'dashboard/settings/responseExportingFileToEmail'
 		});
 
 		dispatch(createToast({
@@ -336,7 +331,7 @@ const sendToEmails = (name: string, type: string, file: Blob, users: Array<User>
 		}));
 	} catch (e) {
 		dispatch({
-			type: DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR
+			type: 'dashboard/settings/recordExportingFileToEmailError'
 		});
 
 		const errorMessage = e instanceof ApiError ? e.message : t('store::dashboard::settings::FileSendingError');
@@ -459,7 +454,7 @@ const saveAutoUpdateSettings = (enabled: boolean, interval: number | string) => 
  * @param {boolean} personalDashboard - указывает является ли новое состояние, состоянием персонального дашборда
  */
 const createNewState = (personalDashboard: boolean) => async (dispatch: Dispatch) => {
-	dispatch(resetState());
+	dispatch({type: 'root/resetState'});
 	dispatch(getAutoUpdateSettings());
 	dispatch(setPersonalValue(personalDashboard));
 	await dispatch(getSettings());
@@ -475,7 +470,7 @@ const changeLayoutMode = (payload: LayoutMode): ThunkAction => (dispatch: Dispat
 
 	dispatch({
 		payload,
-		type: DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE
+		type: 'dashboard/settings/changeLayoutMode'
 	});
 };
 
@@ -484,7 +479,7 @@ const setPersonalValue = (payload: boolean) => (dispatch: Dispatch) => {
 
 	dispatch({
 		payload,
-		type: DASHBOARD_EVENTS.SET_PERSONAL
+		type: 'dashboard/settings/setPersonal'
 	});
 };
 
@@ -508,7 +503,10 @@ const switchDashboard = (saveState: boolean = true): ThunkAction => async (dispa
 
 	try {
 		if (temp) {
-			dispatch(switchState(temp));
+			dispatch({
+				payload: temp,
+				type: 'root/switchState'
+			});
 		} else {
 			await dispatch(createNewState(!isPersonal));
 		}
@@ -521,55 +519,77 @@ const switchDashboard = (saveState: boolean = true): ThunkAction => async (dispa
 
 const initLayoutMode = () => ({
 	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.LAYOUT_MODE),
-	type: DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE
+	type: 'dashboard/settings/changeLayoutMode'
 });
 
 const initPersonalValue = () => ({
 	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.PERSONAL_DASHBOARD, false),
-	type: DASHBOARD_EVENTS.SET_PERSONAL
+	type: 'dashboard/settings/setPersonal'
 });
 
 const initHeaderPanel = () => ({
 	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.SHOW_HEADER_PANEL, true),
-	type: DASHBOARD_EVENTS.CHANGE_SHOW_HEADER
+	type: 'dashboard/settings/changeShowHeader'
 });
 
 const initEditPanelPosition = () => ({
 	payload: getLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.EDIT_PANEL_POSITION, EDIT_PANEL_POSITION.RIGHT),
-	type: DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION
+	type: 'dashboard/settings/setEditPanelPosition'
 });
 
 const changeAutoUpdateSettings = payload => ({
 	payload,
-	type: DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS
+	type: 'dashboard/settings/changeAutoUpdateSettings'
 });
 
 const setCode = payload => ({
 	payload,
-	type: DASHBOARD_EVENTS.SET_CODE
+	type: 'dashboard/settings/setCode'
 });
 
 const setDashboardUUID = payload => ({
 	payload,
-	type: DASHBOARD_EVENTS.SET_DASHBOARD_UUID
+	type: 'dashboard/settings/setDashboardUUID'
 });
 
 const setEditPanelPosition = (payload: EditPanelPosition) => (dispatch: Dispatch) => {
 	setLocalStorageValue(getUserLocalStorageId(), LOCAL_STORAGE_VARS.EDIT_PANEL_POSITION, payload);
 	dispatch({
 		payload,
-		type: DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION
+		type: 'dashboard/settings/setEditPanelPosition'
 	});
 };
 
 const setHideEditPanel = (payload: boolean) => ({
 	payload,
-	type: DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL
+	type: 'dashboard/settings/setHideEditPanel'
 });
+
+/**
+ * Включает/выключает панель копирования в панели редактирования
+ * @param {boolean} payload - параметр сообщает включена или выключена панель копирования
+ * @returns {SettingsAction} - возвращает действие включения/выключения панели копирования.
+ */
+const setShowCopyPanel = (payload: boolean) => ({
+	payload,
+	type: 'dashboard/settings/setShowCopyPanel'
+});
+
+/**
+ * Включает панель копирования в панели редактирования
+ * @returns {SettingsAction} - возвращает действие включения панели копирования.
+ */
+const showCopyPanel = () => setShowCopyPanel(true);
+
+/**
+ * Выключает панель копирования в панели редактирования
+ * @returns {SettingsAction} - возвращает действие включения панели копирования.
+ */
+const hideCopyPanel = () => setShowCopyPanel(false);
 
 const setWidthEditPanel = (payload: number) => ({
 	payload,
-	type: DASHBOARD_EVENTS.SET_WIDTH_EDIT_PANEL
+	type: 'dashboard/settings/setWidthEditPanel'
 });
 
 const changeShowHeader = (payload: boolean) => async (dispatch: Dispatch) => {
@@ -577,7 +597,7 @@ const changeShowHeader = (payload: boolean) => async (dispatch: Dispatch) => {
 
 	await dispatch({
 		payload,
-		type: DASHBOARD_EVENTS.CHANGE_SHOW_HEADER
+		type: 'dashboard/settings/changeShowHeader'
 	});
 
 	dashboardResizer.resetAndResize();
@@ -591,13 +611,16 @@ export {
 	editDashboard,
 	fetchDashboard,
 	getSettings,
+	hideCopyPanel,
 	removePersonalDashboard,
 	saveAutoUpdateSettings,
 	seeDashboard,
 	sendToEmails,
 	setEditPanelPosition,
 	setHideEditPanel,
-	switchDashboard,
+	setShowCopyPanel,
 	setWidthEditPanel,
+	showCopyPanel,
+	switchDashboard,
 	updateUserSourceMode
 };

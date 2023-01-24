@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {BUILD_DATA_EVENTS, COLUMN_TYPES} from './constants';
+import {COLUMN_TYPES} from './constants';
 import {DEFAULT_AGGREGATION, INTEGER_AGGREGATION} from 'store/widgets/constants';
 import type {Group, SetCreatedWidget, TableWidget, UpdateWidget, Widget, WidgetTooltip} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
@@ -140,26 +140,26 @@ export type ReceiveBuildDataPayload = {
 
 export type RequestBuildData = {
 	payload: Widget,
-	type: typeof BUILD_DATA_EVENTS.REQUEST_BUILD_DATA
+	type: 'widgets/buildData/requestBuildData'
 };
 
 export type ReceiveBuildData = {
 	payload: ReceiveBuildDataPayload,
-	type: typeof BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA
+	type: 'widgets/buildData/receiveBuildData'
 };
 
 export type RecordErrorBuildData = {
 	payload: WidgetDataError,
-	type: typeof BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR
+	type: 'widgets/buildData/recordBuildDataError'
 };
 
 type UpdateBuildData = {
 	payload: string,
-	type: typeof BUILD_DATA_EVENTS.UPDATE_BUILD_DATA
+	type: 'widgets/buildData/updateBuildData'
 };
 
 type UnknownBuildDataAction = {
-	type: typeof BUILD_DATA_EVENTS.UNKNOWN_BUILD_DATA_ACTION
+	type: 'widgets/buildData/unknownBuildDataAction'
 };
 
 export type BuildDataAction =

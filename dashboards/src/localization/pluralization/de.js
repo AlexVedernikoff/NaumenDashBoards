@@ -17,24 +17,8 @@ class Pluralization implements IPluralization {
 		return ['%', '€', '$'];
 	}
 
-	axiosLocales () {
-		return {
-			name: 'de',
-			options: {
-				days: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
-				months: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-				shortDays: ['Son', 'Mon', 'Die', 'Mit', 'Don', 'Fre', 'Sam'],
-				shortMonths: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
-				toolbar: {
-					download: 'SVG herunterladen',
-					pan: 'Schwenken',
-					reset: 'Zurücksetzen',
-					selectionZoom: 'Auswahl vergrößern',
-					zoomIn: 'Vergrößern',
-					zoomOut: 'Verkleinern'
-				}
-			}
-		};
+	customRange (data: {end: Date, start: Date}) {
+		return `für ${this.date(data.start)}-${this.date(data.end)}`;
 	}
 }
 

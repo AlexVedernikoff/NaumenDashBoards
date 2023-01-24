@@ -3,21 +3,22 @@ import {COMPARE_PERIOD} from 'store/widgets/data/constants';
 import type {ComparePeriod, SummaryWidget} from 'store/widgets/data/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {DiffValues} from './types';
+import t from 'localization';
 
 const getPeriodTitle = (comparePeriod: ComparePeriod) => {
 	switch (comparePeriod.period) {
 		case COMPARE_PERIOD.PREVIOUS_DAY:
-			return 'за предыдущий день';
+			return t('ComparePeriodBox::AtPreviousDay');
 		case COMPARE_PERIOD.PREVIOUS_WEEK:
-			return 'за предыдущую неделю';
+			return t('ComparePeriodBox::AtPreviousWeek');
 		case COMPARE_PERIOD.PREVIOUS_MONTH:
-			return 'за предыдущий месяц';
+			return t('ComparePeriodBox::AtPreviousMonth');
 		case COMPARE_PERIOD.PREVIOUS_YEAR:
-			return 'за предыдущий год';
+			return t('ComparePeriodBox::AtPreviousYear');
 
 		case COMPARE_PERIOD.CUSTOM: {
 			const {endDate = '', startDate = ''} = comparePeriod;
-			return `за ${startDate}-${endDate}`;
+			return t('ComparePeriodBox::AtCustomRange', {end: endDate, start: startDate});
 		}
 	}
 

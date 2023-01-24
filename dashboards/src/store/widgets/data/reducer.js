@@ -12,15 +12,14 @@ import {
 } from './helpers';
 import {defaultAction, initialWidgetsState} from './init';
 import type {WidgetsAction, WidgetsDataState} from './types';
-import {WIDGETS_EVENTS} from './constants';
 
 const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsAction = defaultAction): WidgetsDataState => {
 	switch (action.type) {
-		case WIDGETS_EVENTS.ADD_WIDGET:
+		case 'widgets/data/addWidget':
 			return addWidget(state, action);
-		case WIDGETS_EVENTS.DELETE_WIDGET:
+		case 'widgets/data/deleteWidget':
 			return deleteWidget(state, action);
-		case WIDGETS_EVENTS.RECORD_VALIDATE_TO_COPY_ERROR:
+		case 'widgets/data/recordValidateToCopyError':
 			return {
 				...state,
 				validatingToCopy: {
@@ -28,7 +27,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: false
 				}
 			};
-		case WIDGETS_EVENTS.RECORD_WIDGET_COPY_ERROR:
+		case 'widgets/data/recordWidgetCopyError':
 			return {
 				...state,
 				copying: {
@@ -36,7 +35,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: false
 				}
 			};
-		case WIDGETS_EVENTS.RECORD_WIDGET_DELETE_ERROR:
+		case 'widgets/data/recordWidgetDeleteError':
 			return {
 				...state,
 				deleting: {
@@ -44,7 +43,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: false
 				}
 			};
-		case WIDGETS_EVENTS.RECORD_WIDGET_SAVE_ERROR:
+		case 'widgets/data/recordWidgetSaveError':
 			return {
 				...state,
 				saving: {
@@ -52,7 +51,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: false
 				}
 			};
-		case WIDGETS_EVENTS.REQUEST_VALIDATE_TO_COPY:
+		case 'widgets/data/requestValidateToCopy':
 			return {
 				...state,
 				validatingToCopy: {
@@ -60,7 +59,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: true
 				}
 			};
-		case WIDGETS_EVENTS.REQUEST_WIDGET_COPY:
+		case 'widgets/data/requestWidgetCopy':
 			return {
 				...state,
 				copying: {
@@ -68,7 +67,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: true
 				}
 			};
-		case WIDGETS_EVENTS.REQUEST_WIDGET_DELETE:
+		case 'widgets/data/requestWidgetDelete':
 			return {
 				...state,
 				deleting: {
@@ -76,7 +75,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: true
 				}
 			};
-		case WIDGETS_EVENTS.REQUEST_WIDGET_SAVE:
+		case 'widgets/data/requestWidgetSave':
 			return {
 				...state,
 				saving: {
@@ -84,14 +83,14 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: true
 				}
 			};
-		case WIDGETS_EVENTS.RESET_FOCUSED_WIDGET:
+		case 'widgets/data/resetFocusedWidget':
 			return {
 				...state,
 				focusedWidget: ''
 			};
-		case WIDGETS_EVENTS.RESET_WIDGET:
+		case 'widgets/data/resetWidget':
 			return resetWidget(state);
-		case WIDGETS_EVENTS.RESPONSE_VALIDATE_TO_COPY:
+		case 'widgets/data/responseValidateToCopy':
 			return {
 				...state,
 				validatingToCopy: {
@@ -99,7 +98,7 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: false
 				}
 			};
-		case WIDGETS_EVENTS.RESPONSE_WIDGET_COPY:
+		case 'widgets/data/responseWidgetCopy':
 			return {
 				...state,
 				copying: {
@@ -107,22 +106,22 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 					loading: false
 				}
 			};
-		case WIDGETS_EVENTS.SET_CREATED_WIDGET:
+		case 'widgets/data/setCreatedWidget':
 			return createWidget(state, action);
-		case WIDGETS_EVENTS.SET_FOCUSED_WIDGET:
+		case 'widgets/data/setFocusedWidget':
 			return {
 				...state,
 				focusedWidget: action.payload
 			};
-		case WIDGETS_EVENTS.SET_SELECTED_WIDGET:
+		case 'widgets/data/setSelectedWidget':
 			return setSelectedWidget(state, action);
-		case WIDGETS_EVENTS.SET_WIDGETS:
+		case 'widgets/data/setWidgets':
 			return setWidgets(state, action);
-		case WIDGETS_EVENTS.UPDATE_WIDGET:
+		case 'widgets/data/updateWidget':
 			return updateWidget(state, action);
-		case WIDGETS_EVENTS.WIDGET_SET_WARNING:
+		case 'widgets/data/widgetSetWarning':
 			return setWidgetWarning(state, action);
-		case WIDGETS_EVENTS.WIDGET_CLEAR_WARNING:
+		case 'widgets/data/widgetClearWarning':
 			return clearWidgetWarning(state, action);
 		default:
 			return state;

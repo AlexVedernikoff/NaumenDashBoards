@@ -1,5 +1,4 @@
 // @flow
-import {DASHBOARD_EVENTS} from './constants';
 import dashboardResizer from 'utils/dashboardResizer';
 import {defaultDashboardAction, initialDashboardState} from './init';
 import {LAYOUT_MODE} from 'store/dashboard/settings/constants';
@@ -7,65 +6,65 @@ import type {SettingsAction, SettingsState} from './types';
 
 const reducer = (state: SettingsState = initialDashboardState, action: SettingsAction = defaultDashboardAction): SettingsState => {
 	switch (action.type) {
-		case DASHBOARD_EVENTS.CHANGE_AUTO_UPDATE_SETTINGS:
+		case 'dashboard/settings/changeAutoUpdateSettings':
 			return {
 				...state,
 				autoUpdate: {...state.autoUpdate, ...action.payload}
 			};
-		case DASHBOARD_EVENTS.CHANGE_LAYOUT_MODE:
+		case 'dashboard/settings/changeLayoutMode':
 			return {
 				...state,
 				layoutMode: state.isMobileDevice ? LAYOUT_MODE.MOBILE : action.payload ?? LAYOUT_MODE.WEB
 			};
-		case DASHBOARD_EVENTS.CHANGE_SHOW_HEADER:
+		case 'dashboard/settings/changeShowHeader':
 			dashboardResizer.setShowHeader(action.payload);
 			return {
 				...state,
 				showHeader: action.payload
 			};
-		case DASHBOARD_EVENTS.CREATE_PERSONAL_DASHBOARD:
+		case 'dashboard/settings/createPersonalDashboard':
 			return {
 				...state,
 				personalCreating: true
 			};
-		case DASHBOARD_EVENTS.CREATED_PERSONAL_DASHBOARD:
+		case 'dashboard/settings/createdPersonalDashboard':
 			return {
 				...state,
 				personalCreating: false
 			};
-		case DASHBOARD_EVENTS.DELETE_PERSONAL_DASHBOARD:
+		case 'dashboard/settings/deletePersonalDashboard':
 			return {
 				...state,
 				personalDeleting: true
 			};
-		case DASHBOARD_EVENTS.DELETED_PERSONAL_DASHBOARD:
+		case 'dashboard/settings/deletedPersonalDashboard':
 			return {
 				...state,
 				personalDeleting: false
 			};
-		case DASHBOARD_EVENTS.ERROR_CREATE_PERSONAL_DASHBOARD:
+		case 'dashboard/settings/errorCreatePersonalDashboard':
 			return {
 				...state,
 				personalCreating: false
 			};
-		case DASHBOARD_EVENTS.ERROR_DELETE_PERSONAL_DASHBOARD:
+		case 'dashboard/settings/errorDeletePersonalDashboard':
 			return {
 				...state,
 				personalDeleting: false
 			};
-		case DASHBOARD_EVENTS.RECEIVE_DASHBOARD:
+		case 'dashboard/settings/receiveDashboard':
 			return {
 				...state,
 				error: null,
 				loading: false
 			};
-		case DASHBOARD_EVENTS.RECORD_DASHBOARD_ERROR:
+		case 'dashboard/settings/recordDashboardError':
 			return {
 				...state,
 				error: action.payload,
 				loading: false
 			};
-		case DASHBOARD_EVENTS.RECORD_EXPORTING_FILE_TO_EMAIL_ERROR:
+		case 'dashboard/settings/recordExportingFileToEmailError':
 			return {
 				...state,
 				exportingFailToEmail: {
@@ -74,13 +73,13 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 					loading: false
 				}
 			};
-		case DASHBOARD_EVENTS.REQUEST_DASHBOARD:
+		case 'dashboard/settings/requestDashboard':
 			return {
 				...state,
 				error: null,
 				loading: true
 			};
-		case DASHBOARD_EVENTS.REQUEST_EXPORTING_FILE_TO_EMAIL:
+		case 'dashboard/settings/requestExportingFileToEmail':
 			return {
 				...state,
 				exportingFailToEmail: {
@@ -89,7 +88,7 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 					loading: true
 				}
 			};
-		case DASHBOARD_EVENTS.RESPONSE_EXPORTING_FILE_TO_EMAIL:
+		case 'dashboard/settings/responseExportingFileToEmail':
 			return {
 				...state,
 				exportingFailToEmail: {
@@ -97,43 +96,48 @@ const reducer = (state: SettingsState = initialDashboardState, action: SettingsA
 					loading: false
 				}
 			};
-		case DASHBOARD_EVENTS.SET_CODE:
+		case 'dashboard/settings/setCode':
 			return {
 				...state,
 				code: action.payload
 			};
-		case DASHBOARD_EVENTS.SET_DASHBOARD_UUID:
+		case 'dashboard/settings/setDashboardUUID':
 			return {
 				...state,
 				dashboardUUID: action.payload
 			};
-		case DASHBOARD_EVENTS.SET_EDIT_PANEL_POSITION:
+		case 'dashboard/settings/setEditPanelPosition':
 			return {
 				...state,
 				editPanelPosition: action.payload
 			};
-		case DASHBOARD_EVENTS.SET_HIDE_EDIT_PANEL:
+		case 'dashboard/settings/setHideEditPanel':
 			return {
 				...state,
 				hideEditPanel: action.payload
 			};
-		case DASHBOARD_EVENTS.SET_PERSONAL:
+		case 'dashboard/settings/setShowCopyPanel':
+			return {
+				...state,
+				showCopyPanel: action.payload
+			};
+		case 'dashboard/settings/setPersonal':
 			return {
 				...state,
 				personal: action.payload
 			};
-		case DASHBOARD_EVENTS.SET_WIDTH_EDIT_PANEL:
+		case 'dashboard/settings/setWidthEditPanel':
 			return {
 				...state,
 				widthEditPanel: action.payload
 			};
-		case DASHBOARD_EVENTS.SWITCH_ON_EDIT_MODE:
+		case 'dashboard/settings/switchOnEditMode':
 			return {
 				...state,
 				editMode: true,
 				hideEditPanel: false
 			};
-		case DASHBOARD_EVENTS.SWITCH_OFF_EDIT_MODE:
+		case 'dashboard/settings/switchOffEditMode':
 			return {
 				...state,
 				editMode: false

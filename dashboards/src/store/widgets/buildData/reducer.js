@@ -1,15 +1,13 @@
 // @flow
 import type {BuildDataAction, BuildDataState} from './types';
-import {BUILD_DATA_EVENTS} from './constants';
 import {defaultAction, initialBuildDataState} from './init';
 import {setWidgetError, updateWidgetData} from './helpers';
-import {WIDGETS_EVENTS} from 'store/widgets/data/constants';
 
 const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDataAction = defaultAction): BuildDataState => {
 	switch (action.type) {
-		case WIDGETS_EVENTS.UPDATE_WIDGET:
+		case 'widgets/data/updateWidget':
 			return updateWidgetData(state, action.payload);
-		case BUILD_DATA_EVENTS.REQUEST_BUILD_DATA:
+		case 'widgets/buildData/requestBuildData':
 			return {
 				...state,
 				[action.payload.id]: {
@@ -20,7 +18,7 @@ const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDat
 					updating: false
 				}
 			};
-		case BUILD_DATA_EVENTS.RECEIVE_BUILD_DATA:
+		case 'widgets/buildData/receiveBuildData':
 			return {
 				...state,
 				[action.payload.id]: {
@@ -30,9 +28,9 @@ const reducer = (state: BuildDataState = initialBuildDataState, action: BuildDat
 					updating: false
 				}
 			};
-		case BUILD_DATA_EVENTS.RECORD_BUILD_DATA_ERROR:
+		case 'widgets/buildData/recordBuildDataError':
 			return setWidgetError(state, action.payload);
-		case BUILD_DATA_EVENTS.UPDATE_BUILD_DATA:
+		case 'widgets/buildData/updateBuildData':
 			return {
 				...state,
 				[action.payload]: {
