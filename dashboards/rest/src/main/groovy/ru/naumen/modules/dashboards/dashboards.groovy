@@ -16,6 +16,7 @@ import groovy.transform.Field
 import groovy.transform.InheritConstructors
 import org.codehaus.groovy.runtime.StringBufferWriter
 import ru.naumen.core.server.script.api.IDbApi
+import ru.naumen.core.server.script.api.IFTSApi
 import ru.naumen.core.server.script.api.IListDataApi
 import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.ISearchParams
@@ -35,7 +36,7 @@ import static MessageProvider.*
 
 @Field @Lazy @Delegate Dashboards dashboards = new DashboardsImpl(
     binding,
-    new DashboardsService(api.utils, api.listdata, api.metainfo, api.web, api.apps, api.db, op, sp, new DashboardUtils(), logger)
+    new DashboardsService(api.utils, api.listdata, api.metainfo, api.web, api.apps, api.db, op, sp, api.fts, new DashboardUtils(), logger)
 )
 
 interface Dashboards
@@ -416,6 +417,7 @@ class DashboardsService
     private final IDbApi db
     private final IScriptConditionsApi op
     private final ISearchParams sp
+    private final IFTSApi fts
     private final DashboardUtils dashboardUtils
     private final logger
 
@@ -427,6 +429,7 @@ class DashboardsService
                       IDbApi db,
                       IScriptConditionsApi op,
                       ISearchParams sp,
+                      IFTSApi fts,
                       DashboardUtils dashboardUtils,
                       def logger)
     {
@@ -438,6 +441,7 @@ class DashboardsService
         this.db = db
         this.op = op
         this.sp = sp
+        this.fts = fts
         this.dashboardUtils = dashboardUtils
         this.logger = logger
     }
@@ -885,12 +889,12 @@ class DashboardsService
         def bottomValues
         if(attrIsDynamic)
         {
-            def condition = removed
-                ? [:]
-                : [removed: false, linkTemplate: TotalValueMarshaller.unmarshal(attributeCode).last()]
+            Map<String, String> condition = [linkTemplate: TotalValueMarshaller.unmarshal(attributeCode).last()]
             //на первом месте стоит тип, по которому будет поиск значений
 
-            bottomValues = types.collectMany { classFqn ->utils.find(classFqn.toString(), condition) }
+            bottomValues = types.collectMany { classFqn ->
+                    getObjectsByCondition(classFqn as String, condition, removed)
+                }
             if( attr.type in AttributeType.LINK_SET_TYPES)
             {
                 bottomValues = bottomValues.collectMany { it.value }.unique { it.UUID }.findAll {it.title.contains(value)}
@@ -902,9 +906,9 @@ class DashboardsService
         }
         else
         {
-            def condition = removed ? [:] : [removed: false]
+            Map<String, Object> condition = [title: value]
             bottomValues = types.collectMany {
-                utils.find(it.toString(), [title: op.like("%${value}%")] + condition, sp.ignoreCase())
+                getObjectsByCondition(it as String, condition, removed)
             }.unique { it.UUID }
         }
         def withParentsBottoms = []
@@ -953,12 +957,37 @@ class DashboardsService
         totalBottoms += repeateableLists.collect { k, rep ->
             //здесь важно получить начало списка - с какого элемента будут отображены все дети
             def base = rep[0]
-            def children = rep*.children
+            def children = base.children
             base.children = getChildrenList(children)
             return base
         }
 
         return totalBottoms
+    }
+
+    /**
+     * Метод получения объектов по условию
+     * @param metaClassFqn - метакласс объектов
+     * @param condition - условие
+     * @param removed - флаг на удаление
+     * @param limit - ограничение по количеству
+     * @return список объектов
+     */
+    Collection<ISDtObject> getObjectsByCondition(String metaClassFqn,
+                                                 Map<String, Object> condition,
+                                                 Boolean removed,
+                                                 Integer limit = 10000)
+    {
+        List<String> objectUuids =
+            fts.extendedSearch(metaClassFqn, condition, removed ? 'all' : 'active', limit)
+        Collection<ISDtObject> resultObjects = []
+
+        if (objectUuids)
+        {
+            resultObjects = utils.find(metaClassFqn, ['UUID': op.in(objectUuids)])
+        }
+
+        return resultObjects
     }
 
     /**
