@@ -130,7 +130,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 	});
 
 	getMainOptions = (options: Array<Attribute>): Array<mixed> => {
-		const {dataSetIndex, helpers, type, value, values} = this.props;
+		const {attributesHelpers, dataSetIndex, type, value, values} = this.props;
 
 		const {attribute} = value;
 		let filterAttribute: Array<?Attribute> = [];
@@ -150,10 +150,10 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			});
 		}
 
-		let attributes = helpers.filterAttributesByUsed(options, dataSetIndex, filterAttribute);
+		let attributes = attributesHelpers.filterAttributesByUsed(options, dataSetIndex, filterAttribute);
 
 		if (dataSetIndex !== 0 && isDontUseParamsForDataSet(values.data[dataSetIndex])) {
-			attributes = helpers.filterAttributeByMainDataSet(options, dataSetIndex);
+			attributes = attributesHelpers.filterAttributeByMainDataSet(options, dataSetIndex);
 		}
 
 		return [...(values.computedAttrs ?? []), ...attributes];

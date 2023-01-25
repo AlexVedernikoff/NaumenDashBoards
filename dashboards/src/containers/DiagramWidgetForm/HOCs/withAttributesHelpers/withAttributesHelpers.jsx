@@ -8,7 +8,7 @@ export const withAttributesHelpers = <Config: {} & InjectedProps>(Component: Rea
 		render () {
 			return (
 				<ATTRIBUTES_HELPERS_CONTEXT.Consumer>
-					{context => <Component {...this.props} helpers={context} />}
+					{context => <Component {...this.props} attributesHelpers={context} />}
 				</ATTRIBUTES_HELPERS_CONTEXT.Consumer>
 			);
 		}

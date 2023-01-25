@@ -38,11 +38,11 @@ export class ParameterFieldset extends Component<Props> {
 	};
 
 	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, dataSetIndex: number): Array<Attribute> => {
-		const {filterOptions, helpers, value} = this.props;
+		const {attributesHelpers, filterOptions, value} = this.props;
 		const {attribute} = value;
 		const filteredOptions = filterOptions ? filterOptions(options, dataSetIndex, filterByRef) : options;
 
-		return helpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
+		return attributesHelpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
 	};
 
 	getChangeDataSetHandler = (index: number) => (dataSetIndex: number) => {
