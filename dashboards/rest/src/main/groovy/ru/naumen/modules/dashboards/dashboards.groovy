@@ -1174,7 +1174,8 @@ class DashboardsService
                 metaClassFqn: AttributeType.TOTAL_VALUE_TYPE,
                 sourceName: utils.get(groupUUID).title,
                 sourceCode: groupUUID,
-                ableForAvg: type in [*AttributeType.NUMBER_TYPES, AttributeType.DT_INTERVAL_TYPE]
+                ableForAvg: type in [*AttributeType.NUMBER_TYPES, AttributeType.DT_INTERVAL_TYPE],
+                visorCode: utils.get(templateUUID).visor?.code
             ) : null
         }?.grep().toList()
 

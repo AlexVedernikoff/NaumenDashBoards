@@ -1556,6 +1556,11 @@ class Attribute extends BaseAttribute
      */
     TimerValue timerValue
 
+    /**
+     * Код представления
+     */
+    String visorCode = ''
+
     static Attribute fromMap(Map<String, Object> data)
     {
         return data ? new Attribute(
@@ -1569,7 +1574,8 @@ class Attribute extends BaseAttribute
             sourceCode: data.sourceCode as String,
             ableForAvg: data.ableForAvg as Boolean,
             timerValue: data.timerValue as TimerValue,
-            ref: fromMap(data.ref as Map<String, Object>)
+            ref: fromMap(data.ref as Map<String, Object>),
+            visorCode: data.visor ?: ''
         ) : null
     }
 
@@ -1599,7 +1605,8 @@ class Attribute extends BaseAttribute
             sourceCode: this.sourceCode,
             ableForAvg: this.ableForAvg,
             timerValue: this.timerValue,
-            ref: this.ref?.deepClone()
+            ref: this.ref?.deepClone(),
+            visorCode: this.visorCode
         )
     }
 
