@@ -1,8 +1,9 @@
 // @flow
+import ArrowIcon from 'icons/ArrowIcon';
 import {Button} from 'naumen-common-components';
 import CheckboxPrivilege from './CheckboxPrivilege';
 import cn from 'classnames';
-import {connect} from 'react-redux';
+import {connect, useDispatch, useSelector} from 'react-redux';
 import {Datepicker} from 'components/molecules/Datepicker/Datepicker.jsx';
 import {deepClone, normalizeDate} from 'helpers';
 import {functions, props} from 'components/organisms/FormPanel/selectors';
@@ -15,7 +16,6 @@ import React, {useEffect, useState} from 'react';
 import {ScaleNames} from 'components/organisms/FormPanel/consts';
 import styles from './styles.less';
 import {TextInput} from 'components/atoms/TextInput/TextInput';
-import {useDispatch, useSelector} from 'react-redux';
 
 const АctionBar = props => {
 	const [active, setActive] = useState(true);
@@ -29,6 +29,7 @@ const АctionBar = props => {
 	const [flag, setFlag] = useState(true);
 
 	const store = useSelector(state => state);
+	const clonedUsers = deepClone(store.APP.users);
 
 	useEffect(() => {
 		const {endDate, startDate} = props;
@@ -61,6 +62,9 @@ const АctionBar = props => {
 	const [showModalUsers, setShowModalUsers] = useState(false);
 	const [valueError, setValueError] = useState('');
 	const [showListVersions, setShowListVersions] = useState(false);
+	const [show, setShow] = useState(false);
+	const [inputUsers, setInputUsers] = useState('');
+	const [filteredUsers, setFilteredUsers] = useState([]);
 
 	const dispatch = useDispatch();
 
@@ -243,24 +247,60 @@ const АctionBar = props => {
 		return null;
 	};
 
+	const getToggleShowUsers = (user) => () => {
+		setShow(!show);
+
+		user.showUsers = !user.showUsers;
+	};
+
 	const renderHeader = () => {
 		return (
 			<div className={styles.usersHeader}>
-				<div>Список пользователей</div>
+				<div>Отделы</div>
 				<div>Права на редактирование</div>
 			</div>
 		);
 	};
 
-	const renderUser = (user) => {
-		const {users} = store.APP;
+	const renderUserItem = (user, users, show) => {
+		return (
+			<CheckboxPrivilege
+				code={user.code}
+				key={user.code}
+				name="Checkbox"
+				nameUser={user.name}
+				show={show}
+				users={users}
+				value={user.ganttMaster}
+			/>
+		);
+	};
+
+	const renderUsersItem = userItem => {
+		if (userItem.showUsers) {
+			return userItem.pers.map(user => renderUserItem(user, clonedUsers, false));
+		}
+	};
+
+	const renderUser = (userItem) => {
+		const arrowCN = cn({
+			[styles.activeArrow]: userItem.showUsers
+		});
 
 		return (
-			<div className={styles.users} key={user.code}>
-				<div>{user.name}</div>
-				<CheckboxPrivilege code={user.code} name="Checkbox" users={users} value={user.ganttMaster} />
+			<div className={styles.users} key={userItem.code}>
+				<div className={styles.wrapperUser} onClick={getToggleShowUsers(userItem)}>
+					<ArrowIcon toggleArrow={arrowCN} />
+					<div className={styles.department}>{userItem.department}</div>
+				</div>
+
+				{renderUsersItem(userItem)}
 			</div>
 		);
+	};
+
+	const filterUser = () => {
+		return filteredUsers.map(user => renderUserItem(user, filteredUsers, true));
 	};
 
 	const renderUsers = () => store.APP.users.map(renderUser);
@@ -268,6 +308,24 @@ const АctionBar = props => {
 	const onSubModal = () => {
 		setShowModalUsers(!showModalUsers);
 		dispatch(postDataUsers(store.APP.users));
+	};
+
+	const filterGanttUsers = target => {
+		const newFilteredUsers = [];
+
+		setInputUsers(target.value);
+
+		setFilteredUsers([]);
+
+		clonedUsers.forEach(departament => {
+			departament.pers.forEach(user => {
+				if (target.value.length && user.name.toLowerCase().includes(target.value.toLowerCase())) {
+					newFilteredUsers.push(user);
+				}
+			});
+		});
+
+		setFilteredUsers(newFilteredUsers);
 	};
 
 	const renderModalUsers = () => {
@@ -280,8 +338,9 @@ const АctionBar = props => {
 					onSubmit={onSubModal}
 					submitText="Сохранить"
 				>
+					<TextInput maxLength={30} onChange={filterGanttUsers} placeholder="Поиск" value={inputUsers} />
 					{renderHeader()}
-					{renderUsers()}
+					{filteredUsers.length ? filterUser() : renderUsers()}
 				</Modal>
 			);
 		}

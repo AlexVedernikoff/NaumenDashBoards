@@ -1,7 +1,6 @@
 @import '/styles/variables';
 
 :local {
-
 	.btn {
 		align-items: center;
 		display: flex;
@@ -42,10 +41,31 @@
 		padding: 8px 10px;
 	}
 
+	.department {
+		cursor: pointer;
+	}
+
 	.error {
 		color: red;
 		margin-top: 10px;
 		opacity: .7;
+	}
+
+	.formControlWrapper {
+		border-bottom: 1px solid #f4f4f4;
+		border-top: 1px solid #f4f4f4;
+		cursor: pointer;
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+		
+		&:hover {
+			background-color: #ebebeb;
+		}
+
+		& > div:nth-child(3) {
+			display: none;
+		}
 	}
 
 	.inputInnerwrapper {
@@ -156,6 +176,10 @@
 		}
 	}
 
+	.title {
+		padding-left: 35px;
+	}
+
 	.unActive {
 		background-color: transparent;
 		border: 1px solid #4D92C8;
@@ -167,15 +191,21 @@
 	}
 
 	.users {
-		align-items: center;
+		align-items: baseline;
 		display: flex;
-		justify-content: space-between;
+		display: flex;
+		flex-direction: column;
+		justify-content: left;
+		margin-bottom: 10px;
+		text-align: left;
 	}
 
 	.usersHeader {
 		align-items: center;
 		display: flex;
 		justify-content: space-between;
+		margin-bottom: 15px;
+		margin-top: 15px;
 
 		& > div {
 			font-weight: 700;
@@ -186,5 +216,22 @@
 		background-color: @white;
 		height: 40px;
 		width: 100%;
+	}
+
+	.wrapperUser {
+		align-items: center;
+		cursor: pointer;
+		display: flex;
+
+		svg {
+			fill: #595959;
+			height: 25px;
+			transform: rotate(90deg);
+			width: 25px;
+
+			&.activeArrow {
+				transform: rotate(180deg);
+			}
+		}
 	}
 }

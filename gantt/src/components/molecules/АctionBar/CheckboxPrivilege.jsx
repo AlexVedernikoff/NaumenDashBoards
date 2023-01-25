@@ -1,12 +1,9 @@
 // @flow
 import {Checkbox, FormControl} from 'naumen-common-components';
 import React, {useEffect, useState} from 'react';
-import {setUsers} from 'store/App/actions';
-import {useDispatch} from 'react-redux';
+import styles from './styles.less';
 
-const CheckboxPrivilege = ({code, users, value}) => {
-	const dispatch = useDispatch();
-
+const CheckboxPrivilege = ({code, nameUser, show, users, value}) => {
 	const [isActive, setIsActive] = useState(value);
 
 	const changeCheckbox = () => {
@@ -19,12 +16,11 @@ const CheckboxPrivilege = ({code, users, value}) => {
 				user.ganttMaster = isActive;
 			}
 		});
-
-		dispatch(setUsers(users));
 	}, [isActive]);
 
 	return (
-		<FormControl label="" small={true}>
+		<FormControl className={styles.formControlWrapper} small={true}>
+			<div className={styles.title}>{nameUser}</div>
 			<Checkbox checked={isActive} name="Checkbox" onChange={changeCheckbox} value={isActive} />
 		</FormControl>
 	);

@@ -17,14 +17,6 @@ const data = {
 	"isPersonal": true,
 	"commonSettings":{
 		"columnSettings":[
-			// {
-			// 	"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
-			// 	"code":"code1",
-			// 	"show":true,
-			// 	"editor":{
-			// 		"type": "date",
-			// 	}
-			// },
 			{
 				"title":"\u0422\u0438\u043f",
 				"code":"start_date",
@@ -54,7 +46,6 @@ const data = {
 				"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb3",
 				"show":false
 			},
-			// Необходимо для следующей итерации
 		],
 		"rollUp":false,
 		"scale":"YEAR"
@@ -106,8 +97,7 @@ const data = {
 			"editable": true,
 			"name": "1",
 			// "render": "split",
-			"typeEntity": "RESOURCE",
-			'add_tasks': '+'
+			"typeEntity": "RESOURCE"
 		},
 		{
 			"id":"2",
@@ -157,10 +147,7 @@ const data = {
 	"workRelationCheckbox": false,
 	"startDate": "2021-09-02, 00:00:00",
 	"endDate": "2025-09-07, 00:00:00",
-	"currentInterval": {
-		"label": "в работах",
-		"value": "work"
-	}
+	"currentInterval": null,
 };
 
 export const getDiagramData = () => {
