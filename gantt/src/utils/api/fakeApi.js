@@ -36,7 +36,7 @@ export default class FakeApi {
 			return {groupUser: USER_ROLES.REGULAR};
 		}
 
-		return {email: 'test@d.ru', groupUser: USER_ROLES.REGULAR, name: 'test'};
+		return {email: 'test@d.ru', groupUser: USER_ROLES.SUPER, name: 'test'};
 	}
 
 	async getDiagramData (contentCode, subjectUuid, user, timezone) {
@@ -92,14 +92,46 @@ export default class FakeApi {
 	async getUsers () {
 		return [
 			{
-				'code': 'Gromov Aleksey',
-				'ganttMaster': true,
-				'name': 'Громов Алексей'
+				'department': 'front',
+				'showUsers': false,
+				'pers':[
+					{
+						'code': 'Gromov Aleksey',
+						'ganttMaster': false,
+						'name': 'Громов Алексей'
+					},
+					{
+						'code': 'Gromov Aleksey',
+						'ganttMaster': false,
+						'name': 'Куртков Алексей'
+					},
+					{
+						'code': 'Gromov Aleksey',
+						'ganttMaster': false,
+						'name': 'Тролин Алексей'
+					}
+				]
 			},
 			{
-				'code': 'Nosov Aleksandr',
-				'ganttMaster': false,
-				'name': 'Носов Александр'
+				'department': 'back',
+				'showUsers': false,
+				'pers': [
+					{
+						'code': 'Nosov Aleksandr',
+						'ganttMaster': false,
+						'name': 'Носов Александр'
+					},
+					{
+						'code': 'Nosov Aleksandr',
+						'ganttMaster': false,
+						'name': 'Артамонов Александр'
+					},
+					{
+						'code': 'Nosov Aleksandr',
+						'ganttMaster': false,
+						'name': 'Сигонин Александр'
+					}
+				]
 			}
 		];
 	}

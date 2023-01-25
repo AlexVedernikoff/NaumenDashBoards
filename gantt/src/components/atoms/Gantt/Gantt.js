@@ -9,6 +9,7 @@ import ModalTask from 'components/atoms/ModalTask';
 import {postEditedWorkData, savePositionOfWork, setColumnSettings, setColumnTask, setDiagramLinksData} from 'store/App/actions';
 import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
+
 const HEIGHT_HEADER = 70;
 
 const Gantt = (props: Props) => {
@@ -636,7 +637,6 @@ const Gantt = (props: Props) => {
 		});
 	};
 
-
 	const inlineEditors = gantt.ext.inlineEditors;
 
 	inlineEditors.attachEvent('onBeforeEditStart', state => {
@@ -806,17 +806,17 @@ const Gantt = (props: Props) => {
 				editor: item.editor,
 				hide: !item.show,
 				label: item.title + `<div id="${item.code}"></div>`,
-				max_width: 300,
 				min_width: 250,
 				name: item.code,
 				resize: true,
 				width: '*'
 			}));
 
+			adaptedColumns[0].tree = true;
 			adaptedColumns.push({hide: !columns.find(item => !item.show), name: 'button', width: 50});
 			adaptedColumns[0].template = task => {
 				if (!task.parent || task.type === 'RESOURCE') {
-					return task[adaptedColumns[0].name];
+					return '<b>' + task[adaptedColumns[0].name] + '</b>';
 				}
 
 				return task[adaptedColumns[0].name];
