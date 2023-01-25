@@ -92,9 +92,31 @@ class GanttDataSetService
     /**
      * Стандартные настройки цветов сущностей
      */
-    private static final Collection<Map<String, String>> DEFAULT_COLOR_SETTINGS = initDefaultColors()
-
+    private static final Collection<EntityColorSettings> DEFAULT_COLOR_SETTINGS =
+        initDefaultColors()
     private static final String GANTT_DATE_PATTERN = "yyyy-MM-dd, HH:mm:ss"
+
+    /**
+     * Коды стандартных цветов
+     */
+    private static final String BLACK_COLOR = '#000000'
+    private static final String WHITE_COLOR = '#ffffff'
+    private static final String RESOURCE_COLOR = '#65c16f'
+    private static final String WORK_COLOR = '#3db9d3'
+
+    /**
+     * Индексы цветов сущностей
+     */
+    private static final int WORK_COLOR_INDEX = 0
+    private static final int RESOURCE_COLOR_INDEX = 2
+    private static final int PROJECT_COLOR_INDEX = 4
+    private static final int MILESTONE_COLOR_INDEX = 6
+    private static final int DUTY_COLOR_INDEX = 8
+    private static final int REPLACEMENT_COLOR_INDEX = 10
+    private static final int VACATION_COLOR_INDEX = 12
+    private static final int ILLNESS_INDEX = 14
+    private static final int DAYOFF_INDEX = 16
+
     /**
      * Максимальный размер выборки из БД.
      */
@@ -919,21 +941,20 @@ class GanttDataSetService
                     it << ['unscheduled': null]
                     it << ['datesStartDateAndEndDate': true]
                     it << ['positionElement': null]
+
                     if (settings.type == SourceType.WORK)
                     {
-                        it << ['typeEntity': settings.type]
+                        String subTypeOfWork = source.value.value
+
+                        buildWorksSubTypes(it, generalSettings, subTypeOfWork)
                         if (!isStartDate)
                         {
-                            it << ['start_date': null]
+                            it << ['start_date': '']
                         }
                         if (!isEndDate)
                         {
-                            it << ['end_date': null]
+                            it << ['end_date': '']
                         }
-                        it << ['textColor': generalSettings?.currentColorSettings[0]?.color ?:
-                            DEFAULT_COLOR_SETTINGS[0].color]
-                        it << ['color': generalSettings?.currentColorSettings[1]?.background ?:
-                            DEFAULT_COLOR_SETTINGS[1].background]
                         if (!it?.start_date && !it?.end_date)
                         {
                             it.unscheduled = true
@@ -948,21 +969,13 @@ class GanttDataSetService
                         settings.id in settingsList.parent))
                     {
                         it << ['render': (generalSettings?.viewOfNestingCheckbox) ? 'split' : null]
-                        it << ['typeEntity': 'project']
-                        it << ['textColor': generalSettings?.currentColorSettings[4]?.color ?:
-                            DEFAULT_COLOR_SETTINGS[4].color]
-                        it << ['color': generalSettings?.currentColorSettings[5]?.background ?:
-                            DEFAULT_COLOR_SETTINGS[5].background]
+                        setEntityColors(generalSettings, it, PROJECT_COLOR_INDEX, 'project')
                     }
 
                     else if (settings.type == SourceType.RESOURCE)
                     {
                         it << ['render': (generalSettings?.viewOfNestingCheckbox) ? 'split' : null]
-                        it << ['typeEntity': settings.type]
-                        it << ['textColor': generalSettings?.currentColorSettings[2]?.color ?:
-                            DEFAULT_COLOR_SETTINGS[2].color]
-                        it << ['color': generalSettings?.currentColorSettings[3]?.background ?:
-                            DEFAULT_COLOR_SETTINGS[3].background]
+                        setEntityColors(generalSettings, it, RESOURCE_COLOR_INDEX, settings.type)
                     }
 
                     ISDtObject currentObject = api.utils.get(it.id)
@@ -976,14 +989,11 @@ class GanttDataSetService
                         String currentElementStatus =
                             api.metainfo.getMetaClass(currentObject).workflow.endState.code
                         it << ['type': 'milestone']
-                        it << ['typeEntity': 'milestone']
-                        it << ['textColor': generalSettings?.currentColorSettings[6]?.color ?:
-                            DEFAULT_COLOR_SETTINGS[6].color]
-                        it << ['color': generalSettings?.currentColorSettings[7]?.background ?:
-                            DEFAULT_COLOR_SETTINGS[7].background]
+                        setEntityColors(generalSettings, it, MILESTONE_COLOR_INDEX, 'milestone')
                         it << ['completed': elementWithFinalStatus == currentElementStatus]
                         it.start_date = currentObject[milestoneAttributeName]
                         it.remove('end_date')
+                        it.remove('unscheduled')
                     }
                     if (settings.type == SourceType.WORK || it.type == 'milestone')
                     {
@@ -1020,6 +1030,56 @@ class GanttDataSetService
             }
         }
         return result
+    }
+
+    /**
+     * Приватный метод добавления данных для подтипов работ
+     * @param element - элемент списка, содержащий параметры для построения диаграммы
+     * @param settings - общие данные для настроек и построения диаграммы Ганта
+     * @param type - название подтипа работы
+     */
+    private void buildWorksSubTypes(LinkedHashMap element, GanttSettingsClass settings, String type)
+    {
+        switch (type)
+        {
+            case 'replacement':
+                String absenceType = utils.get(element.id).absenceTypes?.code ?: 'replacement'
+                switch (absenceType)
+                {
+                    case 'illness':
+                        setEntityColors(settings, element, ILLNESS_INDEX, absenceType)
+                        break
+                    case 'dayOff':
+                        setEntityColors(settings, element, DAYOFF_INDEX, absenceType)
+                        break
+                    case 'vacation':
+                        setEntityColors(settings, element, VACATION_COLOR_INDEX, absenceType)
+                        break
+                    default:
+                        setEntityColors(settings, element, REPLACEMENT_COLOR_INDEX, absenceType)
+                        break
+                }
+                break
+            case 'duty':
+                setEntityColors(settings, element, DUTY_COLOR_INDEX, type)
+                break
+            default:
+                setEntityColors(settings, element, WORK_COLOR_INDEX, type)
+        }
+    }
+
+    /**
+     * Приватный статичный метод для установления подтипов сущностей, а также их цветов
+     * @param settings - общие данные для настроек и построения диаграммы Ганта
+     * @param resMapElement - элемент списка, содержащий параметры для построения диаграммы
+     * @param idxEntity - номер индекса из списка настроек цветов сущностей (EntityColorSettings)
+     * @param type - название подтипа работы
+     */
+    private static void setEntityColors(GanttSettingsClass settings, LinkedHashMap resMapElement, int idxEntity, String type)
+    {
+        resMapElement << ['textColor': settings?.currentColorSettings[idxEntity]?.color ?: DEFAULT_COLOR_SETTINGS[idxEntity].color]
+        resMapElement << ['color': settings?.currentColorSettings[++idxEntity]?.background ?: DEFAULT_COLOR_SETTINGS[idxEntity].background]
+        resMapElement << ['typeEntity': type]
     }
 
     /**
@@ -1138,44 +1198,127 @@ class GanttDataSetService
     private static Collection<EntityColorSettings> initDefaultColors()
     {
         return [
-            new EntityColorSettings("#000000", "WORK", "WORKCOLOR", "Цвет текста работ"),
-            new EntityColorSettings("#3db9d3", "WORK", "WORKBACKGROUND", "Цвет полос работ"),
+            new EntityColorSettings(BLACK_COLOR, null, 'WORK', 'WORKCOLOR', 'Цвет текста работ'),
             new EntityColorSettings(
-                "#000000",
-                "RESOURCE",
-                "RESOURCECOLOR",
-                "Цвет текста ресурсов"
+                null,
+                WORK_COLOR,
+                'WORK',
+                'WORKBACKGROUND',
+                'Цвет полос работ'
             ),
             new EntityColorSettings(
-                "#65c16f",
-                "RESOURCE",
-                "RESOURCEBACKGROUND",
-                "Цвет полос ресурсов"
+                BLACK_COLOR,
+                null,
+                'RESOURCE',
+                'RESOURCECOLOR',
+                'Цвет текста ресурсов'
             ),
             new EntityColorSettings(
-                "#000000",
-                "project",
-                "PROJECTCOLOR",
-                "Цвет текста проектов"
+                null,
+                RESOURCE_COLOR,
+                'RESOURCE',
+                'RESOURCEBACKGROUND',
+                'Цвет полос ресурсов'
             ),
             new EntityColorSettings(
-                "#ffd700",
-                "project",
-                "PROJECTBACKGROUND",
-                "Цвет полос проектов"
+                BLACK_COLOR,
+                null,
+                'project',
+                'PROJECTCOLOR',
+                'Цвет текста проектов'
             ),
             new EntityColorSettings(
-                "#000000",
-                "milestone",
-                "MILESTONECOLOR",
-                "Цвет текста вех"
+                null,
+                RESOURCE_COLOR,
+                'project',
+                'PROJECTBACKGROUND',
+                'Цвет полос проектов'
             ),
             new EntityColorSettings(
-                "#ffffff",
-                "milestone",
-                "MILESTONEBACKGROUND",
-                "Цвет полос вех"
-            )]
+                BLACK_COLOR,
+                null,
+                'milestone',
+                'MILESTONECOLOR',
+                'Цвет текста вех'
+            ),
+            new EntityColorSettings(
+                null,
+                BLACK_COLOR,
+                'milestone',
+                'MILESTONEBACKGROUND',
+                'Цвет полос вех'
+            ),
+            new EntityColorSettings(
+                BLACK_COLOR,
+                null,
+                'duty',
+                'DUTYCOLOR',
+                'Цвет текста дежурств'
+            ),
+            new EntityColorSettings(
+                null,
+                WORK_COLOR,
+                'duty',
+                'DUTYBACKGROUND',
+                'Цвет полос дежурств'
+            ),
+            new EntityColorSettings(
+                BLACK_COLOR,
+                null,
+                'replacement',
+                'REPLACEMENTCOLOR',
+                'Цвет текста замещений'
+            ),
+            new EntityColorSettings(
+                null,
+                WORK_COLOR,
+                'replacement',
+                'REPLACEMENTBACKGROUND',
+                'Цвет полос замещений'
+            ),
+            new EntityColorSettings(
+                BLACK_COLOR,
+                null,
+                'vacation',
+                'VACATIONCOLOR',
+                'Цвет текста отпусков'
+            ),
+            new EntityColorSettings(
+                null,
+                WHITE_COLOR,
+                'vacation',
+                'VACATIONBACKGROUND',
+                'Цвет полос отпусков'
+            ),
+            new EntityColorSettings(
+                BLACK_COLOR,
+                null,
+                'illness',
+                'ILLNESSCOLOR',
+                'Цвет текста больничных'
+            ),
+            new EntityColorSettings(
+                null,
+                WHITE_COLOR,
+                'illness',
+                'ILLNESSBACKGROUND',
+                'Цвет полос больничных'
+            ),
+            new EntityColorSettings(
+                BLACK_COLOR,
+                null,
+                'dayOff',
+                'DAYOFFCOLOR',
+                'Цвет текста отгулов'
+            ),
+            new EntityColorSettings(
+                null,
+                WHITE_COLOR,
+                'dayOff',
+                'DAYOFFBACKGROUND',
+                'Цвет полос отгулов'
+            )
+        ]
     }
 }
 

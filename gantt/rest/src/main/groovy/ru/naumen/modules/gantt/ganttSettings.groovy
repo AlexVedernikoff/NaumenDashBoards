@@ -24,6 +24,7 @@ import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import ru.naumen.core.server.script.spi.ScriptDtOMap
 import ru.naumen.core.server.script.api.metainfo.*
+import ru.naumen.core.server.script.api.utils.*
 import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.metainfo.shared.elements.sec.ISGroup
 import java.text.SimpleDateFormat
@@ -146,7 +147,7 @@ interface GanttSettingsController
     String checkWorksOfResource(Map<String, Object> requestContent)
 
     /**
-     * Метод получения информации о правах управления у пользователей
+     * Метод получения информации о правах доступа у пользователей в отделах
      * @return информация о пользователях
      */
     String getUsers()
@@ -305,7 +306,10 @@ class GanttSettingsImpl implements GanttSettingsController
     @Override
     String postDataUsers(Map requestContent)
     {
-        return toJson(service.postDataUsers(requestContent))
+        Collection<AccessRights> dataUsers = requestContent.data.collect {
+            new ObjectMapper().convertValue(it, AccessRights)
+        }
+        return toJson(service.postDataUsers(dataUsers))
     }
 
     @Override
@@ -345,6 +349,7 @@ class GanttSettingsService
     private static final String MAIN_FQN = 'abstractBO'
     private static final String GROUP_GANT_MASTER = 'GanttMaster'
     private static final String GROUP_MASTER_DASHBOARD = 'sys_dashboardMaster'
+    private static final String DEFAULT_COLUMN_CODE = 'defaultColumnCode'
     private static final String FIRST_COLUMN_TITLE_ELEMENTS = 'firstColumnWithTitleOfElements'
     static final String GANTT_NAMESPACE = 'gantts'
     static final String TYPE_SELECT = 'select'
@@ -1538,51 +1543,80 @@ class GanttSettingsService
     }
 
     /**
-     * Получение базовой информации о пользователях
-     * @return базовая информация о пользователях
+     * Метод получения информации о правах доступа сотрудников в отделах
+     * @return информации о правах доступах сотрудников в отделах
      */
-    Collection<BasicUserData> getUsers()
+    Collection<AccessRights> getUsers()
     {
-        Collection<BasicUserData> userData = []
-        api.utils.find('employee', [:]).each { employee ->
-            BasicUserData user = new BasicUserData()
-            user.code = employee.UUID
-            user.ganttMaster = employee.employeeSecGroups.code.find {
-                it == GROUP_GANT_MASTER
-            }
-            user.name = employee.title
+        Collection<AccessRights> userData = []
+
+        api.utils.find('ou', [:]) each {
+            AccessRights user = new AccessRights(
+                department: it.title,
+                showUsers: false,
+                users: createListOfUsers(it.title)
+            )
             userData.add(user)
         }
         return userData
     }
 
     /**
+     * Приватный метод получения списка сотрудников отдела и их прав доступа
+     * @param department - название отдела, по которому нужно произвести поиск
+     * @return список сотрудников отдела и их прав доступа
+     */
+    private Collection<UserAccess> createListOfUsers(String department)
+    {
+        Collection<UserAccess> userData = []
+        api.utils.find('employee', [:]).each { employee ->
+            if (employee.parent.title == department)
+            {
+                UserAccess user = new UserAccess()
+                user.code = employee.UUID
+                user.ganttMaster = employee.employeeSecGroups.code.find {
+                    it == GROUP_GANT_MASTER
+                } ?: false as Boolean
+                user.name = employee.title
+                userData.add(user)
+            }
+        }
+        return userData
+    }
+
+    /**
      * Метод изменения группы доступа Гантт мастер
-     * @param userData - информация о пользователях
+     * @param userData - информация о пользователях в отделах
      * @return инофрмация о внесенных изменения в права доступа
      */
-    String postDataUsers(Map userData)
+    String postDataUsers(Collection<AccessRights> userData)
+    {
+        userData.each {
+            postDataUsersSupportive(it.users, it.department)
+        }
+    }
+
+    private String postDataUsersSupportive(Collection userData, String department)
     {
         String userRole = ''
-        userData.data.each {
-            ISGroup group = api.security.getGroup(GROUP_GANT_MASTER)
+        userData.each {
             ISDtObject employee = api.utils.get(it.code)
             Boolean whetherUserNecessaryRights = employee.employeeSecGroups.find { employeeGroups
                 ->
                 employeeGroups.code == GROUP_GANT_MASTER
             } ?: false
-            if (it.ganttMaster?.toBoolean() && !whetherUserNecessaryRights)
+            if (it.ganttMaster && !whetherUserNecessaryRights)
             {
                 userRole += it.name + ', '
                 api.security.addMemberToGroup(GROUP_GANT_MASTER, it.code)
             }
-            else if (whetherUserNecessaryRights)
+            else if (!it.ganttMaster && whetherUserNecessaryRights)
             {
                 userRole += it.name + ', '
                 api.security.removeMemberFromGroup(GROUP_GANT_MASTER, it.code)
             }
         }
-        return "The rights of users ${ userRole } have been"
+        return "The rights of ${ department } users ${ userRole } have been"
     }
 
     /**
@@ -1946,7 +1980,7 @@ class BaseGanttDiagramData
     /**
      * Настройки цветов отображения сущностей
      */
-    Collection<Map<String, String>> currentColorSettings = GanttDataSetService.DEFAULT_COLOR_SETTINGS
+    Collection currentColorSettings = GanttDataSetService.DEFAULT_COLOR_SETTINGS
 
     /**
      * Работа из вкладки личной диаграммы
@@ -2746,7 +2780,6 @@ class SequenceChartElements
     String metaInformation
 }
 
-
 /**
  * Список элементов с информацией о последовательности
  */
@@ -2758,32 +2791,32 @@ class LinkedListSequenceChartElements
     Collection <SequenceChartElements> elements
 }
 
-
-/**
- * Класс с базовой информацией о пользователях
- */
-class BasicUserData
-{
-    /**
-     * Идентификатор пользователя
-     */
-    String code
-
-    /**
-     * Наличие прав администратора у пользователя
-     */
-    Boolean ganttMaster
-
-    /**
-     * Имя пользователя
-     */
-    String name
-}
-
 /**
  * Класс, описывающий запрос на обновления настроек цветов сущностей
  */
 class SaveGanttColorSettingsRequest extends BaseGanttSettingsRequest
 {
     Collection<Map<String, String>> currentColorSettings
+}
+
+/**
+ * Класс, содержащий информацию о названии отдела и правах доступа его сотрудников
+ */
+@Canonical
+class AccessRights
+{
+    String department
+    Boolean showUsers
+    Collection<UserAccess> users
+}
+
+/**
+ * Класс, содержащий информацию о правах доступа сотрудника
+ */
+@Canonical
+class UserAccess
+{
+    String code
+    String name
+    Boolean ganttMaster
 }
