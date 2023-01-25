@@ -1,36 +1,27 @@
 // @flow
-import {stringUnification, debounce, truncate} from './helpers';
 import cn from 'classnames';
 import {connect} from 'react-redux';
+import {debounce, stringUnification, truncate} from './helpers';
 import Edit from 'icons/edit.svg';
 import {functions, props} from './selectors';
 import ListHideIcon from 'icons/listHide.svg';
 import ListItem from 'components/organisms/ListItem';
 import Point from 'icons/point.svg';
 import type {Props, RenderTitleProps} from './types';
-import React, { useState } from 'react';
+import React, {useCallback, useState} from 'react';
 import ReactTooltip from 'react-tooltip';
 import Scrollable from 'components/atoms/Scrollable';
 import SearchIcon from 'icons/search.svg';
+import ShowFullIcon from 'icons/showFull.svg';
 import styles from './styles.less';
 
-const List = ({activeElement, data, goToPoint, searchObjects, searchText, setSearchObjects, setSearchText, showEditForm}: Props) => {
+const List = ({activeElement, data, goToPoint, searchObjects, searchText, setActiveElement, setSearchObjects, setSearchText, showEditForm}: Props) => {
 	const [viewList, setViewList] = useState(true);
 	const [valueSearch, setValueSearch] = useState('');
 
-	const debounceSearch = debounce((value: string) => {
-		setSearchText(value);
-
-		if (value) {
-			const objectsSearch = data.flat().filter(point => {
-				return stringUnification(point.title).includes(stringUnification(value));
-			});
-
-			setSearchObjects(objectsSearch);
-		} else {
-			setSearchObjects([]);
-		}
-	});
+	const debounceSearch = useCallback(debounce((value: string) => {
+		setSearchText(stringUnification(value));
+	}), [setSearchText]);
 
 	const handleOpenLink = actions => () => {
 		const [action] = actions || [];
@@ -58,11 +49,28 @@ const List = ({activeElement, data, goToPoint, searchObjects, searchText, setSea
 
 	const handleSearch = (e: InputEvent) => {
 		const value = e.target.value;
+		setValueSearch(value);
+		debounceSearch(value);
+	};
 
-		if (value.length >= 2) {
-			setValueSearch(value);
-			debounceSearch(value);
+	const handleShowFull = () => {
+		setSearchText('');
+		setSearchObjects([]);
+		setValueSearch('');
+		setActiveElement(null);
+	};
+
+	const renderShowFull = () => {
+		if (searchText.length && activeElement) {
+			return (
+				<div className={styles.wrapShowFull} onClick={handleShowFull}>
+					<ShowFullIcon className={styles.iconShowFull} />
+					<div className={styles.textShowFull}>Показать полный список</div>
+				</div>
+			);
 		}
+
+		return null;
 	};
 
 	const renderSearch = () => {
@@ -143,10 +151,6 @@ const List = ({activeElement, data, goToPoint, searchObjects, searchText, setSea
 			return;
 		}
 
-		if (activeElement && activeElement.id === item.id) {
-			return;
-		}
-
 		return renderContainer(item);
 	};
 
@@ -155,12 +159,16 @@ const List = ({activeElement, data, goToPoint, searchObjects, searchText, setSea
 	};
 
 	const renderContent = () => {
-		if (searchText) {
-			if (searchObjects.length) {
-				return searchObjects.map(renderList);
-			} else {
-				return renderNoSearch();
-			}
+		if (activeElement) {
+			return renderList(activeElement);
+		}
+
+		if (!searchObjects.length && searchText) {
+			return renderNoSearch();
+		}
+
+		if (searchObjects.length) {
+			return searchObjects.map(renderList);
 		}
 
 		return data.flat().map(renderList);
@@ -174,9 +182,9 @@ const List = ({activeElement, data, goToPoint, searchObjects, searchText, setSea
 	return (
 		<div className={classNames}>
 			{renderChangeView()}
+			{renderShowFull()}
 			{renderSearch()}
 			<Scrollable>
-				{activeElement && renderContainer(activeElement)}
 				{renderContent()}
 			</Scrollable>
 		</div>

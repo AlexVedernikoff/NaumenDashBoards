@@ -34,4 +34,8 @@ export default class Api {
 			});
 		});
 	}
+
+	async getUuidObjects (searchString: string) {
+		return this.jsApi.restCallModule('schemeRestSettings', 'getUuidObjects', searchString);
+	}
 }

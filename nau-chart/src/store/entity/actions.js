@@ -1,6 +1,6 @@
 // @flow
 import type {Dispatch, Entity, GetState, ThunkAction} from 'store/types';
-import {getContext, getEditForm, getScheme} from 'utils/api';
+import {getContext, getEditForm, getScheme, getUuidObjects} from 'utils/api';
 import {VERIFY_EVENTS} from './constants';
 
 /**
@@ -153,10 +153,31 @@ const setPosition = (payload: {x: number, y: number}) => ({
 	type: VERIFY_EVENTS.SET_POSITION
 });
 
-const setSearchText = (text: string) => ({
-	text,
-	type: VERIFY_EVENTS.SET_SEARCH_TEXT
-});
+const setSearchText = (searchString: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	dispatch({
+		payload: searchString,
+		type: VERIFY_EVENTS.SET_SEARCH_TEXT
+	});
+
+	if (searchString.length) {
+		try {
+			const uuids = await getUuidObjects(searchString);
+
+			const { data } = getState().entity;
+
+			if (uuids) {
+				const entities = data.flat().filter(({ uuid }) => {
+					return uuids.includes(String(uuid));
+				});
+				dispatch(setSearchObjects(entities));
+			}
+		} catch (error) {
+			dispatch(setErrorData(error));
+		}
+	} else {
+		dispatch(setSearchObjects([]));
+	}
+};
 
 const setSearchObjects = (objects: Entity[]) => ({
 	objects,

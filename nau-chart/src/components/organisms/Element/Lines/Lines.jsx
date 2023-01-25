@@ -3,9 +3,9 @@ import {Group, Line, Rect, Text} from 'react-konva';
 import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 
-const Lines = ({centerPointUuid, entity, handleContextMenu, onClick, onHover, points, scale, searchObjects}: Props) => {
+const Lines = ({activeElement, entity, handleContextMenu, onClick, onHover, points, scale, searchObjects}: Props) => {
 	const isSearch = searchObjects.some(point => entity.uuid === point.uuid);
-	const sizeLine = entity.uuid && (isSearch || centerPointUuid === entity.uuid) ? 4 / scale : 2;
+	const sizeLine = entity.uuid && (isSearch || (activeElement && activeElement.uuid === entity.uuid)) ? 4 / scale : 2;
 	const [action] = entity.actions || [];
 
 	const {fromX, fromY, toX, toY} = points;

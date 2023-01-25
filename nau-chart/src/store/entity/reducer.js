@@ -56,7 +56,7 @@ const reducer = (state: EntityState = initialVerifyState, action: EntityAction =
 		case VERIFY_EVENTS.SET_SEARCH_TEXT:
 			return {
 				...state,
-				searchText: action.text
+				searchText: action.payload
 			};
 		case VERIFY_EVENTS.SET_SEARCH_POINTS:
 			return {
