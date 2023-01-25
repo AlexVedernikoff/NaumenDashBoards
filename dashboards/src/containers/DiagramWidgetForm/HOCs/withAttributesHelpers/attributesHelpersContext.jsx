@@ -8,6 +8,7 @@ import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import memoize from 'memoize-one';
 import type {Props} from 'containers/DiagramWidgetForm/types';
 import React from 'react';
+import {VISOR_CODE_TYPES} from 'store/sources/attributes/constants';
 
 export const withAttributesHelperContext = <Config: Props>(Component: React$ComponentType<Config>): React$ComponentType<Config> =>
 	class WithAttributesHelperContext extends React.Component<Config> {
@@ -146,13 +147,15 @@ export const withAttributesHelperContext = <Config: Props>(Component: React$Comp
 				const {parent, value} = item;
 
 				if (parent) {
+					// $FlowFixMe:prop-missing
+					const isFailTypes = value.visorCode === VISOR_CODE_TYPES.HYPERLINK;
 					const isUsed = usedAttributes.find(
 						// $FlowFixMe:prop-missing
 						attr => attr.code === value.code && attr.property === value.property
 					);
 					const isInclude = includeAttributes.find(attrCode => attrCode === value.code);
 
-					if (isUsed && !isInclude) {
+					if (isFailTypes || (isUsed && !isInclude)) {
 						clearChildren.push({key: itemKey, parent});
 					} else {
 						result[itemKey] = {...item};

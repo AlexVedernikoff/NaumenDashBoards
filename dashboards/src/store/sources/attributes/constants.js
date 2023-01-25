@@ -58,6 +58,15 @@ const ATTRIBUTE_TYPES = {
 	PERCENTAGE_RELATIVE_ATTR
 };
 
+const VISOR_CODE_TYPES = {
+	DATE: 'date',
+	DATE_TIME: 'dateTime',
+	FR_CAT: 'stFrCat',
+	HYPERLINK: 'attrHyperlink',
+	PHONE_STRING: 'phoneString',
+	STRING: 'attrString'
+};
+
 // Набор типов дат
 const DATE = {
 	date,
@@ -109,10 +118,11 @@ const TIMER_VALUE = {
 };
 
 export {
+	ATTRIBUTE_SETS,
 	ATTRIBUTE_TYPES,
 	ATTRIBUTES_EVENTS,
-	ATTRIBUTE_SETS,
 	DYNAMIC_ATTRIBUTE_PROPERTY,
+	SOURCE_ATTRIBUTE_TYPES,
 	TIMER_VALUE,
-	SOURCE_ATTRIBUTE_TYPES
+	VISOR_CODE_TYPES
 };
