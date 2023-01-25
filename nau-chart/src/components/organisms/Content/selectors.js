@@ -7,6 +7,7 @@ import type {State} from 'store/types';
  * @returns {ConnectedProps}
  */
 export const props = (state: State): ConnectedProps => ({
+	activeElement: state.entity.activeElement,
 	centerPointUuid: state.entity.centerPointUuid,
 	data: state.entity.data,
 	exportTo: state.entity.exportTo,

@@ -19,4 +19,9 @@ export default class FakeApi {
 		await new Promise(resolve => setTimeout(() => resolve(), 1000));
 		return {uuid: objectUUID};
 	}
+
+	async getUuidObjects (searchString) {
+		await new Promise(resolve => setTimeout(() => resolve(), 1000));
+		return [searchString];
+	}
 }

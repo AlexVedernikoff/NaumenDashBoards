@@ -18,7 +18,7 @@ export class Geolocation extends Component<Props> {
 	constructor (props: Props) {
 		super(props);
 
-		this.maxZoom = 16;
+		this.maxZoom = 18;
 		this.minZoom = 3;
 		this.mapRef = React.createRef();
 	}

@@ -47,10 +47,45 @@ export default {
 				uuid: 100000000000
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222 is uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl',
 				from: 0,
 				header: 'title s uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl',
 				id: 1,
+				options: [
+					{
+						label: 'Модель',
+						presentation: 'right_of_label',
+						value: [
+							{
+								label: 'TT 120 vsgddsgdf gdfg dfgf g gggggggggggggg gggggggggggggggggggggg gggggggggggggggggggggggggg ggggggggggggggggggggggggg gggggggggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg'
+									+ ' gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg gggggggggggggggggg',
+								url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:ciModel$4402'
+							}
+						]
+					},
+					{
+						label: 'Расположение',
+						presentation: 'right_of_label',
+						value: [
+							{
+								label: 'Подвал Южная',
+								url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+							},
+							{
+								label: 'Подвал Южная 2',
+								url: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:location$3801'
+							}
+						]
+					}
+				],
 				title: 'title s uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl is uuid 1 hu5kl',
 				to: 2,
 				type: 'line',

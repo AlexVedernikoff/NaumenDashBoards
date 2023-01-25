@@ -18,8 +18,8 @@ import Points from 'components/organisms/Element/Points';
 import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.less';
-
 const Content = ({
+	activeElement,
 	centerPointUuid,
 	data,
 	exportTo,
@@ -162,6 +162,7 @@ const Content = ({
 		return schemes.map(({lines, points}) => {
 			const schemeItems = [];
 			const props = {
+				activeElement,
 				centerPointUuid,
 				handleContextMenu,
 				onClick: setActiveElement,

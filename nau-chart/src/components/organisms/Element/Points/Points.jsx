@@ -4,7 +4,7 @@ import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 import useImage from 'use-image';
 
-const Points = ({centerPointUuid, entity, handleContextMenu, onClick, onHover, scale, searchObjects, x, y}: Props) => {
+const Points = ({activeElement, entity, handleContextMenu, onClick, onHover, scale, searchObjects, x, y}: Props) => {
 	const tileW = 108;
 	const tileH = 58;
 	const paddingText = 4;
@@ -16,7 +16,7 @@ const Points = ({centerPointUuid, entity, handleContextMenu, onClick, onHover, s
 	const [titleHeightTrim, setTitleHeightTrim] = useState('auto');
 	const [descHeightTrim, setDescHeightTrim] = useState('auto');
 	const isSearch = searchObjects.some(point => entity.uuid === point.uuid);
-	const sizeImage = entity.uuid && (isSearch || centerPointUuid === entity.uuid) ? 66 / (scale < 1 ? scale * 2 : 1) : 44;
+	const sizeImage = entity.uuid && (isSearch || (activeElement && activeElement.uuid === entity.uuid)) ? 66 / (scale < 1 ? scale * 2 : 1) : 44;
 	const [action] = entity.actions || [];
 
 	useEffect(() => {

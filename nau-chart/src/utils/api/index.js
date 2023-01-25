@@ -37,3 +37,12 @@ export const getScheme = async (contentCode: string, subjectUuid: string, curren
 export const getEditForm = async (objectUUID: string, codeEditingForm: string): Promise<string> => {
 	return api.getEditForm(objectUUID, codeEditingForm);
 };
+
+/**
+ * Поиск и получение списка Uuid обьектов, подходящих под запрос
+ * @param {string} searchString - строка для поиска
+ * @returns {Promise<[string]>} - список Uuid
+ */
+export const getUuidObjects = async (searchString: string): Promise<[string]> => {
+	return api.getUuidObjects(searchString);
+};

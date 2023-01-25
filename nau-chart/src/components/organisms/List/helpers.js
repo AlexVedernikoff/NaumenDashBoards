@@ -11,19 +11,22 @@ const truncate = (str: string, n: number) => {
 
 /**
  * Вызов функции не чаще чем на заддоное кол-во времени
- * @param callback {function} функция для вызова
- * @param timeout {number} врямя задежки, по умолчанию 500
- * @returns {function} - функция после задержки
+ * @param {Function} callback  функция для вызова
+ * @param {number} wait врямя задежки, по умолчанию 500
+ * @returns {Function} - функция после задержки
  * */
-const debounce = <A>(callback: (value: A) => void, timeout: number = 500) => {
-	let timer = null;
-
+const debounce = <A>(callback: (value: A) => void, wait: number = 1000) => {
+	let timeout;
 	return (value: A) => {
-		clearTimeout(timer);
+		clearTimeout(timeout);
 
-		timer = setTimeout(() => {
+		const later = () => {
+			timeout = null;
+
 			callback(value);
-		}, timeout);
+		};
+
+		timeout = setTimeout(later, wait);
 	};
 };
 
@@ -32,7 +35,7 @@ const debounce = <A>(callback: (value: A) => void, timeout: number = 500) => {
  * @param string {string} - входная строка
  * @returns {string} - результирующая строка
  */
-const stringUnification = (string: string) => string.toLowerCase().replace(/\s/g, '');
+const stringUnification = (string: string) => string.toLowerCase().replace(/^\s|\s$/g, '');
 
 export {
 	stringUnification,
