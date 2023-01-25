@@ -14,7 +14,6 @@ import T from 'components/atoms/Translation';
 import t from 'localization';
 import Text from 'components/atoms/Text';
 import {TEXT_TYPES} from 'components/atoms/Text/constants';
-import {USER_ROLES} from 'store/context/constants';
 import type {Value} from 'components/molecules/MultiDropDownList/types';
 import WidgetForm from 'components/templates/WidgetForm';
 
@@ -78,24 +77,22 @@ export class WidgetCopyPanel extends Component<Props, State> {
 	);
 
 	renderDashboardsList = () => {
-		const {dashboards, isEditableContext, isUserMode, user} = this.props;
+		const {dashboards} = this.props;
 		const {items, loading} = dashboards;
 
-		if (user.role !== USER_ROLES.REGULAR && !isEditableContext && !isUserMode) {
-			return (
-				<Fragment>
-					<Text className={styles.field} type={TEXT_TYPES.SMALL}>
-						<T text="WidgetCopyPanel::OrChoiceVariant" />
-					</Text>
-					<MultiDropDownList
-						items={items}
-						loading={loading}
-						onFocusSearchInput={this.handleFocusSearchInput}
-						onSelect={this.handleSelect}
-					/>
-				</Fragment>
-			);
-		}
+		return (
+			<Fragment>
+				<Text className={styles.field} type={TEXT_TYPES.SMALL}>
+					<T text="WidgetCopyPanel::OrChoiceVariant" />
+				</Text>
+				<MultiDropDownList
+					items={items}
+					loading={loading}
+					onFocusSearchInput={this.handleFocusSearchInput}
+					onSelect={this.handleSelect}
+				/>
+			</Fragment>
+		);
 	};
 
 	renderModal = () => {

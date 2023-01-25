@@ -4,6 +4,7 @@ import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {|
+	canShowCopyPanel: boolean,
 	layoutMode: LayoutMode,
 |};
 
