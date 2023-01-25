@@ -66,7 +66,7 @@
 	"ComparePeriodBox::PreviousYear": "Previous year",
 	"ComparePeriodBox::StartPeriod": "The start period",
 	"ComparePeriodStyle::CompareWithPeriod": "Comparison with the period",
-	"ComparePeriodStyle::NumberSymbolsAfterComma": "A number of simbols after comma",
+	"ComparePeriodStyle::NumberSymbolsAfterComma": "A number of symbols after comma",
 	"ComputedAttributeEditor::EditField": "Edit field",
 	"CustomColorsSettings::ApplyForAllWidgets": "Apply to all widgets on the dashboard",
 	"CustomGroup::ChangeConfirmation": "The changes will apply to this group in all widgets.",
