@@ -326,7 +326,12 @@ class DashboardDrilldownService
         {
             def slurper = new groovy.json.JsonSlurper()
             def UUID = slurper.parseText(link.descriptor).cardObjectUuid
+            String listType = slurper.parseText(link.descriptor).contentType
             builder.setUuid(UUID)
+            if (listType == "RelObjectList")
+            {
+                builder.setListType(listType)
+            }
         }
         link.template?.with(builder.&setTemplate)
         def filterBuilder = builder.filter()
