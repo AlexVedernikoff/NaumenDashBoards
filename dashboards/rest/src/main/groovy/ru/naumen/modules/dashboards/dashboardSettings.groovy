@@ -2070,22 +2070,27 @@ class DashboardSettingsService
                              String oldWidgetKey = null)
     {
         String type = utils.get(classFqn)?.metaClass?.toString()
-        def loginKeyPart = login ? "_${login}" : ''
-        def dashboardKeyPart = dashboardUUID ? "_${dashboardUUID}": ''
+        def loginKeyPart = login ? "_${ login }" : ''
+        def dashboardKeyPart = dashboardUUID ? "_${ dashboardUUID }" : ''
         String uuidWidget
-        while ({
-            if (oldWidgetKey)
+
+        if (oldWidgetKey)
+        {
+            uuidWidget = oldWidgetKey.endsWith(loginKeyPart)
+                ? oldWidgetKey
+                : "${ oldWidgetKey }${ loginKeyPart }"
+        }
+        else
+        {
+            while ({
+                uuidWidget = "${ type }_${ contentCode }_${ UUID.randomUUID() }${ loginKeyPart }${ dashboardKeyPart }"
+                return keys?.contains(uuidWidget)
+            }())
             {
-                uuidWidget = oldWidgetKey.endsWith(loginKeyPart)
-                    ? oldWidgetKey
-                    : "${oldWidgetKey}${loginKeyPart}"
+                continue
             }
-            else
-            {
-                uuidWidget = "${type}_${contentCode}_${UUID.randomUUID()}${loginKeyPart}${dashboardKeyPart}"
-            }
-            (keys?.contains(uuidWidget))
-        }()) continue
+        }
+
         return uuidWidget
     }
 
