@@ -5,5 +5,4 @@ export type Props = ConnectedProps & ConnectedFunctions;
 
 export type State = {
 	width: number
-}
-;
+};

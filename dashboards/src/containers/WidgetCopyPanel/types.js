@@ -2,14 +2,10 @@
 import type {DashboardsState} from 'store/dashboards/types';
 import type {DivRef} from 'components/types';
 import type {ThunkAction} from 'store/types';
-import type {UserData} from 'store/context/types';
 import type {ValidateWidgetToCopyResult} from 'store/widgets/data/types';
 
 export type ConnectedProps = {|
 	dashboards: DashboardsState,
-	isEditableContext: boolean,
-	isUserMode: boolean,
-	user: UserData,
 |};
 
 export type ConnectedFunctions = {|

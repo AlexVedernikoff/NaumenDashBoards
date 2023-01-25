@@ -41,11 +41,12 @@ export class WidgetAddPanel extends Component<Props, State> {
 	);
 
 	render () {
+		const {canShowCopyPanel} = this.props;
 		return (
 			<div className={styles.title} ref={this.relativeElement}>
 				{this.renderTitleRow('WidgetAddPanel::AddText', this.addTextWidget)}
 				{this.renderTitleRow('WidgetAddPanel::AddWidget', this.addDiagramWidget)}
-				{this.renderTitleRow('WidgetAddPanel::CopyWidget', this.showCopyDiagramWidget)}
+				{canShowCopyPanel && this.renderTitleRow('WidgetAddPanel::CopyWidget', this.showCopyDiagramWidget)}
 			</div>
 		);
 	}
