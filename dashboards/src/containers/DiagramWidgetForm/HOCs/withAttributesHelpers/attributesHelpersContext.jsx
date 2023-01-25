@@ -2,6 +2,7 @@
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTES_HELPERS_CONTEXT} from './constants';
 import type {Breakdown, Indicator, Parameter} from 'store/widgetForms/types';
+import type {DynamicAttributes} from './types';
 import {filterByAttribute} from 'containers/WidgetFormPanel/helpers';
 import {getSourceAttribute} from 'store/sources/attributes/helpers';
 import memoize from 'memoize-one';
@@ -14,6 +15,7 @@ export const withAttributesHelperContext = <Config: Props>(Component: React$Comp
 			filterAttributeByMainDataSet: this.filterAttributeByMainDataSet,
 			filterAttributesByUsed: this.filterAttributesByUsed,
 			filterBreakdownAttributeByMainDataSet: this.filterBreakdownAttributeByMainDataSet,
+			filterDynamicAttributes: this.filterDynamicAttributes,
 			getCommonAttributes: this.getCommonAttributes
 		}));
 
@@ -61,7 +63,7 @@ export const withAttributesHelperContext = <Config: Props>(Component: React$Comp
 		 * Фильтрует атрибуты в зависимости от уже использованных
 		 * @param {Array<Attribute>} options - список атрибутов
 		 * @param {number} dataSetIndex - индекс набора данных
-		 * @param {?Array<?Attribute>} includeAttributes - атрибут который не надо отфильтровывать
+		 * @param {?Array<?Attribute>} includeAttributes - атрибут, который не надо отфильтровывать
 		 * @returns {Array<Attribute>} - список отфильтрованных атрибутов
 		 */
 		filterAttributesByUsed = (options: Array<Attribute>, dataSetIndex: number, includeAttributes: ?Array<?Attribute>): Array<Attribute> => {
@@ -113,6 +115,64 @@ export const withAttributesHelperContext = <Config: Props>(Component: React$Comp
 					result = filterByAttribute(options, attribute, false);
 				}
 			}
+
+			return result;
+		};
+
+		/**
+		 * Фильтрует динамические атрибуты в соответствии с типом атрибута и использованными атрибутами
+		 *
+		 * @param {Array<Attribute>} options - список атрибутов
+		 * @param {number} dataSetIndex - индекс набора данных
+		 * @param {?Array<?Attribute>} includeAttributes - атрибут, который не надо отфильтровывать
+		 * @returns {Array<Attribute>} - список отфильтрованных атрибутов
+		 */
+		filterDynamicAttributes = (
+			options: DynamicAttributes,
+			dataSetIndex: number,
+			includeAttributes: Array<?string>
+		): DynamicAttributes => {
+			const {breakdown, indicators, parameters} = this.props.values.data[dataSetIndex];
+			const usedAttributes = [
+				...this.getUsedAttributes(parameters),
+				...this.getUsedAttributes(indicators),
+				...this.getUsedAttributes(breakdown)
+			];
+			const result = {};
+			const clearChildren = [];
+
+			Object.keys(options).forEach(itemKey => {
+				const item = options[itemKey];
+				const {parent, value} = item;
+
+				if (parent) {
+					const isUsed = usedAttributes.find(
+						// $FlowFixMe:prop-missing
+						attr => attr.code === value.code && attr.property === value.property
+					);
+					const isInclude = includeAttributes.find(attrCode => attrCode === value.code);
+
+					if (isUsed && !isInclude) {
+						clearChildren.push({key: itemKey, parent});
+					} else {
+						result[itemKey] = {...item};
+					}
+				} else {
+					result[itemKey] = {...item};
+				}
+			});
+
+			clearChildren.forEach(({key, parent}) => {
+				if (parent && result[parent]) {
+					const parentItem = result[parent];
+
+					parentItem.children = parentItem.children.filter(child => child !== key);
+
+					if (parentItem.children.length === 0) {
+						delete result[parent];
+					}
+				}
+			});
 
 			return result;
 		};

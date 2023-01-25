@@ -28,6 +28,8 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 	getEmptyHelpers = memoize(() => ({
 		filterAttributeByMainDataSet: (options, dataSetIndex) => options,
 		filterAttributesByUsed: (options, dataSetIndex) => options,
+		filterBreakdownAttributeByMainDataSet: options => options,
+		filterDynamicAttributes: options => options,
 		getCommonAttributes: () => []
 	}));
 

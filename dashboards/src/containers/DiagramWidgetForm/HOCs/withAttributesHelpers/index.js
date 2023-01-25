@@ -1,6 +1,6 @@
 // @flow
 import {ATTRIBUTES_HELPERS_CONTEXT} from './constants';
-import withAttributesHelpers from './withHelpers';
+import withAttributesHelpers from './withAttributesHelpers';
 import withAttributesHelpersContext from './attributesHelpersContext.jsx';
 
 export {

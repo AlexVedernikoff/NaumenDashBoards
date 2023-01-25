@@ -13,6 +13,7 @@ import t from 'localization';
 import Toggle from 'components/atoms/Toggle';
 import TreeList from 'components/molecules/TreeSelect/components/Tree';
 import withAttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withAttributeFieldset';
+import withAttributesHelpers from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers';
 import withShowDynamicAttributes from 'WidgetFormPanel/components/AttributeFieldset/HOCs/withShowDynamicAttributes';
 
 export class MainSelectList extends PureComponent<Props> {
@@ -20,11 +21,7 @@ export class MainSelectList extends PureComponent<Props> {
 	searchDebounce = null;
 
 	componentDidMount () {
-		const {searchValue} = this.props;
-
-		if (searchValue.trim()) {
-			this.handleChangeSearchValue();
-		}
+		this.handleChangeSearchValue();
 	}
 
 	componentDidUpdate (prevProps: Props) {
@@ -112,7 +109,9 @@ export class MainSelectList extends PureComponent<Props> {
 
 	renderDynamicAttributeList = () => {
 		const {
+			attributesHelpers,
 			dataKey,
+			dataSetIndex,
 			dynamicAttributesMode,
 			dynamicGroups,
 			getOptionLabel,
@@ -129,7 +128,9 @@ export class MainSelectList extends PureComponent<Props> {
 				data: {},
 				loading: false
 			}} = dynamicGroups;
-			const {data, loading} = sourceData;
+			let {data, loading} = sourceData;
+
+			data = attributesHelpers.filterDynamicAttributes(data, dataSetIndex, initialSelected);
 
 			return (
 				<TreeList
@@ -204,4 +205,4 @@ export class MainSelectList extends PureComponent<Props> {
 	}
 }
 
-export default withShowDynamicAttributes(withAttributeFieldset(MainSelectList));
+export default withShowDynamicAttributes(withAttributeFieldset(withAttributesHelpers(MainSelectList)));
