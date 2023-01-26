@@ -487,7 +487,7 @@
 	"WidgetCopyPanel::NoReferenceAndUserGroupCopy": "Виджет будет скопирован без относительных критериев фильтрации. Настроенные пользовательские группировки будут заменены на системные. Продолжить копирование?",
 	"WidgetCopyPanel::NoReferenceCopy": "Виджет будет скопирован без относительных критериев фильтрации. Продолжить копирование?",
 	"WidgetCopyPanel::NoUserGroupCopy": "В виджете использована пользовательская настройка группировки и будет изменена на системную. Продолжить копирование?",
-	"WidgetCopyPanel::OrChoiceVariant": "Или выберите виджет из существующих вариантов для копирования",
+	"WidgetCopyPanel::OrChoiceVariant": "Выберите виджет из существующих вариантов для копирования",
 	"WidgetForm::Cancel": "Отмена",
 	"WidgetForm::ChoiceWidgetTooltipForm::AtIndicator": "В показателе",
 	"WidgetForm::ChoiceWidgetTooltipForm::AtTitle": "В заголовке",

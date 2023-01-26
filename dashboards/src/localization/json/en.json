@@ -487,7 +487,7 @@
 	"WidgetCopyPanel::NoReferenceAndUserGroupCopy": "The widget will be copied without relative filter criteria. The customized custom groups will be replaced with system setting. Continue to copy?",
 	"WidgetCopyPanel::NoReferenceCopy": "The widget will be copied without relative filter criteria. Continue copying?",
 	"WidgetCopyPanel::NoUserGroupCopy": "The widget uses the custom groups setting and will be changed to the system setting. Continue copying?",
-	"WidgetCopyPanel::OrChoiceVariant": "Or select a widget from the existing options to copy",
+	"WidgetCopyPanel::OrChoiceVariant": "Select a widget from the existing options to copy",
 	"WidgetForm::Cancel": "Cancel",
 	"WidgetForm::ChoiceWidgetTooltipForm::AtIndicator": "At indicator",
 	"WidgetForm::ChoiceWidgetTooltipForm::AtTitle": "At title",

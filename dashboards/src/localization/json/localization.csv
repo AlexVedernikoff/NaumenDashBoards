@@ -483,7 +483,7 @@
 "WidgetCopyPanel::NoReferenceAndUserGroupCopy","Виджет будет скопирован без относительных критериев фильтрации. Настроенные пользовательские группировки будут заменены на системные. Продолжить копирование?","The widget will be copied without relative filter criteria. The customized custom groups will be replaced with system setting. Continue to copy?",,
 "WidgetCopyPanel::NoReferenceCopy","Виджет будет скопирован без относительных критериев фильтрации. Продолжить копирование?","The widget will be copied without relative filter criteria. Continue copying?",,
 "WidgetCopyPanel::NoUserGroupCopy","В виджете использована пользовательская настройка группировки и будет изменена на системную. Продолжить копирование?","The widget uses the custom groups setting and will be changed to the system setting. Continue copying?",,
-"WidgetCopyPanel::OrChoiceVariant","Или выберите виджет из существующих вариантов для копирования","Or select a widget from the existing options to copy",,
+"WidgetCopyPanel::OrChoiceVariant","Выберите виджет из существующих вариантов для копирования","Select a widget from the existing options to copy",,
 "WidgetForm::Cancel","Отмена","Cancel",,
 "WidgetForm::ChoiceWidgetTooltipForm::AtIndicator","В показателе","At indicator",,
 "WidgetForm::ChoiceWidgetTooltipForm::AtTitle","В заголовке","At title",,
