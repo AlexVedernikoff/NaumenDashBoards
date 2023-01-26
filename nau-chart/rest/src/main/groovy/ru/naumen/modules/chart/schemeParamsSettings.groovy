@@ -503,9 +503,11 @@ Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject>
             }
 
         }
-        if (!(objectsByScript.UUID in allObjectsToScheme.flatten().UUID))
+    }
+    scriptedBusinessObjectsSetupWizard.each {
+        if (!(it.UUID in allObjectsToScheme.flatten().UUID))
         {
-            allObjectsToScheme << [objectsByScript]
+            allObjectsToScheme << [it]
         }
     }
     return allObjectsToScheme
@@ -555,6 +557,7 @@ Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>
                         SchemaWorkingElements.incrementId(),
                         indexFirstElementSet
                     )
+                    //TODO delete block code down and delete indexFirstElementSet
                     if (idx % 12 == 0)
                     {
                         indexFirstElementSet = SchemaWorkingElements.getId()

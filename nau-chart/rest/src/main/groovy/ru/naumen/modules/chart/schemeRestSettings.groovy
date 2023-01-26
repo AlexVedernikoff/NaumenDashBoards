@@ -119,7 +119,7 @@ class ElementsScheme
         hierarchyCommunicationBuilder
             .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
         hierarchyCommunicationBuilder.setUUID(scriptData.UUID)
-
+        hierarchyCommunicationBuilder.setRoundLayout(true)
         hierarchyCommunicationBuilder
             .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
 
@@ -706,9 +706,20 @@ class HierarchyCommunicationBuilder
      */
     String icon
 
+    /**
+     * Организация всех точек на схеме в круг
+     */
+    Boolean roundLayout
+
     HierarchyCommunicationBuilder setCodeEditingForm(String codeEditingForm)
     {
         this.codeEditingForm = codeEditingForm
+        return this
+    }
+
+    HierarchyCommunicationBuilder setRoundLayout(Boolean roundLayout)
+    {
+        this.roundLayout = roundLayout
         return this
     }
 
