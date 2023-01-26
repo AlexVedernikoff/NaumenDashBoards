@@ -232,7 +232,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 					content={content}
 					fontFamily={fontFamily}
 					fontSize={fontSize}
-					formatter={formatters.dataLabel}
+					formatter={formatters.totalDataLabel}
 					position={labelPosition}
 					valueAccessor={({name}) => getter(name) }
 				/>

@@ -31,7 +31,8 @@ export type AxisFormatter = {
 	indicator: ValueFormatter,
 	legend: ValueFormatter,
 	parameter: ValueFormatter,
-	tooltip: ValueFormatter
+	tooltip: ValueFormatter,
+	totalDataLabel: NumberFormatter
 };
 
 export type CircleFormatter = {

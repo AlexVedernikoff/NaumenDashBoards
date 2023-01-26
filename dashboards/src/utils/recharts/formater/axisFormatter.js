@@ -126,7 +126,8 @@ const getAxisFormatterBase = (
 		indicator: getDataFormatter(widget, indicatorsFormat, percentStore, false, false),
 		legend: getLegendFormatter(widget),
 		parameter: categoryFormatter,
-		tooltip: compose(getDataFormatter(widget, normalizedDataLabelsFormat, percentStore, false, true))
+		tooltip: compose(getDataFormatter(widget, normalizedDataLabelsFormat, percentStore, false, true)),
+		totalDataLabel: getDataFormatter(widget, normalizedDataLabelsFormat, {}, true, true)
 	};
 };
 
