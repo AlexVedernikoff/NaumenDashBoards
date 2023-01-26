@@ -669,6 +669,22 @@ class DashboardDrilldownService
                                     case AttributeType.STATE_TYPE:
                                         getStateFilters(attr, value, filterBuilder)
                                         break
+                                    case AttributeType.TEXT_TYPE:
+                                        Boolean conditionRelatedObj =
+                                            metainfo
+                                                .getMetaClass(attr.sourceCode)
+                                                .getAttribute(attr.code)
+                                                .type.attributeType.isAttributeOfRelatedObject()
+                                        if (conditionRelatedObj)
+                                        {
+                                            String message =
+                                                messageProvider.getConstant(
+                                                    NO_DETAIL_DATA_ERROR,
+                                                    currentUserLocale
+                                                )
+                                            utils
+                                                .throwReadableException("${ message }#${ NO_DETAIL_DATA_ERROR }")
+                                        }
                                     default:
                                         result << [getOrFilter(attributeType, attr, value, filterBuilder)]
                                 }
@@ -737,6 +753,20 @@ class DashboardDrilldownService
                                     }
                                 }
                                 break
+                            case AttributeType.TEXT_TYPE:
+                                Boolean conditionRelatedObj =
+                                    metainfo
+                                        .getMetaClass(attr.sourceCode)
+                                        .getAttribute(attr.code)
+                                        .type.attributeType.isAttributeOfRelatedObject()
+                                if (conditionRelatedObj)
+                                {
+                                    String message =
+                                        messageProvider
+                                            .getConstant(NO_DETAIL_DATA_ERROR, currentUserLocale)
+                                    utils
+                                        .throwReadableException("${ message }#${ NO_DETAIL_DATA_ERROR }")
+                                }
                             case AttributeType.STRING_TYPE:
                                 result += customSubGroupCondition.collect { orCondition ->
                                     orCondition.collect {
