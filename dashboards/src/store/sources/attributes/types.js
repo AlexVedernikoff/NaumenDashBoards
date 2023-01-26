@@ -1,6 +1,6 @@
 // @flow
 import type {AttrSetConditions} from 'utils/descriptorUtils/types';
-import {ATTRIBUTES_EVENTS, SOURCE_ATTRIBUTE_TYPES, TIMER_VALUE} from './constants';
+import {ATTRIBUTES_EVENTS, SOURCE_ATTRIBUTE_TYPES, TIMER_VALUE, VISOR_CODE_TYPES} from './constants';
 import type {OnLoadCallback} from 'store/sources/types';
 import type {ThunkAction} from 'store/types';
 
@@ -16,6 +16,7 @@ export type Attribute = {
 	timerValue: ?$Keys<typeof TIMER_VALUE>,
 	title: string,
 	type: $Keys<typeof SOURCE_ATTRIBUTE_TYPES>,
+	visorCode: ?$Keys<typeof VISOR_CODE_TYPES>,
 };
 
 export type MapData = {
