@@ -13,6 +13,8 @@ package ru.naumen.modules.dashboards
 
 import ru.naumen.core.server.script.api.criteria.*
 import ru.naumen.core.server.script.api.injection.InjectApi
+import ru.naumen.core.shared.list.IListDescriptor
+
 import static MessageProvider.*
 import groovy.json.JsonSlurper
 import static groovy.json.JsonOutput.toJson
@@ -28,10 +30,27 @@ trait CriteriaWrapper
 {
     IApiCriteria buildCriteria(Source source)
     {
-        return source.descriptor ? source.descriptor
-                                         .with(api.listdata.&createListDescriptor)
-                                         .with(api.listdata.&createCriteria)
-            : api.db.createCriteria().addSource(source.classFqn)
+        IApiCriteria criteria
+        if (source.descriptor)
+        {
+            IListDescriptor listDescriptor = api.listdata.createListDescriptor(source.descriptor)
+            Boolean newDescriptorMethodsExist =
+                api.listdata.getClass().metaClass.methods*.name.any {
+                    it == 'defineListDescriptor'
+                }
+            if (newDescriptorMethodsExist)
+            {
+                listDescriptor = api.listdata.defineListDescriptor(listDescriptor)
+                                    .setRemovedMode("ALL")
+                                    .create()
+            }
+            criteria = api.listdata.createCriteria(listDescriptor)
+        }
+        else
+        {
+            criteria = api.db.createCriteria().addSource(source.classFqn)
+        }
+        return criteria
     }
 
     /**
@@ -45,10 +64,6 @@ trait CriteriaWrapper
      */
     List execute(IApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean hasBreakdown = false, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
     {
-        if (criteria.currentMetaClass.hasAttribute('removed')) // Костыль, все архивированные объекты исключаются из результата
-        {
-            criteria.add(api.whereClause.eq(api.selectClause.property('removed'), false))
-        }
         Boolean isDebugMode = DashboardUtils.isDebugMode()
         if(diagramType == DiagramType.TABLE)
         {
