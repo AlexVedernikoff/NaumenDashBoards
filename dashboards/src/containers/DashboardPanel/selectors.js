@@ -1,10 +1,10 @@
 // @flow
 import type {AppState} from 'store/types';
-import {cancelWidgetCreate} from 'store/actions';
+import {cancelNewWidgetCreate} from 'store/widgets/data/actions';
 import type {ConnectedFunctions, ConnectedProps} from './types';
 import {getSelectedWidget, getSelectedWidgetId} from 'store/widgets/data/selectors';
+import {hideCopyPanel, setEditPanelPosition, setHideEditPanel, setWidthEditPanel} from 'store/dashboard/settings/actions';
 import NewWidget from 'store/widgets/data/NewWidget';
-import {setEditPanelPosition, setHideEditPanel, setWidthEditPanel} from 'store/dashboard/settings/actions';
 import t from 'localization';
 
 export const props = (state: AppState): ConnectedProps => {
@@ -30,7 +30,8 @@ export const props = (state: AppState): ConnectedProps => {
 };
 
 export const functions: ConnectedFunctions = {
-	goBack: cancelWidgetCreate,
+	cancelNewWidgetCreate,
+	hideCopyPanel,
 	updatePanelPosition: setEditPanelPosition,
 	updateSwiped: setHideEditPanel,
 	updateWidth: setWidthEditPanel

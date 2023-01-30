@@ -475,7 +475,8 @@ type WidgetKebab =
 type WidgetAddPanel =
 	| 'WidgetAddPanel::AddText'
 	| 'WidgetAddPanel::AddWidget'
-	| 'WidgetAddPanel::CopyWidget';
+	| 'WidgetAddPanel::CopyWidget'
+	| 'WidgetAddPanel::CopyWidgetTitle';
 
 type WidgetCopyPanel =
 	| 'WidgetCopyPanel::OrChoiceVariant'
@@ -718,9 +719,12 @@ type WidgetTooltip =
 
 // containers/DashboardPanel
 type DashboardPanelContainers =
+	| 'DashboardPanel::Back'
+	| 'DashboardPanel::ConfirmCancelWidgetCreateText'
+	| 'DashboardPanel::ConfirmCancelWidgetCreateTitle'
+	| 'DashboardPanel::ConfirmCancelWidgetCreateYes'
 	| 'DashboardPanel::Dashboards'
-	| 'DashboardPanel::NewWidget'
-	| 'DashboardPanel::Back';
+	| 'DashboardPanel::NewWidget';
 
 // containers/DateGroupModal
 type DateGroupModal =

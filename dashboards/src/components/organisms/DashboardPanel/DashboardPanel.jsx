@@ -1,6 +1,7 @@
 // @flow
 import Button, {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button';
 import cn from 'classnames';
+import type {DivRef} from 'components/types';
 import {EDIT_PANEL_POSITION} from 'store/dashboard/settings/constants';
 import type {EditPanelPosition} from 'store/dashboard/settings/types';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
@@ -8,7 +9,6 @@ import IconButton from 'components/atoms/IconButton';
 import {MAX_WIDTH, MIN_WIDTH} from './constants';
 import type {Props, State} from './types';
 import React, {createRef, PureComponent, Suspense} from 'react';
-import type {Ref} from 'components/types';
 import styles from './styles.less';
 import T from 'components/atoms/Translation';
 
@@ -17,7 +17,7 @@ const WidgetCopyPanel = React.lazy(() => import('containers/WidgetCopyPanel'));
 const WidgetFormPanel = React.lazy(() => import('containers/WidgetFormPanel'));
 
 export class DashboardPanel extends PureComponent<Props, State> {
-	contentRef: Ref<'div'> = createRef();
+	contentRef: DivRef = createRef();
 
 	state = {
 		width: 320
@@ -45,6 +45,11 @@ export class DashboardPanel extends PureComponent<Props, State> {
 	handleChangePosition = (position: EditPanelPosition) => () => {
 		const {updatePanelPosition} = this.props;
 		return updatePanelPosition(position);
+	};
+
+	handleGoBack = () => {
+		const {goBack, showCopyPanel} = this.props;
+		return goBack(!showCopyPanel, this.contentRef);
 	};
 
 	handleToggle = () => {
@@ -151,11 +156,11 @@ export class DashboardPanel extends PureComponent<Props, State> {
 	};
 
 	renderHeaderTitle = () => {
-		const {goBack, showBackButton, showCopyPanel, title} = this.props;
+		const {showBackButton, showCopyPanel, title} = this.props;
 
 		if (showBackButton || showCopyPanel) {
 			return (
-				<Button className={styles.backButton} onClick={goBack} variant={BUTTON_VARIANTS.SIMPLE}>
+				<Button className={styles.backButton} onClick={this.handleGoBack} variant={BUTTON_VARIANTS.SIMPLE}>
 					<Icon name={ICON_NAMES.BACK_ARROW} />
 					<T text="DashboardPanel::Back" />
 				</Button>
