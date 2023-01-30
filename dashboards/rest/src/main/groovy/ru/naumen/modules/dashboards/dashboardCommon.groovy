@@ -1382,8 +1382,15 @@ class DashboardUtils
                             }
                             if(filter.dtObjectWrapperList)
                             {
-                                filter.dtObjectWrapperList = filter.dtObjectWrapperList.collect { dtObjectWrapper ->
-                                    return getFilterForObjectWrapper(dtObjectWrapper, attrType, needToReverse)
+                                filter.dtObjectWrapperList = filter.dtObjectWrapperList.findResults { dtObjectWrapper ->
+                                    if (dtObjectWrapper)
+                                    {
+                                        return getFilterForObjectWrapper(dtObjectWrapper, attrType, needToReverse)
+                                    }
+                                    else
+                                    {
+                                        return null
+                                    }
                                 }
                             }
                         }
