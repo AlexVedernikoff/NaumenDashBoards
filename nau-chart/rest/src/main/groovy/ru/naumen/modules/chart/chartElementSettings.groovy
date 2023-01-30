@@ -1,73 +1,28 @@
 //Автор: Tkacen-ko
 //Дата создания: 04.08.2022
-//Код: schemeRestSettings
+//Код: chartElementsSettings
 //Назначение:
 /**
- * Лицензионный скриптовый модуль встроенного приложения "Schemes".
- *
- * Содержит служебные методы для получения данных ВП Scheme
+ * Содрежит функционал создающий элемент схемы - точку или линию
  */
-//Версия: 1.0
-
 package ru.naumen.modules.chart
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import groovy.transform.Canonical
-import com.fasterxml.jackson.annotation.JsonAutoDetect
-import ru.naumen.core.server.script.spi.ScriptDtObject
-import static com.amazonaws.util.json.Jackson.toJsonString as toJson
+import ru.naumen.core.server.script.api.metainfo.MetaClassWrapper
 import ru.naumen.core.server.script.api.injection.InjectApi
+import ru.naumen.core.server.script.spi.ScriptDtObject
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
+import ru.naumen.core.shared.dto.ISDtObject
 import groovy.transform.TupleConstructor
-import com.google.gson.internal.LinkedTreeMap
+import groovy.transform.builder.*
+import groovy.transform.Canonical
 import org.jsoup.select.Elements
 import org.jsoup.nodes.Document
-import ru.naumen.core.shared.dto.ISDtObject
-import groovy.transform.Canonical
-import ru.naumen.core.server.script.api.metainfo.MetaClassWrapper
 import org.jsoup.Jsoup
-
-/**
- * Метод для получения данных об объектах для вывода на cхему
- * @param objectUuid - uuid текущего объекта
- * @param contentUuid - uuid карточки объекта
- * @param userUuid - информация о текущем пользователе
- * @return данные для схемы в json формате
- */
-private String getSchemeData(String objectUuid, String contentUuid, LinkedTreeMap userUuid = null)
-{
-    Collection<LinkedHashMap> defaultValue = []
-    LinkedHashMap aggregations = []
-    Object subjectObject = api.utils.get(objectUuid)
-    Object userObject = userUuid['admin'] ?: api.utils.get(userUuid['uuid'])
-    contentUuid = "${api.utils.get(objectUuid).getMetainfo()}_${contentUuid}".toString()
-    LinkedHashMap<String, Object> bindings = userUuid['admin'] ? ['subject': subjectObject] :
-        ['subject': subjectObject, 'user': userObject]
-    try
-    {
-        Collection<Collection<HierarchyCommunicationBuilder>> getData =
-            modules.schemeParamsSettings.getDataDisplayScheme(contentUuid, bindings) ?: defaultValue
-        aggregations = [entities: getData]
-    }
-    catch (Exception ex)
-    {
-        logger.error("#schemeRestSettings> ${ ex.message }", ex)
-    }
-    return new ObjectMapper().writeValueAsString(aggregations)
-}
-
-/**
- * Метод для выполнения поиска объектов на стенде по совпадению в строке
- * @param stringForFindingMatches - строка для выполнения поиска
- * @return список объектов содержащих переданную строку
- */
-String getUuidObjects(String stringForFindingMatches)
-{
-    return new ObjectMapper()
-        .writeValueAsString(api.fts.simpleSearch(stringForFindingMatches, "all", 999))
-}
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 
 @InjectApi
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class ElementsScheme
 {
     public static final String NOT_SPECIFIED = 'не указано'
@@ -78,11 +33,6 @@ class ElementsScheme
     public static final String DATA_TYPE_DT_INTERVAL = 'dtInterval'
     public static final String DATA_TYPE_RICHTEXT = 'richtext'
     public static final String DATA_TYPE_METACLASS = 'metaClass'
-
-    public HierarchyCommunicationBuilder createPointObjectBuilder()
-    {
-        return new HierarchyCommunicationBuilder()
-    }
     Collection settingsCharacteristicsCommunicationHierarchy = new SettingsProviderSchemes()
         .getSettings()
         ?.abstractSchemesCharacteristics
@@ -99,44 +49,38 @@ class ElementsScheme
      * @param from - точка, к которой привязывается текущий элемент
      * @return сформированный объект оборудования
      */
-    HierarchyCommunicationBuilder createHierarchyCommunicationPoint(ISDtObject scriptData,
-                                                                    Object currentStrategy,
-                                                                    Long id,
-                                                                    Long from = id)
+    ElementChart createHierarchyCommunicationPoint(ISDtObject scriptData,
+                                                   Object currentStrategy,
+                                                   Long id,
+                                                   Long from = id)
     {
-        HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
-        hierarchyCommunicationBuilder.setTitle(scriptData.title)
+        MetaclassNameAndAttributeListSchemes attributesFromGroup =
+            getAttributesFromGroup(scriptData, currentStrategy)
+        ElementChart point = new Point()
+        point.setTitle(scriptData.title)
+             .setId(id)
+             .setType('point')
+             .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
+             .setUUID(scriptData.UUID)
+             .setRoundLayout(true)
+             .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
+             .setDesc(getTextToElement(attributesFromGroup, scriptData).additionalText)
+             .setHeader(getTextToElement(attributesFromGroup, scriptData).mainText)
+             .setIcon(getIconToPoint(attributesFromGroup, scriptData))
         if (id == 1)
         {
-            hierarchyCommunicationBuilder.setFrom(null)
+            point.setFrom(null)
         }
         else
         {
-            hierarchyCommunicationBuilder.setFrom(from)
+            point.setFrom(from)
         }
-        hierarchyCommunicationBuilder.setId(id)
-        hierarchyCommunicationBuilder.setType('point')
-        hierarchyCommunicationBuilder
-            .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
-        hierarchyCommunicationBuilder.setUUID(scriptData.UUID)
-
-        hierarchyCommunicationBuilder
-            .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
-
-        MetaclassNameAndAttributeListSchemes attributesFromGroup =
-            getAttributesFromGroup(scriptData, currentStrategy)
-        hierarchyCommunicationBuilder
-            .setDesc(getTextToElement(attributesFromGroup, scriptData).additionalText)
-        hierarchyCommunicationBuilder
-            .setHeader(getTextToElement(attributesFromGroup, scriptData).mainText)
-        hierarchyCommunicationBuilder.setIcon(getIconToPoint(attributesFromGroup, scriptData))
         gettingDataForValueAndLinkElement(
-            hierarchyCommunicationBuilder,
+            point,
             scriptData,
             attributesFromGroup
         )
-
-        return hierarchyCommunicationBuilder
+        return point
     }
 
     /**
@@ -147,40 +91,36 @@ class ElementsScheme
      * @param from - точка, к которой привязывается текущий элемент
      * @return данные по линиям между точками
      */
-    HierarchyCommunicationBuilder createHierarchyCommunicationLine(ISDtObject scriptData,
-                                                                   Object currentStrategy,
-                                                                   Long id,
-                                                                   Long from = id,
-                                                                   Long to = id + 1)
+    ElementChart createHierarchyCommunicationLine(ISDtObject scriptData,
+                                                  Object currentStrategy,
+                                                  Long id,
+                                                  Long from = id,
+                                                  Long to = id + 1)
     {
-        HierarchyCommunicationBuilder hierarchyCommunicationBuilder = createPointObjectBuilder()
-        hierarchyCommunicationBuilder.setUUID(scriptData?.UUID)
-        hierarchyCommunicationBuilder.setTitle(scriptData?.title)
-        hierarchyCommunicationBuilder
-            .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
-        hierarchyCommunicationBuilder.setFrom(from)
-        hierarchyCommunicationBuilder.setTo(to)
-        hierarchyCommunicationBuilder.setId(id)
-        hierarchyCommunicationBuilder.setType('line')
-        if (scriptData)
-        {
-            hierarchyCommunicationBuilder
-                .addAction('Перейти на карточку', api.web.open(scriptData?.UUID))
-        }
-
         MetaclassNameAndAttributeListSchemes attributesFromGroup =
             getAttributesFromGroup(scriptData, currentStrategy)
-        hierarchyCommunicationBuilder
+        ElementChart line = new Line()
+        line.setUUID(scriptData?.UUID)
+            .setTitle(scriptData?.title)
+            .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
+            .setFrom(from)
+            .setTo(to)
+            .setId(id)
+            .setType('line')
             .setDesc(getTextToElement(attributesFromGroup, scriptData).additionalText)
-        hierarchyCommunicationBuilder
             .setHeader(getTextToElement(attributesFromGroup, scriptData).mainText)
-        hierarchyCommunicationBuilder.setIcon(getIconToPoint(attributesFromGroup, scriptData))
+            .setIcon(getIconToPoint(attributesFromGroup, scriptData))
+        if (scriptData)
+        {
+            line
+                .addAction('Перейти на карточку', api.web.open(scriptData?.UUID))
+        }
         gettingDataForValueAndLinkElement(
-            hierarchyCommunicationBuilder,
+            line,
             scriptData,
             attributesFromGroup
         )
-        return hierarchyCommunicationBuilder
+        return line
     }
 
     /**
@@ -222,11 +162,23 @@ class ElementsScheme
         AttributeHandler attributeHandler = new AttributeHandler()
         if (attributesFromGroup)
         {
-            mainText = attributesFromGroup.mainTextAttribute && attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.mainTextAttribute, scriptData) ?
-                attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.mainTextAttribute, scriptData).toString() : null
-
-            additionalText = attributesFromGroup.additionalTextAttribute && attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.additionalTextAttribute, scriptData) ?
-                attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.additionalTextAttribute, scriptData).toString() : null
+            mainText = attributesFromGroup.mainTextAttribute &&
+                       attributeHandler.returnDataByAttributeHierarchy(
+                           attributesFromGroup.mainTextAttribute,
+                           scriptData
+                       ) ?
+                attributeHandler.returnDataByAttributeHierarchy(
+                    attributesFromGroup.mainTextAttribute,
+                    scriptData
+                ).toString() : null
+            additionalText = attributesFromGroup.additionalTextAttribute &&
+                             attributeHandler.returnDataByAttributeHierarchy(
+                                 attributesFromGroup.additionalTextAttribute, scriptData
+                             ) ?
+                attributeHandler.returnDataByAttributeHierarchy(
+                    attributesFromGroup.additionalTextAttribute,
+                    scriptData
+                ).toString() : null
         }
         return ['mainText': mainText, 'additionalText': additionalText]
     }
@@ -248,7 +200,9 @@ class ElementsScheme
             null
         if (attributesFromGroup)
         {
-            Object iconData = attributeHandler.returnDataByAttributeHierarchy(attributesFromGroup.iconAttribute, scriptData)
+            Object iconData =
+                attributeHandler
+                    .returnDataByAttributeHierarchy(attributesFromGroup.iconAttribute, scriptData)
             if (iconData?.first())
             {
                 linkToIcon = "${ basisForLinkIcon }${ iconData.first().UUID }"
@@ -268,7 +222,6 @@ class ElementsScheme
         {
             return null
         }
-
         Collection<ActionsWithObjects> actionsWithObjects = new SettingsProviderSchemes()
             .getSettings()?.actionsWithObjects
         String codeParent
@@ -277,26 +230,22 @@ class ElementsScheme
         ActionsWithObjects action = actionsWithObjects.find {
             getCodeMetaClass(it) == codeSystemObject
         }
-
         if (!action)
         {
             action = actionsWithObjects.find {
                 getCodeMetaClass(it) == scriptData?.parent?.code
             }
         }
-
         if (!action)
         {
             action = actionsWithObjects.find {
                 getCodeMetaClass(it) == codeSystemObject.tokenize('$')?.first()
             }
         }
-
         if (!action)
         {
             codeParent = getCodeEditingForm(scriptData.parent)
         }
-
         return action ? action.codeEditingForm : codeParent
     }
 
@@ -495,7 +444,12 @@ class ElementsScheme
      */
     String formattedValueLabel(String valueLabel, String dataType)
     {
-        LinkedHashMap<String, Collection> unitMeasurementTime = ['SECOND': ['секунда', 'секунды', 'секунд'], 'MINUTE': ['минута', 'минуты', 'минут'], 'HOUR': ['час', 'часа', 'часов'], 'DAY': ['день', 'дня', 'дней'], 'WEEK': ['неделя', 'недели', 'недель'], 'YEAR': ['год', 'года', 'лет']]
+        LinkedHashMap<String, Collection> unitMeasurementTime = ['SECOND': ['секунда', 'секунды', 'секунд'],
+                                                                 'MINUTE': ['минута', 'минуты', 'минут'],
+                                                                 'HOUR': ['час', 'часа', 'часов'],
+                                                                 'DAY': ['день', 'дня', 'дней'],
+                                                                 'WEEK': ['неделя', 'недели', 'недель'],
+                                                                 'YEAR': ['год', 'года', 'лет']]
         if (valueLabel.matches('^\\[.+\\]$'))
         {
             valueLabel = valueLabel.substring(1, valueLabel.length() - 1)
@@ -556,6 +510,69 @@ class ElementsScheme
             }
         }
         return "${ numberHours } ${ result }"
+    }
+}
+
+@InjectApi
+class AttributeHandler
+{
+    /**
+     * Метод получения данных при работе с атрибутами связанного объекта
+     * @param attribute - атрибут
+     * @param equipment - текущий объект для отображения на карте
+     * @return данные по атрибуту
+     */
+    Object returnDataByAttributeHierarchy(String attribute, Object equipment)
+    {
+        Object dataToUse
+        if (attribute.contains('/'))
+        {
+            attribute.tokenize('/').eachWithIndex { currentAttribute, idx ->
+                if (equipment.hasProperty(currentAttribute) &&
+                    equipment[currentAttribute] in ISDtObject)
+                {
+                    equipment = equipment[currentAttribute]
+                }
+                if (idx ==
+                    attribute.tokenize('/').size() - 1 && equipment.hasProperty(currentAttribute))
+                {
+                    dataToUse = checkingDataByAttribute(equipment[currentAttribute])
+                }
+                if (equipment*.hasProperty(currentAttribute).any() &&
+                    equipment[currentAttribute] in Collection)
+                {
+                    dataToUse = equipment[currentAttribute]
+                }
+            }
+        }
+        else
+        {
+            dataToUse =
+                equipment.hasProperty(attribute) ? checkingDataByAttribute(equipment[attribute]) :
+                    null
+        }
+        return dataToUse
+    }
+
+    /**
+     * Метод проверки типа данных, которые необходимо вернуть в зависимости от последнего атрибута
+     * @param objectByLastAttribute - данные полученные по последнему атрибуту
+     * @return данные для отображения элемента на карте
+     */
+    Object checkingDataByAttribute(Object objectByLastAttribute)
+    {
+        Object dataToUse
+        if (objectByLastAttribute && (
+            objectByLastAttribute in
+            Double || objectByLastAttribute in String || objectByLastAttribute in Collection))
+        {
+            dataToUse = objectByLastAttribute
+        }
+        else
+        {
+            dataToUse = objectByLastAttribute ? objectByLastAttribute.toString() : null
+        }
+        return dataToUse
     }
 }
 
@@ -644,7 +661,8 @@ class OpenLinkActionScheme extends ActionScheme
 }
 
 @Canonical
-class HierarchyCommunicationBuilder
+@Builder(builderStrategy = SimpleStrategy)
+abstract class ElementChart
 {
     /**
      * Описание элемента
@@ -665,11 +683,6 @@ class HierarchyCommunicationBuilder
      * Имя элемента
      */
     String title
-
-    /**
-     * Только у линий, это номер точки к которой надо прикрепиться
-     */
-    Long to
 
     /**
      * тип сущности(точка или линия)
@@ -699,6 +712,7 @@ class HierarchyCommunicationBuilder
     /**
      * Код формы редактирования
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String codeEditingForm
 
     /**
@@ -706,52 +720,10 @@ class HierarchyCommunicationBuilder
      */
     String icon
 
-    HierarchyCommunicationBuilder setCodeEditingForm(String codeEditingForm)
-    {
-        this.codeEditingForm = codeEditingForm
-        return this
-    }
-
-    public HierarchyCommunicationBuilder setDesc(String desc)
-    {
-        this.desc = desc
-
-        return this
-    }
-
-    public HierarchyCommunicationBuilder setTitle(String title)
-    {
-        this.title = title
-        return this
-    }
-
-    public HierarchyCommunicationBuilder setType(String type)
-    {
-        this.type = type
-        return this
-    }
-
-    public HierarchyCommunicationBuilder setFrom(Long from)
-    {
-        this.from = from
-        return this
-    }
-
-    public HierarchyCommunicationBuilder setId(Long id)
-    {
-        this.id = id
-        return this
-    }
-
-    public HierarchyCommunicationBuilder setTo(Long to)
-    {
-        this.to = to
-        return this
-    }
-
-    public HierarchyCommunicationBuilder addAction(String name,
-                                                   String link,
-                                                   boolean inPlace = false)
+    ElementChart addAction(String name,
+                           String link,
+                           boolean inPlace = false
+                          )
     {
         this.actions.add(
             new OpenLinkActionScheme(
@@ -764,19 +736,7 @@ class HierarchyCommunicationBuilder
         return this
     }
 
-    public HierarchyCommunicationBuilder setUUID(String UUID)
-    {
-        this.UUID = UUID
-        return this
-    }
-
-    public HierarchyCommunicationBuilder setHeader(String header)
-    {
-        this.header = header
-        return this
-    }
-
-    public HierarchyCommunicationBuilder addOption(String label, ValueSchemes value)
+    ElementChart addOption(String label, ValueSchemes value)
     {
         this.options.add(
             new OptionSchemes(
@@ -789,7 +749,7 @@ class HierarchyCommunicationBuilder
         return this
     }
 
-    public HierarchyCommunicationBuilder addOption(String label, Collection<ValueSchemes> value)
+    public ElementChart addOption(String label, Collection<ValueSchemes> value)
     {
         this.options.add(
             new OptionSchemes(
@@ -798,15 +758,28 @@ class HierarchyCommunicationBuilder
                 presentation: 'RIGHT_OF_LABEL'
             )
         )
-
         return this
     }
+}
 
-    public HierarchyCommunicationBuilder setIcon(String icon)
-    {
-        this.icon = icon
-        return this
-    }
+@Canonical
+@Builder(builderStrategy = SimpleStrategy)
+class Point extends ElementChart
+{
+    /**
+     * Организация всех точек на схеме в круг
+     */
+    Boolean roundLayout
+}
+
+@Canonical
+@Builder(builderStrategy = SimpleStrategy)
+class Line extends ElementChart
+{
+    /**
+     * Только у линий, это номер точки к которой надо прикрепиться
+     */
+    Long to
 }
 
 @Canonical
@@ -836,7 +809,6 @@ class MetaclassNameAndAttributeListSchemes
      *  Атрибут иконки
      */
     String iconAttribute
-
 }
 
 @Canonical
@@ -851,4 +823,27 @@ class DataCharacteristicDisplayListObjectsSchemes
      * Группа атрибутов
      */
     String groupAttribute
+}
+
+class SchemaWorkingElements
+{
+    /**
+     * Идентификатор элемента на схеме
+     */
+    Integer id = 0
+
+    Integer incrementId()
+    {
+        this.id = ++this.id
+    }
+
+    Integer getId()
+    {
+        return id
+    }
+
+    void zeroingId()
+    {
+        id = 0
+    }
 }

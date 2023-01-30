@@ -1,6 +1,6 @@
 //Автор: Tkacen-ko
 //Дата создания: 03.06.2021
-//Код: mapSchemes
+//Код: chartSettingsWizard
 //Назначение:
 /**
  *  Мастер настройки для ВП I итерация
@@ -10,16 +10,14 @@
 //Категория: скриптовый модуль
 package ru.naumen.modules.chart
 
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
+import groovy.transform.Canonical
 import com.amazonaws.util.json.Jackson
-import groovy.json.JsonOutput
-import ru.naumen.jsonschema.annotations.*
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import ru.naumen.jsonschema.annotations.*
 import ru.naumen.core.server.script.api.injection.InjectApi
-import groovy.transform.InheritConstructors
 import ru.naumen.core.server.script.api.ea.IAppContentInfo
-import groovy.transform.Canonical
-import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import ru.naumen.metainfo.shared.ClassFqn
 
 class ConstantSchemes
