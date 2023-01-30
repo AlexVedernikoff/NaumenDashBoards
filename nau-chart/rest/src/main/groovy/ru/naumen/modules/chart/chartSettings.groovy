@@ -9,9 +9,9 @@
 
 package ru.naumen.modules.chart
 
-import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.dto.ISDtObject
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 
 @InjectApi
 class Charts
@@ -80,8 +80,8 @@ class Charts
         Collection<Collection<ElementChart>> allSchemesAllStrategies = []
         SchemaWorkingElements idElements = new SchemaWorkingElements()
         settings.strategies.each { currentStrategy ->
-            if (currentStrategy.listStrategy.find { strategy -> strategy == nameContent
-            })
+            String strategy = currentStrategy.listStrategy.find { strategy -> strategy == nameContent }
+            if (strategy)
             {
                 ISDtObject getObjectFromScript
                 try
@@ -151,8 +151,8 @@ class Charts
         Collection<Collection<ElementChart>> allSchemeToDisplay = []
         SchemaWorkingElements idElements = new SchemaWorkingElements()
         settings.strategies.each { currentStrategy ->
-            if (currentStrategy.listStrategy.find { strategy -> strategy == nameContent
-            })
+            String strategy = currentStrategy.listStrategy.find { strategy -> strategy == nameContent }
+            if (strategy)
             {
                 Collection<ISDtObject> scriptedBusinessObjectsSetupWizard = []
                 try
@@ -171,7 +171,7 @@ class Charts
                     }
 
                 Collection<Set<ISDtObject>> allObjectsToScheme =
-                    breakRelatedObjectsIntoBlocks(
+                    distributeRelatedObjectsIntoBlocks(
                         scriptedBusinessObjectsSetupWizard,
                         listAttributes
                     )
@@ -195,6 +195,7 @@ class Charts
      * Метод проверки чекбокса в мастере и удаления объектов без связей
      * @param currentStrategy - текущая вкладка настроек из мастера
      * @param schemesCurrentStrategies - коллекция схем по текущей стратегии
+     * @return коллекция схем без одиночных элементов, при нажатом чекбоксе в мастере
      */
     Collection<Collection<ElementChart>> checkWhetherPointsWithoutLinks(Object currentStrategy,
                                                                         Collection<Collection<ElementChart>> schemesCurrentStrategies)
@@ -396,11 +397,11 @@ class Charts
     /**
      * Осуществляет распределение элементов схемы по соответствующим массивам по связи объектов
      * @param scriptedBusinessObjectsSetupWizard - информация о всех точках из мастера настроек
-     * @param listAttributes -  список атрибутов
+     * @param listAttributes - список атрибутов
      * @return коллекции наборов со схемами
      */
-    Collection<Set<ISDtObject>> breakRelatedObjectsIntoBlocks(Collection<ISDtObject> scriptedBusinessObjectsSetupWizard,
-                                                              Collection listAttributes)
+    Collection<Set<ISDtObject>> distributeRelatedObjectsIntoBlocks(Collection<ISDtObject> scriptedBusinessObjectsSetupWizard,
+                                                                   Collection listAttributes)
     {
         Collection<Set<ISDtObject>> allObjectsToScheme = []
         scriptedBusinessObjectsSetupWizard.each { objectsByScript ->
@@ -525,7 +526,7 @@ class Charts
      * Метод добавления всех линий по стратегии 'Связь выбранных объектов'
      * @param currentStrategy - текущая вкладка настроек из мастера
      * @param currentSchemeToDisplay - текущая схема
-     * @param listAttributes -  список атрибутов
+     * @param listAttributes - список атрибутов
      * @param allSchemeToDisplay - все схемы
      * @param idElements - идентификатор элемента на схеме
      * @return все линии по соответствующей стратегии
@@ -591,10 +592,10 @@ class Charts
     }
 
     /**
-     * Проверка использования ВП в мастере настроек
-     * @param usedTabSettingsWizard имя схемы используемой в мастере
+     * Проверка выбора ВП в выпадающем списке мастера настроек - 'Места использования'
+     * @param usedTabSettingsWizard - имя схемы используемой в мастере
      * @param settings - данные из мастера настроек
-     * @param nameContent имя используемого контента
+     * @param nameContent - имя используемого контента
      * @return используемость ВП
      */
     Boolean checkingPlaceUseInSettingsWizard(String usedTabSettingsWizard,

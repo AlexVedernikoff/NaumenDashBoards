@@ -7,7 +7,6 @@
  */
 package ru.naumen.modules.chart
 
-import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import ru.naumen.core.server.script.api.metainfo.MetaClassWrapper
 import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.server.script.spi.ScriptDtObject
@@ -21,6 +20,7 @@ import groovy.transform.Canonical
 import org.jsoup.select.Elements
 import org.jsoup.nodes.Document
 import org.jsoup.Jsoup
+import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 
 @InjectApi
 class ElementsScheme
@@ -538,8 +538,7 @@ class AttributeHandler
                 {
                     dataToUse = checkingDataByAttribute(equipment[currentAttribute])
                 }
-                if (true in
-                    equipment*.hasProperty(currentAttribute) &&
+                if (equipment*.hasProperty(currentAttribute).any() &&
                     equipment[currentAttribute] in Collection)
                 {
                     dataToUse = equipment[currentAttribute]
@@ -556,7 +555,7 @@ class AttributeHandler
     }
 
     /**
-     * Метод проверки типа данных который необходимо вернуть в зависимости от последнего атрибута
+     * Метод проверки типа данных, которые необходимо вернуть в зависимости от последнего атрибута
      * @param objectByLastAttribute - данные полученные по последнему атрибуту
      * @return данные для отображения элемента на карте
      */
