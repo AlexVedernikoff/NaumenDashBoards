@@ -1,4 +1,5 @@
 // @flow
+import type {CommonDialogContextProps} from 'containers/CommonDialogs/types';
 import type {EditPanelPosition} from 'store/dashboard/settings/types';
 
 export type ConnectedProps = {
@@ -12,10 +13,11 @@ export type ConnectedProps = {
 };
 
 export type ConnectedFunctions = {
-	goBack: () => void,
+	cancelNewWidgetCreate: () => void,
+	hideCopyPanel: () => void,
 	updatePanelPosition: (position: EditPanelPosition) => void,
 	updateSwiped: (swiped: boolean) => void,
 	updateWidth: (width: number) => void
 };
 
-export type Props = ConnectedProps & ConnectedFunctions;
+export type Props = ConnectedProps & ConnectedFunctions & CommonDialogContextProps;

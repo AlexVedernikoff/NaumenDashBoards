@@ -8,6 +8,7 @@ import React, {Component, createRef} from 'react';
 import type {State} from './types';
 import styles from './styles.less';
 import T from 'components/atoms/Translation';
+import t from 'localization';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 export class WidgetAddPanel extends Component<Props, State> {
@@ -33,6 +34,21 @@ export class WidgetAddPanel extends Component<Props, State> {
 
 	showCopyDiagramWidget = () => { this.props.showCopyPanel(); };
 
+	renderCopyWidgetRow = () => {
+		const {canShowCopyPanel} = this.props;
+
+		if (canShowCopyPanel) {
+			return (
+				<div className={styles.titleRow} onClick={this.showCopyDiagramWidget} title={t('WidgetAddPanel::CopyWidgetTitle')}>
+					<span><T text='WidgetAddPanel::CopyWidget' /></span>
+					<Icon name={ICON_NAMES.EXPAND} />
+				</div>
+			);
+		}
+
+		return null;
+	};
+
 	renderTitleRow = (title: LangType, clickEvent: () => void) => (
 		<div className={styles.titleRow} onClick={clickEvent} >
 			<span><T text={title} /></span>
@@ -41,12 +57,11 @@ export class WidgetAddPanel extends Component<Props, State> {
 	);
 
 	render () {
-		const {canShowCopyPanel} = this.props;
 		return (
 			<div className={styles.title} ref={this.relativeElement}>
 				{this.renderTitleRow('WidgetAddPanel::AddText', this.addTextWidget)}
 				{this.renderTitleRow('WidgetAddPanel::AddWidget', this.addDiagramWidget)}
-				{canShowCopyPanel && this.renderTitleRow('WidgetAddPanel::CopyWidget', this.showCopyDiagramWidget)}
+				{this.renderCopyWidgetRow()}
 			</div>
 		);
 	}

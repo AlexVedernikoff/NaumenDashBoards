@@ -1,4 +1,5 @@
 // @flow
+
 // Ключи, по которым сохраняются данные в localStorage
 const LAYOUT_MODE: 'layoutMode' = 'layoutMode';
 const PERSONAL_DASHBOARD: 'personalDashboard' = 'personalDashboard';
