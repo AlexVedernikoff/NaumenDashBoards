@@ -67,10 +67,10 @@ export class SourceFieldset extends Component<Props, State> {
 
 	componentDidUpdate (prevProps: Props) {
 		const {autoSelectFirstItem, sources, value: propsValue} = this.props;
-		const {descriptor, value} = propsValue.source;
-		const {descriptor: prevDescriptor} = prevProps.value.source;
+		const {value} = propsValue.source;
+		const {value: prevValue} = prevProps.value.source;
 
-		if (descriptor !== prevDescriptor) {
+		if (value.value !== prevValue.value) {
 			this.resetDynamicAttributes();
 		}
 
