@@ -1,16 +1,13 @@
 //Автор: Tkacen-ko
 //Дата создания: 04.08.2022
-//Код: schemeRestSettings
+//Код: chartSettings
 //Назначение:
 /**
- * Лицензионный скриптовый модуль встроенного приложения "Schemes".
- *
- * Содержит служебные методы для получения данных ВП Scheme
+ * Содержит метода общей настройки схем для ВП
  */
 //Версия: 1.0
 
 package ru.naumen.modules.chart
-
 
 import static com.amazonaws.util.json.Jackson.toJsonString as toJson
 import ru.naumen.core.server.script.api.injection.InjectApi
@@ -151,7 +148,6 @@ class Charts
         String nameContent,
         LinkedHashMap<String, Object> bindings)
     {
-        Long id = 0
         Collection<Collection<ElementChart>> allSchemeToDisplay = []
         SchemaWorkingElements idElements = new SchemaWorkingElements()
         settings.strategies.each { currentStrategy ->
@@ -216,7 +212,7 @@ class Charts
      * Метод распределения элементов по соответствующим схемам
      * @param allPointsScheme - все точки для схемы
      * @param allLineScheme -  все линии для схемы
-     * @param id - идентификатор элемента на схеме
+     * @param idElements - идентификатор элемента на схеме
      * @return данные для отображения на схеме
      */
     Collection<Collection<ElementChart>> distributeElementsIntoSeparateSchemes(
@@ -280,6 +276,7 @@ class Charts
      * @param dataPointA -  данные по начальной точке
      * @param dataPointB - данные по конечной точке
      * @param currentStrategy - текущая вкладка настроек из мастера
+     * @param idElements - идентификатор элемента на схеме
      * @return все точки по соответствующей стратегии
      */
     Collection<ElementChart> createPointsForStrategyHierarchyLink(Collection<ISDtObject> dataLine,
@@ -331,6 +328,7 @@ class Charts
      * @param dataPointB - данные по конечной точке
      * @param allPointsScheme - все точки для схемы
      * @param currentStrategy - текущая вкладка настроек из мастера
+     * @param idElements - идентификатор элемента на схеме
      * @return все линии по соответствующей стратегии
      */
     Collection<ElementChart> createLinesAllElementsScheme(Collection<ISDtObject> dataLine,
@@ -409,8 +407,8 @@ class Charts
             listAttributes.each { attributesName ->
                 if (objectsByScript.hasProperty(attributesName))
                 {
-                    Set<ISDtObject> arrayContainingCurrentObject =
-                        allObjectsToScheme.find { listObject
+                    Set<ISDtObject> arrayContainingCurrentObject = allObjectsToScheme.find {
+                        listObject
                             ->
                             listObject.find { object
                                 ->
@@ -418,7 +416,7 @@ class Charts
                                 objectsByScript.UUID ||
                                 object.UUID in objectsByScript[attributesName]?.UUID
                             }
-                        }
+                    }
                     if (arrayContainingCurrentObject)
                     {
                         arrayContainingCurrentObject += objectsByScript
@@ -450,6 +448,16 @@ class Charts
                                 }
                             }
                         }
+                        Set<ISDtObject> setContainingCurrentElement = allObjectsToScheme.find {
+                            listObject
+                                ->
+                                listObject.find { object -> object.UUID == objectsByScript.UUID
+                                }
+                        }
+                        if (setContainingCurrentElement)
+                        {
+                            arrayContainingCurrentObject.addAll(setContainingCurrentElement)
+                        }
                         temporaryAllObjectsToScheme << arrayContainingCurrentObject
                         allObjectsToScheme = temporaryAllObjectsToScheme
                     }
@@ -474,11 +482,6 @@ class Charts
                         allObjectsToScheme << listObjects
                     }
                 }
-
-            }
-            if (!(objectsByScript.UUID in allObjectsToScheme.flatten().UUID))
-            {
-                allObjectsToScheme << [objectsByScript]
             }
         }
         scriptedBusinessObjectsSetupWizard.each {
@@ -487,16 +490,16 @@ class Charts
                 allObjectsToScheme << [it]
             }
         }
-        logger.info("LOGGER499 ${ allObjectsToScheme.flatten().size() }")
         return allObjectsToScheme
     }
 
-/**
- * Метод добавления всех точек по стратегии 'Связь выбранных объектов'
- * @param allObjectsToScheme - все объекты для отображения на схеме
- * @param currentStrategy - текущая вкладка настроек из мастера
- * @return все линии по соответствующей стратегии
- */
+    /**
+     * Метод добавления всех точек по стратегии 'Связь выбранных объектов'
+     * @param allObjectsToScheme - все объекты для отображения на схеме
+     * @param currentStrategy - текущая вкладка настроек из мастера
+     * @param idElements - идентификатор элемента на схеме
+     * @return все линии по соответствующей стратегии
+     */
     Collection<Set<ISDtObject>> addPointsByRelatedObjects(Collection<Set<ISDtObject>> allObjectsToScheme,
                                                           Object currentStrategy,
                                                           SchemaWorkingElements idElements)
@@ -505,44 +508,13 @@ class Charts
         Collection<Collection<ElementChart>> allSchemeToDisplay = []
         allObjectsToScheme.each { currentObjects ->
             Collection<ElementChart> currentScheme = []
-            Long indexFirstElementSet
             currentObjects.eachWithIndex { elementsCurrentScheme, idx ->
-                if (currentObjects.size() == 1)
-                {
-                    currentScheme << elementsScheme.createHierarchyCommunicationPoint(
-                        elementsCurrentScheme,
-                        currentStrategy,
-                        idElements.incrementId(),
-                        null
-                    )
-                }
-                else
-                {
-                    if (idx == 0)
-                    {
-                        indexFirstElementSet = idElements.getId() + 1
-                        currentScheme += elementsScheme.createHierarchyCommunicationPoint(
-                            elementsCurrentScheme,
-                            currentStrategy,
-                            idElements.incrementId(),
-                            null
-                        )
-                    }
-                    else
-                    {
-                        currentScheme += elementsScheme.createHierarchyCommunicationPoint(
-                            elementsCurrentScheme,
-                            currentStrategy,
-                            idElements.incrementId(),
-                            indexFirstElementSet
-                        )
-                        //TODO delete block code down and delete indexFirstElementSet
-                        if (idx % 12 == 0)
-                        {
-                            indexFirstElementSet = idElements.getId()
-                        }
-                    }
-                }
+                currentScheme << elementsScheme.createHierarchyCommunicationPoint(
+                    elementsCurrentScheme,
+                    currentStrategy,
+                    idElements.incrementId(),
+                    null
+                )
             }
             allSchemeToDisplay << currentScheme
         }
@@ -555,6 +527,7 @@ class Charts
      * @param currentSchemeToDisplay - текущая схема
      * @param listAttributes -  список атрибутов
      * @param allSchemeToDisplay - все схемы
+     * @param idElements - идентификатор элемента на схеме
      * @return все линии по соответствующей стратегии
      */
     void addLineByRelatedObjects(Object currentStrategy,

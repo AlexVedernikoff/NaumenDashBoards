@@ -1,10 +1,9 @@
 //Автор: Tkacen-ko
 //Дата создания: 04.08.2022
-//Код: schemeParamsSettings
+//Код: chartElementsSettings
 //Назначение:
 /**
- * Клиентский скриптовый модуль встроенного приложения "Schemes".
- * Содержит методы, определяющие данные для передачи на схему
+ * Содрежит функционал создающий элемент схемы - точку или линию
  */
 package ru.naumen.modules.chart
 
@@ -24,7 +23,6 @@ import org.jsoup.nodes.Document
 import org.jsoup.Jsoup
 
 @InjectApi
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class ElementsScheme
 {
     public static final String NOT_SPECIFIED = 'не указано'
@@ -35,7 +33,6 @@ class ElementsScheme
     public static final String DATA_TYPE_DT_INTERVAL = 'dtInterval'
     public static final String DATA_TYPE_RICHTEXT = 'richtext'
     public static final String DATA_TYPE_METACLASS = 'metaClass'
-
     Collection settingsCharacteristicsCommunicationHierarchy = new SettingsProviderSchemes()
         .getSettings()
         ?.abstractSchemesCharacteristics
@@ -59,32 +56,31 @@ class ElementsScheme
     {
         MetaclassNameAndAttributeListSchemes attributesFromGroup =
             getAttributesFromGroup(scriptData, currentStrategy)
-        ElementChart hierarchyCommunicationBuilder = new Point()
-        hierarchyCommunicationBuilder
-            .setTitle(scriptData.title)
-            .setId(id)
-            .setType('point')
-            .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
-            .setUUID(scriptData.UUID)
-            .setRoundLayout(true)
-            .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
-            .setDesc(getTextToElement(attributesFromGroup, scriptData).additionalText)
-            .setHeader(getTextToElement(attributesFromGroup, scriptData).mainText)
-            .setIcon(getIconToPoint(attributesFromGroup, scriptData))
+        ElementChart point = new Point()
+        point.setTitle(scriptData.title)
+             .setId(id)
+             .setType('point')
+             .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
+             .setUUID(scriptData.UUID)
+             .setRoundLayout(true)
+             .addAction('Перейти на карточку', api.web.open(scriptData.UUID))
+             .setDesc(getTextToElement(attributesFromGroup, scriptData).additionalText)
+             .setHeader(getTextToElement(attributesFromGroup, scriptData).mainText)
+             .setIcon(getIconToPoint(attributesFromGroup, scriptData))
         if (id == 1)
         {
-            hierarchyCommunicationBuilder.setFrom(null)
+            point.setFrom(null)
         }
         else
         {
-            hierarchyCommunicationBuilder.setFrom(from)
+            point.setFrom(from)
         }
         gettingDataForValueAndLinkElement(
-            hierarchyCommunicationBuilder,
+            point,
             scriptData,
             attributesFromGroup
         )
-        return hierarchyCommunicationBuilder
+        return point
     }
 
     /**
@@ -103,9 +99,8 @@ class ElementsScheme
     {
         MetaclassNameAndAttributeListSchemes attributesFromGroup =
             getAttributesFromGroup(scriptData, currentStrategy)
-        ElementChart hierarchyCommunicationBuilder = new Line()
-        hierarchyCommunicationBuilder
-            .setUUID(scriptData?.UUID)
+        ElementChart line = new Line()
+        line.setUUID(scriptData?.UUID)
             .setTitle(scriptData?.title)
             .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(scriptData)))
             .setFrom(from)
@@ -117,15 +112,15 @@ class ElementsScheme
             .setIcon(getIconToPoint(attributesFromGroup, scriptData))
         if (scriptData)
         {
-            hierarchyCommunicationBuilder
+            line
                 .addAction('Перейти на карточку', api.web.open(scriptData?.UUID))
         }
         gettingDataForValueAndLinkElement(
-            hierarchyCommunicationBuilder,
+            line,
             scriptData,
             attributesFromGroup
         )
-        return hierarchyCommunicationBuilder
+        return line
     }
 
     /**
@@ -176,7 +171,6 @@ class ElementsScheme
                     attributesFromGroup.mainTextAttribute,
                     scriptData
                 ).toString() : null
-
             additionalText = attributesFromGroup.additionalTextAttribute &&
                              attributeHandler.returnDataByAttributeHierarchy(
                                  attributesFromGroup.additionalTextAttribute, scriptData
@@ -228,7 +222,6 @@ class ElementsScheme
         {
             return null
         }
-
         Collection<ActionsWithObjects> actionsWithObjects = new SettingsProviderSchemes()
             .getSettings()?.actionsWithObjects
         String codeParent
@@ -237,26 +230,22 @@ class ElementsScheme
         ActionsWithObjects action = actionsWithObjects.find {
             getCodeMetaClass(it) == codeSystemObject
         }
-
         if (!action)
         {
             action = actionsWithObjects.find {
                 getCodeMetaClass(it) == scriptData?.parent?.code
             }
         }
-
         if (!action)
         {
             action = actionsWithObjects.find {
                 getCodeMetaClass(it) == codeSystemObject.tokenize('$')?.first()
             }
         }
-
         if (!action)
         {
             codeParent = getCodeEditingForm(scriptData.parent)
         }
-
         return action ? action.codeEditingForm : codeParent
     }
 
@@ -455,7 +444,12 @@ class ElementsScheme
      */
     String formattedValueLabel(String valueLabel, String dataType)
     {
-        LinkedHashMap<String, Collection> unitMeasurementTime = ['SECOND': ['секунда', 'секунды', 'секунд'], 'MINUTE': ['минута', 'минуты', 'минут'], 'HOUR': ['час', 'часа', 'часов'], 'DAY': ['день', 'дня', 'дней'], 'WEEK': ['неделя', 'недели', 'недель'], 'YEAR': ['год', 'года', 'лет']]
+        LinkedHashMap<String, Collection> unitMeasurementTime = ['SECOND': ['секунда', 'секунды', 'секунд'],
+                                                                 'MINUTE': ['минута', 'минуты', 'минут'],
+                                                                 'HOUR': ['час', 'часа', 'часов'],
+                                                                 'DAY': ['день', 'дня', 'дней'],
+                                                                 'WEEK': ['неделя', 'недели', 'недель'],
+                                                                 'YEAR': ['год', 'года', 'лет']]
         if (valueLabel.matches('^\\[.+\\]$'))
         {
             valueLabel = valueLabel.substring(1, valueLabel.length() - 1)
@@ -517,16 +511,6 @@ class ElementsScheme
         }
         return "${ numberHours } ${ result }"
     }
-}
-
-/**
- * Тип действия
- */
-enum ActionTypeScheme
-{
-    OPEN_LINK,
-    CHANGE_RESPONSIBLE,
-    CHANGE_STATE
 }
 
 @InjectApi
@@ -591,6 +575,16 @@ class AttributeHandler
         }
         return dataToUse
     }
+}
+
+/**
+ * Тип действия
+ */
+enum ActionTypeScheme
+{
+    OPEN_LINK,
+    CHANGE_RESPONSIBLE,
+    CHANGE_STATE
 }
 
 /**
@@ -667,7 +661,6 @@ class OpenLinkActionScheme extends ActionScheme
     boolean inPlace
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true, value = ['uuid', 'title'])
 @Canonical
 @Builder(builderStrategy = SimpleStrategy)
 abstract class ElementChart
