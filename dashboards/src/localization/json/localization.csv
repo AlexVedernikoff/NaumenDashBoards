@@ -95,7 +95,7 @@
 "DashboardHeader::WebSwitch","Переключиться в WEB представление","Switch to the WEB view",,
 "DashboardHeader::Yes","Да","Yes",,
 "DashboardPanel::Back","Назад","Back",,
-"DashboardPanel::ConfirmCancelWidgetCreateText","Все заполненные данные не сохраняться. Вы уверены?","All completed data will not be saved. Are you sure?",,
+"DashboardPanel::ConfirmCancelWidgetCreateText","Все заполненные данные не сохранятся. Вы уверены?","All completed data will not be saved. Are you sure?",,
 "DashboardPanel::ConfirmCancelWidgetCreateTitle","Внимание","Attention",,
 "DashboardPanel::ConfirmCancelWidgetCreateYes","Да","Ok",,
 "DashboardPanel::Dashboards","Дашборды","Dashboards",,

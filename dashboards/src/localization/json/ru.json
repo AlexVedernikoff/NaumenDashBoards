@@ -97,7 +97,7 @@
 	"DashboardHeader::WebSwitch": "Переключиться в WEB представление",
 	"DashboardHeader::Yes": "Да",
 	"DashboardPanel::Back": "Назад",
-	"DashboardPanel::ConfirmCancelWidgetCreateText": "Все заполненные данные не сохраняться. Вы уверены?",
+	"DashboardPanel::ConfirmCancelWidgetCreateText": "Все заполненные данные не сохранятся. Вы уверены?",
 	"DashboardPanel::ConfirmCancelWidgetCreateTitle": "Внимание",
 	"DashboardPanel::ConfirmCancelWidgetCreateYes": "Да",
 	"DashboardPanel::Dashboards": "Дашборды",
