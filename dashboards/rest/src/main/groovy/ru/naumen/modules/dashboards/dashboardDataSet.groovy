@@ -5025,7 +5025,7 @@
                                 new ItemWrapper(value, labels[index])
                             }
                             arrWrapper.sort { a, b ->
-                                a.indicatorValue <=> b.indicatorValue
+                                a.indicatorValue as Double <=> b.indicatorValue as Double
                             }
                             seriesSort(series, widgetSettings)
                             standardDiagram = new StandardDiagram(labels: arrWrapper.parameterValue, series: series, countTotals: countTotals)
