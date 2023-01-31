@@ -8,6 +8,7 @@ import {
 	downloadUri,
 	isFitsPointsOnScreen,
 	pointsCreateCoordinate,
+	pointsRoundCreateCoordinate,
 	sortPointCorrect
 } from './helpers';
 import type {Entity} from 'store/entity/types';
@@ -103,17 +104,29 @@ const Content = ({
 		const bufferSchemes = [];
 
 		(Array.isArray(data) ? data : [data]).forEach((entities: Entity[], index: number) => {
-			const filterPoints = entities.filter(e => e.type === 'point');
-			const filterLines = entities.filter(e => e.type === 'line');
+			const points = entities.filter(e => e.type === 'point');
+			const lines = entities.filter(e => e.type === 'line');
 
-			sortPointCorrect(filterPoints); // приведения к правильному порядку основываясь на зависимости от id и родитель/ребенок
-			const {bufferPoints, options} = pointsCreateCoordinate(filterPoints); // первичная выкладка элементов на схеме
-			const {connectors, customOptions} = conversionSearchPosition(bufferPoints, options); // корректировка выкладки для устранения пересечений
+			const isRoundLayout = points.filter(e => e.roundLayout).length === points.length;
 
-			bufferSchemes.push({lines: filterLines, options: customOptions, points: connectors});
+			if (isRoundLayout) {
+				const {bufferPoints, options} = pointsRoundCreateCoordinate(points); // первичная выкладка элементов на круговой схеме
 
-			if (index === 0) {
-				setOffset({x: 0, y: -customOptions.minY - window.innerHeight / 2});
+				bufferSchemes.push({lines: lines, options, points: bufferPoints});
+
+				if (index === 0) {
+					setOffset({x: 0, y: -options.minY - window.innerHeight / 2});
+				}
+			} else {
+				sortPointCorrect(points); // приведения к правильному порядку основываясь на зависимости от id и родитель/ребенок
+				const {bufferPoints, options} = pointsCreateCoordinate(points); // первичная выкладка элементов на схеме
+				const {connectors, customOptions} = conversionSearchPosition(bufferPoints, options); // корректировка выкладки для устранения пересечений
+
+				bufferSchemes.push({lines: lines, options: customOptions, points: connectors});;
+
+				if (index === 0) {
+					setOffset({x: 0, y: -customOptions.minY - window.innerHeight / 2});
+				}
 			}
 		});
 

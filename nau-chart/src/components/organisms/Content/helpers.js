@@ -148,6 +148,56 @@ function pointsCreateCoordinate (points: Entity[]): {bufferPoints: Connector[], 
 }
 
 /**
+ * Присвоение точкам первичных позиций и угла для построения круговой схемы.
+ * @param {Entity[]} points - массив точек
+ * @returns {{bufferPoints: Connector[], options: OptionsSizeCanvas}} - обьект с точками и параметрами сдвига на холсте
+ */
+function pointsRoundCreateCoordinate (points: Entity[]): {bufferPoints: Connector[], options: OptionsSizeCanvas} {
+	const options = {
+		maxX: 0,
+		maxY: 0,
+		minY: 0
+	};
+	let radius = 150; // Минимальный радиус, при котором умещаются 2+ точки по горизонту
+	let xCenter = 60 + radius;
+	let yCenter = radius;
+
+	const bufferPoints = [];
+	const pointCount = points.length;
+
+	const centralAngle = 360 / pointCount; // центральный угол зависящий от кол-во элементов
+	const closeAngle = (180 - centralAngle) / 2; // вычисляем угол прилегающий к окружности
+
+	if (pointCount > 4) {
+		radius = radius * Math.sin(closeAngle * Math.PI / 180) / Math.sin(centralAngle * Math.PI / 180); // новый минимальный радиус при более 4 элементов
+		xCenter = 60 + radius;
+		yCenter = radius;
+	}
+
+	points.forEach((entity: Entity, index: string) => {
+		const angle = centralAngle * index - 180; // угол начала окружности справа, поворот на 180 градусов в лево
+		const x = xCenter + radius * Math.cos(angle * Math.PI / 180);
+		const y = yCenter + radius * Math.sin(angle * Math.PI / 180);
+
+		if (options.minY > y) {
+			options.minY = y;
+		}
+
+		if (options.maxY < y) {
+			options.maxY = y;
+		}
+
+		if (options.maxX < x) {
+			options.maxX = x;
+		}
+
+		bufferPoints.push({...entity, angle, radius, x, y});
+	});
+
+	return {bufferPoints, options};
+}
+
+/**
  * Подсчет количества соединения относительно начала.
  *
  * @param {Array} points - массив точек
@@ -516,6 +566,7 @@ export {
 	getBigConnectAngle,
 	isFitsPointsOnScreen,
 	pointsCreateCoordinate,
+	pointsRoundCreateCoordinate,
 	sortPointCorrect,
 	searchCross
 };

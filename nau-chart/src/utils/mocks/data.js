@@ -672,6 +672,7 @@ export default {
 				],
 				desc: '222222',
 				from: null,
+				header: '100',
 				id: 100,
 				options: [
 					{
@@ -699,23 +700,37 @@ export default {
 						]
 					}
 				],
+				roundLayout: true,
 				title: '4234234 double',
 				to: null,
 				type: 'point',
 				uuid: 4234234
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 100,
+				header: '101',
 				id: 101,
+				roundLayout: true,
 				title: '1111',
 				to: 102,
-				type: 'line'
+				type: 'line',
+				uuid: 4234234102
 			},
 			{
 				desc: '222222',
-				from: 100,
+				from: null,
+				header: '101',
 				id: 102,
+				roundLayout: true,
 				title: '1111',
 				to: null,
 				type: 'point'
@@ -724,17 +739,237 @@ export default {
 				desc: '222222',
 				from: 102,
 				id: 103,
+				roundLayout: true,
 				title: '1111',
 				to: 104,
 				type: 'line'
 			},
 			{
 				desc: '222222',
-				from: 102,
+				from: null,
+				header: '104',
 				id: 104,
+				roundLayout: true,
 				title: '1111',
 				to: null,
 				type: 'point'
+			},
+			{
+				desc: '123456',
+				from: 104,
+				id: 105,
+				roundLayout: true,
+				title: '1111',
+				to: 106,
+				type: 'line'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '106',
+				id: 106,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				desc: '123456',
+				from: 106,
+				id: 107,
+				roundLayout: true,
+				title: '1111',
+				to: 108,
+				type: 'line'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '108',
+				id: 108,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				desc: '123456',
+				from: 108,
+				id: 109,
+				roundLayout: true,
+				title: '1111',
+				to: 110,
+				type: 'line'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '110',
+				id: 110,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				// desc: '123456',
+				from: 106,
+				// header: '111 from 106 to 110',
+				id: 111,
+				roundLayout: true,
+				title: '1111',
+				to: 110,
+				type: 'line'
+			},
+			{
+				// desc: '123456',
+				from: 104,
+				// header: '112 from 104 to 110',
+				id: 112,
+				roundLayout: true,
+				title: '112 from 104 to 110',
+				to: 110,
+				type: 'line'
+			},
+			{
+				// desc: '123456',
+				from: 100,
+				// header: '113 from 100 to 106',
+				id: 113,
+				roundLayout: true,
+				title: 'вфывфыв',
+				to: 106,
+				type: 'line'
+			},
+			{
+				// desc: '123456',
+				from: 100,
+				// header: '113 from 100 to 104',
+				id: 114,
+				roundLayout: true,
+				title: 'вфывфыв',
+				to: 104,
+				type: 'line'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '115',
+				id: 115,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '116',
+				id: 116,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '117',
+				id: 117,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '118',
+				id: 118,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '119',
+				id: 119,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '120',
+				id: 120,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '121',
+				id: 121,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				desc: '222222',
+				from: null,
+				header: '122',
+				id: 122,
+				roundLayout: true,
+				title: '1111',
+				to: null,
+				type: 'point'
+			},
+			{
+				// desc: '123456',
+				from: 119,
+				// header: '113 from 100 to 104',
+				id: 114,
+				roundLayout: true,
+				title: 'вфывфыв',
+				to: 104,
+				type: 'line'
+			},
+			{
+				// desc: '123456',
+				from: 119,
+				// header: '113 from 100 to 104',
+				id: 114,
+				roundLayout: true,
+				title: 'вфывфыв',
+				to: 120,
+				type: 'line'
+			},
+			{
+				// desc: '123456',
+				from: 119,
+				// header: '113 from 100 to 104',
+				id: 114,
+				roundLayout: true,
+				title: 'вфывфыв',
+				to: 121,
+				type: 'line'
+			},
+			{
+				// desc: '123456',
+				from: 119,
+				// header: '113 from 100 to 104',
+				id: 114,
+				roundLayout: true,
+				title: 'вфывфыв',
+				to: 122,
+				type: 'line'
 			}
 		],
 		[

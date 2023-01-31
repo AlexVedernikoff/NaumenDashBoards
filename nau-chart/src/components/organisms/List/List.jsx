@@ -61,7 +61,7 @@ const List = ({activeElement, data, goToPoint, searchObjects, searchText, setAct
 	};
 
 	const renderShowFull = () => {
-		if (searchText.length && activeElement) {
+		if (activeElement) {
 			return (
 				<div className={styles.wrapShowFull} onClick={handleShowFull}>
 					<ShowFullIcon className={styles.iconShowFull} />

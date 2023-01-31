@@ -20,7 +20,7 @@ export default class Api {
 	}
 
 	async getScheme (contentCode: string, subjectUuid: string, currentUser: UserData) {
-		return this.jsApi.restCallModule('schemeRestSettings', 'getSchemeData', subjectUuid, contentCode, currentUser);
+		return this.jsApi.restCallModule('chartRestSettings', 'getSchemeData', subjectUuid, contentCode, currentUser);
 	}
 
 	async getEditForm (objectUUID: string, editFormCode: string) {
@@ -36,6 +36,6 @@ export default class Api {
 	}
 
 	async getUuidObjects (searchString: string) {
-		return this.jsApi.restCallModule('schemeRestSettings', 'getUuidObjects', searchString);
+		return this.jsApi.restCallModule('chartRestSettings', 'getUuidObjects', searchString);
 	}
 }
