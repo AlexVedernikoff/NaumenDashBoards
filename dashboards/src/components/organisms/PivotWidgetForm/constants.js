@@ -13,12 +13,20 @@ addMethod(array, 'singlePivotParams', function () {
 			function (parameter: Parameter) {
 				const {parent: parameters} = this;
 
-				return parameters.every((item: Parameter) => (
-					item === parameter
-					|| item.attribute?.code !== parameter.attribute?.code
-					|| item.attribute?.sourceCode !== parameter.attribute?.sourceCode
-					|| item.group?.way !== parameter.group?.way
-				));
+				return parameters.every((item: Parameter) => {
+					let result = true;
+
+					if (item !== parameter) {
+						const itemAttribute = item.attribute?.ref ? item.attribute.ref : item.attribute;
+						const parameterAttribute = parameter.attribute?.ref ? parameter.attribute.ref : parameter.attribute;
+
+						result = itemAttribute?.code !== parameterAttribute?.code
+						|| itemAttribute?.sourceCode !== parameterAttribute?.sourceCode
+						|| item.group?.way !== parameter.group?.way;
+					}
+
+					return result;
+				});
 			}
 		))
 	);
