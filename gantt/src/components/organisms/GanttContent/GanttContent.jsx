@@ -1,81 +1,52 @@
 // @flow
 import АctionBar from 'components/molecules/АctionBar';
-import {connect} from 'react-redux';
 import cn from 'classnames';
+import {connect} from 'react-redux';
+import ErrorBoundary from 'src/components/atoms/ErrorBoundary/ErrorBoundary.jsx';
 import {functions, props} from './selectors';
 import GanttGrid from 'components/molecules/Gantt';
 import GanttPanel from 'containers/GanttPanel';
-import ErrorBoundary from 'src/components/organisms/ErrorBoundary/ErrorBoundary.jsx';
 import type {Props} from 'containers/GanttContent/types';
-import React, {PureComponent} from 'react';
+import React, {useState} from 'react';
 import styles from './styles.less';
 import ViewPanel from 'components/molecules/ViewPanel';
 
-export class GanttContent extends PureComponent<Props> {
-	constructor (props) {
-		super(props);
-		this.onMove = this.onMove.bind(this);
-		this.onRefresh = this.onRefresh.bind(this);
-		this.handleToggle = this.handleToggle.bind(this);
-		this.handleToggleProgress = this.handleToggleProgress.bind(this);
-		this.handleToggleLinks = this.handleToggleLinks.bind(this);
-		this.handleToggleMilestoneBlock = this.handleToggleMilestoneBlock.bind(this);
-		this.handleToggleStateMilestoneBlock = this.handleToggleStateMilestoneBlock.bind(this);
-		this.handleToggleWorksWithoutDates = this.handleToggleWorksWithoutDates.bind(this);
-		this.addNewTask = this.addNewTask.bind(this);
-		this.state = {
-			flag: false,
-			milestones: '',
-			name: 'Просмотреть',
-			newTask: false,
-			refresh: false,
-			swiped: false
-		};
-	}
+const GanttContent = (props: Props) => {
+	const {allLinks, editMode, errorData, isPersonal, progress, user} = props;
+	const {role} = user;
+	const [flag, setFlag] = useState(false);
+	const [milestones] = useState('');
+	const [name, setName] = useState('Просмотреть');
+	const [newTask, setNewTask] = useState(false);
+	const [refresh, setRefresh] = useState(false);
+	const [swiped, setSwiped] = useState(false);
 
-	addNewTask () {
-		this.setState({ newTask: !this.state.newTask });
-	}
+	const panelCN = cn({
+		[styles.container]: true,
+		[styles.personal]: !props.isPersonal,
+		[styles.content]: true
+	});
 
-	handleToggle = () => {
-		this.setState({swiped: !this.state.swiped});
-		this.state.name === 'Просмотреть' ? this.setState({name: 'Редактировать'}) : this.setState({name: 'Просмотреть'});
+	const addNewTask = () => setNewTask(!newTask);
+
+	const handleToggle = () => {
+		setSwiped(!swiped);
+		name === 'Просмотреть' ? setName('Редактировать') : setName('Просмотреть');
 	};
 
-	handleToggleLinks = () => {
-		this.props.switchWorkRelationCheckbox(!this.props.workRelationCheckbox);
-	};
+	const handleToggleLinks = () => props.switchWorkRelationCheckbox(!props.workRelationCheckbox);
 
-	handleToggleMilestoneBlock = () => {
-		this.props.switchMilestonesCheckbox(!this.props.milestonesCheckbox);
-	};
+	const handleToggleMilestoneBlock = () => props.switchMilestonesCheckbox(!props.milestonesCheckbox);
 
-	handleToggleProgress = () => {
-		this.props.switchProgressCheckbox(!this.props.progressCheckbox);
-	};
+	const handleToggleProgress = () => props.switchProgressCheckbox(!props.progressCheckbox);
 
-	handleToggleStateMilestoneBlock = () => {
-		this.props.switchStateMilestonesCheckbox(!this.props.stateMilestonesCheckbox);
-	};
+	const handleToggleStateMilestoneBlock = () => props.switchStateMilestonesCheckbox(!props.stateMilestonesCheckbox);
 
-	handleToggleWorksWithoutDates = () => {
-		this.props.switchWorksWithoutStartOrEndDateCheckbox(!this.props.worksWithoutStartOrEndDateCheckbox);
-	};
+	const onRefresh = () => setRefresh(!refresh);
 
-	onRefresh () {
-		this.setState({ refresh: !this.state.refresh });
-		this.renderGanttGrid();
-	}
+	const onMove = () => setFlag(!flag);
 
-	onMove () {
-		this.setState({ flag: !this.state.flag });
-		this.renderGanttGrid();
-	}
-
-	renderGanttGrid = () => {
-		const {errorData} = this.props;
-		const {allLinks, flag, milestones, newTask, progress, refresh} = this.state;
-
+	const renderGanttGrid = () => {
 		return errorData
 			? <p>Ошибка загрузки данных</p>
 			: <ErrorBoundary><GanttGrid
@@ -89,62 +60,47 @@ export class GanttContent extends PureComponent<Props> {
 			></GanttGrid></ErrorBoundary>;
 	};
 
-	renderPanel = () => {
-		const {editMode, isPersonal} = this.props;
-
+	const renderPanel = () => {
 		return (editMode || isPersonal)
 			? <GanttPanel
-				allLinks={this.state.allLinks}
-				handleToggle={this.handleToggle}
-				handleToggleLinks={this.handleToggleLinks}
-				handleToggleMilestoneBlock={this.handleToggleMilestoneBlock}
-				handleToggleProgress={this.handleToggleProgress}
-				handleToggleStateMilestoneBlock={this.handleToggleStateMilestoneBlock}
-				handleToggleWorksWithoutDates={this.handleToggleWorksWithoutDates}
-				milestones={this.state.milestones}
-				progress={this.state.progress}
-				swiped={this.state.swiped}
-				isPersonal={this.props.isPersonal}
-				role={this.props.user.role}
+				allLinks={allLinks}
+				handleToggle={handleToggle}
+				handleToggleLinks={handleToggleLinks}
+				handleToggleMilestoneBlock={handleToggleMilestoneBlock}
+				handleToggleProgress={handleToggleProgress}
+				handleToggleStateMilestoneBlock={handleToggleStateMilestoneBlock}
+				isPersonal={props.isPersonal}
+				milestones={milestones}
+				progress={progress}
+				role={props.user.role}
+				swiped={swiped}
 			/> : null;
 	};
 
-	renderViewPanel = () => {
-		const {role} = this.props.user;
+	const renderViewPanel = () => (role !== 'SUPER' && !!role) ? <ViewPanel /> : null;
 
-		return (role !== 'SUPER' && role !== '') ? <ViewPanel /> : null;
-	};
-
-	renderАctionBar = () => {
-		const {editMode} = this.props;
+	const renderАctionBar = () => {
+		const {editMode} = props;
 
 		return (
 			<АctionBar
-				addNewTask={this.addNewTask}
+				addNewTask={addNewTask}
 				editMode={editMode}
-				handleToggle={this.handleToggle}
-				name={this.state.name}
-				onClick={this.onMove}
-				refresh={this.onRefresh}
+				handleToggle={handleToggle}
+				name={name}
+				onClick={onMove}
+				refresh={onRefresh}
 			/>);
 	};
 
-	render () {
-		const panelCN = cn({
-			[styles.container]: true,
-			[styles.personal]: !this.props.isPersonal,
-			[styles.content]: true
-		});
-
-		return (
-			<div className={panelCN}>
-				{this.renderViewPanel()}
-				{this.renderАctionBar()}
-				{this.renderPanel()}
-				{this.renderGanttGrid()}
-			</div>
-		);
-	}
-}
+	return (
+		<div className={panelCN}>
+			{renderViewPanel()}
+			{renderАctionBar()}
+			{renderPanel()}
+			{renderGanttGrid()}
+		</div>
+	);
+};
 
 export default connect(props, functions)(GanttContent);

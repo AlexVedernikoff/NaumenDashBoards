@@ -15,7 +15,8 @@ import {
 	setListVersions,
 	setRangeTime,
 	setResourceSettings,
-	switchWorkRelationCheckbox
+	switchWorkRelationCheckbox,
+	switchWorksWithoutStartOrEndDateCheckbox
 } from 'store/App/actions';
 import {
 	fetchAttributesMilestones
@@ -29,7 +30,6 @@ const props = (state: AppState) => {
 		endDate,
 		errorSettings,
 		loadingSettings,
-		mandatoryAttributes,
 		milestonesCheckbox,
 		multiplicityCheckbox,
 		progressCheckbox,
@@ -54,7 +54,6 @@ const props = (state: AppState) => {
 		endDate,
 		errorSettings,
 		loading: loadingSettings,
-		mandatoryAttributes,
 		milestonesCheckbox,
 		multiplicityCheckbox,
 		progressCheckbox,
@@ -89,7 +88,8 @@ const functions = {
 	setListVersions,
 	setRangeTime,
 	setResourceSettings,
-	switchWorkRelationCheckbox
+	switchWorkRelationCheckbox,
+	switchWorksWithoutStartOrEndDateCheckbox
 };
 
 export {
