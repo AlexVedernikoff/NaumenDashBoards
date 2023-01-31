@@ -70,7 +70,7 @@ export class SourceFieldset extends Component<Props, State> {
 		const {value} = propsValue.source;
 		const {value: prevValue} = prevProps.value.source;
 
-		if (value.value !== prevValue.value) {
+		if (value?.value !== prevValue?.value) {
 			this.resetDynamicAttributes();
 		}
 
