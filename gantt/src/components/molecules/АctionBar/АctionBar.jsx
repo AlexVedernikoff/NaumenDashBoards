@@ -16,6 +16,7 @@ import React, {useEffect, useState} from 'react';
 import {ScaleNames} from 'components/organisms/FormPanel/consts';
 import styles from './styles.less';
 import {TextInput} from 'components/atoms/TextInput/TextInput';
+import type {User} from './types';
 
 const АctionBar = props => {
 	const [active, setActive] = useState(true);
@@ -247,7 +248,7 @@ const АctionBar = props => {
 		return null;
 	};
 
-	const getToggleShowUsers = (user) => () => {
+	const getToggleShowUsers = (user: User) => () => {
 		setShow(!show);
 
 		user.showUsers = !user.showUsers;
@@ -278,7 +279,7 @@ const АctionBar = props => {
 
 	const renderUsersItem = userItem => {
 		if (userItem.showUsers) {
-			return userItem.pers.map(user => renderUserItem(user, clonedUsers, false));
+			return userItem.users.map(user => renderUserItem(user, clonedUsers, false));
 		}
 	};
 
@@ -318,7 +319,7 @@ const АctionBar = props => {
 		setFilteredUsers([]);
 
 		clonedUsers.forEach(departament => {
-			departament.pers.forEach(user => {
+			departament.users.forEach(user => {
 				if (target.value.length && user.name.toLowerCase().includes(target.value.toLowerCase())) {
 					newFilteredUsers.push(user);
 				}

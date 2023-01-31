@@ -36,7 +36,7 @@ const ColorPanel = (props: Props) => {
 	const handleSaveClick = () => {
 		tasks.forEach(item => {
 			for (let i = 0; i < currentColors.length; i++) {
-				if (item.type === currentColors[i].type) {
+				if (currentColors[i] && item.typeEntity === currentColors[i].type) {
 					if (currentColors[i].background) {
 						item.color = currentColors[i].background;
 					} else if (currentColors[i].color) {
@@ -56,7 +56,7 @@ const ColorPanel = (props: Props) => {
 			<form className={styles.wrapper}>
 				{currentColors.map(item =>
 					(
-						<div className={styles.colorItem} key={item.id}>
+						item && <div className={styles.colorItem} key={item.id}>
 							<input
 								id={item.id}
 								name="head"

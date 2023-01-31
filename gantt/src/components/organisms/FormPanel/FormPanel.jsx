@@ -14,10 +14,11 @@ import cn from 'classnames';
 import ColorPanel from 'src/components/molecules/ColorPanel';
 import type {Column, ResourceSetting} from 'src/store/App/types';
 import {CommonSettings} from 'store/App/types';
-import {connect} from 'react-redux';
+import {connect, useDispatch, useSelector} from 'react-redux';
 import {deepClone, isEmpty, normalizeDate, shiftTimeZone} from 'src/helpers';
 import {defaultColumn} from 'src/store/App/constants';
 import {defaultResourceSetting} from 'store/App/constants';
+import {ERROR_MESSAGES, IntervalSelectionCriterion, JobTitleType, ScaleNames} from './consts';
 import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
 import {gantt} from 'naumen-gantt';
@@ -29,77 +30,127 @@ import {
 	skipChildren
 } from './utils';
 import GridLayout from 'react-grid-layout';
-import {ERROR_MESSAGES, IntervalSelectionCriterion, JobTitleType, ScaleNames} from './consts';
 import Modal from 'src/components/atoms/Modal';
 import type {Props} from './types';
 import React, {useEffect, useState} from 'react';
 import Resource from './components/Resource';
-
 import {
 	setColumnTask,
 	setTextWork,
 	switchMultiplicityCheckbox,
-	switchTextPositionCheckbox,
-	switchVacationAndWeekendsCheckbox,
 	switchViewOfNestingCheckbox,
-	switchWorksWithoutStartOrEndDateCheckbox,
 	updateWorks
 } from 'store/App/actions';
 import ShowBox from 'src/components/atoms/ShowBox';
 import styles from './styles.less';
-import {useDispatch, useSelector} from 'react-redux';
 import {v4 as uuidv4} from 'uuid';
 import Work from './components/Work';
 
 const FormPanel = (props: Props) => {
 	const dispatch = useDispatch();
 	const store = useSelector(state => state);
-	const {endDate, errorSettings, loading, resources, settings, startDate} = props;
+	const {
+		endDate,
+		errorSettings,
+		handleToggleLinks,
+		handleToggleMilestoneBlock,
+		handleToggleProgress,
+		handleToggleStateMilestoneBlock,
+		loading,
+		resources,
+		settings,
+		startDate
+	} = props;
 	const {columnSettings} = settings;
-	const sd = startDate
-		? typeof startDate === 'string'
-			? normalizeDate(startDate).toLocaleString()
-			: new Date(startDate).toLocaleString()
-		: undefined;
-	const ed = endDate
-		? typeof endDate === 'string'
-			? normalizeDate(endDate).toLocaleString()
-			: new Date(endDate).toLocaleString()
-		: undefined;
 	const [showModal, setShowModal] = useState(false);
 	const [columnSettingsModal, setColumnSettingsModal] = useState([]);
 	const [layout, setLayout] = useState([]);
 	const [error, setError] = useState('');
-	const [inputStartDate, setInputStartDate] = useState(sd);
-	const [inputEndDate, setInputEndDate] = useState(ed);
-	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
-	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
-	const [valueError, setValueError] = useState('');
+	const [inputStartDate, setInputStartDate] = useState('');
+	const [inputEndDate, setInputEndDate] = useState('');
 	const [inputMonthDays, setInputMonthDays] = useState('');
 	const [inputLastDays, setinputLastDays] = useState('');
 	const [currentInterval, setCurrentInterval] = useState(store.APP.currentInterval);
-	const [diagramStartDate, setDiagramStartDate] = useState(new Date(startDate));
-	const [diagramEndDate, setDiagramEndDate] = useState(new Date(endDate));
+	const [showDatePickerStartDate, setShowDatePickerStartDate] = useState(false);
+	const [showDatePickerEndDate, setShowDatePickerEndDate] = useState(false);
+	const [valueError, setValueError] = useState('');
+	const [diagramStartDate, setDiagramStartDate] = useState(new Date(store.APP.startDate));
+	const [diagramEndDate, setDiagramEndDate] = useState(new Date(store.APP.endDate));
 	const [valueInterval, setValueInterval] = useState(store.APP.currentInterval);
 	const [href, setHref] = useState('#');
 	const [isErrorHref, setIsErrorHref] = useState(false);
 	const [viewWork, setViewWork] = useState(store.APP.viewWork);
 
 	useEffect(() => {
-		if (store.APP.currentInterval) {
-			setValueInterval(store.APP.currentInterval);
-			setCurrentInterval(store.APP.currentInterval);
-			const newStartDate = typeof startDate === 'string' ? normalizeDate(startDate) : startDate;
-			const newEndDate = typeof endDate === 'string' ? normalizeDate(endDate) : endDate;
-			const msInOneDay = 86400000;
-			const msStartDate = new Date(newStartDate).getTime();
-			const msEndTime = new Date(newEndDate).getTime();
-			const days = Math.round((msEndTime - msStartDate) / msInOneDay);
+		setViewWork(store.APP.viewWork);
 
-			setinputLastDays(days);
-			setInputMonthDays(days);
+		if (store.APP.viewWork?.value === 'about') {
+			gantt.templates.rightside_text = (start, end, task) => task.text;
+			gantt.templates.task_text = () => '';
+			gantt.render();
+		} else if (store.APP.viewWork?.value === 'work') {
+			gantt.templates.rightside_text = () => '';
+			gantt.templates.task_text = (start, end, task) => task.text;
+			gantt.render();
+		} else {
+			gantt.templates.rightside_text = () => '';
+			gantt.templates.task_text = () => '';
+			gantt.render();
+		}
+	}, [store.APP.viewWork]);
+
+	useEffect(() => {
+		if (store.APP.currentInterval) {
+			setCurrentInterval(store.APP.currentInterval);
+			setValueInterval(store.APP.currentInterval);
 		}
 	}, [store.APP.currentInterval]);
+
+	useEffect(() => {
+		if (store.APP.startDate && store.APP.endDate) {
+			const sd = store.APP.startDate
+				? typeof store.APP.startDate === 'string'
+					? normalizeDate(store.APP.startDate).toLocaleString()
+					: new Date(store.APP.startDate).toLocaleString()
+				: undefined;
+			const ed = store.APP.endDate
+				? typeof store.APP.endDate === 'string'
+					? normalizeDate(store.APP.endDate).toLocaleString()
+					: new Date(store.APP.endDate).toLocaleString()
+				: undefined;
+
+			if (currentInterval?.value === 'INTERVAL') {
+				sd && setInputStartDate(sd);
+				ed && setInputEndDate(ed);
+				setinputLastDays('');
+				setInputMonthDays('');
+				setDiagramStartDate(normalizeDate(sd));
+				setDiagramEndDate(normalizeDate(ed));
+			} else if (currentInterval?.value === 'MONTH' || currentInterval?.value === 'LASTDAYS') {
+				const newStartDate = typeof store.APP?.startDate === 'string' ? normalizeDate(startDate) : startDate;
+				const newEndDate = typeof store.APP?.endDate === 'string' ? normalizeDate(endDate) : endDate;
+				const msInOneDay = 86400000;
+				const msStartDate = new Date(newStartDate).getTime();
+				const msEndTime = new Date(newEndDate).getTime();
+				const days = Math.round((msEndTime - msStartDate) / msInOneDay);
+
+				days && setinputLastDays(days);
+				days && setInputMonthDays(days);
+
+				setInputStartDate('');
+				setInputEndDate('');
+				setDiagramStartDate(normalizeDate(sd));
+				setDiagramEndDate(normalizeDate(ed));
+			} else if (currentInterval?.value === 'NEXTDAYS') {
+				setInputStartDate('');
+				setInputEndDate('');
+				setinputLastDays('');
+				setInputMonthDays('');
+				setDiagramStartDate(normalizeDate(sd));
+				setDiagramEndDate(normalizeDate(ed));
+			}
+		}
+	}, [store.APP.startDate, store.APP.endDate]);
 
 	const handleAddNewBlock = (index: number, value: string) => {
 		const {setResourceSettings} = props;
@@ -263,22 +314,31 @@ const FormPanel = (props: Props) => {
 		setColumnSettingsModal([]);
 	};
 
+	const renderCheckbox = (handle, label, value) => {
+		return (
+			<div onClick={handle}>
+				<FormControl className={styles.checkbox} label={label} small={true}>
+					<Checkbox checked={value} name="Checkbox" onChange={handle} value={value} />
+				</FormControl>
+			</div>
+		);
+	};
+
 	const handleSave = () => {
-		sibmitRange();
+		const res = sibmitRange();
 		const {
 			diagramKey,
-			endDate,
 			milestonesCheckbox,
 			multiplicityCheckbox,
 			progressCheckbox,
 			saveSettings,
 			settings,
-			startDate,
 			stateMilestonesCheckbox,
 			viewOfNestingCheckbox,
 			workRelationCheckbox,
 			worksWithoutStartOrEndDateCheckbox
 		} = props;
+		const {endDate, startDate} = store.APP;
 		const newError = checkingSettings();
 
 		const shiftedEndDate = typeof startDate === 'string' ? shiftTimeZone(normalizeDate(startDate)) : shiftTimeZone(startDate);
@@ -293,28 +353,49 @@ const FormPanel = (props: Props) => {
 			setIsErrorHref(false);
 		}
 
-		if (!inputEndDate && !inputStartDate) {
-			setHref('#interval');
+		if (store.APP.currentInterval?.value === 'INTERVAL') {
+			if (!inputEndDate && !inputStartDate) {
+				setHref('#interval');
+			}
+		} else if (store.APP.currentInterval?.value === 'MONTH') {
+			if (!inputMonthDays) {
+				setHref('#interval');
+			}
+		} else if (store.APP.currentInterval?.value === 'LASTDAYS') {
+			if (!inputLastDays) {
+				setHref('#interval');
+			}
 		}
 
-		if (!newError && !isErrorHref && href === '#' && valueInterval && inputEndDate && inputStartDate) {
-			setDiagramEndDate(gantt.date.add(new Date(diagramEndDate), shiftedEndDate, 'hour'));
-			setDiagramStartDate(gantt.date.add(new Date(diagramStartDate), shiftedStartDate, 'hour'));
+		const condition = (((inputEndDate && inputStartDate) || inputMonthDays || inputLastDays || inputLastDays || currentInterval?.value === 'NEXTDAYS') ? true : false);
+
+		const newInputEndDate = inputEndDate && normalizeDate(inputEndDate);
+		const newInputStartDate = inputStartDate && normalizeDate(inputStartDate);
+
+		if (!newError && !isErrorHref && href === '#' && valueInterval && condition) {
+			if (store.APP.currentInterval?.value === 'MONTH' || store.APP.currentInterval?.value === 'LASTDAYS') {
+				setDiagramEndDate(gantt.date.add(res.endDate, shiftedEndDate, 'hour'));
+				setDiagramStartDate(gantt.date.add(res.startDate, shiftedStartDate, 'hour'));
+			} else {
+				setDiagramEndDate(gantt.date.add(new Date(diagramEndDate), shiftedEndDate, 'hour'));
+				setDiagramStartDate(gantt.date.add(new Date(diagramStartDate), shiftedStartDate, 'hour'));
+			}
 
 			const {isPersonal} = store.APP;
+			const condition = (currentInterval?.value === 'MONTH' || currentInterval?.value === 'LASTDAYS' || currentInterval?.value === 'NEXTDAYS');
 
 			saveSettings(
 				{
 					commonSettings: settings,
 					currentInterval,
 					diagramKey,
-					endDate: diagramEndDate,
+					endDate: condition ? res.endDate : newInputEndDate,
 					isPersonal,
 					milestonesCheckbox,
 					multiplicityCheckbox,
 					progressCheckbox,
 					resourceAndWorkSettings: resources,
-					startDate: diagramStartDate,
+					startDate: condition ? res.startDate : newInputStartDate,
 					stateMilestonesCheckbox,
 					viewOfNestingCheckbox,
 					viewWork,
@@ -415,6 +496,8 @@ const FormPanel = (props: Props) => {
 				props.setRangeTime(date);
 				setValueError('');
 				setHref('#');
+
+				return date;
 			} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
 				setValueError(ERROR_MESSAGES.wrongDate);
 				setHref('#interval');
@@ -432,15 +515,16 @@ const FormPanel = (props: Props) => {
 			if (isNaN(inputValue)) {
 				setValueError(ERROR_MESSAGES.incorrectValue);
 				setHref('#interval');
+			// eslint-disable-next-line no-negated-condition
 			} else if (!inputValue) {
 				setValueError(ERROR_MESSAGES.emptyField);
 				setHref('#interval');
 			} else {
 				const today = new Date();
-				const calculatedDate = new Date(today.setDate(today.getDate() + inputValue));
+				const calculatedDate = month ? new Date(today.setDate(today.getDate() + inputValue)) : new Date(today.setDate(today.getDate() - inputValue));
 
-				const endDate = month ? new Date(calculatedDate) : today;
-				const startDate = month ? today : new Date(calculatedDate);
+				const endDate = month ? new Date(calculatedDate) : new Date();
+				const startDate = month ? new Date() : new Date(calculatedDate);
 
 				setDiagramStartDate(startDate);
 				setDiagramEndDate(endDate);
@@ -448,6 +532,8 @@ const FormPanel = (props: Props) => {
 				props.setRangeTime({endDate, startDate});
 				setValueError('');
 				setHref('#');
+
+				return {endDate, startDate};
 			}
 		} else if (valueInterval?.value === 'NEXTDAYS') {
 			const todayStartDate = new Date();
@@ -456,6 +542,7 @@ const FormPanel = (props: Props) => {
 			const hours = todayStartDate.getHours();
 
 			todayStartDate.setHours(0);
+
 			const balanceHours = 23 - hours;
 
 			todayEndDate.setHours(hours + balanceHours);
@@ -467,6 +554,8 @@ const FormPanel = (props: Props) => {
 			setDiagramEndDate(endDate);
 
 			props.setRangeTime({endDate, startDate});
+
+			return {endDate, startDate};
 		}
 	};
 
@@ -604,38 +693,6 @@ const FormPanel = (props: Props) => {
 		</div>
 	);
 
-	const renderCheckboxCommonBlock = () => {
-		const {settings} = props;
-
-		return (
-			<div onClick={handleCheckboxChange}>
-				<FormControl className={cn(styles.checkbox)} label="Свернуть работы по умолчанию" small={true}>
-					<Checkbox checked={settings.rollUp} name="Checkbox" onChange={handleCheckboxChange} value={settings.rollUp} />
-				</FormControl>
-			</div>
-		);
-	};
-
-	const renderCheckboxMilestoneBlock = () => {
-		return (
-			<div onClick={props.handleToggleMilestoneBlock}>
-				<FormControl className={cn(styles.checkbox)} label="Отображать контрольные точки" small={true}>
-					<Checkbox checked={props.milestonesCheckbox} name="Checkbox" onChange={props.handleToggleMilestoneBlock} value={props.milestonesCheckbox} />
-				</FormControl>
-			</div>
-		);
-	};
-
-	const renderCheckboxStateMilestoneBlock = () => {
-		return (
-			props.milestonesCheckbox && <div onClick={props.handleToggleStateMilestoneBlock}>
-				<FormControl className={cn(styles.checkbox)} label="Отображать состояние контрольных точек" small={true}>
-					<Checkbox checked={props.stateMilestonesCheckbox} name="Checkbox" onChange={props.handleToggleStateMilestoneBlock} value={props.stateMilestonesCheckbox} />
-				</FormControl>
-			</div>
-		);
-	};
-
 	const handleOpenFilterForm = async () => {
 		try {
 			const {worksWithoutStartOrEndDateCheckbox} = store.APP;
@@ -644,6 +701,11 @@ const FormPanel = (props: Props) => {
 			dispatch(setColumnTask(res));
 			gantt.clearAll();
 			setTimeout(() => {
+				res.forEach(item => {
+					if (item.type === 'milestone') {
+						item.hide_bar = !store.APP.milestonesCheckbox;
+					}
+				});
 				gantt.parse(JSON.stringify({data: res, links: store.APP.workRelations}));
 				gantt.render();
 			}, 500);
@@ -652,19 +714,9 @@ const FormPanel = (props: Props) => {
 		}
 	};
 
-	const handleToggleWorksWithoutDates = (value) => {
-		switchWorksWithoutStartOrEndDateCheckbox(!value.value);
+	const handleToggleWorksWithoutDates = () => {
+		props.switchWorksWithoutStartOrEndDateCheckbox(!props.worksWithoutStartOrEndDateCheckbox);
 		handleOpenFilterForm();
-	};
-
-	const renderCheckboxWorksWithoutDates = () => {
-		return (
-			<div onClick={props.handleToggleWorksWithoutDates}>
-				<FormControl className={styles.checkbox} label="Отображать работы без даты начала и окончания даты" small={true}>
-					<Checkbox checked={props.worksWithoutStartOrEndDateCheckbox} name="Checkbox" onChange={handleToggleWorksWithoutDates} value={props.worksWithoutStartOrEndDateCheckbox} />
-				</FormControl>
-			</div>
-		);
 	};
 
 	const handleToggleSplitTasks = () => {
@@ -689,35 +741,6 @@ const FormPanel = (props: Props) => {
 		gantt.config.round_dnd_dates = !props.multiplicityCheckbox;
 	};
 
-	const renderCheckboxSplitTasks = () => {
-		return (
-			<div onClick={handleToggleSplitTasks}>
-				<FormControl className={styles.checkbox} label="Выстроить работы в одну линию ресурса" small={true}>
-					<Checkbox
-						checked={props.viewOfNestingCheckbox}
-						name="Checkbox"
-						onChange={handleToggleSplitTasks}
-						value={props.viewOfNestingCheckbox}
-					/>
-				</FormControl>
-			</div>
-		);
-	};
-
-	const renderCheckboxMultiplicityTasks = () => {
-		return (
-			<div onClick={handleToggleMultiplicityTasks}>
-				<FormControl className={styles.checkbox} label="Включить кратность календарной сетки для работ" small={true}>
-					<Checkbox
-						checked={props.multiplicityCheckbox}
-						name="Checkbox"
-						onChange={handleToggleMultiplicityTasks}
-						value={props.multiplicityCheckbox}
-					/>
-				</FormControl>
-			</div>
-		);
-	};
 
 	const renderButtonCommonBlock = () => (
 		<Button className={styles.button} variant="ADDITIONAL">
@@ -765,14 +788,25 @@ const FormPanel = (props: Props) => {
 		}
 	};
 
-	const renderCommonBlock = () => {
+	const renderCheckboxProgress = () => renderCheckbox(handleToggleProgress, 'Отображать прогресс выполнения работ на диаграмме', props.progressCheckbox);
+
+	const renderCheckboxСonnections = () => renderCheckbox(handleToggleLinks, 'Отображать связи работ на диаграмме', props.workRelationCheckbox);
+
+	const renderCheckboxSplitTasks = () => renderCheckbox(handleToggleSplitTasks, 'Выстроить работы в одну линию ресурса', props.viewOfNestingCheckbox);
+
+	const renderCheckboxMultiplicityTasks = () => renderCheckbox(handleToggleMultiplicityTasks, 'Включить кратность календарной сетки для работ', props.multiplicityCheckbox);
+
+	const renderCheckboxCommonBlock = () => renderCheckbox(handleCheckboxChange, 'Свернуть работы по умолчанию', props.settings.rollUp);
+
+	const renderCheckboxMilestoneBlock = () => renderCheckbox(handleToggleMilestoneBlock, 'Отображать контрольные точки', props.milestonesCheckbox);
+
+	const renderCheckboxStateMilestoneBlock = () => props.milestonesCheckbox && renderCheckbox(handleToggleStateMilestoneBlock, 'Отображать состояние контрольных точек', props.stateMilestonesCheckbox);
+
+	const renderCheckboxWorksWithoutDates = () => renderCheckbox(handleToggleWorksWithoutDates, 'Отображать работы с открытыми датами', props.worksWithoutStartOrEndDateCheckbox);
+
+	const renderCheckboxes = () => {
 		return (
-			<div className={styles.field}>
-				{renderHeaderCommonBlock()}
-				{renderSelectCommonBlock()}
-				{renderSelectInterval()}
-				{renderButtonColorPanel()}
-				{renderViewWork()}
+			<>
 				{renderCheckboxProgress()}
 				{renderCheckboxСonnections()}
 				{renderCheckboxCommonBlock()}
@@ -781,6 +815,19 @@ const FormPanel = (props: Props) => {
 				{renderCheckboxWorksWithoutDates()}
 				{renderCheckboxSplitTasks()}
 				{renderCheckboxMultiplicityTasks()}
+			</>
+		);
+	};
+
+	const renderCommonBlock = () => {
+		return (
+			<div className={styles.field}>
+				{renderHeaderCommonBlock()}
+				{renderSelectCommonBlock()}
+				{renderSelectInterval()}
+				{renderButtonColorPanel()}
+				{renderViewWork()}
+				{renderCheckboxes()}
 				<div className={styles.form} id='panelSettingsButton'>
 					{renderButtonCommonBlock()}
 					{renderForm()}
@@ -859,34 +906,19 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
-	const editColumn = (index, method) => () => method(index);
+	const editColumn = (index, method) => () => {
+		return (index !== 0) ? method(index) : false;
+	};
 
 	const getContentModal = () => {
 		return (
-			<GridLayout
-				className="layout"
-				cols={1}
-				layouts={layout}
-				onLayoutChange={layout => setLayout(layout)}
-				rowHeight={35}
-				width={300}>
+			<GridLayout className="layout" cols={1} layouts={layout} onLayoutChange={layout => setLayout(layout)} rowHeight={35} width={300}>
 				{columnSettingsModal.map((item, index) => (
 					<div className={styles.item} data-grid={{h: 1, static: !index, w: 1, x: 0, y: index}} key={item.code}>
 						<Icon className={styles.kebab} name="KEBAB" />
-						<ShowBox
-							checked={item.show}
-							name={item.code}
-							onChange={editColumn(index, handleColumnShowChange)}
-							value={item.show} />
-						<TextInput
-							className={styles.input}
-							maxLength={30}
-							name={item.code}
-							onChange={target => handleColumnNameChange(target, index)}
-							onlyNumber={false}
-							placeholder="Введите название столбца"
-							value={item.title} />
-						<IconButton className={styles.basket} icon="BASKET"onClick={editColumn(index, handleDeleteColumn)} />
+						<ShowBox checked={item.show} className={index === 0 && styles.disabled} name={item.code} onChange={editColumn(index, handleColumnShowChange)} value={item.show} />
+						<TextInput className={styles.input} maxLength={30} name={item.code} onChange={target => handleColumnNameChange(target, index)} onlyNumber={false} placeholder="Введите название столбца" value={item.title} />
+						<IconButton className={index === 0 ? styles.disabled : styles.basket} icon="BASKET"onClick={editColumn(index, handleDeleteColumn)} />
 					</div>
 				))}
 			</GridLayout>
@@ -914,16 +946,6 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
-	const renderCheckboxProgress = () => {
-		return (
-			<div onClick={props.handleToggleProgress}>
-				<FormControl className={cn(styles.checkbox)} label="Отображать прогресс выполнения работ на диаграмме" small={true}>
-					<Checkbox checked={props.progressCheckbox} name="Checkbox" onChange={props.handleToggleProgress} value={props.progressCheckbox} />
-				</FormControl>
-			</div>
-		);
-	};
-
 	const changeViewWork = ({value}) => {
 		setViewWork(value);
 
@@ -941,34 +963,6 @@ const FormPanel = (props: Props) => {
 					options={JobTitleType}
 					placeholder='Вывод названий работ'
 					value={viewWork} />
-			</div>
-		);
-	};
-
-	useEffect(() => {
-		setViewWork(store.APP.viewWork);
-
-		if (store.APP.viewWork?.value === 'about') {
-			gantt.templates.rightside_text = (start, end, task) => task.text;
-			gantt.templates.task_text = () => '';
-			gantt.render();
-		} else if (store.APP.viewWork?.value === 'work') {
-			gantt.templates.rightside_text = () => '';
-			gantt.templates.task_text = (start, end, task) => task.text;
-			gantt.render();
-		} else {
-			gantt.templates.rightside_text = () => '';
-			gantt.templates.task_text = () => '';
-			gantt.render();
-		}
-	}, [store.APP.viewWork]);
-
-	const renderCheckboxСonnections = () => {
-		return (
-			<div onClick={props.handleToggleLinks}>
-				<FormControl className={cn(styles.checkbox)} label="Отображать связи работ на диаграмме" small={true}>
-					<Checkbox checked={props.workRelationCheckbox} name="Checkbox" onChange={props.handleToggleLinks} value={props.workRelationCheckbox} />
-				</FormControl>
 			</div>
 		);
 	};

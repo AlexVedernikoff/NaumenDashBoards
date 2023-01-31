@@ -18,34 +18,35 @@ const data = {
 	"commonSettings":{
 		"columnSettings":[
 			{
-				"title":"\u0422\u0438\u043f",
-				"code":"start_date",
-				"show":true,
+				"title":"Название",
+				"code":"qdw",
+				"show": true,
 				"editor":{
-					"type": "date", 
-					"map_to": "start_date", 
+					"type": "text", 
+					"map_to": "qdw", 
 				}
 			},
-			{
-				"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f",
-				"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb",
-				"show":false
-			},
-			{
-				"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435\u0435",
-				"code":"d951f959-640b-4b47-b7ed-2f0daf78671",
-				"show":true
-			},
-			{
-				"title":"\u0422\u0438\u043f\u043f",
-				"code":"5af9985a-79b4-42b9-9d0f-635f6d80561e2",
-				"show":true
-			},
-			{
-				"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f\u044f",
-				"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb3",
-				"show":false
-			},
+			// {
+			// 	"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f",
+			// 	"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb",
+			// 	"show":false
+			// },
+			// {
+			// 	"title":"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435\u0435",
+			// 	"code":"d951f959-640b-4b47-b7ed-2f0daf78671",
+			// 	"show":true
+			// },
+			// {
+			// 	"title":"\u0422\u0438\u043f\u043f",
+			// 	"code":"5af9985a-79b4-42b9-9d0f-635f6d80561e2",
+			// 	"show":true
+			// },
+			// {
+			// 	"title":"\u0414\u0430\u0442\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f\u044f",
+			// 	"code":"f55d87bc-b3ee-4d95-ac5d-144f51cfa8cb3",
+			// 	"show":false
+			// },
+			// Необходимо для следующей итерации
 		],
 		"rollUp":false,
 		"scale":"YEAR"
@@ -85,9 +86,11 @@ const data = {
 	'textPositionCheckbox': false,
 	'tasks': [
 		{
+			'd951f959-640b-4b47-b7ed-2f0daf7867': "Иванов Иван",
+			'qdw': "Ваня",
 			"id":"employee$75250",
 			"text":"Иванов Иван",
-			"code1":"Иванов Иван",
+			"code1":"Иван",
 			"start_date":"2020-11-13T12:55:26",
 			"end_date": "2024-01-01T12:55:26",
 			"level":0,
@@ -97,10 +100,13 @@ const data = {
 			"editable": true,
 			"name": "1",
 			// "render": "split",
-			"typeEntity": "RESOURCE"
+			"typeEntity": "RESOURCE",
+			'add_tasks': '+'
 		},
 		{
+			"d951f959-640b-4b47-b7ed-2f0daf7867": "Иванов Иван",
 			"id":"2",
+			"qdw": "Ваня",
 			"text":"смена1",
 			"code1":"смена1",
 			"start_date":"2020-11-13T12:55:26",
@@ -115,6 +121,8 @@ const data = {
 			"typeEntity": "WORK"
 		},
 		{
+			"d951f959-640b-4b47-b7ed-2f0daf7867": "Иванов Иван",
+			"qdw": "Ваня",
 			"id":"3",
 			"text":"смена2",
 			"code1":"смена2",
@@ -145,9 +153,13 @@ const data = {
 	},
 	"progressCheckbox": false,
 	"workRelationCheckbox": false,
-	"startDate": "2021-09-02, 00:00:00",
-	"endDate": "2025-09-07, 00:00:00",
-	"currentInterval": null,
+	"startDate": "2020-01-11, 00:00:00",
+	"endDate": "2024-01-14, 00:00:00",
+	"currentInterval": {
+		"label": "в работах",
+		"value": "work"
+	},
+	"currentInterval": {"label": "с ... по", "value": "INTERVAL"}
 };
 
 export const getDiagramData = () => {

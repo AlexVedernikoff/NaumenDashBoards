@@ -2,13 +2,12 @@
 import {Button} from 'naumen-common-components';
 import cn from 'classnames';
 import {createPersonalView, deletePersonalView, getGanttData, setPersonal} from 'store/App/actions';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from './styles.less';
 import {useDispatch, useSelector} from 'react-redux';
 
 const ViewPanel = () => {
-	const store = useSelector(state => state);
-	const {isPersonalDiagram} = store.APP;
+	const isPersonalDiagram = useSelector(state => state.isPersonalDiagram);
 
 	const [activeGeneralViewButton, setActiveGeneralViewButton] = useState(true);
 	const [activePersonalViewButton, setActivePersonalViewButton] = useState(false);
@@ -72,6 +71,12 @@ const ViewPanel = () => {
 			</div>
 		);
 	};
+
+	useEffect(() => {
+		dispatch(setPersonalView(isPersonalDiagram));
+
+		setActivePersonal(isPersonalDiagram);
+	}, [isPersonalDiagram]);
 
 	return (
 		<div className={styles.wrapper}>

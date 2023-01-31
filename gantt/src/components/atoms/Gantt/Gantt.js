@@ -9,6 +9,7 @@ import ModalTask from 'components/atoms/ModalTask';
 import {postEditedWorkData, savePositionOfWork, setColumnSettings, setColumnTask, setDiagramLinksData} from 'store/App/actions';
 import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
+import {config} from './config';
 
 const HEIGHT_HEADER = 70;
 
@@ -121,10 +122,9 @@ const Gantt = (props: Props) => {
 
 	const editWorkInterval = () => {
 		const {tasks} = store.APP;
-		const tasksGantt = gantt.getTaskByTime();
 		const keys = ['end_date', 'start_date', 'id'];
 
-		const tasksWithoutExcess = tasksGantt.map(task => keys.reduce((acc, key) => {
+		const tasksWithoutExcess = tasks.map(task => keys.reduce((acc, key) => {
 			if (task[key]) {
 				if (typeof task[key] === 'object') {
 					const minutes = task[key].getMinutes();
@@ -135,7 +135,7 @@ const Gantt = (props: Props) => {
 					} else if (minutes === 1 && key === 'end_date') {
 						acc.end_date = '';
 					} else {
-						for (let item = 0; item < tasks.length; item++) {
+						for (let item = 0; task < tasks.length; item++) {
 							if (task.id === tasks[item].id) {
 								if (tasks[item].start_date === '') {
 									acc.start_date = '';
@@ -150,6 +150,7 @@ const Gantt = (props: Props) => {
 				}
 			}
 
+			acc[key] = task[key];
 			return acc;
 		}, {}));
 
@@ -192,6 +193,19 @@ const Gantt = (props: Props) => {
 	};
 
 	useEffect(() => {
+		gantt.attachEvent('onGanttReady', () => {
+			const el = document.querySelector('.gantt_hor_scroll');
+
+			if (el) {
+				el.addEventListener('scroll', () => {
+					document.documentElement.style.setProperty(
+						'--gantt-frozen-column-scroll-left', el.scrollLeft + 'px'
+					);
+				});
+			}
+		});
+
+		gantt.config.layout = config;
 		gantt.config.auto_scheduling = true;
 		gantt.config.autoscroll = true;
 		gantt.config.auto_scheduling = true;
@@ -232,7 +246,6 @@ const Gantt = (props: Props) => {
 		gantt.plugins({
 			auto_scheduling: true,
 			marker: true,
-			multiselect: true,
 			tooltip: true
 		});
 
@@ -377,93 +390,6 @@ const Gantt = (props: Props) => {
 		saveChangedWorkProgress(task.id, task.progress);
 		dispatch(setColumnTask(newTasks));
 
-		const {fixedColumn} = deepClone(store.APP.settings);
-
-		fixedColumn.name = fixedColumn.code;
-		fixedColumn.tree = true;
-		fixedColumn.label = fixedColumn.title;
-
-		const newFixedColumn = {
-			columns: [
-				fixedColumn
-			]
-		};
-
-		gantt.config.layout = {
-			cols: [
-				{
-					min_width: 600,
-					rows: [
-						{
-							cols: [
-								{
-									min_width: 200,
-									rows: [
-										{
-											bind: 'task',
-											config: newFixedColumn,
-											scrollY: 'gridScrollY',
-											view: 'grid'
-										}
-									],
-									width: 250
-								},
-								{
-									min_width: 250,
-									rows: [
-										{
-											bind: 'task',
-											scrollX: 'gridScrollX',
-											scrollY: 'gridScrollY',
-											scrollable: true,
-											view: 'grid'
-										},
-										{
-											id: 'gridScrollX',
-											view: 'scrollbar'
-										}
-									]
-								},
-								{
-									id: 'gridScrollY',
-									view: 'scrollbar'
-								}
-							],
-							group: 'gantt'
-						}
-					],
-					width: 600
-				},
-				{ resizer: true, width: 1 },
-				{
-					rows: [
-						{
-							cols: [
-								{
-									rows: [
-										{
-											scrollX: 'scrollHor',
-											scrollY: 'scrollVer',
-											view: 'timeline'
-										},
-										{
-											id: 'scrollHor',
-											view: 'scrollbar'
-										}
-									]
-								},
-								{
-									id: 'scrollVer',
-									view: 'scrollbar'
-								}
-							],
-							group: 'gantt'
-						}
-					]
-				}
-			],
-			css: 'gantt_container'
-		};
 
 		gantt.render();
 	}, 100));
@@ -591,7 +517,7 @@ const Gantt = (props: Props) => {
 			}
 		});
 		gantt.render();
-	}, [store.APP.milestonesCheckbox]);
+	}, [store.APP.milestonesCheckbox, store.APP.worksWithoutStartOrEndDateCheckbox]);
 
 	// Экспортирует диаграмму при изменении props.flag
 	useEffect(() => {
@@ -806,7 +732,7 @@ const Gantt = (props: Props) => {
 				editor: item.editor,
 				hide: !item.show,
 				label: item.title + `<div id="${item.code}"></div>`,
-				min_width: 250,
+				min_width: 200,
 				name: item.code,
 				resize: true,
 				width: '*'
