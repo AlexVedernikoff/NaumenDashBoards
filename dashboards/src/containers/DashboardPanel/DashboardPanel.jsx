@@ -10,11 +10,11 @@ import t from 'localization';
 import {withCommonDialog} from 'containers/CommonDialogs/withCommonDialog';
 
 class DashboardPanel extends PureComponent<Props> {
-	handleGoBack = (isCancel: boolean, relativeElement?: DivRef) => {
+	handleGoBackAsync = async (isCancel: boolean, relativeElement?: DivRef) => {
 		const {cancelNewWidgetCreate, confirm, hideCopyPanel} = this.props;
 
 		if (isCancel) {
-			if (confirm(
+			if (await confirm(
 				t('DashboardPanel::ConfirmCancelWidgetCreateTitle'),
 				t('DashboardPanel::ConfirmCancelWidgetCreateText'),
 				{
@@ -31,7 +31,9 @@ class DashboardPanel extends PureComponent<Props> {
 	};
 
 	render () {
-		return (<Component {...this.props} goBack={this.handleGoBack} />);
+		const goBack = (isCancel, relativeElement) => { this.handleGoBackAsync(isCancel, relativeElement); };
+
+		return (<Component {...this.props} goBack={goBack} />);
 	}
 }
 
