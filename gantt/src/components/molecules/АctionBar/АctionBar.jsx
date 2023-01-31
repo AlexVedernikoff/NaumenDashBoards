@@ -14,6 +14,7 @@ import Modal from 'components/atoms/Modal/Modal';
 import {postDataUsers} from 'store/App/actions';
 import React, {useEffect, useState} from 'react';
 import {ScaleNames} from 'components/organisms/FormPanel/consts';
+import StepTransferPanel from 'components/atoms/StepTransferPanel/StepTransferPanel';
 import styles from './styles.less';
 import {TextInput} from 'components/atoms/TextInput/TextInput';
 import type {User} from './types';
@@ -565,10 +566,13 @@ const АctionBar = props => {
 		);
 	};
 
+	const renderStepTransferPanel = () => <StepTransferPanel />;
+
 	const renderPanel = () => {
 		return (
 			<div className={styles.container}>
 				{renderButtonsVersion()}
+				{renderStepTransferPanel()}
 				<div className={styles.container}>
 					{renderButtonUsers()}
 					{renderButtonsZoom()}

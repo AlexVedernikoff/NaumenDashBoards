@@ -18,10 +18,10 @@ module.exports = {
 	},
 	mode: define.mode,
 	module: loaders,
-	optimization,
-	// optimization: {
-	// 	minimize: false
-	// },
+	// optimization,
+	optimization: {
+		minimize: false
+	},
 	output: {
 		filename: 'bundle.js',
 		path: define.dist
