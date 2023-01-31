@@ -43,7 +43,7 @@ export const GanttPanel = (props: Props) => {
 	const CN = cn({
 		[styles.container]: true,
 		[styles.personal]: (props.isPersonal && role !== 'SUPER') || (role === 'ganttMaster'),
-		[styles.swipedContainer]: props.swiped
+		[styles.swipedContainer]: !props.swiped
 	});
 
 	return (

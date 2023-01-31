@@ -583,6 +583,7 @@ const Gantt = (props: Props) => {
 
 	inlineEditors.attachEvent('onBeforeSave', debounce(async function (state) {
 		setColumn(state.columnName);
+
 		const columns = props.columns;
 		const column = columns.find(column => column.code === state.columnName);
 		const columnOption = column.editor.options?.find(option => option.key === state.newValue);
@@ -615,11 +616,12 @@ const Gantt = (props: Props) => {
 
 				if (res) {
 					res.status === 500 ? setErrorAttr(true) : setErrorAttr(false);
+
 					const tasksGantt = gantt.getTaskByTime();
 
 					tasksGantt.forEach(task => {
 						if (task.id === state.id) {
-							task.text = state.oldValue;
+							task.text = task.name;
 						}
 					});
 					gantt.render();
@@ -650,7 +652,7 @@ const Gantt = (props: Props) => {
 									task.text = state.newValue;
 									task.name = state.newValue;
 								} else {
-									task.text = state.oldValue;
+									task.text = task.name;
 								}
 							} else {
 								if (column.editor.type === 'text') {
@@ -680,10 +682,11 @@ const Gantt = (props: Props) => {
 
 				if (res) {
 					res.status === 500 ? setErrorAttr(true) : setErrorAttr(false);
+
 					const tasksGantt = gantt.getTaskByTime();
 
 					tasksGantt.forEach(task => {
-						task.text = state.oldValue;
+						task.text = task.name;
 					});
 					gantt.render();
 					alert('Нередактируемый атрибут');
@@ -698,6 +701,7 @@ const Gantt = (props: Props) => {
 							newTask.text = state.newValue;
 						}
 					}
+
 					dispatch(setColumnTask(newTasks));
 
 					const tasksGantt = gantt.getTaskByTime();
@@ -740,6 +744,7 @@ const Gantt = (props: Props) => {
 
 			adaptedColumns[0].tree = true;
 			adaptedColumns.push({hide: !columns.find(item => !item.show), name: 'button', width: 50});
+
 			adaptedColumns[0].template = task => {
 				if (!task.parent || task.type === 'RESOURCE') {
 					return '<b>' + task[adaptedColumns[0].name] + '</b>';
