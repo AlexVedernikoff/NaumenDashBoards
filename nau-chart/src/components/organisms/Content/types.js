@@ -21,11 +21,11 @@ export type ConnectedFunctions = {
 export type Props = ConnectedProps & ConnectedFunctions;
 
 export type Connector = Entity & {
-	angle: number,
-	fromX: number,
-	fromY: number,
-	toX: number,
-	toY: number,
+	angle?: number,
+	fromX?: number,
+	fromY?: number,
+	toX?: number,
+	toY?: number,
 	x: number,
 	y: number,
 };

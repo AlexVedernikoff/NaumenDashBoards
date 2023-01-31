@@ -33,6 +33,7 @@ export type Entity = {
 	icon: string,
 	id: string,
 	options?: Option[],
+	roundLayout?: boolean,
 	title: string,
 	to: string | null,
 	type: string,
