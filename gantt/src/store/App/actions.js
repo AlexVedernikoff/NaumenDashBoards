@@ -69,7 +69,7 @@ const getAppConfig = (): ThunkAction => async (dispatch: Dispatch): Promise<void
 		dispatch(setSubjectUuid(subjectUuid));
 		dispatch(setUserData({email, name, role}));
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
-		dispatch(setResourceSettings(resourceAndWorkSettings && Object.keys(resourceAndWorkSettings).length ? resourceAndWorkSettings : [{ ...defaultResourceSetting, id: uuidv4() }]));
+		dispatch(setResourceSettings(resourceAndWorkSettings && Object.keys(resourceAndWorkSettings).length ? resourceAndWorkSettings : defaultResourceSettings));
 		dispatch(setSources(sources));
 		dispatch(saveMasterSettings());
 		await dispatch(getGanttData());
@@ -157,31 +157,17 @@ const getUsersAll = (): ThunkAction => async (dispatch: Dispatch): Promise<void>
 const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
 	try {
 		dispatch(showLoaderData());
+
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 		const {
 			commonSettings,
-			diagramKey,
-			endDate,
-			multiplicityCheckbox,
-			startDate,
-			tasks,
-			viewOfNestingCheckbox,
-			viewWork,
-			workProgresses,
-			workRelations
+			diagramKey
 		} = await getGanttVersionsSettings(versionKey, timezone);
 
-		dispatch(setColumnTask(tasks));
 		dispatch(setCurrentVersion(versionKey));
-		dispatch(changeWorkProgress(workProgresses));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
-		dispatch(setDiagramLinksData(workRelations));
-		dispatch(setRangeTime({endDate, startDate}));
 		dispatch(saveMasterSettings());
-		dispatch(switchMultiplicityCheckbox(multiplicityCheckbox));
-		dispatch(switchViewOfNestingCheckbox(viewOfNestingCheckbox));
-		dispatch(setTextWork(viewWork));
 	} catch (error) {
 		dispatch(setErrorCommon(error));
 	} finally {
@@ -625,28 +611,36 @@ const getGanttData = (personalView: boolean): ThunkAction => async (dispatch: Di
 			worksWithoutStartOrEndDateCheckbox
 		} = await getDiagramData(contentCode, subjectUuid, timeZone, personalView);
 
+		const defaultStartDate = new Date();
+		const defaultEndDate = new Date();
+		const defaultCurrentInterval = currentInterval ? currentInterval : {label: 'с ... по', value: 'INTERVAL'};
+		const defaultCurrentDates = (startDate !== null && endDate !== null) ? {endDate, startDate} : {endDate: defaultEndDate, startDate: defaultStartDate};
+
+		defaultStartDate.setMonth(defaultStartDate.getMonth() - 6);
+		defaultEndDate.setMonth(defaultEndDate.getMonth() + 6);
+
 		dispatch(getUsersAll());
-		dispatch(switchMilestonesCheckbox(milestonesCheckbox));
+		dispatch(switchMilestonesCheckbox(!!milestonesCheckbox));
 		dispatch(setEntityList(currentColorSettings));
-		dispatch(switchStateMilestonesCheckbox(stateMilestonesCheckbox));
-		dispatch(switchWorksWithoutStartOrEndDateCheckbox(worksWithoutStartOrEndDateCheckbox));
-		dispatch(setCurrentValueForInterval(currentInterval));
-		dispatch(setRangeTime({endDate, startDate}));
-		dispatch(switchProgressCheckbox(progressCheckbox));
-		dispatch(switchWorkRelationCheckbox(workRelationCheckbox));
+		dispatch(switchStateMilestonesCheckbox(!!stateMilestonesCheckbox));
+		dispatch(switchWorksWithoutStartOrEndDateCheckbox(!!worksWithoutStartOrEndDateCheckbox));
+		dispatch(setCurrentValueForInterval(defaultCurrentInterval));
+		dispatch(setRangeTime(defaultCurrentDates));
+		dispatch(switchProgressCheckbox(!!progressCheckbox));
+		dispatch(switchWorkRelationCheckbox(!!workRelationCheckbox));
 		dispatch(setAttributesMap(attributesMap));
-		dispatch(setPersonalView(isPersonalDiagram));
-		dispatch(setPersonal(isPersonal));
+		dispatch(setPersonalView(!!isPersonalDiagram));
+		dispatch(setPersonal(!!isPersonal));
 		dispatch(setContentCode(contentCode));
-		dispatch(setTextWork(viewWork));
+		dispatch(setTextWork(viewWork || {label: 'в работах', value: 'work'}));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setSubjectUuid(subjectUuid));
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
 		dispatch(setDiagramData(tasks || []));
 		dispatch(setDiagramLinksData(workRelations));
-		dispatch(switchMultiplicityCheckbox(multiplicityCheckbox));
-		dispatch(switchTextPositionCheckbox(textPositionCheckbox));
-		dispatch(switchViewOfNestingCheckbox(viewOfNestingCheckbox));
+		dispatch(switchMultiplicityCheckbox(!!multiplicityCheckbox));
+		dispatch(switchTextPositionCheckbox(!!textPositionCheckbox));
+		dispatch(switchViewOfNestingCheckbox(!!viewOfNestingCheckbox));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
