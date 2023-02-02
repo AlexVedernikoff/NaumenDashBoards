@@ -6,7 +6,7 @@ const HIDE_LOADER_SETTINGS: 'HIDE_LOADER_SETTINGS' = 'HIDE_LOADER_SETTINGS';
 const SAVE_MASTER_SETTINGS: 'SAVE_MASTER_SETTINGS' = 'SAVE_MASTER_SETTINGS';
 const SET_ATTRIBUTE: 'SET_ATTRIBUTE' = 'SET_ATTRIBUTE';
 const SET_ATTRIBUTE_MAP: 'SET_ATTRIBUTE_MAP' = 'SET_ATTRIBUTE_MAP';
-const SET_ENTITY_LIST: 'SET_ENTITY_LIST' ='SET_ENTITY_LIST';
+const SET_ENTITY_LIST: 'SET_ENTITY_LIST' = 'SET_ENTITY_LIST';
 const SET_COLUMN_SETTINGS: 'SET_COLUMN_SETTINGS' = 'SET_COLUMN_SETTINGS';
 const SET_COLUMN_TASK: 'SET_COLUMN_TASK' = 'SET_COLUMN_TASK';
 const SET_COMMON_SETTINGS: 'SET_COMMON_SETTINGS' = 'SET_COMMON_SETTINGS';
@@ -31,7 +31,7 @@ const SET_RESOURCE_SETTINGS: 'SET_RESOURCE_SETTINGS' = 'SET_RESOURCE_SETTINGS';
 const SET_SOURCES: 'SET_SOURCES' = 'SET_SOURCES';
 const SET_SUBJECT_UUID: 'SET_SUBJECT_UUID' = 'SET_SUBJECT_UUID';
 const SET_TASK: 'SET_TASK' = 'SET_TASK';
-const SET_TEXT_WORK: 'SET_TEXT_WORK' ='SET_TEXT_WORK';
+const SET_TEXT_WORK: 'SET_TEXT_WORK' = 'SET_TEXT_WORK';
 const SET_USERS: 'SET_USERS' = 'SET_USERS';
 const SET_USER_DATA: 'SET_USER_DATA' = 'SET_USER_DATA';
 const SET_WORK_DATA: 'SET_WORK_DATA' = 'SET_WORK_DATA';
@@ -47,7 +47,7 @@ const SWITCH_WORKS_WITHOUT_START_OR_END_DATE_CHECKBOX: 'SWITCH_WORKS_WITHOUT_STA
 const SWITCH_MULTIPLICITY_CHECKBOX: 'SWITCH_MULTIPLICITY_CHECKBOX' = 'SWITCH_MULTIPLICITY_CHECKBOX';
 const SWITCH_VACATION_AND_WEEKENDS_CHECKBOX: 'SWITCH_VACATION_AND_WEEKENDS_CHECKBOX' = 'SWITCH_VACATION_AND_WEEKENDS_CHECKBOX';
 const SWITCH_VIEW_OF_NESTING_CHECKBOX: 'SWITCH_VIEW_OF_NESTING_CHECKBOX' = 'SWITCH_VIEW_OF_NESTING_CHECKBOX';
-const SWITCH_TEXT_POSITION_CHECKBOX: 'SWITCH_TEXT_POSITION_CHECKBOX' ='SWITCH_TEXT_POSITION_CHECKBOX';
+const SWITCH_TEXT_POSITION_CHECKBOX: 'SWITCH_TEXT_POSITION_CHECKBOX' = 'SWITCH_TEXT_POSITION_CHECKBOX';
 
 const APP_EVENTS = {
 	CANCEL_SETTINGS,
@@ -174,6 +174,121 @@ const defaultColumn = {
 	'title': ''
 };
 
-const defaultResourceSettings = [defaultResourceSetting];
+const defaultResourceSettings = [
+	{
+		'attributeSettings': [
+			{
+				'attribute': {
+					'code': 'title',
+					'declaredMetaClass': null,
+					'label': null,
+					'metaClassFqn': null,
+					'property': null,
+					'ref': null,
+					'sourceCode': null,
+					'sourceName': null,
+					'title': 'Название',
+					'type': null,
+					'value': null
+				},
+				'code': 'efee4e5e-db51-481a-9e9a-d7724a1e4739',
+				'title': 'Название'
+			}
+		],
+		'color': null,
+		'communicationResourceAttribute': null,
+		'id': '652b7ea3-c9d8-4c80-90aa-6e1fe0705e0a',
+		'level': 0,
+		'nested': false,
+		'parent': '',
+		'render': null,
+		'source': {
+			'descriptor': '',
+			'value': {
+				'label': 'Сотрудник',
+				'value': 'employee'
+			}
+		},
+		'textColor': null,
+		'type': 'RESOURCE',
+		'typeEntity': null
+	},
+	{
+		'attributeSettings': [
+			{
+				'attribute': {
+					'code': 'title',
+					'declaredMetaClass': null,
+					'label': null,
+					'metaClassFqn': null,
+					'property': null,
+					'ref': null,
+					'sourceCode': null,
+					'sourceName': null,
+					'title': 'Название',
+					'type': null,
+					'value': null
+				},
+				'code': 'efee4e5e-db51-481a-9e9a-d7724a1e4739',
+				'title': 'Название'
+			}
+		],
+		'color': null,
+		'communicationResourceAttribute': {
+			'code': 'responsibleEmployee',
+			'declaredMetaClass': 'serviceCall',
+			'label': null,
+			'metaClassFqn': 'serviceCall',
+			'property': 'employee',
+			'ref': null,
+			'sourceCode': 'serviceCall',
+			'sourceName': 'Заявка',
+			'title': 'Ответственный (сотрудник)',
+			'type': 'object',
+			'value': null
+		},
+		'endWorkAttribute': {
+			'code': 'dateDecision',
+			'declaredMetaClass': 'serviceCall',
+			'label': null,
+			'metaClassFqn': 'serviceCall',
+			'property': null,
+			'ref': null,
+			'sourceCode': 'serviceCall',
+			'sourceName': 'Заявка',
+			'title': 'Дата решения',
+			'type': 'dateTime',
+			'value': null
+		},
+		'id': 'bf2c8ccb-bd88-4a0c-a00c-6f2158230194',
+		'level': 1,
+		'nested': false,
+		'parent': '652b7ea3-c9d8-4c80-90aa-6e1fe0705e0a',
+		'render': null,
+		'source': {
+			'descriptor': '',
+			'value': {
+				'label': 'Заявка',
+				'value': 'serviceCall'
+			}
+		},
+		'startWorkAttribute': {
+			'code': 'registrationDate',
+			'declaredMetaClass': 'serviceCall',
+			'label': null,
+			'metaClassFqn': 'serviceCall',
+			'property': null,
+			'ref': null,
+			'sourceCode': 'serviceCall',
+			'sourceName': 'Заявка',
+			'title': 'Дата регистрации',
+			'type': 'dateTime',
+			'value': null
+		},
+		'textColor': null,
+		'type': 'WORK',
+		'typeEntity': null
+	}
+];
 
 export {APP_EVENTS, USER_ROLES, defaultCommonSettings, defaultResourceSetting, defaultResourceSettings, defaultColumn, defaultAttributeSetting};
