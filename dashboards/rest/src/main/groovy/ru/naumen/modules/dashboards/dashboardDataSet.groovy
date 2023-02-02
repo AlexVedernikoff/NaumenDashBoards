@@ -466,7 +466,7 @@
             {
                 request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters, offsetUTCMinutes)
                 DashboardUtils.log('dashboardDataSet', 429, 'request', request, true)
-                res = getDiagramData(request, user, diagramType, templateUUID)
+                res = getDiagramData(request, user, diagramType, templateUUID, 1, widgetSettings)
                 replaceResultAttributeMetaClass(res.first(), request)
                 DashboardUtils.log('dashboardDataSet', 431, 'res', res, true)
                 countTotals = getTotalAmount(request, res, diagramType, templateUUID, user, widgetSettings)
@@ -7268,7 +7268,7 @@
                         total = prepareRequestWithStates(total, listIdsOfNormalAggregations, resWithPercentCnt)
                     }
                     return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
-                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request))
+                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request), requestContent?.sorting)
                 case 'computation':
                     def requisiteNode = node as ComputationRequisiteNode
                     def calculator = new FormulaCalculator(requisiteNode.formula)
@@ -7343,7 +7343,7 @@
                         getPercentCntAggregationIndexes(request)
                     )]
                     return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, formatResult(total, aggregationCnt), parameter,
-                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request))
+                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request), requestContent?.sorting)
                 default:
                     String message = messageProvider.getMessage(REQUISITE_IS_NOT_SUPPORTED_ERROR, currentUserLocale, nodeType: nodeType)
                     utils.throwReadableException("$message#${REQUISITE_IS_NOT_SUPPORTED_ERROR}")
@@ -7362,6 +7362,8 @@
          * @param aggregationSortingType - сортировка показателя
          * @param parameterWithDateOrDtInterval - флаг на наличие параметра с датой или временным интервалом
          * @param diagramType - тип диаграммы
+         * @param percentCntAggregationIndexes - индексы агрегаций с типом PERCENT_CNT
+         * @param sorting - настройки сортировки
          * @return готовый датасет
          */
         private List totalPrepareForNoFiltersResult(Integer top, Boolean isDiagramTypeTable,
@@ -7373,7 +7375,8 @@
                                                     String aggregationSortingType,
                                                     Boolean parameterWithDateOrDtInterval,
                                                     DiagramType diagramType,
-                                                    List percentCntAggregationIndexes)
+                                                    List percentCntAggregationIndexes,
+                                                    Sorting sorting)
         {
             if (top)
             {
@@ -7384,6 +7387,19 @@
                 }
                 else
                 {
+                    if (sorting)
+                    {
+                        total = total.sort { a, b ->
+                            Double indicatorValueA = a[0] as Double
+                            Double indicatorValueB = b[0] as Double
+                            Integer sortingResult = indicatorValueA <=> indicatorValueB
+                            if (sorting.type == SortingType.DESC)
+                            {
+                                sortingResult = -sortingResult
+                            }
+                            return sortingResult
+                        }
+                    }
                     total = getTop(total, top, [], [], true,
                                    parameterWithDate ? parameter : null,
                                    parameterSortingType, aggregationSortingType)
