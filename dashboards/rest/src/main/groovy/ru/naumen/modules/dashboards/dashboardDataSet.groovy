@@ -7387,7 +7387,8 @@
                 }
                 else
                 {
-                    if (sorting)
+                    Boolean resultWithoutBreakdown = total?.first()?.size() == 2
+                    if (sorting && resultWithoutBreakdown)
                     {
                         total = total.sort { a, b ->
                             Double indicatorValueA = a[0] as Double
