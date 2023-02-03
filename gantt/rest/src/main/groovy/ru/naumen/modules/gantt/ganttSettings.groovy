@@ -763,6 +763,20 @@ class GanttSettingsService
                 }
             }
         }
+        if (!attributeSettings.find {
+            it.code in ['start_date', 'end_date']
+        })
+        {
+            ganttSettings.commonSettings.columnSettings.each
+                {
+                    if (it.code in ['start_date', 'end_date'])
+                    {
+                        it.code = UUID.randomUUID()
+                        it.editor.type = 'text'
+                        it.editor.map_to = 'text'
+                    }
+                }
+        }
         resourceAndWorkSettings.attributeSettings = attributeSettings
     }
 
