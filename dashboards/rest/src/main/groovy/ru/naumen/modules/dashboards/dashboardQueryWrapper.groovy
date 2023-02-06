@@ -1402,7 +1402,7 @@ class QueryWrapper implements CriteriaWrapper
             DashboardUtils.getFormatKeyForTemplateOfDynamicAttribute(templateUUID)
         IApiCriteria totalValueCriteria =
             criteriaBlankDataForDynamicAttributes.subquery().addSource(totalValueFormatKey)
-        IApiCriteria linkedScId = sc.property(totalValueCriteria, 'linkedSc.id')
+        Object linkedScId = sc.property(totalValueCriteria, 'linkedSc.id')
         totalValueCriteria.addColumn(linkedScId)
         totalValueCriteria.add(api.filters.attrValueEq('linkTemplate', templateUUID))
                           .add(w.isNotNull(linkedScId))
