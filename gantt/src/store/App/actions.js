@@ -597,6 +597,7 @@ const getGanttData = (personalView: boolean): ThunkAction => async (dispatch: Di
 			endDate,
 			isPersonal,
 			isPersonalDiagram,
+			isVersions,
 			milestonesCheckbox,
 			multiplicityCheckbox,
 			progressCheckbox,
@@ -641,6 +642,7 @@ const getGanttData = (personalView: boolean): ThunkAction => async (dispatch: Di
 		dispatch(switchMultiplicityCheckbox(!!multiplicityCheckbox));
 		dispatch(switchTextPositionCheckbox(!!textPositionCheckbox));
 		dispatch(switchViewOfNestingCheckbox(!!viewOfNestingCheckbox));
+		dispatch(setIsVersions(isVersions));
 	} catch (error) {
 		dispatch(setErrorData(error));
 	} finally {
@@ -1011,7 +1013,13 @@ const setEntityList = (payload: boolean) => ({
 	type: APP_EVENTS.SET_ENTITY_LIST
 });
 
+const setIsVersions = (payload: boolean) => ({
+	payload,
+	type: APP_EVENTS.SET_IS_VERSIONS
+});
+
 export {
+	setIsVersions,
 	addNewWorkForVersion,
 	cancelSettings,
 	changeScale,
