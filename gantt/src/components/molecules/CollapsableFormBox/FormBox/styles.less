@@ -1,0 +1,41 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		border-bottom: 1px solid #EBEBEB;
+		padding: 16px 0;
+	}
+
+	.header {
+		align-items: center;
+		display: flex;
+		flex-direction: row;
+		padding: 0 24px;
+		margin-bottom: 16px;
+	}
+
+	.title {
+		color: @black;
+		font-weight: 500;
+		// margin-right: auto;
+		flex-grow: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap
+	}
+
+	.control {
+		align-items: center;
+		display: flex;
+	}
+
+	.leftControl {
+		.control();
+		margin-right: 12px;
+	}
+
+	.rightControl {
+		.control();
+		margin-left: 8px;
+	}
+};

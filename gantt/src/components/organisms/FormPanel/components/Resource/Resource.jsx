@@ -248,10 +248,17 @@ const Resource = (props: Props) => {
 	const renderColumn = (column: Column, index, options: Array<Attribute>) => {
 		const opts = index === 0 && options && options.filter(option => option.type === 'string');
 
+		const currentCN = cn({
+			[styles.selectIcon]: true,
+			[styles.selectWidth]: true,
+			[styles.width]: true,
+			[styles.defaultInput]: getAttribute(column.code) === null
+		});
+
 		return (
 			<li className={styles.item} key={column.code}>
 				<span className={styles.title}>{column.title}</span>
-				<Select className={cn(styles.selectIcon, styles.selectWidth, styles.width)}
+				<Select className={currentCN}
 					editable={Boolean(index)}
 					icon={'CHEVRON'}
 					isSearching={true}

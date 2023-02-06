@@ -11,7 +11,7 @@ import {gantt} from 'naumen-gantt';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import Modal from 'components/atoms/Modal/Modal';
-import {postDataUsers} from 'store/App/actions';
+import {postDataUsers, setIsVersions} from 'store/App/actions';
 import React, {useEffect, useState} from 'react';
 import {ScaleNames} from 'components/organisms/FormPanel/consts';
 import StepTransferPanel from 'components/atoms/StepTransferPanel/StepTransferPanel';
@@ -371,6 +371,8 @@ const АctionBar = props => {
 		const {settings, tasks, viewWork, workRelations} = store.APP;
 
 		props.savedGanttVersionSettings(isPersonal, settings, title, new Date().toLocaleString(), tasks, workRelations, viewWork);
+
+		dispatch(setIsVersions(true));
 		dispatch(props.setCurrentVersion(''));
 
 		setShowModalSave(!showModalSave);
@@ -513,12 +515,16 @@ const АctionBar = props => {
 			[styles.unActive]: !active
 		});
 
-		return (
-			<div className={styles.leftContainer}>
-				<Button className={versionsCN} onClick={handleVersionButtonClick}>Версии</Button>
-				<Button className={currentCN} onClick={handleCurrentButtonClick}>Текущий</Button>
-			</div>
-		);
+		if (store.APP.isVersions) {
+			return (
+				<div className={styles.leftContainer}>
+					<Button className={versionsCN} onClick={handleVersionButtonClick}>Версии</Button>
+					<Button className={currentCN} onClick={handleCurrentButtonClick}>Текущий</Button>
+				</div>
+			);
+		}
+
+		return null;
 	};
 
 	const renderButtonUsers = () => {

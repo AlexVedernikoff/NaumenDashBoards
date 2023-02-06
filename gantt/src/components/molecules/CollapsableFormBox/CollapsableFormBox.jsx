@@ -1,5 +1,6 @@
 // @flow
-import {FormBox, IconButton} from 'naumen-common-components';
+import {FormBox} from './FormBox/FormBox';
+import {IconButton} from 'naumen-common-components';
 import type {Props, State} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
