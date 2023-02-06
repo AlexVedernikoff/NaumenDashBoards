@@ -110,6 +110,15 @@ const getEditForm = (objectUUID: string, editFormCode: string) => {
 	});
 };
 
+const getUuidObjects = async (searchString: string) => {
+	if (process.env.NODE_ENV === 'development') {
+		return [searchString];
+	}
+
+	const {jsApi} = window;
+	return jsApi.restCallModule('mapRestSettings', 'getUuidObjects', searchString);
+};
+
 export {
 	changeResponsible,
 	changeState,
@@ -117,5 +126,6 @@ export {
 	getEditForm,
 	getParams,
 	getMapObjects,
+	getUuidObjects,
 	injectJsApi
 };

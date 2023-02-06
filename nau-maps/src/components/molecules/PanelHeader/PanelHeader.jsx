@@ -21,12 +21,12 @@ export class PanelHeader extends Component<Props> {
 	};
 
 	renderText = () => {
-		const {name, searchText, showSingleObject} = this.props;
+		const {name, searchQuery, showSingleObject} = this.props;
 		const props = {
 			className: styles.text
 		};
 
-		let value = showSingleObject || searchText ? 'Показать полный список' : name;
+		let value = showSingleObject || searchQuery ? 'Показать полный список' : name;
 
 		if (value.length > 30) {
 			props['data-tip'] = value;

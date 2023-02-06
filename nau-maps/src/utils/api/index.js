@@ -6,7 +6,8 @@ import {
 	getContext,
 	getEditForm,
 	getMapObjects,
-	getParams
+	getParams,
+	getUuidObjects
 } from './context';
 import client from './client';
 
@@ -18,5 +19,6 @@ export {
 	getContext,
 	getEditForm,
 	getMapObjects,
-	getParams
+	getParams,
+	getUuidObjects
 };

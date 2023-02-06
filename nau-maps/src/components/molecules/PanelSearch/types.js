@@ -1,12 +1,12 @@
 // @flow
-type OwnProps = {
-	header: string
-};
+type OwnProps = {};
 
 export type ConnectedProps = {
-	listName: string
+	searchQuery: string
 };
 
-export type ConnectedFunctions = {};
+export type ConnectedFunctions = {
+	searchMapObject: (searchQuery: string) => {}
+};
 
 export type Props = OwnProps & ConnectedProps & ConnectedFunctions;

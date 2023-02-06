@@ -7,6 +7,7 @@ export class PanelPointContentValue extends Component<Props> {
 	constructor (props: Props) {
 		super(props);
 
+		this.maxLengthText = 255;
 		this.state = {
 			viewTextFull: false
 		};
@@ -17,7 +18,7 @@ export class PanelPointContentValue extends Component<Props> {
 	};
 
 	truncate = (str, n) => {
-		return str.length > n && !this.state.viewTextFull ? str.substr(0, n - 1) : str;
+		return str.length > n && !this.state.viewTextFull ? str.substring(0, n) : str;
 	};
 
 	renderTextFull () {
@@ -27,7 +28,7 @@ export class PanelPointContentValue extends Component<Props> {
 
 	renderValue () {
 		const {value: {label, url}} = this.props;
-		const text = this.truncate(label, 255);
+		const text = this.truncate(label, this.maxLengthText);
 
 		if (url) {
 			const props = {
@@ -48,7 +49,7 @@ export class PanelPointContentValue extends Component<Props> {
 		return (
 			<div>
 				{this.renderValue()}
-				{label.length > 255 && this.renderTextFull()}
+				{label.length > this.maxLengthText && this.renderTextFull()}
 			</div>
 		);
 	}

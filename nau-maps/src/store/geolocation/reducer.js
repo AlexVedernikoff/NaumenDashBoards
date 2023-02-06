@@ -91,7 +91,7 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 			return {
 				...state,
 				searchObjects: [],
-				searchText: '',
+				searchQuery: '',
 				showSingleObject: false
 			};
 		case GEOLOCATION_EVENTS.SET_SINGLE_POINT:
@@ -156,7 +156,7 @@ const reducer = (state: GeolocationState = initialGeolocationState, action: Geol
 		case GEOLOCATION_EVENTS.SET_SEARCH_TEXT:
 			return {
 				...state,
-				searchText: action.payload
+				searchQuery: action.payload
 			};
 		case GEOLOCATION_EVENTS.SET_SEARCH_POINTS:
 			return {

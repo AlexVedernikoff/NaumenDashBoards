@@ -7,17 +7,17 @@ import {setSingleObject, toggleMapContextMenu} from 'store/geolocation/actions';
 const props = (state: AppState, props: OwnProps): ConnectedProps => {
 	const {geolocation} = state;
 	const {part} = props;
-	const {params, showSingleObject, singleObject} = geolocation;
-	const data = {
+	const {params, searchObjects, showSingleObject, singleObject} = geolocation;
+	const line = {
 		data: part.data,
 		geoposition: part.geopositions[0],
 		type: part.type
 	};
-	const active = (showSingleObject && singleObject) ? checkActivePoint(data, singleObject) : false;
+	const active = checkActivePoint(line, singleObject, showSingleObject, searchObjects);
 
 	return {
 		active,
-		color: part.data.color || params.colorPart
+		color: part.color || params.colorPart
 	};
 };
 
