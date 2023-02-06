@@ -22,6 +22,7 @@ import ru.naumen.core.server.script.api.DbApi$Query
 import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 import ru.naumen.core.server.script.api.ISelectClauseApi
+import ru.naumen.core.server.script.api.IWhereClauseApi
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 
@@ -726,26 +727,33 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 else if(lastParameterAttributeType in AttributeType.HAS_UUID_TYPES)
                 {
-                    String columnStringValue = LinksAttributeMarshaller.marshal(
-                        attributeChains.takeWhile {
-                            it.type in AttributeType.HAS_UUID_TYPES
-                        }.code.with(this.&replaceMetaClassCode).join('.'),
-                        DashboardQueryWrapperUtils.UUID_CODE
-                    ).toString()
+                    if (attributeCodes.contains('value') && !totalValueCriteria &&
+                        parameter.attribute.property.equals(AttributeType.TOTAL_VALUE_TYPE))
+                    {
+                        column = sc.property(criteriaForColumn, 'test')
+                    }
+                    else
+                    {
+                        String columnStringValue = LinksAttributeMarshaller.marshal(
+                            attributeChains.takeWhile {
+                                it.type in AttributeType.HAS_UUID_TYPES
+                            }.code.with(this.&replaceMetaClassCode).join('.'),
+                            DashboardQueryWrapperUtils.UUID_CODE
+                        ).toString()
 
-                    Object columnFirst = sc.property(criteriaForColumn, attributeCodes)
-                    Object columnSecond = sc.property(criteriaForColumn, columnStringValue)
+                        Object columnFirst = sc.property(criteriaForColumn, attributeCodes)
+                        Object columnSecond = sc.property(criteriaForColumn, columnStringValue)
 
-                    column = sc.selectCase()
-                               .when(api.whereClause.isNull(columnSecond), columnFirst)
-                               .otherwise(
-                                   sc.concat(
-                                       columnFirst,
-                                       sc.constant(LinksAttributeMarshaller.delimiter),
-                                       columnSecond
+                        column = sc.selectCase()
+                                   .when(api.whereClause.isNull(columnSecond), columnFirst)
+                                   .otherwise(
+                                       sc.concat(
+                                           columnFirst,
+                                           sc.constant(LinksAttributeMarshaller.delimiter),
+                                           columnSecond
+                                       )
                                    )
-                               )
-
+                    }
                     criteria.addGroupColumn(column)
                     criteria.addColumn(column)
                 }
@@ -1368,6 +1376,49 @@ class QueryWrapper implements CriteriaWrapper
         }
     }
 
+    /**
+     * Метод получения незаполненных данных для динамических атрибутов
+     * @param criteriaBlankDataForDynamicAttributes - критерия для незаполненых данных
+     * @param requestHasOneNoneAggregation - флаг наличия N/A агрегации
+     * @param diagramType - тип диаграммы
+     * @param hasBreakdown - флаг наличия разбивки
+     * @param ignoreParameterLimit - флаг игнорирования лимита параметра
+     * @param paginationSettings - настройки пагинации
+     * @param templateUUID - ключ шаблона
+     * @return список незаполненных данных
+     */
+    List getBlankDataForDynamicElements(IApiCriteria criteriaBlankDataForDynamicAttributes,
+                                        Boolean requestHasOneNoneAggregation,
+                                        DiagramType diagramType,
+                                        Boolean hasBreakdown,
+                                        Boolean ignoreParameterLimit,
+                                        PaginationSettings paginationSettings,
+                                        String templateUUID)
+    {
+        ISelectClauseApi sc = api.selectClause
+        IWhereClauseApi w = api.whereClause
+
+        String totalValueFormatKey =
+            DashboardUtils.getFormatKeyForTemplateOfDynamicAttribute(templateUUID)
+        IApiCriteria totalValueCriteria =
+            criteriaBlankDataForDynamicAttributes.subquery().addSource(totalValueFormatKey)
+        IApiCriteria linkedScId = sc.property(totalValueCriteria, 'linkedSc.id')
+        totalValueCriteria.addColumn(linkedScId)
+        totalValueCriteria.add(api.filters.attrValueEq('linkTemplate', templateUUID))
+                          .add(w.isNotNull(linkedScId))
+
+        criteriaBlankDataForDynamicAttributes.add(w.notIn(sc.property('id'), totalValueCriteria))
+        return execute(
+            criteriaBlankDataForDynamicAttributes,
+            diagramType,
+            hasBreakdown,
+            ignoreParameterLimit,
+            paginationSettings
+        ).collect {
+            requestHasOneNoneAggregation || it in String ? [it] : it
+        }
+    }
+
     private Closure getAggregation(Aggregation type)
     {
         Closure getMessage = { Aggregation aggregationType -> messageProvider.getMessage(NOT_SUPPORTED_AGGREGATION_TYPE_ERROR, locale, aggregationType: aggregationType)}
@@ -1492,6 +1543,8 @@ class DashboardQueryWrapperUtils
         Source requestDataSource  =  assigningCorrectSource(requestData, diagramType, apiMetainfo)
         QueryWrapper wrapper = QueryWrapper.build(requestDataSource, templateUUID)
         def criteria = wrapper.criteria
+        QueryWrapper wrapperBlankData = QueryWrapper.build(requestDataSource)
+        IApiCriteria criteriaBlankDataForDynamicAttributes= wrapperBlankData.criteria
         Boolean totalValueCriteria = false
         wrapper.locale = currentUserLocale
         locale = currentUserLocale
@@ -1647,7 +1700,58 @@ class DashboardQueryWrapperUtils
         Boolean requestHasOneNoneAggregation = clonedAggregations?.count {
             it?.type == Aggregation.NOT_APPLICABLE
         } == 1 && clonedAggregations?.size() == 1 && clonedGroups.size() == 0
-        return wrapper.getResult(requestHasOneNoneAggregation, diagramType, hasBreakdown, ignoreParameterLimit, paginationSettings)
+        Boolean onlyFilledAndHasDynamicElements = !onlyFilled && totalValueCriteria
+        List<List> totalList = []
+        totalList.addAll(
+            wrapper.getResult(
+                requestHasOneNoneAggregation,
+                diagramType,
+                hasBreakdown,
+                ignoreParameterLimit,
+                paginationSettings
+            )
+        )
+        if (onlyFilledAndHasDynamicElements)
+        {
+            clonedAggregations.each {
+                wrapperBlankData.processAggregation(
+                    wrapperBlankData,
+                    criteriaBlankDataForDynamicAttributes,
+                    false,
+                    requestData,
+                    it as AggregationParameter,
+                    diagramType,
+                    top,
+                    onlyFilled,
+                    sourceMetaClassCriteriaMap
+                )
+            }
+            clonedGroups.each {
+                wrapperBlankData.processGroup(
+                    wrapperBlankData,
+                    criteriaBlankDataForDynamicAttributes,
+                    false,
+                    it as GroupParameter,
+                    diagramType,
+                    requestData.source,
+                    user,
+                    sourceMetaClassCriteriaMap
+                )
+            }
+            totalList.addAll(
+                wrapperBlankData.getBlankDataForDynamicElements(
+                    criteriaBlankDataForDynamicAttributes,
+                    requestHasOneNoneAggregation,
+                    diagramType,
+                    hasBreakdown,
+                    ignoreParameterLimit,
+                    paginationSettings,
+                    templateUUID
+                )
+            )
+        }
+
+        return totalList
     }
 
     /**
