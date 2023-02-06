@@ -20,10 +20,11 @@ export class Line extends Component<Props, State> {
 	};
 
 	renderLine = () => {
-		const {part} = this.props;
+		const {active, part} = this.props;
 		const {color, data: {header = ''}, geopositions, lineStyle = 'solidLine', opacity = 100, tooltip, weight = 6} = part;
 		const opacityFloat = Number(opacity) / 100;
-		const strokeStyleArray = lineStyle === 'dashedLine' ? '7, 11' : '0, 0';
+		const weightFinish = active ? weight * 1.5 : weight;
+		const strokeStyleArray = lineStyle === 'dashedLine' ? `${weightFinish}, ${weightFinish * 2}` : '0, 0';
 		const positions = geopositions.map(geoposition => new LatLng(geoposition.latitude, geoposition.longitude));
 
 		return <Polyline
@@ -34,7 +35,7 @@ export class Line extends Component<Props, State> {
 			onContextMenu={this.showContentMenu}
 			opacity={opacityFloat}
 			positions={positions}
-			weight={weight}
+			weight={weightFinish}
 		>
 			<TooltipPoint sticky={true} title={tooltip || header} />
 		</Polyline>;

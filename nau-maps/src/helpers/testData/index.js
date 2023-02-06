@@ -505,6 +505,7 @@ export default {
 						],
 						'color': '#fb0202',
 						'header': 'Участок 2: Подвал Южная >> Щорса-37',
+						'lineStyle': 'dashedLine',
 						'options': [
 							{
 								'label': 'Площадка А',
@@ -562,8 +563,9 @@ export default {
 								'type': 'open_link'
 							}
 						],
-						'color': '',
+						'color': '#0000ff',
 						'header': 'Участок 2: Щорса-37 >> ЦОД №1',
+						'lineStyle': 'dashedLine',
 						'options': [
 							{
 								'label': 'Площадка А',

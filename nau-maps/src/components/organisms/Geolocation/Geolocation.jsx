@@ -18,8 +18,6 @@ export class Geolocation extends Component<Props> {
 	constructor (props: Props) {
 		super(props);
 
-		this.maxZoom = 18;
-		this.minZoom = 3;
 		this.mapRef = React.createRef();
 	}
 
@@ -120,7 +118,7 @@ export class Geolocation extends Component<Props> {
 	}
 
 	renderYandexMap () {
-		const {mapSelect, mapsKeyList: {yandex}, resetSingleObject, zoom} = this.props;
+		const {mapSelect, mapsKeyList: {yandex}, maxZoom, minZoom, resetSingleObject, zoom} = this.props;
 
 		return (
 			<YMaps
@@ -139,8 +137,8 @@ export class Geolocation extends Component<Props> {
 						this.yandexMapLoad(e);
 					}}
 					options={{
-						maxZoom: this.maxZoom,
-						minZoom: this.minZoom
+						maxZoom,
+						minZoom
 					}}
 				>
 					<PointsList typeMap={mapSelect} />
@@ -150,14 +148,14 @@ export class Geolocation extends Component<Props> {
 	}
 
 	renderOpenMap () {
-		const {mapSelect, resetSingleObject, zoom} = this.props;
+		const {mapSelect, maxZoom, minZoom, resetSingleObject, zoom} = this.props;
 
 		return (
 			<LeafletMap
 				center={[0, 0]}
 				className={styles.mapContainer}
-				maxZoom={this.maxZoom}
-				minZoom={this.minZoom}
+				maxZoom={maxZoom}
+				minZoom={minZoom}
 				onClick={resetSingleObject}
 				onzoomend={this.handleChangeAutoZoom}
 				ref={this.mapRef}

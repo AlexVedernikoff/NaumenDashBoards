@@ -10,7 +10,7 @@ import getLatLngBounds from 'helpers/bound';
  */
 export const props = (state: AppState): ConnectedProps => {
 	const {geolocation} = state;
-	const {controls: {zoom}, goToElement, mapObjects, mapSelect, mapsKeyList, showSingleObject, singleObject, timeUpdate} = geolocation;
+	const {controls: {maxZoom, minZoom, zoom}, goToElement, mapObjects, mapSelect, mapsKeyList, showSingleObject, singleObject, timeUpdate} = geolocation;
 	const bounds = mapObjects && mapObjects.length ? mapObjects : [];
 
 	return {
@@ -18,6 +18,8 @@ export const props = (state: AppState): ConnectedProps => {
 		goToElement,
 		mapSelect,
 		mapsKeyList,
+		maxZoom,
+		minZoom,
 		showSingleObject,
 		singleObject,
 		timeUpdate,

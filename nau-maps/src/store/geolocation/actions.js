@@ -1,7 +1,7 @@
 // @flow
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
 import {GEOLOCATION_EVENTS} from 'store/geolocation/constants';
-import {getContext, getEditForm, getMapObjects, getParams} from 'utils/api';
+import {getContext, getEditForm, getMapObjects, getParams, getUuidObjects} from 'utils/api';
 import type {GroupCode, Point, PointType} from 'types/point';
 import {notify} from 'helpers/notify';
 import testData from 'helpers/testData';
@@ -47,7 +47,7 @@ const fetchGeolocation = (): ThunkAction => async (dispatch: Dispatch, getState:
 
 		const nauMapsMapLastSelect = localStorage.getItem('nauMapsMapLastSelect');
 
-		if (nauMapsMapLastSelect && mapApiKey.hasOwnProperty(nauMapsMapLastSelect)) {
+		if (nauMapsMapLastSelect && Object.prototype.hasOwnProperty.call(mapApiKey, nauMapsMapLastSelect)) {
 			dispatch(setMapPanel(nauMapsMapLastSelect));
 		}
 
@@ -77,15 +77,13 @@ const showEditForm = (objectUUID: string, codeEditingForm: string): ThunkAction 
 	}
 };
 
-const setSearchText = (payload: string) => ({
-	payload,
-	type: GEOLOCATION_EVENTS.SET_SEARCH_TEXT
-});
-
 const zoomIn = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
-		const {controls: {zoom}} = getState().geolocation;
-		dispatch(changeZoom(zoom + 1));
+		const {controls: {maxZoom, zoom}} = getState().geolocation;
+
+		if (zoom < maxZoom) {
+			dispatch(changeZoom(zoom + 1));
+		}
 	} catch (error) {
 		notify('error', 'error');
 		dispatch(recordGeolocationdError(error));
@@ -94,8 +92,11 @@ const zoomIn = (): ThunkAction => async (dispatch: Dispatch, getState: GetState)
 
 const zoomOut = (): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 	try {
-		const {controls: {zoom}} = getState().geolocation;
-		dispatch(changeZoom(zoom - 1));
+		const {controls: {minZoom, zoom}} = getState().geolocation;
+
+		if (zoom > minZoom) {
+			dispatch(changeZoom(zoom - 1));
+		}
 	} catch (error) {
 		notify('error', 'error');
 		dispatch(recordGeolocationdError(error));
@@ -135,10 +136,30 @@ const setSingleObject = (data: Point) => ({
 	type: GEOLOCATION_EVENTS.SET_SINGLE_POINT
 });
 
-const setSearchObjects = (data: Point[]) => ({
-	payload: data,
-	type: GEOLOCATION_EVENTS.SET_SEARCH_POINTS
-});
+const searchMapObject = (searchQuery: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+	try {
+		const uuids = await getUuidObjects(searchQuery);
+		const { mapObjects } = getState().geolocation;
+
+		if (uuids) {
+			const entities = mapObjects.filter(({data: { uuid }}) => {
+				return uuids.includes(uuid);
+			});
+
+			dispatch({
+				payload: entities,
+				type: GEOLOCATION_EVENTS.SET_SEARCH_POINTS
+			});
+		}
+	} catch (error) {
+		dispatch(recordGeolocationdError(error));
+	}
+
+	dispatch({
+		payload: searchQuery,
+		type: GEOLOCATION_EVENTS.SET_SEARCH_TEXT
+	});
+};
 
 const setMapPanel = (map: string) => ({
 	payload: map,
@@ -206,11 +227,10 @@ export {
 	resetAllGroups,
 	resetSingleObject,
 	selectAllGroups,
-	setSearchObjects,
 	setSingleObject,
 	setMapPanel,
 	setTab,
-	setSearchText,
+	searchMapObject,
 	showEditForm,
 	toggleFilter,
 	toggleGroup,

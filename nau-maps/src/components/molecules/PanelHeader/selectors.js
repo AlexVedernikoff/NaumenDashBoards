@@ -6,7 +6,7 @@ import {setSingleObject, setTab} from 'store/geolocation/actions';
 const props = (state: AppState): ConnectedProps => {
 	return {
 		name: state.geolocation.params.listName,
-		searchText: state.geolocation.searchText,
+		searchQuery: state.geolocation.searchQuery,
 		showSingleObject: state.geolocation.showSingleObject
 	};
 };

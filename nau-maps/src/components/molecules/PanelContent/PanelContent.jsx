@@ -17,21 +17,17 @@ export class PanelContent extends Component<Props> {
 	};
 
 	render () {
-		const {points, searchObjects, searchText, showSingleObject, singleObject} = this.props;
+		const {points, searchObjects, searchQuery, showSingleObject, singleObject} = this.props;
 
-		if (showSingleObject) {
+		if (searchObjects.length) {
+			return searchObjects.map(this.renderObject);
+		} else if (showSingleObject) {
 			return this.renderObject(singleObject, singleObject.data.uuid);
+		} else if (searchQuery) {
+			return this.renderNoSearch();
+		} else {
+			return points.map(this.renderObject);
 		}
-
-		if (searchText) {
-			if (searchObjects.length) {
-				return searchObjects.map(this.renderObject);
-			} else {
-				return this.renderNoSearch();
-			}
-		}
-
-		return points.map(this.renderObject);
 	}
 }
 

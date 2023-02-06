@@ -11,6 +11,8 @@ export const initialGeolocationState: GeolocationState = {
 	controls: {
 		filterOpen: false,
 		mapContentMenuOpen: false,
+		maxZoom: 18,
+		minZoom: 3,
 		panelMapOpen: false,
 		panelOpen: true,
 		zoom: 10
@@ -33,7 +35,7 @@ export const initialGeolocationState: GeolocationState = {
 		updatePointsMode: 'getMapObjects'
 	},
 	searchObjects: [],
-	searchText: '',
+	searchQuery: '',
 	showSingleObject: false,
 	singleObject: null,
 	staticGroups: [],

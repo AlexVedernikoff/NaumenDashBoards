@@ -18,9 +18,10 @@ class Line extends Component<Props, State> {
 	};
 
 	renderLine = () => {
-		const {part} = this.props;
+		const {active, part} = this.props;
 		const {color, data: {header = ''}, geopositions, lineStyle = 'solidLine', opacity = 100, tooltip, weight = 6} = part;
 		const opacityFloat = Number(opacity) / 100;
+		const weightFinish = active ? weight * 1.5 : weight;
 		const strokeStyleArray = lineStyle === 'dashedLine' ? [1, 2] : [0, 0];
 		const positions = geopositions.map(geoposition => [geoposition.latitude, geoposition.longitude]);
 
@@ -34,7 +35,7 @@ class Line extends Component<Props, State> {
 				opacity: opacityFloat,
 				strokeColor: color,
 				strokeStyle: strokeStyleArray,
-				strokeWidth: weight
+				strokeWidth: weightFinish
 			}}
 			properties={{
 				hintContent: tooltip || header
