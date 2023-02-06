@@ -205,7 +205,11 @@ const Gantt = (props: Props) => {
 			}
 		});
 
-		gantt.config.layout = config;
+		if (gantt.config.columns.length >= 6) {
+			gantt.config.layout = config;
+			gantt.config.grid_elastic_columns = 'min-width';
+		}
+
 		gantt.config.auto_scheduling = true;
 		gantt.config.autoscroll = true;
 		gantt.config.auto_scheduling = true;
@@ -223,7 +227,6 @@ const Gantt = (props: Props) => {
 		gantt.config.readonly = true;
 		gantt.config.show_unscheduled = true;
 		gantt.config.sort = true;
-		gantt.config.grid_elastic_columns = 'min-width';
 
 		gantt.config.round_dnd_dates = !!store.APP.multiplicityCheckbox;
 
@@ -736,7 +739,7 @@ const Gantt = (props: Props) => {
 				editor: item.editor,
 				hide: !item.show,
 				label: item.title + `<div id="${item.code}"></div>`,
-				min_width: 200,
+				min_width: gantt.config.columns.length >= 6 ? 200 : 0,
 				name: item.code,
 				resize: true,
 				width: '*'
@@ -797,7 +800,14 @@ const Gantt = (props: Props) => {
 			setShowMenu(false);
 		}
 
-		return <CheckedMenu items={items} onCheck={checkItemMenuHide} onToggle={() => setShowMenu(!showMenu)} position={position} />;
+		return (
+			<CheckedMenu
+				items={items}
+				onCheck={checkItemMenuHide}
+				onToggle={() => setShowMenu(!showMenu)}
+				position={position}
+			/>
+		);
 	};
 
 	const renderModalTask = () => {
