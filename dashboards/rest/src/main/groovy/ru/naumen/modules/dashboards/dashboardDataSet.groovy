@@ -5018,8 +5018,9 @@
                         }
                         labels = getTotalLabelsForDiagram(labels, groupFormat, format, changeLabels, reverseLabels)
                         standardDiagram = new StandardDiagram(labels: labels, series: series, countTotals: countTotals)
-
-                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR && widgetSettings?.sorting?.type == SortingType.ASC)
+                        List seriesWithZero = series.data[1]
+                        Number checkOnNull = seriesWithZero.count(0)
+                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR && widgetSettings?.sorting?.type == SortingType.ASC && checkOnNull < 5)
                         {
                             List<ItemWrapper> arrWrapper = series.findResult {it.data}.withIndex().collect { value, index ->
                                 new ItemWrapper(value, labels[index])
@@ -5031,7 +5032,7 @@
                             standardDiagram = new StandardDiagram(labels: arrWrapper.parameterValue, series: series, countTotals: countTotals)
                             return standardDiagram
                         }
-                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR && widgetSettings?.sorting?.type == SortingType.DESC)
+                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR && widgetSettings?.sorting?.type == SortingType.DESC && checkOnNull < 5)
                         {
                             seriesSort(series, widgetSettings)
                         }
