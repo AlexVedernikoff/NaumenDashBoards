@@ -79,9 +79,34 @@
 		}
 	}
 
+	.buttonSaveColors {
+		font-weight: 500;
+		padding: 8px 20px 9px;
+		width: 222px;
+
+		&:active, &:focus {
+			background-color: #2f6b99;
+		}
+		
+		&:hover {
+			background-color: #3578ad;
+		}
+
+		&::before {
+			content: none !important;
+		}
+	}
+
+	.colorPanel {
+		border-top: 1px solid #EBEBEB;
+		padding-top: 10px;
+		margin-bottom: 0px;
+		margin-top: 10px;
+	}
+
 	.datepicker {
-		position: absolute;
 		margin-top: -35px;
+		position: absolute;
 		z-index: 2;
 	}
 
@@ -189,9 +214,11 @@
 	}
 
 	.select {
-		padding-bottom: 12px;
-		padding-top: 4px;
-		width: 100%;
+		border-bottom: 1px solid #EBEBEB;
+		padding-bottom: 10px;
+		margin-bottom: 0px;
+		margin-top: 10px;
+		width: 100%;	
 	}
 
 	.bottom {
@@ -273,7 +300,6 @@
 	}
 
 	.content {
-		padding-right: 8px;
 		direction: ltr;
 	}
 

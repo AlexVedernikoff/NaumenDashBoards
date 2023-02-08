@@ -43,6 +43,7 @@ import {
 } from 'store/App/actions';
 import ShowBox from 'src/components/atoms/ShowBox';
 import styles from './styles.less';
+import Tabs from './components/Tabs';
 import {v4 as uuidv4} from 'uuid';
 import Work from './components/Work';
 
@@ -418,9 +419,7 @@ const FormPanel = (props: Props) => {
 		setShowModal(!showModal);
 	};
 
-	const renderHeaderCommonBlock = () => (
-		<h3 className={styles.contentTitle}>Общий блок</h3>
-	);
+	const renderHeaderCommonBlock = () => <Tabs />;
 
 	const renderSelectCommonBlock = () => (
 		<div className={styles.select}>
@@ -763,10 +762,9 @@ const FormPanel = (props: Props) => {
 	};
 
 	const renderButtonColorPanel = () => (
-		<div>
-			<Button className={styles.button} onClick={toggleModal(true)} variant="ADDITIONAL">
-				<div className={styles.bigButton}> </div>
-				Открыть панель цветов
+		<div className={styles.colorPanel}>
+			<Button className={`${styles.button} ${styles.buttonSaveColors}`} onClick={toggleModal(true)} variant="INFO">
+				Настроить цветовую палитру
 			</Button>
 		</div>
 	);
@@ -820,18 +818,20 @@ const FormPanel = (props: Props) => {
 	};
 
 	const renderCommonBlock = () => {
+		const {activeTab} = store.APP;
 		return (
 			<div className={styles.field}>
-				{renderHeaderCommonBlock()}
-				{renderSelectCommonBlock()}
-				{renderSelectInterval()}
-				{renderButtonColorPanel()}
-				{renderViewWork()}
-				{renderCheckboxes()}
-				<div className={styles.form} id='panelSettingsButton'>
+				{activeTab === 'styles' && <div>
+					{renderSelectCommonBlock()}
+					{renderSelectInterval()}
+					{renderViewWork()}
+					{renderCheckboxes()}
+					{renderButtonColorPanel()}
+				</div>}
+				{activeTab === 'params' && <div className={styles.form} id='panelSettingsButton'>
 					{renderButtonCommonBlock()}
 					{renderForm()}
-				</div>
+				</div>}
 			</div>
 		);
 	};
@@ -977,8 +977,9 @@ const FormPanel = (props: Props) => {
 
 	return (
 		<div className={styles.content}>
+			{renderHeaderCommonBlock()}
 			{renderCommonBlock()}
-			{resources.map((item, index) => getFormByType(item, index))}
+			{store.APP.activeTab === 'params' && resources.map((item, index) => getFormByType(item, index))}
 			{renderError()}
 			{renderColorPanel()}
 			{renderBottom()}

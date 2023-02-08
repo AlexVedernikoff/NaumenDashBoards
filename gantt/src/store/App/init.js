@@ -3,6 +3,7 @@ import type {AppAction, AppState} from './types';
 import {APP_EVENTS, USER_ROLES} from './constants';
 
 export const initialAppState: AppState = {
+	activeTab: 'params',
 	attributesMap: {
 		employee: [],
 		serviceCall$PMTask: []
