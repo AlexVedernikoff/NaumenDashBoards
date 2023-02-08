@@ -6,6 +6,11 @@ import {defaultAppAction, initialAppState} from './init';
 
 const reducer = (state: AppState = initialAppState, action: AppAction = defaultAppAction): AppState => {
 	switch (action.type) {
+		case APP_EVENTS.SET_ACTIVE_TAB:
+			return {
+				...state,
+				activeTab: action.payload
+			};
 		case APP_EVENTS.SET_IS_VERSIONS:
 			return {
 				...state,

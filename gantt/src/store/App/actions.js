@@ -1013,6 +1013,11 @@ const setEntityList = (payload: boolean) => ({
 	type: APP_EVENTS.SET_ENTITY_LIST
 });
 
+const setActiveTab = (payload: string) => ({
+	payload,
+	type: APP_EVENTS.SET_ACTIVE_TAB
+});
+
 const setIsVersions = (payload: boolean) => ({
 	payload,
 	type: APP_EVENTS.SET_IS_VERSIONS
@@ -1066,6 +1071,7 @@ export {
 	setPersonalView,
 	setRangeTime,
 	setResourceSettings,
+	setActiveTab,
 	setUsers,
 	setTextWork,
 	showLoaderSettings,
