@@ -2603,6 +2603,10 @@ class PivotTableBody extends TableBody
      * Цвет рамки параметра
      */
     String parameterRowColor
+    /**
+     * Флаг на скрытие групп по умолчанию в сводной таблице
+     */
+    Boolean collapse = true
 }
 
 /**
