@@ -19,7 +19,8 @@ import static groovy.json.JsonOutput.toJson
 import groovy.json.JsonSlurper
 import groovy.transform.Field
 import java.sql.Clob
-
+import groovy.json.JsonOutput
+import ru.naumen.core.server.hibernate.DDLTool
 
 @Field @Lazy @Delegate DashboardConfig dashboardConfig = new DashboardConfigImpl(binding)
 
@@ -193,20 +194,173 @@ class DashboardConfigService
     private static final String FILE_FORMAT = 'json'
     private static final String FILE_DESCRIPTION = 'Описание'
 
+    private static boolean LOGGING_IS_ENABLED = true
+    private static final String LOGGING_PREFIX = "workerKeyValueStorage >>> "
     /**
      * Необходимые неймспейсы, используемые приложением
      */
     private static final Collection<String> DASHBOARDS_REQUIRED_NAMESPACES = ["custom_groups","widgets","dashboards","sources","dashboardsSources"]
 
-    private static final String GET_ALL_KEY_VALUE_STOGAGE_SQL = """
+    private static final String GET_ALL_KEY_VALUE_STORAGE_SQL = """
         SELECT name_space, key_, value
         FROM tbl_sys_keyvaluestorage
         """
-    private static final String CHECK_ON_EXIST_SQL = """
-        SELECT value
-        FROM tbl_sys_keyvaluestorage
-        WHERE name_space = '%s' AND key_ = '%s'        
-        """
+    private static final String CHECK_ON_EXIST_UNIVERSAL_SQL = """SELECT value FROM tbl_sys_keyvaluestorage
+                                                          WHERE name_space = '%s'
+                                                              AND key_ = '%s'
+                                                          FETCH FIRST 1 ROWS ONLY
+                                                          """
+    private static final String CHECK_ON_EXIST_FOR_MSSQL = """SELECT TOP 1 value FROM tbl_sys_keyvaluestorage
+                                                      WHERE name_space = '%s'
+                                                      AND key_ = '%s'"""
+
+    def log(def obj)
+    {
+        if (LOGGING_IS_ENABLED)
+        {
+            logger.info(LOGGING_PREFIX + obj.toString())
+        }
+    }
+
+    /**
+     * Метод формирует из результатов SQL запроса JSON для сохранения в файл\вывода на экран
+     * @param queryResult - результат SQL запроса
+     * @param outToConsole - выводить JSON в консоль или в файл
+     */
+    def processQueryResult(def queryResult, def outToConsole = false)
+    {
+        def resultMap = [:];
+        for (def l : queryResult)
+        {
+            def namespace = l.getAt(0);
+            if (resultMap.get(namespace) == null)
+            {
+                resultMap.put(namespace, [:]);
+            }
+            def key = l.getAt(1);
+            def value = l.getAt(2);
+            //updated: aosvalov 08.04.2020 https://naupp.naumen.ru/sd/operator/#uuid:smrmTask$93383812
+            if (value instanceof Clob)
+            {
+                resultMap.get(namespace).put(key, value.getSubString(1, (int) value.length()));
+            }
+            else
+            {
+                resultMap.get(namespace).put(key, value);
+            }
+        }
+        def resJson = toJson(resultMap)
+        if (outToConsole)
+        {
+            log("${JsonOutput.prettyPrint(resJson)}")
+            return;
+        }
+
+        def root = api.utils.findFirst('root', [:]);
+        if (!root.get(KEY_VALUE_STORAGE_ATTR_CODE).isEmpty())
+        {
+            root.get(KEY_VALUE_STORAGE_ATTR_CODE).UUID.forEach { api.utils.delete(it) }
+        }
+        api.utils.attachFile(root, KEY_VALUE_STORAGE_ATTR_CODE, FILE_TITLE, FILE_FORMAT, FILE_DESCRIPTION, resJson.getBytes());
+    }
+
+    /**
+     * Копирует все данные из таблицы tbl_sys_keyvaluestorage
+     * формирует мапку [namespace : [key : value]], и в формате json
+     * прикрепляет к атрибуту компании
+     */
+    def copyAllKeyValueStorageToFile()
+    {
+        def resQuery = executeQuery(GET_ALL_KEY_VALUE_STORAGE_SQL);
+        processQueryResult(resQuery);
+        log('success copyAllSpaceKeyValueStorage');
+    }
+
+    /**
+     * Считывает все ключи и значения из указанных неймспейсов keyValue хранилища
+     * и либо выводит их в консоль, либо сохраняет в файл
+     * @param nameSpaces список неймспейсов для копирования
+     * @param outToConsole флаг, true - выводим в консоль, иначе - в файл
+     */
+    def getNameSpacesKeyValueFromStorage(def nameSpaces = [], def outToConsole = false)
+    {
+        def sqlQuery = GET_ALL_KEY_VALUE_STORAGE_SQL;
+        if (nameSpaces)
+        {
+            sqlQuery = """SELECT name_space, key_, value
+                      FROM tbl_sys_keyvaluestorage
+                      WHERE name_space IN ('${ nameSpaces.join("','") }')
+        """;
+        }
+
+        def resQuery = executeQuery(sqlQuery);
+        processQueryResult(resQuery, outToConsole);
+        log("success copy ${nameSpaces ? nameSpaces.join(', ') : 'all'} namespaces KeyValueStorage");
+    }
+
+    /**
+     * Обновляет keyValue Storage данными из файла
+     * @param file - файл в формате json Например: [namespace : [key : value]]
+     * @param nameSpaces - список неймспейсов для обновления, если не указан - обновляем всё
+     */
+    def updateDataInKeyValueStorageFromFile(def file, def nameSpaces = [])
+    {
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        def storageRows = jsonSlurper.parseText(new String(api.utils.readFileContent(file)));
+        def total = storageRows.get('dashboards')?.size()
+        log(storageRows.values().getAt(0).keySet().size())
+        def counter = 1;
+        for (def namespaceForUpdate : storageRows.keySet())
+        {
+            if (nameSpaces && !(namespaceForUpdate in nameSpaces))
+            {
+                //Задан список неймспейсов и текущего нет в этом списке - пропускаем
+                log("Неймспейс ${namespaceForUpdate} отсутствует в списке указанных для обновления и будет пропущен!");
+                continue;
+            }
+            def mapInItteration = storageRows.get(namespaceForUpdate);
+            for (def keyForUpdate : mapInItteration.keySet())
+            {
+                def newValue = mapInItteration.get(keyForUpdate);
+                /**
+                 * Воспользовался SQL, т.к. если попробовать взять значение по ключу, то там может оказаться NULL
+                 * и тогда не понятно был ли такой ключ в неймспейсе и значение по нему было равно NULL или
+                 * такого ключа не было.
+                 */
+                log("update ${counter++}/${total}")
+                def query = String.format(getCheckOnExistSQL(), namespaceForUpdate, keyForUpdate);
+                def currentValue = api.tx.call { executeQuery(query) };
+                def resultPut = api.keyValue.put(namespaceForUpdate, keyForUpdate, newValue);
+                if (!resultPut)
+                {
+                    log("ERROR put new value = ${newValue} by key = ${keyForUpdate} in namespace = ${namespaceForUpdate}");
+                }
+                if (resultPut && currentValue.size() != 0  && !currentValue.getAt(0).equals(newValue))
+                {
+                    log("In namespace = ${namespaceForUpdate} by key = ${keyForUpdate} new value = ${newValue}")
+                }
+            }
+        }
+    }
+
+    //Определение типа БД
+    static String getCheckOnExistSQL()
+    {
+        if (DDLTool.isMSSQL())
+        {
+            return CHECK_ON_EXIST_FOR_MSSQL;
+        }
+        else
+        {
+            return CHECK_ON_EXIST_UNIVERSAL_SQL;
+        }
+    }
+
+    def executeQuery(def query)
+    {
+        def sessionFactory = beanFactory.getBean("sessionFactory")
+        return sessionFactory.getCurrentSession().createSQLQuery(query).list()
+    }
 
     /**
      * Метод компиляции  модулей в нужном порядке
@@ -616,112 +770,6 @@ class DashboardConfigService
     void setTimerStatusRefreshEnable(boolean isSetTimerRefresh = true)
     {
         beanFactory.getBean(CONFIGURATION_PROPERTIES).setTimerStatusRefreshEnable(isSetTimerRefresh)
-    }
-
-    /**
-     * Вспомогательный метод выполнения SQL-скрипта
-     * @param query SQL-скрипт
-     * @return
-     */
-    private def executeQuery(def query)
-    {
-        def sessionFactory = beanFactory.getBean("sessionFactory")
-        return sessionFactory.getCurrentSession().createSQLQuery(query).list()
-    }
-
-    /**
-     * Копирует все данные из таблицы tbl_sys_keyvaluestorage
-     * формирует словарь [namespace : [key : value]], и в формате json
-     * прикрепляет к атрибуту компании с кодом dashboard
-     */
-    void copyAllKeyValueStorageToFile()
-    {
-        def resultMap = [:]
-        def resQuery = executeQuery(GET_ALL_KEY_VALUE_STOGAGE_SQL);
-        for (def l : resQuery)
-        {
-            def namespace = l.getAt(0);
-
-            if (!DASHBOARDS_REQUIRED_NAMESPACES.contains(namespace))
-            {
-                continue
-            }
-
-            if (resultMap.get(namespace) == null)
-            {
-                resultMap.put(namespace, [:]);
-            }
-            def key = l.getAt(1);
-            def value = l.getAt(2);
-            //updated: aosvalov 08.04.2020 https://naupp.naumen.ru/sd/operator/#uuid:smrmTask$93383812
-            if (value instanceof Clob)
-            {
-                resultMap.get(namespace).put(key, value.getSubString(1, (int) value.length()));
-            }
-            else
-            {
-                resultMap.get(namespace).put(key, value);
-            }
-        }
-        def resJson = toJson(resultMap)
-        def root = api.utils.findFirst('root', [:]);
-        if (!root.get(KEY_VALUE_STORAGE_ATTR_CODE).isEmpty())
-        {
-            root.get(KEY_VALUE_STORAGE_ATTR_CODE).UUID.forEach { api.utils.delete(it) }
-        }
-        api.utils.attachFile(root, KEY_VALUE_STORAGE_ATTR_CODE, FILE_TITLE, FILE_FORMAT,
-                             FILE_DESCRIPTION, resJson.getBytes());
-        logger.info('workerKeyValueStorage >>> success copyAllSpaceKeyValueStorage');
-    }
-
-    /**
-     * Обновляет keyValue Storage данными из файла
-     * @param file - файл в формате json. Например: [namespace : [key : value]]
-     */
-    void updateDataInKeyValueStorageFromFile(def file)
-    {
-        def slurper = new JsonSlurper()
-        def contentForUpdate = slurper.parseText(new String(api.utils.readFileContent(file)));
-        def total = contentForUpdate.get('dashboards').size()
-        logger.info('workerKeyValueStorage >>> ' + contentForUpdate.values().getAt(0).keySet().size())
-        def counter = 1;
-        for (def namespaceForUpdate : contentForUpdate.keySet())
-        {
-            if (!DASHBOARDS_REQUIRED_NAMESPACES.contains(namespaceForUpdate))
-            {
-                continue
-            }
-
-            def mapInItteration = contentForUpdate.get(namespaceForUpdate);
-            for (def keyForUpdate : mapInItteration.keySet())
-            {
-                def newValue = mapInItteration.get(keyForUpdate);
-                /* Используется SQL, т.к. если попробовать взять значение по ключу, то там может
-                   оказаться NULL и тогда непонятно, был ли такой ключ в неймспейсе, и значение
-                   по нему было равно NULL, или такого ключа не было. */
-                logger.info("workerKeyValueStorage >>> update ${counter++}/${total}")
-                def query = String.format(CHECK_ON_EXIST_SQL, namespaceForUpdate, keyForUpdate);
-                def currentValue = api.tx.call {
-                    def queryResult = executeQuery(query)
-                    return queryResult.size() ? queryResult.first() : null
-                };
-                if (currentValue && Proxy.isProxyClass(currentValue.class))
-                {
-                    currentValue = currentValue.getSubString(1, (int) currentValue.length())
-                }
-                def resultPut = api.keyValue.put(namespaceForUpdate, keyForUpdate, newValue);
-                if (!resultPut)
-                {
-                    logger.info("workerKeyValueStorage >>> ERROR put new value = ${newValue} " +
-                                "by key = ${keyForUpdate} in namespace = ${namespaceForUpdate}");
-                }
-                if (resultPut && currentValue?.size() != 0  && !currentValue?.getAt(0).equals(newValue))
-                {
-                    logger.info("workerKeyValueStorage >>> In namespace = ${namespaceForUpdate} " +
-                                "by key = ${keyForUpdate} new value = ${newValue}")
-                }
-            }
-        }
     }
 
     /**
