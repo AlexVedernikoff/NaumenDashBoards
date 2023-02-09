@@ -25,6 +25,7 @@ import ru.naumen.core.server.script.api.criteria.IApiCriteria
 import ru.naumen.core.server.script.spi.ScriptDtObject
 import sun.util.calendar.ZoneInfo
 import ru.naumen.core.server.script.spi.ScriptDate
+import ru.naumen.core.server.script.api.metainfo.WorkflowWrapper
 
 @Field @Lazy @Delegate GanttDataSetController ganttDataSet = new GanttDataSetImpl()
 
@@ -105,17 +106,20 @@ class GanttDataSetService
     private static final String WORK_COLOR = '#3db9d3'
 
     /**
+     * Типы сущностей
+     */
+    private static final String MILESTONE = 'milestone'
+    private static final String PROJECT = 'project'
+    private static final String WORK = 'WORK'
+    private static final String RESOURCE = 'RESOURCE'
+
+    /**
      * Индексы цветов сущностей
      */
     private static final int WORK_COLOR_INDEX = 0
     private static final int RESOURCE_COLOR_INDEX = 2
     private static final int PROJECT_COLOR_INDEX = 4
     private static final int MILESTONE_COLOR_INDEX = 6
-    private static final int DUTY_COLOR_INDEX = 8
-    private static final int REPLACEMENT_COLOR_INDEX = 10
-    private static final int VACATION_COLOR_INDEX = 12
-    private static final int ILLNESS_INDEX = 14
-    private static final int DAYOFF_INDEX = 16
 
     /**
      * Максимальный размер выборки из БД.
@@ -155,6 +159,8 @@ class GanttDataSetService
         data.currentColorSettings = settings.currentColorSettings
         data.isPersonalDiagram = settings.isPersonalDiagram
         data.isPersonal = settings.isPersonal
+        data.isVersions = (!settings.diagramVersionsKeys.isEmpty())
+
         if (user)
         {
             data.isPersonalDiagram = settings.isPersonalDiagram
@@ -193,6 +199,8 @@ class GanttDataSetService
             {
                 data.tasks = filterTasksWithNoDateRanges(data.tasks)
             }
+            determiningCurrentPositionElement(request, data, user)
+            data.tasks = finalSortingElements(data.tasks)
         }
         return data
     }
@@ -229,9 +237,6 @@ class GanttDataSetService
             setWorkProgress(it, settings)
             setColumnDateFormats(it, timezone)
         }
-
-        determiningCurrentPositionElement(request, data, user)
-        data.tasks = finalSortingElements(data.tasks)
     }
 
     /**
@@ -292,10 +297,12 @@ class GanttDataSetService
         }
         String sequenceInformation = service.getJsonSettings(keySequencesElements)
         Collection<SequenceChartElements> sequenceElements = []
-        if (sequenceInformation)
+        LinkedListSequenceChartElements linkedListSequenceChartElements =
+            Jackson.fromJsonString(sequenceInformation, LinkedListSequenceChartElements)
+
+        if (sequenceInformation && (
+            data.tasks.size() == linkedListSequenceChartElements.elements.size()))
         {
-            LinkedListSequenceChartElements linkedListSequenceChartElements =
-                Jackson.fromJsonString(sequenceInformation, LinkedListSequenceChartElements)
             linkedListSequenceChartElements.elements.each { settingsSequenceChartElements ->
                 if (data.tasks.find {
                     it.id == settingsSequenceChartElements.workUuid
@@ -310,7 +317,7 @@ class GanttDataSetService
         else
         {
             data.tasks.eachWithIndex { currentTask, idx ->
-                if (currentTask.type == SourceType.RESOURCE || currentTask.type == 'project')
+                if (currentTask.type == SourceType.RESOURCE || currentTask.type == PROJECT)
                 {
                     SequenceChartElements sequenceChartElements = new SequenceChartElements()
                     sequenceChartElements.workUuid = currentTask.id
@@ -322,7 +329,7 @@ class GanttDataSetService
                     position++
                     sequenceElements.add(sequenceChartElements)
                 }
-                if (currentTask.type == SourceType.WORK || currentTask.type == 'milestone')
+                else if (currentTask.type == SourceType.WORK || currentTask.type == MILESTONE)
                 {
                     SequenceChartElements parentChartElements = sequenceElements.find {
                         currentTask.parent == it.workUuid
@@ -361,7 +368,7 @@ class GanttDataSetService
                     }
                 }
             }
-            LinkedListSequenceChartElements linkedListSequenceChartElements = new LinkedListSequenceChartElements()
+            linkedListSequenceChartElements = new LinkedListSequenceChartElements()
             linkedListSequenceChartElements.elements = sequenceElements
             service.saveJsonSettings(
                 keySequencesElements,
@@ -430,7 +437,7 @@ class GanttDataSetService
         return tasks.findResults {
             Boolean startAndEndDateExist = it.start_date && it.end_date
             Boolean type = it.type == SourceType.WORK
-            if (it.type in [SourceType.RESOURCE, 'milestone', 'project'])
+            if (it.type in [SourceType.RESOURCE, MILESTONE, PROJECT])
             {
                 return it
             }
@@ -453,14 +460,14 @@ class GanttDataSetService
 
         Map<String, Collection<DiagramEntity>> diagramEntitiesGroupedByMetaClassCode =
             ganttVersionsSettings.diagramEntities.groupBy {
-                it.entityUUID.split('\\$').first()
+                it.entityUUID.tokenize('$').first()
             }
 
         ganttVersionsSettings.ganttSettings.resourceAndWorkSettings.each {
             String settingsMetaClassCode = it.source.value.value
             if (settingsMetaClassCode.contains('$'))
             {
-                settingsMetaClassCode = settingsMetaClassCode.split('\\$').first()
+                settingsMetaClassCode = settingsMetaClassCode.tokenize('$').first()
             }
             Collection<DiagramEntity> diagramEntities =
                 diagramEntitiesGroupedByMetaClassCode[settingsMetaClassCode]
@@ -486,7 +493,7 @@ class GanttDataSetService
 
             diagramEntities.each { entity ->
                 Map<String, Object> task = [:]
-                if (entity.sourceType in ['WORK', 'milestone', 'project'])
+                if (entity.sourceType in [WORK, MILESTONE, PROJECT])
                 {
                     task.parent = entity.parent
                     task.datesStartDateAndEndDate = entity.datesStartDateAndEndDate
@@ -518,7 +525,7 @@ class GanttDataSetService
                     }
                 }
 
-                if (task.type == 'WORK')
+                if (task.type == WORK)
                 {
                     task << ['typeEntity': task.type]
                     task << ['textColor':
@@ -529,7 +536,7 @@ class GanttDataSetService
                                      .ganttSettings?.currentColorSettings[1]?.background ?:
                                      DEFAULT_COLOR_SETTINGS[1].color]
                 }
-                else if (task.type == 'RESOURCE')
+                else if (task.type == RESOURCE)
                 {
                     task << ['typeEntity': task.type]
                     task << ['textColor':
@@ -540,7 +547,7 @@ class GanttDataSetService
                                      .ganttSettings?.currentColorSettings[3]?.background ?:
                                      DEFAULT_COLOR_SETTINGS[3].color]
                 }
-                else if (task.type == 'project')
+                else if (task.type == PROJECT)
                 {
                     task << ['typeEntity': task.type]
                     task << ['textColor':
@@ -551,7 +558,7 @@ class GanttDataSetService
                                      .ganttSettings?.currentColorSettings[5]?.background ?:
                                      DEFAULT_COLOR_SETTINGS[5].color]
                 }
-                else if (task.type == 'milestone')
+                else if (task.type == MILESTONE)
                 {
                     task << ['typeEntity': task.type]
                     task << ['textColor':
@@ -661,7 +668,7 @@ class GanttDataSetService
             {
                 workToMerge[key] =
                     value.getHours() ? value.format('dd.MM.yyyy, HH:mm:ss', timezone) :
-                        value.format('dd.MM.yyyy')
+                        value.format('dd.MM.yyyy, 00:00:00')
             }
         }
 
@@ -705,7 +712,7 @@ class GanttDataSetService
         allWorks.each {
             if (it.parent == work.id)
             {
-                work['type'] = 'project'
+                work['type'] = PROJECT
             }
         }
     }
@@ -920,7 +927,7 @@ class GanttDataSetService
                             {
                                 attributeValue = 'нет'
                             }
-                            return [(key): updateIfMetaClass(attributeValue, valueMap.attr)]
+                            return [(key): updateIfMetaClass(attributeValue, valueMap.attr) ?: '']
                         }
 
                     if (itemMap.parent)
@@ -932,11 +939,13 @@ class GanttDataSetService
                 }
                 // Добавление данных, общих для списка.
                 resMap.each {
+                    ISDtObject currentObject = api.utils.get(it.id)
+
                     it << ['level': settings.level]
                     it << ['type': settings.type]
                     it << ['editable': true]
                     it << ['workOfLink': api.web.open(it.id)]
-                    it << ['name': null]
+                    it << ['name': currentObject.title]
                     it << ['duration': null]
                     it << ['unscheduled': null]
                     it << ['datesStartDateAndEndDate': true]
@@ -944,24 +953,49 @@ class GanttDataSetService
 
                     if (settings.type == SourceType.WORK)
                     {
-                        String subTypeOfWork = source.value.value
+                        setEntityColors(generalSettings, it, WORK_COLOR_INDEX, WORK)
 
-                        buildWorksSubTypes(it, generalSettings, subTypeOfWork)
-                        if (!isStartDate)
-                        {
-                            it << ['start_date': '']
-                        }
-                        if (!isEndDate)
-                        {
-                            it << ['end_date': '']
-                        }
-                        if (!it?.start_date && !it?.end_date)
+                        if (!it.start_date && !it.end_date)
                         {
                             it.unscheduled = true
                         }
-                        if (!it?.start_date || !it?.end_date)
+                        if (!it.start_date || !it.end_date)
                         {
                             it.duration = 1
+                        }
+                        if (!it.start_date)
+                        {
+                            it << ['start_date': '']
+                        }
+                        if (!it.end_date)
+                        {
+                            it << ['end_date': '']
+                        }
+
+                        if (milestoneAttributeName)
+                        {
+                            if (currentObject.hasProperty(milestoneAttributeName) &&
+                                currentObject[milestoneAttributeName])
+                            {
+                                WorkflowWrapper workFlowObject = api.metainfo.getMetaClass(currentObject).workflow
+                                it.type = MILESTONE
+                                String elementWithFinalStatus =
+                                    workFlowObject.getState(
+                                        currentObject.state
+                                    ).code
+                                String currentElementStatus =
+                                    workFlowObject.endState.code
+                                setEntityColors(
+                                    generalSettings,
+                                    it,
+                                    MILESTONE_COLOR_INDEX,
+                                    MILESTONE
+                                )
+                                it << ['completed': elementWithFinalStatus == currentElementStatus]
+                                it.start_date = currentObject[milestoneAttributeName]
+                                it.remove('end_date')
+                                it.remove('unscheduled')
+                            }
                         }
                     }
 
@@ -969,7 +1003,7 @@ class GanttDataSetService
                         settings.id in settingsList.parent))
                     {
                         it << ['render': (generalSettings?.viewOfNestingCheckbox) ? 'split' : null]
-                        setEntityColors(generalSettings, it, PROJECT_COLOR_INDEX, 'project')
+                        setEntityColors(generalSettings, it, PROJECT_COLOR_INDEX, PROJECT)
                     }
 
                     else if (settings.type == SourceType.RESOURCE)
@@ -978,24 +1012,7 @@ class GanttDataSetService
                         setEntityColors(generalSettings, it, RESOURCE_COLOR_INDEX, settings.type)
                     }
 
-                    ISDtObject currentObject = api.utils.get(it.id)
-                    if (milestoneAttributeName && currentObject.hasProperty(milestoneAttributeName) &&
-                        currentObject[milestoneAttributeName])
-                    {
-                        String elementWithFinalStatus =
-                            api.metainfo.getMetaClass(currentObject).workflow.getState(
-                                currentObject.state
-                            ).code
-                        String currentElementStatus =
-                            api.metainfo.getMetaClass(currentObject).workflow.endState.code
-                        it << ['type': 'milestone']
-                        setEntityColors(generalSettings, it, MILESTONE_COLOR_INDEX, 'milestone')
-                        it << ['completed': elementWithFinalStatus == currentElementStatus]
-                        it.start_date = currentObject[milestoneAttributeName]
-                        it.remove('end_date')
-                        it.remove('unscheduled')
-                    }
-                    if (settings.type == SourceType.WORK || it.type == 'milestone')
+                    if (settings.type == SourceType.WORK || it.type == MILESTONE)
                     {
                         it << ['positionElement': null]
                     }
@@ -1104,7 +1121,7 @@ class GanttDataSetService
 
         return result.collect {
             String entityUUID = it.first()
-            String metaClassCode = entityUUID.split('\\$').first()
+            String metaClassCode = entityUUID.tokenize('$').first()
             if (!statusesDataGroupedByClassCode[metaClassCode])
             {
                 statusesDataGroupedByClassCode[metaClassCode] =
@@ -1198,125 +1215,55 @@ class GanttDataSetService
     private static Collection<EntityColorSettings> initDefaultColors()
     {
         return [
-            new EntityColorSettings(BLACK_COLOR, null, 'WORK', 'WORKCOLOR', 'Цвет текста работ'),
+            new EntityColorSettings(BLACK_COLOR, null, WORK, 'WORKCOLOR', 'Цвет текста работ'),
             new EntityColorSettings(
                 null,
                 WORK_COLOR,
-                'WORK',
+                WORK,
                 'WORKBACKGROUND',
                 'Цвет полос работ'
             ),
             new EntityColorSettings(
                 BLACK_COLOR,
                 null,
-                'RESOURCE',
+                RESOURCE,
                 'RESOURCECOLOR',
                 'Цвет текста ресурсов'
             ),
             new EntityColorSettings(
                 null,
                 RESOURCE_COLOR,
-                'RESOURCE',
+                RESOURCE,
                 'RESOURCEBACKGROUND',
                 'Цвет полос ресурсов'
             ),
             new EntityColorSettings(
                 BLACK_COLOR,
                 null,
-                'project',
+                PROJECT,
                 'PROJECTCOLOR',
                 'Цвет текста проектов'
             ),
             new EntityColorSettings(
                 null,
                 RESOURCE_COLOR,
-                'project',
+                PROJECT,
                 'PROJECTBACKGROUND',
                 'Цвет полос проектов'
             ),
             new EntityColorSettings(
                 BLACK_COLOR,
                 null,
-                'milestone',
+                MILESTONE,
                 'MILESTONECOLOR',
                 'Цвет текста вех'
             ),
             new EntityColorSettings(
                 null,
                 BLACK_COLOR,
-                'milestone',
+                MILESTONE,
                 'MILESTONEBACKGROUND',
                 'Цвет полос вех'
-            ),
-            new EntityColorSettings(
-                BLACK_COLOR,
-                null,
-                'duty',
-                'DUTYCOLOR',
-                'Цвет текста дежурств'
-            ),
-            new EntityColorSettings(
-                null,
-                WORK_COLOR,
-                'duty',
-                'DUTYBACKGROUND',
-                'Цвет полос дежурств'
-            ),
-            new EntityColorSettings(
-                BLACK_COLOR,
-                null,
-                'replacement',
-                'REPLACEMENTCOLOR',
-                'Цвет текста замещений'
-            ),
-            new EntityColorSettings(
-                null,
-                WORK_COLOR,
-                'replacement',
-                'REPLACEMENTBACKGROUND',
-                'Цвет полос замещений'
-            ),
-            new EntityColorSettings(
-                BLACK_COLOR,
-                null,
-                'vacation',
-                'VACATIONCOLOR',
-                'Цвет текста отпусков'
-            ),
-            new EntityColorSettings(
-                null,
-                WHITE_COLOR,
-                'vacation',
-                'VACATIONBACKGROUND',
-                'Цвет полос отпусков'
-            ),
-            new EntityColorSettings(
-                BLACK_COLOR,
-                null,
-                'illness',
-                'ILLNESSCOLOR',
-                'Цвет текста больничных'
-            ),
-            new EntityColorSettings(
-                null,
-                WHITE_COLOR,
-                'illness',
-                'ILLNESSBACKGROUND',
-                'Цвет полос больничных'
-            ),
-            new EntityColorSettings(
-                BLACK_COLOR,
-                null,
-                'dayOff',
-                'DAYOFFCOLOR',
-                'Цвет текста отгулов'
-            ),
-            new EntityColorSettings(
-                null,
-                WHITE_COLOR,
-                'dayOff',
-                'DAYOFFBACKGROUND',
-                'Цвет полос отгулов'
             )
         ]
     }

@@ -180,7 +180,7 @@ interface GanttSettingsController
      * @param requestContent - тело запроса, содержащее информацию о цветах сущностей
      * @return настройки, содержащие информацию о цветах сущностей, отправленные в хранилище
      */
-    String saveGanttColorSettings(Map<String, Object> requestContent)
+    String saveGanttColorSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
 }
 
 @InheritConstructors
@@ -333,11 +333,11 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String saveGanttColorSettings(Map<String, Object> requestContent)
+    String saveGanttColorSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         SaveGanttColorSettingsRequest request = new ObjectMapper()
             .convertValue(requestContent, SaveGanttColorSettingsRequest)
-        return toJson(service.saveGanttColorSettings(request))
+        return toJson(service.saveGanttColorSettings(request, user))
     }
 }
 
@@ -546,120 +546,133 @@ class GanttSettingsService
             ganttSettings.resourceAndWorkSettings.each { resourceAndWorkSetting ->
                 if (resourceAndWorkSetting.type == SourceType.WORK)
                 {
-                    resourceAndWorkSetting.attributeSettings.each { attributeSetting ->
+                    resourceAndWorkSetting.attributeSettings.eachWithIndex { attributeSetting, indx ->
                         if (attributeSetting.code ==
                             columnSetting.code && attributeSetting.attribute.type)
                         {
-                            String metaClassFqn = attributeSetting.attribute.metaClassFqn
-                            String attributeCode = attributeSetting.attribute.code
-                            String type = attributeSetting.attribute.type
-                            columnSetting.editor.type = attributeSetting.attribute.type
-                            IAttributeWrapper getAtribute =
-                                api.metainfo.getMetaClass(metaClassFqn).getAttribute(attributeCode)
-                            switch (columnSetting.editor.type)
+                            //TODO оптимизировать
+                            if (indx == 0)
                             {
-                                case AttributeType.STRING_TYPE:
-                                    columnSetting.editor.map_to = 'text'
-                                    columnSetting.editor.options = null
-                                    columnSetting.editor.type = 'text'
-                                    break
-                                case AttributeType.CATALOG_ITEM_SET_TYPE:
-                                case AttributeType.CATALOG_ITEM_TYPE:
-                                    attributeCode = attributeSetting.attribute.property
-                                    columnSetting.editor.type = TYPE_SELECT
-                                    Set elementsDirectory = []
-                                    api.utils.find(attributeCode, [:]).findAll().each {
-                                        elementsDirectory.add(
-                                            ['label': it.title,
-                                             'key'  : it.title,
-                                             'value': it.UUID]
-                                        )
-                                    }
-                                    columnSetting.editor.options = elementsDirectory
-                                    break
-                                case AttributeType.INTEGER_TYPE:
-                                    columnSetting.editor.options = null
-                                    columnSetting.editor.type = 'number'
-                                    columnSetting.editor.map_to = 'integer'
-                                    break
-                                case AttributeType.DATE_TYPE:
-                                case AttributeType.DATE_TIME_TYPE:
-                                    columnSetting.editor.options = null
-                                    columnSetting.editor.type = 'date'
-                                    if (attributeSetting.attribute.code ==
-                                        resourceAndWorkSetting.startWorkAttribute.code)
-                                    {
-                                        columnSetting.editor.map_to = "start_date"
-                                        columnSetting.code = "start_date"
-                                        attributeSetting.code = "start_date"
-                                    }
-                                    if (attributeSetting.attribute.code ==
-                                        resourceAndWorkSetting.endWorkAttribute.code)
-                                    {
-                                        columnSetting.editor.map_to = "end_date"
-                                        columnSetting.code = "end_date"
-                                        attributeSetting.code = "end_date"
-                                    }
-                                    break
-                                case AttributeType.OBJECT_TYPE:
-                                    Set newOptionsColumnSetting = []
-                                    columnSetting.editor.type = TYPE_SELECT
-                                    String referenceClass =
+                                columnSetting.editor.map_to = attributeSetting.code
+                                columnSetting.editor.options = null
+                                columnSetting.editor.type = 'text'
+                                return
+                            }
+                            else
+                            {
+                                String metaClassFqn = attributeSetting.attribute.metaClassFqn
+                                String attributeCode = attributeSetting.attribute.code
+                                String type = attributeSetting.attribute.type
+                                columnSetting.editor.type = attributeSetting.attribute.type
+                                IAttributeWrapper getAtribute =
+                                    api.metainfo.getMetaClass(metaClassFqn)
+                                       .getAttribute(attributeCode)
+                                switch (columnSetting.editor.type)
+                                {
+                                    case AttributeType.STRING_TYPE:
+                                        columnSetting.editor.options = null
+                                        columnSetting.editor.type = 'text'
+                                        break
+                                    case AttributeType.CATALOG_ITEM_SET_TYPE:
+                                    case AttributeType.CATALOG_ITEM_TYPE:
+                                        attributeCode = attributeSetting.attribute.property
+                                        columnSetting.editor.type = TYPE_SELECT
+                                        Set elementsDirectory = []
+                                        api.utils.find(attributeCode, [:]).findAll().each {
+                                            elementsDirectory.add(
+                                                ['label': it.title,
+                                                 'key'  : it.title,
+                                                 'value': it.UUID]
+                                            )
+                                        }
+                                        columnSetting.editor.options = elementsDirectory
+                                        break
+                                    case AttributeType.INTEGER_TYPE:
+                                        columnSetting.editor.options = null
+                                        columnSetting.editor.type = 'number'
+                                        break
+                                    case AttributeType.DATE_TYPE:
+                                    case AttributeType.DATE_TIME_TYPE:
+                                        columnSetting.editor.options = null
+                                        columnSetting.editor.type = 'date'
+                                        if (attributeSetting.attribute.code ==
+                                            resourceAndWorkSetting.startWorkAttribute.code)
+                                        {
+                                            columnSetting.code = 'start_date'
+                                            attributeSetting.code = 'start_date'
+                                        }
+                                        if (attributeSetting.attribute.code ==
+                                            resourceAndWorkSetting.endWorkAttribute.code)
+                                        {
+                                            columnSetting.code = 'end_date'
+                                            attributeSetting.code = 'end_date'
+                                        }
+                                        break
+                                    case AttributeType.OBJECT_TYPE:
+                                        Set newOptionsColumnSetting = []
+                                        columnSetting.editor.type = TYPE_SELECT
+                                        String referenceClass =
+                                            api.metainfo.getMetaClass(metaClassFqn)
+                                               .getAttribute(attributeCode)
+                                               .getType().getRelatedMetaClass().toString()
+                                        api.utils.find(referenceClass, [:]).findAll().each {
+                                            newOptionsColumnSetting.add(
+                                                ['label': it.title,
+                                                 'key'  : it.title,
+                                                 'value': it.UUID]
+                                            )
+                                        }
+                                        columnSetting.editor.options = newOptionsColumnSetting
+                                        break
+                                    case AttributeType.BOOL_TYPE:
+                                        Set newOptionsColumnSetting = []
+                                        columnSetting.editor.type = TYPE_SELECT
+                                        newOptionsColumnSetting
+                                            .add(['label': 'да', 'key': 'да', 'value': true])
+                                        newOptionsColumnSetting
+                                            .add(['label': 'нет', 'key': 'нет', 'value': false])
+                                        columnSetting.editor.options = newOptionsColumnSetting
+                                        break
+                                    case AttributeType.STATE_TYPE:
+                                        Set newOptionsColumnSetting = []
+                                        columnSetting.editor.type = TYPE_SELECT
                                         api.metainfo.getMetaClass(metaClassFqn)
-                                           .getAttribute(attributeCode)
-                                           .getType().getRelatedMetaClass().toString()
-                                    api.utils.find(referenceClass, [:]).findAll().each {
-                                        newOptionsColumnSetting.add(
-                                            ['label': it.title,
-                                             'key': it.title,
-                                             'value': it.UUID]
-                                        )
-                                    }
-                                    columnSetting.editor.options = newOptionsColumnSetting
-                                    break
-                                case AttributeType.BOOL_TYPE:
-                                    Set newOptionsColumnSetting = []
-                                    columnSetting.editor.type = TYPE_SELECT
-                                    newOptionsColumnSetting
-                                        .add(['label': 'да', 'key': 'да', 'value': true])
-                                    newOptionsColumnSetting
-                                        .add(['label': 'нет', 'key': 'нет', 'value': false])
-                                    columnSetting.editor.options = newOptionsColumnSetting
-                                    break
-                                case AttributeType.STATE_TYPE:
-                                    Set newOptionsColumnSetting = []
-                                    columnSetting.editor.type = TYPE_SELECT
-                                    api.metainfo.getMetaClass(metaClassFqn).workflow.states.each {
-                                        newOptionsColumnSetting.add(
-                                            ['label': it.title, 'key': it.title, 'value': it.code]
-                                        )
-                                    }
-                                    columnSetting.editor.options = newOptionsColumnSetting
-                                    break
-                                default:
-                                    columnSetting.editor.options = null
-                                    columnSetting.editor.type = 'text'
-                                    break
+                                           .workflow.states.each {
+                                            newOptionsColumnSetting.add(
+                                                ['label': it.title, 'key': it.title, 'value':
+                                                    it.code]
+                                            )
+                                        }
+                                        columnSetting.editor.options = newOptionsColumnSetting
+                                        break
+                                    default:
+                                        columnSetting.editor.options = null
+                                        columnSetting.editor.type = 'text'
+                                        break
+                                }
+                                if (attributeSetting.code == 'start_date' &&
+                                    attributeSetting.attribute.code !=
+                                    resourceAndWorkSetting.startWorkAttribute.code)
+                                {
+                                    String randomUUID = java.util.UUID.randomUUID().toString()
+                                    columnSetting.code = randomUUID
+                                    attributeSetting.code = randomUUID
+                                    columnSetting.editor.map_to = attributeSetting.attribute.type
+                                }
+                                else if (attributeSetting.code == 'end_date' &&
+                                         attributeSetting.attribute.code !=
+                                         resourceAndWorkSetting.endWorkAttribute.code)
+                                {
+                                    String randomUUID = java.util.UUID.randomUUID().toString()
+                                    columnSetting.code = randomUUID
+                                    attributeSetting.code = randomUUID
+                                    columnSetting.editor.map_to = attributeSetting.attribute.type
+                                }
+                                else
+                                {
+                                    columnSetting.editor.map_to = attributeSetting.code
+                                }
                             }
-                            if (attributeSetting.code == 'start_date' &&
-                                attributeSetting.attribute.code !=
-                                resourceAndWorkSetting.startWorkAttribute.code)
-                            {
-                                String randomUUID = java.util.UUID.randomUUID().toString()
-                                columnSetting.code = randomUUID
-                                attributeSetting.code = randomUUID
-                                columnSetting.editor.map_to = attributeSetting.attribute.type
-                            }
-                            if (attributeSetting.code == 'end_date' &&
-                                attributeSetting.attribute.code !=
-                                resourceAndWorkSetting.endWorkAttribute.code)
-                            {
-                                String randomUUID = java.util.UUID.randomUUID().toString()
-                                columnSetting.code = randomUUID
-                                attributeSetting.code = randomUUID
-                                columnSetting.editor.map_to = attributeSetting.attribute.type
-                            }
-
                         }
                     }
                 }
@@ -694,7 +707,7 @@ class GanttSettingsService
             ? Jackson.fromJsonString(currentGanttSettingsJSON, GanttSettingsClass)
             : new GanttSettingsClass()
         String keyForVersions =
-            request?.ganttSettings?.diagramKey?.split('_').last() == 'personalVersion' ?[
+            request?.ganttSettings?.diagramKey?.split('_').last() == 'personalVersion' ? [
                 subjectUUID, 'personalVersion'
             ].join('_')
         : subjectUUID
@@ -929,7 +942,7 @@ class GanttSettingsService
 
                 if (metaClassCode.contains('$'))
                 {
-                    metaClassCode = metaClassCode.split('\\$').first()
+                    metaClassCode = metaClassCode.tokenize('$').first()
                 }
 
                 mapAttributes[metaClassCode] = ['start_date': startAttributeCode,
@@ -981,7 +994,7 @@ class GanttSettingsService
                 entity.completed = it.completed
             }
 
-            String metaClassCode = entity.entityUUID.split('\\$').first()
+            String metaClassCode = entity.entityUUID.tokenize('$').first()
             Map<String, String> metaClassMapAttributes = mapAttributes[metaClassCode]
 
             if (metaClassMapAttributes)
@@ -1002,12 +1015,11 @@ class GanttSettingsService
             attributesForColumns << [elementCode : (request.tasks.find { task -> task?.elementCode
             }?.elementCode)]
         }
-
         if (saveJsonSettings(
             versionKey,
             Jackson.toJsonString(ganttVersionSettings),
             GANTT_VERSION_NAMESPACE
-        ))
+        ) && saveJsonSettings(diagramKey, toJson(ganttSettings)))
         {
             return ganttVersionSettings
         }
@@ -1118,7 +1130,8 @@ class GanttSettingsService
             it.workUuid == requestContent.workId
         }
         String metaInformationMovedElement =
-            api.utils.get(positionTransferredElement.workUuid).getMetainfo().toString()
+            api.utils.get(positionTransferredElement.workUuid)
+               .getMetainfo().id
         changingConnectivitySchemaElements(
             positionTransferredElement,
             elementsForChangingSequence,
@@ -1139,11 +1152,11 @@ class GanttSettingsService
                 break
             }
             elementsForChangingSequence.find {
-                it.metaInformation ==
+                it.metaInformation.tokenize('$')?.first() ==
                 metaInformationMovedElement && it.workUuid == sequenceChartElements.uuidNextElement
             }?.idLocations = orderArrangement
             sequenceChartElements = elementsForChangingSequence.find {
-                it.metaInformation ==
+                it.metaInformation.tokenize('$')?.first() ==
                 metaInformationMovedElement && it.workUuid == sequenceChartElements.uuidNextElement
             }
             orderArrangement++
@@ -1187,51 +1200,84 @@ class GanttSettingsService
                                             Integer idLastResource,
                                             String metaInformationMovedElement)
     {
+        // Если элемент перемещается на то же место
+        if (positionTransferredElement.idLocations == requestContent.positionElement)
+        {
+            return
+        }
+        Boolean isZeroElement
+
+        if (positionTransferredElement.idLocations < requestContent.positionElement)
+        {
+            isZeroElement = (positionTransferredElement.idLocations == 0)
+            ++requestContent.positionElement
+            ++idLastResource
+        }
+
+        // Откуда переместить
         if (positionTransferredElement.idLocations)
         {
+            // Если в конце
             if (!positionTransferredElement.uuidNextElement)
             {
                 elements.find {
-                    it.metaInformation ==
+                    it.metaInformation.tokenize('$')?.first() ==
                     metaInformationMovedElement &&
                     it.idLocations == (positionTransferredElement.idLocations - 1)
                 }?.uuidNextElement = null
             }
+            // Если не в конце
             else
             {
                 elements.find {
-                    it.metaInformation ==
+                    it.metaInformation.tokenize('$')?.first() ==
                     metaInformationMovedElement &&
                     it.idLocations == (positionTransferredElement.idLocations - 1)
                 }?.uuidNextElement = positionTransferredElement.uuidNextElement
             }
         }
+
+        // Куда переместить
         if (requestContent.positionElement)
         {
             elements.find {
-                it.metaInformation ==
+                it.metaInformation.tokenize('$')?.first() ==
                 metaInformationMovedElement &&
                 it.idLocations == (requestContent.positionElement - 1)
             }?.uuidNextElement = positionTransferredElement.workUuid
         }
+
+        // Куда переместить: Если не последний элемент
         if (requestContent.positionElement != idLastResource)
         {
             elements.find {
-                it.metaInformation ==
+                it.metaInformation.tokenize('$')?.first() ==
                 metaInformationMovedElement && it.workUuid == positionTransferredElement.workUuid
             }?.uuidNextElement = elements.find {
-                it.metaInformation ==
+                it.metaInformation.tokenize('$')?.first() ==
                 metaInformationMovedElement && it.idLocations == requestContent.positionElement
             }?.workUuid
         }
+
+        // Присвоение новой позиции перемещаемого элемента
         elements.find {
-            it.metaInformation ==
+            it.metaInformation.tokenize('$')?.first() ==
             metaInformationMovedElement && it.workUuid == requestContent.workId
         }?.idLocations = requestContent.positionElement
+
+        // Если перемещаемый элемент имеет индекс позиции = 0
+        if (isZeroElement)
+        {
+            elements.find {
+                it.idLocations == 1 && it.workUuid != requestContent.workId
+            }?.idLocations = 0
+        }
+
+        // Куда переместить: на нулевой индекс
         if (!requestContent.positionElement)
         {
             elements.find {
-                it.idLocations == 0
+                it.idLocations == 0 && it.workUuid != requestContent.workId
             }?.idLocations = 1
         }
     }
@@ -1277,7 +1323,29 @@ class GanttSettingsService
     Boolean deleteGanttVersionSettings(String versionKey,
                                        String namespace = GANTT_VERSION_NAMESPACE)
     {
-        return api.keyValue.delete(namespace, versionKey)
+        if (namespace == GANTT_NAMESPACE)
+        {
+            return (api.keyValue.delete(namespace, versionKey))
+        }
+        Collection<String> parts = versionKey.split('_')
+        // Если размер parts == 4, значит диаграмма является "Личным" видом, иначе "Общим"
+        String diagramKey = (parts.size() == 4) ? "${ parts[0] }_${ parts[1] }_${ parts[2] }" :
+            "${ parts[0].tokenize('$').first() }_${ parts[1] }"
+        String ganttSettingsFromKeyValue = getJsonSettings(diagramKey)
+
+        if (!ganttSettingsFromKeyValue)
+        {
+            return false
+        }
+        GanttSettingsClass ganttSettings =
+            Jackson.fromJsonString(ganttSettingsFromKeyValue, GanttSettingsClass)
+
+        ganttSettings.diagramVersionsKeys.remove(versionKey)
+        return (api.keyValue.delete(namespace, versionKey) &&
+                saveJsonSettings(diagramKey, toJson(ganttSettings)) && saveJsonSettings(
+            parts[0],
+            toJson(ganttSettings)
+        ))
     }
 
     /**
@@ -1576,14 +1644,14 @@ class GanttSettingsService
     }
 
     /**
-     * Приватный метод получения списка сотрудников отдела и их прав доступа
+     * Приватный метод получения списка сотрудников отдела и их прав доступа (без вывода заархивированных сотрудников)
      * @param department - название отдела, по которому нужно произвести поиск
      * @return список сотрудников отдела и их прав доступа
      */
     private Collection<UserAccess> createListOfUsers(String department)
     {
         Collection<UserAccess> userData = []
-        api.utils.find('employee', [:]).each { employee ->
+        api.utils.find('employee', ['removed': false]).each { employee ->
             if (employee.parent.title == department)
             {
                 UserAccess user = new UserAccess()
@@ -1673,9 +1741,7 @@ class GanttSettingsService
         ganttSettings.isPersonalDiagram = false
         ganttSettings.isPersonal = false
         if (!saveJsonSettings(ganttSettingsKey, toJson(ganttSettings)) || !
-            deleteGanttVersionSettings(
-                [user.UUID, request.contentCode, 'personalVersion'].join('_'), GANTT_NAMESPACE
-            ))
+            deleteGanttVersionSettings([user.UUID, request.contentCode, 'personalVersion'].join('_'), GANTT_NAMESPACE))
         {
             throw new Exception('Настройки не были сохранены!')
         }
@@ -1688,9 +1754,12 @@ class GanttSettingsService
      * Сохраняет настройки цвета отрисовки сущностей
      * @param request - тело запроса, содержащее информацию о цветах сущностей
      */
-    void saveGanttColorSettings(SaveGanttColorSettingsRequest request)
+    void saveGanttColorSettings(SaveGanttColorSettingsRequest request, IUUIDIdentifiable user = null)
     {
-        String ganttSettingsKey = generateDiagramKey(request.subjectUUID, request.contentCode)
+        String ganttSettingsKey = (request?.isPersonal) ?
+            [user.UUID, request.contentCode, 'personalVersion'].join('_') :
+            generateDiagramKey(request.subjectUUID, request.contentCode)
+
         String currentGanttSettingsJSON = getJsonSettings(ganttSettingsKey)
         GanttSettingsClass currentGanttSettings = currentGanttSettingsJSON
             ? fromJson(currentGanttSettingsJSON, GanttSettingsClass)
@@ -1800,6 +1869,11 @@ class BaseGanttSettingsRequest
      * Ключ контента, на котором расположена диаграмма
      */
     String contentCode
+
+    /**
+     * Работа из вкладки личной диаграммы
+     */
+    Boolean isPersonal
 }
 
 /**
@@ -1811,11 +1885,6 @@ class GetGanttSettingsRequest extends BaseGanttSettingsRequest
      * Таймзона устройства пользователя
      */
     String timezone
-
-    /**
-     * Работа из вкладки личной диаграммы
-     */
-    Boolean isPersonal
 }
 
 /**
@@ -1888,11 +1957,6 @@ class SaveGanttVersionSettingsRequest extends BaseGanttSettingsRequest
      * Настройки для столбцов бокового меню
      */
     CommonSettings commonSettings
-
-    /**
-     * Работа из вкладки личной диаграммы
-     */
-    Boolean isPersonal
 }
 
 /**
@@ -2000,6 +2064,11 @@ class BaseGanttDiagramData
      * Работа из вкладки личной диаграммы
      */
     Boolean isPersonal
+
+    /**
+     * Наличие сохраненных версий диаграммы
+     */
+    Boolean isVersions
 }
 
 /**
@@ -2272,7 +2341,7 @@ class CommonSettings
     /**
      * Свернуть работы по умолчанию
      */
-    Boolean rollUp = true
+    Boolean rollUp = false
 
     /**
      * Настройки столбцов таблицы
@@ -2810,7 +2879,7 @@ class LinkedListSequenceChartElements
  */
 class SaveGanttColorSettingsRequest extends BaseGanttSettingsRequest
 {
-    Collection<Map<String, String>> currentColorSettings
+    Collection currentColorSettings
 }
 
 /**
