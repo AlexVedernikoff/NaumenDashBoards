@@ -66,7 +66,7 @@ trait CriteriaWrapper
     List execute(IApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean hasBreakdown = false, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
     {
         Boolean isDebugMode = DashboardUtils.isDebugMode()
-        if(diagramType == DiagramType.TABLE)
+        if(diagramType in [DiagramType.TABLE, DiagramType.PIVOT_TABLE])
         {
             if(paginationSettings)
             {
