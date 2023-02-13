@@ -288,7 +288,8 @@ enum FormatType
 {
     LABEL_FORMAT,
     NUMBER_FORMAT,
-    INTEGER_FORMAT
+    INTEGER_FORMAT,
+    DT_INTERVAL_FORMAT
 }
 
 /**
@@ -517,6 +518,19 @@ enum PivotIndicatorType
 {
     GROUP_INDICATOR_INFO,
     INDICATOR_INFO
+}
+
+/**
+ * Тип формата для параметров интервальных атрибутов
+ */
+enum DtIntervalFormatType
+{
+    DAY,
+    HOURS,
+    MINUTES,
+    NOT_SELECTED,
+    SECONDS,
+    WEEK
 }
 
 //endregion
@@ -3233,6 +3247,10 @@ class NewIndicator
      * Фильтрация на показателе
      */
     String descriptor
+    /**
+     * Формат
+     */
+    DtIntervalFormat format
 }
 
 /**
@@ -3472,6 +3490,27 @@ class NumberFormat extends Format
      * Разделить разряды
      */
     Boolean splitDigits
+}
+
+/**
+ * Форматирование для параметров интервальных атрибутов
+ */
+@Canonical
+@JsonIgnoreProperties(ignoreUnknown = true)
+class DtIntervalFormat extends NumberFormat
+{
+    /**
+     * Первая часть формата
+     */
+    DtIntervalFormatType quotient
+    /**
+     * Вторая часть формата
+     */
+    DtIntervalFormatType remainder
+    /**
+     * Количество символов
+     */
+    Integer symbolCount
 }
 
 /**
