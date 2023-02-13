@@ -232,14 +232,14 @@ class DefaultVisualizationSchemes
 /**
  * Настройки для владки 'Действия с объектами'
  */
-@JsonSchemaMeta(title = 'Действия с объектами')
+@JsonSchemaMeta(requiredFields = ['metaClassObjects', 'codeEditingForm'], title = 'Действия с объектами')
 class ActionsWithObjects
 {
     @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
-    @JsonSchemaMeta(title = 'Метакласс')
+    @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
 
-    @JsonSchemaMeta(title = 'Код формы редактирования')
+    @JsonSchemaMeta(title = 'Код формы редактирования', nullable = false)
     String codeEditingForm = ''
 }
 
