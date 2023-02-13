@@ -423,6 +423,7 @@
 "TableWidgetForm::BodySettingsBox::ShowEmptyString","Показывать пустую строку "" ""","Show empty string "" """,,
 "TableWidgetForm::BodySettingsBox::ShowNull","Показывать ""null""","Show ""null""",,
 "TableWidgetForm::BodySettingsBox::ShowRowNumber","Отображать номер строки","Display row number",,
+"TableWidgetForm::BodySettingsBox::CollapseGroup","Сворачивать группу","Collapse groups",,
 "TableWidgetForm::BodySettingsBox::ShowZero","Показывать ""0""","Show ""0""",,
 "TableWidgetForm::BodySettingsBox::TableBody","Тело таблицы","Table body",,
 "TableWidgetForm::BodySettingsBox::Wrap","Перенос слов","Wrap",,

@@ -53,6 +53,8 @@ export class PivotWidget extends PureComponent<Props, State> {
 
 	handleChangeColumnsWidth = (columnsWidth: Array<number>) => this.setState({columnsWidth});
 
+	handleClearEvent = e => e.stopPropagation();
+
 	handleDrillDown = (indicator: string, filters: Array<{key: string, value: string}>, breakdown?: string) => {
 		const {drillDown, setWidgetWarning, widget} = this.props;
 		const {options: {getDrillDownOptions}} = this.state;
@@ -110,7 +112,7 @@ export class PivotWidget extends PureComponent<Props, State> {
 
 		return (
 			<ResizeDetector onResize={this.handleResize}>
-				<div className={cn(styles.container, className)} ref={this.containerRef}>
+				<div className={cn(styles.container, className)} onClick={this.handleClearEvent} ref={this.containerRef}>
 					{this.renderHeaders()}
 					{this.renderBody()}
 				</div>

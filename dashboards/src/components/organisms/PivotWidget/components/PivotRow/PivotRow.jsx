@@ -12,8 +12,13 @@ import {TEXT_HANDLERS} from 'store/widgets/data/constants';
 
 export class PivotRow extends PureComponent<Props, State> {
 	state = {
-		showChildren: true
+		showChildren: false
 	};
+
+	componentDidMount () {
+		const {style} = this.props;
+		return this.setState({showChildren: !style.collapse});
+	}
 
 	handleClickCell = (column: PivotColumn) => () => {
 		const {drillDown, filter} = this.props;

@@ -41,12 +41,14 @@ const breakdown = 'breakdown';
 const breakdownFormat = 'breakdownFormat';
 const calcTotalColumn = 'calcTotalColumn';
 const checked = 'checked';
+const collapse = 'collapse';
 const colorsSettings = 'colorsSettings';
-const computedAttrs = 'computedAttrs';
 const comparePeriod = 'comparePeriod';
+const computedAttrs = 'computedAttrs';
 const count = 'count';
 const data = 'data';
 const dataLabels = 'dataLabels';
+const defaultValue = 'defaultValue';
 const diagramName = 'diagramName';
 const disabled = 'disabled';
 const displayType = 'displayType';
@@ -58,18 +60,23 @@ const header = 'header';
 const indicator = 'indicator';
 const indicatorGrouping = 'indicatorGrouping';
 const indicators = 'indicators';
+const indicatorSettings = 'indicatorSettings';
 const isNumber = 'isNumber';
 const legend = 'legend';
 const legendPosition = 'legendPosition';
 const links = 'links';
-const name = 'name';
-const navigation = 'navigation';
 const max = 'max';
 const min = 'min';
+const name = 'name';
+const navigation = 'navigation';
+const pageSize = 'pageSize';
 const parameter = 'parameter';
+const parameterRowColor = 'parameterRowColor';
 const parameters = 'parameters';
+const parameterSettings = 'parameterSettings';
 const parametersOrder = 'parametersOrder';
 const period = 'period';
+const pivot = 'pivot';
 const position = 'position';
 const ranges = 'ranges';
 const scale = 'scale';
@@ -78,15 +85,16 @@ const showBlankData = 'showBlankData';
 const showDependent = 'showDependent';
 const showEmptyData = 'showEmptyData';
 const showName = 'showName';
+const showRowNum = 'showRowNum';
 const showShadow = 'showShadow';
 const showSubTotalAmount = 'showSubTotalAmount';
 const showTotalAmount = 'showTotalAmount';
 const showTotalRowAmount = 'showTotalRowAmount';
 const sorting = 'sorting';
 const source = 'source';
-const sources = 'sources';
 const sourceForCompute = 'sourceForCompute';
 const sourceRowName = 'sourceRowName';
+const sources = 'sources';
 const startDate = 'startDate';
 const style = 'style';
 const template = 'template';
@@ -98,19 +106,12 @@ const to = 'to';
 const tooltip = 'tooltip';
 const top = 'top';
 const type = 'type';
-const use = 'use';
 const up = 'up';
+const use = 'use';
 const useName = 'useName';
 const value = 'value';
 const xAxisName = 'xAxisName';
 const yAxisName = 'yAxisName';
-const defaultValue = 'defaultValue';
-const indicatorSettings = 'indicatorSettings';
-const pageSize = 'pageSize';
-const parameterSettings = 'parameterSettings';
-const showRowNum = 'showRowNum';
-const pivot = 'pivot';
-const parameterRowColor = 'parameterRowColor';
 
 const PIVOT_FIELDS = {
 	defaultValue,
@@ -131,6 +132,7 @@ const DIAGRAM_FIELDS = {
 	breakdownFormat,
 	calcTotalColumn,
 	checked,
+	collapse,
 	colorsSettings,
 	comparePeriod,
 	computedAttrs,

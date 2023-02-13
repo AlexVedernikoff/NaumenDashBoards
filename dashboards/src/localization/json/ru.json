@@ -427,6 +427,7 @@
 	"TableWidgetForm::BodySettingsBox::ShowEmptyString": "Показывать пустую строку \" \"",
 	"TableWidgetForm::BodySettingsBox::ShowNull": "Показывать \"null\"",
 	"TableWidgetForm::BodySettingsBox::ShowRowNumber": "Отображать номер строки",
+	"TableWidgetForm::BodySettingsBox::CollapseGroup": "Сворачивать группу",
 	"TableWidgetForm::BodySettingsBox::ShowZero": "Показывать \"0\"",
 	"TableWidgetForm::BodySettingsBox::TableBody": "Тело таблицы",
 	"TableWidgetForm::BodySettingsBox::Wrap": "Перенос слов",

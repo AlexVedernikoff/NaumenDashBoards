@@ -550,7 +550,8 @@ export type PivotHeaderSettings = TableHeaderSettings & {};
 
 export type PivotBodySettings = {
 	...TableBodySettings,
-	parameterRowColor?: string
+	collapse: boolean,
+	parameterRowColor?: string,
 };
 
 export type PivotStyle = {

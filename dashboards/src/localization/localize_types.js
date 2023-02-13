@@ -355,18 +355,19 @@ type TableWidgetFormScheme =
 
 // components/organisms/TableWidgetForm/components/BodySettingsBox
 type TableWidgetFormBodySettingsBox =
-	| 'TableWidgetForm::BodySettingsBox::ShowZero'
-	| 'TableWidgetForm::BodySettingsBox::ShowDash'
-	| 'TableWidgetForm::BodySettingsBox::ShowNull'
-	| 'TableWidgetForm::BodySettingsBox::ShowEmptyString'
-	| 'TableWidgetForm::BodySettingsBox::TableBody'
-	| 'TableWidgetForm::BodySettingsBox::ShowRowNumber'
-	| 'TableWidgetForm::BodySettingsBox::RowCountLimit'
-	| 'TableWidgetForm::BodySettingsBox::Wrap'
-	| 'TableWidgetForm::BodySettingsBox::EmptyData'
 	| 'TableWidgetForm::BodySettingsBox::AligningData'
+	| 'TableWidgetForm::BodySettingsBox::CollapseGroup'
+	| 'TableWidgetForm::BodySettingsBox::EmptyData'
+	| 'TableWidgetForm::BodySettingsBox::IndicatorStyle'
 	| 'TableWidgetForm::BodySettingsBox::ParameterStyle'
-	| 'TableWidgetForm::BodySettingsBox::IndicatorStyle';
+	| 'TableWidgetForm::BodySettingsBox::RowCountLimit'
+	| 'TableWidgetForm::BodySettingsBox::ShowDash'
+	| 'TableWidgetForm::BodySettingsBox::ShowEmptyString'
+	| 'TableWidgetForm::BodySettingsBox::ShowNull'
+	| 'TableWidgetForm::BodySettingsBox::ShowRowNumber'
+	| 'TableWidgetForm::BodySettingsBox::ShowZero'
+	| 'TableWidgetForm::BodySettingsBox::TableBody'
+	| 'TableWidgetForm::BodySettingsBox::Wrap';
 
 // components/organisms/TableWidgetForm/components/HeaderSettingsBox
 type TableWidgetFormHeaderSettingsBox =

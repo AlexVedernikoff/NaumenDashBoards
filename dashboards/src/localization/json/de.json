@@ -427,6 +427,7 @@
 	"TableWidgetForm::BodySettingsBox::ShowEmptyString": "",
 	"TableWidgetForm::BodySettingsBox::ShowNull": "",
 	"TableWidgetForm::BodySettingsBox::ShowRowNumber": "",
+	"TableWidgetForm::BodySettingsBox::CollapseGroup": "",
 	"TableWidgetForm::BodySettingsBox::ShowZero": "",
 	"TableWidgetForm::BodySettingsBox::TableBody": "",
 	"TableWidgetForm::BodySettingsBox::Wrap": "",
