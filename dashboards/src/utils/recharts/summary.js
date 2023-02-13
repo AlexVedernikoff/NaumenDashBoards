@@ -44,7 +44,7 @@ const getOptions = (
 					fontStyle
 				},
 				type: 'SummaryOptions',
-				value
+				value: value || 0
 			};
 		}
 	}
