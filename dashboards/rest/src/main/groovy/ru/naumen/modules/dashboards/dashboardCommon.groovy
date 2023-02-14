@@ -3053,7 +3053,7 @@ class DataLabels implements IHasFontSettings
      * Форматирование для меток(данные из показателя)
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    NumberFormat format
+    DtIntervalFormat format
 }
 
 /**
