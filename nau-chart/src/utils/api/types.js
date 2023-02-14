@@ -1,4 +1,12 @@
 // @flow
+import type {DefaultLocationPoints, Entity, ListViews} from 'store/entity/types';
+
+export type ResponseData = {
+	dataDefaultLocationPoints: DefaultLocationPoints[],
+	entities: Entity,
+	listViews: ListViews
+};
+
 export type UserData = {
 	admin: boolean,
 	licensed: boolean,

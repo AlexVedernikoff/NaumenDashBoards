@@ -3,7 +3,16 @@ import {Group, Line, Rect, Text} from 'react-konva';
 import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 
-const Lines = ({activeElement, entity, handleContextMenu, onClick, onHover, points, scale, searchObjects}: Props) => {
+const Lines = ({
+	activeElement,
+	entity,
+	handleActiveElement,
+	handleContextMenu,
+	handleIsHoverCursor,
+	points,
+	scale,
+	searchObjects
+}: Props) => {
 	const isSearch = searchObjects.some(point => entity.uuid === point.uuid);
 	const sizeLine = entity.uuid && (isSearch || (activeElement && activeElement.uuid === entity.uuid)) ? 4 / scale : 2;
 	const [action] = entity.actions || [];
@@ -46,34 +55,34 @@ const Lines = ({activeElement, entity, handleContextMenu, onClick, onHover, poin
 		}
 	}, [refTitle, refDesc]);
 
-	const handleOnClick = () => {
+	const handleHover = (hover: boolean) => () => {
 		if (action) {
 			const {link} = action;
 
 			if (link) {
-				onClick(entity);
+				handleIsHoverCursor(hover);
 			}
 		}
 	};
 
-	const handleOnHover = hover => () => {
+	const handleActive = e => {
 		if (action) {
 			const {link} = action;
 
 			if (link) {
-				onHover(hover);
+				handleActiveElement(entity, e.evt.ctrlKey);
 			}
 		}
 	};
 
 	return (
 		<Group
-			onClick={handleOnClick}
 			onContextMenu={handleContextMenu}
-			onMouseOut={handleOnHover(false)}
-			onMouseOver={handleOnHover(true)}
-			onTouchEnd={handleOnHover(false)}
-			onTouchStart={handleOnHover(true)}
+			onMouseDown={handleActive}
+			onMouseOut={handleHover(false)}
+			onMouseOver={handleHover(true)}
+			onTouchEnd={handleHover(false)}
+			onTouchStart={handleHover(true)}
 		>
 			<Group
 				rotation={rotation}

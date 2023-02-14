@@ -13,9 +13,9 @@ export type ConnectedProps = {
 export type ConnectedFunctions = {
 	goToPoint: (uuid: string) => {},
 	setActiveElement: (payload: Entity) => {},
-	setExportTo: (payload: string) => {},
+	setExportTo: (payload: string | null) => {},
 	setPosition: (payload: {x: number, y: number}) => {},
-	setScale: (delta: ?boolean) => {},
+	setScale: (delta: ?boolean) => number,
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;
@@ -35,4 +35,5 @@ export type OptionsSizeCanvas = {
 	maxY: number,
 	minY: number,
 };
+
 export type Scheme = {lines: Connector[], options: OptionsSizeCanvas, points: Connector[]};

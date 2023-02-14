@@ -23,10 +23,12 @@ const Content = ({
 	activeElement,
 	centerPointUuid,
 	data,
+	editingGlobal,
 	exportTo,
 	goToPoint,
 	openContextMenu,
 	position,
+	saveEntitiesLocationSettings,
 	scale,
 	searchObjects,
 	setActiveElement,
@@ -35,8 +37,11 @@ const Content = ({
 	setScale
 }: Props) => {
 	const stageRef = useRef(null);
-	const [isDrag, setIsDrag] = useState(false);
-	const [hoverElement, setHoverElement] = useState(null);
+	const [isDragCursor, setIsDragCursorCursor] = useState(false);
+	const [isHoverCursor, setIsHoverCursor] = useState(null);
+	const [isDraggable, setIsDraggable] = useState(false);
+	const [startPositionEdit, setStartPositionEdit] = useState({x: 0, y: 0});
+	const [selectElements, setSelectElements] = useState([]);
 	const [offset, setOffset] = useState({x: 0, y: 0});
 	const [schemes, setSchemes] = useState([]);
 
@@ -112,7 +117,7 @@ const Content = ({
 			const isRoundLayout = points.filter(e => e.roundLayout).length === points.length;
 
 			if (isRoundLayout) {
-				const {bufferPoints, options} = pointsRoundCreateCoordinate(points); // первичная выкладка элементов на круговой схеме
+				const {bufferPoints, options} = pointsRoundCreateCoordinate(points); // выкладка элементов на круговой схеме
 
 				bufferSchemes.push({lines: lines, options, points: bufferPoints});
 
@@ -138,26 +143,107 @@ const Content = ({
 	const handleCloseContextMenu = () => {
 		openContextMenu(null);
 
-		if (!isDrag) {
+		if (!isDragCursor) {
 			goToPoint(null);
 		}
 
-		setIsDrag(false);
+		setIsDragCursorCursor(false);
 	};
 
 	const handleContextMenu = e => {
 		e.evt.preventDefault();
 		openContextMenu(e);
-		setIsDrag(false);
+		setIsDragCursorCursor(false);
+		setSelectElements([]);
 	};
 
-	const handleDragStart = () => {
-		setIsDrag(true);
+	const handleDragStart = e => {
+		console.log('handleDragStart', selectElements);
+		setIsDragCursorCursor(true);
+
+		if (selectElements.length) {
+			if (editingGlobal) {
+				setIsDraggable(true);
+				setStartPositionEdit({x: e.evt.pageX, y: e.evt.pageY});
+			} else {
+				const [activeElements] = selectElements;
+				setActiveElement(activeElements);
+			}
+		} else {
+			if (activeElement) {
+				setActiveElement(null);
+			}
+		}
 	};
 
 	const handleDragEnd = e => {
-		setPosition({x: e.target.x(), y: e.target.y()});
-		setIsDrag(false);
+		setIsDragCursorCursor(false);
+
+		if (editingGlobal) {
+			setIsDraggable(false);
+
+			schemes.map(({lines, points}) => {
+				return {
+					lines: lines.map(line => {
+						line.saveFromX = line.fromX;
+						line.saveFromY = line.fromY;
+
+						line.saveToX = line.toX;
+						line.saveToY = line.toY;
+
+						return line;
+					}),
+					points: points.map(point => {
+						point.saveX = point.x;
+						point.saveY = point.y;
+
+						return point;
+					})
+				};
+			});
+		}
+	};
+
+	const handleMouseMove = e => {
+		if (isDraggable && selectElements.length) {
+			const shiftX = e.evt.pageX - startPositionEdit.x;
+			const shiftY = e.evt.pageY - startPositionEdit.y;
+			const idList = selectElements.map(element => element.id);
+			const bufferPointPosition = [];
+			const bufferSchemes = [];
+
+			schemes.forEach(({lines, points}) => {
+				bufferSchemes.push({
+					lines: lines.map(line => {
+						if (idList.indexOf(line.from) !== -1) {
+							line.fromX = line.saveFromX + shiftX;
+							line.fromY = line.saveFromY + shiftY;
+						}
+
+						if (idList.indexOf(line.to) !== -1) {
+							line.toX = line.saveToX + shiftX;
+							line.toY = line.saveToY + shiftY;
+						}
+
+						return line;
+					}),
+					points: points.map(point => {
+						if (idList.indexOf(point.id) !== -1) {
+							point.x = point.saveX + shiftX;
+							point.y = point.saveY + shiftY;
+						}
+
+						bufferPointPosition.push({uuid: point.uuid, x: point.x, y: point.y});
+
+						return point;
+					})
+				});
+			});
+
+			setSchemes([...bufferSchemes]);
+
+			saveEntitiesLocationSettings(bufferPointPosition);
+		}
 	};
 
 	const handleWheelZoom = e => {
@@ -173,15 +259,31 @@ const Content = ({
 		}
 	};
 
+	const handleIsHoverCursor = hover => {
+		setIsHoverCursor(hover);
+	};
+
+	const handleActiveElement = (element, isCtrlKey) => { // клик по элементу и добавление его в массив активных
+		if (editingGlobal && isCtrlKey) {
+			const shouldAdd = !(selectElements.find(elem => elem.uuid === element.uuid));
+
+			if (shouldAdd) {
+				setSelectElements([...selectElements, element]);
+			}
+		} else {
+			setSelectElements([element]);
+		}
+	};
+
 	const renderSchemeItems = () => {
 		return schemes.map(({lines, points}) => {
 			const schemeItems = [];
 			const props = {
 				activeElement,
 				centerPointUuid,
+				handleActiveElement,
 				handleContextMenu,
-				onClick: setActiveElement,
-				onHover: setHoverElement,
+				handleIsHoverCursor,
 				scale,
 				searchObjects
 			};
@@ -208,19 +310,20 @@ const Content = ({
 	};
 
 	const classNames = cn({
-		[styles.hover]: hoverElement,
-		[styles.drag]: isDrag
+		[styles.hover]: isHoverCursor,
+		[styles.drag]: isDragCursor
 	});
 
 	return (
 		<Stage
 			className={classNames}
-			draggable
+			draggable={!isDraggable}
 			height={window.innerHeight - 2}
 			offset={offset}
 			onClick={handleCloseContextMenu}
-			onDragEnd={handleDragEnd}
-			onDragStart={handleDragStart}
+			onMouseDown={handleDragStart}
+			onMouseMove={handleMouseMove}
+			onMouseUp={handleDragEnd}
 			onWheel={handleWheelZoom}
 			ref={stageRef}
 			scaleX={scale}

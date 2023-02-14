@@ -1,4 +1,5 @@
 export default {
+	dataDefaultLocationPoints: [],
 	entities: [
 		[
 			{
@@ -92,6 +93,14 @@ export default {
 				uuid: 1
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '',
 				from: 0,
 				header: 'is uuid 2 hyfrt',
@@ -102,6 +111,14 @@ export default {
 				uuid: 2
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '',
 				from: 2,
 				header: 'is uuid 3 hdfh is uuid 3 hdfh is uuid 3 hdfh is uuid 3 hdfh is uuid 3 hdfh',
@@ -112,6 +129,14 @@ export default {
 				uuid: 3
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 2,
 				id: 4,
@@ -139,6 +164,14 @@ export default {
 				uuid: 243423
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 2,
 				id: 6,
@@ -147,6 +180,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 4,
 				id: 7,
@@ -155,6 +196,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 4,
 				id: 8,
@@ -163,6 +212,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 6,
 				id: 9,
@@ -171,6 +228,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 6,
 				id: 10,
@@ -179,6 +244,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 11,
@@ -187,6 +260,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 12,
@@ -195,6 +276,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 13,
@@ -203,6 +292,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 14,
@@ -211,6 +308,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 2,
 				id: 15,
@@ -219,6 +324,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 2,
 				id: 16,
@@ -227,6 +340,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 4,
 				id: 17,
@@ -235,6 +356,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 4,
 				id: 18,
@@ -243,6 +372,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 19,
@@ -251,6 +388,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 20,
@@ -259,6 +404,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 21,
@@ -267,6 +420,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 22,
@@ -275,6 +436,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 23,
@@ -283,6 +452,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 8,
 				id: 24,
@@ -291,6 +468,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 12,
 				id: 25,
@@ -299,6 +484,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 12,
 				id: 26,
@@ -307,6 +500,14 @@ export default {
 				type: 'point'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 12,
 				id: 27,
@@ -315,6 +516,14 @@ export default {
 				type: 'line'
 			},
 			{
+				actions: [
+					{
+						inPlace: false,
+						link: 'https://inventory-nordclan.nsd.naumen.ru/sd/operator/?anchor=uuid:cmdb$4105',
+						name: 'Перейти на карточку',
+						type: 'open_link'
+					}
+				],
 				desc: '222222',
 				from: 12,
 				id: 28,
@@ -935,7 +1144,7 @@ export default {
 				// desc: '123456',
 				from: 119,
 				// header: '113 from 100 to 104',
-				id: 114,
+				id: 123,
 				roundLayout: true,
 				title: 'вфывфыв',
 				to: 104,
@@ -945,7 +1154,7 @@ export default {
 				// desc: '123456',
 				from: 119,
 				// header: '113 from 100 to 104',
-				id: 114,
+				id: 124,
 				roundLayout: true,
 				title: 'вфывфыв',
 				to: 120,
@@ -955,7 +1164,7 @@ export default {
 				// desc: '123456',
 				from: 119,
 				// header: '113 from 100 to 104',
-				id: 114,
+				id: 125,
 				roundLayout: true,
 				title: 'вфывфыв',
 				to: 121,
@@ -965,7 +1174,7 @@ export default {
 				// desc: '123456',
 				from: 119,
 				// header: '113 from 100 to 104',
-				id: 114,
+				id: 126,
 				roundLayout: true,
 				title: 'вфывфыв',
 				to: 122,
@@ -1173,5 +1382,27 @@ export default {
 				uuid: 4234234
 			}
 		]
-	]
+	],
+	listViews: {
+		generalViews: {
+			viewData: [{
+				creatorView: 'superUser$Natalya',
+				label: 'Общий_тестовый',
+				value: 'f10a2de4234'
+			}]
+		},
+		personalView: {
+			defaultSchemaKey: 'f10a24234de',
+			viewData: [{
+				creatorView: 'superUser$Natalya',
+				label: 'Персональный_тестовый',
+				value: 'f10a24234de'
+			},
+			{
+				creatorView: 'superUser$Natalya',
+				label: 'Персональный_второй_тестовый',
+				value: 'f10ahdsr2de'
+			}]
+		}
+	}
 };

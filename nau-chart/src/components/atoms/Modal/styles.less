@@ -1,0 +1,94 @@
+@import '/styles/variables';
+
+:local {
+	.modal {
+		background-color: rgba(0, 0, 0, 0.1);
+		bottom: 0;
+		left: 0;
+		overflow-y: auto;
+		position: fixed;
+		right: 0;
+		top: 0;
+		/* модальное окно должно отображаться поверх всех форм ВП */
+		z-index: 99999;
+	}
+
+	.container {
+		background-color: white;
+		border-radius: @border-radius;
+		box-shadow: 0 2px 8px rgba(129, 146, 161, 0.37);
+		color: #323232;
+		display: flex;
+		flex-direction: column-reverse;
+		margin: 80px auto;
+		width: 320px;
+	}
+
+	.error {
+		background-color: #F5D8D6;
+		border-left: #E08B85 4px solid;
+		padding: 16px 20px;
+	}
+
+	.content {
+		background-color: transparent;
+	}
+
+	.noticeContent {
+		padding: 36px 20px 20px 20px;
+	}
+
+	.buttonGroup {
+		background-color: #F2F2F2;
+		border-radius: @border-radius @border-radius 0 0;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		order: -1;
+		padding: 10px 18px;
+	}
+
+	.buttonGroup button {
+		color: #595959;
+		font-size: 13px;
+		width: auto;
+
+		&:first-child {
+			background-color: #4D92C8;
+			color: #FFFFFF;
+		}
+
+		&:nth-child(2) {
+
+			&:hover {
+				background-color: transparent !important;
+				color: #595959 !important;
+			}
+		}
+
+		&:hover, &:active {
+			color: #FFFFFF;
+		}
+	}
+
+	.errorButtonGroup {
+		background-color: transparent;
+		border-radius: 0;
+		justify-content: flex-start;
+		order: 1;
+		padding: 14px 0 9px 0;
+	}
+
+	.errorButtonGroup button {
+		color: #595959;
+		padding: 0;
+
+		&:hover, &:active {
+			color: #E08A85
+		}
+	}
+
+	.cancelButton {
+		margin-left: 13px;
+	}
+}

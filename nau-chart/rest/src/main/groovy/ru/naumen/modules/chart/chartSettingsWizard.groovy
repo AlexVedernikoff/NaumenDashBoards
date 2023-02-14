@@ -23,7 +23,7 @@ import ru.naumen.metainfo.shared.ClassFqn
 class ConstantSchemes
 {
     final static String NAME_MECHANISM_SETTINGS = 'schemes'
-    final static String EMBEDDED_APPLICATION_CODE = 'nauScheme'
+    final static String EMBEDDED_APPLICATION_CODE = 'nauScheme'  //testScheme
     final static String ACTUAL_VERSION = 'actualVersion'
     final static String FIRST_PART_STRATEGY_CODE = 'schemesStrategy'
 }
@@ -130,13 +130,14 @@ class HierarchyCommunicationSettings extends AbstractSchemesCharacteristics
     Collection<ContentHierarchyCommunicationSettings> strategies = [new ContentHierarchyCommunicationSettings()]
 }
 
-@JsonSchemaMeta(requiredFields = ['hierarchyNameStrategy', 'hierarchyCodeStrategy', 'scriptText', 'metaClassObjects', 'pathCoordinateLongitude', 'pointA', 'pointB'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['hierarchyNameStrategy', 'scriptText', 'metaClassObjects', 'pathCoordinateLongitude'], title = ' ')
 class ContentHierarchyCommunicationSettings
 {
     @JsonSchemaMeta(title = 'Название стратегии', nullable = false)
     String hierarchyNameStrategy = ''
+
     @UiSchemaMeta(disabled = true)
-    @JsonSchemaMeta(title = 'Код стратегии', nullable = false)
+    @JsonSchemaMeta(title = 'Код стратегии')
     String hierarchyCodeStrategy = 'schemesStrategy'
 
     @UiSchemaMeta(widget = 'textarea')
@@ -147,14 +148,14 @@ class ContentHierarchyCommunicationSettings
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
 
-    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Атрибут связи', nullable = false)
     String pathCoordinateLongitude = ""
-    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
-    @JsonSchemaMeta(title = 'Точка А', nullable = false)
+    @UiSchemaMeta(widget = 'abstract-select', source = 'getAttributesChildMetaclass')
+    @JsonSchemaMeta(title = 'Точка А')
     String pointA = ""
-    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
-    @JsonSchemaMeta(title = 'Точка Б', nullable = false)
+    @UiSchemaMeta(widget = 'abstract-select', source = 'getAttributesChildMetaclass')
+    @JsonSchemaMeta(title = 'Точка Б')
     String pointB = ""
 
     @JsonSchemaMeta(title = 'Не выводить объекты без связи')
@@ -179,17 +180,17 @@ class ObjecRelationshipsSettings extends AbstractSchemesCharacteristics
     Collection<ContentObjecRelationshipsSettings> strategies = [new ContentObjecRelationshipsSettings()]
 }
 
-@JsonSchemaMeta(requiredFields = ['objectNameStrategy', 'objectCodeStrategy', 'scriptText'], title = ' ')
+@JsonSchemaMeta(requiredFields = ['objectNameStrategy'], title = ' ')
 class ContentObjecRelationshipsSettings
 {
     @JsonSchemaMeta(title = 'Название стратегии', nullable = false)
     String objectNameStrategy = ''
     @UiSchemaMeta(disabled = true)
-    @JsonSchemaMeta(title = 'Код стратегии', nullable = false)
+    @JsonSchemaMeta(title = 'Код стратегии')
     String objectCodeStrategy = 'schemesStrategy'
 
     @UiSchemaMeta(widget = 'textarea')
-    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Скрипт должен возвращать единый список объектов для построения связи.  Возможно использование переменной subject, которая содержит объект, на карточке которого размещен контент с приложением.', nullable = false)
+    @JsonSchemaMeta(title = 'Текст скрипта', description = 'Скрипт должен возвращать единый список объектов для построения связи.  Возможно использование переменной subject, которая содержит объект, на карточке которого размещен контент с приложением.')
     String scriptText = ''
 
     @JsonSchemaMeta(title = 'Правила связывания объектов схемы')
@@ -215,16 +216,16 @@ class DefaultVisualizationSchemes
     @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
-    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Главный текст')
     String mainText = ''
-    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Дополнительный текст')
     String additionalText = ''
     @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
-    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Иконка')
     String icon = ''
 }
@@ -260,16 +261,16 @@ class CharacteristicsOutputDiagram
     @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс', nullable = false)
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
-    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Главный текст')
     String mainText = ''
-    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Дополнительный текст')
     String additionalText = ''
     @UiSchemaMeta(widget = 'attrGroup-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Группа атрибутов')
     String attributeGroup = ''
-    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
+    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
     @JsonSchemaMeta(title = 'Иконка')
     String icon = ''
 }

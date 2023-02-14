@@ -19,7 +19,7 @@ export class Icon extends PureComponent<Props> {
 		const svgCN = cn(styles.icon, className);
 
 		return (
-			<svg className={svgCN} fill="currentColor" height={height} onClick={onClick} viewBox={viewBox} width={width} >
+			<svg className={svgCN} fill="currentColor" height={height} onClick={onClick} viewBox={viewBox} width={width}>
 				{title && <title>{title}</title>}
 				<use className={styles.use} xlinkHref={`#${name}`} />
 			</svg>

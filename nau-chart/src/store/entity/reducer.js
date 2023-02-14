@@ -21,10 +21,25 @@ const reducer = (state: EntityState = initialVerifyState, action: EntityAction =
 				...state,
 				centerPointUuid: action.uuid
 			};
-		case VERIFY_EVENTS.SET_DATA:
+		case VERIFY_EVENTS.SET_ENTITIES_DATA:
 			return {
 				...state,
 				data: action.payload
+			};
+		case VERIFY_EVENTS.SET_DEFAULT_LOCATION_POINTS:
+			return {
+				...state,
+				dataDefaultLocationPoints: action.payload
+			};
+		case VERIFY_EVENTS.SET_DEFAULT_VIEW_DATA:
+			return {
+				...state,
+				dataDefaultView: action.payload
+			};
+		case VERIFY_EVENTS.SET_LIST_VIEWS:
+			return {
+				...state,
+				listViews: action.payload
 			};
 		case VERIFY_EVENTS.SET_ERROR_DATA:
 			return {
@@ -62,6 +77,27 @@ const reducer = (state: EntityState = initialVerifyState, action: EntityAction =
 			return {
 				...state,
 				searchObjects: action.objects
+			};
+		case VERIFY_EVENTS.CHANGE_EDITING_GLOBAL:
+			return {
+				...state,
+				editingGlobal: action.payload
+			};
+		case VERIFY_EVENTS.CHANGE_POPUP_SAVE_VIEWS:
+			return {
+				...state,
+				setting: {
+					...state.setting,
+					popupSaveViews: action.payload
+				}
+			};
+		case VERIFY_EVENTS.CHANGE_POPUP_SETTING_VIEWS:
+			return {
+				...state,
+				setting: {
+					...state.setting,
+					popupSettingViews: action.payload
+				}
 			};
 		default:
 			return state;
