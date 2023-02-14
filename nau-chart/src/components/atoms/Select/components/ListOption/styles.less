@@ -1,0 +1,54 @@
+@import '/styles/variables';
+
+:local {
+	.option {
+		align-items: center;
+		box-sizing: border-box;
+		cursor: pointer;
+		display: flex;
+		justify-content: space-between;
+		overflow: hidden;
+		padding: 8px 12px;
+		text-overflow: ellipsis;
+
+		&:hover {
+			background-color: @lightgrey;
+
+			.actions {
+				display: block;
+			}
+		}
+	}
+
+	.actions {
+		display: none;
+	}
+
+	.found {
+		font-weight: bold;
+	}
+
+	.label {
+		flex: auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.selected {
+		background-color: @gainsboro;
+		border-top: 1px solid @white;
+		border-bottom: 1px solid @white;
+	}
+
+	.label {
+		font-size: 13px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.selectedIconContainer svg {
+		color: @info;
+	}
+}

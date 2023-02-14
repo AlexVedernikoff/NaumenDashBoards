@@ -2,17 +2,18 @@
 import type {Entity} from 'store/entity/types';
 
 export type ConnectedProps = {
-	centerPointUuid: string | null,
+	activeElement: Entity,
 	entity: Entity,
 	scale: number,
+	searchObjects: Entity[],
 	x: number,
 	y: number
 };
 
 export type ConnectedFunctions = {
+	handleActiveElement: (entity: Entity, ctrlKey: boolean) => {},
 	handleContextMenu: (e: Event) => {},
-	onClick: (entity: Entity) => {},
-	onHover: (hover: boolean) => {},
+	handleIsHoverCursor: (hover: boolean) => {},
 };
 
 export type Props = ConnectedProps & ConnectedFunctions;

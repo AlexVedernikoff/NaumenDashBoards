@@ -6,13 +6,29 @@ export const initialVerifyState: EntityState = {
 	activeElement: null,
 	centerPointUuid: null,
 	data: [],
+	dataDefaultLocationPoints: [],
+	dataDefaultView: null,
+	editingGlobal: false,
 	error: false,
 	exportTo: null,
+	listViews: {
+		generalViews: {
+			viewData: []
+		},
+		personalView: {
+			defaultSchemaKey: '',
+			viewData: []
+		}
+	},
 	loading: false,
 	position: {x: 0, y: 0},
 	scale: 1,
 	searchObjects: [],
-	searchText: ''
+	searchText: '',
+	setting: {
+		popupSaveViews: false,
+		popupSettingViews: false
+	}
 };
 
 export const defaultVerifyAction = {

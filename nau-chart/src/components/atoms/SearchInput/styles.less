@@ -1,0 +1,52 @@
+@import '/styles/variables';
+
+:local {
+	.container {
+		display: flex;
+		height: 32px;
+		padding: 12px;
+	}
+
+	.inputContainer {
+		border-bottom: 2px solid @gainsboro;
+		box-sizing: border-box;
+		display: flex;
+		flex: 1 1 auto;
+		min-width: 0; // Firefox fix
+		padding-bottom: 3px;
+
+		&:hover {
+			.removeIconContainer {
+				visibility: visible;
+			}
+		}
+	}
+
+	.input {
+		flex: 1 1 auto;
+		min-width: 0;
+		padding: 4px;
+
+		&:focus {
+			border-color: @info;
+		}
+
+		::placeholder {
+			color: @grey;
+		}
+	}
+
+	.removeIconContainer {
+		cursor: pointer;
+		margin-left: 14px;
+		min-width: 16px;
+		padding: 4px;
+		visibility: hidden;
+	}
+
+	.searchIcon {
+		color: @dimgrey;
+		min-width: 16px;
+		padding: 8px 8px 8px 0;
+	}
+}

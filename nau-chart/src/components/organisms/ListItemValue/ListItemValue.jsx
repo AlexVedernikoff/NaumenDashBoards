@@ -9,7 +9,7 @@ const ListItemValue = ({label, url}: Props) => {
 	const [viewTextFull, setViewTextFull] = useState(true);
 
 	const truncate = (str, n) => {
-		return str.length > n && viewTextFull ? str.substr(0, n - 1) : str;
+		return str.length > n && viewTextFull ? str.substring(0, n) : str;
 	};
 
 	const changeViewText = () => {

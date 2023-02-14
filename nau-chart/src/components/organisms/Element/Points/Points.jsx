@@ -4,7 +4,17 @@ import type {Props} from './types';
 import React, {useEffect, useRef, useState} from 'react';
 import useImage from 'use-image';
 
-const Points = ({activeElement, entity, handleContextMenu, onClick, onHover, scale, searchObjects, x, y}: Props) => {
+const Points = ({
+	activeElement,
+	entity,
+	handleActiveElement,
+	handleContextMenu,
+	handleIsHoverCursor,
+	scale,
+	searchObjects,
+	x,
+	y
+}: Props) => {
 	const tileW = 108;
 	const tileH = 58;
 	const paddingText = 4;
@@ -33,34 +43,34 @@ const Points = ({activeElement, entity, handleContextMenu, onClick, onHover, sca
 		}
 	}, [refTitle, refDesc]);
 
-	const handleOnClick = () => {
+	const handleHover = (hover: boolean) => () => {
 		if (action) {
 			const {link} = action;
 
 			if (link) {
-				onClick(entity);
+				handleIsHoverCursor(hover);
 			}
 		}
 	};
 
-	const handleOnHover = (hover: boolean) => () => {
+	const handleActive = (e: Event) => {
 		if (action) {
 			const {link} = action;
 
 			if (link) {
-				onHover(hover);
+				handleActiveElement(entity, e.evt.ctrlKey);
 			}
 		}
 	};
 
 	return (
 		<Group
-			onClick={handleOnClick}
 			onContextMenu={handleContextMenu}
-			onMouseOut={handleOnHover(false)}
-			onMouseOver={handleOnHover(true)}
-			onTouchEnd={handleOnHover(false)}
-			onTouchStart={handleOnHover(true)}
+			onMouseDown={handleActive}
+			onMouseOut={handleHover(false)}
+			onMouseOver={handleHover(true)}
+			onTouchEnd={handleHover(false)}
+			onTouchStart={handleHover(true)}
 		>
 			<Image
 				height={sizeImage}

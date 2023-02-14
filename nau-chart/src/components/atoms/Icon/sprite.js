@@ -2,9 +2,9 @@
 import type {IconName, Symbol} from './types';
 
 class Sprite {
-	mounted = false;
+	symbols: Array<Symbol> = [];
 	sprite = null;
-	symbols: Symbol[] = [];
+	mounted = false;
 
 	createSprite = () => {
 		this.sprite = this.parse(`

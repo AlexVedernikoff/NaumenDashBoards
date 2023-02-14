@@ -24,4 +24,14 @@ export default class FakeApi {
 		await new Promise(resolve => setTimeout(() => resolve(), 1000));
 		return [searchString];
 	}
+
+	async saveLocationSettings (currentUser, entitiesData) {
+		await new Promise(resolve => setTimeout(() => resolve(), 1000));
+		return {currentUser, entitiesData};
+	}
+
+	async deleteChartSettings (currentUser) {
+		await new Promise(resolve => setTimeout(() => resolve(), 1000));
+		return currentUser;
+	}
 }

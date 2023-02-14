@@ -40,17 +40,47 @@ export type Entity = {
 	uuid: string | null
 };
 
+export type DefaultLocationPoints = {
+	uuid: string,
+	x: number,
+	y: number
+};
+
+export type ViewData = {
+	creatorView: string,
+	label: string,
+	value: string
+};
+
+export type ListViews = {
+	generalViews: {
+		viewData: ViewData[]
+	},
+	personalView: {
+		defaultSchemaKey: string,
+		viewData: ViewData[]
+	}
+};
+
 export type EntityState = {
-	activeElement: Entity,
+	activeElement: Entity | null,
 	centerPointUuid: string,
 	data: Entity[],
+	dataDefaultLocationPoints: DefaultLocationPoints[],
+	dataDefaultView: ViewData | null,
+	editingGlobal: boolean,
 	error: boolean,
 	exportTo: string,
+	listViews: ListViews,
 	loading: boolean,
 	position: {x: number, y: number},
 	scale: number,
 	searchObjects: [],
-	searchText: string
+	searchText: string,
+	setting: {
+		popupSaveViews: boolean,
+		popupSettingViews: boolean
+	}
 };
 
 export type EntityAction = {

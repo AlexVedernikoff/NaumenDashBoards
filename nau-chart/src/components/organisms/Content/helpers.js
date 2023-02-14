@@ -528,11 +528,25 @@ const convertSchemesPositions = (schemes: Scheme[]) => {
 				const x = fromX + (to.x - from.x) / 2;
 				const y = fromY + (to.y - from.y) / 2;
 
-				bufferLines.push({...line, fromX, fromY, toX, toY, x, y});
+				bufferLines.push({
+					...line,
+					fromX,
+					fromY,
+					saveFromX: fromX,
+					saveFromY: fromY,
+					saveToX: toX,
+					saveToY: toY,
+					toX,
+					toY,
+					x,
+					y
+				});
 			}
 		});
 		points.forEach(point => {
-			bufferPoints.push({...point, x: point.x + offsetX, y: point.y + offsetY});
+			const x = point.x + offsetX;
+			const y = point.y + offsetY;
+			bufferPoints.push({...point, saveX: x, saveY: y, x, y});
 		});
 
 		if (!isIndividual) { // если многомерная схема то сдвигаем вниз на 350
