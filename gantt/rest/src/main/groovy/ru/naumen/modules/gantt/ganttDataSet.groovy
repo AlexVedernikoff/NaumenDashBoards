@@ -730,30 +730,11 @@ class GanttDataSetService
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         if (work['start_date'])
         {
-            if (workAttributeSettings?.startWorkAttribute?.type == 'date' || (work['start_date'] in
-                                                                              ScriptDate && !
-                                                                                  work['start_date']
-                                                                                      .getMinutes() && !
-                                                                                  work['start_date']
-                                                                                      .getHours()))
-            {
-                work['start_date'] = work['start_date'].format(dateFormat)
-            }
-            else
-            {
-                work['start_date'] = work['start_date'].format(dateFormat, timezone)
-            }
+            work['start_date'] = work['start_date'].format(dateFormat)
         }
         if (work['end_date'])
         {
-            if (workAttributeSettings?.endWorkAttribute?.type == 'date')
-            {
-                work['end_date'] = work['end_date'].format(dateFormat)
-            }
-            else
-            {
-                work['end_date'] = work['end_date'].format(dateFormat, timezone)
-            }
+            work['end_date'] = work['end_date'].format(dateFormat)
         }
     }
 

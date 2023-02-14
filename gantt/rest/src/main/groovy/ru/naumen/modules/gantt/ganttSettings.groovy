@@ -77,7 +77,7 @@ interface GanttSettingsController
      * @param requestContent - тело запроса [subjectUUID:..., contentCode: ..., ganttSettings: {}]
      * @return настройки, отправленные в хранилище
      */
-    String saveGanttSettings(Map<String, Object> requestContent)
+    String saveGanttSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
 
     /**
      * Метод получения названий и ключей версий диаграммы
@@ -227,11 +227,11 @@ class GanttSettingsImpl implements GanttSettingsController
     }
 
     @Override
-    String saveGanttSettings(Map<String, Object> requestContent)
+    String saveGanttSettings(Map<String, Object> requestContent, IUUIDIdentifiable user)
     {
         SaveGanttSettingsRequest request = new ObjectMapper()
             .convertValue(requestContent, SaveGanttSettingsRequest)
-        return Jackson.toJsonString(service.saveGanttSettings(request))
+        return Jackson.toJsonString(service.saveGanttSettings(request, user))
     }
 
     @Override
@@ -685,7 +685,7 @@ class GanttSettingsService
      * @param request - тело запроса
      * @return настройки, отправленные в хранилище
      */
-    GanttSettingsClass saveGanttSettings(SaveGanttSettingsRequest request)
+    GanttSettingsClass saveGanttSettings(SaveGanttSettingsRequest request, IUUIDIdentifiable user)
     {
         String subjectUUID = request.subjectUUID
         String contentCode = request.contentCode
@@ -960,7 +960,7 @@ class GanttSettingsService
         List<Map<String, Object>> data = ganttDataSetService
             .buildDataListFromSettings(
                 ganttSettings,
-                ganttSettings.resourceAndWorkSettings,
+                ganttSettings?.resourceAndWorkSettings ?: [],
                 null,
                 request.subjectUUID
             )
@@ -1089,9 +1089,7 @@ class GanttSettingsService
             return null
         }
         String formatEditedTime = "yyyy-MM-dd'T'HH:mm:ss"
-        String timezoneString = 'Europe/Moscow'
-        TimeZone timezone = TimeZone.getTimeZone(timezoneString)
-        Date attributeDate = Date.parse(formatEditedTime, attributeValue, timezone)
+        Date attributeDate = Date.parse(formatEditedTime, attributeValue)
         return attributeDate
     }
 
@@ -1632,11 +1630,11 @@ class GanttSettingsService
     {
         Collection<AccessRights> userData = []
 
-        api.utils.find('ou', [:]) each {
+        api.db.query('SELECT title FROM ou').list().each {
             AccessRights user = new AccessRights(
-                department: it.title,
+                department: it,
                 showUsers: false,
-                users: createListOfUsers(it.title)
+                users: createListOfUsers(it)
             )
             userData.add(user)
         }
@@ -1651,58 +1649,56 @@ class GanttSettingsService
     private Collection<UserAccess> createListOfUsers(String department)
     {
         Collection<UserAccess> userData = []
-        api.utils.find('employee', ['removed': false]).each { employee ->
-            if (employee.parent.title == department)
-            {
-                UserAccess user = new UserAccess()
-                user.code = employee.UUID
-                user.ganttMaster = employee.employeeSecGroups.code.find {
-                    it == GROUP_GANT_MASTER
-                } ?: false as Boolean
-                user.name = employee.title
-                userData.add(user)
-            }
+        String query = "FROM employee WHERE removed = false AND parent.title = '${department.replace('\'', '\"')}'"
+
+        api.db.query(query).list().each { employee ->
+            UserAccess user = new UserAccess()
+            user.code = employee.UUID
+            user.ganttMaster = employee.employeeSecGroups.code.find {
+                it == GROUP_GANT_MASTER
+            } ?: false as Boolean
+            user.name = employee.title
+            userData.add(user)
         }
         return userData
     }
 
     /**
-     * Метод изменения группы доступа Гантт мастер
-     * @param userData - информация о пользователях в отделах
-     * @return инофрмация о внесенных изменения в права доступа
+     * Метод изменения группы доступа Гант Мастер
+     * @param departmentsData - информация о пользователях в отделах
      */
-    String postDataUsers(Collection<AccessRights> userData)
+    void postDataUsers(Collection<AccessRights> departmentsData)
     {
-        userData.each {
-            postDataUsersSupportive(it.users, it.department)
+        departmentsData.each { department ->
+            postDataUsersSupportive(department.users)
         }
     }
 
-    private String postDataUsersSupportive(Collection userData, String department)
+    /**
+     * Вспомогательный метод изменения группы доступа Гант Мастер
+     * @param usersData - информация о пользователях в отделах
+     */
+    private void postDataUsersSupportive(Collection usersData)
     {
-        String userRole = ''
-        userData.each {
-            ISDtObject employee = api.utils.get(it.code)
+        usersData.each { user ->
+            ISDtObject employee = api.utils.get(user.code)
             Boolean whetherUserNecessaryRights = employee.employeeSecGroups.find { employeeGroups
                 ->
                 employeeGroups.code == GROUP_GANT_MASTER
             } ?: false
-            if (it.ganttMaster && !whetherUserNecessaryRights)
+            if (user.ganttMaster && !whetherUserNecessaryRights)
             {
-                userRole += it.name + ', '
-                api.security.addMemberToGroup(GROUP_GANT_MASTER, it.code)
+                api.security.addMemberToGroup(GROUP_GANT_MASTER, user.code)
             }
-            else if (!it.ganttMaster && whetherUserNecessaryRights)
+            else if (!user.ganttMaster && whetherUserNecessaryRights)
             {
-                userRole += it.name + ', '
-                api.security.removeMemberFromGroup(GROUP_GANT_MASTER, it.code)
+                api.security.removeMemberFromGroup(GROUP_GANT_MASTER, user.code)
             }
         }
-        return "The rights of ${ department } users ${ userRole } have been"
     }
 
     /**
-     * Метод создания персонального дашборда.
+     * Метод создания персональной диаграммы.
      * @param request - тело запроса
      * @param user - текущий пользователь
      * @return true|Exception
@@ -1729,7 +1725,7 @@ class GanttSettingsService
     }
 
     /**
-     * Метод удаления персонального дашборда.
+     * Метод удаления персональной диаграммы.
      * @param request - тело запроса
      * @param user - текущий пользователь
      * @return true|Exception
