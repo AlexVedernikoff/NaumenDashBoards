@@ -106,6 +106,8 @@
 	"DataLabelsBox::DataLabels": "",
 	"DataLabelsBox::DataLabelsDisabled": "",
 	"DataLabelsBox::Shadow": "",
+	"DataTopField::Max": "",
+	"DataTopField::Min": "",
 	"DataTopField::ShowTop": "",
 	"DateGroupModal::Between": "",
 	"DateGroupModal::DateTimeDay::7D": "",

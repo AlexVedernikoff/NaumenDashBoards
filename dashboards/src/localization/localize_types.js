@@ -556,6 +556,8 @@ type DataLabelsBox =
 
 // components/organisms/WidgetFormPanel/components/DataTopField
 type DataTopField =
+	| 'DataTopField::Max'
+	| 'DataTopField::Min'
 	| 'DataTopField::ShowTop';
 
 // components/organisms/WidgetFormPanel/components/DisplayModeSelectBox

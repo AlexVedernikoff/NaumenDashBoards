@@ -1,7 +1,8 @@
 // @flow
+import CheckIconButtonGroup from 'components/molecules/CheckIconButtonGroup';
 import Checkbox from 'components/atoms/Checkbox';
 import cn from 'classnames';
-import {COUNT_OPTIONS} from './constants';
+import {COUNT_OPTIONS, MODE_OF_TOP_OPTIONS} from './constants';
 import {DEFAULT_TOP_SETTINGS, DEFAULT_TOP_SETTINGS_INIT} from 'store/widgets/data/constants';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FormControl from 'components/molecules/FormControl';
@@ -10,11 +11,12 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
 import styles from './styles.less';
-import t from 'localization';
+import t, {translateObjectsArray} from 'localization';
 
 export class DataTopField extends PureComponent<Props> {
 	static defaultProps = {
 		disabled: false,
+		hasModeOfTop: true,
 		value: DEFAULT_TOP_SETTINGS
 	};
 
@@ -36,6 +38,8 @@ export class DataTopField extends PureComponent<Props> {
 		const intValue = parseInt(value);
 		return this.changeSettings(name, isNaN(intValue) ? null : intValue);
 	};
+
+	handleChangeModeOfTop = ({name, value}) => this.changeSettings(name, value);
 
 	handleSelectCount = ({name, value}: OnSelectEvent) => this.changeSettings(name, value);
 
@@ -66,6 +70,27 @@ export class DataTopField extends PureComponent<Props> {
 		);
 	};
 
+	renderModeOfTop = () => {
+		const {hasModeOfTop, value} = this.props;
+		const {modeOfTop, show} = value;
+		const options = translateObjectsArray('title', MODE_OF_TOP_OPTIONS);
+
+		if (show && hasModeOfTop) {
+			return (
+				<div className={styles.modeOfTop}>
+					<CheckIconButtonGroup
+						name={DIAGRAM_FIELDS.modeOfTop}
+						onChange={this.handleChangeModeOfTop}
+						options={options}
+						value={modeOfTop}
+					/>
+				</div>
+			);
+		}
+
+		return null;
+	};
+
 	renderShowCheckbox = () => {
 		const {show} = this.props.value;
 
@@ -84,9 +109,12 @@ export class DataTopField extends PureComponent<Props> {
 		});
 
 		return (
-			<div className={CN}>
-				{this.renderShowCheckbox()}
-				{this.renderCountSelect()}
+			<div className={styles.container}>
+				<div className={CN}>
+					{this.renderShowCheckbox()}
+					{this.renderCountSelect()}
+				</div>
+				{this.renderModeOfTop()}
 			</div>
 		);
 	}
