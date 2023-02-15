@@ -14,7 +14,7 @@ import {
 	HEADER_POSITIONS,
 	INDICATOR_GROUPING_TYPE,
 	LABEL_FORMATS,
-	MODE_OF_TOP,
+	// MODE_OF_TOP,
 	NOTATION_FORMATS,
 	RANGES_POSITION,
 	RANGES_TYPES,
@@ -158,7 +158,7 @@ export type Indicator = {
 
 export type DataTopSettings = {
 	count: ?number,
-	modeOfTop: $Keys<typeof MODE_OF_TOP>,
+	// modeOfTop: $Keys<typeof MODE_OF_TOP>, #SMRMEXT-13926
 	show: boolean
 };
 

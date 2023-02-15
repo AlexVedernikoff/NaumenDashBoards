@@ -72,20 +72,25 @@ export class DataTopField extends PureComponent<Props> {
 
 	renderModeOfTop = () => {
 		const {hasModeOfTop, value} = this.props;
-		const {modeOfTop, show} = value;
-		const options = translateObjectsArray('title', MODE_OF_TOP_OPTIONS);
 
-		if (show && hasModeOfTop) {
-			return (
-				<div className={styles.modeOfTop}>
-					<CheckIconButtonGroup
-						name={DIAGRAM_FIELDS.modeOfTop}
-						onChange={this.handleChangeModeOfTop}
-						options={options}
-						value={modeOfTop}
-					/>
-				</div>
-			);
+		if (process.env.TASK === 'SMRMEXT-13926') {
+			// const {modeOfTop, show} = value; #SMRMEXT-13926
+			const modeOfTop = '';
+			const {show} = value;
+			const options = translateObjectsArray('title', MODE_OF_TOP_OPTIONS);
+
+			if (show && hasModeOfTop) {
+				return (
+					<div className={styles.modeOfTop}>
+						<CheckIconButtonGroup
+							name={DIAGRAM_FIELDS.modeOfTop}
+							onChange={this.handleChangeModeOfTop}
+							options={options}
+							value={modeOfTop}
+						/>
+					</div>
+				);
+			}
 		}
 
 		return null;

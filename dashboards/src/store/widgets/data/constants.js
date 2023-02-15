@@ -203,13 +203,13 @@ const MODE_OF_TOP = {
 
 const DEFAULT_TOP_SETTINGS: DataTopSettings = Object.freeze({
 	count: null,
-	modeOfTop: MODE_OF_TOP.MAX,
+	// modeOfTop: MODE_OF_TOP.MAX, #SMRMEXT-13926
 	show: false
 });
 
 const DEFAULT_TOP_SETTINGS_INIT: DataTopSettings = Object.freeze({
 	count: 5,
-	modeOfTop: MODE_OF_TOP.MAX,
+	// modeOfTop: MODE_OF_TOP.MAX, #SMRMEXT-13926
 	show: true
 });
 
