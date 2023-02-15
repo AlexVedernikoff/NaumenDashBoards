@@ -1,6 +1,6 @@
 // @flow
 import type {AttrSetConditions} from 'utils/descriptorUtils/types';
-import type {Breakdown, Indicator, SourceData} from './types';
+import type {Breakdown, DiagramDataSet, Indicator, SourceData} from './types';
 import type {DataSet as TableDataSet} from 'store/widgetForms/tableForm/types';
 import type {DataSet as SpeedometerDataSet} from 'store/widgetForms/speedometerForm/types';
 import type {DataSet as SummaryDataSet} from 'store/widgetForms/summaryForm/types';
@@ -9,6 +9,7 @@ import {DEFAULT_PARAMETER} from 'store/widgetForms/constants';
 import {omit} from 'helpers';
 import {parseCasesAndGroupCode} from 'utils/descriptorUtils';
 import type {PivotIndicator} from 'store/widgetForms/pivotForm/types';
+import {SHOW_SUB_TOTAL_MODE} from './constants';
 
 /**
  * Возвращает разбивку по умолчанию
@@ -129,6 +130,36 @@ const fixLeaveOneIndicator = (dataSet: TableDataSet): TableDataSet => {
 	return result;
 };
 
+/**
+ * Определяет режим отображения/скрытия чекбокса промежуточных итогов
+ * @param {?Array<DiagramDataSet>} data - источники данных на виджете
+ * @returns {SHOW_SUB_TOTAL_MODE} - HIDE - скрыть; SHOW - показать; DISABLE - (временно) отобразить без возможности выбора
+ * TODO: после реализации правильного расчета процента, функция должна возвращать boolean @see #SMRMEXT-13872
+ */
+const getShowSubTotalMode = (data: ?Array<DiagramDataSet>): $Keys<typeof SHOW_SUB_TOTAL_MODE> => {
+	const aggregations = [];
+	let result = SHOW_SUB_TOTAL_MODE.SHOW;
+
+	if (data) {
+		data.forEach(dataSet => {
+			if (!dataSet.sourceForCompute) {
+				dataSet.indicators.forEach(indicator => {
+					if (indicator) aggregations.push(indicator.aggregation);
+				});
+			}
+		});
+	}
+
+	if (aggregations.some(aggregation => aggregation === DEFAULT_AGGREGATION.PERCENT)) {
+		result = SHOW_SUB_TOTAL_MODE.HIDE;
+	} else if (aggregations.some(aggregation => aggregation === DEFAULT_AGGREGATION.PERCENT_CNT)) {
+		// TODO: после удаления этого кода проверить, что не осталось временного кода с задачи #SMRMEXT-13872
+		result = SHOW_SUB_TOTAL_MODE.DISABLE;
+	}
+
+	return result;
+};
+
 export {
 	fixIndicatorsAggregation,
 	fixIndicatorsAggregationDataSet,
@@ -138,5 +169,6 @@ export {
 	fixPivotIndicators,
 	fixRemoveParameters,
 	getDefaultBreakdown,
+	getShowSubTotalMode,
 	parseAttrSetConditions
 };
