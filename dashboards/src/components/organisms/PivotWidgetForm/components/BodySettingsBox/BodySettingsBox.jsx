@@ -37,7 +37,7 @@ export class BodySettingsBox extends PureComponent<Props> {
 	};
 
 	render () {
-		const {defaultValue, parameterRowColor, showRowNum, textAlign, textHandler} = this.props.value;
+		const {collapse, defaultValue, parameterRowColor, showRowNum, textAlign, textHandler} = this.props.value;
 
 		return (
 			<div className={styles.container}>
@@ -49,6 +49,16 @@ export class BodySettingsBox extends PureComponent<Props> {
 							name={DIAGRAM_FIELDS.showRowNum}
 							onChange={this.handleBoolChange}
 							value={showRowNum}
+						/>
+					</FormControl>
+				</FormField>
+				<FormField>
+					<FormControl label={t('TableWidgetForm::BodySettingsBox::CollapseGroup')}>
+						<Checkbox
+							checked={collapse}
+							name={DIAGRAM_FIELDS.collapse}
+							onChange={this.handleBoolChange}
+							value={collapse}
 						/>
 					</FormControl>
 				</FormField>

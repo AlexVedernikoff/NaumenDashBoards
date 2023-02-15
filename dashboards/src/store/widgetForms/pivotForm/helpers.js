@@ -117,7 +117,7 @@ const changeValues = (
  */
 const convertTableStyleToPivot = (table: Table): PivotStyle => {
 	const {body, columnHeader} = deepClone(table);
-	const newBody = {...body, parameterRowColor: DEFAULT_PRESET_COLOR};
+	const newBody = {...body, collapse: true, parameterRowColor: DEFAULT_PRESET_COLOR};
 
 	return {body: newBody, columnHeader};
 };

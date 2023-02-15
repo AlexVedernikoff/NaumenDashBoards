@@ -77,6 +77,7 @@ const DEFAULT_PARAMETER_CELL_SETTINGS = Object.freeze({
 
 const DEFAULT_PIVOT_SETTINGS = {
 	body: {
+		collapse: true,
 		defaultValue: {
 			label: ('TableWidgetForm::BodySettingsBox::ShowEmptyString': LangType),
 			value: DEFAULT_TABLE_VALUE.EMPTY_ROW
