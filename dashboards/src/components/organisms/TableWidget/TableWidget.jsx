@@ -8,7 +8,7 @@ import type {ColumnsRatioWidth, TableSorting} from 'store/widgets/data/types';
 import {createDrillDownMixin} from 'store/widgets/links/helpers';
 import {debounce, deepClone} from 'helpers';
 import {DEFAULT_TABLE_VALUE} from 'store/widgets/data/constants';
-import {formatDate, formatMSInterval} from 'utils/recharts/formater/helpers';
+import {formatDate, oldFormatMSInterval} from 'utils/recharts/formater/helpers';
 import {
 	getIndicatorAttribute,
 	getSeparatedLabel,
@@ -356,7 +356,7 @@ export class TableWidget extends PureComponent<Props, State> {
 			const {aggregation, attribute} = indicator;
 
 			if (hasMSInterval(attribute, aggregation)) {
-				cellValue = formatMSInterval(Number(value));
+				cellValue = oldFormatMSInterval(Number(value));
 			} else if (hasPercentCount(attribute, aggregation)) {
 				cellValue = parsePercentCountColumnValueForTable(value);
 			} else if (value && hasPercent(attribute, aggregation)) {

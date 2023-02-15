@@ -15,9 +15,9 @@ import styles from './styles.less';
 import withWidget from 'WidgetFormPanel/HOCs/withWidget';
 
 export class StyleTab extends Component<Props> {
-	getSortingOptions = () => {
-		return getSortingOptions(!this.hasCustomGroup()).filter(option => option.value !== SORTING_VALUES.PARAMETER);
-	};
+	getSortingOptions = () => getSortingOptions(!this.hasCustomGroup()).filter(option => option.value !== SORTING_VALUES.PARAMETER);
+
+	handleChangeData = data => this.props.onChange(DIAGRAM_FIELDS.data, data);
 
 	hasCustomGroup = () => !!this.props.values.data.find(({breakdown}) => breakdown[0].group.way === GROUP_WAYS.CUSTOM);
 
@@ -52,7 +52,14 @@ export class StyleTab extends Component<Props> {
 					options={this.getSortingOptions()}
 					value={sorting}
 				/>
-				<DataLabelsBox name={DIAGRAM_FIELDS.dataLabels} onChange={onChange} value={dataLabels} widget={widget} />
+				<DataLabelsBox
+					data={data}
+					name={DIAGRAM_FIELDS.dataLabels}
+					onChange={onChange}
+					onChangeData={this.handleChangeData}
+					value={dataLabels}
+					widget={widget}
+				/>
 				{this.renderColorsBox()}
 			</div>
 		);

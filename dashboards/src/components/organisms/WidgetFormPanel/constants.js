@@ -24,13 +24,17 @@ const FIELDS = {
 const additional = 'additional';
 const labelFormat = 'labelFormat';
 const notation = 'notation';
-const symbolCount = 'symbolCount';
+const quotient = 'quotient';
+const remainder = 'remainder';
 const splitDigits = 'splitDigits';
+const symbolCount = 'symbolCount';
 
-const LABEL_FORMAT_FIELDS = {
+const AXIS_FORMAT_FIELDS = {
 	additional,
 	labelFormat,
 	notation,
+	quotient,
+	remainder,
 	splitDigits,
 	symbolCount
 };
@@ -124,7 +128,7 @@ const PIVOT_FIELDS = {
 
 const DIAGRAM_FIELDS = {
 	...FIELDS,
-	...LABEL_FORMAT_FIELDS,
+	...AXIS_FORMAT_FIELDS,
 	...PIVOT_FIELDS,
 	borders,
 	breakdown,
@@ -197,7 +201,7 @@ const DIAGRAM_FIELDS = {
 };
 
 export {
+	AXIS_FORMAT_FIELDS,
 	DIAGRAM_FIELDS,
-	FIELDS,
-	LABEL_FORMAT_FIELDS
+	FIELDS
 };

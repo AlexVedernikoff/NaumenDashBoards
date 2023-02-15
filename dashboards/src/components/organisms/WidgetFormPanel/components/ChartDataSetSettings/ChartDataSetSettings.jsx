@@ -1,8 +1,8 @@
 // @flow
+import type {AxisFormat, DataTopSettings} from 'store/widgets/data/types';
 import type {Breakdown, Indicator} from 'store/widgetForms/types';
 import Checkbox from 'components/atoms/Checkbox';
 import DataTopField from 'WidgetFormPanel/components/DataTopField';
-import type {DataTopSettings} from 'store/widgets/data/types';
 import DefaultComponents from './defaultComponents';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import type {FormBoxProps} from 'WidgetFormPanel/components/IndicatorsBox/types';
@@ -63,6 +63,14 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 		onChange(index, {...value, breakdown: undefined});
 	};
 
+	handleResetIndicatorFormat = (index: number, format: AxisFormat) => {
+		const {onChangeDataLabelFormat, value} = this.props;
+
+		if (!value.sourceForCompute) {
+			onChangeDataLabelFormat(format);
+		}
+	};
+
 	renderBreakdownFieldSet = () => {
 		const {components, index, requiredBreakdown, value} = this.props;
 		const {breakdown, dataKey, indicators} = value;
@@ -107,6 +115,7 @@ export class ChartDataSetSettings extends PureComponent<Props> {
 				dataKey={dataKey}
 				index={index}
 				onChange={this.handleChangeIndicators}
+				onResetIndicatorFormat={this.handleResetIndicatorFormat}
 				source={source}
 				value={indicators}
 			/>

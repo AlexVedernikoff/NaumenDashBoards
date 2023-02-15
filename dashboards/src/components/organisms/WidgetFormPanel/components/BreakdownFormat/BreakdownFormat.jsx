@@ -1,7 +1,7 @@
 // @flow
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
+import {getDefaultFormatForParameter, getMainDataSet} from 'store/widgets/data/helpers';
 import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -20,7 +20,7 @@ export class BreakdownFormat extends PureComponent<Props> {
 
 		if (Array.isArray(breakdown) && breakdown.length > 0) {
 			const {attribute, group} = breakdown[0];
-			const format = this.props.breakdown ?? getDefaultFormatForAttribute(attribute, group);
+			const format = this.props.breakdown ?? getDefaultFormatForParameter(attribute, group);
 
 			if (format) {
 				return (

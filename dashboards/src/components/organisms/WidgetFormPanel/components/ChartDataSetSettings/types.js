@@ -1,6 +1,6 @@
 // @flow
+import type {AxisFormat, DataTopSettings, MixedAttribute} from 'src/store/widgets/data/types';
 import type {Breakdown, Indicator, Parameter, SourceData} from 'src/store/widgetForms/types';
-import type {DataTopSettings, MixedAttribute} from 'src/store/widgets/data/types';
 
 type DataSet = {
 	breakdown?: Breakdown,
@@ -39,6 +39,7 @@ export type Props = {
 	components: Components,
 	index: number,
 	onChange: (index: number, value: DataSet, callback?: Function) => void,
+	onChangeDataLabelFormat: (format: AxisFormat) => void,
 	requiredBreakdown: boolean,
 	usesBlankData: boolean,
 	usesEmptyData: boolean,

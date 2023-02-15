@@ -1,7 +1,8 @@
 // @flow
+import {AXIS_FORMAT_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import {AXIS_FORMAT_TYPE, LABEL_FORMATS} from 'store/widgets/data/constants';
 import FormField from 'components/molecules/FormField';
-import {LABEL_FORMAT_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
+import type {LabelFormat} from 'store/widgets/data/types';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import Select from 'components/molecules/Select';
@@ -11,9 +12,10 @@ import t from 'localization';
 export class LabelParameterFormat extends PureComponent<Props> {
 	handleChange = ({value}) => {
 		const {onChange} = this.props;
+		const labelFormat: LabelFormat = value?.value ?? LABEL_FORMATS.TITLE;
 
 		onChange({
-			labelFormat: value?.value ?? LABEL_FORMATS.TITLE,
+			labelFormat,
 			type: AXIS_FORMAT_TYPE.LABEL_FORMAT
 		});
 	};
@@ -28,7 +30,7 @@ export class LabelParameterFormat extends PureComponent<Props> {
 		return (
 			<FormField label={fieldLabel} small>
 				<Select
-					name={LABEL_FORMAT_FIELDS.labelFormat}
+					name={AXIS_FORMAT_FIELDS.labelFormat}
 					onSelect={this.handleChange}
 					options={options}
 					value={selectedItem}
