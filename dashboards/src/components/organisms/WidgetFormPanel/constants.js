@@ -67,6 +67,7 @@ const legendPosition = 'legendPosition';
 const links = 'links';
 const max = 'max';
 const min = 'min';
+const modeOfTop = 'modeOfTop';
 const name = 'name';
 const navigation = 'navigation';
 const pageSize = 'pageSize';
@@ -156,6 +157,7 @@ const DIAGRAM_FIELDS = {
 	links,
 	max,
 	min,
+	modeOfTop,
 	name,
 	navigation,
 	parameter,

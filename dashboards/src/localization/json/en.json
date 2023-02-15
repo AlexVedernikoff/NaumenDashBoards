@@ -106,6 +106,8 @@
 	"DataLabelsBox::DataLabels": "Data Labels",
 	"DataLabelsBox::DataLabelsDisabled": "Data tags are disabled because of the large amount of data",
 	"DataLabelsBox::Shadow": "Shadow",
+	"DataTopField::Max": "Max",
+	"DataTopField::Min": "Min",
 	"DataTopField::ShowTop": "Output the top",
 	"DateGroupModal::Between": "Between",
 	"DateGroupModal::DateTimeDay::7D": "DD MM - DD MM (2 January - 8 January)",

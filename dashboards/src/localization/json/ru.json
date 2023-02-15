@@ -106,6 +106,8 @@
 	"DataLabelsBox::DataLabels": "Метки данных",
 	"DataLabelsBox::DataLabelsDisabled": "Метки данных отключены из-за большого количества данных",
 	"DataLabelsBox::Shadow": "Тень",
+	"DataTopField::Max": "Max",
+	"DataTopField::Min": "Min",
 	"DataTopField::ShowTop": "Вывести топ",
 	"DateGroupModal::Between": "с ...по",
 	"DateGroupModal::DateTimeDay::7D": "ДД ММ - ДД ММ (2 января - 8 января)",
