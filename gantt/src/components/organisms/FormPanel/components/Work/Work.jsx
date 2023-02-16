@@ -100,6 +100,8 @@ const Work = (props: Props) => {
 		if (target) {
 			handleAddNewBlock(target);
 		}
+
+		props.setError(false);
 	};
 
 	const handleDeleteBlock = () => {
@@ -147,7 +149,6 @@ const Work = (props: Props) => {
 
 		return (
 			<div className={styles.select}>
-				<span className={styles.label}>Работа</span>
 				<TreeSelect
 					className={styles.sourceTreeSelect}
 					onRemove={handleRemoveSource}
@@ -156,6 +157,7 @@ const Work = (props: Props) => {
 					removable={true}
 					value={work.source.value}
 				/>
+				{(!work.source.value && props.errorValidation) && <div className={styles.errorValidation}>Заполните метакласс у добавленной работы</div>}
 			</div>
 		);
 	};
@@ -220,7 +222,6 @@ const Work = (props: Props) => {
 
 		return (
 			<div className={styles.select}>
-				<span className={styles.label}>Атрибут связи с ресурсом</span>
 				<Select className={cn(styles.margin, styles.selectIcon, styles.width)}
 					fetchOptions={getOptionsForBondWithResource}
 					icon={'CHEVRON'}
@@ -231,6 +232,7 @@ const Work = (props: Props) => {
 					placeholder='Атрибут связи с ресурсом'
 					value={currentValue}
 				/>
+				{(!currentValue && props.errorValidation) && <div className={styles.errorValidation}>У работы не заполнен обязательный параметр связи c родительским ресурсом</div>}
 			</div>
 		);
 	};
@@ -309,10 +311,10 @@ const Work = (props: Props) => {
 		const label = target === 'start' ? 'Атрибут начала работ' : 'Атрибут окончания работ';
 		const attribute = target === 'start' ? work?.startWorkAttribute : work?.endWorkAttribute;
 		const currentValue: Attribute = attribute ? getAdditionalFields(attribute, attribute.title, attribute.code) : null;
+		const currntError = target === 'start' ? 'Заполните у работы атрибуты начала' : 'Заполните у работы атрибуты окончания';
 
 		return (
 			<div className={styles.select}>
-				<span className={styles.label}>{label}</span>
 				<Select className={cn(styles.margin, styles.selectIcon, styles.width)}
 					fetchOptions={getOptionsForDate}
 					icon={'CHEVRON'}
@@ -323,6 +325,7 @@ const Work = (props: Props) => {
 					placeholder={label}
 					value={currentValue}
 				/>
+				{(!currentValue && props.errorValidation) && <div className={styles.errorValidation}>{currntError}</div>}
 			</div>
 		);
 	};

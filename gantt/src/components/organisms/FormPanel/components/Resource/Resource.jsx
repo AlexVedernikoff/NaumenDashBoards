@@ -11,6 +11,7 @@ import {createFilterContext, getFilterContext} from 'src/store/helpers';
 import {deepClone} from 'helpers';
 import {defaultAttributeSetting, ITEM_TYPES_FOR_ALL} from 'src/store/App/constants';
 import DropdownMenu from 'components/atoms/DropdownMenu';
+import ErrorResource from "./ErrorResource";
 import Form from 'src/components/atoms/Form';
 import {functions, props} from './selectors';
 import Modal from 'src/components/atoms/Modal';
@@ -98,6 +99,8 @@ const Resource = (props: Props) => {
 		if (target) {
 			handleAddNewBlock(target);
 		}
+
+		props.setError(false);
 	};
 
 	const handleDeleteBlock = () => {
@@ -145,7 +148,6 @@ const Resource = (props: Props) => {
 
 		return (
 			<div className={styles.select}>
-				<span className={styles.label}>Ресурс</span>
 				<TreeSelect
 					className={styles.sourceTreeSelect}
 					onRemove={handleRemoveSource}
@@ -154,6 +156,7 @@ const Resource = (props: Props) => {
 					removable={true}
 					value={resource.source.value}
 				/>
+				{(!resource.source.value && props.errorValidation) && <ErrorResource />}
 			</div>
 		);
 	};
