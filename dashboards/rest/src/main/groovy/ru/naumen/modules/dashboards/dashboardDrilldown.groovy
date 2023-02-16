@@ -705,7 +705,15 @@ class DashboardDrilldownService
                             def value = context.get(groupType)
                             def format = value?.last()
                             String stringValue = value?.head()
-                            filterProvider.getFilter(groupType, format, stringValue, filterBuilder, attr, classFqn, descriptor)
+                            result << [filterProvider.getFilter(
+                                groupType,
+                                format,
+                                stringValue,
+                                filterBuilder,
+                                attr,
+                                classFqn,
+                                descriptor
+                            )]
                         }
                     }
                     for (customSubGroupCondition in customSubGroupSet)
