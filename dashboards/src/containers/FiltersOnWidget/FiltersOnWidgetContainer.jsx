@@ -105,18 +105,22 @@ export class FiltersOnWidgetContainer extends Component<Props, State> {
 	};
 
 	render () {
-		const {dataSets} = this.props;
+		const {availableFiltersOnWidget, dataSets} = this.props;
 		const {filters} = this.state;
 
-		return (
-			<FiltersOnWidget
-				dataSets={dataSets}
-				filters={filters}
-				onAddNewFilterItem={this.handleAddNewFilterItem}
-				onChangeFilter={this.handleChangeFilter}
-				onDeleteFilter={this.handleDeleteFilterItem}
-			/>
-		);
+		if (availableFiltersOnWidget) {
+			return (
+				<FiltersOnWidget
+					dataSets={dataSets}
+					filters={filters}
+					onAddNewFilterItem={this.handleAddNewFilterItem}
+					onChangeFilter={this.handleChangeFilter}
+					onDeleteFilter={this.handleDeleteFilterItem}
+				/>
+			);
+		}
+
+		return null;
 	}
 }
 

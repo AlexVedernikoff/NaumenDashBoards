@@ -13,6 +13,7 @@ import type {CustomFilter, SourceData} from 'store/widgets/data/types';
 import {fetchAttributesForFilters} from 'store/sources/actions';
 import {getSelectedWidget} from 'store/widgets/data/selectors';
 import {getSourceAttributeGroup} from 'store/sources/selectors';
+import {isUserModeDashboard} from 'store/dashboard/settings/selectors';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
@@ -21,7 +22,10 @@ import {WIDGET_TYPES} from 'store/widgets/data/constants';
  * @param {CustomFilter[]}  widgetFilterOptions - кастомные фильтры источника
  * @returns {Array<CustomFilterValue>} - раз
  */
-const mapCustomFilterToValues = (dataSetIndex: number, widgetFilterOptions: CustomFilter[]): Array<CustomFilterValue> => {
+const mapCustomFilterToValues = (
+	dataSetIndex: number,
+	widgetFilterOptions: CustomFilter[]
+): Array<CustomFilterValue> => {
 	const result = [];
 
 	widgetFilterOptions.forEach(({attributes, label}) => {
@@ -88,6 +92,7 @@ export const props = (state: AppState, props: ContainerProps): ConnectedProps =>
 	const {values: {data}} = props;
 	const {attributes} = state.sources;
 	const widget = getSelectedWidget(state);
+	const isUserMode = isUserModeDashboard(state);
 	const attrGroupCodeGenerator = source => getSourceAttributeGroup(state, source);
 	const initialCustomFiltersValues = generateCustomFiltersValues(data);
 	let dataSets = generateCustomFilterItems(data, attributes, attrGroupCodeGenerator);
@@ -99,6 +104,7 @@ export const props = (state: AppState, props: ContainerProps): ConnectedProps =>
 	}
 
 	return {
+		availableFiltersOnWidget: !isUserMode,
 		dataSets,
 		initialCustomFiltersValues
 	};
