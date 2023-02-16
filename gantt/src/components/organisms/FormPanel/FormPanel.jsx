@@ -851,24 +851,6 @@ const FormPanel = (props: Props) => {
 		);
 	};
 
-	const renderError = () => {
-		if (error) {
-			return (
-				<Modal
-					notice={false}
-					onClose={() => setError('')}
-					onSubmit={() => setError('')}
-					submitText="Ок"
-					text={''}
-				>
-					{error}
-				</Modal>
-			);
-		}
-
-		return null;
-	};
-
 	const checkingSettings = () => {
 		for (let i = 0; i < resources.length; i++) {
 			if (!resources[i]?.source?.value?.label) {
@@ -933,6 +915,7 @@ const FormPanel = (props: Props) => {
 		return (
 			<FormByType
 				columns={columnSettings}
+				errorValidation={error}
 				handleAddNewBlock={value => handleAddNewBlock(index, value)}
 				handleDeleteBlock={() => handleDeleteBlock(index)}
 				handleUpdateChildrenLevel={isNested => handleUpdateChildrenLevel(index, isNested)}
@@ -941,6 +924,7 @@ const FormPanel = (props: Props) => {
 				level={item.level}
 				onChange={(value, updateChildren) => handleUpdateResourceSettings(value, index, updateChildren)}
 				options={sources}
+				setError={setError}
 				value={item}
 			/>
 		);
@@ -980,7 +964,6 @@ const FormPanel = (props: Props) => {
 			{renderHeaderCommonBlock()}
 			{renderCommonBlock()}
 			{store.APP.activeTab === 'params' && resources.map((item, index) => getFormByType(item, index))}
-			{renderError()}
 			{renderColorPanel()}
 			{renderBottom()}
 		</div>
