@@ -20,7 +20,15 @@ const createPostData = (widget: Widget, index: number) => {
 	if (source) {
 		const {label: title, value} = sourceValue;
 		const {cases, classFqn} = getPartsClassFqn(value, getDescriptorCases);
-		const widgetFilters = widgetFilterOptions?.filter(({descriptor}) => !!descriptor).map(({descriptor}) => ({dataKey, descriptor})) ?? [];
+		const widgetFilters = [];
+
+		if (widgetFilterOptions) {
+			widgetFilterOptions.forEach(({descriptor}) => {
+				if (descriptor) {
+					widgetFilters.push({dataKey, descriptor});
+				}
+			});
+		}
 
 		postData = {
 			cases,
@@ -37,8 +45,8 @@ const createPostData = (widget: Widget, index: number) => {
 
 /**
  * Преобразует ссылку к относительному виду. Необходимо для корректной работы
- * @param {string} link - абсолютная ссылка [http://nordclan-dev2.nsd.naumen.ru/sd/operator/?anchor=list:!!encoded_prms=encoded_text$99466589]
- * @returns {string} - относительная ссылка [/sd/operator/?anchor=list:!!encoded_prms=encoded_text$99466589]
+ * @param {string} link - абсолютная ссылка, вида "http://<server>/sd/operator/<path>"
+ * @returns {string} - относительная ссылка, вида "/sd/operator/<path>"
  */
 const getRelativeLink = (link: string): string => link.replace(/^(.+?)\?/, '/sd/operator/?');
 
@@ -70,46 +78,54 @@ const drillDown = (widget: Widget, index: number, mixin: ?DrillDownMixin): Thunk
  * @param {object} payload - данные для построения ссылки
  * @returns {ThunkAction}
  */
-const openObjectsList = (widget: Widget, payload: Object): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {context, dashboard} = getState();
-	const {subjectUuid} = context;
-	const {id, type} = widget;
-	const {attrGroupCode = ''} = await parseAttrSetConditions(payload) ?? {};
+const openObjectsList = (widget: Widget, payload: Object): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		const {context, dashboard} = getState();
+		const {subjectUuid} = context;
+		const {id, type} = widget;
+		const {attrGroupCode = ''} = await parseAttrSetConditions(payload) ?? {};
 
-	dispatch(requestLink(id));
+		dispatch(requestLink(id));
 
-	try {
-		const {link} = await api.instance.drillDown.getLink(payload, subjectUuid, type, dashboard.settings.code, attrGroupCode);
+		try {
+			const {link} = await api.instance.drillDown.getLink(
+				payload,
+				subjectUuid,
+				type,
+				dashboard.settings.code,
+				attrGroupCode
+			);
 
-		window.open(getRelativeLink(link));
-		dispatch(receiveLink(id));
-	} catch (exception) {
-		if (exception instanceof DrillDownBigData || exception instanceof NoDetailData) {
-			dispatch(setWarningMessage({id, message: t('store::widgets::links::DataLimit')}));
-			return;
+			window.open(getRelativeLink(link));
+			dispatch(receiveLink(id));
+		} catch (exception) {
+			if (exception instanceof DrillDownBigData || exception instanceof NoDetailData) {
+				dispatch(setWarningMessage({id, message: t('store::widgets::links::DataLimit')}));
+				return;
+			}
+
+			dispatch(recordLinkError(id));
 		}
-
-		dispatch(recordLinkError(id));
-	}
-};
+	};
 
 /**
  * Открывает карточку объекта по переданному значению объекта
  * @param {string} value - значение объекта
  * @returns {ThunkAction}
  */
-const openCardObject = (value: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	dispatch(requestLink(value));
+const openCardObject = (value: string): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
+		dispatch(requestLink(value));
 
-	try {
-		const {link} = await api.instance.dashboards.getCardObject(value);
+		try {
+			const {link} = await api.instance.dashboards.getCardObject(value);
 
-		window.open(getRelativeLink(link));
-		dispatch(receiveLink(value));
-	} catch (e) {
-		dispatch(recordLinkError(value));
-	}
-};
+			window.open(getRelativeLink(link));
+			dispatch(receiveLink(value));
+		} catch (e) {
+			dispatch(recordLinkError(value));
+		}
+	};
 
 /**
  * Открывает дашборд по переданному идентификатору и сохраняет идентификатор виджета, для последующего фокуса.
@@ -117,22 +133,23 @@ const openCardObject = (value: string): ThunkAction => async (dispatch: Dispatch
  * @param {string} widgetId - уникальный идентификатор виджета
  * @returns {ThunkAction}
  */
-const openNavigationLink = (dashboardId: string, widgetId: string): ThunkAction => async (dispatch: Dispatch, getState: GetState): Promise<void> => {
-	const {context: {subjectUuid}} = getState();
-	const storageSettings = new StorageSettings(dashboardId);
+const openNavigationLink = (dashboardId: string, widgetId: string): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
+		const {context: {subjectUuid}} = getState();
+		const storageSettings = new StorageSettings(dashboardId);
 
-	widgetId ? storageSettings.setTargetWidget(widgetId) : storageSettings.setFocus(true);
-	dispatch(requestLink(dashboardId));
+		widgetId ? storageSettings.setTargetWidget(widgetId) : storageSettings.setFocus(true);
+		dispatch(requestLink(dashboardId));
 
-	try {
-		const {link} = await api.instance.dashboards.getDashboardLink(dashboardId, subjectUuid);
+		try {
+			const {link} = await api.instance.dashboards.getDashboardLink(dashboardId, subjectUuid);
 
-		window.open(getRelativeLink(link));
-		dispatch(receiveLink(dashboardId));
-	} catch (e) {
-		dispatch(recordLinkError(dashboardId));
-	}
-};
+			window.open(getRelativeLink(link));
+			dispatch(receiveLink(dashboardId));
+		} catch (e) {
+			dispatch(recordLinkError(dashboardId));
+		}
+	};
 
 const requestLink = (payload: string) => ({
 	payload,

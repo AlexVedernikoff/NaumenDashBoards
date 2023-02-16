@@ -34,6 +34,7 @@ export class TimerValueGroupModal extends Component<Props> {
 			case LESS:
 				return <MultipleIntervalOrCondition data={data} onChange={onChange} options={this.options} type={type} />;
 		}
+
 		return null;
 	};
 

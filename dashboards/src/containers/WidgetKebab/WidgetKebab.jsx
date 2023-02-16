@@ -5,6 +5,7 @@ import {
 	clearFiltersOnWidget,
 	exportScreenShot,
 	getDataForNavigation,
+	getParametersMixin,
 	parseDiagramWidget
 } from './helpers';
 import {CLEAR_FILTER} from './constants';
@@ -72,7 +73,9 @@ export class WidgetKebabContainer extends PureComponent<Props, State> {
 		const {diagramWidget} = this.state;
 
 		if (typeof value === 'number' && diagramWidget) {
-			drillDown(diagramWidget, value);
+			const mixin = getParametersMixin(diagramWidget, value);
+
+			drillDown(diagramWidget, value, mixin);
 		}
 	};
 

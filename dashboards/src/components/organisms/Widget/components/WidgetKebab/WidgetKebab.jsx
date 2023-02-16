@@ -20,7 +20,15 @@ export class WidgetKebab extends PureComponent<Props> {
 
 		if (mode) {
 			const {availableOptions, icon, text, value} = mode;
-			return <KebabDropdownButton icon={icon} onSelect={onChangeMode} options={availableOptions} text={text} value={value} />;
+			return (
+				<KebabDropdownButton
+					icon={icon}
+					onSelect={onChangeMode}
+					options={availableOptions}
+					text={text}
+					value={value}
+				/>
+			);
 		}
 
 		return null;
@@ -31,7 +39,15 @@ export class WidgetKebab extends PureComponent<Props> {
 
 		if (data) {
 			const {availableOptions, icon, text, value} = data;
-			return <KebabDropdownButton icon={icon} onSelect={onDrillDown} options={availableOptions} text={text} value={value} />;
+			return (
+				<KebabDropdownButton
+					icon={icon}
+					onSelect={onDrillDown}
+					options={availableOptions}
+					text={text}
+					value={value}
+				/>
+			);
 		}
 
 		return null;
@@ -41,7 +57,13 @@ export class WidgetKebab extends PureComponent<Props> {
 		const {editable, onSelect} = this.props;
 
 		if (editable) {
-			return <KebabIconButton icon={ICON_NAMES.EDIT} onClick={onSelect} text={t('WidgetKebab::Edit')} />;
+			return (
+				<KebabIconButton
+					icon={ICON_NAMES.EDIT}
+					onClick={onSelect}
+					text={t('WidgetKebab::Edit')}
+				/>
+			);
 		}
 
 		return null;
@@ -52,7 +74,15 @@ export class WidgetKebab extends PureComponent<Props> {
 
 		if (exportParams) {
 			const {availableOptions, icon, text, value} = exportParams;
-			return <KebabDropdownButton icon={icon} onSelect={this.handleExport} options={availableOptions} text={text} value={value} />;
+			return (
+				<KebabDropdownButton
+					icon={icon}
+					onSelect={this.handleExport}
+					options={availableOptions}
+					text={text}
+					value={value}
+				/>
+			);
 		}
 
 		return null;
@@ -63,7 +93,15 @@ export class WidgetKebab extends PureComponent<Props> {
 
 		if (filtersOnWidget) {
 			const {availableOptions, icon, text, value} = filtersOnWidget;
-			return <KebabDropdownButton icon={icon} onSelect={onChangeFiltersOnWidget} options={availableOptions} text={text} value={value} />;
+			return (
+				<KebabDropdownButton
+					icon={icon}
+					onSelect={onChangeFiltersOnWidget}
+					options={availableOptions}
+					text={text}
+					value={value}
+				/>
+			);
 		}
 
 		return null;
@@ -74,7 +112,11 @@ export class WidgetKebab extends PureComponent<Props> {
 
 		if (navigation) {
 			return (
-				<KebabIconButton icon={ICON_NAMES.EXTERNAL_LINK} onClick={onNavigation} text={navigation.text} />
+				<KebabIconButton
+					icon={ICON_NAMES.EXTERNAL_LINK}
+					onClick={onNavigation}
+					text={navigation.text}
+				/>
 			);
 		}
 
@@ -86,7 +128,13 @@ export class WidgetKebab extends PureComponent<Props> {
 		const handleRemove = () => onRemove(widgetRef);
 
 		if (editable) {
-			return <KebabIconButton icon={ICON_NAMES.BASKET} onClick={handleRemove} text={t('WidgetKebab::Delete')} />;
+			return (
+				<KebabIconButton
+					icon={ICON_NAMES.BASKET}
+					onClick={handleRemove}
+					text={t('WidgetKebab::Delete')}
+				/>
+			);
 		}
 
 		return null;

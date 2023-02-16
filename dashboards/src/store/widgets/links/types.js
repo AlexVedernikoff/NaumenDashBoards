@@ -1,5 +1,5 @@
 // @flow
-import type {Group, MixedAttribute, Widget} from 'store/widgets/data/types';
+import type {Group, MixedAttribute, Parameter, Widget} from 'store/widgets/data/types';
 import {LINKS_EVENTS} from './constants';
 import type {ThunkAction} from 'store/types';
 
@@ -22,6 +22,8 @@ export type DrillDownMixin = {
 	filterId?: string,
 	filters: Array<Filter>,
 	isSummaryAdditionalValue?: boolean,
+	parameters?: Array<Parameter>,
+	showBlankData?: boolean,
 	summaryWidgetKey?: string,
 	title: string,
 	widgetFilters?: WidgetFilters[]
@@ -36,7 +38,11 @@ export type LinkMap = {
 	[key: string]: Link
 };
 
-export type DrillDownAction = (widget: Widget, index: number, mixin?: DrillDownMixin) => ThunkAction;
+export type DrillDownAction = (
+	widget: Widget,
+	index: number,
+	mixin?: DrillDownMixin
+) => ThunkAction;
 
 export type OpenCardObjectAction = (value: string) => ThunkAction;
 

@@ -1,12 +1,33 @@
 // @flow
-import type {AnyWidget, CustomFilter, DisplayMode, Widget} from 'store/widgets/data/types';
+import type {
+	AnyWidget,
+	AxisData,
+	CircleData,
+	ComboData,
+	CustomFilter,
+	DisplayMode,
+	PivotData,
+	TableData,
+	Widget
+} from 'store/widgets/data/types';
 import api from 'api';
 import {CLEAR_FILTER} from './constants';
-import {createFilterContext, descriptorContainsFilter, getFilterContext} from 'utils/descriptorUtils';
+import {
+	createFilterContext,
+	descriptorContainsFilter,
+	getFilterContext
+} from 'utils/descriptorUtils';
 import {deepClone} from 'helpers';
 import {DIAGRAM_WIDGET_TYPES, DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {DISPLAY_MODE_OPTIONS} from 'store/widgets/constants';
-import type {DropDownParams, FiltersOnWidget, NavigationData, NavigationProps, Option} from './types';
+import type {DrillDownMixin} from 'store/widgets/links/types';
+import type {
+	DropDownParams,
+	FiltersOnWidget,
+	NavigationData,
+	NavigationProps,
+	Option
+} from './types';
 import exporter, {FILE_VARIANTS} from 'utils/export';
 import {getDescriptorCases} from 'src/store/helpers';
 import {getPartsClassFqn} from 'store/widgets/links/helpers';
@@ -115,12 +136,11 @@ const exportParamsSelector = memoize((widget: AnyWidget): ?DropDownParams => {
 
 	if (diagramWidget) {
 		const {PDF, PNG, XLSX} = FILE_VARIANTS;
-		const availableOptions = diagramWidget.type === DIAGRAM_WIDGET_TYPES.PIVOT_TABLE ? [PNG] : [PDF, PNG];
+		const {PIVOT_TABLE, TABLE} = DIAGRAM_WIDGET_TYPES;
+		const {type} = diagramWidget;
+		const availableOptions = type === PIVOT_TABLE ? [PNG] : [PDF, PNG];
 
-		if (
-			diagramWidget.type === DIAGRAM_WIDGET_TYPES.TABLE
-			|| diagramWidget.type === DIAGRAM_WIDGET_TYPES.PIVOT_TABLE
-		) {
+		if (type === TABLE || type === PIVOT_TABLE) {
 			availableOptions.push(XLSX);
 		}
 
@@ -263,8 +283,9 @@ const getNewDescriptor = async (filter: CustomFilter, classFqn: string): Promise
 			});
 
 			const options = {useRestriction: true};
+			const {serializedContext} = await api.instance.filterForm.openForm(context, options);
 
-			({serializedContext: newDescriptor} = await api.instance.filterForm.openForm(context, options));
+			newDescriptor = serializedContext;
 		}
 	} catch (ex) {
 		console.error('Filtration error', ex);
@@ -332,12 +353,57 @@ const exportScreenShot = async (widget: Widget, type: $Keys<typeof FILE_VARIANTS
 	}
 };
 
+/**
+ * Формирует примесь данных к параметрам создания ссылки для перехода на данные источника
+ * @param {Widget} widget - виджет
+ * @param {number} index - номер источника
+ * @returns {DrillDownMixin} - примесь данных
+ */
+const getParametersMixin = (widget: Widget, index: number): DrillDownMixin => {
+	const title = widget.data[index].source.value.label;
+	const result: DrillDownMixin = {
+		filters: [],
+		title
+	};
+
+	if (widget.type === WIDGET_TYPES.BAR
+		|| widget.type === WIDGET_TYPES.BAR_STACKED
+		|| widget.type === WIDGET_TYPES.COLUMN
+		|| widget.type === WIDGET_TYPES.COLUMN_STACKED
+		|| widget.type === WIDGET_TYPES.LINE
+		|| widget.type === WIDGET_TYPES.COMBO
+	) {
+		const dataSet: AxisData | ComboData = widget.data[index];
+
+		result.parameters = dataSet.parameters;
+		result.showBlankData = dataSet.showBlankData || dataSet.showEmptyData;
+	} else if (widget.type === WIDGET_TYPES.DONUT || widget.type === WIDGET_TYPES.PIE) {
+		const dataSet: CircleData = widget.data[index];
+
+		result.parameters = [];
+		result.showBlankData = dataSet.showBlankData || dataSet.showEmptyData;
+	} else if (widget.type === WIDGET_TYPES.TABLE) {
+		const dataSet: TableData = widget.data[index];
+
+		result.parameters = dataSet.parameters;
+		result.showBlankData = widget.showBlankData || widget.showEmptyData;
+	} else if (widget.type === WIDGET_TYPES.PIVOT_TABLE) {
+		const dataSet: PivotData = widget.data[index];
+
+		result.parameters = dataSet.parameters;
+		result.showBlankData = false;
+	}
+
+	return result;
+};
+
 export {
 	changeFiltersOnWidget,
 	clearFiltersOnWidget,
 	dataSelector,
 	exportParamsSelector,
 	exportScreenShot,
+	getParametersMixin,
 	filtersOnWidgetSelector,
 	getDataForNavigation,
 	getNewDescriptor,

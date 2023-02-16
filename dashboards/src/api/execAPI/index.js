@@ -20,7 +20,10 @@ export const execAPITransport = (frame: FrameAPI): Transport => {
 
 			return response;
 		} catch (e) {
-			console.error('Transport: ', e);
+			if (process.env.NODE_ENV === 'development') {
+				console.error('Transport: ', e);
+			}
+
 			const error = parseError(e);
 
 			throw error;
