@@ -1,15 +1,14 @@
 // @flow
-import {array, baseSchema, mixed, object} from 'containers/DiagramWidgetForm/schema';
 import DiagramWidgetForm from 'containers/DiagramWidgetForm';
-import {lazy} from 'yup';
+import {isStackedChart} from 'store/widgets/helpers';
 import memoize from 'memoize-one';
 import OptionsTab from './components/OptionsTab';
 import ParamsTab from './components/ParamsTab';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
+import {schema, schemaStacked} from './constants';
 import StyleTab from './components/StyleTab';
 import type {WidgetType} from 'src/store/widgets/data/types';
-import {WIDGET_TYPES} from 'src/store/widgets/data/constants';
 
 export class AxisChartWidgetForm extends PureComponent<Props> {
 	components = {
@@ -18,22 +17,7 @@ export class AxisChartWidgetForm extends PureComponent<Props> {
 		StyleTab
 	};
 
-	getSchema = memoize((type: WidgetType) => object({
-		...baseSchema,
-		data: array().of(object({
-			breakdown: mixed().requiredByCompute(lazy(() => {
-				const {BAR, COLUMN, LINE} = WIDGET_TYPES;
-				const hasConditionalBreakdown = type === BAR || type === COLUMN || type === LINE;
-
-				return hasConditionalBreakdown ? array().conditionalBreakdown() : array().breakdown();
-			})),
-			indicators: mixed().requiredByCompute(array().indicators()),
-			parameters: mixed().requiredByCompute(array().parameters()),
-			source: object().source(),
-			top: object().topSettings()
-		})),
-		sources: mixed().minSourceNumbers().sourceNumbers()
-	}));
+	getSchema = memoize((type: WidgetType) => isStackedChart(type) ? schemaStacked : schema);
 
 	handleSubmit = values => {
 		const {onSave, type, widget} = this.props;

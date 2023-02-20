@@ -39,6 +39,7 @@ import {
 	DIAGRAM_WIDGET_TYPES,
 	WIDGET_TYPES
 } from 'store/widgets/data/constants';
+import {DEFAULT_AGGREGATION} from 'store/widgets/constants';
 import {
 	DEFAULT_LEGEND,
 	DEFAULT_WIDGET_WIDTH,
@@ -908,7 +909,7 @@ const calculateYAxisNumberWidth = (maxString: string, settings: AxisOptions, axi
 const makeSubTotalGetter = (widget: AxisWidget, data: RechartData, usePercentage: boolean): SubTotalGetter | null => {
 	let result = null;
 
-	if (widget.showSubTotalAmount) {
+	if (widget.showSubTotalAmount && !usePercentage /* #SMRMEXT-13872 */) {
 		const cache = {};
 
 		data.forEach(({name, ...dataSet}) => {
@@ -926,12 +927,22 @@ const makeSubTotalGetter = (widget: AxisWidget, data: RechartData, usePercentage
 	return result;
 };
 
+/**
+ * Проверяет можно ли отображать промежуточные итоги по агрегации индикатора
+ * @see #SMRMEXT-13872
+ * @param {string} aggregation - агрегация индикатора
+ * @returns {boolean} - true, если промежуточные итоги можно оторажать
+ */
+const canShowSubTotal = (aggregation: string) =>
+	aggregation !== DEFAULT_AGGREGATION.PERCENT && aggregation !== DEFAULT_AGGREGATION.PERCENT_CNT;
+
 export {
 	calculateCategoryHeight,
 	calculateCategoryRotateHeight,
 	calculateCategoryWidth,
 	calculateStringsSize,
 	calculateYAxisNumberWidth,
+	canShowSubTotal,
 	equalLabels,
 	getAutoColor,
 	getAxisWidget,

@@ -3,10 +3,13 @@ import Checkbox from 'components/atoms/Checkbox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
+import {getShowSubTotalMode} from 'store/widgetForms/helpers';
 import type {OnChangeEvent} from 'components/types';
 import type {Props} from './types';
 import React, {Fragment, PureComponent} from 'react';
+import {SHOW_SUB_TOTAL_MODE} from 'store/widgetForms/constants';
 import t from 'localization';
+import withValues from 'components/organisms/WidgetForm/HOCs/withValues';
 
 class ShowTotalAmountBox extends PureComponent<Props> {
 	static defaultProps = {
@@ -16,24 +19,31 @@ class ShowTotalAmountBox extends PureComponent<Props> {
 	handleChange = ({name, value}: OnChangeEvent<boolean>) => {
 		const {onChange} = this.props;
 		return onChange(name, !value);
-	};
+	};;
 
 	renderShowSubTotalAmount = () => {
-		const {showSubTotalAmount, subTotalAmountView} = this.props;
+		const {showSubTotalAmount, subTotalAmountView, values: {data}} = this.props;
 
 		if (subTotalAmountView) {
-			return (
-				<FormField>
-					<FormControl label={t('ShowTotalAmountBox::ShowSubTotalAmount')}>
-						<Checkbox
-							checked={showSubTotalAmount}
-							name={DIAGRAM_FIELDS.showSubTotalAmount}
-							onChange={this.handleChange}
-							value={showSubTotalAmount}
-						/>
-					</FormControl>
-				</FormField>
-			);
+			const mode = getShowSubTotalMode(data);
+			const checked = showSubTotalAmount && mode === SHOW_SUB_TOTAL_MODE.SHOW;
+			const disabled = mode === SHOW_SUB_TOTAL_MODE.DISABLE;
+
+			if (mode !== SHOW_SUB_TOTAL_MODE.HIDE) {
+				return (
+					<FormField>
+						<FormControl disabled={disabled} label={t('ShowTotalAmountBox::ShowSubTotalAmount')}>
+							<Checkbox
+								checked={checked}
+								disabled={disabled}
+								name={DIAGRAM_FIELDS.showSubTotalAmount}
+								onChange={this.handleChange}
+								value={showSubTotalAmount}
+							/>
+						</FormControl>
+					</FormField>
+				);
+			}
 		}
 
 		return null;
@@ -65,4 +75,4 @@ class ShowTotalAmountBox extends PureComponent<Props> {
 	}
 }
 
-export default ShowTotalAmountBox;
+export default withValues(DIAGRAM_FIELDS.data)(ShowTotalAmountBox);

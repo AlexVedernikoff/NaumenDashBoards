@@ -1,8 +1,17 @@
 // @flow
 import type {AxisChartOptions, ContainerSize} from './types';
+import {
+	canShowSubTotal,
+	getAxisWidget,
+	getDataLabels,
+	getLegendOptions,
+	getSeriesData,
+	getSeriesInfo,
+	getXAxisCategory,
+	makeSubTotalGetter
+} from './helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getAxisFormatter} from './formater';
-import {getAxisWidget, getDataLabels, getLegendOptions, getSeriesData, getSeriesInfo, getXAxisCategory, makeSubTotalGetter} from './helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {getYAxisNumber, normalizeSeries} from './columns.helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
@@ -29,7 +38,8 @@ const getOptions = (
 			const {indicators, xAxisName, yAxisName} = buildDataSet;
 			const {aggregation, attribute: indicatorAttribute} = indicators[0];
 			const usesPercent = hasPercent(indicatorAttribute, aggregation);
-			const subTotalGetter = makeSubTotalGetter(axisWidget, seriesData, usesPercent);
+			const showSubTotal = canShowSubTotal(aggregation); // #SMRMEXT-13872
+			const subTotalGetter = showSubTotal ? makeSubTotalGetter(axisWidget, seriesData, usesPercent) : null;
 			const legend = getLegendOptions(container, axisWidget.legend);
 			const xAxis = getXAxisCategory(axisWidget, container, labels.map(formatters.parameter), xAxisName);
 			const yAxis = getYAxisNumber(axisWidget, container, xAxis, legend, rawData, formatters.indicator, yAxisName, usesPercent);

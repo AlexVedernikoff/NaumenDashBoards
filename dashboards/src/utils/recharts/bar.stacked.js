@@ -1,8 +1,16 @@
 // @flow
 import type {AxisChartOptions, ContainerSize} from './types';
+import {
+	canShowSubTotal,
+	getAxisWidget,
+	getDataLabels,
+	getLegendOptions,
+	getSeriesData,
+	getSeriesInfo,
+	makeSubTotalGetter
+} from './helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getAxisFormatter} from './formater';
-import {getAxisWidget, getDataLabels, getLegendOptions, getSeriesData, getSeriesInfo, makeSubTotalGetter} from './helpers';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {getXAxisNumber, getYAxisCategory, normalizeSeries} from './bar.helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
@@ -30,7 +38,8 @@ const getOptions = (
 			const {indicators} = buildDataSet;
 			const {aggregation, attribute: indicatorAttribute} = indicators[0];
 			const usesPercent = hasPercent(indicatorAttribute, aggregation);
-			const subTotalGetter = makeSubTotalGetter(axisWidget, seriesData, usesPercent);
+			const showSubTotal = canShowSubTotal(aggregation); // #SMRMEXT-13872
+			const subTotalGetter = showSubTotal ? makeSubTotalGetter(axisWidget, seriesData, usesPercent) : null;
 
 			if (usesPercent) {
 				seriesData = normalizeSeries(seriesData);
