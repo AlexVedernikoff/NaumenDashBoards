@@ -3,7 +3,13 @@ import {compose} from 'redux';
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
-import {fixIndicatorsAggregationDataSet, fixLeaveOneIndicator, fixRemoveParameters, getDefaultBreakdown} from 'store/widgetForms/helpers';
+import {
+	fixClearIndicatorsFormat,
+	fixIndicatorsAggregationDataSet,
+	fixLeaveOneIndicator,
+	fixRemoveParameters,
+	getDefaultBreakdown
+} from 'store/widgetForms/helpers';
 import {omit} from 'helpers';
 import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
 import type {Values as AxisValues} from 'src/store/widgetForms/axisChartForm/types';
@@ -62,7 +68,7 @@ const changeValuesByAxisOrComboChart = (state: State, values: AxisValues | Combo
 				__type: 'CIRCLE_DATA_SET',
 				breakdown: sourceForCompute ? [] : (breakdown ?? getDefaultBreakdown(dataKey)),
 				dataKey,
-				indicators,
+				indicators: fixClearIndicatorsFormat(indicators),
 				showBlankData,
 				showEmptyData,
 				source,

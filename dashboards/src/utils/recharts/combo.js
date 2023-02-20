@@ -37,7 +37,7 @@ const getOptions = (
 				series,
 				type: 'ComboChartOptions',
 				xAxis: getXAxisCategory(comboWidget, container, labels.map(formatters.parameter), xAxisName),
-				yAxis: getYAxisesNumber(comboWidget, rawData, series)
+				yAxis: getYAxisesNumber(comboWidget, rawData, series, formatters.indicator)
 			};
 		}
 	}

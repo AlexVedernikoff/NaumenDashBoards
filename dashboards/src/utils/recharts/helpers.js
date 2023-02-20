@@ -25,6 +25,7 @@ import type {
 	ComboWidget,
 	CustomChartColorsSettings,
 	CustomChartColorsSettingsData,
+	DTIntervalAxisFormat,
 	Legend,
 	LegendPosition,
 	PivotWidget,
@@ -37,8 +38,8 @@ import {
 	DEFAULT_BREAKDOWN_COLOR,
 	DEFAULT_CHART_COLORS,
 	DIAGRAM_WIDGET_TYPES,
-	WIDGET_TYPES
-} from 'store/widgets/data/constants';
+	DT_INTERVAL_PERIOD
+	, WIDGET_TYPES} from 'store/widgets/data/constants';
 import {
 	DEFAULT_LEGEND,
 	DEFAULT_WIDGET_WIDTH,
@@ -58,6 +59,7 @@ import {
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import {hasBreakdown} from 'store/widgets/helpers';
+import {INTERVALS_DIVIDER} from 'utils/recharts/formater/constants';
 import {SEPARATOR} from 'store/widgets/buildData/constants';
 
 /**
@@ -82,6 +84,20 @@ const getNiceScale = (value: number, additiveLow: boolean = false): number => {
 	}
 
 	return result;
+};
+
+/**
+ * Округляет временные интервалы до ближайшего минимального целого интервала
+ * @param {number} value - исходное число интервала в ms
+ * @param {boolean} format - формат отображения интервала
+ * @returns {number} - округленное число в ms
+ */
+const getNiceScaleDTInterval = (value: number, format: DTIntervalAxisFormat): number => {
+	const {quotient} = format;
+	const divider = INTERVALS_DIVIDER[quotient || DT_INTERVAL_PERIOD.HOURS];
+	const quotientTop = Math.ceil(value / divider);
+
+	return quotientTop * divider;
 };
 
 /**
@@ -944,6 +960,7 @@ export {
 	getDataLabels,
 	getLegendOptions,
 	getNiceScale,
+	getNiceScaleDTInterval,
 	getPivotWidget,
 	getRechartAxisSetting,
 	getSeriesData,

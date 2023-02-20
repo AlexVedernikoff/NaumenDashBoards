@@ -79,7 +79,7 @@ export const EMPTY_CHART_OPTIONS = {
 	type: 'EmptyChartOptions'
 };
 
-export const RULER_WIDTH = 10;
+export const RULER_WIDTH = 13;
 
 export const AXIS_FONT_SIZE = 12;
 

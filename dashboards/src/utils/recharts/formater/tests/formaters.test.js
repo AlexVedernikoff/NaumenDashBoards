@@ -8,6 +8,7 @@ import {
 	defaultNumberFormatter,
 	defaultStringFormatter,
 	formatDate,
+	oldFormatMSInterval,
 	formatMSInterval,
 	getLabelFormatter,
 	loggerFormatter,
@@ -17,7 +18,7 @@ import {
 	percentFormat,
 	sevenDaysFormatter
 } from 'utils/recharts/formater/helpers'
-import {AXIS_FORMAT_TYPE, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/data/constants';
+import {AXIS_FORMAT_TYPE, DT_INTERVAL_PERIOD, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/data/constants';
 
 
 const numberFormat = {
@@ -32,6 +33,19 @@ const labelFormat = {
 	labelFormat: LABEL_FORMATS.TITLE_CODE,
 	type: AXIS_FORMAT_TYPE.LABEL_FORMAT
 }
+
+const dtIntervalFormat = {
+	quotient: DT_INTERVAL_PERIOD.HOURS,
+	remainder: DT_INTERVAL_PERIOD.SECONDS,
+	symbolCount: 0,
+	type: AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT
+}
+
+const sec = 1000;
+const min = sec * 60;
+const hours = min * 60;
+const days = hours * 24;
+const week = days * 7;
 
 
 describe('Formatters test', () => {
@@ -212,41 +226,70 @@ describe('Formatters test', () => {
 		expect(formatter(1019)).toBe('1.02тыс.');
 	});
 
+	it('oldFormatMSInterval', () => {
+		expect(oldFormatMSInterval(0)).toBe('0')
+		expect(oldFormatMSInterval(100)).toBe('100')
+
+		expect(oldFormatMSInterval(1 * sec)).toBe('1c')
+		expect(oldFormatMSInterval(15 * sec)).toBe('15c')
+		expect(oldFormatMSInterval(15 * sec + 421)).toBe('15с')
+
+		expect(oldFormatMSInterval(1 * min)).toBe('1мин')
+		expect(oldFormatMSInterval(6 * min)).toBe('6мин')
+		expect(oldFormatMSInterval(4 * min + 25 * sec + 15)).toBe('4мин 25с')
+
+		expect(oldFormatMSInterval(1 * hours)).toBe('1ч')
+		expect(oldFormatMSInterval(2 * hours)).toBe('2ч')
+		expect(oldFormatMSInterval(2 * hours + 20 * sec)).toBe('2ч 20с')
+		expect(oldFormatMSInterval(2 * hours + 1 * min + 25)).toBe('2ч 60с')
+		expect(oldFormatMSInterval(5 * hours + 14 * min + 25)).toBe('5ч 840с')
+
+		expect(oldFormatMSInterval(1 * days)).toBe('1д')
+		expect(oldFormatMSInterval(2 * days)).toBe('2д')
+		expect(oldFormatMSInterval(5 * days + 14 * min + 25)).toBe('120ч 840с')
+		expect(oldFormatMSInterval(5 * days + 14 * min + 15 * sec)).toBe('120ч 855с')
+		expect(oldFormatMSInterval(5 * days + 2 * hours + 14 * min + 15 * sec)).toBe('122ч 855с')
+
+		expect(oldFormatMSInterval(1 * week)).toBe('1нед')
+		expect(oldFormatMSInterval(2 * week)).toBe('2нед')
+		expect(oldFormatMSInterval(2 * week + 14 * min + 25)).toBe('336ч 840с')
+		expect(oldFormatMSInterval(2 * week + 14 * min + 15 * sec)).toBe('336ч 855с')
+		expect(oldFormatMSInterval(2 * week + 2 * hours + 14 * min + 15 * sec)).toBe('338ч 855с')
+		expect(oldFormatMSInterval(2 * week + 3 * days + 2 * hours + 14 * min + 15 * sec)).toBe('410ч 855с')
+	});
+
 	it('formatMSInterval', () => {
-		expect(formatMSInterval(0)).toBe('0')
-		expect(formatMSInterval(100)).toBe('100')
+		const msFormat = {
+			...dtIntervalFormat,
+			quotient: DT_INTERVAL_PERIOD.MINUTES,
+			remainder: DT_INTERVAL_PERIOD.SECONDS
+		};
+		const msFormatter = formatMSInterval(msFormat);
+		expect(msFormatter(4 * min + 25 * sec)).toBe('4мин 25с');
+		expect(msFormatter(5 * hours + 14 * min)).toBe('314мин');
+		expect(msFormatter(5 * hours + 14 * min + 25 * sec)).toBe('314мин 25с');
 
-		const sec = 1000;
-		expect(formatMSInterval(1 * sec)).toBe(' 1 c')
-		expect(formatMSInterval(15 * sec)).toBe(' 15 c')
-		expect(formatMSInterval(15 * sec + 421)).toBe(' 15 с')
+		const hsFormat = {
+			...dtIntervalFormat,
+			quotient: DT_INTERVAL_PERIOD.HOURS,
+			remainder: DT_INTERVAL_PERIOD.SECONDS
+		};
+		const hsFormatter = formatMSInterval(hsFormat);
+		expect(hsFormatter(4 * min + 25 * sec)).toBe('265с');
+		expect(hsFormatter(5 * hours + 14 * min)).toBe('5ч 840с');
+		expect(hsFormatter(1 * days + 14 * min + 25 * sec)).toBe('24ч 865с');
 
-		const min = sec * 60;
-		expect(formatMSInterval(1 * min)).toBe(' 1 мин')
-		expect(formatMSInterval(6 * min)).toBe(' 6 мин')
-		expect(formatMSInterval(4 * min + 25 * sec + 15)).toBe(' 4 мин 25 с')
+		const dmzFormat = {
+			...dtIntervalFormat,
+			quotient: DT_INTERVAL_PERIOD.DAY,
+			remainder: DT_INTERVAL_PERIOD.HOURS,
+			symbolCount: 2
+		};
+		const dmzFormatter = formatMSInterval(dmzFormat);
+		expect(dmzFormatter(2 * days + 4 * hours + 25 * min)).toBe('2д 4.42ч');
+		expect(dmzFormatter(20 * hours)).toBe('20.00ч');
+		expect(dmzFormatter(1 * days + 30 * min)).toBe('1д 0.50ч');
 
-		const hours = min * 60;
-		expect(formatMSInterval(1 * hours)).toBe(' 1 ч')
-		expect(formatMSInterval(2 * hours)).toBe(' 2 ч')
-		expect(formatMSInterval(2 * hours + 20 * sec)).toBe(' 2 ч 20 с')
-		expect(formatMSInterval(2 * hours + 1 * min + 25)).toBe(' 2 ч 60 с')
-		expect(formatMSInterval(5 * hours + 14 * min + 25)).toBe(' 5 ч 840 с')
-
-		const days = hours * 24;
-		expect(formatMSInterval(1 * days)).toBe(' 1 д')
-		expect(formatMSInterval(2 * days)).toBe(' 2 д')
-		expect(formatMSInterval(5 * days + 14 * min + 25)).toBe(' 120 ч 840 с')
-		expect(formatMSInterval(5 * days + 14 * min + 15 * sec)).toBe(' 120 ч 855 с')
-		expect(formatMSInterval(5 * days + 2 * hours + 14 * min + 15 * sec)).toBe(' 122 ч 855 с')
-
-		const week = days * 7;
-		expect(formatMSInterval(1 * week)).toBe(' 1 нед')
-		expect(formatMSInterval(2 * week)).toBe(' 2 нед')
-		expect(formatMSInterval(2 * week + 14 * min + 25)).toBe(' 336 ч 840 с')
-		expect(formatMSInterval(2 * week + 14 * min + 15 * sec)).toBe(' 336 ч 855 с')
-		expect(formatMSInterval(2 * week + 2 * hours + 14 * min + 15 * sec)).toBe(' 338 ч 855 с')
-		expect(formatMSInterval(2 * week + 3 * days + 2 * hours + 14 * min + 15 * sec)).toBe(' 410 ч 855 с')
 	});
 
 	it('formatDate', () => {

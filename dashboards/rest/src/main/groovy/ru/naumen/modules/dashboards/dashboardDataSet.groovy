@@ -6839,7 +6839,7 @@
          */
         Set minutesAndHoursInCorrectOrder(Set labels, String format, Boolean reverse)
         {
-            //это формат ii, форматтер изменится только, если придёт формат часов
+            //это формат ii, форматер изменится только, если придёт формат часов
             SimpleDateFormat formatter = new SimpleDateFormat("mm мин", new Locale("ru"))
             switch(format)
             {

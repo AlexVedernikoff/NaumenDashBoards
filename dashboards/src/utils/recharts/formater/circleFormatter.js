@@ -1,39 +1,41 @@
 // @flow
-import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT} from 'store/widgets/data/constants';
+import type {AxisFormat, CircleWidget} from 'store/widgets/data/types';
+import {AXIS_FORMAT_TYPE} from 'store/widgets/data/constants';
 import {
 	checkInfinity,
 	checkNumber,
+	checkString,
 	cntPercentFormatter,
+	defaultNumberFormatter,
 	formatMSInterval,
+	getDataLabelsFormat,
+	getLabelFormatter,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
 	storedFormatter
 } from './helpers';
 import type {CircleFormatter, NumberFormatter, PercentStore, ValueFormatter} from './types';
-import type {CircleWidget, NumberAxisFormat} from 'store/widgets/data/types';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
-import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasCountPercent, hasMSInterval, hasPercent} from 'store/widgets/helpers';
+import {getDefaultFormatForParameter, getMainDataSet} from 'store/widgets/data/helpers';
+import {hasCountPercent, hasPercent} from 'store/widgets/helpers';
 
 const getDataFormatter = (
 	widget: CircleWidget,
-	format: NumberAxisFormat,
+	format: AxisFormat,
 	percentStore: PercentStore
 ): NumberFormatter => {
 	const dataSet = getMainDataSet(widget.data);
 	const {indicators} = dataSet;
 	const {aggregation, attribute: indicatorAttribute} = indicators[0];
-
-	const usesMSInterval = hasMSInterval(indicatorAttribute, aggregation);
 	const usesPercent = hasPercent(indicatorAttribute, aggregation);
 	const usesCntPercent = hasCountPercent(indicatorAttribute, aggregation);
 
-	let formatter = null;
+	let formatter = checkNumber(defaultNumberFormatter(0));
 
-	if (usesMSInterval) {
-		formatter = checkNumber(formatMSInterval);
-	} else {
+	if (format.type === AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT) {
+		formatter = checkNumber(formatMSInterval(format));
+	} else if (format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT || format.type === AXIS_FORMAT_TYPE.INTEGER_FORMAT) {
 		const numberFormat = !format.additional && usesPercent ? {...format, additional: '%'} : format;
 
 		formatter = makeFormatterByNumberFormat(numberFormat);
@@ -43,6 +45,8 @@ const getDataFormatter = (
 		} else {
 			formatter = checkInfinity(formatter);
 		}
+	} else if (format.type === AXIS_FORMAT_TYPE.LABEL_FORMAT) {
+		formatter = checkString(getLabelFormatter(format.labelFormat));
 	}
 
 	return formatter;
@@ -62,7 +66,7 @@ const getCategoryFormatter = (widget: CircleWidget): ValueFormatter => {
 		return sevenDaysFormatter;
 	}
 
-	return makeFormatterByFormat(breakdownFormat ?? getDefaultFormatForAttribute(attribute, group), false);
+	return makeFormatterByFormat(breakdownFormat ?? getDefaultFormatForParameter(attribute, group), false);
 };
 
 /**
@@ -77,13 +81,9 @@ const getCircleFormatterBase = (
 	labels: Array<string> | Array<number>,
 	percentStore: PercentStore = {}
 ): CircleFormatter => {
-	const {dataLabels} = widget;
-	const dataLabelsFormat = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
-	const normalizedDataLabelsFormat = dataLabelsFormat && dataLabelsFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
-		? dataLabelsFormat
-		: DEFAULT_NUMBER_AXIS_FORMAT;
+	const dataLabelsFormat = getDataLabelsFormat(widget);
 	const categoryFormatter = getCategoryFormatter(widget);
-	const dataLabelsFormatter = getDataFormatter(widget, normalizedDataLabelsFormat, percentStore);
+	const dataLabelsFormatter = getDataFormatter(widget, dataLabelsFormat, percentStore);
 
 	return {
 		category: categoryFormatter,

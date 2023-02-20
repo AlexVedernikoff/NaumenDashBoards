@@ -82,9 +82,9 @@ const checkCntPercentFormatter = (
 };
 
 /**
- * Форматтер для столбцов сводной таблицы
+ * Форматер для столбцов сводной таблицы
  * @param {PivotWidget} widget - виджет сводной таблицы
- * @returns {ValuePivotFormatter} - форматтер значений сводной по столбцам
+ * @returns {ValuePivotFormatter} - форматер значений сводной по столбцам
  */
 const getValueFormatter = (widget: PivotWidget): ValuePivotFormatter => {
 	const defaultString = getDefaultValue(widget.pivot?.body?.defaultValue?.value ?? DEFAULT_TABLE_VALUE.EMPTY_ROW);
@@ -113,9 +113,9 @@ const getValueFormatter = (widget: PivotWidget): ValuePivotFormatter => {
 };
 
 /**
- * Форматтер для итогов
+ * Форматер для итогов
  * @param {PivotWidget} widget - виджет сводной таблицы
- * @returns {ValuePivotFormatter} - форматтер значений сводной с одним столбцом
+ * @returns {ValuePivotFormatter} - форматер значений сводной с одним столбцом
  */
 const getTotalFormatter = (widget: PivotWidget): ValuePivotFormatter => {
 	const defaultString = getDefaultValue(widget.pivot?.body?.defaultValue?.value ?? DEFAULT_TABLE_VALUE.EMPTY_ROW);

@@ -2,7 +2,12 @@
 import {compose} from 'redux';
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_SOURCE} from 'store/widgetForms/constants';
-import {fixIndicatorsAggregation, fixIndicatorsTooltip, fixPivotIndicators} from 'store/widgetForms/helpers';
+import {
+	fixClearIndicatorsFormat,
+	fixIndicatorsAggregation,
+	fixIndicatorsTooltip,
+	fixPivotIndicators
+} from 'store/widgetForms/helpers';
 import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
 import type {Values as CircleChartValues} from 'src/store/widgetForms/circleChartForm/types';
 import type {Values as ComboChartValues} from 'src/store/widgetForms/comboChartForm/types';
@@ -50,6 +55,7 @@ const changeValues = (state: State, values: AxisChartValues | CircleChartValues 
 			const transformIndicators = compose(
 				fixPivotIndicators,
 				fixIndicatorsAggregation,
+				fixClearIndicatorsFormat,
 				fixIndicatorsTooltip(tooltip?.show ?? false)
 			);
 
