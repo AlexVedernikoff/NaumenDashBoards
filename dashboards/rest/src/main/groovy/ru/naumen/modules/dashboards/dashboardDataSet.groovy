@@ -5018,39 +5018,7 @@
                         }
                         labels = getTotalLabelsForDiagram(labels, groupFormat, format, changeLabels, reverseLabels)
                         standardDiagram = new StandardDiagram(labels: labels, series: series, countTotals: countTotals)
-                        List seriesWithZero = series.data[0]
-                        Number checkOnNull = seriesWithZero.count(0)
-                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR && widgetSettings?.sorting?.type == SortingType.ASC && checkOnNull < 1)
-                        {
-                            List<ItemWrapper> arrWrapper = series.findResult {it.data}.withIndex().collect { value, index ->
-                                new ItemWrapper(value, labels[index])
-                            }
-                            arrWrapper.sort { a, b ->
-                                a.indicatorValue as Double <=> b.indicatorValue as Double
-                            }
-                            seriesSort(series, widgetSettings)
-                            Integer seriesIndex = series.data[0].size()
-                            series = series.sort { a, b ->
-                                Double indicatorValueA = a.data[seriesIndex - 1] as Double
-                                Double indicatorValueB = b.data[seriesIndex - 1] as Double
-                                Integer sortingResult = indicatorValueA <=> indicatorValueB
-                                return sortingResult
-                            }
-                            standardDiagram = new StandardDiagram(labels: arrWrapper.parameterValue, series: series, countTotals: countTotals)
-                            return standardDiagram
-                        }
-                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR && widgetSettings?.sorting?.type == SortingType.DESC && checkOnNull < 1)
-                        {
-                            seriesSort(series, widgetSettings)
-                            Integer seriesIndex = series.data[0].size()
-                            series = series.sort { a, b ->
-                                Double indicatorValueA = a.data[seriesIndex - 1] as Double
-                                Double indicatorValueB = b.data[seriesIndex - 1] as Double
-                                Integer sortingResult = indicatorValueA <=> indicatorValueB
-                                return -sortingResult
-                            }
-
-                        }
+                        return standardDiagram
                     }
                     return standardDiagram
                 default:
