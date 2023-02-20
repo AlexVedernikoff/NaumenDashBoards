@@ -13,6 +13,7 @@ package ru.naumen.modules.dashboards
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.Field
 import com.fasterxml.jackson.core.type.TypeReference
+import ru.naumen.core.server.script.api.criteria.*
 import ru.naumen.core.server.script.IListLinkDefinition
 import ru.naumen.core.server.script.api.IAuthenticationApi
 import ru.naumen.core.server.script.api.IDateApi
@@ -503,6 +504,7 @@ class DashboardDrilldownService
     {
         if (filters)
         {
+            String indicatorsCode
             filters.groupBy {
                 Jackson.toJsonString(it.attribute)
             }.collect {
@@ -544,6 +546,7 @@ class DashboardDrilldownService
                         {
                             if(attr.type != 'COMPUTED_ATTR')
                             {
+                                indicatorsCode = attr.code
                                 result << [filterBuilder.OR(attr.code, 'notNull', null)]
                             }
                             return null
@@ -599,10 +602,46 @@ class DashboardDrilldownService
                             def objects = []
                             if(attributeType in AttributeType.LINK_TYPES)
                             {
-                                def wrapper = new MainDateFilterProvider().getWrapperForDynamicAttr(attr, classFqn, descriptor)
-                                wrapper.totalValueCriteria.add(this.filters.attrValueEq('value',
-                                                                                      utils.get(LinksAttributeMarshaller.unmarshal(value).last())))
-                                objects = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
+                                if (value == 'Не заполнено')
+                                {
+                                    List elements = getElementsByCriteriaToFilter(
+                                        attr,
+                                        classFqn,
+                                        descriptor,
+                                        indicatorsCode
+                                    )
+                                    checkValuesSize(elements)
+                                    result << [filterBuilder.OR(
+                                        indicatorsCode, 'contains', elements.collect {
+                                        it as String
+                                    }
+                                    )]
+                                }
+                                else
+                                {
+                                    QueryWrapper wrapper = new MainDateFilterProvider()
+                                        .getWrapperForDynamicAttr(attr, classFqn, descriptor)
+                                    wrapper.totalValueCriteria.add(
+                                        this.filters.attrValueEq(
+                                            'value',
+                                            utils.get(
+                                                LinksAttributeMarshaller.unmarshal(value).last()
+                                            )
+                                        )
+                                    )
+                                    objects =
+                                        wrapper
+                                            .getResult(true, DiagramType.TABLE, true, true)
+                                            .flatten()
+                                    checkValuesSize(objects)
+                                    attr.code = AttributeType.TOTAL_VALUE_TYPE
+                                    result << [filterBuilder.OR(attr.code, 'notNull', null)]
+                                    result << [filterBuilder.OR(
+                                        attr.code, 'containsInSet', objects.collect {
+                                        it.hasProperty('UUID') ? it.UUID : it
+                                    }
+                                    )]
+                                }
                             }
                             else
                             {
@@ -612,11 +651,15 @@ class DashboardDrilldownService
                                     property: AttributeType.TOTAL_VALUE_TYPE
                                 )
                                 objects = findObjects(attr.ref, attr.property, value)
+                                checkValuesSize(objects)
+                                attr.code = AttributeType.TOTAL_VALUE_TYPE
+                                result << [filterBuilder.OR(attr.code, 'notNull', null)]
+                                result << [filterBuilder.OR(
+                                    attr.code, 'containsInSet', objects.collect {
+                                    it.hasProperty('UUID') ? it.UUID : it
+                                }
+                                )]
                             }
-                            checkValuesSize(objects)
-                            attr.code = AttributeType.TOTAL_VALUE_TYPE
-                            result << [filterBuilder.OR(attr.code, 'notNull', null)]
-                            result << [filterBuilder.OR(attr.code, 'containsInSet', objects.collect  {it.hasProperty("UUID")? it.UUID : it })]
                         }
                         else
                         {
@@ -1288,6 +1331,49 @@ class DashboardDrilldownService
                 }
             }
         }
+    }
+
+    /**
+     * Метод получения элементов по критерии для фильтрации динамических атрибутов
+     * @param attr - аттрибут целиком
+     * @param classFqn - метакласс запроса
+     * @param descriptor - дескриптор
+     * @param indicatorsCode - код из фильтра индикатора
+     * @return список элементов полученный из критерии
+     */
+    private List getElementsByCriteriaToFilter(Attribute attr,
+                                               String classFqn,
+                                               String descriptor,
+                                               String indicatorsCode)
+    {
+        String templateUUID =
+            TotalValueMarshaller.unmarshal(attr.code).last()
+        Source source = new Source(
+            classFqn: classFqn,
+            descriptor: descriptor
+        )
+        QueryWrapper wrapper = QueryWrapper.build(source)
+        IApiCriteria criteria = wrapper.criteria
+        String totalValueFormatKey =
+            DashboardUtils
+                .getFormatKeyForTemplateOfDynamicAttribute(
+                    templateUUID
+                )
+        IApiCriteria totalValueCriteria =
+            criteria.subquery().addSource(totalValueFormatKey)
+        Object linkedScId =
+            selectClause.property(totalValueCriteria, 'linkedSc.id')
+        totalValueCriteria.addColumn(linkedScId)
+        totalValueCriteria.add(
+            this.filters.attrValueEq('linkTemplate', templateUUID)
+        )
+                          .add(whereClause.isNotNull(linkedScId))
+        criteria.add(
+            whereClause.notIn(selectClause.property('id'), totalValueCriteria)
+        ).addColumn(selectClause.property(indicatorsCode)).addGroupColumn(
+            selectClause.property(indicatorsCode)
+        )
+        return db.query(criteria).list()
     }
 
     private String getFilterCondition(String condition)
