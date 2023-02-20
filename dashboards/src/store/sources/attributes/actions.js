@@ -53,6 +53,7 @@ const fetchAttributes = (classFqn: string, parentClassFqn: ?string = null, attrS
 		} catch (error) {
 			dispatch(recordAttributesError(classFqn));
 		}
+
 		return [];
 	};
 

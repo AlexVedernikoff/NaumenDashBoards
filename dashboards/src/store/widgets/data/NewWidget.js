@@ -12,7 +12,11 @@ class NewWidget {
 	type: WidgetType = WIDGET_TYPES.COLUMN;
 	recommendedPosition: ?WidgetLayoutPosition;
 
-	constructor (layoutMode: LayoutMode = LAYOUT_MODE.WEB, type: WidgetType = WIDGET_TYPES.COLUMN, recommendedPosition: ?WidgetLayoutPosition = null) {
+	constructor (
+		layoutMode: LayoutMode = LAYOUT_MODE.WEB,
+		type: WidgetType = WIDGET_TYPES.COLUMN,
+		recommendedPosition: ?WidgetLayoutPosition = null
+	) {
 		this.displayMode = layoutMode;
 		this.type = type;
 		this.recommendedPosition = recommendedPosition;

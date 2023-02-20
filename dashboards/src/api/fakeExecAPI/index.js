@@ -5,8 +5,8 @@ import Frame from './frame';
 import {parseError} from 'api/execAPI/parseError';
 import type {Transport} from 'api/types';
 
-const fakeExecAPITransportDecorator = (transport: Transport) => {
-	return async (...params) => {
+const fakeExecAPITransportDecorator = (transport: Transport) =>
+	async (...params) => {
 		const response = await transport(...params);
 
 		if (response.ok) {
@@ -20,7 +20,6 @@ const fakeExecAPITransportDecorator = (transport: Transport) => {
 
 		throw error;
 	};
-};
 
 export default class FakeExecAPI extends CommonAPI {
 	constructor () {

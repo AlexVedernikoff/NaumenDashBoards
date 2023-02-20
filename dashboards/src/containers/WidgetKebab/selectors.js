@@ -1,7 +1,13 @@
 // @flow
 import type {AppState} from 'store/types';
 import type {ConnectedFunctions, ConnectedProps, OwnProps} from './types';
-import {dataSelector, exportParamsSelector, filtersOnWidgetSelector, modeSelector, navigationSelector} from './helpers';
+import {
+	dataSelector,
+	exportParamsSelector,
+	filtersOnWidgetSelector,
+	modeSelector,
+	navigationSelector
+} from './helpers';
 import {drillDown, openNavigationLink} from 'store/widgets/links/actions';
 import {editWidgetChunkData, saveWidgetWithNewFilters} from 'store/widgets/actions';
 import {exportPivotToXLSX, exportTableToXLSX} from 'store/widgets/buildData/actions';

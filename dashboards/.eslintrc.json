@@ -70,7 +70,15 @@
 		"sort-keys-fix/sort-keys-fix": "warn",
 		"sort-vars": [2, {"ignoreCase": false}],
 		"local-rules/sort-class-methods": "error",
-		"local-rules/sort-imports": "error"
+		"local-rules/sort-imports": "error",
+		"max-len": [ "warn", {
+			"code": 100,
+			"tabWidth": 2,
+			"ignoreComments": true,
+			"ignoreTrailingComments": true,
+			"ignoreTemplateLiterals": true,
+			"ignoreRegExpLiterals": true
+		}]
 	},
 	"settings": {
 		"react": {
