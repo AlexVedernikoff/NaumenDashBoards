@@ -4998,10 +4998,7 @@
                         }
                         labelsForDiagram = getTotalLabelsForDiagram(labelsForDiagram, groupFormat, format, changeLabels, reverseLabels)
                         standardDiagram = new StandardDiagram(labels: labelsForDiagram, series: seriesForDiagram, countTotals: countTotals)
-                        if (widgetSettings?.sorting?.value == SortingValue.INDICATOR)
-                        {
-                            seriesSort(seriesForDiagram, widgetSettings)
-                        }
+                        return standardDiagram
                     }
                     else
                     {
