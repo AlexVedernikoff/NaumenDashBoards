@@ -17,6 +17,7 @@ export const withAttributesHelperContext = <Config: Props>(Component: React$Comp
 			filterAttributesByUsed: this.filterAttributesByUsed,
 			filterBreakdownAttributeByMainDataSet: this.filterBreakdownAttributeByMainDataSet,
 			filterDynamicAttributes: this.filterDynamicAttributes,
+			filterUncomfortableAttributes: this.filterUncomfortableAttributes,
 			getCommonAttributes: this.getCommonAttributes
 		}));
 
@@ -179,6 +180,13 @@ export const withAttributesHelperContext = <Config: Props>(Component: React$Comp
 
 			return result;
 		};
+
+		filterUncomfortableAttributes = (attributes: Array<Attribute>) =>
+			attributes.filter(({code, metaClassFqn}) =>
+				!(metaClassFqn === 'employee' && code === 'password')
+				&& !(metaClassFqn === 'employee' && code === 'immediateSupervisor')
+				&& !(metaClassFqn === 'employee' && code === 'isEmployeeActive')
+			);
 
 		/**
 		 * Фильтрует атрибуты разбивки в соответствии с типом разбивки первого источника

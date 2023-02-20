@@ -106,6 +106,8 @@ export class BreakdownFieldset extends Component<Props> {
 		const {attributesHelpers, filterAttributesByMain, index: dataSetIndex, onlyCommonAttributes, value} = this.props;
 		let attributes = onlyCommonAttributes ? attributesHelpers.getCommonAttributes(options) : options;
 
+		attributes = attributesHelpers.filterUncomfortableAttributes(attributes);
+
 		if (filterAttributesByMain && index > this.mainIndex) {
 			attributes = attributesHelpers.filterBreakdownAttributeByMainDataSet(attributes, dataSetIndex);
 		}

@@ -9,6 +9,7 @@ export type Context = {
 	filterAttributesByUsed: (attributes: Array<Attribute>, dataSetIndex: number, includeAttributes: ?Array<?Attribute>) => Array<Attribute>,
 	filterBreakdownAttributeByMainDataSet: (attributes: Array<Attribute>, dataSetIndex: number) => Array<Attribute>,
 	filterDynamicAttributes: (attributes: DynamicAttributes, dataSetIndex: number, includeAttributes: ?Array<?Attribute>) => DynamicAttributes,
+	filterUncomfortableAttributes: (attributes: Array<Attribute>) => Array<Attribute>,
 	getCommonAttributes: (attributes: Array<Attribute>) => Array<Attribute>
 };
 
