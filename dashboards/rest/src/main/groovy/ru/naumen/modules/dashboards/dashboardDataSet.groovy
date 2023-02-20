@@ -5042,6 +5042,14 @@
                         if (widgetSettings?.sorting?.value == SortingValue.INDICATOR && widgetSettings?.sorting?.type == SortingType.DESC && checkOnNull < 1)
                         {
                             seriesSort(series, widgetSettings)
+                            Integer seriesIndex = series.data[0].size()
+                            series = series.sort { a, b ->
+                                Double indicatorValueA = a.data[seriesIndex - 1] as Double
+                                Double indicatorValueB = b.data[seriesIndex - 1] as Double
+                                Integer sortingResult = indicatorValueA <=> indicatorValueB
+                                return -sortingResult
+                            }
+
                         }
                     }
                     return standardDiagram
