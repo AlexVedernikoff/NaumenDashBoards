@@ -1,10 +1,12 @@
 // @flow
 import type {AttrSetConditions} from 'utils/descriptorUtils/types';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {AXIS_FORMAT_TYPE} from 'store/widgets/data/constants';
 import type {Breakdown, Indicator, SourceData} from './types';
 import type {DataSet as TableDataSet} from 'store/widgetForms/tableForm/types';
 import type {DataSet as SpeedometerDataSet} from 'store/widgetForms/speedometerForm/types';
 import type {DataSet as SummaryDataSet} from 'store/widgetForms/summaryForm/types';
-import {DEFAULT_AGGREGATION, DEFAULT_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
+import {DEFAULT_AGGREGATION, DEFAULT_SYSTEM_GROUP, GROUP_WAYS, INTEGER_AGGREGATION} from 'store/widgets/constants';
 import {DEFAULT_PARAMETER} from 'store/widgetForms/constants';
 import {omit} from 'helpers';
 import {parseCasesAndGroupCode} from 'utils/descriptorUtils';
@@ -129,7 +131,12 @@ const fixLeaveOneIndicator = (dataSet: TableDataSet): TableDataSet => {
 	return result;
 };
 
+const fixClearIndicatorsFormat = (indicators: ?Array<Indicator>): Array<Indicator> =>
+	(indicators || []).map(indicator => omit(indicator, 'format'));
+
+
 export {
+	fixClearIndicatorsFormat,
 	fixIndicatorsAggregation,
 	fixIndicatorsAggregationDataSet,
 	fixIndicatorsTooltip,

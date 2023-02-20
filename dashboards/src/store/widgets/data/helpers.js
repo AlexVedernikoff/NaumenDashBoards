@@ -21,7 +21,9 @@ import type {
 } from './types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {AxisFormat} from 'store/widgets/data/types';
 import {AXIS_FORMAT_TYPE, DEFAULT_AXIS_FORMAT} from 'store/widgets/data/constants';
+import {DEFAULT_AGGREGATION, INTEGER_AGGREGATION} from 'store/widgets/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {GROUP_WAYS} from 'src/store/widgets/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -296,7 +298,13 @@ const clearWidgetWarning = (state: WidgetsDataState, {payload}: ClearMessageWarn
 	};
 };
 
-const getDefaultFormatForAttribute = (attribute: Attribute | null, group: Group | null) => {
+/**
+ * Получение формата по умолчанию по параметру/разбивке
+ * @param {Attribute | null} attribute - атрибут параметра/разбивки
+ * @param {Group | null} group - группировка параметра/разбивки
+ * @returns {AxisFormat} - формат по умолчанию
+ */
+const getDefaultFormatForParameter = (attribute: Attribute | null, group: Group | null): AxisFormat | null => {
 	let format = null;
 
 	const {
@@ -326,6 +334,30 @@ const getDefaultFormatForAttribute = (attribute: Attribute | null, group: Group 
 	}
 
 	return format;
+};
+
+/**
+ * Получение типа форматирования по индикатору
+ * @param {Indicator} indicator - индикатор
+ * @returns {AxisFormat} - тип форматирования
+ */
+const getDefaultFormatForIndicator = (indicator: Indicator): AxisFormat => {
+	let result = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.NUMBER_FORMAT];
+	const {aggregation, attribute} = indicator;
+
+	if (aggregation === DEFAULT_AGGREGATION.COUNT) {
+		result = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.INTEGER_FORMAT];
+	}
+
+	if (aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE) {
+		result = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.LABEL_FORMAT];
+	}
+
+	if (attribute?.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION) {
+		result = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT];
+	}
+
+	return result;
 };
 
 /**
@@ -365,7 +397,8 @@ export {
 	getComboYAxisName,
 	getCustomColorsSettingsKey,
 	getCustomColorsSettingsKeyByData,
-	getDefaultFormatForAttribute,
+	getDefaultFormatForParameter,
+	getDefaultFormatForIndicator,
 	getMainDataSet,
 	getMainDataSetIndex,
 	getSourceDescriptor,

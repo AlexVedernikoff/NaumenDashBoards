@@ -27,7 +27,7 @@ const polarToCartesian = (centerX: number, centerY: number, radius: number, angl
  * @param {number} min - абсолютное значение минимума (0 - при проценте)
  * @param {number} max - абсолютное значение максимума (100 - при проценте)
  * @param {string} defaultColor - цвет не указанного отрезка
- * @param {number} formatter - форматтер для текстов
+ * @param {number} formatter - форматер для текстов
  * @returns {Array<Range>} - полный отсортированный массив отрезков
  */
 const normalizingRanges = (ranges: Array<Range>, type: RangesTypes, min: number, max: number, defaultColor: string, formatter: (value: number) => string) => {

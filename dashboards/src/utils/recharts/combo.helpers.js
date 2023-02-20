@@ -1,7 +1,9 @@
 // @flow
-import {calculateYAxisNumberWidth, getAutoColor, getNiceScale, getRechartAxisSetting} from './helpers';
+import {AXIS_FORMAT_TYPE} from 'store/widgets/data/constants';
+import {calculateYAxisNumberWidth, getAutoColor, getNiceScale, getNiceScaleDTInterval, getRechartAxisSetting} from './helpers';
 import type {Chart, ComboWidget} from 'store/widgets/data/types';
 import type {ComboAxisOptions, ComboSeriesInfo} from './types';
+import type {ComboNumberFormatter} from 'utils/recharts/formater/types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 
@@ -96,12 +98,14 @@ const getComboSeriesInfo = (
  * @param {ComboWidget} widget - виджет
  * @param {DiagramBuildData} data - данные
  * @param {ComboSeriesInfo} series - данные по источникам
+ * @param {ComboNumberFormatter | null} formatter - форматер для длины строки
  * @returns {Array<ComboAxisOptions>} - настройки осей Y
  */
 const getYAxisesNumber = (
 	widget: ComboWidget,
 	data: DiagramBuildData,
-	series: ComboSeriesInfo
+	series: ComboSeriesInfo,
+	formatter: ?ComboNumberFormatter
 ): Array<ComboAxisOptions> => {
 	const result = [];
 	const {max, min, showDependent} = widget.indicator;
@@ -121,20 +125,27 @@ const getYAxisesNumber = (
 					niceValue = max;
 				} else {
 					const dataSetMax = isStacked ? getRangeStacked(dataKey, data.series) : getRangeSeries(dataKey, data.series);
+					const format = dataSet.indicators?.[0]?.format;
 
-					niceValue = getNiceScale(dataSetMax * 1.25);
+					niceValue = format && format.type === AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT
+						? getNiceScaleDTInterval(dataSetMax, format)
+						: getNiceScale(dataSetMax * 1.25);
 				}
 			} else {
 				let dataSetMax = max;
+				const format = dataSet.indicators?.[0]?.format;
 
 				if (typeof dataSetMax !== 'number') {
 					dataSetMax = isStacked ? getRangeStacked(dataKey, data.series) : getRangeSeries(dataKey, data.series);
 				}
 
-				niceValue = getNiceScale(dataSetMax * 1.25);
+				niceValue = format && format.type === AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT
+					? getNiceScaleDTInterval(dataSetMax, format)
+					: getNiceScale(dataSetMax * 1.25);
 			}
 
-			const width = calculateYAxisNumberWidth(niceValue.toString(), settings, yAxisName);
+			const niceValuesText = formatter ? formatter(dataKey)(niceValue) : niceValue.toString();
+			const width = calculateYAxisNumberWidth(niceValuesText, settings, yAxisName);
 
 			result.push({
 				...settings,

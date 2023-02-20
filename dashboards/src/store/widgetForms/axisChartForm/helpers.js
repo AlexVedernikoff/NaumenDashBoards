@@ -4,6 +4,7 @@ import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
 import {fixIndicatorsAggregationDataSet, fixLeaveOneIndicator, fixLeaveOneParameters} from 'store/widgetForms/helpers';
+import {omit} from 'helpers';
 import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
 import type {Values as CircleValues} from 'store/widgetForms/circleChartForm/types';
 import type {Values as ComboValues} from 'store/widgetForms/comboChartForm/types';
@@ -106,16 +107,35 @@ const changeValuesByComboChart = (state: State, values: ComboValues): State => {
 		tooltip
 	} = values;
 
+	const firstDataSet = data.find(ds => !ds.sourceForCompute);
+	const axisDataLabel = {...dataLabels};
+
+	if (firstDataSet?.indicators?.[0].format) {
+		axisDataLabel.format = firstDataSet.indicators[0].format;
+	}
+
 	return {
 		...state,
 		colorsSettings,
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const {type, ...rest} = dataSet;
+			let result = {...rest, __type: 'AXIS_DATA_SET'};
 
-			return {...rest, __type: 'AXIS_DATA_SET'};
+			if (dataSet === firstDataSet) {
+				result.indicators = result.indicators.map(indicator => omit(indicator, 'format'));
+			} else if (!dataSet.sourceForCompute) {
+				result = {
+					...result,
+					indicators: [DEFAULT_INDICATOR],
+					parameters: [DEFAULT_PARAMETER],
+					sourceForCompute: true
+				};
+			}
+
+			return result;
 		}),
-		dataLabels,
+		dataLabels: axisDataLabel,
 		displayMode,
 		header,
 		legend,

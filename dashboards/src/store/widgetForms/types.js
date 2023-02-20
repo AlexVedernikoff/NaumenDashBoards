@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import type {CustomFilter, Group, MixedAttribute, Source, WidgetTooltip} from 'store/widgets/data/types';
+import type {AxisFormat, CustomFilter, Group, MixedAttribute, Source, WidgetTooltip} from 'store/widgets/data/types';
 import type {DataSet as AxisChartDataSet, State as AxisChartFormState, Values as AxisChartValues} from './axisChartForm/types';
 import type {DataSet as CircleChartDataSet, State as CircleChartFormState, Values as CircleChartValues} from './circleChartForm/types';
 import type {DataSet as ComboChartDataSet, State as ComboChartFormState, Values as ComboChartValues} from './comboChartForm/types';
@@ -28,6 +28,7 @@ export type Indicator = {
 	aggregation: string,
 	attribute: MixedAttribute | null,
 	descriptor?: string | null,
+	format?: AxisFormat,
 	tooltip?: WidgetTooltip | null
 };
 

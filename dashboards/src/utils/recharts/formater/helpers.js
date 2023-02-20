@@ -1,9 +1,23 @@
 // @flow
-import type {AxisFormat, LabelFormat, NumberAxisFormat} from 'store/widgets/data/types';
-import {AXIS_FORMAT_TYPE, LABEL_FORMATS, NOTATION_FORMATS} from 'store/widgets/data/constants';
+import type {
+	AxisFormat,
+	AxisWidget,
+	CircleWidget,
+	DTIntervalAxisFormat,
+	LabelFormat,
+	NumberAxisFormat
+} from 'store/widgets/data/types';
+import {
+	AXIS_FORMAT_TYPE,
+	DEFAULT_NUMBER_AXIS_FORMAT,
+	DT_INTERVAL_PERIOD,
+	LABEL_FORMATS,
+	NOTATION_FORMATS
+} from 'store/widgets/data/constants';
 import type {CTXValue, NumberFormatter, PercentStore, StringFormatter, ValueFormatter} from './types';
 import {compose} from 'redux';
-import {INTERVALS} from './constants';
+import {getDefaultFormatForIndicator, getMainDataSet} from 'store/widgets/data/helpers';
+import {INTERVALS, INTERVALS_DIVIDER} from './constants';
 import moment from 'utils/moment.config';
 import {SEPARATOR, TITLE_SEPARATOR} from 'store/widgets/buildData/constants';
 import t from 'localization';
@@ -41,7 +55,7 @@ export const defaultNumberFormatter = (symbolCount: number = 0): NumberFormatter
 export const defaultStringFormatter: StringFormatter = (value: string) => value;
 
 /**
- * Форматтер для NumberAxisFormat
+ * Форматер для NumberAxisFormat
  * @param {NumberFormatter} format - формат представления значения
  * @returns {StringFormatter} - функция-форматер
  */
@@ -79,7 +93,7 @@ export const getLabelFormatter = (format: LabelFormat = LABEL_FORMATS.TITLE): St
 };
 
 /**
- * Форматтер-оболочка для проверки на бесконечность
+ * Форматер-оболочка для проверки на бесконечность
  * @param {NumberFormatter}  successFormatter - функция-форматер для числа не равного 0
  * @returns {NumberFormatter} - функция-форматер, возвращающая пустую строку, если значение равно Infinity, или результат вызова successFormatter
  * в другом случае
@@ -87,7 +101,7 @@ export const getLabelFormatter = (format: LabelFormat = LABEL_FORMATS.TITLE): St
 export const checkInfinity = (successFormatter: NumberFormatter): NumberFormatter => (value: number | typeof Infinity) => value === Infinity ? '' : successFormatter(value);
 
 /**
- * Форматтер-оболочка для проверки на 0
+ * Форматер-оболочка для проверки на 0
  * @param {NumberFormatter}  successFormatter - функция-форматер для числа не равного 0
  * @returns {NumberFormatter} - функция-форматер, возвращающая пустую строку, если значение равно 0, или результат вызова successFormatter
  * в другом случае
@@ -95,7 +109,7 @@ export const checkInfinity = (successFormatter: NumberFormatter): NumberFormatte
 export const checkZero = (successFormatter: NumberFormatter): NumberFormatter => (value: number) => value === 0 ? '' : successFormatter(value);
 
 /**
- * Форматтер-оболочка для проверки на строку
+ * Форматер-оболочка для проверки на строку
  * @param {StringFormatter}  successFormatter - функция-форматер для строк
  * @returns {Function} - функция-форматер, возвращающая переданное значение, если значение не строка, иначе результат вызова successFormatter
  * в другом случае
@@ -106,7 +120,7 @@ export const checkString = (successFormatter: StringFormatter) => (value?: strin
 };
 
 /**
- * Форматтер-оболочка для проверки на число
+ * Форматер-оболочка для проверки на число
  * @param {NumberFormatter}  successFormatter - функция-форматер для числа
  * @returns {Function} - функция-форматер, возвращающая переданное значение, если значение не число, иначе результат вызова successFormatter
  * в другом случае
@@ -119,20 +133,20 @@ export const checkNumber = (successFormatter: NumberFormatter): ValueFormatter =
 	};
 
 /**
- * Форматтер для добавления строки в конец значения
+ * Форматер для добавления строки в конец значения
  * @param {string} additional - строка добавления
  * @returns {StringFormatter} - функция-форматер
  */
 export const additionalFormat = (additional: string): StringFormatter => value => value ? `${value}${additional}` : value;
 
 /**
- * Форматтер для добавления процента в конец значения
+ * Форматер для добавления процента в конец значения
  * @returns {StringFormatter} - функция-форматер
  */
 export const percentFormat: StringFormatter = additionalFormat('%');
 
 /**
- * Форматтер для группировки SEVEN_DAYS
+ * Форматер для группировки SEVEN_DAYS
  * @param {string | number} value - значение
  * @returns {string} - преобразованное значение для требуемого формата
  */
@@ -150,7 +164,7 @@ export const sevenDaysFormatter: ValueFormatter = (value?: string | number): str
 };
 
 /**
- * Форматтер-оболочка для описания нотацией
+ * Форматер-оболочка для описания нотацией
  * @param {string} notation - описание нотацией
  * @param {NumberFormatter} addConverter - внутренний форматер
  * @returns {NumberFormatter} - функция-форматер
@@ -218,11 +232,11 @@ export const makeFormatterByNumberFormat = (format: NumberAxisFormat, hideZero: 
 
 /**
  * Преобразует AxisFormat в форматер
- * @param {AxisFormat} format - требуемый формат
+ * @param {AxisFormat | null} format - требуемый формат
  * @param {boolean} hideZero - сообщает нужно ли убирать нулевые (пустые) значения
  * @returns {ValueFormatter} - функция форматер
  */
-export const makeFormatterByFormat = (format: AxisFormat, hideZero: boolean = true): ValueFormatter => {
+export const makeFormatterByFormat = (format: AxisFormat | null, hideZero: boolean = true): ValueFormatter => {
 	let result = checkString(getLabelFormatter());
 
 	if (format !== null) {
@@ -233,13 +247,17 @@ export const makeFormatterByFormat = (format: AxisFormat, hideZero: boolean = tr
 		if (format.type === AXIS_FORMAT_TYPE.INTEGER_FORMAT || format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT) {
 			result = checkNumber(makeFormatterByNumberFormat(format, hideZero));
 		}
+
+		if (format.type === AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT) {
+			result = checkNumber(formatMSInterval(format));
+		}
 	}
 
 	return result;
 };
 
 /**
- * Форматтер, который применяет базовый форматер, и добавляет запись
+ * Форматер, который применяет базовый форматер, и добавляет запись
  * [значение, отформатированное значение, облегчённый контекст] в массив stored.
  * Накапливает информацию о форматировании для генерации тест-кейсов.
  * @param {Array<[string | number, string]>} stored - массив для сохранения пар [значение, отформатировавшие значение]
@@ -300,7 +318,48 @@ export const cntPercentFormatter = (
 };
 
 /**
+ * Форматер для работы с временными интервалами
+ * @param {DTIntervalAxisFormat} format - описание формата
+ * @returns {NumberFormatter} - функция-форматер
+ */
+export const formatMSInterval = (format: DTIntervalAxisFormat): NumberFormatter => {
+	if (format.quotient !== format.remainder || (format.remainder && format.remainder !== DT_INTERVAL_PERIOD.NOT_SELECTED)) {
+		const firstDivider = INTERVALS_DIVIDER[format.quotient];
+		const secondDivider = INTERVALS_DIVIDER[format.remainder];
+
+		const firstDividerFormatter = makeFormatterByNumberFormat(
+			{splitDigits: true, symbolCount: secondDivider ? 0 : (format.symbolCount ?? 0), type: AXIS_FORMAT_TYPE.NUMBER_FORMAT},
+			false
+		);
+		const secondDividerFormatter = makeFormatterByNumberFormat(
+			{splitDigits: true, symbolCount: format.symbolCount ?? 0, type: AXIS_FORMAT_TYPE.NUMBER_FORMAT},
+			false
+		);
+
+		return (ms: number): string => {
+			const quotient = ms / firstDivider;
+			const truncQuotient = Math.trunc(quotient);
+			const remainder = secondDivider ? (ms - truncQuotient * firstDivider) / secondDivider : null;
+			const params = {};
+
+			if (truncQuotient) {
+				params[(format.quotient: string)] = firstDividerFormatter(truncQuotient);
+			}
+
+			if (remainder) {
+				params[(format.remainder: string)] = secondDividerFormatter(remainder);
+			}
+
+			return t('Formatter::formatMSInterval', params);
+		};
+	}
+
+	return oldFormatMSInterval;
+};
+
+/**
  * Преобразует интервал из миллисекунд в понятный для пользователя вид
+ * @deprecated Перед использованием спросить у аналитика
  * @param {number} ms - значение интервала в миллисекундах
  * @returns {string} - Человекочитаемый формат интервала
  * - В случае целого числа недель, дней, часов или минут, выводим в соответствии с полученным значением:
@@ -316,7 +375,7 @@ export const cntPercentFormatter = (
  * --- от 86 400 000 мс до 604 800 000 мс -  целую часть в часах,  остаток в секундах
  * --- от 604 800 000 - целую часть в часах,  остаток в секундах
  */
-export const formatMSInterval = (ms: number): string => {
+export const oldFormatMSInterval = (ms: number): string => {
 	let result = ms.toString();
 	const intervalDataIndex = INTERVALS.findIndex(({max, min}) => ms >= min && ms < max);
 
@@ -358,7 +417,7 @@ export const formatMSInterval = (ms: number): string => {
 		}
 	}
 
-	return result;
+	return result.trim();
 };
 
 /**
@@ -367,3 +426,29 @@ export const formatMSInterval = (ms: number): string => {
  * @returns {string} - Человекочитаемый формат даты
  */
 export const formatDate = (date: string): string => date.endsWith(' 00:00') ? date.slice(0, -6) : date;
+
+/**
+ * Получает формат для форматирования подписей
+ * @param {AxisWidget} widget - виджет
+ * @returns {AxisFormat} - формат
+ */
+export const getDataLabelsFormat = (widget: AxisWidget | CircleWidget): AxisFormat => {
+	const {dataLabels} = widget;
+	let result = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
+	const dataSet = getMainDataSet(widget.data);
+	const {indicators} = dataSet;
+
+	if (indicators.length > 0) {
+		const defaultFormat = getDefaultFormatForIndicator(indicators[0]);
+
+		if (
+			result.type !== defaultFormat.type
+			&& !(result.type === AXIS_FORMAT_TYPE.INTEGER_FORMAT && defaultFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT)
+			&& !(result.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT && defaultFormat.type === AXIS_FORMAT_TYPE.INTEGER_FORMAT)
+		) {
+			result = defaultFormat;
+		}
+	}
+
+	return result;
+};
