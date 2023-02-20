@@ -1,10 +1,21 @@
 // @flow
 import type {Attribute} from 'src/store/sources/attributes/types';
-import type {AxisData, CircleData, ComboData, SourceData, SummaryData, TableData} from 'src/store/widgets/data/types';
+import type {
+	AxisData,
+	CircleData,
+	ComboData,
+	SourceData,
+	SummaryData,
+	TableData
+} from 'src/store/widgets/data/types';
 import type {SetFieldValue, Values} from 'components/organisms/WidgetForm/types';
 import type {ThunkAction} from 'store/types';
 
-export type DataSetTypes = Array<AxisData> | Array<CircleData> | Array<ComboData> | Array<SummaryData> | Array<TableData>;
+export type DataSetTypes = Array<AxisData>
+	| Array<CircleData>
+	| Array<ComboData>
+	| Array<SummaryData>
+	| Array<TableData>;
 
 export type CustomFilterValue = {
 	attributes: ?Attribute[],
@@ -21,10 +32,15 @@ export type CustomFilterDataSet = {
 };
 
 export type ConnectedFunctions = {
-	fetchAttributesForFilters: (classFqn: string, parentClassFqn: ?string, attrGroupCode: string) => ThunkAction
+	fetchAttributesForFilters: (
+		classFqn: string,
+		parentClassFqn: ?string,
+		attrGroupCode: string
+	) => ThunkAction
 };
 
 export type ConnectedProps = {
+	availableFiltersOnWidget: boolean,
 	dataSets: CustomFilterDataSet[],
 	initialCustomFiltersValues: CustomFilterValue[]
 };

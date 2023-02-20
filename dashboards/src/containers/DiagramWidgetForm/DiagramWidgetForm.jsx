@@ -10,7 +10,9 @@ import {TAB_TYPES} from 'src/containers/DiagramWidgetForm/constants';
 import {TabbedWidgetForm} from 'components/templates/WidgetForm';
 import type {Values} from 'store/widgetForms/axisChartForm/types';
 import WidgetForm from 'components/organisms/WidgetForm';
-import {withAttributesHelpersContext} from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers';
+import {
+	withAttributesHelpersContext
+} from 'containers/DiagramWidgetForm/HOCs/withAttributesHelpers';
 
 export class DiagramWidgetForm extends PureComponent<Props, State> {
 	static defaultProps = {
@@ -74,11 +76,29 @@ export class DiagramWidgetForm extends PureComponent<Props, State> {
 
 		switch (tab) {
 			case OPTIONS:
-				return <OptionsTab onChange={onChange} raiseErrors={this.handleOptionsTabErrors} values={values} />;
+				return (
+					<OptionsTab
+						onChange={onChange}
+						raiseErrors={this.handleOptionsTabErrors}
+						values={values}
+					/>
+				);
 			case PARAMS:
-				return <ParamsTab onChange={onChange} raiseErrors={this.handleParamsTabErrors} values={values} />;
+				return (
+					<ParamsTab
+						onChange={onChange}
+						raiseErrors={this.handleParamsTabErrors}
+						values={values}
+					/>
+				);
 			case STYLE:
-				return <StyleTab onChange={onChange} raiseErrors={this.handleStyleTabErrors} values={values} />;
+				return (
+					<StyleTab
+						onChange={onChange}
+						raiseErrors={this.handleStyleTabErrors}
+						values={values}
+					/>
+				);
 			default:
 				return null;
 		}
