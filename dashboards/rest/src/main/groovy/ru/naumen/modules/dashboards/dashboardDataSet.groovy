@@ -7365,21 +7365,6 @@
     }
 
     /**
-     * Модель данных для сортировки по показателю
-     */
-    @Canonical
-    class ItemWrapper
-    {   /**
-        * Значение показателя
-        */
-        Object indicatorValue
-        /**
-         * Значение параметра
-         */
-        Object parameterValue
-    }
-
-    /**
      * Модель данных для значений по y с разбивкой
      */
     @TupleConstructor
