@@ -4953,29 +4953,6 @@
                         series: series,
                         countTotals: countTotals
                     )
-                    if (widgetSettings?.sorting?.value == SortingValue.INDICATOR)
-                    {
-                        List<ItemWrapper> arrWrapper = series.findResult {
-                            it.data
-                        }.withIndex().collect { value, index ->
-                            new ItemWrapper(value, groupResult[index])
-                        }
-                        Integer sortingValue
-                        arrWrapper.sort { a, b ->
-                            sortingValue = a.indicatorValue as Double <=> b.indicatorValue as Double
-                            if (widgetSettings?.sorting?.type == SortingType.DESC)
-                            {
-                                sortingValue = -sortingValue
-                            }
-                            return sortingValue
-                        }
-                        seriesSort(series, widgetSettings)
-                        standardDiagram = new StandardDiagram(
-                            labels: arrWrapper.parameterValue,
-                            series: series,
-                            countTotals: countTotals
-                        )
-                    }
                     return standardDiagram
                 case 3:
                     def (groupResult, breakdownResult) = transposeDataSet.tail()
@@ -5021,32 +4998,6 @@
                 default:
                     String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
                     utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
-            }
-        }
-
-        /**
-         * Метод сортировки по показателю с разбивкой
-         * @param series - данные показателя
-         * @param widgetSettings - настройки виджета
-         * @return результат отсортированных данных по показателю с разбивкой
-         */
-        private Collection<Series> seriesSort(Collection<Series> series, Widget widgetSettings)
-        {
-            series.each { it ->
-                it.data.sort { a, b ->
-                    Object value1 = a as Double
-                    Object value2 = b as Double
-                    Integer sortingValue = value1 <=> value2
-                    if (widgetSettings?.sorting?.type == SortingType.DESC)
-                    {
-                        sortingValue = -sortingValue
-                    }
-                    else
-                    {
-                        sortingValue
-                    }
-                    return sortingValue
-                }
             }
         }
 
@@ -7249,7 +7200,7 @@
                         total = prepareRequestWithStates(total, listIdsOfNormalAggregations, resWithPercentCnt)
                     }
                     return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, total, parameter,
-                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request), requestContent?.sorting)
+                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request))
                 case 'computation':
                     def requisiteNode = node as ComputationRequisiteNode
                     def calculator = new FormulaCalculator(requisiteNode.formula)
@@ -7324,7 +7275,7 @@
                         getPercentCntAggregationIndexes(request)
                     )]
                     return totalPrepareForNoFiltersResult(top, isDiagramTypeTable, tableHasBreakdown, formatResult(total, aggregationCnt), parameter,
-                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request), requestContent?.sorting)
+                                                          parameterWithDate, parameterSortingType, aggregationSortingType, parameterWithDateOrDtInterval, diagramType, getPercentCntAggregationIndexes(request))
                 default:
                     String message = messageProvider.getMessage(REQUISITE_IS_NOT_SUPPORTED_ERROR, currentUserLocale, nodeType: nodeType)
                     utils.throwReadableException("$message#${REQUISITE_IS_NOT_SUPPORTED_ERROR}")
@@ -7344,7 +7295,6 @@
          * @param parameterWithDateOrDtInterval - флаг на наличие параметра с датой или временным интервалом
          * @param diagramType - тип диаграммы
          * @param percentCntAggregationIndexes - индексы агрегаций с типом PERCENT_CNT
-         * @param sorting - настройки сортировки
          * @return готовый датасет
          */
         private List totalPrepareForNoFiltersResult(Integer top, Boolean isDiagramTypeTable,
@@ -7356,8 +7306,7 @@
                                                     String aggregationSortingType,
                                                     Boolean parameterWithDateOrDtInterval,
                                                     DiagramType diagramType,
-                                                    List percentCntAggregationIndexes,
-                                                    Sorting sorting)
+                                                    List percentCntAggregationIndexes)
         {
             if (top)
             {
@@ -7369,13 +7318,13 @@
                 else
                 {
                     Boolean resultWithoutBreakdown = total?.first()?.size() == 2
-                    if (sorting && resultWithoutBreakdown)
+                    if (aggregationSortingType && resultWithoutBreakdown)
                     {
                         total = total.sort { a, b ->
                             Double indicatorValueA = a[0] as Double
                             Double indicatorValueB = b[0] as Double
                             Integer sortingResult = indicatorValueA <=> indicatorValueB
-                            if (sorting.type == SortingType.DESC)
+                            if (aggregationSortingType == 'DESC')
                             {
                                 sortingResult = -sortingResult
                             }
