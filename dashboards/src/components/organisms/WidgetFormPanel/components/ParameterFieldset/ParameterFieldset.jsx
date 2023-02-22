@@ -45,7 +45,7 @@ export class ParameterFieldset extends Component<Props> {
 		filteredOptions = attributesHelpers.filterUncomfortableAttributes(filteredOptions);
 		filteredOptions = attributesHelpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
 
-		return attributesHelpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
+		return filteredOptions;
 	};
 
 	getChangeDataSetHandler = (index: number) => (dataSetIndex: number) => {
