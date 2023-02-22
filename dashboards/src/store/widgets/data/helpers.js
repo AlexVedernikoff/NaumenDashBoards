@@ -21,7 +21,9 @@ import type {
 } from './types';
 import type {Attribute} from 'store/sources/attributes/types';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import type {AxisFormat} from 'store/widgets/data/types';
 import {AXIS_FORMAT_TYPE, DEFAULT_AXIS_FORMAT} from 'store/widgets/data/constants';
+import {DEFAULT_AGGREGATION, INTEGER_AGGREGATION} from 'store/widgets/constants';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
 import {GROUP_WAYS} from 'src/store/widgets/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
@@ -161,7 +163,11 @@ const getBuildSet = ({data}: Object) => data.find(set => !set.sourceForCompute) 
  * @param {string} yAxisName - название оси Y
  * @returns {string}
  */
-const getComboYAxisName = (source: Source | null, indicators: Array<Indicator>, yAxisName: string = ''): string => {
+const getComboYAxisName = (
+	source: Source | null,
+	indicators: Array<Indicator>,
+	yAxisName: string = ''
+): string => {
 	const {attribute} = indicators[0];
 	let name = yAxisName;
 
@@ -199,7 +205,11 @@ function getMainDataSetIndex <T: Object> (data: $ReadOnlyArray<T>): number {
  * @param {Group} group - группировка атрибута
  * @returns {string | null}
  */
-const createCustomColorsSettingsKey = (source: Source, attribute: Attribute, group: Group): string | null => {
+const createCustomColorsSettingsKey = (
+	source: Source,
+	attribute: Attribute,
+	group: Group
+): string | null => {
 	let key = '';
 
 	if (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE) {
@@ -243,7 +253,10 @@ const getCustomColorsSettingsKey = (widget: Widget): string | null => {
  * @param {WidgetType} type - тип виджета
  * @returns {string | null}
  */
-const getCustomColorsSettingsKeyByData = (data: Array<AxisData | CircleData>, type: WidgetType = WIDGET_TYPES.BAR): string | null => {
+const getCustomColorsSettingsKeyByData = (
+	data: Array<AxisData | CircleData>,
+	type: WidgetType = WIDGET_TYPES.BAR
+): string | null => {
 	// $FlowFixMe[prop-missing]
 	const {breakdown, parameters, source} = getMainDataSet(data);
 	let key = null;
@@ -267,7 +280,10 @@ const getCustomColorsSettingsKeyByData = (data: Array<AxisData | CircleData>, ty
  * @param {SetMessageWarning} payload - данные об ошибке
  * @returns {WidgetsDataState}
  */
-const setWidgetWarning = (state: WidgetsDataState, {payload}: SetMessageWarning): WidgetsDataState => ({
+const setWidgetWarning = (
+	state: WidgetsDataState,
+	{payload}: SetMessageWarning
+): WidgetsDataState => ({
 	...state,
 	map: {
 		...state.map,
@@ -284,7 +300,10 @@ const setWidgetWarning = (state: WidgetsDataState, {payload}: SetMessageWarning)
  * @param {ClearMessageWarning} payload - id виджета
  * @returns {WidgetsDataState}
  */
-const clearWidgetWarning = (state: WidgetsDataState, {payload}: ClearMessageWarning): WidgetsDataState => {
+const clearWidgetWarning = (
+	state: WidgetsDataState,
+	{payload}: ClearMessageWarning
+): WidgetsDataState => {
 	const {warningMessage, ...newPayload} = state.map[payload];
 
 	return {
@@ -296,7 +315,16 @@ const clearWidgetWarning = (state: WidgetsDataState, {payload}: ClearMessageWarn
 	};
 };
 
-const getDefaultFormatForAttribute = (attribute: Attribute | null, group: Group | null) => {
+/**
+ * Получение формата по умолчанию по параметру/разбивке
+ * @param {Attribute | null} attribute - атрибут параметра/разбивки
+ * @param {Group | null} group - группировка параметра/разбивки
+ * @returns {AxisFormat} - формат по умолчанию
+ */
+const getDefaultFormatForParameter = (
+	attribute: Attribute | null,
+	group: Group | null
+): AxisFormat | null => {
 	let format = null;
 
 	const {
@@ -329,12 +357,39 @@ const getDefaultFormatForAttribute = (attribute: Attribute | null, group: Group 
 };
 
 /**
+ * Получение типа форматирования по индикатору
+ * @param {Indicator} indicator - индикатор
+ * @returns {AxisFormat} - тип форматирования
+ */
+const getDefaultFormatForIndicator = (indicator: Indicator): AxisFormat => {
+	let result = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.NUMBER_FORMAT];
+	const {aggregation, attribute} = indicator;
+
+	if (aggregation === DEFAULT_AGGREGATION.COUNT) {
+		result = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.INTEGER_FORMAT];
+	}
+
+	if (aggregation === DEFAULT_AGGREGATION.NOT_APPLICABLE) {
+		result = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.LABEL_FORMAT];
+	}
+
+	if (attribute?.type === ATTRIBUTE_TYPES.dtInterval && aggregation in INTEGER_AGGREGATION) {
+		result = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT];
+	}
+
+	return result;
+};
+
+/**
  * Возвращает реальный дескриптор из источника
  * @param {SourceData} source - источник
  * @param {Array}  filters - список фильтров
  * @returns {string} - дескриптор
  */
-const getSourceDescriptor = (source: SourceData, filters: Array<{descriptor: string, id: string}>) => {
+const getSourceDescriptor = (
+	source: SourceData,
+	filters: Array<{descriptor: string, id: string}>
+) => {
 	const {descriptor, filterId} = source;
 	let result = descriptor;
 
@@ -354,7 +409,9 @@ const getSourceDescriptor = (source: SourceData, filters: Array<{descriptor: str
  * @param {?TableData} dataSet - источник
  * @returns {boolean} - возвращает true, если источник установлен и вычисляется как одна строка, иначе false
  */
-const isDontUseParamsForDataSet = (dataSet: ?TableData) => dataSet && typeof dataSet.sourceRowName === 'string';
+const isDontUseParamsForDataSet = (
+	dataSet: ?TableData
+) => dataSet && typeof dataSet.sourceRowName === 'string';
 
 export {
 	addWidget,
@@ -365,7 +422,8 @@ export {
 	getComboYAxisName,
 	getCustomColorsSettingsKey,
 	getCustomColorsSettingsKeyByData,
-	getDefaultFormatForAttribute,
+	getDefaultFormatForParameter,
+	getDefaultFormatForIndicator,
 	getMainDataSet,
 	getMainDataSetIndex,
 	getSourceDescriptor,

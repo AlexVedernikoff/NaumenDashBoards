@@ -1,4 +1,5 @@
 // @flow
+import type {AxisFormat} from 'store/widgets/data/types';
 import type {Indicator, SourceData} from 'store/widgetForms/types';
 
 export type FormBoxProps = {
@@ -15,6 +16,7 @@ export type Props = {
 	dataKey: string,
 	index: number,
 	onChange: (index: number, value: Array<Indicator>, callback?: Function) => void,
+	onResetIndicatorFormat?: (index: number, value: AxisFormat) => void,
 	source: SourceData,
 	value: Array<Indicator>
 };

@@ -3,7 +3,12 @@ import {compose} from 'redux';
 import type {DataSet, State} from './types';
 import {DEFAULT_INDICATOR, DEFAULT_PARAMETER, DEFAULT_SOURCE} from 'store/widgetForms/constants';
 import {DEFAULT_TOP_SETTINGS} from 'store/widgets/data/constants';
-import {fixIndicatorsAggregationDataSet, fixLeaveOneIndicator, fixLeaveOneParameters} from 'store/widgetForms/helpers';
+import {
+	fixClearIndicatorsFormat,
+	fixIndicatorsAggregationDataSet,
+	fixLeaveOneIndicator,
+	fixLeaveOneParameters
+} from 'store/widgetForms/helpers';
 import type {Values as TableValues} from 'store/widgetForms/tableForm/types';
 import type {Values as CircleValues} from 'store/widgetForms/circleChartForm/types';
 import type {Values as ComboValues} from 'store/widgetForms/comboChartForm/types';
@@ -58,7 +63,11 @@ const changeValuesByCircleChart = (state: State, values: CircleValues): State =>
 		colorsSettings,
 		computedAttrs,
 		data: data.map((dataSet, index) => {
-			const {parameters = [DEFAULT_PARAMETER], xAxisName = '', yAxisName = ''} = state.data[index] || {};
+			const {
+				parameters = [DEFAULT_PARAMETER],
+				xAxisName = '',
+				yAxisName = ''
+			} = state.data[index] || {};
 			const {indicators = []} = dataSet;
 
 			return {
@@ -106,16 +115,35 @@ const changeValuesByComboChart = (state: State, values: ComboValues): State => {
 		tooltip
 	} = values;
 
+	const firstDataSet = data.find(ds => !ds.sourceForCompute);
+	const axisDataLabel = {...dataLabels};
+
+	if (firstDataSet?.indicators?.[0].format) {
+		axisDataLabel.format = firstDataSet.indicators[0].format;
+	}
+
 	return {
 		...state,
 		colorsSettings,
 		computedAttrs,
 		data: data.map((dataSet, index) => {
 			const {type, ...rest} = dataSet;
+			let result = {...rest, __type: 'AXIS_DATA_SET'};
 
-			return {...rest, __type: 'AXIS_DATA_SET'};
+			if (dataSet === firstDataSet) {
+				result.indicators = fixClearIndicatorsFormat(result.indicators);
+			} else if (!dataSet.sourceForCompute) {
+				result = {
+					...result,
+					indicators: [DEFAULT_INDICATOR],
+					parameters: [DEFAULT_PARAMETER],
+					sourceForCompute: true
+				};
+			}
+
+			return result;
 		}),
-		dataLabels,
+		dataLabels: axisDataLabel,
 		displayMode,
 		header,
 		legend,
@@ -134,7 +162,10 @@ const changeValuesByComboChart = (state: State, values: ComboValues): State => {
  * @param {SpeedometerValues | SummaryValues} values - значения формы спидометра или сводки
  * @returns {State}
  */
-const changeValuesBySpeedometerOrSummary = (state: State, values: SpeedometerValues | SummaryValues): State => {
+const changeValuesBySpeedometerOrSummary = (
+	state: State,
+	values: SpeedometerValues | SummaryValues
+): State => {
 	const {
 		computedAttrs,
 		data,
@@ -180,7 +211,11 @@ const changeValuesByTable = (state: State, values: TableValues): State => {
 		templateName,
 		tooltip
 	} = values;
-	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAggregationDataSet);
+	const transformDataSet = compose(
+		fixLeaveOneParameters,
+		fixLeaveOneIndicator,
+		fixIndicatorsAggregationDataSet
+	);
 
 	return {
 		...state,
@@ -218,7 +253,11 @@ const changeValuesByPivot = (state: State, values: PivotValues): State => {
 		templateName,
 		tooltip
 	} = values;
-	const transformDataSet = compose(fixLeaveOneParameters, fixLeaveOneIndicator, fixIndicatorsAggregationDataSet);
+	const transformDataSet = compose(
+		fixLeaveOneParameters,
+		fixLeaveOneIndicator,
+		fixIndicatorsAggregationDataSet
+	);
 
 	return {
 		...state,

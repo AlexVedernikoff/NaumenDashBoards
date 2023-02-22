@@ -31,6 +31,8 @@ export class StyleTab extends Component<Props> {
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
 
+	handleChangeData = data => this.props.onChange(DIAGRAM_FIELDS.data, data);
+
 	hasCustomGroup = () => {
 		const {values} = this.props;
 		const {CUSTOM} = GROUP_WAYS;
@@ -111,7 +113,15 @@ export class StyleTab extends Component<Props> {
 					options={getSortingOptions(!this.hasCustomGroup())}
 					value={sorting}
 				/>
-				<DataLabelsBox name={DIAGRAM_FIELDS.dataLabels} onChange={onChange} value={dataLabels} widget={widget} />
+				<DataLabelsBox
+					data={data}
+					name={DIAGRAM_FIELDS.dataLabels}
+					onChange={onChange}
+					onChangeData = {this.handleChangeData}
+					showFormat='single'
+					value={dataLabels}
+					widget={widget}
+				/>
 				{this.renderColorsBox()}
 			</div>
 		);

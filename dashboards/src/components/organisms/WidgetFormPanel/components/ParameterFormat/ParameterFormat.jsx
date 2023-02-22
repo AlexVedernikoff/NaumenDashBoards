@@ -1,6 +1,6 @@
 // @flow
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
+import {getDefaultFormatForParameter, getMainDataSet} from 'store/widgets/data/helpers';
 import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props} from './types';
 import React, {PureComponent} from 'react';
@@ -21,7 +21,7 @@ export class ParameterFormat extends PureComponent<Props> {
 			const {attribute, group} = parameters[0];
 
 			if (attribute) {
-				const {format = getDefaultFormatForAttribute(attribute, group)} = parameter;
+				const {format = getDefaultFormatForParameter(attribute, group)} = parameter;
 				const label = attribute.title;
 
 				return (

@@ -10,6 +10,7 @@ import {
 	COPY_WIDGET_ERRORS,
 	DEFAULT_TABLE_VALUE,
 	DISPLAY_MODE,
+	DT_INTERVAL_PERIOD,
 	FONT_STYLES,
 	HEADER_POSITIONS,
 	INDICATOR_GROUPING_TYPE,
@@ -107,6 +108,13 @@ export type MixedAttribute = ComputedAttr | PercentageRelativeAttr | Attribute;
 
 export type LabelFormat = $Keys<typeof LABEL_FORMATS>;
 
+export type DTIntervalAxisFormat = {
+	quotient: $Keys<typeof DT_INTERVAL_PERIOD>,
+	remainder: $Keys<typeof DT_INTERVAL_PERIOD>,
+	symbolCount?: number,
+	type: typeof AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT,
+};
+
 export type LabelAxisFormat = {
 	labelFormat?: LabelFormat,
 	type: typeof AXIS_FORMAT_TYPE.LABEL_FORMAT,
@@ -120,7 +128,7 @@ export type NumberAxisFormat = {
 	type: typeof AXIS_FORMAT_TYPE.NUMBER_FORMAT | typeof AXIS_FORMAT_TYPE.INTEGER_FORMAT,
 };
 
-export type AxisFormat = LabelAxisFormat | NumberAxisFormat;
+export type AxisFormat = LabelAxisFormat | NumberAxisFormat | DTIntervalAxisFormat;
 
 export type ComparePeriodFormat = {
 	down?: string,
@@ -153,6 +161,7 @@ export type WidgetTooltip = {
 export type Indicator = {
 	aggregation: string,
 	attribute: MixedAttribute | null,
+	format?: AxisFormat,
 	tooltip?: WidgetTooltip | null
 };
 
@@ -667,9 +676,17 @@ export type AnyWidget =
 	| TextWidget
 ;
 
-export type EditWidgetChunkDataAction = (widget: Widget, chunkData: Object, refreshData?: boolean) => ThunkAction;
+export type EditWidgetChunkDataAction = (
+	widget: Widget,
+	chunkData: Object,
+	refreshData?: boolean
+) => ThunkAction;
 
-export type UpdateWidgetAction = (widget: Widget, chunkData: Object, refreshData?: boolean) => ThunkAction;
+export type UpdateWidgetAction = (
+	widget: Widget,
+	chunkData: Object,
+	refreshData?: boolean
+) => ThunkAction;
 
 export type SetWidgetWarning = {
 	id: string,
@@ -678,7 +695,11 @@ export type SetWidgetWarning = {
 
 export type ClearWidgetFiltersAction = (widget: Widget) => ThunkAction;
 
-export type CallWidgetFiltersAction = (widget: Widget, dataSetIndex: number, filterIndex: number) => ThunkAction;
+export type CallWidgetFiltersAction = (
+	widget: Widget,
+	dataSetIndex: number,
+	filterIndex: number
+) => ThunkAction;
 
 export type AddWidget = {
 	payload: NewWidget,
@@ -817,7 +838,11 @@ export type WidgetsDataState = {
 	validatingToCopy: ChangingState
 };
 
-export type SetUseGlobalChartSettingsAction = (key: string, useGlobal: boolean, targetWidgetId?: string) => ThunkAction;
+export type SetUseGlobalChartSettingsAction = (
+	key: string,
+	useGlobal: boolean,
+	targetWidgetId?: string
+) => ThunkAction;
 
 export type SaveWidgetWithNewFiltersAction = (widget: $Shape<Widget>) => ThunkAction;
 

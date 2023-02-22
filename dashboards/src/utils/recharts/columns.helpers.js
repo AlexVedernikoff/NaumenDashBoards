@@ -1,7 +1,8 @@
 // @flow
+import {AXIS_FORMAT_TYPE} from 'store/widgets/data/constants';
 import type {AxisOptions, ContainerSize, RechartData} from './types';
 import type {AxisWidget} from 'store/widgets/data/types';
-import {calculateStringsSize, getNiceScale, getRechartAxisSetting} from './helpers';
+import {calculateStringsSize, getNiceScale, getNiceScaleDTInterval, getRechartAxisSetting} from './helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {LEGEND_ALIGN} from './constants';
 import type {ValueFormatter} from 'utils/recharts/formater/types';
@@ -48,7 +49,9 @@ const getYAxisNumber = (
 	const domain = [0, value => {
 		let result = 1;
 
-		if (!isNormalized) {
+		if (widget.dataLabels.format && widget.dataLabels.format.type === AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT) {
+			result = getNiceScaleDTInterval(value, widget.dataLabels.format);
+		} else if (!isNormalized) {
 			result = getNiceScale(value, showSubTotalAmount);
 
 			if (showSubTotalAmount) {

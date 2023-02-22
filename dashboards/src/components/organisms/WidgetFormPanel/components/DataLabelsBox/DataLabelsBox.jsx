@@ -3,12 +3,15 @@ import type {AxisFormat, DataLabels} from 'store/widgets/data/types';
 import {AXIS_FORMAT_TYPE, DEFAULT_AXIS_FORMAT} from 'store/widgets/data/constants';
 import Checkbox from 'components/atoms/Checkbox';
 import ColorInput from 'components/molecules/ColorInput';
+import {deepClone} from 'helpers';
 import deepEqual from 'fast-deep-equal';
 import type {DefaultProps, Props} from './types';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FontFamilySelect from 'WidgetFormPanel/components/FontFamilySelect';
 import FontSizeSelect from 'WidgetFormPanel/components/FontSizeSelect';
 import FormField from 'components/molecules/FormField';
+import {getIndicatorsFormats, hasDTInterval} from './helpers';
+import Label from 'components/atoms/Label';
 import type {OnChangeEvent, OnSelectEvent} from 'components/types';
 import ParameterFormat from 'components/molecules/ParameterFormatPanel';
 import React, {PureComponent} from 'react';
@@ -20,7 +23,7 @@ import ToggableFormBox from 'components/molecules/ToggableFormBox';
 export class DataLabelsBox extends PureComponent<Props> {
 	static defaultProps: DefaultProps = {
 		name: '',
-		showFormat: true
+		showFormat: 'single'
 	};
 
 	componentDidUpdate (prevProps: Props) {
@@ -63,6 +66,21 @@ export class DataLabelsBox extends PureComponent<Props> {
 		}
 	};
 
+	getChangeIndicatorFormatHandler = (dataSetIndex: number, indicatorIndex: number) => format => {
+		const {data, onChangeData} = this.props;
+		const newData = deepClone(data);
+
+		try {
+			newData[dataSetIndex].indicators[indicatorIndex].format = format;
+
+			if (onChangeData) {
+				onChangeData(newData);
+			}
+		} catch (e) {
+			console.error();
+		}
+	};
+
 	handleChange = ({name, value}: OnChangeEvent<any>) => this.change(name, !value);
 
 	handleChangeFormat = (format: AxisFormat, callback?: Function) => {
@@ -76,23 +94,7 @@ export class DataLabelsBox extends PureComponent<Props> {
 
 	handleSelect = ({name, value}: OnSelectEvent) => this.change(name, value);
 
-	renderFormat = () => {
-		const {showFormat, value} = this.props;
-
-		if (showFormat) {
-			const {computedFormat, format} = value;
-			const dataLabelFormat = format ?? computedFormat ?? DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.NUMBER_FORMAT];
-
-			return (
-				<ParameterFormat
-					onChange={this.handleChangeFormat}
-					value={dataLabelFormat}
-				/>
-			);
-		}
-
-		return null;
-	};
+	renderFormat = () => this.props.showFormat === 'single' ? this.renderSingleFormat() : this.renderMultipleFormat();
 
 	renderMessage = () => {
 		const {disabled} = this.props.value;
@@ -100,6 +102,36 @@ export class DataLabelsBox extends PureComponent<Props> {
 		if (disabled) {
 			return (
 				<div className={styles.isDisabledLabels}><T text="DataLabelsBox::DataLabelsDisabled" /></div>
+			);
+		}
+
+		return null;
+	};
+
+	renderMultipleFormat = () => {
+		const {data} = this.props;
+		const indicatorsFormats = getIndicatorsFormats(data);
+
+		if (indicatorsFormats.length > 0) {
+			const elements = indicatorsFormats.map(({dataSetIndex, format, indicatorIndex, title}) => (
+				<ParameterFormat
+					key={`${dataSetIndex}.${indicatorIndex}`}
+					onChange={this.getChangeIndicatorFormatHandler(dataSetIndex, indicatorIndex)}
+					title={title}
+					value={format}
+				/>
+			));
+
+			return (
+				<>
+					<FormField>
+						<Label className={styles.multipleLabel}>
+							<T text="DataLabelsBox::UnitsMeasurement" />
+						</Label>
+					</FormField>
+
+					{elements}
+				</>
 			);
 		}
 
@@ -114,6 +146,30 @@ export class DataLabelsBox extends PureComponent<Props> {
 				<Checkbox checked={showShadow} name={DIAGRAM_FIELDS.showShadow} onChange={this.handleChange} value={showShadow} />
 				<span className={styles.shadowInputLabel}><T text="DataLabelsBox::Shadow" /></span>
 			</div>
+		);
+	};
+
+	renderSingleFormat = () => {
+		const {data, value} = this.props;
+		const showDTInterval = hasDTInterval(data);
+		const {computedFormat, format} = value;
+		let dataLabelFormat = format;
+
+		if (dataLabelFormat) {
+			if (showDTInterval && dataLabelFormat.type !== AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT) {
+				dataLabelFormat = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT];
+			}
+		} else if (showDTInterval) {
+			dataLabelFormat = DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT];
+		} else {
+			dataLabelFormat = computedFormat ?? DEFAULT_AXIS_FORMAT[AXIS_FORMAT_TYPE.NUMBER_FORMAT];
+		}
+
+		return (
+			<ParameterFormat
+				onChange={this.handleChangeFormat}
+				value={dataLabelFormat}
+			/>
 		);
 	};
 

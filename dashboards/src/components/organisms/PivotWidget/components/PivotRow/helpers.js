@@ -11,7 +11,7 @@ import type {ValuePivotFormatter} from 'utils/recharts/formater/types';
  * Формирует отформатированное значение для столбца
  * @param {PivotColumn} column - столбец
  * @param {PivotDataItem} data - данные по показателю
- * @param {ValuePivotFormatter} formatter - форматтер для значения
+ * @param {ValuePivotFormatter} formatter - форматер для значения
  * @returns {string} - значение
  */
 export const getValueForColumn = (column: PivotColumn, data: PivotDataItem, formatter: ValuePivotFormatter) => {

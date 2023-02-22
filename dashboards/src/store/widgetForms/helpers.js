@@ -51,7 +51,9 @@ const fixIndicatorsAggregation = (indicators: ?Array<Indicator>): Array<Indicato
 		? {...indicator, aggregation: DEFAULT_AGGREGATION.COUNT}
 		: indicator) ?? [];
 
-const fixPivotIndicators = (indicators: null | Array<Indicator> | Array<PivotIndicator>): Array<Indicator> =>
+const fixPivotIndicators = (
+	indicators: null | Array<Indicator> | Array<PivotIndicator>
+): Array<Indicator> =>
 	indicators?.map(indicator => indicator) ?? [];
 
 /**
@@ -65,28 +67,31 @@ const fixIndicatorsAggregationDataSet = (dataSet: TableDataSet): TableDataSet =>
 		indicators: fixIndicatorsAggregation(dataSet.indicators)
 	});
 
-const fixIndicatorsTooltip = (needClearTooltip: boolean) => (indicators: ?Array<Indicator>): Array<Indicator> => {
-	let result = indicators || [];
+const fixIndicatorsTooltip = (needClearTooltip: boolean) =>
+	(indicators: ?Array<Indicator>): Array<Indicator> => {
+		let result = indicators || [];
 
-	if (needClearTooltip) {
-		result = result.map(indicator => ({
-			...indicator,
-			tooltip: {
-				...(indicator.tooltip ?? {}),
-				show: false
-			}
-		}));
-	}
+		if (needClearTooltip) {
+			result = result.map(indicator => ({
+				...indicator,
+				tooltip: {
+					...(indicator.tooltip ?? {}),
+					show: false
+				}
+			}));
+		}
 
-	return result;
-};
+		return result;
+	};
 
 /**
  * Оставляет только один показатель в источнике
  * @param {TableDataSet | SpeedometerDataSet | SummaryDataSet} dataSet - изначальный источник данных
  * @returns {TableDataSet | SpeedometerDataSet | SummaryDataSet} - источник данных c ровно одним показателем
  */
-function fixLeaveOneParameters <T: TableDataSet | SpeedometerDataSet | SummaryDataSet> (dataSet: T): T {
+function fixLeaveOneParameters <T: TableDataSet | SpeedometerDataSet | SummaryDataSet> (
+	dataSet: T
+): T {
 	let result = dataSet;
 
 	if (dataSet.parameters && dataSet.parameters.length > 1) {
@@ -131,6 +136,14 @@ const fixLeaveOneIndicator = (dataSet: TableDataSet): TableDataSet => {
 };
 
 /**
+ * Очищает форматы у индикаторов для данного типа виджета
+ * @param {Array<Indicator> | null} indicators - список индикаторов
+ * @returns {Array<Indicator>} - список индикаторов с очищенным форматом
+ */
+const fixClearIndicatorsFormat = (indicators: ?Array<Indicator>): Array<Indicator> =>
+	(indicators || []).map(indicator => omit(indicator, 'format'));
+
+/**
  * Определяет режим отображения/скрытия чекбокса промежуточных итогов
  * @param {?Array<DiagramDataSet>} data - источники данных на виджете
  * @returns {SHOW_SUB_TOTAL_MODE} - HIDE - скрыть; SHOW - показать; DISABLE - (временно) отобразить без возможности выбора
@@ -161,6 +174,7 @@ const getShowSubTotalMode = (data: ?Array<DiagramDataSet>): $Keys<typeof SHOW_SU
 };
 
 export {
+	fixClearIndicatorsFormat,
 	fixIndicatorsAggregation,
 	fixIndicatorsAggregationDataSet,
 	fixIndicatorsTooltip,

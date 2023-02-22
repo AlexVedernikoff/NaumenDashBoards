@@ -1,4 +1,5 @@
 // @flow
+import type {AxisFormat} from 'store/widgets/data/types';
 import type {Breakdown, Parameter} from 'store/widgetForms/types';
 import type {
 	BreakdownFieldsetProps,
@@ -18,7 +19,7 @@ import DefaultComponents from 'WidgetFormPanel/components/ChartDataSetSettings/d
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import DisplayModeSelectBox from 'containers/DisplayModeSelectBox/DisplayModeSelectBox';
 import {getAttributeValue} from 'store/sources/attributes/helpers';
-import {getDefaultFormatForAttribute} from 'store/widgets/data/helpers';
+import {getDefaultFormatForParameter} from 'store/widgets/data/helpers';
 import {getSortValue} from './helpers';
 import {GROUP_WAYS} from 'store/widgets/constants';
 import memoize from 'memoize-one';
@@ -49,7 +50,7 @@ export class ParamsTab extends PureComponent<Props> {
 			if (breakdownItem) {
 				const {attribute, group} = breakdownItem;
 
-				format = getDefaultFormatForAttribute(attribute, group);
+				format = getDefaultFormatForParameter(attribute, group);
 			}
 
 			onChange(DIAGRAM_FIELDS.breakdownFormat, format);
@@ -64,6 +65,14 @@ export class ParamsTab extends PureComponent<Props> {
 
 	handleChangeData = (data: Array<DataSet>, callback?: Function) =>
 		this.props.onChange(DIAGRAM_FIELDS.data, data, callback);
+
+	handleChangeDataLabelFormat = (format: AxisFormat) => {
+		const {onChange, values} = this.props;
+		const {dataLabels} = values;
+		const newDataLabels = {...dataLabels, format};
+
+		onChange(DIAGRAM_FIELDS.dataLabels, newDataLabels);
+	};
 
 	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
@@ -94,7 +103,7 @@ export class ParamsTab extends PureComponent<Props> {
 
 		if (!dataSet.sourceForCompute) {
 			const value = getSortValue(parameters, sorting);
-			const format = getDefaultFormatForAttribute(attribute, group);
+			const format = getDefaultFormatForParameter(attribute, group);
 
 			onChange(DIAGRAM_FIELDS.sorting, {...sorting, value});
 			onChange(DIAGRAM_FIELDS.parameter, {...parameter, format});
@@ -142,6 +151,7 @@ export class ParamsTab extends PureComponent<Props> {
 					index={index}
 					key={dataSet.dataKey}
 					onChange={this.handleChangeDataSet}
+					onChangeDataLabelFormat={this.handleChangeDataLabelFormat}
 					requiredBreakdown={requiredBreakdown}
 					usesBlankData={!hasCustomGroup}
 					usesEmptyData={hasCustomGroup}

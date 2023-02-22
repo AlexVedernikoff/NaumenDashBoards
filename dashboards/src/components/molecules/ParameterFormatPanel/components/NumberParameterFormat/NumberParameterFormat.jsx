@@ -1,8 +1,8 @@
 // @flow
+import {AXIS_FORMAT_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import Checkbox from 'components/atoms/Checkbox';
 import FormControl from 'components/molecules/FormControl';
 import FormField from 'components/molecules/FormField';
-import {LABEL_FORMAT_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import {NOTATION_FORMATS} from 'store/widgets/data/constants';
 import {NOTATION_FORMATS_OPTIONS} from './constants';
 import NumberInput from 'components/atoms/NumberInput';
@@ -48,7 +48,7 @@ export class NumberParameterFormat extends PureComponent<Props> {
 		return (
 			<FormField label={t('NumberParameterFormat::Additional')} small>
 				<SelectWithCustomEdit
-					name={LABEL_FORMAT_FIELDS.additional}
+					name={AXIS_FORMAT_FIELDS.additional}
 					onSelect={this.handleChange}
 					options={options}
 					placeholder={t('NumberParameterFormat::AdditionalOptionsUndefined')}
@@ -66,7 +66,7 @@ export class NumberParameterFormat extends PureComponent<Props> {
 		return (
 			<FormField className={styles.singleControl} small>
 				<FormControl label={t('NumberParameterFormat::NumberFormat')} reverse={true}>
-					<Toggle checked={showNotation} name={LABEL_FORMAT_FIELDS.notation} onChange={this.toggleNotation} value={showNotation} />
+					<Toggle checked={showNotation} name={AXIS_FORMAT_FIELDS.notation} onChange={this.toggleNotation} value={showNotation} />
 				</FormControl>
 			</FormField>
 		);
@@ -82,7 +82,7 @@ export class NumberParameterFormat extends PureComponent<Props> {
 			return (
 				<FormField small>
 					<Select
-						name={LABEL_FORMAT_FIELDS.notation}
+						name={AXIS_FORMAT_FIELDS.notation}
 						onSelect={this.handleNotationValue}
 						options={options}
 						value={notationValue}
@@ -103,7 +103,7 @@ export class NumberParameterFormat extends PureComponent<Props> {
 				<FormControl label={t('NumberParameterFormat::SplitDigits')} small>
 					<Checkbox
 						checked={splitDigits}
-						name={LABEL_FORMAT_FIELDS.splitDigits}
+						name={AXIS_FORMAT_FIELDS.splitDigits}
 						onChange={this.handleChangeChecked}
 						value={splitDigits}
 					/>
@@ -122,7 +122,7 @@ export class NumberParameterFormat extends PureComponent<Props> {
 					<NumberInput
 						max={5}
 						min={0}
-						name={LABEL_FORMAT_FIELDS.symbolCount}
+						name={AXIS_FORMAT_FIELDS.symbolCount}
 						onChange={this.handleChange}
 						value={symbolCount ?? 0}
 					/>

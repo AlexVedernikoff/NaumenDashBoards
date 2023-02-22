@@ -4,7 +4,7 @@ import ColorsBox from 'containers/ColorsBox';
 import DataLabelsBox from 'WidgetFormPanel/components/DataLabelsBox';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FormField from 'components/molecules/FormField';
-import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
+import {getDefaultFormatForParameter, getMainDataSet} from 'store/widgets/data/helpers';
 import {getSortingOptions} from 'WidgetFormPanel/helpers';
 import HeaderBox from 'WidgetFormPanel/components/HeaderBox';
 import IndicatorSettingsBox from 'components/organisms/ComboChartWidgetForm/components/IndicatorSettingsBox';
@@ -30,8 +30,7 @@ XAXISNAME_CONTEXT.displayName = 'XAXISNAME_CONTEXT';
 export class StyleTab extends Component<Props> {
 	handleChange = (name: string, data: Object) => {
 		const {onChange} = this.props;
-
-		onChange(name, data);
+		return onChange(name, data);
 	};
 
 	handleChangeAxisName = (index: number) => ({name, value}: OnChangeEvent<string>) => {
@@ -40,6 +39,8 @@ export class StyleTab extends Component<Props> {
 
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
+
+	handleChangeData = data => this.handleChange(DIAGRAM_FIELDS.data, data);
 
 	handleChangeFormat = format => {
 		const {onChange, values} = this.props;
@@ -78,7 +79,7 @@ export class StyleTab extends Component<Props> {
 			const {attribute, group} = parameters[0];
 
 			if (attribute) {
-				const {format = getDefaultFormatForAttribute(attribute, group)} = parameter;
+				const {format = getDefaultFormatForParameter(attribute, group)} = parameter;
 				const label = attribute.title;
 
 				return (
@@ -132,7 +133,15 @@ export class StyleTab extends Component<Props> {
 					options={getSortingOptions(!hasCustomGroup)}
 					value={sorting}
 				/>
-				<DataLabelsBox name={DIAGRAM_FIELDS.dataLabels} onChange={this.handleChange} showFormat={false} value={dataLabels} widget={widget} />
+				<DataLabelsBox
+					data={data}
+					name={DIAGRAM_FIELDS.dataLabels}
+					onChange={this.handleChange}
+					onChangeData={this.handleChangeData}
+					showFormat='multiple'
+					value={dataLabels}
+					widget={widget}
+				/>
 				<ColorsBox
 					disabledCustomSettings={true}
 					name={DIAGRAM_FIELDS.colorsSettings}

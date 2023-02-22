@@ -1,7 +1,14 @@
 // @flow
+import {AXIS_FORMAT_TYPE} from 'store/widgets/data/constants';
 import type {AxisOptions, ContainerSize, RechartData} from './types';
 import type {AxisWidget} from 'store/widgets/data/types';
-import {calculateCategoryWidth, calculateStringsSize, getNiceScale, getRechartAxisSetting} from './helpers';
+import {
+	calculateCategoryWidth,
+	calculateStringsSize,
+	getNiceScale,
+	getNiceScaleDTInterval,
+	getRechartAxisSetting
+} from './helpers';
 import {LEGEND_HEIGHT, XAXIS_MAX_WIDTH} from './constants';
 import {LEGEND_POSITIONS} from 'utils/recharts/constants';
 
@@ -82,24 +89,30 @@ const getXAxisNumber = (
 
 	if (!isNormalized) {
 		domain = [0, value => {
-			let niceScale = getNiceScale(value, showSubTotalAmount);
+			let niceScale = value;
 
-			if (showSubTotalAmount) {
+			if (widget.dataLabels.format && widget.dataLabels.format.type === AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT) {
+				niceScale = getNiceScaleDTInterval(value, widget.dataLabels.format);
+			} else {
+				let niceScale = getNiceScale(value, showSubTotalAmount);
+
+				if (showSubTotalAmount) {
 				// Вычисляем дополнительный отступ чтобы вместить
 				// метки с промежуточными итогами
-				const diff = niceScale - value;
-				const diffWidth = diff * graphWidth / niceScale;
-				const labelForSubTotalAmount = '_' + value;
-				const {width} = calculateStringsSize(
-					[[labelForSubTotalAmount]],
-					widget.dataLabels.fontFamily,
-					widget.dataLabels.fontSize
-				)[0];
+					const diff = niceScale - value;
+					const diffWidth = diff * graphWidth / niceScale;
+					const labelForSubTotalAmount = '_' + value;
+					const {width} = calculateStringsSize(
+						[[labelForSubTotalAmount]],
+						widget.dataLabels.fontFamily,
+						widget.dataLabels.fontSize
+					)[0];
 
-				if (diffWidth < width) {
-					const bestValue = value + (niceScale / graphWidth * width);
+					if (diffWidth < width) {
+						const bestValue = value + (niceScale / graphWidth * width);
 
-					niceScale = getNiceScale(bestValue, showSubTotalAmount);
+						niceScale = getNiceScale(bestValue, showSubTotalAmount);
+					}
 				}
 			}
 

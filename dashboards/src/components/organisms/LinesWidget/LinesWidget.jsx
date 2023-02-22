@@ -231,14 +231,14 @@ export class LinesWidget extends PureComponent<Props, State> {
 
 	renderYAxis = () => {
 		const {options: {formatters, yAxis}} = this.state;
-		const {axisName: value, fontFamily, fontSize, show, showName, width} = yAxis;
+		const {axisName: value, domain, fontFamily, fontSize, show, showName, width} = yAxis;
 		const label = showName
 			? <YTitleLabel fontFamily={fontFamily} fontSize={fontSize} value={value} />
 			: null;
 
 		return (
 			<YAxis
-				domain={[0, dataMax => Math.ceil(dataMax * 1.1)]}
+				domain={domain}
 				fontFamily={fontFamily}
 				fontSize={fontSize}
 				hide={!show}

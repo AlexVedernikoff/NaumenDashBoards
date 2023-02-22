@@ -1,5 +1,5 @@
 // @flow
-import {checkNumber, formatMSInterval, makeFormatterByNumberFormat} from './helpers';
+import {checkNumber, makeFormatterByNumberFormat, oldFormatMSInterval} from './helpers';
 import {DEFAULT_NUMBER_AXIS_FORMAT} from 'store/widgets/data/constants';
 import {getMainDataSet} from 'store/widgets/data/helpers';
 import {hasMSInterval} from 'store/widgets/helpers';
@@ -21,7 +21,7 @@ const getTotalFormatter = (widget: SpeedometerWidget): NumberFormatter => {
 	let formatter = null;
 
 	if (usesMSInterval) {
-		formatter = formatMSInterval;
+		formatter = oldFormatMSInterval;
 	} else {
 		const defaultSymbolCount = aggregation === INTEGER_AGGREGATION.AVG ? 2 : 0;
 		const numberFormat = format ?? computedFormat ?? {...DEFAULT_NUMBER_AXIS_FORMAT, symbolCount: defaultSymbolCount};

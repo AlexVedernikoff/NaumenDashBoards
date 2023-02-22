@@ -1,13 +1,17 @@
 // @flow
+import type {AxisFormat, AxisWidget} from 'store/widgets/data/types';
 import {AXIS_FORMAT_TYPE, DEFAULT_NUMBER_AXIS_FORMAT} from 'store/widgets/data/constants';
 import type {AxisFormatter, PercentStore, ValueFormatter} from './types';
-import type {AxisWidget, NumberAxisFormat} from 'store/widgets/data/types';
 import {
 	checkInfinity,
 	checkNumber,
+	checkString,
 	checkZero,
 	cntPercentFormatter,
+	defaultNumberFormatter,
 	formatMSInterval,
+	getDataLabelsFormat,
+	getLabelFormatter,
 	makeFormatterByFormat,
 	makeFormatterByNumberFormat,
 	sevenDaysFormatter,
@@ -15,8 +19,8 @@ import {
 } from './helpers';
 import {compose} from 'redux';
 import {DATETIME_SYSTEM_GROUP, GROUP_WAYS} from 'store/widgets/constants';
-import {getDefaultFormatForAttribute, getMainDataSet} from 'store/widgets/data/helpers';
-import {hasCountPercent, hasMSInterval, hasPercent} from 'store/widgets/helpers';
+import {getDefaultFormatForParameter, getMainDataSet} from 'store/widgets/data/helpers';
+import {hasCountPercent, hasPercent} from 'store/widgets/helpers';
 
 /**
  * Создает форматер для блока легенды
@@ -27,8 +31,8 @@ const getLegendFormatter = (widget: AxisWidget): ValueFormatter => {
 	const dataSet = getMainDataSet(widget.data);
 	const {breakdown, parameters} = dataSet;
 	const format = Array.isArray(breakdown)
-		? widget.breakdownFormat ?? getDefaultFormatForAttribute(breakdown[0].attribute, breakdown[0].group)
-		: widget.parameter?.format ?? getDefaultFormatForAttribute(parameters[0].attribute, parameters[0].group);
+		? widget.breakdownFormat ?? getDefaultFormatForParameter(breakdown[0].attribute, breakdown[0].group)
+		: widget.parameter?.format ?? getDefaultFormatForParameter(parameters[0].attribute, parameters[0].group);
 	const formatter = makeFormatterByFormat(format, false);
 
 	return formatter;
@@ -37,7 +41,7 @@ const getLegendFormatter = (widget: AxisWidget): ValueFormatter => {
 /**
  * Создает форматер для меток и оси индикатора
  * @param {AxisWidget} widget - виджет
- * @param {NumberAxisFormat} format - установленный пользователем формат, используется только для меток данных
+ * @param {AxisFormat} format - установленный пользователем формат, используется только для меток данных
  * @param {PercentStore} percentStore - данные для cnt(%)
  * @param {boolean} checkShowEmptyData - указывает на необходимость показывать скрытые данные
  * @param {boolean} checkPercentAggregation - указывает на необходимость добавлять % по умолчанию, при процентной агрегации
@@ -45,7 +49,7 @@ const getLegendFormatter = (widget: AxisWidget): ValueFormatter => {
  */
 const getDataFormatter = (
 	widget: AxisWidget,
-	format: NumberAxisFormat,
+	format: AxisFormat,
 	percentStore: PercentStore = {},
 	checkShowEmptyData: boolean,
 	checkPercentAggregation: boolean = true
@@ -53,17 +57,16 @@ const getDataFormatter = (
 	const dataSet = getMainDataSet(widget.data);
 	const {breakdown, indicators, parameters, showEmptyData} = dataSet;
 	const {aggregation, attribute: indicatorAttribute} = indicators[0];
-	const usesMSInterval = hasMSInterval(indicatorAttribute, aggregation);
-	const usesPercent = checkPercentAggregation && hasPercent(indicatorAttribute, aggregation);
-	const usesCntPercent = checkPercentAggregation && hasCountPercent(indicatorAttribute, aggregation);
 	const {CUSTOM} = GROUP_WAYS;
 	const hasCustomGroup = parameters[0].group.way === CUSTOM || breakdown?.[0].group.way === CUSTOM;
 	const showZero = checkShowEmptyData && hasCustomGroup && showEmptyData;
-	let formatter = null;
+	let formatter = checkNumber(defaultNumberFormatter(0));
 
-	if (usesMSInterval) {
-		formatter = checkNumber(formatMSInterval);
-	} else {
+	if (format.type === AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT) {
+		formatter = checkNumber(formatMSInterval(format));
+	} else if (format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT || format.type === AXIS_FORMAT_TYPE.INTEGER_FORMAT) {
+		const usesPercent = checkPercentAggregation && hasPercent(indicatorAttribute, aggregation);
+		const usesCntPercent = checkPercentAggregation && hasCountPercent(indicatorAttribute, aggregation);
 		const numberFormat = !format.additional && format.additional !== '' && usesPercent ? {...format, additional: '%'} : format;
 
 		formatter = makeFormatterByNumberFormat(numberFormat);
@@ -79,6 +82,8 @@ const getDataFormatter = (
 		}
 
 		formatter = checkNumber(formatter);
+	} else if (format.type === AXIS_FORMAT_TYPE.LABEL_FORMAT) {
+		formatter = checkString(getLabelFormatter(format.labelFormat));
 	}
 
 	return formatter;
@@ -98,7 +103,7 @@ const getCategoryFormatter = (widget: AxisWidget): ValueFormatter => {
 		return sevenDaysFormatter;
 	}
 
-	return makeFormatterByFormat(parameter.format ?? getDefaultFormatForAttribute(attribute, group), false);
+	return makeFormatterByFormat(parameter.format ?? getDefaultFormatForParameter(attribute, group), false);
 };
 
 /**
@@ -113,21 +118,19 @@ const getAxisFormatterBase = (
 	labels: Array<string> | Array<number>,
 	percentStore: PercentStore = {}
 ): AxisFormatter => {
-	const {dataLabels} = widget;
 	const categoryFormatter = getCategoryFormatter(widget);
-	const dataLabelsFormat = dataLabels.format ?? dataLabels.computedFormat ?? DEFAULT_NUMBER_AXIS_FORMAT;
-	const normalizedDataLabelsFormat = dataLabelsFormat && dataLabelsFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
-		? dataLabelsFormat
-		: DEFAULT_NUMBER_AXIS_FORMAT;
-	const indicatorsFormat = {...DEFAULT_NUMBER_AXIS_FORMAT, symbolCount: null};
+	const dataLabelsFormat = getDataLabelsFormat(widget);
+	const isNumberFormat = dataLabelsFormat.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
+		|| dataLabelsFormat.type === AXIS_FORMAT_TYPE.INTEGER_FORMAT;
+	const indicatorsFormat = isNumberFormat ? {...DEFAULT_NUMBER_AXIS_FORMAT, symbolCount: null} : dataLabelsFormat;
 
 	return {
-		dataLabel: getDataFormatter(widget, normalizedDataLabelsFormat, percentStore, true, true),
+		dataLabel: getDataFormatter(widget, dataLabelsFormat, percentStore, true, true),
 		indicator: getDataFormatter(widget, indicatorsFormat, percentStore, false, false),
 		legend: getLegendFormatter(widget),
 		parameter: categoryFormatter,
-		tooltip: compose(getDataFormatter(widget, normalizedDataLabelsFormat, percentStore, false, true)),
-		totalDataLabel: getDataFormatter(widget, normalizedDataLabelsFormat, {}, true, true)
+		tooltip: compose(getDataFormatter(widget, dataLabelsFormat, percentStore, false, true)),
+		totalDataLabel: getDataFormatter(widget, dataLabelsFormat, {}, true, true)
 	};
 };
 

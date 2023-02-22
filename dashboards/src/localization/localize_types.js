@@ -33,6 +33,17 @@ type Datepicker =
 	| 'Datepicker::Sat'
 	| 'Datepicker::Sun';
 
+type DTIntervalFormat =
+	| 'DTIntervalFormat::Day'
+	| 'DTIntervalFormat::Hours'
+	| 'DTIntervalFormat::Minutes'
+	| 'DTIntervalFormat::NotSelect'
+	| 'DTIntervalFormat::QuotientPart'
+	| 'DTIntervalFormat::RemainderPart'
+	| 'DTIntervalFormat::Seconds'
+	| 'DTIntervalFormat::SymbolCount'
+	| 'DTIntervalFormat::Week';
+
 // components/molecules/Kebab
 type Kebab =
 	| 'Kebab::Menu';
@@ -550,9 +561,10 @@ type ComputedAttributeEditor =
 
 // components/organisms/WidgetFormPanel/components/DataLabelsBox
 type DataLabelsBox =
+	| 'DataLabelsBox::DataLabels'
 	| 'DataLabelsBox::DataLabelsDisabled'
 	| 'DataLabelsBox::Shadow'
-	| 'DataLabelsBox::DataLabels';
+	| 'DataLabelsBox::UnitsMeasurement';
 
 // components/organisms/WidgetFormPanel/components/DataTopField
 type DataTopField =
@@ -920,9 +932,10 @@ type DrillDownBySelection =
 
 // utils/chart/mixins/formater
 type Formatter =
-	| 'Formatter::Thousand'
-	| 'Formatter::Million'
 	| 'Formatter::Billion'
+	| 'Formatter::formatMSInterval'
+	| 'Formatter::Million'
+	| 'Formatter::Thousand'
 	| 'Formatter::Trillion';
 
 // utils/export
@@ -1003,6 +1016,7 @@ export type LangType =
 	| DiagramWidgetFormScheme
 	| DisplayModeSelectBox
 	| DrillDownBySelection
+	| DTIntervalFormat
 	| Export
 	| ExportByEmailButton
 	| ExportByEmailFormFormFooter
