@@ -1,10 +1,19 @@
 // @flow
 import type {Breakdown, Parameter} from 'store/widgetForms/types';
-import type {BreakdownFieldsetProps, Components} from 'WidgetFormPanel/components/ChartDataSetSettings/types';
+import type {
+	BreakdownFieldsetProps,
+	Components
+} from 'WidgetFormPanel/components/ChartDataSetSettings/types';
 import ChartDataSetSettings from 'WidgetFormPanel/components/ChartDataSetSettings';
 import {createAxisDataSet} from 'store/widgetForms/axisChartForm/helpers';
 import type {DataSet} from 'store/widgetForms/axisChartForm/types';
-import {DEFAULT_AXIS_SORTING_SETTINGS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {
+	DEFAULT_AXIS_SORTING_SETTINGS,
+	MODE_OF_TOP,
+	SORTING_TYPES,
+	SORTING_VALUES,
+	WIDGET_TYPES
+} from 'store/widgets/data/constants';
 import DefaultComponents from 'WidgetFormPanel/components/ChartDataSetSettings/defaultComponents';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import DisplayModeSelectBox from 'containers/DisplayModeSelectBox/DisplayModeSelectBox';
@@ -59,6 +68,20 @@ export class ParamsTab extends PureComponent<Props> {
 	handleChangeDataSet = (index: number, newDataSet: DataSet, callback?: Function) => {
 		const {onChange, values} = this.props;
 		const newData = values.data.map((dataSet, i) => i === index ? newDataSet : dataSet);
+		const {top: newTop} = newDataSet;
+		const {top: oldTop} = values.data?.[index] ?? {};
+
+		if (
+			!newDataSet.sourceForCompute
+			&& newTop.show
+			&& (newTop.show !== oldTop?.show || newTop.modeOfTop !== oldTop?.modeOfTop)
+		) {
+			const {sorting: prevSorting} = values;
+			const type = newTop.modeOfTop === MODE_OF_TOP.MAX ? SORTING_TYPES.ASC : SORTING_TYPES.DESC;
+			const newSorting = {...prevSorting, type, value: SORTING_VALUES.INDICATOR};
+
+			onChange(DIAGRAM_FIELDS.sorting, newSorting);
+		}
 
 		onChange(DIAGRAM_FIELDS.data, newData, callback);
 	};
@@ -152,7 +175,11 @@ export class ParamsTab extends PureComponent<Props> {
 				<WidgetNameBox onChange={onChange} values={values} />
 				<WidgetSelectBox />
 				<SourceBox onAdd={this.handleAddDataSet}>{data.map(this.renderSourceFieldset)}</SourceBox>
-				<ParametersDataBox onChange={this.handleChangeData} onChangeParameters={this.handleChangeParameters} value={data} />
+				<ParametersDataBox
+					onChange={this.handleChangeData}
+					onChangeParameters={this.handleChangeParameters}
+					value={data}
+				/>
 				{data.map(this.renderDataSetSettings)}
 				<ShowTotalAmountBox
 					onChange={onChange}
@@ -160,7 +187,11 @@ export class ParamsTab extends PureComponent<Props> {
 					showTotalAmount={showTotalAmount}
 					subTotalAmountView={subTotalAmountView}
 				/>
-				<DisplayModeSelectBox name={DIAGRAM_FIELDS.displayMode} onChange={onChange} value={displayMode} />
+				<DisplayModeSelectBox
+					name={DIAGRAM_FIELDS.displayMode}
+					onChange={onChange}
+					value={displayMode}
+				/>
 				<NavigationBox name={DIAGRAM_FIELDS.navigation} onChange={onChange} value={navigation} />
 			</Fragment>
 		);
