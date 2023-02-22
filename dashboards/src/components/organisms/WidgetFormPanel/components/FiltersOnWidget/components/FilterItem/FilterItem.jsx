@@ -78,6 +78,7 @@ export class FilterItem extends PureComponent<Props, State> {
 				code !== 'UUID'
 					&& !(metaClassFqn === 'employee' && code === 'password')
 					&& !(metaClassFqn === 'employee' && code === 'immediateSupervisor')
+					&& !(metaClassFqn === 'employee' && code === 'isEmployeeActive')
 			);
 			const attribute = value.attributes && value.attributes.length > 0 ? value.attributes[0] : null;
 

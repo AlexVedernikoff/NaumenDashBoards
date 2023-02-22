@@ -40,7 +40,10 @@ export class ParameterFieldset extends Component<Props> {
 	filterOptions = (filterByRef: boolean) => (options: Array<Attribute>, dataSetIndex: number): Array<Attribute> => {
 		const {attributesHelpers, filterOptions, value} = this.props;
 		const {attribute} = value;
-		const filteredOptions = filterOptions ? filterOptions(options, dataSetIndex, filterByRef) : options;
+		let filteredOptions = filterOptions ? filterOptions(options, dataSetIndex, filterByRef) : options;
+
+		filteredOptions = attributesHelpers.filterUncomfortableAttributes(filteredOptions);
+		filteredOptions = attributesHelpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
 
 		return attributesHelpers.filterAttributesByUsed(filteredOptions, dataSetIndex, [attribute]);
 	};

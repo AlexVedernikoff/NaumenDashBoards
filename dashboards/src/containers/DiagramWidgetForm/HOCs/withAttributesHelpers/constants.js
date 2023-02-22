@@ -7,6 +7,7 @@ const ATTRIBUTES_HELPERS_CONTEXT = createContext<Context>({
 	filterAttributesByUsed: () => [],
 	filterBreakdownAttributeByMainDataSet: () => [],
 	filterDynamicAttributes: () => ({}),
+	filterUncomfortableAttributes: () => [],
 	getCommonAttributes: () => []
 });
 
