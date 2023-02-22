@@ -97,7 +97,7 @@ export class DTIntervalFormat extends PureComponent<Props> {
 	renderSymbolCount = () => {
 		const {value: {symbolCount}} = this.props;
 		return (
-			<FormField label='Количество знаков после запятой'>
+			<FormField label={t('DTIntervalFormat::SymbolCount')}>
 				<NumberInput
 					max={5}
 					min={0}

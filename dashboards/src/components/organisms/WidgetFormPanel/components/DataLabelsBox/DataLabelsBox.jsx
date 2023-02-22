@@ -125,7 +125,9 @@ export class DataLabelsBox extends PureComponent<Props> {
 			return (
 				<>
 					<FormField>
-						<Label className={styles.multipleLabel}>Единицы изменения</Label>
+						<Label className={styles.multipleLabel}>
+							<T text="DataLabelsBox::UnitsMeasurement" />
+						</Label>
 					</FormField>
 
 					{elements}
