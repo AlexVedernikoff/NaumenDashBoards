@@ -94,7 +94,12 @@ export class DataTopField extends PureComponent<Props> {
 
 		return (
 			<FormControl label={t('DataTopField::ShowTop')}>
-				<Checkbox checked={show} name={DIAGRAM_FIELDS.show} onChange={this.handleToggleShow} value={show} />
+				<Checkbox
+					checked={show}
+					name={DIAGRAM_FIELDS.show}
+					onChange={this.handleToggleShow}
+					value={show}
+				/>
 			</FormControl>
 		);
 	};
