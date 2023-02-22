@@ -25,7 +25,7 @@ import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.ISelectClauseApi
 import ru.naumen.core.server.script.api.ITypesApi
 import ru.naumen.core.server.script.api.IWebApi
-import ru.naumen.core.server.script.spi.ScriptConditionsApi
+import ru.naumen.core.server.script.spi.IScriptConditionsApi
 import ru.naumen.core.server.script.api.IWhereClauseApi
 import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
@@ -122,7 +122,7 @@ class DashboardDrilldownService
     private final IDbApi db
     private final IDateApi date
     private final IWebApi web
-    private final ScriptConditionsApi op
+    private final IScriptConditionsApi op
     private final DashboardUtils dashboardUtils
     private final DashboardDataSetService dashboardDataSetService
     private final DashboardSettingsService dashboardSettingsService
@@ -143,7 +143,7 @@ class DashboardDrilldownService
                               IDbApi db,
                               IDateApi date,
                               IWebApi web,
-                              ScriptConditionsApi op,
+                              IScriptConditionsApi op,
                               DashboardUtils dashboardUtils,
                               DashboardDataSetService dashboardDataSetService,
                               DashboardSettingsService dashboardSettingsService,
@@ -233,7 +233,7 @@ class DashboardDrilldownService
 
         DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(requestContent.dashboardKey)
         cardObjectUuid = dashboardDataSetService.getCardObjectUUID(dbSettings, user) ?: cardObjectUuid
-        Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, metainfo.getMetaClass(requestContent.classFqn))
+        Link link = new Link(transformRequest(requestContent, cardObjectUuid), cardObjectUuid, metainfo.getMetaClass(requestContent.classFqn), utils, op)
 
         Boolean anyFiltersWithCustomGroupKey = link.filters.any { it?.group?.way == Way.CUSTOM}
 
@@ -2598,7 +2598,14 @@ class Link
      */
     private String subjectUUID
 
-    Link(GetLinkRequest map, String cardObjectUuid, def metaInfo)
+    /**
+     * @param map - данные запроса
+     * @param cardObjectUuid - UUID карточки объекта
+     * @param metaInfo - метакласс объектов
+     * @param utils - api для получения объектов
+     * @param op - api для условий поиска
+     */
+    Link(GetLinkRequest map, String cardObjectUuid, def metaInfo, IScriptUtils utils, IScriptConditionsApi op)
     {
         this.subjectUUID = cardObjectUuid
         this.classFqn = map.classFqn
