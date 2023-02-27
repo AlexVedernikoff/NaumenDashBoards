@@ -126,7 +126,7 @@ export class MultipleIntervalOrCondition extends PureComponent<Props> {
 				/>
 			</div>
 		);
-	};;
+	};
 
 	render () {
 		return (

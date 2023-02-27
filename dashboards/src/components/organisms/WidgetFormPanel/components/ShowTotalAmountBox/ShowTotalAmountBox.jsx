@@ -19,23 +19,21 @@ class ShowTotalAmountBox extends PureComponent<Props> {
 	handleChange = ({name, value}: OnChangeEvent<boolean>) => {
 		const {onChange} = this.props;
 		return onChange(name, !value);
-	};;
+	};
 
 	renderShowSubTotalAmount = () => {
 		const {showSubTotalAmount, subTotalAmountView, values: {data}} = this.props;
 
 		if (subTotalAmountView) {
 			const mode = getShowSubTotalMode(data);
-			const checked = showSubTotalAmount && mode === SHOW_SUB_TOTAL_MODE.SHOW;
-			const disabled = mode === SHOW_SUB_TOTAL_MODE.DISABLE;
+			const checked = showSubTotalAmount;
 
-			if (mode !== SHOW_SUB_TOTAL_MODE.HIDE) {
+			if (mode === SHOW_SUB_TOTAL_MODE.SHOW) {
 				return (
 					<FormField>
-						<FormControl disabled={disabled} label={t('ShowTotalAmountBox::ShowSubTotalAmount')}>
+						<FormControl label={t('ShowTotalAmountBox::ShowSubTotalAmount')}>
 							<Checkbox
 								checked={checked}
-								disabled={disabled}
 								name={DIAGRAM_FIELDS.showSubTotalAmount}
 								onChange={this.handleChange}
 								value={showSubTotalAmount}

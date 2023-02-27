@@ -90,7 +90,7 @@ export class ComparePeriodBox extends PureComponent<Props> {
 			</FormField>
 
 		);
-	};;
+	};
 
 	render () {
 		const {value} = this.props;
