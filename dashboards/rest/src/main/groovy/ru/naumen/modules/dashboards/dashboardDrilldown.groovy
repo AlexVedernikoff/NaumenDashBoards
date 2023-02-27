@@ -1224,73 +1224,81 @@ class DashboardDrilldownService
                                 }
                                 break
                             case AttributeType.TIMER_TYPES:
-                                result += customSubGroupCondition.collect { orCondition ->
-                                    orCondition.collect {
-                                        if(attr.ref)
-                                        {
-                                            def uuids = getValuesForRefAttrInCustomGroup(attr, it.data, customSubGroupCondition)
-                                            return filterBuilder.OR(attr.code, 'containsInSet', uuids)
-                                        }
-                                        switch (Condition.getByTitle(it.type.toLowerCase()))
-                                        {
-                                            case Condition.STATUS_CONTAINS:
-                                                String code = it.data.value?.toLowerCase()?.take(1)
-                                                return filterBuilder.
-                                                    OR(attr.code, 'timerStatusContains', [code])
-                                            case Condition.STATUS_NOT_CONTAINS:
-                                                String code = it.data.value?.toLowerCase()?.take(1)
-                                                return filterBuilder.
-                                                    OR(attr.code, 'timerStatusNotContains', [code])
-                                            case Condition.EXPIRES_BETWEEN:
-                                                String dateFormat
-                                                def dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
-                                                def start
-                                                if(dateSet.startDate)
-                                                {
-                                                    dateFormat = dashboardUtils.getDateFormatByDate(dateSet.startDate as String)
-                                                    start = Date.parse(dateFormat, dateSet.startDate as String)
-                                                }
-                                                else
-                                                {
-                                                    String attrCode = "${attr.code}.deadLineTime"
-                                                    Date minDate = dashboardUtils.getMinDate(
-                                                        attrCode,
-                                                        attr.sourceCode,
-                                                        this.descriptor
+                                if (attr.timerValue == TimerValue.VALUE)
+                                {
+                                    List values = getValuesForRefAttrInCustomGroup(attr, null, customSubGroupCondition)
+                                    result += [[filterBuilder.OR('UUID', 'contains', values)]]
+                                }
+                                else
+                                {
+                                    result += customSubGroupCondition.collect { orCondition ->
+                                        orCondition.collect {
+                                            if(attr.ref)
+                                            {
+                                                Collection uuids = getValuesForRefAttrInCustomGroup(attr, it.data, customSubGroupCondition)
+                                                return filterBuilder.OR(attr.code, 'containsInSet', uuids)
+                                            }
+                                            switch (Condition.getByTitle(it.type.toLowerCase()))
+                                            {
+                                                case Condition.STATUS_CONTAINS:
+                                                    String code = it.data.value?.toLowerCase()?.take(1)
+                                                    return filterBuilder.
+                                                        OR(attr.code, 'timerStatusContains', [code])
+                                                case Condition.STATUS_NOT_CONTAINS:
+                                                    String code = it.data.value?.toLowerCase()?.take(1)
+                                                    return filterBuilder.
+                                                        OR(attr.code, 'timerStatusNotContains', [code])
+                                                case Condition.EXPIRES_BETWEEN:
+                                                    String dateFormat
+                                                    Map<String, Object> dateSet = it.data as Map<String, Object> // тут будет массив дат или одна из них
+                                                    Date start
+                                                    if(dateSet.startDate)
+                                                    {
+                                                        dateFormat = dashboardUtils.getDateFormatByDate(dateSet.startDate as String)
+                                                        start = Date.parse(dateFormat, dateSet.startDate as String)
+                                                    }
+                                                    else
+                                                    {
+                                                        String attrCode = "${attr.code}.deadLineTime"
+                                                        Date minDate = dashboardUtils.getMinDate(
+                                                            attrCode,
+                                                            attr.sourceCode,
+                                                            this.descriptor
+                                                        )
+                                                        start = new Date(minDate.time).clearTime()
+                                                    }
+                                                    Date end
+                                                    if (dateSet.endDate)
+                                                    {
+                                                        dateFormat = dashboardUtils.getDateFormatByDate(dateSet.endDate as String)
+                                                        end = Date.parse(dateFormat, dateSet.endDate as String)
+                                                    }
+                                                    else
+                                                    {
+                                                        end = new Date().clearTime()
+                                                    }
+                                                    return filterBuilder.OR(
+                                                        attr.code,
+                                                        'backTimerDeadLineFromTo',
+                                                        [start, end]
                                                     )
-                                                    start = new Date(minDate.time).clearTime()
-                                                }
-                                                def end
-                                                if (dateSet.endDate)
-                                                {
-                                                    dateFormat = dashboardUtils.getDateFormatByDate(dateSet.endDate as String)
-                                                    end = Date.parse(dateFormat, dateSet.endDate as String)
-                                                }
-                                                else
-                                                {
-                                                    end = new Date().clearTime()
-                                                }
-                                                return filterBuilder.OR(
-                                                    attr.code,
-                                                    'backTimerDeadLineFromTo',
-                                                    [start, end]
-                                                )
-                                            case Condition.EXPIRATION_CONTAINS:
-                                                String conditionType = it.data.value == 'EXCEED'
-                                                    ? 'timerStatusContains'
-                                                    : 'timerStatusNotContains'
-                                                return filterBuilder.OR(attr.code, conditionType, ['e'])
-                                            case Condition.EQUAL:
-                                            case Condition.NOT_EQUAL:
-                                            case Condition.GREATER:
-                                            case Condition.LESS:
-                                            case Condition.EMPTY:
-                                            case Condition.NOT_EMPTY:
-                                                String message = messageProvider.getConstant(NO_DETAIL_DATA_ERROR, currentUserLocale)
-                                                utils.throwReadableException("${message}#${NO_DETAIL_DATA_ERROR}")
-                                            default:
-                                                String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
-                                                utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
+                                                case Condition.EXPIRATION_CONTAINS:
+                                                    String conditionType = it.data.value == 'EXCEED'
+                                                        ? 'timerStatusContains'
+                                                        : 'timerStatusNotContains'
+                                                    return filterBuilder.OR(attr.code, conditionType, ['e'])
+                                                case Condition.EQUAL:
+                                                case Condition.NOT_EQUAL:
+                                                case Condition.GREATER:
+                                                case Condition.LESS:
+                                                case Condition.EMPTY:
+                                                case Condition.NOT_EMPTY:
+                                                    String message = messageProvider.getConstant(NO_DETAIL_DATA_ERROR, currentUserLocale)
+                                                    utils.throwReadableException("${message}#${NO_DETAIL_DATA_ERROR}")
+                                                default:
+                                                    String message = messageProvider.getMessage(NOT_SUPPORTED_CONDITION_TYPE_ERROR, currentUserLocale, conditionType: it.type)
+                                                    utils.throwReadableException("$message#${NOT_SUPPORTED_CONDITION_TYPE_ERROR}")
+                                            }
                                         }
                                     }
                                 }
@@ -1476,13 +1484,14 @@ class DashboardDrilldownService
      * @param attr - атрибут целиком
      * @param data - данные о кастомной группировке
      * @param customSubGroupCondition - условия кастомной группировки
+     * @param fromSystemGroup - флаг на системную группировку
      * @return список uuid-ов для атрибута первого уровня и фильтрации containsInSet
      */
-    private Collection getValuesForRefAttrInCustomGroup(Attribute attr, def data, List<List> customSubGroupCondition)
+    private Collection getValuesForRefAttrInCustomGroup(Attribute attr, def data, List<List> customSubGroupCondition, Boolean fromSystemGroup = false)
     {
-        Source source = new Source(classFqn: classFqn, descriptor: descriptor)
+        Source source = new Source(classFqn: attr.sourceCode, descriptor: '')
         def attributeType = Attribute.getAttributeType(attr)
-        Closure<Collection<Collection<FilterParameter>>> mappingFilters = dashboardDataSetService.getMappingFilterMethodByType(attributeType, subjectUUID, source, 240, true)
+        Closure<Collection<Collection<FilterParameter>>> mappingFilters = dashboardDataSetService.getMappingFilterMethodByType(attributeType, '', source, 240, fromSystemGroup)
         def filters = mappingFilters(
             customSubGroupCondition,
             attr,
@@ -1492,7 +1501,17 @@ class DashboardDrilldownService
         def filterParam = filters?.find()
         def wrapper = QueryWrapper.build(source)
 
-        wrapper.criteria.addColumn(selectClause.property("${attr.code}.UUID"))
+        String fullAttributeCode
+        if (attr.type in AttributeType.TIMER_TYPES && attr.timerValue == TimerValue.VALUE)
+        {
+            fullAttributeCode = 'UUID'
+        }
+        else
+        {
+            fullAttributeCode = attr.code + '.UUID'
+        }
+
+        wrapper.criteria.addColumn(selectClause.property(fullAttributeCode))
         wrapper.filtering(wrapper.criteria, false, filterParam)
 
         def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
@@ -1511,12 +1530,12 @@ class DashboardDrilldownService
         // "notContainsWithRemoved", "containsUser", "containsSubject", "containsUserAttribute", "containsSubjectAttribute"
         String code = attr.code
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        def values = []
         if(attr.ref)
         {
             //пришли из ссылочного атрибута
             def lastAttr = attr.attrChains().last()
             code = lastAttr.code
-            def values = []
             if (value == 'Не заполнено' || value == 'EMPTY')
             {
                 return filterBuilder.OR(attr.code, 'null', null)
@@ -1609,8 +1628,30 @@ class DashboardDrilldownService
             case AttributeType.TIMER_TYPES:
                 if (attr.timerValue == TimerValue.VALUE)
                 {
-                    String message = messageProvider.getMessage(NO_DETAIL_DATA_ERROR, currentUserLocale)
-                    api.utils.throwReadableException("$message#${NO_DETAIL_DATA_ERROR}")
+                    value = value?.split(':')
+                    if (value)
+                    {
+                        //формируем условие как для кастомной группировки
+                        List<List<Map<String, Object>>> customSubGroupCondition = [[[
+                                                            'type': 'equal',
+                                                            'data': [
+                                                                'label': '',
+                                                                'value': [
+                                                                    ['type': 'HOUR', 'value': value[0]],
+                                                                    ['type': 'MINUTE', 'value': value[1]],
+                                                                    ['type': 'SECOND', 'value': value[2]]
+                                                                ]
+                                                            ]
+                                                        ]]]
+
+                        values = getValuesForRefAttrInCustomGroup(attr, null, customSubGroupCondition, true)
+                        return filterBuilder.OR('UUID', 'contains', values)
+                    }
+                    else
+                    {
+                        String message = messageProvider.getMessage(NO_DETAIL_DATA_ERROR, currentUserLocale)
+                        api.utils.throwReadableException("$message#${NO_DETAIL_DATA_ERROR}")
+                    }
                 }
                 else
                 {
