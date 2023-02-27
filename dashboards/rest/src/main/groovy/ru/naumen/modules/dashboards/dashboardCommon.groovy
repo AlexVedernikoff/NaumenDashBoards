@@ -533,6 +533,15 @@ enum DtIntervalFormatType
     WEEK
 }
 
+/**
+ * Тип формирования топа
+ */
+enum ModeOfTop
+{
+    MAX,
+    MIN
+}
+
 //endregion
 
 @InjectApi
@@ -1691,7 +1700,7 @@ class Requisite
     Collection<RequisiteNode> nodes
     Boolean showNulls
     Boolean showBlank
-    Integer top
+    Top top
 }
 
 class RequisiteNode
@@ -3172,6 +3181,11 @@ class Top
      * Флаг на отображение топа
      */
     Boolean show = false
+    /**
+     * выбор максимального или минимального значения топ
+     */
+    ModeOfTop modeOfTop = ModeOfTop.MAX
+
 }
 
 /**
@@ -3750,7 +3764,7 @@ abstract class Widget
                                     sourceForCompute : sourceForCompute, indicators:indicators,
                                     breakdown        : fields."breakdown_$index",
                                     breakdownGroup   : fields."breakdownGroup_$index",
-                                    top              : top?.show ? top?.count : null,
+                                    top              : top?.show ? top : null,
                                     type             : type,
                                     showEmptyData    : fields.showEmptyData,
                                     showBlankData    : fields.showBlankData]
@@ -3775,7 +3789,7 @@ abstract class Widget
                                     indicators      : indicators,
                                     breakdown       : fields."breakdown_$index",
                                     breakdownGroup  : fields."breakdownGroup_$index",
-                                    top             : top?.show ? top?.count : null,
+                                    top             : top?.show ? top : null,
                                     showEmptyData   : fields.showEmptyData,
                                     showBlankData   : fields.showBlankData]
                     data = [(dataKey): dataBody]
@@ -3800,7 +3814,7 @@ abstract class Widget
                                           indicators      : indicators,
                                           breakdown       : fields."breakdown_$index",
                                           breakdownGroup  : fields."breakdownGroup_$index",
-                                          top             : top?.show ? top?.count : null,
+                                          top             : top?.show ? top : null,
                                           showEmptyData   : fields.showEmptyData,
                                           showBlankData   : fields.showBlankData,
                                           calcTotalColumn : fields."calcTotalColumn_$index",

@@ -280,7 +280,7 @@
             List tableTotals
             PaginationSettings paginationSettings
             def tableSorting
-            Integer tableTop
+            Top tableTop
             Boolean reverseRowCount = false
             def offsetUTCMinutes = dashboardUtils.getOffsetUTCMinutes(user?.UUID, frontOffsetMinutes)
             String minValue
@@ -309,7 +309,7 @@
                     paginationSettings = new PaginationSettings(pageSize: pageSize, firstElementIndex: firstElementIndex)
                 }
                 Boolean computationInTableRequest = widgetSettings?.data?.any { it.indicators?.any { it?.attribute?.any { it.type == 'COMPUTED_ATTR'} } }
-                tableTop = widgetSettings.top?.show ? widgetSettings.top?.count as Integer : null
+                tableTop = widgetSettings.top?.show ? widgetSettings.top : null
                 if (computationInTableRequest && !tableTop)
                 {
                     //вернём всё из бд, после сагрегируем
@@ -573,7 +573,7 @@
             RequisiteNode node = requisite.nodes.first()
             Boolean onlyFilled = !requisite.showNulls
             Boolean notBlank = !requisite.showBlank
-            Integer top = requisite.top
+            Top top = requisite.top
 
             List<Map<String, Object>> aggregationsInfo = getPivotTableAggregationsInfo(requestData)
             Map<String, Object> filterMap = getInfoAboutFilters(requestDataKey, request)
@@ -1329,21 +1329,22 @@
          * Метод, возвращающий датасет с "ручной" пагинацией
          * @param groups - список объектов
          * @param paginationSettings - настройки пагинации
+         * @param top - топ
          * @return датасет с "ручной" пагинацией
          */
-        def getDataSetWithPagination(def groups, PaginationSettings paginationSettings)
+        def getDataSetWithPagination(def groups, PaginationSettings paginationSettings, Top top)
         {
             if(paginationSettings)
             {
                 if(groups in Map)
                 {
                     List keys = groups?.keySet()?.toList()
-                    keys = sliceCollection(keys, paginationSettings)
+                    keys = sliceCollection(keys, paginationSettings, top)
                     return groups.findAll { it.key in keys }
                 }
                 else
                 {
-                    return sliceCollection(groups, paginationSettings)
+                    return sliceCollection(groups, paginationSettings, top)
                 }
             }
             else return groups
@@ -1351,16 +1352,28 @@
 
         /**
          * Метод, возвращающий элементы между индексами
-         * @param elements - элементы
+         * @param list - список элементов
          * @param paginationSettings - настройки пагинации
+         * @param top - топ элементов
          * @return элементы, подходящие по индексам для страницы
          */
-        Collection sliceCollection(Collection list, PaginationSettings paginationSettings)
+        Collection sliceCollection(Collection list, PaginationSettings paginationSettings, Top top)
         {
-            Integer offset = paginationSettings.firstElementIndex
-            Integer limit = paginationSettings.pageSize
-            def from = Math.min(offset, list?.size()) as int
-            def to = (limit ? Math.min(offset + limit, list?.size()) : list?.size()) as int
+            Integer offset
+            Integer limit
+            if (top.modeOfTop == ModeOfTop.MAX)
+            {
+                offset = paginationSettings.firstElementIndex
+                limit = paginationSettings.pageSize
+            }
+            else
+            {
+                offset = list?.size() > paginationSettings.pageSize ? (list.size() - top.count) :
+                    paginationSettings.firstElementIndex
+            }
+            int from = Math.min(offset, list?.size()) as int
+            int to = (limit ? Math.min(offset + limit, list?.size()) : list?.size()) as int
+
             return list.subList(from, to)
         }
 
@@ -1714,7 +1727,7 @@
                                              DiagramType diagramType, Collection<WidgetFilterResponse> widgetFilters,
                                              Integer offsetUTCMinutes = 0,
                                              Boolean showTableNulls = false, Boolean showTableBlanks = false,
-                                             Boolean computationInTableRequest = false, Integer tableTop = 0,
+                                             Boolean computationInTableRequest = false, Top tableTop = null,
                                              Sorting tableSorting = null)
         {
             def sorting
@@ -1964,7 +1977,7 @@
                     }
                     Boolean showNulls = isDiagramTypeTable ? showTableNulls : data.showEmptyData as Boolean
                     Boolean showBlank = isDiagramTypeTable ? showTableBlanks : data.showBlankData as Boolean
-                    Integer top = isDiagramTypeTable ? tableTop : data?.top?.show ? data.top?.count as Integer : null
+                    Top top = isDiagramTypeTable ? tableTop : data?.top?.show ? data.top : null
                     requisite = new Requisite(title: 'DEFAULT',
                                               nodes: (computeCheck) ? requisiteNode : [requisiteNode],
                                               showNulls: showNulls,
@@ -3644,7 +3657,7 @@
             return request.requisite.collect { requisite ->
                 Boolean onlyFilled = !requisite.showNulls
                 Boolean notBlank = !requisite.showBlank
-                Integer top = requisite.top
+                Top top = requisite.top
                 return requisite.nodes.collectMany { node ->
                     String nodeType = node.type
                     switch (nodeType.toLowerCase())
@@ -3919,7 +3932,7 @@
                                   List<String> notAggregatedAttributes,
                                   PaginationSettings paginationSettings,
                                   IgnoreLimits ignoreLimits,
-                                  Integer top,
+                                  Top top,
                                   DiagramType diagramType,
                                   String templateUUID,
                                   Boolean customInBreakTable,
@@ -3993,7 +4006,7 @@
          * @param hasPercentCntAggregation - флаг, есть ли у виджета аггрегация с типом PERCENT_CNT
          * @return обработанные данные
          */
-        private List<List> getFilteringResultForTop(List<List> filteringResult, Integer top, DiagramType diagramType, Boolean hasPercentCntAggregation)
+        private List<List> getFilteringResultForTop(List<List> filteringResult, Top top, DiagramType diagramType, Boolean hasPercentCntAggregation)
         {
             if (top && !(diagramType in [DiagramType.TABLE, DiagramType.PIVOT_TABLE]))
             {
@@ -4023,12 +4036,24 @@
                 }
                 resultSumGroupedByParameterValue = resultSumGroupedByParameterValue.sort { -it.value }
                 List<String> parameterValues = resultSumGroupedByParameterValue.keySet().toList()
-                if (parameterValues.size() < top)
+                if (parameterValues.size() < top.count)
                 {
-                    top = parameterValues.size()
+                    top.count = parameterValues.size()
                 }
 
-                List<String> topParameterValues = top ? parameterValues[0..(top - 1)] : []
+                List<String> topParameterValues = top ?
+                    {
+                        if (top.modeOfTop == ModeOfTop.MAX)
+                        {
+                            parameterValues[0..(top.count - 1)]
+                        }
+                        else
+                        {
+                            parameterValues[
+                                (parameterValues.size() - top.count)..(parameterValues.size() - 1)
+                            ]
+                        }
+                    } : []
                 filteringResult = topParameterValues.collectMany { parameterValue ->
                     List<List> matchParameterValues = filteringResult.findAll { it[2] == parameterValue}
                     return matchParameterValues
@@ -4098,19 +4123,35 @@
          * @param i - индекс текущего фильтра (для одного списка)
          * @return - готовый датасет для получения top-а
          */
-        List prepareResultListListForTop(List res, Integer filterListSize,  Integer top, List parameterFilters = [], List breakdownFilters = [], Integer i = 0)
+        List prepareResultListListForTop(List res, Integer filterListSize, Top top, List parameterFilters = [], List breakdownFilters = [], Integer i = 0)
         {
-            if (top && res.size() > top)
+            if (top && res.size() > top.count)
             {
-                return res[0..top - 1]
+                if (top.modeOfTop==ModeOfTop.MAX)
+                {
+                    return res[0..(top.count - 1)]
+                }
+                else
+                {
+                    return res[(res.size()-top.count)..(res.size()-1)]
+                }
             }
-            if ((parameterFilters && i < top) || !top)
+            if ((parameterFilters && i < top.count) || !top)
             {
                 return res
             }
             else if (breakdownFilters && top)
             {
-                return res.size() > top ? res[0..top - 1] : res
+                return res.size() > top.count ? {
+                    if (top.modeOfTop==ModeOfTop.MAX)
+                    {
+                        res[0..(top.count - 1)]
+                    }
+                    else
+                    {
+                        res[(res.size()-top.count)..(res.size()-1)]
+                    }
+                } : res
             }
             else
             {
@@ -5142,7 +5183,7 @@
                                                  boolean totalColumn,
                                                  boolean showRowNum,
                                                  Integer rowCount,
-                                                 Integer tableTop,
+                                                 Top tableTop,
                                                  PaginationSettings paginationSettings,
                                                  Sorting sorting,
                                                  Boolean reverseRowCount,
@@ -5710,7 +5751,7 @@
                                           Boolean totalColumn,
                                           Boolean showRowNum,
                                           Integer rowCount,
-                                          Integer tableTop,
+                                          Top tableTop,
                                           PaginationSettings paginationSettings,
                                           Sorting sorting,
                                           Boolean reverseRowCount,
@@ -5790,9 +5831,9 @@
                 rowCount = data.size()
                 if(tableTop && tableTop < rowCount)
                 {
-                    PaginationSettings tempPaginationSettings = new PaginationSettings(pageSize: tableTop, firstElementIndex: 0)
-                    data = getDataSetWithPagination(data, tempPaginationSettings)
-                    rowCount = tableTop
+                    PaginationSettings tempPaginationSettings = new PaginationSettings(pageSize: tableTop.count, firstElementIndex: 0)
+                    data = getDataSetWithPagination(data, tempPaginationSettings, tableTop)
+                    rowCount = tableTop.count
                 }
                 if(reverseRowCount)
                 {
@@ -5823,7 +5864,7 @@
                               ?.attribute instanceof ComputedAttr ) || tableTop)
                 {
                     tempMaps = sortTableDataSetWithMaps(tempMaps, attributes, sorting)
-                    tempMaps = getDataSetWithPagination(tempMaps, paginationSettings)
+                    tempMaps = getDataSetWithPagination(tempMaps, paginationSettings, tableTop)
                 }
 
                 if (sourceRowNames)
@@ -6013,7 +6054,7 @@
 
             if(hasBreakdown)
             {
-                data = getDataSetWithPagination(data, paginationSettings)
+                data = getDataSetWithPagination(data, paginationSettings, tableTop)
             }
 
             if(showRowNum)
@@ -7014,7 +7055,7 @@
          * @param aggregationOrderWithDates - порядок для показателя в запросе, где в параметре дата
          * @return TOP Х данных
          */
-        List getTop(List currentRes, Integer top, List parameterFilters = [], List breakdownFilters = [],
+        List getTop(List currentRes, Top top, List parameterFilters = [], List breakdownFilters = [],
                     Boolean fromNoOrTwoFiltersList = false, def parameterWithDate = null,
                     String parameterOrderWithDates = '', String aggregationOrderWithDates = '')
         {
@@ -7027,9 +7068,17 @@
             //суммируем данные по группам - подсчитываем значения первого показателя и выставляем в порядке по убыванию
             def tempResult = currentRes.groupBy { it[paramIndex] }.collect{ k, v -> [k, v]}
             //берём из этих групп первые по top или все группы, если данных меньше
-            if(tempResult.size() > top && fromNoOrTwoFiltersList)
+            if (tempResult.size() > top.count && fromNoOrTwoFiltersList)
             {
-                tempResult = tempResult[0..top - 1]
+                if (top.modeOfTop==ModeOfTop.MAX)
+                {
+                    tempResult = tempResult[0..(top.count - 1)]
+                }
+                else
+                {
+                    tempResult = tempResult[(tempResult.size()-top.count)..(tempResult.size()-1)]
+                }
+
             }
             if(parameterWithDate && aggregationOrderWithDates == 'ASC')
             {
@@ -7184,7 +7233,7 @@
         private List getNoFilterListDiagramData(Object node,
                                                 DiagramRequest request,
                                                 Integer aggregationCnt,
-                                                Integer top,
+                                                Top top,
                                                 Boolean notBlank,
                                                 Boolean onlyFilled,
                                                 DiagramType diagramType,
@@ -7357,7 +7406,7 @@
          * @param percentCntAggregationIndexes - индексы агрегаций с типом PERCENT_CNT
          * @return готовый датасет
          */
-        private List totalPrepareForNoFiltersResult(Integer top, Boolean isDiagramTypeTable,
+        private List totalPrepareForNoFiltersResult(Top top, Boolean isDiagramTypeTable,
                                                     Boolean tableHasBreakdown,
                                                     List total,
                                                     GroupParameter parameter,
@@ -7381,12 +7430,15 @@
 
                 if (isDiagramTypeTable && !tableHasBreakdown)
                 {
-                    def tempPaginationSettings = new PaginationSettings(pageSize: top,firstElementIndex: 0)
-                    total = getDataSetWithPagination(total, tempPaginationSettings)
+                    PaginationSettings tempPaginationSettings = new PaginationSettings(pageSize: top.count, firstElementIndex: 0)
+                    total = getDataSetWithPagination(total, tempPaginationSettings, top)
                 }
                 else
                 {
                     Boolean resultWithoutBreakdown = total?.first()?.size() == 2
+                    total = getTop(total, top, [], [], true,
+                                   parameterWithDate ? parameter : null,
+                                   parameterSortingType, aggregationSortingType)
                     if (aggregationSortingType && resultWithoutBreakdown)
                     {
                         total = total.sort { a, b ->
@@ -7400,9 +7452,6 @@
                             return sortingResult
                         }
                     }
-                    total = getTop(total, top, [], [], true,
-                                   parameterWithDate ? parameter : null,
-                                   parameterSortingType, aggregationSortingType)
                 }
             }
 

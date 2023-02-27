@@ -154,7 +154,7 @@ class QueryWrapper implements CriteriaWrapper
      * @param sourceMetaClassCriteriaMap - маппинг метаклассов источников и критерий
      * @return объект обертки запроса
      */
-    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, IApiCriteria criteriaForColumn, boolean fromSevenDays, Integer top, RequestData requestData, Map<String, Object> sourceMetaClassCriteriaMap)
+    QueryWrapper aggregate(IApiCriteria criteria, Boolean totalValueCriteria, AggregationParameter parameter, IApiCriteria criteriaForColumn, boolean fromSevenDays, Top top, RequestData requestData, Map<String, Object> sourceMetaClassCriteriaMap)
     {
         Aggregation aggregationType = parameter.type
         def sc = api.selectClause
@@ -636,7 +636,7 @@ class QueryWrapper implements CriteriaWrapper
      */
     QueryWrapper processAggregation(QueryWrapper wrapper, IApiCriteria criteria, Boolean totalValueCriteria,
                                     RequestData requestData, AggregationParameter parameter,
-                                    DiagramType diagramType, Integer top, Boolean onlyFilled, Map<String, Object> sourceMetaClassCriteriaMap)
+                                    DiagramType diagramType, Top top, Boolean onlyFilled, Map<String, Object> sourceMetaClassCriteriaMap)
     {
         IApiCriteria criteriaForColumn = criteria
         if (diagramType == DiagramType.PIVOT_TABLE && parameter.attribute.metaClassFqn != requestData.source.classFqn)
@@ -1539,7 +1539,7 @@ class DashboardQueryWrapperUtils
      * @return результат выборки
      */
     List<List> getData(RequestData requestData,
-                       Integer top,
+                       Top top,
                        String currentUserLocale,
                        IUUIDIdentifiable user,
                        Boolean onlyFilled = true,
