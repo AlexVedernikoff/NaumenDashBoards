@@ -61,9 +61,10 @@ trait CriteriaWrapper
      * @param hasBreakdown - флаг, есть ли разбивка
      * @param ignoreParameterLimit - флаг, игнорировать ли лимит
      * @param paginationSettings - настройки пагинации
+     * @param isTimerTypeAttributeInGroup - флаг на присутствие в группировке атрибута типа счетчик
      * @return результат разбивки
      */
-    List execute(IApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean hasBreakdown = false, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null)
+    List execute(IApiCriteria criteria, DiagramType diagramType = DiagramType.COLUMN, Boolean hasBreakdown = false, Boolean ignoreParameterLimit = false, PaginationSettings paginationSettings = null, Boolean isTimerTypeAttributeInGroup = false)
     {
         Boolean isDebugMode = DashboardUtils.isDebugMode()
         if(diagramType in [DiagramType.TABLE, DiagramType.PIVOT_TABLE])
@@ -102,7 +103,7 @@ trait CriteriaWrapper
             DbApi$Query query = api.db.query(criteria)
             DashboardUtils.log(QueryWrapper.DASHBOARD_QUERY_WRAPPER_MODULE_NAME, 61, 'query', query.hq.getQueryString())
         }
-        return api.db.query(criteria).setMaxResults(hasBreakdown ? 5000 : 100).list()
+        return api.db.query(criteria).setMaxResults(hasBreakdown || isTimerTypeAttributeInGroup ? 5000 : 100).list()
     }
 }
 
@@ -761,7 +762,7 @@ class QueryWrapper implements CriteriaWrapper
                 {
                     if(attributeChains?.find {it?.type == AttributeType.TIMER_TYPE}?.timerValue == TimerValue.VALUE )
                     {
-                        IApiCriteriaColumn timerColumn = sc.columnDivide(sc.property(criteriaForColumn, attributeCodes), sc.constant(1000))
+                        IApiCriteriaColumn timerColumn = sc.property(criteriaForColumn, attributeCodes)
                         criteria.addGroupColumn(timerColumn)
                         criteria.addColumn(timerColumn)
                     }
@@ -1365,13 +1366,24 @@ class QueryWrapper implements CriteriaWrapper
         return this
     }
 
+    /**
+     * Метод получения результата из базы
+     * @param requestHasOneNoneAggregation - флаг на присутствие в запросе агрегации N/A
+     * @param diagramType - тип диаграмы
+     * @param hasBreakdown - флаг на разбивку
+     * @param ignoreParameterLimit - флаг на игнорирование лимита
+     * @param paginationSettings - настройки пагинации
+     * @param isTimerTypeAttributeInGroup - флаг на присутствие в группировке атрибута типа счетчик
+     * @return результат запроса
+     */
     List<List> getResult(Boolean requestHasOneNoneAggregation = false,
                          DiagramType diagramType = DiagramType.COLUMN,
                          Boolean hasBreakdown = false,
                          Boolean ignoreParameterLimit = false,
-                         PaginationSettings paginationSettings = null)
+                         PaginationSettings paginationSettings = null,
+                         Boolean isTimerTypeAttributeInGroup = false)
     {
-        return execute(criteria, diagramType, hasBreakdown, ignoreParameterLimit, paginationSettings).collect {
+        return execute(criteria, diagramType, hasBreakdown, ignoreParameterLimit, paginationSettings, isTimerTypeAttributeInGroup).collect {
             requestHasOneNoneAggregation || it in String ? [it] : it.collect() as List
         }
     }
@@ -1564,7 +1576,7 @@ class DashboardQueryWrapperUtils
         }
 
         requestData.groups.each { validate(it as GroupParameter) }
-        def clonedGroups = requestData.groups.collect {
+        List<GroupParameter> clonedGroups = requestData.groups.collect {
             new GroupParameter(
                 title: it.title,
                 type: it.type,
@@ -1573,6 +1585,12 @@ class DashboardQueryWrapperUtils
                 format: it.format
             )
         }
+
+        Boolean isTimerTypeAttributeInGroup = clonedGroups.any {
+            return Attribute.getAttributeType(it.attribute) ==
+                   AttributeType.TIMER_TYPE && it.attribute.timerValue == TimerValue.VALUE
+        }
+
         Boolean hasBreakdown = clonedGroups?.any {it?.title?.contains('breakdown') }
 
         wrapper.setCases(requestData.source.classFqn,
@@ -1708,7 +1726,8 @@ class DashboardQueryWrapperUtils
                 diagramType,
                 hasBreakdown,
                 ignoreParameterLimit,
-                paginationSettings
+                paginationSettings,
+                isTimerTypeAttributeInGroup
             )
         )
         if (onlyFilledAndHasDynamicElements)

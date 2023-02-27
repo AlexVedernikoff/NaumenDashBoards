@@ -3411,24 +3411,24 @@
                     case Condition.GREATER:
                         def temAttribute = attribute.deepClone()
                         temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
-                        def durationInMs = getTimerDurationInMsByConditionValue(condition.data, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                        def durationInMs = getTimerDurationInMsByConditionValue(fromDD ? condition.data.value : condition.data, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
                         return buildFilterParameterFromCondition(Comparison.GREATER, temAttribute, durationInMs)
                     case Condition.LESS:
                         def temAttribute = attribute.deepClone()
                         temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
-                        def durationInMs = getTimerDurationInMsByConditionValue(condition.data, TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES)
+                        def durationInMs = getTimerDurationInMsByConditionValue(fromDD ? condition.data.value : condition.data, TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES)
                         return buildFilterParameterFromCondition(Comparison.LESS, temAttribute, durationInMs)
                     case Condition.EQUAL:
                         def temAttribute = attribute.deepClone()
                         temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
-                        def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(condition.data)
-                        def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(condition.data,fromDD ? TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS : TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                        def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(fromDD ? condition.data.value : condition.data)
+                        def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(fromDD ? condition.data.value : condition.data, fromDD ? TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS : TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
                         return buildFilterParameterFromCondition(Comparison.BETWEEN, temAttribute, [durationInMsMinuteStart, durationInMsMinuteEnd])
                     case Condition.NOT_EQUAL:
                         def temAttribute = attribute.deepClone()
                         temAttribute.addLast(new Attribute(title: 'значение счётчика', code: 'elapsed', type: 'long'))
-                        def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(condition.data)
-                        def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(condition.data, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                        def durationInMsMinuteStart = getTimerDurationInMsByConditionValue(fromDD ? condition.data.value : condition.data)
+                        def durationInMsMinuteEnd = getTimerDurationInMsByConditionValue(fromDD ? condition.data.value : condition.data, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
                         return buildFilterParameterFromCondition(Comparison.NOT_BETWEEN, temAttribute, [durationInMsMinuteStart, durationInMsMinuteEnd])
                     case Condition.EMPTY:
                         def temAttribute = attribute.deepClone()
@@ -3451,29 +3451,42 @@
          * @param roundType - тип округления
          * @return - количество миллисекунд
          */
-        Long getTimerDurationInMsByConditionValue(ArrayList conditionValue, TIMER_ROUND_TYPE roundType = TIMER_ROUND_TYPE.NO_ROUND)
+        Long getTimerDurationInMsByConditionValue(ArrayList conditionValue,
+                                                  TIMER_ROUND_TYPE roundType = TIMER_ROUND_TYPE.NO_ROUND)
         {
-            def msInSecond = 1000
-            def msInMinute = 60 * msInSecond
-            def minutesInHour = 60
+            Long msInSecond = 1000L
+            Long msInMinute = 60L * msInSecond
+            Long minutesInHour = 60L
 
             Long durationInMs = conditionValue.collect {
                 switch (it.type)
                 {
                     case 'HOUR':
-                        return msInMinute * minutesInHour * (it.value as Integer)
-                    case 'MINUTE':
-                        def minutes = it.value as Integer
+                        Long hours = it.value as Long
 
-                        if (roundType == TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES) {
+                        if (roundType == TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                        {
+                            hours++
+                        }
+                        if (roundType == TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES)
+                        {
+                            hours--
+                        }
+                        return msInMinute * minutesInHour * hours
+                    case 'MINUTE':
+                        Long minutes = it.value as Long
+
+                        if (roundType == TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES)
+                        {
                             minutes++
                         }
-                        if (roundType == TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES) {
+                        if (roundType == TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES)
+                        {
                             minutes--
                         }
                         return msInMinute * minutes
                     case 'SECOND':
-                        def seconds = it.value as Integer
+                        Long seconds = it.value as Long
 
                         if (roundType == TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS)
                         {
@@ -3488,13 +3501,15 @@
                 }
             }.sum()
 
-            if (roundType in [TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS, TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES])
-            {
-                durationInMs--
-            }
-            if (roundType in [TIMER_ROUND_TYPE.ROUND_FLOOR_BY_SECONDS, TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES])
+            if (roundType in [TIMER_ROUND_TYPE.ROUND_CEIL_BY_SECONDS,
+                              TIMER_ROUND_TYPE.ROUND_CEIL_BY_MINUTES])
             {
                 durationInMs++
+            }
+            if (roundType in [TIMER_ROUND_TYPE.ROUND_FLOOR_BY_SECONDS,
+                              TIMER_ROUND_TYPE.ROUND_FLOOR_BY_MINUTES])
+            {
+                durationInMs--
             }
 
             return durationInMs
@@ -4458,8 +4473,7 @@
                             }
                             if(parameter.attribute.attrChains()?.last()?.timerValue == TimerValue.VALUE)
                             {
-                                value = new Long(value) * 1000
-                                return getTimerValue(value)
+                                return getTimerValue(new Long(value))
                             }
                             return (value as TimerStatus).getRussianName()
                         case AttributeType.DATE_TYPES:
@@ -4660,14 +4674,17 @@
         /**
          * Метод получения значения счетчика для пользователя в формате чч:мм
          * @param value - значение в миллисекундах из БД
-         * @return
+         * @return отформатированное в формате "чч:мм:сс" длительность времени
          */
         private String getTimerValue(Long value)
         {
-            def hours = TimeUnit.MILLISECONDS.toHours(value)
-            def minutes = TimeUnit.MILLISECONDS.toMinutes(value) - TimeUnit.MINUTES.toMinutes(TimeUnit.MILLISECONDS.toHours(value))
-            def seconds = TimeUnit.MILLISECONDS.toSeconds(value) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(value))
-            def temp = "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}"
+            Long hours = TimeUnit.MILLISECONDS.toHours(value)
+            Long hoursInMinutes = hours * 60
+            Long minutes = TimeUnit.MILLISECONDS.toMinutes(value) - hoursInMinutes
+            Long minutesInSeconds = (hoursInMinutes + minutes) * 60
+            Long seconds = TimeUnit.MILLISECONDS.toSeconds(value) - minutesInSeconds
+            String formattedDurationValue = "${ hours.toString().padLeft(2, '0') }:${ minutes.toString().padLeft(2, '0') }:${ seconds.toString().padLeft(2, '0') }"
+            return formattedDurationValue
         }
 
         /**
@@ -7049,9 +7066,16 @@
          * @param parameterFilters - список фильтров параметра
          * @param breakdownFilters - список фильтров разбивки
          * @param percentCntAggregationIndexes - список индексов аггрегаций PERCENT_CNT
+         * @param parameter - параметр
          * @return - итоговый датасет в отсортированном виде
          */
-        List sortResList(List res, String aggregationSortingType = '', parameterSortingType = '', parameterFilters = [], breakdownFilters = [], List percentCntAggregationIndexes = [])
+        List sortResList(List res,
+                         String aggregationSortingType = '',
+                         parameterSortingType = '',
+                         parameterFilters = [],
+                         breakdownFilters = [],
+                         List percentCntAggregationIndexes = [],
+                         GroupParameter parameter = null)
         {
             int paramIndex = !breakdownFilters ? 1 : 2 // место, с которого начинаются значения параметра
             Integer aggregationIndex = 0 //место, где находятся значения агрегации
@@ -7099,10 +7123,46 @@
 
             if(parameterSortingType)
             {
-                res = res.sort { it[paramIndex].toUpperCase() }
+                Boolean isParameterTypeTimer = false
+                if (parameter)
+                {
+                    isParameterTypeTimer = Attribute.getAttributeType(parameter.attribute) ==
+                                           AttributeType.TIMER_TYPE &&
+                                           parameter.attribute.timerValue == TimerValue.VALUE
+                }
+
+                if (isParameterTypeTimer)
+                {
+                    res = res.sort { a, b ->
+                        Long secondsA = getSecondsByFormattedDuration(a[paramIndex])
+                        Long secondsB = getSecondsByFormattedDuration(b[paramIndex])
+                        return secondsA <=> secondsB
+                    }
+                }
+                else
+                {
+                    res = res.sort {
+                        it[paramIndex].toUpperCase()
+                    }
+                }
+
                 return parameterSortingType == 'ASC' ? res : res.reverse()
             }
             return res
+        }
+
+        /**
+         * Метод получения количества секунд по отформатированной строке длительности
+         * @param formattedDuration - отформатированная длительность
+         * @return количество секунд
+         */
+        private Long getSecondsByFormattedDuration(String formattedDuration)
+        {
+            Collection<String> durationComponents = formattedDuration.split(':')
+            Integer hours = durationComponents[0] as Integer
+            Integer minutes = durationComponents[1] as Integer
+            Integer seconds = durationComponents[2] as Integer
+            return seconds + minutes * 60 + hours * 3600
         }
 
         /**
@@ -7300,7 +7360,7 @@
         private List totalPrepareForNoFiltersResult(Integer top, Boolean isDiagramTypeTable,
                                                     Boolean tableHasBreakdown,
                                                     List total,
-                                                    def parameter,
+                                                    GroupParameter parameter,
                                                     Boolean parameterWithDate,
                                                     String parameterSortingType,
                                                     String aggregationSortingType,
@@ -7310,6 +7370,15 @@
         {
             if (top)
             {
+
+                Boolean nessecaryToSort = !parameterWithDateOrDtInterval &&
+                                          (aggregationSortingType || parameterSortingType) &&
+                                          (diagramType in DiagramType.SortableTypes || (top && isDiagramTypeTable))
+                if (nessecaryToSort)
+                {
+                    total = sortResList(total, aggregationSortingType, parameterSortingType, [], [], percentCntAggregationIndexes, parameter)
+                }
+
                 if (isDiagramTypeTable && !tableHasBreakdown)
                 {
                     def tempPaginationSettings = new PaginationSettings(pageSize: top,firstElementIndex: 0)
@@ -7337,13 +7406,6 @@
                 }
             }
 
-            Boolean nessecaryToSort = !parameterWithDateOrDtInterval &&
-                                      (aggregationSortingType || parameterSortingType) &&
-                                      (diagramType in DiagramType.SortableTypes || (top && isDiagramTypeTable))
-            if (nessecaryToSort)
-            {
-                total = sortResList(total, aggregationSortingType, parameterSortingType, [], [], percentCntAggregationIndexes)
-            }
             return total
         }
     }
