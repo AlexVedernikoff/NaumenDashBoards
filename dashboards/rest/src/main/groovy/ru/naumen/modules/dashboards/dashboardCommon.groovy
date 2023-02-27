@@ -5104,6 +5104,14 @@ class GetLinkRequest
      * Тип диаграммы
      */
     DiagramType diagramTypeFromRequest
+    /**
+     * лист параметров
+     */
+    List parameters
+    /**
+     * Флаг незаполенных данных
+     */
+    Boolean showBlankData
 }
 
 /**

@@ -15,11 +15,9 @@ import groovy.transform.Field
 import com.fasterxml.jackson.core.type.TypeReference
 import ru.naumen.core.server.script.api.criteria.*
 import ru.naumen.core.server.script.IListLinkDefinition
-import ru.naumen.core.server.script.api.IAuthenticationApi
 import ru.naumen.core.server.script.api.IDateApi
 import ru.naumen.core.server.script.api.IDbApi
 import ru.naumen.core.server.script.api.IFiltersApi
-import ru.naumen.core.server.script.api.IKeyValueStorageApi
 import ru.naumen.core.server.script.api.IListDataApi
 import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.ISelectClauseApi
@@ -27,10 +25,9 @@ import ru.naumen.core.server.script.api.ITypesApi
 import ru.naumen.core.server.script.api.IWebApi
 import ru.naumen.core.server.script.spi.IScriptConditionsApi
 import ru.naumen.core.server.script.api.IWhereClauseApi
-import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 import ru.naumen.core.server.script.spi.IScriptUtils
-import ru.naumen.metainfo.shared.IAttrReference
+
 import java.text.SimpleDateFormat
 import static groovy.json.JsonOutput.toJson
 import com.amazonaws.util.json.Jackson
@@ -39,8 +36,6 @@ import static DeserializationHelper.mapper
 import ru.naumen.core.shared.IUUIDIdentifiable
 import org.apache.commons.lang3.time.DateUtils
 import static MessageProvider.*
-import static CurrentUserHolder.*
-import static DashboardMarshallerClass.*
 
 @Field @Lazy @Delegate DashboardDrilldown dashboardDrilldown = new DashboardDrilldownImpl(binding,
                                                                                           new DashboardDrilldownService(api.utils,
@@ -180,6 +175,7 @@ class DashboardDrilldownService
         String userUUID = user?.UUID
         currentUserLocale = dashboardUtils.getUserLocale(userUUID)
         def offsetMinutes = dashboardUtils.getOffsetUTCMinutes(userUUID, requestContent.offsetUTCMinutes)
+        Boolean showBlankData = requestContent.showBlankData
         String cardObjectUuid = requestContent.cardObjectUuid
 
         if(requestContent.filterId)
@@ -247,7 +243,10 @@ class DashboardDrilldownService
 
             }
         }
-        def linkBuilder = getLinkBuilder(link, offsetMinutes)
+        Boolean conditionForDataSet = !link.filters && !showBlankData && (
+            requestContent.diagramTypeFromRequest != (DiagramType.TABLE || DiagramType.PIVOT_TABLE))
+        IListLinkDefinition linkBuilder =
+            getLinkBuilder(link, offsetMinutes, requestContent.parameters, conditionForDataSet)
         return web.list(linkBuilder)
     }
 
@@ -312,9 +311,14 @@ class DashboardDrilldownService
      * Метод получения сконструированного билдера
      * @param api - интерфейс формирования ссылок
      * @param offsetMinutes - интерфейс формирования ссылок
+     * @param parameters - список параметров группировки
+     * @param conditionForDataSet - флаг условий для датасета
      * @return сконструированный билдер
      */
-    private def getLinkBuilder(Link link, Integer offsetMinutes)
+    private def getLinkBuilder(Link link,
+                               Integer offsetMinutes,
+                               List parameters,
+                               Boolean conditionForDataSet)
     {
         def builder = web.defineListLink(false)
                          .setTitle(link.title)
@@ -338,6 +342,7 @@ class DashboardDrilldownService
         def filterBuilder = builder.filter()
         addDescriptorInFilter(filterBuilder, link.descriptor, builder)
         formatFilter(filterBuilder, link.filters, link.classFqn, link.cases, link.descriptor, offsetMinutes, link.diagramType)
+        filterTotalDataSetWithoutBlankData(filterBuilder, conditionForDataSet, parameters)
         return builder
     }
 
@@ -1653,6 +1658,24 @@ class DashboardDrilldownService
         return result
     }
 
+    /**
+     * Метод фильтрации итогового датасета без учета незаполненных данных
+     * @param filterBuilder - билдер для фильтра
+     * @param conditionForDataSet - флаг условия для датасета
+     * @param parameters - список параметров группировки
+     */
+    private void filterTotalDataSetWithoutBlankData(IListLinkDefinition.IFilter filterBuilder,
+                                                    Boolean conditionForDataSet,
+                                                    List parameters)
+    {
+        if (conditionForDataSet)
+        {
+            parameters.each { data ->
+                Attribute attr = data.attribute
+                filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', null))
+            }
+        }
+    }
 
     interface FilterProvider
     {
