@@ -2527,9 +2527,10 @@
                 def formula = (node as ComputationRequisiteNode).formula
                 def variableNames = new FormulaCalculator(formula).variableNames
 
+                Collection<GroupParameter> basicSourceGroups
+
                 return variableNames.collectEntries { variableName ->
                     def comp = computeData[variableName] as Map<String, Object>
-
                     def attribute = comp?.aggregation?.attribute
                     def attributeType = Attribute.getAttributeType(attribute)
                     if (attributeType in AttributeType.LINK_TYPES && attributeType != AttributeType.CATALOG_ITEM_TYPE)
@@ -2541,8 +2542,13 @@
                     def requestData = getData(dataKey) as RequestData
                     def newRequestData = requestData.clone()
 
+                    if (basicSourceGroups == null)
+                    {
+                        basicSourceGroups = newRequestData.groups
+                    }
+
                     def group = null
-                    if (!checkDuplicateGroup(newRequestData.groups, comp.group as GroupParameter))
+                    if (!checkDuplicateGroup(basicSourceGroups, comp.group as GroupParameter))
                     {
                         group = comp.group as GroupParameter
                     }
@@ -2562,8 +2568,8 @@
                         newRequestData.aggregations = [aggregation]
                     }
                     // предполагаем что количество агрегаций будет не больше одной
-                    newRequestData.groups = (newRequestData.groups || group)
-                        ? (newRequestData.groups.findAll { it?.title != 'usual_breakdown' } + group).grep()
+                    newRequestData.groups = (basicSourceGroups || group)
+                        ? (basicSourceGroups.findAll { it?.title != 'usual_breakdown' } + group).grep()
                         : null
                     // группировку нужно будет добавить к существующим
                     newRequestData.groups = newRequestData.groups as Set
