@@ -90,7 +90,11 @@ export class AttributeSelect extends Component<Props, State> {
 	renderDropIcon = () => {
 		const {droppable, value} = this.props;
 
-		return droppable && value && <IconButton icon={ICON_NAMES.BASKET} onClick={this.handleClickDropIcon} />;
+		if (droppable && value) {
+			return (<IconButton icon={ICON_NAMES.BASKET} onClick={this.handleClickDropIcon} />);
+		}
+
+		return null;
 	};
 
 	renderEditIcon = () => {
@@ -172,7 +176,16 @@ export class AttributeSelect extends Component<Props, State> {
 	};
 
 	renderSelect = () => {
-		const {disabled, fetchOptions, getOptions, loading, onSelect, options, removable, value} = this.props;
+		const {
+			disabled,
+			fetchOptions,
+			getOptions,
+			loading,
+			onSelect,
+			options,
+			removable,
+			value
+		} = this.props;
 
 		return (
 			<Select

@@ -1,5 +1,6 @@
 // @flow
 import AttributeCreatingModal from 'containers/AttributeCreatingModal';
+import {CALCULATE_OPTION} from 'WidgetFormPanel/components/AttributeAggregationField/constants';
 import type {ComputedAttr} from 'store/widgets/data/types';
 import FieldButton from 'components/atoms/FieldButton';
 import type {Props, State} from './types';
@@ -47,8 +48,11 @@ export class ComputedAttributeEditor extends PureComponent<Props, State> {
 
 	render () {
 		return (
-			<FieldButton onClick={this.handleClickFieldButton} tip={t('ComputedAttributeEditor::EditField')}>
-				f(x)
+			<FieldButton
+				onClick={this.handleClickFieldButton}
+				tip={t('ComputedAttributeEditor::EditField')}
+			>
+				{CALCULATE_OPTION.label}
 				{this.renderModal()}
 			</FieldButton>
 		);

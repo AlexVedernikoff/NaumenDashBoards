@@ -63,7 +63,13 @@ export class RefSelect extends PureComponent<Props> {
 
 		return (
 			<div className={containerCN} onClick={onClick}>
-				<Icon className={styles.linkIcon} height={18} name={ICON_NAMES.LINK} viewBox="0 0 12 18" width={12} />
+				<Icon
+					className={styles.linkIcon}
+					height={18}
+					name={ICON_NAMES.LINK}
+					viewBox="0 0 12 18"
+					width={12}
+				/>
 				<div className={styles.label}>{label}</div>
 			</div>
 		);

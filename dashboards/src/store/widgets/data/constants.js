@@ -91,7 +91,7 @@ const FONT_STYLES = {
 
 const FONT_SIZE_AUTO_OPTION = 'auto';
 
-// Достопная размерность шрифтов
+// Доступная размерность шрифтов
 const FONT_SIZE_OPTIONS = [13, 14, 15, 16, 17];
 
 // Максимальный размер шрифта
@@ -146,7 +146,7 @@ const DEFAULT_CIRCLE_SORTING_SETTINGS = {
 	value: INDICATOR
 };
 
-// Значения для отсутвующих данных в таблице
+// Значения для отсутствующих данных в таблице
 const EMPTY_ROW: 'EMPTY_ROW' = 'EMPTY_ROW';
 const DASH: 'DASH' = 'DASH';
 const NULL: 'NULL' = 'NULL';

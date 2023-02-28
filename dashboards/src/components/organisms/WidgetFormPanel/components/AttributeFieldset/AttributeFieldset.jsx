@@ -136,7 +136,11 @@ export class AttributeFieldset extends PureComponent<Props, State> {
 		const {components, disabled, refComponents, removable, value} = this.props;
 		const {attrSetConditions} = this.state;
 
-		if (value && (value.type in ATTRIBUTE_SETS.REFERENCE) && (value.property !== DYNAMIC_ATTRIBUTE_PROPERTY)) {
+		if (
+			value
+			&& (value.type in ATTRIBUTE_SETS.REFERENCE)
+			&& (value.property !== DYNAMIC_ATTRIBUTE_PROPERTY)
+		) {
 			return (
 				<RefSelect
 					attrSetConditions={attrSetConditions}

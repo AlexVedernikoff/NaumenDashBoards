@@ -11,6 +11,7 @@ export type AggregationOption = {
 
 export type Props = {
 	attribute: Attribute | null,
+	hasCreateCalculatedFieldButton: boolean,
 	hasPercentAggregation: boolean,
 	name: string,
 	onSelect: (name: string, value: string) => void,

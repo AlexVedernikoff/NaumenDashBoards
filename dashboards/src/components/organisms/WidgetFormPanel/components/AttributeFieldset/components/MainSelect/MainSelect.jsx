@@ -104,7 +104,16 @@ export class MainSelect extends Component<Props, State> {
 	};
 
 	render () {
-		const {components, getOptions, name, onChangeLabel, onRemove, onSelect, removable, value} = this.props;
+		const {
+			components,
+			getOptions,
+			name,
+			onChangeLabel,
+			onRemove,
+			onSelect,
+			removable,
+			value
+		} = this.props;
 		const {dynamicAttributesMode} = this.state;
 		const {loading, options} = this.getOptionsData();
 

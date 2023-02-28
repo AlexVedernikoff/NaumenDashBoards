@@ -7,6 +7,7 @@ import t from 'localization';
 
 export class AttributeAggregationField extends PureComponent<Props, State> {
 	static defaultProps = {
+		hasCreateCalculatedFieldButton: false,
 		hasPercentAggregation: true,
 		usesNotApplicableAggregation: false
 	};
@@ -25,21 +26,44 @@ export class AttributeAggregationField extends PureComponent<Props, State> {
 	};
 
 	componentDidMount () {
-		const {attribute, hasPercentAggregation, usesNotApplicableAggregation, value} = this.props;
-		const options = getAggregationOptions(attribute, hasPercentAggregation, usesNotApplicableAggregation);
+		const {
+			attribute,
+			hasCreateCalculatedFieldButton,
+			hasPercentAggregation,
+			usesNotApplicableAggregation,
+			value
+		} = this.props;
+		const options = getAggregationOptions(
+			attribute,
+			hasPercentAggregation,
+			usesNotApplicableAggregation,
+			hasCreateCalculatedFieldButton
+		);
 
 		this.setState({options}, () => this.checkValueInOptions(value));
 	}
 
 	componentDidUpdate (prevProps: Props) {
-		const {attribute, hasPercentAggregation, usesNotApplicableAggregation, value} = this.props;
+		const {
+			attribute,
+			hasCreateCalculatedFieldButton,
+			hasPercentAggregation,
+			usesNotApplicableAggregation,
+			value
+		} = this.props;
 
 		if (
 			prevProps.attribute !== attribute
 			|| prevProps.usesNotApplicableAggregation !== usesNotApplicableAggregation
 			|| prevProps.hasPercentAggregation !== hasPercentAggregation
+			|| prevProps.hasCreateCalculatedFieldButton !== hasCreateCalculatedFieldButton
 		) {
-			const options = getAggregationOptions(attribute, hasPercentAggregation, usesNotApplicableAggregation);
+			const options = getAggregationOptions(
+				attribute,
+				hasPercentAggregation,
+				usesNotApplicableAggregation,
+				hasCreateCalculatedFieldButton
+			);
 
 			this.setState({options}, () => this.checkValueInOptions(value));
 		}
