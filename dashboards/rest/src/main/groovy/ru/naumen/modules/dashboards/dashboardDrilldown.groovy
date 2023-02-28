@@ -2511,7 +2511,7 @@ class DashboardDrilldownService
             def datePoint = valueMap.year ? date.createDateTimePointPredicates(['MONTH', valueMap.month as int, 'EQ'],
                                                                                ['YEAR', valueMap.year, 'EQ'])
                 : date.createDateTimePointPredicates(['MONTH', valueMap.month as int, 'EQ'], ['MONTH', valueMap.month as int, 'EQ'])
-            return filterBuilder.AND(filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint))
+            return filterBuilder.OR(attr.code, 'fromToDatePoint', datePoint)
         }
     }
 
