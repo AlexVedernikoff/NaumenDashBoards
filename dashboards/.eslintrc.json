@@ -77,7 +77,8 @@
 			"ignoreComments": true,
 			"ignoreTrailingComments": true,
 			"ignoreTemplateLiterals": true,
-			"ignoreRegExpLiterals": true
+			"ignoreRegExpLiterals": true,
+			"ignorePattern": "^import [^,]+ from |^export"
 		}]
 	},
 	"settings": {

@@ -98,8 +98,12 @@ export class MainSelectList extends PureComponent<Props> {
 
 		if (node && !searchValue) {
 			const {value} = node;
+			const groupCode = getOptionValue ? getOptionValue((value: Object)) : value.title;
 
-			fetchDynamicAttributes(dataKey, getOptionValue ? getOptionValue((value: Object)) : value.title);
+			fetchDynamicAttributes(
+				dataKey,
+				groupCode
+			);
 		}
 	};
 
@@ -170,7 +174,9 @@ export class MainSelectList extends PureComponent<Props> {
 	renderToggleShowingDynAttr = () => {
 		const {dynamicAttributesMode, source, sources} = this.props;
 		const {value: sourceValue} = source;
-		const hasDynamic = sourceValue && sources[sourceValue.value] && sources[sourceValue.value].value.hasDynamic;
+		const hasDynamic = sourceValue
+				&& sources[sourceValue.value]
+				&& sources[sourceValue.value].value.hasDynamic;
 		const showDynamicAttributes = dynamicAttributesMode === 'show';
 
 		if (hasDynamic) {

@@ -5,12 +5,12 @@ import AttributeAggregationField from 'WidgetFormPanel/components/AttributeAggre
 import AttributeCreatingModal from 'containers/AttributeCreatingModal';
 import AttributeFieldset from 'WidgetFormPanel/components/AttributeFieldset';
 import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {CALCULATE, DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
 import {compose} from 'redux';
 import type {ComputedAttr, PercentageRelativeAttr} from 'store/widgets/data/types';
 import ComputedAttributeEditor from 'WidgetFormPanel/components/ComputedAttributeEditor';
 import Container from 'components/atoms/Container';
 import CreationPanel from 'components/atoms/CreationPanel';
-import {DEFAULT_AGGREGATION} from 'src/store/widgets/constants';
 import type {DiagramDataSet, Indicator} from 'store/widgetForms/types';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FieldButton from 'components/atoms/FieldButton';
@@ -27,7 +27,9 @@ import type {Props as ContainerProps} from 'components/atoms/Container/types';
 import type {Props, State} from './types';
 import React, {createContext, PureComponent} from 'react';
 import SelectModal, {SelectItem} from 'components/molecules/SelectModal';
-import SourcesAndFieldsExtended, {FIELD_TYPE} from 'WidgetFormPanel/components/SourcesAndFieldsExtended';
+import SourcesAndFieldsExtended, {
+	FIELD_TYPE
+} from 'WidgetFormPanel/components/SourcesAndFieldsExtended';
 import t from 'localization';
 import uuid from 'tiny-uuid';
 import {WIDGET_TYPES} from 'store/widgets/data/constants';
@@ -150,7 +152,11 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			});
 		}
 
-		let attributes = attributesHelpers.filterAttributesByUsed(options, dataSetIndex, filterAttribute);
+		let attributes = attributesHelpers.filterAttributesByUsed(
+			options,
+			dataSetIndex,
+			filterAttribute
+		);
 
 		if (dataSetIndex !== 0 && isDontUseParamsForDataSet(values.data[dataSetIndex])) {
 			attributes = attributesHelpers.filterAttributeByMainDataSet(options, dataSetIndex);
@@ -164,7 +170,11 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		MenuContainer: this.renderMenuContainer(false)
 	});
 
-	handleChangeLabel = ({value: attribute}: OnSelectEvent, index: number, callback?: Function) => this.change({
+	handleChangeLabel = (
+		{value: attribute}: OnSelectEvent,
+		index: number,
+		callback?: Function
+	) => this.change({
 		...this.props.value,
 		attribute
 	}, callback);
@@ -192,10 +202,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 				if (filterForm.success) {
 					if (filterForm.descriptor) {
-						this.change({
-							...indicator,
-							descriptor: filterForm.descriptor
-						});
+						this.change({...indicator, descriptor: filterForm.descriptor});
 					} else {
 						this.change(omit(indicator, 'descriptor'));
 					}
@@ -219,16 +226,16 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		const {value} = this.props;
 
 		this.removeComputedAttribute(attribute);
-		this.change({
-			...value,
-			attribute: null
-		});
+		this.change({...value, attribute: null});
 	};
 
-	handleSelectAggregation = (name: string, aggregation: string) => this.change({
-		...this.props.value,
-		aggregation
-	});
+	handleSelectAggregation = (name: string, aggregation: string) => {
+		if (aggregation === CALCULATE) {
+			this.handleClickCreationPanel();
+		} else {
+			this.change({...this.props.value, aggregation});
+		}
+	};
 
 	handleSelectIndicator = ({value: attribute}: OnSelectEvent) => {
 		const {value} = this.props;
@@ -253,10 +260,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 			}
 		}
 
-		this.change({
-			...newIndicator,
-			attribute: deepClone(attribute)
-		});
+		this.change({...newIndicator, attribute: deepClone(attribute)});
 	};
 
 	handleSubmitCreatingModal = (attribute: ComputedAttr) => {
@@ -265,16 +269,16 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		this.setState({showCreatingModal: false});
 
 		this.saveComputedAttribute(attribute);
-		this.change({
-			...value,
-			attribute
-		});
+		this.change({...value, attribute});
 	};
 
 	removeComputedAttribute = (attribute: ComputedAttr) => {
 		const {setFieldValue, values} = this.props;
 
-		setFieldValue(DIAGRAM_FIELDS.computedAttrs, values.computedAttrs.filter(a => a.code !== attribute.code));
+		setFieldValue(
+			DIAGRAM_FIELDS.computedAttrs,
+			values.computedAttrs.filter(a => a.code !== attribute.code)
+		);
 	};
 
 	saveComputedAttribute = (newAttribute: ComputedAttr) => {
@@ -290,10 +294,7 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		}
 
 		setFieldValue(DIAGRAM_FIELDS.computedAttrs, newComputedAttrs);
-		this.change({
-			...value,
-			attribute: newAttribute
-		});
+		this.change({...value, attribute: newAttribute});
 	};
 
 	renderAggregation = (indicator: Indicator) => {
@@ -304,12 +305,22 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		if (attribute?.type !== COMPUTED_ATTR) {
 			const {REFERENCE} = ATTRIBUTE_SETS;
 			// $FlowFixMe
-			const value: Attribute = attribute && attribute.type in REFERENCE && attribute?.type !== catalogItem ? attribute.ref : attribute;
-			const hasPercentAggregation = ![WIDGET_TYPES.SPEEDOMETER, WIDGET_TYPES.SUMMARY].includes(type.value);
+			let value: Attribute = attribute;
+
+			if (attribute && attribute.type in REFERENCE && attribute?.type !== catalogItem) {
+				// $FlowFixMe
+				value = attribute.ref;
+			}
+
+			const hasPercentAggregation = ![
+				WIDGET_TYPES.SPEEDOMETER,
+				WIDGET_TYPES.SUMMARY
+			].includes(type.value);
 
 			return (
 				<AttributeAggregationField
 					attribute={value}
+					hasCreateCalculatedFieldButton={true}
 					hasPercentAggregation={hasPercentAggregation}
 					onSelect={this.handleSelectAggregation}
 					tip={t('IndicatorFieldset::Aggregation')}
@@ -344,7 +355,10 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 
 		if (showCreatingModal) {
 			return (
-				<AttributeCreatingModal onClose={this.handleCloseCreatingModal} onSubmit={this.handleSubmitCreatingModal} />
+				<AttributeCreatingModal
+					onClose={this.handleCloseCreatingModal}
+					onSubmit={this.handleSubmitCreatingModal}
+				/>
 			);
 		}
 	};
@@ -395,7 +409,10 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		return (
 			<Container className={className}>
 				{children}
-				<CreationPanel onClick={this.handleClickCreationPanel} text={t('IndicatorFieldset::CreateField')} />
+				<CreationPanel
+					onClick={this.handleClickCreationPanel}
+					text={t('IndicatorFieldset::CreateField')}
+				/>
 			</Container>
 		);
 	};
@@ -405,7 +422,11 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		const {attribute} = value;
 
 		if (attribute && attribute.type === ATTRIBUTE_TYPES.PERCENTAGE_RELATIVE_ATTR) {
-			return <FieldButton onClick={this.getEditPercentageRelativeAttributeHandler(attribute)}>f(%)</FieldButton>;
+			return (
+				<FieldButton onClick={this.getEditPercentageRelativeAttributeHandler(attribute)}>
+					f(%)
+				</FieldButton>
+			);
 		}
 
 		return null;
@@ -417,8 +438,14 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 		if (showSelectionModal) {
 			return (
 				<SelectModal onClose={this.handleCloseSelectionModal}>
-					<SelectItem onClick={this.handleClickMathFormula} text='IndicatorFieldset::MathFormula' />
-					<SelectItem onClick={this.getClickSourcePercentageRelativeHandler()} text='IndicatorFieldset::SourcePercentageRelative' />
+					<SelectItem
+						onClick={this.handleClickMathFormula}
+						text='IndicatorFieldset::MathFormula'
+					/>
+					<SelectItem
+						onClick={this.getClickSourcePercentageRelativeHandler()}
+						text='IndicatorFieldset::SourcePercentageRelative'
+					/>
 				</SelectModal>
 			);
 		}
@@ -438,18 +465,33 @@ export class IndicatorFieldset extends PureComponent<Props, State> {
 				value={attribute}
 			>
 				{fieldSelectMainContainer}
-				<CreationPanel onClick={this.handleClickCreationPanel} text={t('IndicatorFieldset::CreateField')} />
+				<CreationPanel
+					onClick={this.handleClickCreationPanel}
+					text={t('IndicatorFieldset::CreateField')}
+				/>
 			</SourcesAndFieldsExtended>
 		);
 	};
 
 	render () {
-		const {className, dataKey, dataSetIndex, index, onRemove, removable, source, value} = this.props;
+		const {
+			className,
+			dataKey,
+			dataSetIndex,
+			index,
+			onRemove,
+			removable,
+			source,
+			value
+		} = this.props;
 		const {attribute} = value;
 
 		return (
 			<Context.Provider value={value}>
-				<FormField className={className} path={getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.indicators, index)}>
+				<FormField
+					className={className}
+					path={getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.indicators, index)}
+				>
 					<AttributeFieldset
 						components={this.getMainComponents()}
 						dataKey={dataKey}
