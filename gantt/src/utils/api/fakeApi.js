@@ -94,6 +94,7 @@ export default class FakeApi {
 			{
 				'department': 'front',
 				'showUsers': false,
+				'lvl': 0,
 				'users': [
 					{
 						'code': 'Gromov Aleksey',
@@ -110,11 +111,36 @@ export default class FakeApi {
 						'ganttMaster': false,
 						'name': 'Тролин Алексей'
 					}
+				],
+				'innerDepartments': [
+					{
+						'department': 'front',
+						'showUsers': false,
+						'lvl': 1,
+						'users': [
+							{
+								'code': 'Gromov Aleksey',
+								'ganttMaster': false,
+								'name': 'ОГОГО'
+							},
+							{
+								'code': 'qwd qwdq',
+								'ganttMaster': false,
+								'name': 'Куртков Алексей'
+							},
+							{
+								'code': 'wefwe wef',
+								'ganttMaster': false,
+								'name': 'Тролин Алексей'
+							}
+						]
+					}
 				]
 			},
 			{
 				'department': 'back',
 				'showUsers': false,
+				'lvl': 0,
 				'users': [
 					{
 						'code': 'Nosov Aleksandr',

@@ -6,6 +6,9 @@ export type UserItem = {
 
 export type User = {
     department: string,
+    innerDepartments: Departments,
     showUsers: boolean,
-    users: UserItem[]
+    users: UserItem[],
 };
+
+export type Departments = User[];

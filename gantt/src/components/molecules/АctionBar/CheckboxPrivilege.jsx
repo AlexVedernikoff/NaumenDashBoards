@@ -1,49 +1,19 @@
 // @flow
-import {Checkbox, FormControl} from 'naumen-common-components';
-import type {Dispatch, ThunkAction} from 'store/types';
-import {deepClone} from 'src/helpers';
-import React, {useEffect, useState} from 'react';
-import {
-	setUsers
-} from 'store/App/actions';
-import styles from './styles.less';
-import {useDispatch, useSelector} from 'react-redux';
+import Department from './Department';
+import React from 'react';
+import type {Departments} from './types';
 
-const CheckboxPrivilege = ({code, nameUser, show, users, value}) => {
-	const dispatch = useDispatch();
-	const store = useSelector(state => state);
+const CheckboxPrivilege = ({usersClone}) => {
 
-	const [isActive, setIsActive] = useState(value);
-	const usersClone = deepClone(store.APP.users);
+	const renderDepartment = (department, index, usersClone) => <Department data={department} key={index} usersClone={usersClone} />;
 
-	const changeCheckbox = () => {
-		setIsActive(!isActive);
-
-		usersClone.forEach(item => {
-			item.users.forEach(userCLone => {
-				if (userCLone.code === code) {
-					userCLone.ganttMaster = !isActive;
-				}
-			});
-		});
-
-		dispatch(setUsers(usersClone));
+	const renderTree = (departments: Departments) => {
+		return departments.map((i, index) => renderDepartment(i, index, usersClone));
 	};
 
-	useEffect(() => {
-		users.forEach(user => {
-			if (user.code === code) {
-				user.ganttMaster = isActive;
-			}
-		});
-	}, [isActive]);
+	const showHTMLData = renderTree(usersClone);
 
-	return (
-		<FormControl className={styles.formControlWrapper} small={true}>
-			<div className={styles.title}>{nameUser}</div>
-			<Checkbox checked={isActive} name="Checkbox" onChange={changeCheckbox} value={isActive} />
-		</FormControl>
-	);
+	return <div>{showHTMLData}</div>;
 };
 
 export default CheckboxPrivilege;
