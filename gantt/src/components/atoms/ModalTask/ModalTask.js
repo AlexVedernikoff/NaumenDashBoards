@@ -80,8 +80,21 @@ const ModalTask = (props: Props) => {
 
 		setCurrentValue(task.text);
 
-		setInputStartDate(task.start_date.toLocaleString());
-		setInputEndDate(task.end_date.toLocaleString());
+		const tasks = deepClone(store.APP.tasks);
+
+		tasks.forEach(item => {
+			if (item.start_date) {
+				setInputStartDate(task.start_date.toLocaleString());
+			} else {
+				setInputStartDate('');
+			}
+
+			if (item.end_date) {
+				setInputEndDate(task.end_date.toLocaleString());
+			} else {
+				setInputEndDate('');
+			}
+		});
 	};
 
 	gantt.hideLightbox = () => {
@@ -339,16 +352,18 @@ const ModalTask = (props: Props) => {
 	const dataFinal = currentTask.type === 'milestone' ? dataMilestoneInterval : dataInterval;
 
 	const listDataInterval = dataFinal.map((item, index) => {
-		return (
-			<div className={styles.interval__wrapper_input} key={index}>
-				<span className={styles.interval__label}>{item.text}</span>
-				<div className={styles.wrapper_input}>
-					<TextInput className={styles.input} maxLength={30} onChange={item.changeDate} placeholder="дд.мм.гггг, чч:мм:сс" value={item.inputDate} />
-					<IconButton className={styles.basket} icon="TOUCH_CALENDAR" onClick={() => item.setShowDatePickerDate(!item.showDatePickerDate)} />
+		if (item.inputDate) {
+			return (
+				<div className={styles.interval__wrapper_input} key={index}>
+					<span className={styles.interval__label}>{item.text}</span>
+					<div className={styles.wrapper_input}>
+						<TextInput className={styles.input} maxLength={30} onChange={item.changeDate} placeholder="дд.мм.гггг, чч:мм:сс" value={item.inputDate} />
+						<IconButton className={styles.basket} icon="TOUCH_CALENDAR" onClick={() => item.setShowDatePickerDate(!item.showDatePickerDate)} />
+					</div>
+					{item.renderDatePickerDate()}
 				</div>
-				{item.renderDatePickerDate()}
-			</div>
-		);
+			);
+		}
 	});
 
 	// нужно для следующего мр

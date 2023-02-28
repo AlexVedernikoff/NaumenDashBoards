@@ -1,5 +1,4 @@
 // @flow
-import ArrowIcon from 'icons/ArrowIcon';
 import {Button} from 'naumen-common-components';
 import CheckboxPrivilege from './CheckboxPrivilege';
 import cn from 'classnames';
@@ -227,34 +226,6 @@ const АctionBar = props => {
 		return null;
 	};
 
-	const sibmitSave = () => {
-		setShowModalSave(!showModalSave);
-	};
-
-	const renderModalSave = () => {
-		if (showModalSave) {
-			return (
-				<Modal
-					className={styles.modal}
-					notice={true}
-					onClose={() => setShowModalSave(!showModalSave)}
-					onSubmit={() => sibmitSave()}
-					submitText="Сохранить"
-				>
-					<div>Изменения к атрибутам не будут применены</div>
-				</Modal>
-			);
-		}
-
-		return null;
-	};
-
-	const getToggleShowUsers = (user: User) => () => {
-		setShow(!show);
-
-		user.showUsers = !user.showUsers;
-	};
-
 	const renderHeader = () => {
 		return (
 			<div className={styles.usersHeader}>
@@ -264,70 +235,51 @@ const АctionBar = props => {
 		);
 	};
 
-	const renderUserItem = (user, users, show) => {
-		return (
-			<CheckboxPrivilege
-				code={user.code}
-				key={user.code}
-				name="Checkbox"
-				nameUser={user.name}
-				show={show}
-				users={users}
-				value={user.ganttMaster}
-			/>
-		);
-	};
+	const renderFiltredUsers = () => <CheckboxPrivilege usersClone={filteredUsers} />;
 
-	const renderUsersItem = userItem => {
-		if (userItem.showUsers) {
-			return userItem.users.map(user => renderUserItem(user, clonedUsers, false));
-		}
-	};
-
-	const renderUser = (userItem) => {
-		const arrowCN = cn({
-			[styles.activeArrow]: userItem.showUsers
-		});
-
-		return (
-			<div className={styles.users} key={userItem.code}>
-				<div className={styles.wrapperUser} onClick={getToggleShowUsers(userItem)}>
-					<ArrowIcon toggleArrow={arrowCN} />
-					<div className={styles.department}>{userItem.department}</div>
-				</div>
-
-				{renderUsersItem(userItem)}
-			</div>
-		);
-	};
-
-	const filterUser = () => {
-		return filteredUsers.map(user => renderUserItem(user, filteredUsers, true));
-	};
-
-	const renderUsers = () => store.APP.users.map(renderUser);
+	const renderUsers = () => <CheckboxPrivilege usersClone={store.APP.users} />;
 
 	const onSubModal = () => {
 		setShowModalUsers(!showModalUsers);
 		dispatch(postDataUsers(store.APP.users));
 	};
 
-	const filterGanttUsers = target => {
-		const newFilteredUsers = [];
+	const filterGanttUsers = (value, clonedUsers) => {
+		const statUsers = deepClone(store.APP.users);
 
-		setInputUsers(target.value);
+		setInputUsers(value);
 
-		setFilteredUsers([]);
+		if (!value.length || value === '') {
+			setFilteredUsers(statUsers);
+		} else {
+			clonedUsers.forEach(item => {
+				const array = [];
 
-		clonedUsers.forEach(departament => {
-			departament.users.forEach(user => {
-				if (target.value.length && user.name.toLowerCase().includes(target.value.toLowerCase())) {
-					newFilteredUsers.push(user);
-				}
+				item.users.forEach(user => {
+					if (value.length && user.name.toLowerCase().includes(value.toLowerCase())) {
+						array.push(user);
+
+						item.users = array;
+						item.showUsers = true;
+					} else {
+						if (!array.length) {
+							item.users = [];
+						}
+					}
+
+					if (item.innerDepartments?.length) {
+						filterGanttUsers(value, item.innerDepartments);
+					}
+				});
+
+				setFilteredUsers(clonedUsers);
 			});
-		});
+		}
+	};
 
-		setFilteredUsers(newFilteredUsers);
+	const filteredUserss = value => {
+		setInputUsers(value);
+		filterGanttUsers(value.value, clonedUsers);
 	};
 
 	const renderModalUsers = () => {
@@ -340,9 +292,9 @@ const АctionBar = props => {
 					onSubmit={onSubModal}
 					submitText="Сохранить"
 				>
-					<TextInput maxLength={30} onChange={filterGanttUsers} placeholder="Поиск" value={inputUsers} />
+					<TextInput className={styles.inputSearch} maxLength={40} onChange={filteredUserss} placeholder="Поиск" value={inputUsers} />
 					{renderHeader()}
-					{filteredUsers.length ? filterUser() : renderUsers()}
+					{inputUsers ? renderFiltredUsers() : renderUsers()}
 				</Modal>
 			);
 		}
