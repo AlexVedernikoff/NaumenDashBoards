@@ -7055,6 +7055,10 @@
             if((parameterFilters || breakdownFilters) && currentRes.find()?.size() > 2)
             {
                 paramIndex = parameterFilters ? 1 : 2
+                if (breakdownFilters && breakdownFilters.last().attribute.code.contains('linkTemplate')) //заглушка, по хорошему надо понять, почему приодит пустой список атрибутов
+                {
+                    paramIndex = 1
+                }
             }
             //суммируем данные по группам - подсчитываем значения первого показателя и выставляем в порядке по убыванию
             def tempResult = currentRes.groupBy { it[paramIndex] }.collect{ k, v -> [k, v]}
