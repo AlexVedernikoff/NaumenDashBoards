@@ -4048,18 +4048,10 @@
                 }
 
                 List<String> topParameterValues = top ?
-                    {
-                        if (top.modeOfTop == ModeOfTop.MAX)
-                        {
-                            parameterValues[0..(top.count - 1)]
-                        }
-                        else
-                        {
-                            parameterValues[
-                                (parameterValues.size() - top.count)..(parameterValues.size() - 1)
-                            ]
-                        }
-                    } : []
+                    top.modeOfTop == ModeOfTop.MAX ? parameterValues[0..(top.count - 1)] :
+                        parameterValues[
+                            (parameterValues.size() - top.count)..(parameterValues.size() - 1)
+                        ] : []
                 filteringResult = topParameterValues.collectMany { parameterValue ->
                     List<List> matchParameterValues = filteringResult.findAll { it[2] == parameterValue}
                     return matchParameterValues
@@ -4148,16 +4140,9 @@
             }
             else if (breakdownFilters && top)
             {
-                return res.size() > top.count ? {
-                    if (top.modeOfTop==ModeOfTop.MAX)
-                    {
-                        res[0..(top.count - 1)]
-                    }
-                    else
-                    {
-                        res[(res.size()-top.count)..(res.size()-1)]
-                    }
-                } : res
+                return res.size() > top.count ?
+                    top.modeOfTop == ModeOfTop.MAX ? res[0..(top.count - 1)] :
+                        res[(res.size() - top.count)..(res.size() - 1)] : res
             }
             else
             {
