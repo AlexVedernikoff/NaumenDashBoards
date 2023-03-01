@@ -10,8 +10,6 @@ import {createAxisDataSet} from 'store/widgetForms/axisChartForm/helpers';
 import type {DataSet} from 'store/widgetForms/axisChartForm/types';
 import {
 	DEFAULT_AXIS_SORTING_SETTINGS,
-	MODE_OF_TOP,
-	SORTING_TYPES,
 	SORTING_VALUES,
 	WIDGET_TYPES
 } from 'store/widgets/data/constants';
@@ -86,8 +84,7 @@ export class ParamsTab extends PureComponent<Props> {
 			&& (newTop.show !== oldTop?.show || newTop.modeOfTop !== oldTop?.modeOfTop)
 		) {
 			const {sorting: prevSorting} = values;
-			const type = newTop.modeOfTop === MODE_OF_TOP.MAX ? SORTING_TYPES.ASC : SORTING_TYPES.DESC;
-			const newSorting = {...prevSorting, type, value: SORTING_VALUES.INDICATOR};
+			const newSorting = {...prevSorting, value: SORTING_VALUES.INDICATOR};
 
 			onChange(DIAGRAM_FIELDS.sorting, newSorting);
 		}
