@@ -1,6 +1,6 @@
 // @flow
 import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
+import {ATTRIBUTE_SETS, ATTRIBUTE_TYPES, TIMER_VALUE} from 'store/sources/attributes/constants';
 import {
 	AVG_APPLICABLE_OPTION,
 	CALCULATE_OPTION,
@@ -20,9 +20,13 @@ const getAggregationOptions = (
 	let result = [...DEFAULT_AGGREGATION_OPTIONS];
 
 	if (attribute) {
-		const {ableForAvg, type} = attribute;
+		const {ableForAvg, timerValue, type} = attribute;
 
-		if (type in ATTRIBUTE_SETS.NUMBER || type === ATTRIBUTE_TYPES.dtInterval) {
+		if (
+			type in ATTRIBUTE_SETS.NUMBER
+			|| type === ATTRIBUTE_TYPES.dtInterval
+			|| (type === ATTRIBUTE_TYPES.timer && timerValue === TIMER_VALUE.VALUE)
+		) {
 			result = [...INTEGER_AGGREGATION_OPTIONS, ...DEFAULT_AGGREGATION_OPTIONS];
 		}
 
