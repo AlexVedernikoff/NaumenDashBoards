@@ -339,6 +339,10 @@ class DashboardDrilldownService
             }
         }
         link.template?.with(builder.&setTemplate)
+        if (link.template == 'dashboardTemp')
+        {
+            builder.setAttrGroup('forDashAttrList')
+        }
         def filterBuilder = builder.filter()
         addDescriptorInFilter(filterBuilder, link.descriptor, builder)
         formatFilter(filterBuilder, link.filters, link.classFqn, link.cases, link.descriptor, offsetMinutes, link.diagramType)
