@@ -5151,6 +5151,11 @@ class GetLinkRequest
      */
     List parameters
     /**
+     * лист разбивок
+     */
+    List breakdown
+
+    /**
      * Флаг незаполенных данных
      */
     Boolean showBlankData

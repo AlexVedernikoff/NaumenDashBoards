@@ -246,7 +246,13 @@ class DashboardDrilldownService
         Boolean conditionForDataSet = !link.filters && !showBlankData && (
             requestContent.diagramTypeFromRequest != (DiagramType.TABLE || DiagramType.PIVOT_TABLE))
         IListLinkDefinition linkBuilder =
-            getLinkBuilder(link, offsetMinutes, requestContent.parameters, conditionForDataSet)
+            getLinkBuilder(
+                link,
+                offsetMinutes,
+                requestContent.parameters,
+                requestContent.breakdown,
+                conditionForDataSet
+            )
         return web.list(linkBuilder)
     }
 
@@ -312,12 +318,14 @@ class DashboardDrilldownService
      * @param api - интерфейс формирования ссылок
      * @param offsetMinutes - интерфейс формирования ссылок
      * @param parameters - список параметров группировки
+     * @param breakdowns - список параметров разбивки
      * @param conditionForDataSet - флаг условий для датасета
      * @return сконструированный билдер
      */
     private def getLinkBuilder(Link link,
                                Integer offsetMinutes,
                                List parameters,
+                               List breakdowns,
                                Boolean conditionForDataSet)
     {
         def builder = web.defineListLink(false)
@@ -346,7 +354,7 @@ class DashboardDrilldownService
         def filterBuilder = builder.filter()
         addDescriptorInFilter(filterBuilder, link.descriptor, builder)
         formatFilter(filterBuilder, link.filters, link.classFqn, link.cases, link.descriptor, offsetMinutes, link.diagramType)
-        filterTotalDataSetWithoutBlankData(filterBuilder, conditionForDataSet, parameters)
+        filterTotalDataSetWithoutBlankData(filterBuilder, conditionForDataSet, parameters, breakdowns)
         return builder
     }
 
@@ -1708,14 +1716,19 @@ class DashboardDrilldownService
      * @param filterBuilder - билдер для фильтра
      * @param conditionForDataSet - флаг условия для датасета
      * @param parameters - список параметров группировки
+     * @param breakdowns - список параметров разбивки
      */
     private void filterTotalDataSetWithoutBlankData(IListLinkDefinition.IFilter filterBuilder,
                                                     Boolean conditionForDataSet,
-                                                    List parameters)
+                                                    List parameters, List breakdowns)
     {
         if (conditionForDataSet)
         {
             parameters.each { data ->
+                Attribute attr = data.attribute
+                filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', null))
+            }
+            breakdowns.each { data ->
                 Attribute attr = data.attribute
                 filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', null))
             }
