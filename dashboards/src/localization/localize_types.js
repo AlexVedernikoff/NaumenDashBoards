@@ -361,7 +361,9 @@ type ValueWithLimitWarning =
 
 // components/organisms/TableWidgetForm
 type TableWidgetFormScheme =
+	| 'TableWidgetForm::Scheme::CheckSourceLinksForAllSources'
 	| 'TableWidgetForm::Scheme::DoubleAttribute'
+	| 'TableWidgetForm::Scheme::SourceLinkAttribute'
 	| 'TableWidgetForm::Scheme::WrongSource';
 
 // components/organisms/TableWidgetForm/components/BodySettingsBox

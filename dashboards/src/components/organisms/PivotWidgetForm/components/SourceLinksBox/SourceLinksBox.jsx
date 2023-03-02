@@ -1,4 +1,6 @@
 // @flow
+import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
+import FieldError from 'WidgetFormPanel/components/FieldError';
 import FormBox from 'components/molecules/FormBox';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
@@ -8,6 +10,7 @@ import type {Props} from './types';
 import React, {Component} from 'react';
 import SourceLink from './components/SourceLink';
 import SourceLinkEditor from 'containers/SourceLinkEditor';
+import styles from './styles.less';
 import t from 'localization';
 
 export class SourceLinksBox extends Component<Props> {
@@ -62,6 +65,7 @@ export class SourceLinksBox extends Component<Props> {
 			<components.SourceLink
 				components={components}
 				data={data}
+				index={index}
 				key={key}
 				link={link}
 				onChange={this.getLinkChangeHandler(index)}
@@ -80,8 +84,12 @@ export class SourceLinksBox extends Component<Props> {
 
 		if (data.length > 1) {
 			return (
-				<FormBox rightControl={this.renderAddSourceLinks()} title={t('PivotWidgetForm::SourceLinksBox')}>
+				<FormBox
+					rightControl={this.renderAddSourceLinks()}
+					title={t('PivotWidgetForm::SourceLinksBox')}
+				>
 					{links.map(this.renderLink)}
+					<FieldError className={styles.errorField} path={DIAGRAM_FIELDS.links} />
 				</FormBox>
 			);
 		}
