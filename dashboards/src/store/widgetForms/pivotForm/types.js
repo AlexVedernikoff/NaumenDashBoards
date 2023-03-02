@@ -1,5 +1,11 @@
 // @flow
-import type {BreakdownItem, Indicator, Parameter, ParameterOrder, SourceData} from 'store/widgetForms/types';
+import type {
+	BreakdownItem,
+	Indicator,
+	Parameter,
+	ParameterOrder,
+	SourceData
+} from 'store/widgetForms/types';
 import type {
 	ComputedAttr,
 	DisplayMode,

@@ -1,9 +1,11 @@
 // @flow
 import AbsolutePortal from 'components/molecules/AbsolutePortal';
 import cn from 'classnames';
+import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import type {DivRef} from 'components/types';
 import {EDIT_PANEL_POSITION} from 'store/dashboard/settings/constants';
-import FormField from 'components/molecules/FormField';
+import FormField from 'WidgetFormPanel/components/FormField';
+import {getErrorPath} from 'WidgetFormPanel/helpers';
 import Icon, {ICON_NAMES} from 'components/atoms/Icon';
 import IconButton from 'components/atoms/IconButton';
 import type {PivotLink} from 'store/widgets/data/types';
@@ -116,8 +118,10 @@ export class SourceLink extends Component<Props, State> {
 	};
 
 	render () {
+		const {index} = this.props;
+
 		return (
-			<FormField small>
+			<FormField path={getErrorPath(DIAGRAM_FIELDS.links, index, DIAGRAM_FIELDS.attribute)} small>
 				<div className={styles.link} ref={this.ref}>
 					{this.renderSources()}
 					{this.renderConnection()}

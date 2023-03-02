@@ -11,6 +11,7 @@ export type Components = {
 export type Props = {
 	components: Components,
 	data: Array<DataSet>,
+	index: number,
 	link: PivotLink,
 	onChange: (value: PivotLink) => void,
 	onDelete: () => void,

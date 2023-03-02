@@ -40,6 +40,7 @@ const AXIS_FORMAT_FIELDS = {
 };
 
 // общие поля виджетов-диаграмм
+const attribute = 'attribute';
 const borders = 'borders';
 const breakdown = 'breakdown';
 const breakdownFormat = 'breakdownFormat';
@@ -119,6 +120,7 @@ const xAxisName = 'xAxisName';
 const yAxisName = 'yAxisName';
 
 const PIVOT_FIELDS = {
+	attribute,
 	defaultValue,
 	indicatorSettings,
 	pageSize,
