@@ -1670,9 +1670,13 @@ class DashboardQueryWrapperUtils
             wrapper.filtering(criteria, totalValueCriteria, it as List<FilterParameter>)
         }
 
+        Boolean percentCntAggregationForColumnStackedExists = clonedAggregations.size() == 1 &&
+                                                              clonedGroups.size() == 2 &&
+                                                              clonedAggregations.first().type == Aggregation.PERCENT_CNT
+
         //Фильтрация по непустым атрибутам
         def attributeSet = []
-        if (onlyFilled)
+        if (onlyFilled && !percentCntAggregationForColumnStackedExists)
         {
             attributeSet = clonedAggregations.findAll { it?.type == Aggregation.NOT_APPLICABLE }.attribute + clonedGroups*.attribute
         }
