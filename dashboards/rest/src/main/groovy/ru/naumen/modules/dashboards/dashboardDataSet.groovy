@@ -109,8 +109,8 @@
                 widgetFilters = []
             }
             return user
-                ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, requestContent).with(JsonOutput.&toJson) }
-                : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, requestContent).with(JsonOutput.&toJson)
+                ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.sessionData).with(JsonOutput.&toJson) }
+                : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.sessionData).with(JsonOutput.&toJson)
         }
 
         @Override
@@ -127,8 +127,8 @@
                 widgetFilters = []
             }
             return user
-                ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.tableRequestSettings, requestContent).with(JsonOutput.&toJson) }
-                : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.tableRequestSettings, requestContent).with(JsonOutput.&toJson)
+                ? api.auth.callAs(user){ service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.sessionData, request.tableRequestSettings).with(JsonOutput.&toJson) }
+                : service.buildDiagram(request.dashboardKey, request.widgetKey, request.cardObjectUuid, widgetFilters, request.offsetUTCMinutes, user, request.sessionData, request.tableRequestSettings).with(JsonOutput.&toJson)
         }
     }
 
@@ -264,8 +264,8 @@
                          Collection<WidgetFilterResponse> widgetFilters = [],
                          Integer frontOffsetMinutes,
                          IUUIDIdentifiable user = null,
-                         TableRequestSettings tableRequestSettings = null,
-                         Map<String, Object> requestContent)
+                         SessionData sessionData = null,
+                         TableRequestSettings tableRequestSettings = null)
         {
             currentUserLocale = dashboardUtils.getUserLocale(user?.UUID)
             DashboardSettingsClass dbSettings = dashboardSettingsService.getDashboardSetting(dashboardKey, true)
@@ -286,6 +286,7 @@
             String minValue
             String maxValue
             Boolean isSourceForEachRow = widgetSettings.data.sourceRowName.findAll() && diagramType == DiagramType.TABLE
+            Aggregation widgetPercentCntAggregationType = getWidgetPercentCntAggregationType(widgetSettings, sessionData)
 
             if (diagramType in [DiagramType.TABLE, DiagramType.PIVOT_TABLE])
             {
@@ -466,7 +467,7 @@
             {
                 request = mappingDiagramRequest(widgetSettings, subjectUUID, diagramType, widgetFilters, offsetUTCMinutes)
                 DashboardUtils.log('dashboardDataSet', 429, 'request', request, true)
-                res = getDiagramData(request, user, diagramType, templateUUID, 1, widgetSettings)
+                res = getDiagramData(request, user, diagramType, templateUUID, 1, widgetSettings, null, null, widgetPercentCntAggregationType)
                 replaceResultAttributeMetaClass(res.first(), request)
                 DashboardUtils.log('dashboardDataSet', 431, 'res', res, true)
                 countTotals = getTotalAmount(request, res, diagramType, templateUUID, user, widgetSettings)
@@ -539,6 +540,22 @@
                     String message = messageProvider.getMessage(NOT_SUPPORTED_DIAGRAM_TYPE_ERROR, currentUserLocale, diagramType: diagramType)
                     return utils.throwReadableException("${message}#${NOT_SUPPORTED_DIAGRAM_TYPE_ERROR}")
             }
+        }
+
+        /**
+         * Метод определения, какой тип агрегации использовать на виджете, учитывая сессионные данные
+         * @param widget - данные виджета
+         * @param sessionData - данные сессии
+         * @return тип агрегации
+         */
+        private Aggregation getWidgetPercentCntAggregationType(Widget widget, SessionData sessionData)
+        {
+            Aggregation aggregationType = widget.aggregationType
+            if (sessionData?.aggregationType)
+            {
+                aggregationType = sessionData.aggregationType
+            }
+            return aggregationType
         }
 
         /**
@@ -643,7 +660,9 @@
                             Closure formatGroup = this.&formatGroupSet.rcurry(
                                 newRequestData,
                                 listIdsOfNormalAggregations,
-                                DiagramType.PIVOT_TABLE
+                                DiagramType.PIVOT_TABLE,
+                                notBlank,
+                                null
                             )
                             result = getCustomGroupResult(
                                 newRequest,
@@ -653,8 +672,6 @@
                                 formatGroup,
                                 formatAggregation,
                                 listIdsOfNormalAggregations,
-                                filterMap.parameterFilters,
-                                filterMap.breakdownFilters,
                                 [],
                                 paginationSettings,
                                 ignoreLimits,
@@ -677,7 +694,9 @@
                         Closure formatGroup = this.&formatGroupSet.rcurry(
                             newRequestData,
                             listIdsOfNormalAggregations,
-                            DiagramType.PIVOT_TABLE
+                            DiagramType.PIVOT_TABLE,
+                            notBlank,
+                            null
                         )
 
                         NewBreakdown breakdownAttribute = aggregation.breakdown
@@ -718,8 +737,6 @@
                                 formatGroup,
                                 formatAggregation,
                                 listIdsOfNormalAggregations,
-                                filterMap.parameterFilters,
-                                filterMap.breakdownFilters,
                                 [],
                                 paginationSettings,
                                 ignoreLimits,
@@ -758,8 +775,6 @@
                                     formatGroup,
                                     formatAggregation,
                                     listIdsOfNormalAggregations,
-                                    filterMap.parameterFilters,
-                                    filterMap.breakdownFilters,
                                     [],
                                     paginationSettings,
                                     ignoreLimits,
@@ -3649,6 +3664,7 @@
          * @param requestContent - тело запроса
          * @param ignoreLimits - map с флагами на игнорирование ограничений из БД
          * @param paginationSettings - настройки для пагинации в таблице
+         * @param widgetPercentCntAggregationType - тип агрегации на виджете для агрегации PERCENT_CNT
          * @return сырые данные из Бд по запросу
          */
         def getDiagramData(DiagramRequest request, IUUIDIdentifiable user,
@@ -3656,7 +3672,8 @@
                            String templateUUID = '',
                            Integer aggregationCnt = 1, def requestContent = null,
                            IgnoreLimits ignoreLimits = new IgnoreLimits(),
-                           PaginationSettings paginationSettings = null)
+                           PaginationSettings paginationSettings = null,
+                           Aggregation widgetPercentCntAggregationType = null)
         {
             assert request: "Empty request!"
             Boolean isSourceForEachRow = requestContent?.data?.sourceRowName?.findAll() && diagramType == DiagramType.TABLE
@@ -3722,7 +3739,9 @@
                                     requestContent,
                                     ignoreLimits,
                                     user,
-                                    paginationSettings
+                                    paginationSettings,
+                                    null,
+                                    widgetPercentCntAggregationType
                                 )
                             }
                             RequestData newRequestData = requestData.clone()
@@ -3733,7 +3752,8 @@
                                 onlyFilled,
                                 getPercentCntAggregationIndexes(request)
                             )
-                            Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType)
+                            Closure formatGroup = this.&formatGroupSet.rcurry(newRequestData, listIdsOfNormalAggregations, diagramType, notBlank, widgetPercentCntAggregationType)
+                            Boolean widgetHasCustomBreakdown = !parameterFilters?.size() && breakdownFilters?.size()
                             List<List> res = getCustomGroupResult(
                                 request,
                                 requestContent,
@@ -3742,8 +3762,6 @@
                                 formatGroup,
                                 formatAggregation,
                                 listIdsOfNormalAggregations,
-                                parameterFilters,
-                                breakdownFilters,
                                 notAggregatedAttributes,
                                 paginationSettings,
                                 ignoreLimits,
@@ -3757,7 +3775,9 @@
                                 isSourceForEachRow,
                                 notBlank,
                                 null,
-                                user
+                                user,
+                                widgetPercentCntAggregationType,
+                                widgetHasCustomBreakdown
                             )
 
                             def parameter = requestData.groups.find()
@@ -3815,7 +3835,7 @@
                                 return filtering.collect { filters ->
                                     RequestData newData = data.clone()
                                     newData.filters = filters
-                                    Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType)
+                                    Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType, notBlank, widgetPercentCntAggregationType)
                                     def res = dashboardQueryWrapperUtils.getData(newData as RequestData, top,currentUserLocale, user, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
                                     if(!res && !onlyFilled)
                                     {
@@ -3908,8 +3928,6 @@
          * @param formatGroup - метод обработки групп
          * @param formatAggregation - метод обработки аггрегаций
          * @param listIdsOfNormalAggregations - список ID нормальных аггрегаций
-         * @param parameterFilters - фильтры на параметрах
-         * @param breakdownFilters - фильтры на разбивке
          * @param notAggregatedAttributes - атрибуты с агрегацией N/A
          * @param paginationSettings - настройки пагинации
          * @param ignoreLimits - флаг, игнорировать лимиты
@@ -3924,31 +3942,33 @@
          * @param notBlank - флаг на получение только заполненных данных, без null
          * @param indicatorFiltration - фильтрация на показателе
          * @param user - текущий пользователь
+         * @param widgetPercentCntAggregationType - тип агрегации на виджете для агрегации PERCENT_CNT
+         * @param widgetHasCustomBreakdown - флаг, что на виджете есть кастомная группировка только на разбивке
          * @return результат с учетом фильтров на пользовательской группировке
          */
         List<List> getCustomGroupResult(DiagramRequest request,
-                                  Widget requestContent,
-                                  RequestData newRequestData,
-                                  List filtering,
-                                  Closure formatGroup,
-                                  Closure formatAggregation,
-                                  List listIdsOfNormalAggregations,
-                                  List parameterFilters,
-                                  List breakdownFilters,
-                                  List<String> notAggregatedAttributes,
-                                  PaginationSettings paginationSettings,
-                                  IgnoreLimits ignoreLimits,
-                                  Top top,
-                                  DiagramType diagramType,
-                                  String templateUUID,
-                                  Boolean customInBreakTable,
-                                  Boolean onlyFilled,
-                                  Integer aggregationCnt,
-                                  Integer filterListSize,
-                                  Boolean isSourceForEachRow,
-                                  Boolean notBlank,
-                                  IndicatorFiltration indicatorFiltration = null,
-                                  IUUIDIdentifiable user = null)
+                                        Widget requestContent,
+                                        RequestData newRequestData,
+                                        List filtering,
+                                        Closure formatGroup,
+                                        Closure formatAggregation,
+                                        List listIdsOfNormalAggregations,
+                                        List<String> notAggregatedAttributes,
+                                        PaginationSettings paginationSettings,
+                                        IgnoreLimits ignoreLimits,
+                                        Top top,
+                                        DiagramType diagramType,
+                                        String templateUUID,
+                                        Boolean customInBreakTable,
+                                        Boolean onlyFilled,
+                                        Integer aggregationCnt,
+                                        Integer filterListSize,
+                                        Boolean isSourceForEachRow,
+                                        Boolean notBlank,
+                                        IndicatorFiltration indicatorFiltration = null,
+                                        IUUIDIdentifiable user = null,
+                                        Aggregation widgetPercentCntAggregationType = null,
+                                        widgetHasCustomBreakdown = false)
         {
             List<List> filteringResult = filtering?.withIndex()?.collectMany { filters, i ->
                 newRequestData.filters = filters
@@ -4001,6 +4021,14 @@
             }
 
             Boolean hasPercentCntAggregation = getPercentCntAggregationIndexes(request).size() != 0
+            Boolean percentCntAggregationForColumnStackedExists =
+                filteringResult.first().size() == 3 && hasPercentCntAggregation
+
+            if (percentCntAggregationForColumnStackedExists &&
+                widgetPercentCntAggregationType == Aggregation.PERCENT_CNT_BY_PARAMETERS)
+            {
+                filteringResult = turnPercentByWidgetIntoPercentByParameter(filteringResult, widgetHasCustomBreakdown ? 2 : 1)
+            }
             return getFilteringResultForTop(filteringResult, top, diagramType, hasPercentCntAggregation)
         }
 
@@ -4282,11 +4310,11 @@
                                   DiagramRequest request,
                                   DiagramType diagramType,
                                   Boolean exceptNulls = false,
-                                  Collection<Integer> percentCntAggregationIndexes = []
-                                 )
+                                  Collection<Integer> percentCntAggregationIndexes = [])
         {
             Boolean diagramTypeStacked = (diagramType == DiagramType.BAR_STACKED) || (diagramType == DiagramType.COLUMN_STACKED)
             Boolean isTypeMetaClass = request?.data?.any { key, value -> value.aggregations.any { it.type == Aggregation.PERCENT }}
+
             if (listIdsOfNormalAggregations.size() < 1)
             {
                 return listOfLists
@@ -4387,9 +4415,16 @@
          * @param data - данные запроса
          * @param listIdsOfNormalAggregations - список индексов нормальных агрегаций
          * @param diagramType - тип диаграммы
+         * @param notBlank - флаг на отображение пустых незаполненных данных
+         * @param widgetPercentCntAggregationType - тип агрегации на виджете для агрегации PERCENT_CNT
          * @return результат выборки с изменёнными значениями группировки
          */
-        List formatGroupSet(List tempList, RequestData data, List listIdsOfNormalAggregations, DiagramType diagramType)
+        List formatGroupSet(List tempList,
+                            RequestData data,
+                            List listIdsOfNormalAggregations,
+                            DiagramType diagramType,
+                            Boolean notBlank,
+                            Aggregation widgetPercentCntAggregationType = null)
         {
             List list = []
             list.addAll(tempList)
@@ -4402,14 +4437,28 @@
             }
             else
             {
+                Boolean percentCntAggregationForColumnStackedExists = data.aggregations?.size() == 1 &&
+                                                                      data.groups?.size() == 2 &&
+                                                                      data.aggregations?.first().type == Aggregation.PERCENT_CNT
+
+                if (percentCntAggregationForColumnStackedExists && widgetPercentCntAggregationType == Aggregation.PERCENT_CNT_BY_PARAMETERS)
+                {
+                    list = turnPercentByWidgetIntoPercentByParameter(list)
+                }
+
                 List notAggregated = data.aggregations.findAll {it.type == Aggregation.NOT_APPLICABLE }  //ищем агрегации n/a
                 List requestGroups = updateNotAggregatedToGroups(notAggregated) + data.groups
                 Source source = data.source
-                return list.collect { el ->
+                return list.findResults { el ->
                     def groups = []
                     groups.addAll(el) //резервируем значения для групп
                     def elAggregations = el[listIdsOfNormalAggregations] //резервируем значения для агрегаций
                     elAggregations.each { groups.remove(groups.indexOf(it)) } //убираем в группах агрегации
+
+                    if (notBlank && percentCntAggregationForColumnStackedExists && groups.any { it == null })
+                    {
+                        return null
+                    }
 
                     //обрабатываем группы
                     def totalGroupValues = groups.withIndex().collect { group, i ->
@@ -4425,6 +4474,43 @@
                     return totalGroupValues
                 }
             }
+        }
+
+        /**
+         * Метод перевода процентов относительно виджета в процент относительно параметра
+         * @param list - исходные данные
+         * @param parameterIndex - индекс параметра
+         * @return измененные данные
+         */
+        private List turnPercentByWidgetIntoPercentByParameter(List list, Integer parameterIndex = 1)
+        {
+            Integer indicatorIndex = 0
+            Integer percentIndex = 1
+            Integer countIndex = 0
+
+            Map<String, List> listGroupedByParameter = list.groupBy { it[parameterIndex] }
+            Map<String, Double> fullPercentAmountsByParameters = listGroupedByParameter.collectEntries {parameter, data ->
+                Double fullPercentAmount = data.sum {
+                    String countWithPercent = it[indicatorIndex]
+                    String[] countWithPercentArray = countWithPercent.split(' ')
+                    Double percentAmount = countWithPercentArray[percentIndex] as Double
+                    return percentAmount
+                }
+                return [(parameter as String): fullPercentAmount]
+            }
+
+            list = list.collect { it ->
+                String parameter = it[parameterIndex]
+                Double fullPercentAmount = fullPercentAmountsByParameters[parameter]
+                String countWithPercent = it[indicatorIndex]
+                String[] countWithPercentArray = countWithPercent.split(' ')
+                Double percentAmount = countWithPercentArray[percentIndex] as Double
+                Double percentAmountByParameter = percentAmount / fullPercentAmount
+                it[indicatorIndex] = countWithPercentArray[countIndex] + ' ' + (percentAmountByParameter * 100)
+                return it
+            }
+
+            return list
         }
 
         /**
@@ -7238,6 +7324,7 @@
          * @param user - текущий пользователь системы
          * @param paginationSettings - настройки пагинации
          * @param indicatorFiltration - фильтрация на показателе
+         * @param widgetPercentCntAggregationType - тип агрегации на виджете для агрегации PERCENT_CNT
          * @return сырые данные для построения диаграм
          */
         private List getNoFilterListDiagramData(Object node,
@@ -7251,7 +7338,8 @@
                                                 IgnoreLimits ignoreLimits,
                                                 IUUIDIdentifiable user,
                                                 PaginationSettings paginationSettings = null,
-                                                IndicatorFiltration indicatorFiltration = null)
+                                                IndicatorFiltration indicatorFiltration = null,
+                                                Aggregation widgetPercentCntAggregationType = null)
         {
             Boolean isSourceForEachRow = requestContent?.data?.sourceRowName?.findAll() && diagramType == DiagramType.TABLE
             String nodeType = node.type
@@ -7291,7 +7379,7 @@
                         diagramType in DiagramType.CountTypes ? false : onlyFilled,
                         getPercentCntAggregationIndexes(request)
                     )
-                    Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType)
+                    Closure formatGroup = this.&formatGroupSet.rcurry(requestData, listIdsOfNormalAggregations, diagramType, notBlank, widgetPercentCntAggregationType)
                     def res = dashboardQueryWrapperUtils.getData(requestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings, indicatorFiltration)
                                                         .with(formatGroup)
                                                         .with(formatAggregation)
@@ -7345,7 +7433,7 @@
                     aggregationCnt = 1
                     def variables = dataSet.collectEntries { key, data ->
                         Closure postProcess =
-                            this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType)
+                            this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType, notBlank, widgetPercentCntAggregationType)
                         Collection result = dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
                                                                       .with(postProcess)
 

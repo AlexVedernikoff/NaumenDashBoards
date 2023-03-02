@@ -165,12 +165,16 @@ enum Aggregation
     COUNT_CNT('COUNT(%s)'),
     PERCENT('COUNT(%s)*100.00/%s'),
     PERCENT_CNT('PERCENT_CNT'),
+    PERCENT_CNT_BY_COMMON('PERCENT_CNT_BY_COMMON'),
+    PERCENT_CNT_BY_PARAMETERS('PERCENT_CNT_BY_PARAMETERS'),
     SUM('SUM(%s)'),
     AVG('AVG(%s)'),
     MAX('MAX(%s)'),
     MIN('MIN(%s)'),
     MDN('%s'), //TODO: Тут должна была быть медиана.
     NOT_APPLICABLE('')
+
+    static final Collection<String> PERCENT_CNT_TYPES = [PERCENT_CNT,  PERCENT_CNT_BY_COMMON, PERCENT_CNT_BY_PARAMETERS]
 
     Aggregation(String aggregationFormat)
     {
@@ -3729,6 +3733,10 @@ abstract class Widget
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     TooltipSettings tooltip
+    /**
+     * Тип агрегации, используемый на диаграммах с накоплением
+     */
+    Aggregation aggregationType = Aggregation.PERCENT_CNT_BY_COMMON
 
     /**
      * Метод по преобразованию данных диаграм с форматом prev к поддерживаемому формату
@@ -5041,6 +5049,26 @@ class GetGataForCompositeDiagramRequest
      * Смещение ЧП
      */
     Integer offsetUTCMinutes
+    /**
+     * Данные для получения сессионных данных по виджету
+     */
+    SessionData sessionData
+}
+
+/**
+ * Класс, описывающий данные для получения сессионных данных по виджету
+ */
+@Canonical
+class SessionData
+{
+    /**
+     * Тип аггрегации
+     */
+    Aggregation aggregationType
+    /**
+     * Ключ виджета
+     */
+    String id
 }
 
 /**
