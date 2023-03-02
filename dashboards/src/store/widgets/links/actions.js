@@ -99,8 +99,13 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction =>
 			window.open(getRelativeLink(link));
 			dispatch(receiveLink(id));
 		} catch (exception) {
-			if (exception instanceof DrillDownBigData || exception instanceof NoDetailData) {
+			if (exception instanceof DrillDownBigData) {
 				dispatch(setWarningMessage({id, message: t('store::widgets::links::DataLimit')}));
+				return;
+			}
+
+			if (exception instanceof NoDetailData) {
+				dispatch(setWarningMessage({id, message: exception.message}));
 				return;
 			}
 
