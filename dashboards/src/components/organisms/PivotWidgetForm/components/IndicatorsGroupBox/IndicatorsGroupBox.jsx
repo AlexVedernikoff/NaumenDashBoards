@@ -1,5 +1,8 @@
 // @flow
+import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FormBox from 'components/molecules/FormBox';
+import FormField from 'WidgetFormPanel/components/FormField';
+import {getErrorPath} from 'WidgetFormPanel/helpers';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import IndicatorGroupModal from './components/IndicatorGroupModal';
@@ -105,9 +108,16 @@ export class IndicatorsGroupBox extends PureComponent<Props, State> {
 	};
 
 	render () {
+		const {value} = this.props;
+		const paths = value?.map(
+			(item, index) => getErrorPath(DIAGRAM_FIELDS.indicatorGrouping, index, DIAGRAM_FIELDS.label)
+		) ?? [];
+
 		return (
 			<Fragment>
-				<FormBox rightControl={this.renderControl()} title={t('PivotWidgetForm::GroupingIndicators')} />
+				<FormBox rightControl={this.renderControl()} title={t('PivotWidgetForm::GroupingIndicators')}>
+					<FormField paths={paths} small />
+				</FormBox>
 				{this.renderIndicatorGroupModal()}
 			</Fragment>
 		);

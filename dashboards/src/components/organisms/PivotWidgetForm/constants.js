@@ -39,7 +39,7 @@ addMethod(array, 'singlePivotParams', function () {
 addMethod(array, 'sourceLinks', function () {
 	return lazy(() => array().of(sourceLinks).test(
 		'check-source-links-for-all-sources',
-		t('TableWidgetForm::Scheme::CheckSourceLinksForAllSources'),
+		t('PivotWidgetScheme::CheckSourceLinksForAllSources'),
 		function (sourceLinks: Array<PivotLink>) {
 			const result: Array<string> = [];
 			const {parent: {data}} = this;
@@ -53,8 +53,8 @@ addMethod(array, 'sourceLinks', function () {
 				}
 			});
 
-			if (result.length) {
-				const message = t('TableWidgetForm::Scheme::CheckSourceLinksForAllSources', {
+			if (result.length > 1) {
+				const message = t('PivotWidgetScheme::CheckSourceLinksForAllSources', {
 					sources: result.join(', ')
 				});
 
@@ -70,14 +70,14 @@ const indicatorGrouping = object({
 	children: array().nullable().of(lazy(() => indicatorGrouping)),
 	hasSum: boolean(),
 	key: string().required(),
-	label: string().required(),
+	label: string().required(t('PivotWidgetScheme::SetNameGroup')),
 	type: string().required()
 });
 
 const sourceLinks = object({
-	attribute: mixed().required(t('TableWidgetForm::Scheme::SourceLinkAttribute')),
-	dataKey1: string().required(),
-	dataKey2: string().required()
+	attribute: mixed().required(t('PivotWidgetScheme::SetLinkAttribute')),
+	dataKey1: string().required(t('PivotWidgetScheme::SetLinkDataKey1')),
+	dataKey2: string().required(t('PivotWidgetScheme::SetLinkDataKey2'))
 });
 
 const parametersOrder = object({
@@ -85,10 +85,28 @@ const parametersOrder = object({
 	parameter: object().required()
 });
 
+const pivotIndicators = object({
+	aggregation: string().required(),
+	attribute: mixed().required(t('PivotWidgetScheme::SetIndicatorAttribute')),
+	breakdown: mixed().when({
+		is: value => !!value,
+		then: object({
+			attribute: mixed().required(t('PivotWidgetScheme::SetBreakdownAttribute')),
+			dataKey: string().required(),
+			group: object({
+				data: string().required(),
+				way: string().required()
+			})
+		})
+	}),
+	descriptor: string().nullable(),
+	key: string().required()
+});
+
 const schema = object({
 	...baseSchema,
 	data: array().of(object({
-		indicators: mixed().requiredByCompute(array().indicators(false)),
+		indicators: mixed().requiredByCompute(array().of(pivotIndicators)),
 		parameters: mixed().requiredByCompute(array().parameters(false).singlePivotParams()),
 		source: object().source()
 	})),

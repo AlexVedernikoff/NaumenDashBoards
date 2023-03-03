@@ -226,7 +226,7 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 	};
 
 	renderBreakdown = (indicatorValue: IndicatorValue, valueIndex: number) => {
-		const {dataKey, dataSetIndex, indicator} = indicatorValue;
+		const {dataKey, dataSetIndex, index, indicator} = indicatorValue;
 		const {attribute, breakdown} = indicator;
 
 		if (attribute) {
@@ -237,6 +237,7 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 					dataKey={dataKey}
 					index={dataSetIndex}
 					indicator={attribute}
+					indicatorIndex={index}
 					onChange={this.getChangeBreakdownHandler(valueIndex)}
 					onRemove={this.getClearBreakdownHandler(valueIndex)}
 					onlyCommonAttributes={true}
