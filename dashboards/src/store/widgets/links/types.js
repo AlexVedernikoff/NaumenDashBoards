@@ -1,5 +1,5 @@
 // @flow
-import type {Group, MixedAttribute, Parameter, Widget} from 'store/widgets/data/types';
+import type {Breakdown, Group, MixedAttribute, Parameter, Widget} from 'store/widgets/data/types';
 import {LINKS_EVENTS} from './constants';
 import type {ThunkAction} from 'store/types';
 
@@ -16,6 +16,7 @@ export type WidgetFilters = {
 };
 
 export type DrillDownMixin = {
+	breakdown?: Breakdown,
 	cases?: [],
 	classFqn?: string | null,
 	descriptor?: string,

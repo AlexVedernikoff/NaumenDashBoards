@@ -376,21 +376,25 @@ const getParametersMixin = (widget: Widget, index: number): DrillDownMixin => {
 		const dataSet: AxisData | ComboData = widget.data[index];
 
 		result.parameters = dataSet.parameters;
+		result.breakdown = dataSet.breakdown;
 		result.showBlankData = dataSet.showBlankData || dataSet.showEmptyData;
 	} else if (widget.type === WIDGET_TYPES.DONUT || widget.type === WIDGET_TYPES.PIE) {
 		const dataSet: CircleData = widget.data[index];
 
 		result.parameters = [];
+		result.breakdown = dataSet.breakdown;
 		result.showBlankData = dataSet.showBlankData || dataSet.showEmptyData;
 	} else if (widget.type === WIDGET_TYPES.TABLE) {
 		const dataSet: TableData = widget.data[index];
 
 		result.parameters = dataSet.parameters;
+		result.breakdown = dataSet.breakdown;
 		result.showBlankData = widget.showBlankData || widget.showEmptyData;
 	} else if (widget.type === WIDGET_TYPES.PIVOT_TABLE) {
 		const dataSet: PivotData = widget.data[index];
 
 		result.parameters = dataSet.parameters;
+		result.breakdown = dataSet.indicators.flatMap(({breakdown}) => breakdown || []);
 		result.showBlankData = false;
 	}
 
