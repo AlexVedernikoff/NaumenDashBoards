@@ -1,8 +1,14 @@
 // @flow
 import {AXIS_FORMAT_TYPE} from 'store/widgets/data/constants';
-import type {AxisOptions, ContainerSize, RechartData} from './types';
+import type {AxisOptions, ContainerSize, ReChartLegend, RechartData, RechartDomains} from './types';
 import type {AxisWidget} from 'store/widgets/data/types';
-import {calculateStringsSize, getNiceScale, getNiceScaleDTInterval, getRechartAxisSetting} from './helpers';
+import {
+	calculateStringsSize,
+	calculateYAxisNumberWidth,
+	getNiceScale,
+	getNiceScaleDTInterval,
+	getRechartAxisSetting
+} from './helpers';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {LEGEND_ALIGN} from './constants';
 import type {ValueFormatter} from 'utils/recharts/formater/types';
@@ -24,32 +30,57 @@ const normalizeSeries = (data: RechartData): RechartData =>
 		return result;
 	});
 
+/**
+ * Формирует параметры оси Y
+ * @param {AxisWidget} widget - виджет
+ * @param {DiagramBuildData} data - данные виджета
+ * @param {ValueFormatter} formatter - форматер для значений/индикатора
+ * @param {string} axisName - название оси виджета
+ * @returns {AxisOptions} - параметры оси Y
+ */
 const getYAxisNumber = (
 	widget: AxisWidget,
-	container: ContainerSize,
-	xAxis: {height?: number},
-	legend: {align: $Values<typeof LEGEND_ALIGN>, height?: number},
 	data: DiagramBuildData,
 	formatter: ValueFormatter,
-	axisName: string = '',
-	isNormalized: boolean = false
+	axisName: string = ''
 ): AxisOptions => {
 	const settings = getRechartAxisSetting(widget.indicator);
 	const formattedSeries = data.series.flatMap(el => el.data.map(val => formatter(val)));
 	const maxValueLength = Math.max(...formattedSeries.map(val => String(val).length), 0);
 	const maxString = Array(maxValueLength + 1).fill('0').join('');
-	const sizes = calculateStringsSize([[maxString], [axisName]], settings.fontFamily, settings.fontSize);
-	let width = sizes[0]?.width ?? 0;
+	const width = calculateYAxisNumberWidth(maxString, settings, axisName);
+	const domain = [0, value => value];
 
-	if (settings.showName) {
-		width += (sizes[1]?.height ?? 0);
-	}
+	return {...settings, axisName, domain, width};
+};
 
+/**
+ * Вычисляет домен для оси Y с учетом размеров виджета и "красоты' чисел, чтобы границы на оси
+ * выглядели более эстетично и были легко воспринимаемыми для пользователей
+ * @param {AxisWidget} widget - виджет
+ * @param {ContainerSize} container - размеры контейнера
+ * @param {AxisOptions} xAxis - частичные параметры оси X
+ * @param {AxisOptions} yAxis - частичные параметры оси Y
+ * @param {ReChartLegend} legend - частичные параметры легенды
+ * @param {boolean} isNormalized - индикатор нормализации виджета
+ * @returns {RechartDomains} - домен для оси Y
+ */
+const getYAxisDomainNiceScale = (
+	widget: AxisWidget,
+	container: ContainerSize,
+	xAxis: AxisOptions,
+	yAxis: AxisOptions,
+	legend: ReChartLegend,
+	isNormalized: boolean = false
+): RechartDomains => {
 	const showSubTotalAmount = widget.showSubTotalAmount;
 	const domain = [0, value => {
 		let result = 1;
 
-		if (widget.dataLabels.format && widget.dataLabels.format.type === AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT) {
+		if (
+			widget.dataLabels.format
+			&& widget.dataLabels.format.type === AXIS_FORMAT_TYPE.DT_INTERVAL_FORMAT
+		) {
 			result = getNiceScaleDTInterval(value, widget.dataLabels.format);
 		} else if (!isNormalized) {
 			result = getNiceScale(value, showSubTotalAmount);
@@ -71,7 +102,7 @@ const getYAxisNumber = (
 				)[0];
 
 				if (diffHeight < height) {
-					const bestValue = value + (result / graphHeight * width);
+					const bestValue = value + (result / graphHeight * (yAxis.width ?? 1));
 
 					result = getNiceScale(bestValue, showSubTotalAmount);
 				}
@@ -81,10 +112,11 @@ const getYAxisNumber = (
 		return result;
 	}];
 
-	return {...settings, axisName, domain, width};
+	return domain;
 };
 
 export {
 	getYAxisNumber,
+	getYAxisDomainNiceScale,
 	normalizeSeries
 };

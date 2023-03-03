@@ -53,6 +53,7 @@ import {
 	LEGEND_POSITIONS,
 	LEGEND_VERTICAL_ALIGN,
 	LEGEND_WIDTH_PERCENT,
+	RECHART_AXIS_LEFT_MARGIN,
 	ROTATE_AXIS_COEFFICIENT,
 	RULER_WIDTH,
 	SUB_TOTAL_POSITION,
@@ -143,14 +144,22 @@ const getColorForLabel = (
  * @param {Array<string>} defaultColors - набор цветов по умолчанию
  * @returns {boolean}
  */
-const getBreakdownColors = (settings: CustomChartColorsSettingsData, labels: Array<string>, defaultColors: Array<string> = []) => {
-	const colors = Array(labels.length).fill(settings.defaultColor).map((c, i) => defaultColors[i] ?? c);
+const getBreakdownColors = (
+	settings: CustomChartColorsSettingsData,
+	labels: Array<string>,
+	defaultColors: Array<string> = []
+) => {
+	const colors = Array(labels.length)
+		.fill(settings.defaultColor)
+		.map((c, i) => defaultColors[i] ?? c);
 	const usedLabels = [];
 
 	settings.colors.forEach(({color, key}) => {
-		const index = labels.findIndex((label, index) => equalLabels(label, key) && !usedLabels.includes(index));
+		const index = labels.findIndex(
+			(label, index) => equalLabels(label, key) && !usedLabels.includes(index)
+		);
 
-		if (index > -1) {
+		if (index >= 0) {
 			if (color) {
 				colors[index] = color;
 			}
@@ -430,7 +439,9 @@ const getLegendOptions = (container: ContainerSize, legend: ?Legend): ReChartLeg
 		const style = {fontFamily, fontSize, maxWidth: undefined};
 
 		if (align === LEGEND_ALIGN.CENTER) {
-			layout = displayType === LEGEND_DISPLAY_TYPES.BLOCK ? LEGEND_LAYOUT.VERTICAL : LEGEND_LAYOUT.HORIZONTAL;
+			layout = displayType === LEGEND_DISPLAY_TYPES.BLOCK
+				? LEGEND_LAYOUT.VERTICAL
+				: LEGEND_LAYOUT.HORIZONTAL;
 			height = LEGEND_HEIGHT;
 			width = containerWidth;
 		} else {
@@ -546,9 +557,17 @@ const calculateStringsSize = (
  * @param {number} maxWidth - максимальная ширина для подписей
  * @returns {number | null} - минимальная ширина для меток, в случае успеха, null в противном случае
  */
-const checkOneLineWidth = (labels: Array<string>, params: AxisOptions, maxWidth: number): number | null => {
+const checkOneLineWidth = (
+	labels: Array<string>,
+	params: AxisOptions,
+	maxWidth: number
+): number | null => {
 	let result = null;
-	const lineSizes = calculateStringsSize(labels.map(label => [label]), params.fontFamily, params.fontSize);
+	const lineSizes = calculateStringsSize(
+		labels.map(label => [label]),
+		params.fontFamily,
+		params.fontSize
+	);
 	const widths = lineSizes.map(({width}) => width);
 	const maxOfWidths = Math.max(...widths);
 
@@ -567,10 +586,19 @@ const checkOneLineWidth = (labels: Array<string>, params: AxisOptions, maxWidth:
  * @param {number} height - высота оси
  * @returns {number | null} - минимальная ширина для меток, в случае успеха, null в противном случае
  */
-const checkMultilineWidth = (labels: Array<string>, params: AxisOptions, maxWidth: number, height: number): number | null => {
+const checkMultilineWidth = (
+	labels: Array<string>,
+	params: AxisOptions,
+	maxWidth: number,
+	height: number
+): number | null => {
 	let result = null;
 	// Проверка на то что все может разместиться в разбитых строках:  mode - line
-	const multilineSizes = calculateStringsSize(labels.map(label => label.split(' ')), params.fontFamily, params.fontSize);
+	const multilineSizes = calculateStringsSize(
+		labels.map(label => label.split(' ')),
+		params.fontFamily,
+		params.fontSize
+	);
 	const widths = multilineSizes.map(({width}) => width);
 	const maxOfWidths = Math.max(...widths);
 	const heights = multilineSizes.map(({height}) => height);
@@ -622,18 +650,22 @@ const calculateCategoryWidth = (
  * @param {number} axisWidth - ширина оси
  * @returns {number | null} - высота для меток, в случае успеха, null в противном случае
  */
-const checkOneLineHeight = (
+const getOneLineHeight = (
 	labels: Array<string>,
 	params: AxisOptions,
 	axisWidth: number
 ) => {
 	let result = null;
-	const rowWidth = axisWidth / labels.length;
-	const linesSizes = calculateStringsSize(labels.map(label => [label]), params.fontFamily, params.fontSize);
+	const columnWidth = axisWidth / labels.length * 0.9;
+	const linesSizes = calculateStringsSize(
+		labels.map(label => [label]),
+		params.fontFamily,
+		params.fontSize
+	);
 	const widths = linesSizes.map(({width}) => width);
 	const maxOfWidths = Math.max(...widths);
 
-	if (maxOfWidths < rowWidth) {
+	if (maxOfWidths < columnWidth) {
 		const heights = linesSizes.map(({height}) => height);
 
 		result = Math.max(...heights) * 1.25;
@@ -660,7 +692,11 @@ const getSplitterLinesByWidth = (width: number, params: AxisOptions) => {
 
 	return (label: string) => {
 		const labels = label.split(' ');
-		const sizes = calculateStringsSize(labels.map(label => [label]), params.fontFamily, params.fontSize);
+		const sizes = calculateStringsSize(
+			labels.map(label => [label]),
+			params.fontFamily,
+			params.fontSize
+		);
 		const result = [];
 		let curLine = [];
 		let curSize = 0;
@@ -702,14 +738,14 @@ const getSplitterLinesByWidth = (width: number, params: AxisOptions) => {
  * @param {number} axisMaxHeight - максимальная высота для подписей
  * @returns {MultilineHeightResult | null} - минимальная ширина для меток, в случае успеха, null в противном случае
  */
-const checkMultilineHeight = (
+const getMultilineHeight = (
 	labels: Array<string>,
 	params: AxisOptions,
 	axisWidth: number,
 	axisMaxHeight: number
 ): MultilineHeightResult | null => {
 	let result = null;
-	const columnWidth = axisWidth / labels.length * 0.8;
+	const columnWidth = axisWidth / labels.length * 0.9;
 	const multiLines = labels.map(getSplitterLinesByWidth(columnWidth, params));
 	const multilineSizes = calculateStringsSize(multiLines, params.fontFamily, params.fontSize);
 	const isLessWidth = multilineSizes.every(({width}) => width < columnWidth);
@@ -732,11 +768,16 @@ const checkMultilineHeight = (
  * @param {AxisOptions} params - параметры оси
  * @returns {number | null} - высота для меток, в случае успеха, null в противном случае
  */
-const checkRotateHeight = (
+const getRotateHeight = (
 	labels: Array<string>,
 	params: AxisOptions
 ) => {
-	const rotateSizes = calculateStringsSize(labels.map(label => [label]), params.fontFamily, params.fontSize, -60);
+	const rotateSizes = calculateStringsSize(
+		labels.map(label => [label]),
+		params.fontFamily,
+		params.fontSize,
+		-60
+	);
 	const heights = rotateSizes.map(({height}) => height);
 
 	return Math.ceil(Math.max(...heights));
@@ -757,18 +798,18 @@ const calculateCategoryHeight = (
 	width: number
 ): CalculateCategoryHeightResult => {
 	let result = {height: maxHeight, mode: LABEL_DRAW_MODE.ROTATE};
-	const singleLine = checkOneLineHeight(labels, params, width);
+	const singleLine = getOneLineHeight(labels, params, width);
 
 	if (singleLine) {
 		result = {height: singleLine, mode: LABEL_DRAW_MODE.SINGLELINE};
 	} else {
-		const multiline = checkMultilineHeight(labels, params, width, maxHeight);
+		const multiline = getMultilineHeight(labels, params, width, maxHeight);
 
 		if (multiline) {
 			result = {...multiline, mode: LABEL_DRAW_MODE.MULTILINE};
 		} else {
 			const AXIS_HEIGHT = 8;
-			const rotateHeight = checkRotateHeight(labels, params) + AXIS_HEIGHT;
+			const rotateHeight = getRotateHeight(labels, params) + AXIS_HEIGHT;
 
 			if (rotateHeight < maxHeight) {
 				result = {height: rotateHeight, mode: LABEL_DRAW_MODE.ROTATE};
@@ -795,9 +836,12 @@ const calculateCategoryRotateHeight = (
 	width: number
 ): CalculateCategoryRotateHeight => {
 	const fixWidth = width === 0 ? DEFAULT_WIDGET_WIDTH : width; // FIX: когда React еще не прокинул ref
-	const interval = Math.trunc((labels.length * params.fontSize * ROTATE_AXIS_COEFFICIENT) / fixWidth);
-	const calcLabels = interval === 0 ? labels : labels.filter((l, idx) => idx % (interval + 1) === 0);
-	const rotateHeight = checkRotateHeight(calcLabels, params) + X_AXIS_HEIGHT;
+	const fullSize = labels.length * params.fontSize * ROTATE_AXIS_COEFFICIENT;
+	const interval = Math.trunc(fullSize / fixWidth);
+	const calcLabels = interval === 0
+		? labels
+		: labels.filter((l, idx) => idx % (interval + 1) === 0);
+	const rotateHeight = getRotateHeight(calcLabels, params) + X_AXIS_HEIGHT;
 
 	return {
 		height: Math.min(maxHeight, rotateHeight),
@@ -847,14 +891,17 @@ const getDataLabels = (widget: AxisWidget | CircleWidget | ComboWidget): DataLab
 
 /**
  * Расчет ширины Y оси с индикатором
- * TODO: такое же есть в колоночных
  * @param {string} maxString - максимально значение на оси
  * @param {AxisOptions} settings - параметры оси
  * @param {string} axisName - название оси
  * @returns {number} - ширина оси
  */
 const calculateYAxisNumberWidth = (maxString: string, settings: AxisOptions, axisName: string) => {
-	const sizes = calculateStringsSize([[maxString], [axisName]], settings.fontFamily, settings.fontSize);
+	const sizes = calculateStringsSize(
+		[[maxString], [axisName]],
+		settings.fontFamily,
+		settings.fontSize
+	);
 	let result = (sizes[0]?.width ?? 0) + RULER_WIDTH;
 
 	if (settings.showName) {
@@ -871,18 +918,20 @@ const calculateYAxisNumberWidth = (maxString: string, settings: AxisOptions, axi
  * @param {AxisWidget | ComboWidget} widget - виджет
  * @param {ContainerSize} container - общий контейнер
  * @param {Array<string>} labels - подписи категорий
+ * @param {AxisOptions} yAxis - настройка оси Y
  * @param {string} axisName - название оси
  * @returns {AxisOptions} - настройки оси X
  */const getXAxisCategory = (
 	widget: AxisWidget | ComboWidget,
 	container: ContainerSize,
 	labels: Array<string> = [],
+	yAxis: {width?: number},
 	axisName: string = ''
 ): AxisOptions => {
 	const settings = getRechartAxisSetting(widget.parameter);
 	const addPlaceForName = settings.showName ? settings.fontSize * 2 : 0;
 	const maxHeight = LEGEND_HEIGHT - addPlaceForName;
-	let {width} = container;
+	let width = container.width - RECHART_AXIS_LEFT_MARGIN;
 
 	if (widget.legend && widget.legend.show) {
 		const {position} = widget.legend;
@@ -890,6 +939,10 @@ const calculateYAxisNumberWidth = (maxString: string, settings: AxisOptions, axi
 		if (position === LEGEND_POSITIONS.left || position === LEGEND_POSITIONS.right) {
 			width -= width * LEGEND_WIDTH_PERCENT;
 		}
+	}
+
+	if (yAxis.width) {
+		width -= yAxis.width;
 	}
 
 	let result;
@@ -900,7 +953,8 @@ const calculateYAxisNumberWidth = (maxString: string, settings: AxisOptions, axi
 
 		result = {...settings, axisName, height, interval, mode: LABEL_DRAW_MODE.ROTATE};
 	} else {
-		const {height, labels: multilineLabels, mode} = calculateCategoryHeight(labels, settings, maxHeight, width);
+		const categoryHeightInfo = calculateCategoryHeight(labels, settings, maxHeight, width);
+		const {height, labels: multilineLabels, mode} = categoryHeightInfo;
 
 		result = {...settings, axisName, height, interval: 0, mode, multilineLabels};
 	}
@@ -923,7 +977,11 @@ const calculateYAxisNumberWidth = (maxString: string, settings: AxisOptions, axi
  * @returns {SubTotalGetter} - функция и параметры для отображения промежуточных итогов, null - если показывать
  * промежуточные итоги не нужно.
  */
-const makeSubTotalGetter = (widget: AxisWidget, data: RechartData, usePercentage: boolean): SubTotalGetter | null => {
+const makeSubTotalGetter = (
+	widget: AxisWidget,
+	data: RechartData,
+	usePercentage: boolean
+): SubTotalGetter | null => {
 	let result = null;
 
 	if (widget.showSubTotalAmount && !usePercentage /* #SMRMEXT-13872 */) {

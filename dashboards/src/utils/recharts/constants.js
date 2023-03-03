@@ -131,3 +131,5 @@ export const PIVOT_COLUMN_TYPE = {
 	TOTAL_SUM: 'TOTAL_SUM',
 	VALUE: 'VALUE'
 };
+
+export const RECHART_AXIS_LEFT_MARGIN = 30;

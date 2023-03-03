@@ -97,6 +97,8 @@ export type RechartPieData = Array<RechartPieDataItem>;
 
 export type RechartDomain = number | string | (value: number) => number;
 
+export type RechartDomains = [RechartDomain, RechartDomain];
+
 export type SeriesInfo = Array<{
 	breakdownLabels: null | Array<string>,
 	color: (string) => string,

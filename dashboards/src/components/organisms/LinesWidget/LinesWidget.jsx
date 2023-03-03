@@ -216,7 +216,7 @@ export class LinesWidget extends PureComponent<Props, State> {
 
 	renderXAxisTick = () => {
 		const {options: {xAxis}} = this.state;
-		const {fontFamily, fontSize, height, mode, showName} = xAxis;
+		const {fontFamily, fontSize, height, mode, multilineLabels, showName} = xAxis;
 		const tickHeight = height ? (height - (showName ? fontSize * 1.5 : 0)) : 0;
 
 		return (
@@ -225,6 +225,7 @@ export class LinesWidget extends PureComponent<Props, State> {
 				fontSize={fontSize}
 				height={tickHeight}
 				mode={mode}
+				multilineLabels={multilineLabels}
 			/>
 		);
 	};
