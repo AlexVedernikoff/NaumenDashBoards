@@ -130,9 +130,8 @@ const hasAttributeDrillDown = (attribute: MixedAttribute | null) => {
 	if (sourceAttribute) {
 		const isDateType = getAttributeValue(sourceAttribute, 'type') === ATTRIBUTE_TYPES.dtInterval;
 		const isServiceCallEvt = sourceAttribute.metaClassFqn === 'serviceCall__Evt';
-		const isTimerValue = !!sourceAttribute.timerValue;
 
-		return !isDateType && !isServiceCallEvt && !isTimerValue;
+		return !isDateType && !isServiceCallEvt;
 	}
 
 	return true;
