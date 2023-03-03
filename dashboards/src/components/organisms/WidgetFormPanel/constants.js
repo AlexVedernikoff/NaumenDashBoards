@@ -52,6 +52,8 @@ const comparePeriod = 'comparePeriod';
 const computedAttrs = 'computedAttrs';
 const count = 'count';
 const data = 'data';
+const dataKey1 = 'dataKey1';
+const dataKey2 = 'dataKey2';
 const dataLabels = 'dataLabels';
 const defaultValue = 'defaultValue';
 const diagramName = 'diagramName';
@@ -67,6 +69,7 @@ const indicatorGrouping = 'indicatorGrouping';
 const indicators = 'indicators';
 const indicatorSettings = 'indicatorSettings';
 const isNumber = 'isNumber';
+const label = 'label';
 const legend = 'legend';
 const legendPosition = 'legendPosition';
 const links = 'links';
@@ -121,7 +124,10 @@ const yAxisName = 'yAxisName';
 
 const PIVOT_FIELDS = {
 	attribute,
+	dataKey1,
+	dataKey2,
 	defaultValue,
+	indicatorGrouping,
 	indicatorSettings,
 	pageSize,
 	parameterRowColor,
@@ -155,9 +161,9 @@ const DIAGRAM_FIELDS = {
 	from,
 	header,
 	indicator,
-	indicatorGrouping,
 	indicators,
 	isNumber,
+	label,
 	legend,
 	legendPosition,
 	links,

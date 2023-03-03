@@ -28,6 +28,7 @@ export type Props = ValuesProps<Values> & HelpersProps & {
 	getUsedDataKeys?: (data: Array<DataSet>) => Array<string>,
 	index: number,
 	indicator: MixedAttribute | null,
+	indicatorIndex: number,
 	isMain: boolean,
 	onChange: (value: Breakdown, callback?: Function) => void,
 	onlyCommonAttributes: boolean,

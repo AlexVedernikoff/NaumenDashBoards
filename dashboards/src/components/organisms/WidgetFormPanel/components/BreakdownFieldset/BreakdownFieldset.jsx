@@ -42,6 +42,7 @@ export class BreakdownFieldset extends Component<Props> {
 		dataKey: '',
 		disabled: false,
 		filterAttributesByMain: false,
+		indicatorIndex: 0,
 		isMain: true,
 		onlyCommonAttributes: false,
 		required: false,
@@ -176,7 +177,7 @@ export class BreakdownFieldset extends Component<Props> {
 	};
 
 	renderField = (item: BreakdownItem, breakdownIndex: number) => {
-		const {index: dataSetIndex, isMain, onRemove, removable, required, values} = this.props;
+		const {index: dataSetIndex, indicatorIndex, isMain, onRemove, removable, required, values} = this.props;
 		const {attribute} = item;
 		const dataSet = values.data[dataSetIndex];
 		const hasRemove = removable && !required;
@@ -192,10 +193,15 @@ export class BreakdownFieldset extends Component<Props> {
 			const components = {
 				Field: this.renderGroupWithContext
 			};
+			const paths = [
+				getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.breakdown, breakdownIndex),
+				getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.indicators, indicatorIndex, DIAGRAM_FIELDS.breakdown),
+				getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.indicators, indicatorIndex, DIAGRAM_FIELDS.breakdown, DIAGRAM_FIELDS.attribute)
+			];
 
 			return (
 				<Context.Provider key={breakdownIndex} value={context}>
-					<FormField path={getErrorPath(DIAGRAM_FIELDS.data, dataSetIndex, DIAGRAM_FIELDS.breakdown, breakdownIndex)}>
+					<FormField paths={paths}>
 						<AttributeFieldset
 							components={components}
 							dataKey={dataKey}

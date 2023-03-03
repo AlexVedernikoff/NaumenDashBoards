@@ -361,9 +361,7 @@ type ValueWithLimitWarning =
 
 // components/organisms/TableWidgetForm
 type TableWidgetFormScheme =
-	| 'TableWidgetForm::Scheme::CheckSourceLinksForAllSources'
 	| 'TableWidgetForm::Scheme::DoubleAttribute'
-	| 'TableWidgetForm::Scheme::SourceLinkAttribute'
 	| 'TableWidgetForm::Scheme::WrongSource';
 
 // components/organisms/TableWidgetForm/components/BodySettingsBox
@@ -441,6 +439,15 @@ type PivotWidgetFormSourceLinkEditor =
 	| 'PivotWidgetForm::SourceLinkEditor::LinkAttribute'
 	| 'PivotWidgetForm::SourceLinkEditor::Source1'
 	| 'PivotWidgetForm::SourceLinkEditor::Source2';
+
+type PivotWidgetScheme =
+	| 'PivotWidgetScheme::CheckSourceLinksForAllSources'
+	| 'PivotWidgetScheme::SetBreakdownAttribute'
+	| 'PivotWidgetScheme::SetIndicatorAttribute'
+	| 'PivotWidgetScheme::SetLinkAttribute'
+	| 'PivotWidgetScheme::SetLinkDataKey1'
+	| 'PivotWidgetScheme::SetLinkDataKey2'
+	| 'PivotWidgetScheme::SetNameGroup';
 
 type SourcesAndFieldsExtended =
 	| 'SourcesAndFieldsExtended::ParameterSelection'
@@ -1050,6 +1057,12 @@ export type LangType =
 	| NumberParameterFormat
 	| OrConditionControl
 	| ParametersDataBox
+	| PivotWidget
+	| PivotWidgetForm
+	| PivotWidgetFormGroupingBox
+	| PivotWidgetFormIndicatorsGroupBox
+	| PivotWidgetFormSourceLinkEditor
+	| PivotWidgetScheme
 	| RechartsFormatMSInterval
 	| SavedFilters
 	| SearchInput
@@ -1075,8 +1088,8 @@ export type LangType =
 	| StoreWidgetsData
 	| StoreWidgetsLinks
 	| SubGroup
-	| SummaryTooltip
 	| SubGroupSection
+	| SummaryTooltip
 	| SummaryWidgetFormIndicatorBox
 	| SystemDateGroupFormat
 	| SystemGroup
@@ -1093,11 +1106,6 @@ export type LangType =
 	| TableWidgetFormSingleRowDataSetSettings
 	| TableWidgetFormTableBox
 	| TableWidgetFormTableTooltipForm
-	| PivotWidget
-	| PivotWidgetForm
-	| PivotWidgetFormGroupingBox
-	| PivotWidgetFormIndicatorsGroupBox
-	| PivotWidgetFormSourceLinkEditor
 	| TextAlignControl
 	| TextArea
 	| TextHandlerControl

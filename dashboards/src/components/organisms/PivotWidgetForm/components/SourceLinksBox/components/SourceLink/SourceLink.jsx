@@ -119,9 +119,14 @@ export class SourceLink extends Component<Props, State> {
 
 	render () {
 		const {index} = this.props;
+		const paths = [
+			getErrorPath(DIAGRAM_FIELDS.links, index, DIAGRAM_FIELDS.attribute),
+			getErrorPath(DIAGRAM_FIELDS.links, index, DIAGRAM_FIELDS.dataKey1),
+			getErrorPath(DIAGRAM_FIELDS.links, index, DIAGRAM_FIELDS.dataKey2)
+		];
 
 		return (
-			<FormField path={getErrorPath(DIAGRAM_FIELDS.links, index, DIAGRAM_FIELDS.attribute)} small>
+			<FormField paths={paths} small>
 				<div className={styles.link} ref={this.ref}>
 					{this.renderSources()}
 					{this.renderConnection()}
