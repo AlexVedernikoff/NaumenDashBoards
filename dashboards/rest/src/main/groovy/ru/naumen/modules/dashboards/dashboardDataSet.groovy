@@ -1376,15 +1376,24 @@
         {
             Integer offset
             Integer limit
-            if (top.modeOfTop == ModeOfTop.MAX)
+            if (top)
             {
-                offset = paginationSettings.firstElementIndex
-                limit = paginationSettings.pageSize
+                if (top.modeOfTop == ModeOfTop.MAX)
+                {
+                    offset = paginationSettings.firstElementIndex
+                    limit = paginationSettings.pageSize
+                }
+                else
+                {
+                    offset =
+                        list?.size() > paginationSettings.pageSize ? (list.size() - top.count) :
+                            paginationSettings.firstElementIndex
+                }
             }
             else
             {
-                offset = list?.size() > paginationSettings.pageSize ? (list.size() - top.count) :
-                    paginationSettings.firstElementIndex
+                offset = paginationSettings.firstElementIndex
+                limit = paginationSettings.pageSize
             }
             int from = Math.min(offset, list?.size()) as int
             int to = (limit ? Math.min(offset + limit, list?.size()) : list?.size()) as int
