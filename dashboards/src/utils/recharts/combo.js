@@ -3,7 +3,13 @@ import type {ComboChartOptions, ContainerSize} from './types';
 import type {DiagramBuildData} from 'store/widgets/buildData/types';
 import {getBuildSet} from 'store/widgets/data/helpers';
 import {getComboFormatter} from './formater';
-import {getComboSeriesData, getComboWidget, getDataLabels, getLegendOptions, getXAxisCategory} from './helpers';
+import {
+	getComboSeriesData,
+	getComboWidget,
+	getDataLabels,
+	getLegendOptions,
+	getXAxisCategory
+} from './helpers';
 import {getComboSeriesInfo, getYAxisesNumber} from './combo.helpers';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
 import {makeGeneratorComboDrillDownOptions} from './drillDown.helpers';
