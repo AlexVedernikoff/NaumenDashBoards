@@ -1927,6 +1927,10 @@
                                 type: v.aggregation as Aggregation,
                                 attribute: v.attr
                             )
+                            if (sorting?.value == SortingValue.INDICATOR)
+                            {
+                                aggr.sortingType = sorting.type
+                            }
                             return [(k): [aggregation: aggr, group: br, dataKey: dataKey]]
                         }
                         compIndicatorId++
@@ -7443,7 +7447,7 @@
                     def variables = dataSet.collectEntries { key, data ->
                         Closure postProcess =
                             this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType, notBlank, widgetPercentCntAggregationType)
-                        Collection result = dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits.parameter, '', paginationSettings)
+                        Collection result = dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
                                                                       .with(postProcess)
 
                         if (result.size() == 0 || result.first() in Collection && result.first().size() == 0)
@@ -7524,17 +7528,15 @@
                                                     DiagramType diagramType,
                                                     List percentCntAggregationIndexes)
         {
+            Boolean nessecaryToSort = !parameterWithDateOrDtInterval &&
+                                      (aggregationSortingType || parameterSortingType) &&
+                                      (diagramType in DiagramType.SortableTypes || (top && isDiagramTypeTable))
+            if (nessecaryToSort)
+            {
+                total = sortResList(total, aggregationSortingType, parameterSortingType, [], [], percentCntAggregationIndexes, parameter)
+            }
             if (top)
             {
-
-                Boolean nessecaryToSort = !parameterWithDateOrDtInterval &&
-                                          (aggregationSortingType || parameterSortingType) &&
-                                          (diagramType in DiagramType.SortableTypes || (top && isDiagramTypeTable))
-                if (nessecaryToSort)
-                {
-                    total = sortResList(total, aggregationSortingType, parameterSortingType, [], [], percentCntAggregationIndexes, parameter)
-                }
-
                 if (isDiagramTypeTable && !tableHasBreakdown)
                 {
                     PaginationSettings tempPaginationSettings = new PaginationSettings(pageSize: top.count, firstElementIndex: 0)
