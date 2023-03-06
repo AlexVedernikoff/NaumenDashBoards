@@ -1051,22 +1051,23 @@ class QueryWrapper implements CriteriaWrapper
             case GroupType.HOUR_INTERVAL:
             case GroupType.DAY_INTERVAL:
             case GroupType.WEEK_INTERVAL:
-            if (attributeCodes.contains('value') && !totalValueCriteria &&
-                parameter.attribute.property.equals(AttributeType.TOTAL_VALUE_TYPE))
-            {
-                column = sc.property(criteriaForColumn, 'test')
-            }
-                criteria.addGroupColumn(column)
-                criteria.addColumn(column)
+                if (attributeCodes.contains('value') && !totalValueCriteria &&
+                    parameter.attribute.property.equals(AttributeType.TOTAL_VALUE_TYPE))
+                {
+                    column = sc.property(criteriaForColumn, 'test')
+                }
+                columnAccordingToUTC = methodAtTimeZone(sc, column, timeZone)
+                criteria.addGroupColumn(columnAccordingToUTC)
+                criteria.addColumn(columnAccordingToUTC)
                 String sortingType = parameter.sortingType
                 if (sortingType)
                 {
                     Closure sorting = getSorting(sortingType)
-                    column.with(sorting).with(criteria.&addOrder)
+                    columnAccordingToUTC.with(sorting).with(criteria.&addOrder)
                 }
                 else
                 {
-                    criteria.addOrder(ApiCriteriaOrders.asc(column))
+                    criteria.addOrder(ApiCriteriaOrders.asc(columnAccordingToUTC))
                 }
                 break
             case GroupType.getTimerTypes():
@@ -1074,12 +1075,13 @@ class QueryWrapper implements CriteriaWrapper
                 String statusCode = statusType?.toLowerCase().charAt(0)
                 String columnCode = attributeCodes.join('.')
                 criteria.add(api.filters.attrContains(columnCode, statusCode, false, false))
-                criteria.addColumn(columnAccordingToUTC)
-                criteria.addGroupColumn(columnAccordingToUTC)
+                criteria.addColumn(column)
+                criteria.addGroupColumn(column)
                 break
             case GroupType.HOURS:
+                columnAccordingToUTC = methodAtTimeZone(sc, column, timeZone)
                 String format = parameter.format
-                IApiCriteriaColumn hourColumn = sc.extract(column, 'HOUR')
+                IApiCriteriaColumn hourColumn = sc.extract(columnAccordingToUTC, 'HOUR')
                 switch (format)
                 {
                     case 'hh':
