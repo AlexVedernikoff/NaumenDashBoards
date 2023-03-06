@@ -339,6 +339,9 @@ class QueryWrapper implements CriteriaWrapper
             if (attribute.type in AttributeType.NUMBER_TYPES)
             {
                 column = sc.cast(column, 'string')
+                column = sc.selectCase()
+                    .when(api.whereClause.isNull(column), sc.constant('0'))
+                    .otherwise(column)
             }
             column = sc.concat(column, sc.constant(ObjectMarshaller.delimiter), sc.property(DashboardQueryWrapperUtils.UUID_CODE))
             criteria.addGroupColumn(sc.property(DashboardQueryWrapperUtils.UUID_CODE))
