@@ -5237,12 +5237,12 @@
                     if(diagramType == DiagramType.SPEEDOMETER)
                     {
                         return new SpeedometerDiagram(title: title,
-                                                      total: value in String? Integer.valueOf(value) : value,
+                                                      total: value in String? Double.valueOf(value) : value,
                                                       min: minValue,
                                                       max: maxValue)
                     }
                     return new SummaryDiagram(title: title,
-                                              total: value in String? Integer.valueOf(value) : value)
+                                              total: value in String? Double.valueOf(value) : value)
                 default:
                     String message = messageProvider.getConstant(INVALID_RESULT_DATA_SET_ERROR, currentUserLocale)
                     utils.throwReadableException("$message#${INVALID_RESULT_DATA_SET_ERROR}")
