@@ -7544,7 +7544,7 @@
                 }
                 else
                 {
-                    Boolean resultWithoutBreakdown = total?.first()?.size() == 2
+                    Boolean resultWithoutBreakdown = total?.size() && total?.first()?.size() == 2
                     total = getTop(total, top, [], [], true,
                                    parameterWithDate ? parameter : null,
                                    parameterSortingType, aggregationSortingType)
