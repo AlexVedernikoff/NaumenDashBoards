@@ -4034,8 +4034,9 @@
             }
 
             Boolean hasPercentCntAggregation = getPercentCntAggregationIndexes(request).size() != 0
-            Boolean percentCntAggregationForColumnStackedExists =
-                filteringResult.first().size() == 3 && hasPercentCntAggregation
+            Boolean percentCntAggregationForColumnStackedExists = filteringResult?.size()
+                && filteringResult.first().size() == 3
+                && hasPercentCntAggregation
 
             if (percentCntAggregationForColumnStackedExists &&
                 widgetPercentCntAggregationType == Aggregation.PERCENT_CNT_BY_PARAMETERS)
@@ -4088,7 +4089,7 @@
                     top.count = parameterValues.size()
                 }
 
-                List<String> topParameterValues = top ?
+                List<String> topParameterValues = top && parameterValues?.size() ?
                     top.modeOfTop == ModeOfTop.MAX ? parameterValues[0..(top.count - 1)] :
                         parameterValues[
                             (parameterValues.size() - top.count)..(parameterValues.size() - 1)
@@ -7544,23 +7545,9 @@
                 }
                 else
                 {
-                    Boolean resultWithoutBreakdown = total?.size() && total?.first()?.size() == 2
                     total = getTop(total, top, [], [], true,
                                    parameterWithDate ? parameter : null,
                                    parameterSortingType, aggregationSortingType)
-                    if (aggregationSortingType && resultWithoutBreakdown)
-                    {
-                        total = total.sort { a, b ->
-                            Double indicatorValueA = a[0] as Double
-                            Double indicatorValueB = b[0] as Double
-                            Integer sortingResult = indicatorValueA <=> indicatorValueB
-                            if (aggregationSortingType == 'DESC')
-                            {
-                                sortingResult = -sortingResult
-                            }
-                            return sortingResult
-                        }
-                    }
                 }
             }
 
