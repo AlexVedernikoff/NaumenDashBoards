@@ -1051,6 +1051,11 @@ class QueryWrapper implements CriteriaWrapper
             case GroupType.HOUR_INTERVAL:
             case GroupType.DAY_INTERVAL:
             case GroupType.WEEK_INTERVAL:
+            if (attributeCodes.contains('value') && !totalValueCriteria &&
+                parameter.attribute.property.equals(AttributeType.TOTAL_VALUE_TYPE))
+            {
+                column = sc.property(criteriaForColumn, 'test')
+            }
                 criteria.addGroupColumn(column)
                 criteria.addColumn(column)
                 String sortingType = parameter.sortingType
