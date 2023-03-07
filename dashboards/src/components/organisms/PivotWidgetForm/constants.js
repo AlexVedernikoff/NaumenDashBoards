@@ -53,7 +53,7 @@ addMethod(array, 'sourceLinks', function () {
 				}
 			});
 
-			if (result.length > 1) {
+			if (result.length >= 1) {
 				const message = t('PivotWidgetScheme::CheckSourceLinksForAllSources', {
 					sources: result.join(', ')
 				});
