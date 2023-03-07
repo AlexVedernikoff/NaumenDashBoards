@@ -1283,8 +1283,8 @@ class DashboardUtils
         switch (attributeType)
         {
             case AttributeType.NUMBER_TYPES:
-                return true
             case AttributeType.DT_INTERVAL_TYPE:
+            case AttributeType.TIMER_TYPES:
                 return true
             case AttributeType.CATALOG_ITEM_TYPE:
                 return getApi().utils.findFirst(sourceCode, [(attributeCode): getOp().isNotNull()])?.get(attributeCode)?.code?.isNumber()

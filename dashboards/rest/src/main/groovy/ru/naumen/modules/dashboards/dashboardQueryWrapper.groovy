@@ -1056,18 +1056,17 @@ class QueryWrapper implements CriteriaWrapper
                 {
                     column = sc.property(criteriaForColumn, 'test')
                 }
-                columnAccordingToUTC = methodAtTimeZone(sc, column, timeZone)
-                criteria.addGroupColumn(columnAccordingToUTC)
-                criteria.addColumn(columnAccordingToUTC)
+                criteria.addGroupColumn(column)
+                criteria.addColumn(column)
                 String sortingType = parameter.sortingType
                 if (sortingType)
                 {
                     Closure sorting = getSorting(sortingType)
-                    columnAccordingToUTC.with(sorting).with(criteria.&addOrder)
+                    column.with(sorting).with(criteria.&addOrder)
                 }
                 else
                 {
-                    criteria.addOrder(ApiCriteriaOrders.asc(columnAccordingToUTC))
+                    criteria.addOrder(ApiCriteriaOrders.asc(column))
                 }
                 break
             case GroupType.getTimerTypes():
@@ -1909,6 +1908,7 @@ class DashboardQueryWrapperUtils
         {
             case AttributeType.DT_INTERVAL_TYPE:
             case AttributeType.NUMBER_TYPES:
+            case AttributeType.TIMER_TYPES:
                 if (!(type in Aggregation.with {
                     [MIN, MAX, SUM, AVG, COUNT_CNT, PERCENT, NOT_APPLICABLE, PERCENT_CNT ]
                 }))
