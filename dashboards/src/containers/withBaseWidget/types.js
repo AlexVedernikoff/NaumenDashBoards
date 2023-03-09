@@ -1,9 +1,10 @@
 // @flow
-import type {Chart, SetWidgetWarning} from 'store/widgets/data/types';
+import type {Chart, SessionWidgetPart, SetWidgetWarning} from 'store/widgets/data/types';
 import type {DiagramBuildData, DiagramData, FetchBuildDataAction} from 'store/widgets/buildData/types';
 import type {DivRef} from 'components/types';
 import type {DrillDownAction} from 'store/widgets/links/types';
 import type {GlobalCustomChartColorsSettings} from 'store/dashboard/customChartColorsSettings/types';
+import type {ThunkAction} from 'store/types';
 
 type CommonOptions = Object;
 
@@ -11,6 +12,7 @@ export type ConnectedFunctions = {
 	drillDown: DrillDownAction,
 	fetchBuildData: FetchBuildDataAction,
 	setWidgetWarning: (info: SetWidgetWarning) => void,
+	updateSessionWidget: (widget: SessionWidgetPart) => ThunkAction
 };
 
 export type ConnectedProps = {

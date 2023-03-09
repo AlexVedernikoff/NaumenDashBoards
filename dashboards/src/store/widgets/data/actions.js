@@ -1,6 +1,6 @@
 // @flow
 import {addLayouts, removeLayouts, replaceLayoutsId, saveNewLayouts} from 'store/dashboard/layouts/actions';
-import type {AnyWidget, Chart, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
+import type {AnyWidget, Chart, SessionWidgetPart, SetWidgetWarning, ValidateWidgetToCopyResult, Widget} from './types';
 import api from 'api';
 import {ApiError} from 'api/errors';
 import {batch} from 'react-redux';
@@ -14,8 +14,8 @@ import type {DivRef} from 'components/types';
 import type {FetchBuildDataAction} from 'store/widgets/buildData/types';
 import {fetchCustomGroups} from 'store/customGroups/actions';
 import {fetchSourcesFilters} from 'store/sources/sourcesFilters/actions';
-import {getAllWidgets} from 'store/widgets/data/selectors';
-import {getCustomColorsSettingsKey} from './helpers';
+import {getAllWidgets, getWidgetSessionData} from './selectors';
+import {getCustomColorsSettingsKey, uniteWidgetWithSession} from './helpers';
 import {getParams} from 'store/helpers';
 import {getWidgetGlobalChartColorsSettings} from 'store/dashboard/customChartColorsSettings/selectors';
 import {hasChartColorsSettings} from 'store/widgets/helpers';
@@ -48,18 +48,19 @@ const checkWidgetsCount = (relativeElement?: DivRef) => (dispatch: Dispatch, get
  * @param {DivRef} relativeElement - элемент, вызвавший событие проверки
  * @returns {ThunkAction}
  */
-const addNewWidget = (payload: NewWidget, relativeElement?: DivRef): ThunkAction => (dispatch: Dispatch): void => {
-	dispatch(checkWidgetsCount(relativeElement));
+const addNewWidget = (payload: NewWidget, relativeElement?: DivRef): ThunkAction =>
+	(dispatch: Dispatch): void => {
+		dispatch(checkWidgetsCount(relativeElement));
 
-	batch(() => {
-		dispatch(focusWidget(payload.id));
-		dispatch({payload, type: 'widgets/data/addWidget'});
-		dispatch({type: 'dashboard/settings/switchOnEditMode'});
-		dispatch(addLayouts(NewWidget.id, payload.recommendedPosition));
-	});
+		batch(() => {
+			dispatch(focusWidget(payload.id));
+			dispatch({payload, type: 'widgets/data/addWidget'});
+			dispatch({type: 'dashboard/settings/switchOnEditMode'});
+			dispatch(addLayouts(NewWidget.id, payload.recommendedPosition));
+		});
 
-	dashboardResizer.resetHeight();
-};
+		dashboardResizer.resetHeight();
+	};
 
 /**
  * Сбрасывает редактирование нового виджета
@@ -95,13 +96,14 @@ const cancelForm = (): ThunkAction => (dispatch: Dispatch, getState: GetState): 
  * @param {FetchBuildDataAction} fetchBuildData - thunk обновления данных виджета
  * @returns {ThunkAction}
  */
-const saveWidget = (widget: AnyWidget, fetchBuildData: FetchBuildDataAction): ThunkAction => (dispatch: Dispatch): void => {
-	if (widget.id === NewWidget.id) {
-		dispatch(createWidget(widget, fetchBuildData));
-	} else {
-		dispatch(editWidget(widget, fetchBuildData));
-	}
-};
+const saveWidget = (widget: AnyWidget, fetchBuildData: FetchBuildDataAction): ThunkAction =>
+	(dispatch: Dispatch): void => {
+		if (widget.id === NewWidget.id) {
+			dispatch(createWidget(widget, fetchBuildData));
+		} else {
+			dispatch(editWidget(widget, fetchBuildData));
+		}
+	};
 
 /**
  * Сохраняет график
@@ -109,13 +111,14 @@ const saveWidget = (widget: AnyWidget, fetchBuildData: FetchBuildDataAction): Th
  * @param {FetchBuildDataAction} fetchBuildData - thunk обновления данных виджета
  * @returns {ThunkAction}
  */
-const saveChartWidget = (widget: Chart, fetchBuildData: FetchBuildDataAction): ThunkAction => (dispatch: Dispatch): void => {
-	if (widget.id === NewWidget.id) {
-		dispatch(createWidget(widget, fetchBuildData));
-	} else {
-		dispatch(editChartWidget(widget, fetchBuildData));
-	}
-};
+const saveChartWidget = (widget: Chart, fetchBuildData: FetchBuildDataAction): ThunkAction =>
+	(dispatch: Dispatch): void => {
+		if (widget.id === NewWidget.id) {
+			dispatch(createWidget(widget, fetchBuildData));
+		} else {
+			dispatch(editChartWidget(widget, fetchBuildData));
+		}
+	};
 
 /**
  * Редактирует данные графика
@@ -143,15 +146,18 @@ const editChartWidget = (widget: Chart, fetchBuildData: FetchBuildDataAction): T
  * @returns {ThunkAction}
  */
 const editWidget = (settings: AnyWidget, fetchBuildData: FetchBuildDataAction): ThunkAction =>
-	async (dispatch: Dispatch): Promise<string | void> => {
+	async (dispatch: Dispatch, getState: GetState): Promise<string | void> => {
 		let validationErrors;
 
 		dispatch(requestWidgetSave());
 
 		try {
-			const widget = await api.instance.dashboardSettings.widget.edit(getParams(), settings);
+			const sessionData = getWidgetSessionData(getState(), settings.id);
+			const fullSettings = uniteWidgetWithSession(settings, sessionData);
+			const widget = await api.instance.dashboardSettings.widget.edit(getParams(), fullSettings);
 
 			dispatch(updateWidget(widget));
+			dispatch(clearSessionData(widget.id));
 			dispatch(saveNewLayouts());
 			dispatch(fetchBuildData(widget));
 		} catch (e) {
@@ -199,7 +205,10 @@ const editWidgetChunkData = (
  * @param {FetchBuildDataAction} fetchBuildData - thunk обновления данных виджета
  * @returns {ThunkAction}
  */
-const saveWidgetWithNewFilters = (widget: Widget, fetchBuildData: FetchBuildDataAction): ThunkAction =>
+const saveWidgetWithNewFilters = (
+	widget: Widget,
+	fetchBuildData: FetchBuildDataAction
+): ThunkAction =>
 	async (dispatch: Dispatch, getState: GetState): Promise<void> => {
 		try {
 			const state = getState();
@@ -271,7 +280,9 @@ const createWidget = (settings: AnyWidget, fetchBuildData: FetchBuildDataAction)
 		try {
 			await dispatch(updateWidgetCustomColorsSettings(settings));
 
-			const widget = await api.instance.dashboardSettings.widget.create(getParams(), settings);
+			const sessionData = getWidgetSessionData(getState(), settings.id);
+			const fullSettings = uniteWidgetWithSession(settings, sessionData);
+			const widget = await api.instance.dashboardSettings.widget.create(getParams(), fullSettings);
 
 			batch(() => {
 				dispatch(deleteWidget(NewWidget.id));
@@ -311,8 +322,14 @@ const copyWidget = (
 		try {
 			dispatch(checkWidgetsCount(relativeElement));
 
-			const widget = await api.instance.dashboardSettings.widget.copyWidget(getParams(), dashboardKey, widgetKey);
-			const widgetCustomColorsSettingsUpdated = await dispatch(updateWidgetCustomColorsSettings(widget));
+			const widget = await api.instance.dashboardSettings.widget.copyWidget(
+				getParams(),
+				dashboardKey,
+				widgetKey
+			);
+			const widgetCustomColorsSettingsUpdated = await dispatch(
+				updateWidgetCustomColorsSettings(widget)
+			);
 
 			if (widgetCustomColorsSettingsUpdated) {
 				const {colorsSettings} = widget;
@@ -348,84 +365,87 @@ const copyWidget = (
  * @param {DivRef} relativeElement - вызывающий контейнер
  * @returns {ThunkAction}
  */
-const removeWidgetWithConfirm = (widgetId: string, relativeElement?: DivRef): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	const confirmOptions = {
-		cancelText: t('store::widgets::data::RemoveWidgetConfirmNo'),
-		defaultButton: DEFAULT_BUTTONS.CANCEL_BUTTON,
-		footerPosition: FOOTER_POSITIONS.RIGHT,
-		relativeElement,
-		size: SIZES.SMALL,
-		submitText: t('store::widgets::data::RemoveWidgetConfirmYes')
-	};
+const removeWidgetWithConfirm = (widgetId: string, relativeElement?: DivRef): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
+		const confirmOptions = {
+			cancelText: t('store::widgets::data::RemoveWidgetConfirmNo'),
+			defaultButton: DEFAULT_BUTTONS.CANCEL_BUTTON,
+			footerPosition: FOOTER_POSITIONS.RIGHT,
+			relativeElement,
+			size: SIZES.SMALL,
+			submitText: t('store::widgets::data::RemoveWidgetConfirmYes')
+		};
 
-	if (await dispatch(confirmDialog(
-		t('store::widgets::data::RemoveWidgetConfirmTitle'),
-		t('store::widgets::data::RemoveWidgetConfirmText'),
-		confirmOptions
-	))) {
-		dispatch(removeWidget(widgetId));
-	}
-};
+		if (await dispatch(confirmDialog(
+			t('store::widgets::data::RemoveWidgetConfirmTitle'),
+			t('store::widgets::data::RemoveWidgetConfirmText'),
+			confirmOptions
+		))) {
+			dispatch(removeWidget(widgetId));
+		}
+	};
 
 /**
  * Удаляет виджет
  * @param {string} widgetId - идентификатор виджета;
  * @returns {ThunkAction}
  */
-const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatch): Promise<void> => {
-	dispatch(requestWidgetDelete());
+const removeWidget = (widgetId: string): ThunkAction =>
+	async (dispatch: Dispatch): Promise<void> => {
+		dispatch(requestWidgetDelete());
 
-	try {
-		await api.instance.dashboardSettings.widget.delete(getParams(), widgetId);
+		try {
+			await api.instance.dashboardSettings.widget.delete(getParams(), widgetId);
 
-		batch(() => {
-			dispatch(removeLayouts(widgetId));
-			dispatch(deleteWidget(widgetId));
-		});
+			batch(() => {
+				dispatch(removeLayouts(widgetId));
+				dispatch(deleteWidget(widgetId));
+			});
 
-		dispatch(saveNewLayouts());
-	} catch (e) {
-		dispatch(recordDeleteError());
-	}
-};
+			dispatch(saveNewLayouts());
+		} catch (e) {
+			dispatch(recordDeleteError());
+		}
+	};
 
 /**
  * Устанавливает выбранный виджет для последующего редактирования
  * @param {string} widgetId - id виджета
  * @returns {ThunkAction}
  */
-const selectWidget = (widgetId: string): ThunkAction => (dispatch: Dispatch, getState: GetState): void => {
-	const state = getState();
-	const {data: widgetsData} = state.widgets;
+const selectWidget = (widgetId: string): ThunkAction =>
+	(dispatch: Dispatch, getState: GetState): void => {
+		const state = getState();
+		const {data: widgetsData} = state.widgets;
 
-	if (widgetId !== NewWidget.id) {
-		const widgetData = widgetsData.map[widgetId];
+		if (widgetId !== NewWidget.id) {
+			const widgetData = widgetsData.map[widgetId];
 
-		if (widgetData.data) {
-			const sourcesSet = new Set(
-				widgetData
-					.data
-					.map(dataSet => dataSet.source.value?.value)
-					.filter(e => !!e)
-			);
+			if (widgetData.data) {
+				const sourcesSet = new Set(
+					widgetData
+						.data
+						.map(dataSet => dataSet.source.value?.value)
+						.filter(e => !!e)
+				);
 
-			sourcesSet.forEach(item => {
-				dispatch(fetchSourcesFilters(item));
-			});
+				sourcesSet.forEach(item => {
+					dispatch(fetchSourcesFilters(item));
+				});
+			}
 		}
-	}
 
-	dispatch({
-		payload: false,
-		type: 'dashboard/settings/setShowCopyPanel'
-	});
-	dispatch(setSelectedWidget(widgetId));
-	dispatch({
-		type: 'dashboard/settings/switchOnEditMode'
-	});
+		dispatch({
+			payload: false,
+			type: 'dashboard/settings/setShowCopyPanel'
+		});
+		dispatch(setSelectedWidget(widgetId));
+		dispatch({
+			type: 'dashboard/settings/switchOnEditMode'
+		});
 
-	dashboardResizer.resetHeight();
-};
+		dashboardResizer.resetHeight();
+	};
 
 /**
  * Проверяет является ли выбранный виджет валидным для копирования
@@ -445,7 +465,11 @@ const validateWidgetToCopy = (dashboardKey: string, widgetKey: string): ThunkAct
 		try {
 			let result = false;
 
-			({reasons, result} = await api.instance.dashboardSettings.widget.checkToCopy(getParams(), dashboardKey, widgetKey));
+			({reasons, result} = await api.instance.dashboardSettings.widget.checkToCopy(
+				getParams(),
+				dashboardKey,
+				widgetKey
+			));
 			isValid = !result;
 
 			dispatch({
@@ -586,6 +610,16 @@ const updateWidget = (payload: AnyWidget) => ({
 	type: 'widgets/data/updateWidget'
 });
 
+const clearSessionData = (payload: string) => ({
+	payload,
+	type: 'widgets/data/clearSessionData'
+});
+
+const updateSessionWidget = (payload: SessionWidgetPart) => ({
+	payload,
+	type: 'widgets/data/updateSessionWidget'
+});
+
 export {
 	addNewWidget,
 	cancelForm,
@@ -605,6 +639,7 @@ export {
 	setWarningMessage,
 	setUseGlobalChartSettings,
 	setWidgets,
+	updateSessionWidget,
 	updateWidget,
 	validateWidgetToCopy,
 	removeWidgetWithConfirm,

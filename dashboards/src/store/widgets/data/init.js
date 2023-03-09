@@ -17,6 +17,7 @@ export const initialWidgetsState: WidgetsDataState = {
 		loading: false
 	},
 	selectedWidget: '',
+	sessionData: {},
 	validatingToCopy: {
 		error: false,
 		loading: false

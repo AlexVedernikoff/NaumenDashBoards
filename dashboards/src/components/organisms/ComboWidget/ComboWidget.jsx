@@ -193,7 +193,10 @@ export class ComboWidget extends PureComponent<Props, State> {
 			// класс rechart_dataLabels_shadow объявлен глобально в стилях ReChartWidget
 			const showClassName = showShadow ? 'rechart_dataLabels_shadow' : '';
 			const position = isBar ? 'center' : 'top';
-			const label = isBar ? (<StoreLabel dataKey={id} force={isBar} />) : null;
+			const formatter = formatters.dataLabel(dataKey);
+			const label = isBar
+				? (<StoreLabel dataKey={id} force={isBar} formatter={formatter} />)
+				: null;
 
 			return (
 				<LabelList
@@ -203,7 +206,7 @@ export class ComboWidget extends PureComponent<Props, State> {
 					fill={fontColor}
 					fontFamily={fontFamily}
 					fontSize={fontSize}
-					formatter={formatters.dataLabel(dataKey)}
+					formatter={formatter}
 					position={position}
 				/>
 			);

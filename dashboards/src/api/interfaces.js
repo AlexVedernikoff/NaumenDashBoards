@@ -117,6 +117,7 @@ export interface DashboardDataSetAPI {
 		dashboardId: string,
 		widgetId: string,
 		subjectUUID: string,
+		sessionData: DTOValue,
 		widgetFilters: Array<DTOValue>
 	): Promise<DTOValue>;
 
@@ -125,6 +126,7 @@ export interface DashboardDataSetAPI {
 		widgetId: string,
 		subjectUUID: string,
 		requestData: DTOValue,
+		sessionData: DTOValue,
 		widgetFilters: Array<DTOValue>
 	): Promise<DTOValue>;
 }

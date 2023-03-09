@@ -1,8 +1,7 @@
 // @flow
 import type {Action, ChangingState, ThunkAction} from 'store/types';
-import type {Attribute} from 'store/sources/attributes/types';
-import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import {
+	AGGREGATION_TYPE,
 	AXIS_FORMAT_TYPE,
 	CHART_COLORS_SETTINGS_TYPES,
 	COMBO_TYPES,
@@ -26,6 +25,8 @@ import {
 	WIDGET_SETS,
 	WIDGET_TYPES
 } from './constants';
+import type {Attribute} from 'store/sources/attributes/types';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {DashboardItem, WidgetItem} from 'store/dashboards/types';
 import type {DivRef} from 'components/types';
 import {GROUP_WAYS} from 'store/widgets/constants';
@@ -310,6 +311,7 @@ export type AxisWidgetType = $Keys<typeof WIDGET_SETS.AXIS>;
 
 export type AxisWidget = {
 	...BaseWidget,
+	aggregationType: $Keys<typeof AGGREGATION_TYPE>,
 	breakdownFormat?: AxisFormat,
 	colorsSettings: ChartColorsSettings,
 	data: Array<AxisData>,
@@ -676,6 +678,11 @@ export type AnyWidget =
 	| TextWidget
 ;
 
+export type SessionWidgetPart = {
+	...{[key: string]: any}, // $Shape<Widget> не запускается
+	id: string
+};
+
 export type EditWidgetChunkDataAction = (
 	widget: Widget,
 	chunkData: Object,
@@ -709,6 +716,16 @@ export type AddWidget = {
 export type UpdateWidget = {
 	payload: Widget,
 	type: 'widgets/data/updateWidget'
+};
+
+export type UpdateSessionWidget = {
+	payload: SessionWidgetPart,
+	type: 'widgets/data/updateSessionWidget'
+};
+
+export type ClearSessionData = {
+	payload: string,
+	type: 'widgets/data/clearSessionData'
 };
 
 export type SetCreatedWidget = {
@@ -802,6 +819,7 @@ export type ClearMessageWarning = {
 export type WidgetsAction =
 	| AddWidget
 	| ClearMessageWarning
+	| ClearSessionData
 	| DeleteWidget
 	| RecordValidateToCopyError
 	| RecordWidgetCopyError
@@ -818,14 +836,19 @@ export type WidgetsAction =
 	| SelectWidget
 	| SetCreatedWidget
 	| SetFocusedWidget
-	| SetWidgets
-	| UpdateWidget
 	| SetMessageWarning
+	| SetWidgets
 	| UnknownWidgetsAction
+	| UpdateSessionWidget
+	| UpdateWidget
 ;
 
 export type WidgetMap = {
-	[key: string]: Widget;
+	[key: string]: Widget
+};
+
+export type SessionWidgetMap = {
+	[key: string]: SessionWidgetPart
 };
 
 export type WidgetsDataState = {
@@ -835,6 +858,7 @@ export type WidgetsDataState = {
 	map: WidgetMap,
 	saving: ChangingState,
 	selectedWidget: string,
+	sessionData: SessionWidgetMap,
 	validatingToCopy: ChangingState
 };
 

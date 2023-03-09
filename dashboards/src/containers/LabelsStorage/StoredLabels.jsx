@@ -9,7 +9,7 @@ export class StoredLabels extends PureComponent<{}> {
 		const {content, dataKey, force, formatter, height, parentViewBox, textBreakAll, value, viewBox, width, ...props} = label;
 		const dx = width / 2;
 		const dy = height / 2;
-		const textValue = formatter ? formatter(value) : value;
+		const textValue = formatter ? formatter(value, label) : value;
 		const key = generateLabelKey(label);
 
 		return (

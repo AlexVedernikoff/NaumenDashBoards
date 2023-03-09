@@ -27,12 +27,14 @@ import t from 'localization';
  * @param {Function} func - основной форматер
  * @returns {Function} - функция-форматер c логгированием в dev режиме
  */
-export function loggerFormatter<U, T> (func: (value: U) => T): (value: U) => T {
+export function loggerFormatter<U, T, C> (
+	func: (value: U, context?: C) => T
+): (value: U, context?: C) => T {
 	if (process.env.NODE_ENV === 'development') {
-		return value => {
-			const result = func(value);
+		return (value, context) => {
+			const result = func(value, context);
 
-			console.log('LOG: ', value, '->', result);
+			console.log('LOG: ', value, 'with', context, '->', result);
 			return result;
 		};
 	} else {
@@ -45,7 +47,8 @@ export function loggerFormatter<U, T> (func: (value: U) => T): (value: U) => T {
  * @param {number} symbolCount - количество знаков после запятой, по умолчанию - 0
  * @returns {NumberFormatter} - функция-форматер
  */
-export const defaultNumberFormatter = (symbolCount: number = 0): NumberFormatter => (value: number): string => value.toFixed(symbolCount);
+export const defaultNumberFormatter = (symbolCount: number = 0): NumberFormatter =>
+	(value: number): string => value.toFixed(symbolCount);
 
 /**
  * Служебный, не изменяющий форматер.
@@ -95,41 +98,49 @@ export const getLabelFormatter = (format: LabelFormat = LABEL_FORMATS.TITLE): St
 /**
  * Форматер-оболочка для проверки на бесконечность
  * @param {NumberFormatter}  successFormatter - функция-форматер для числа не равного 0
- * @returns {NumberFormatter} - функция-форматер, возвращающая пустую строку, если значение равно Infinity, или результат вызова successFormatter
+ * @returns {NumberFormatter} - функция-форматер, возвращающая пустую строку, если значение равно
+ * Infinity, или результат вызова successFormatter
  * в другом случае
  */
-export const checkInfinity = (successFormatter: NumberFormatter): NumberFormatter => (value: number | typeof Infinity) => value === Infinity ? '' : successFormatter(value);
+export const checkInfinity = (successFormatter: NumberFormatter): NumberFormatter =>
+	(value: number | typeof Infinity, context?: CTXValue) =>
+		value === Infinity ? '' : successFormatter(value, context);
 
 /**
  * Форматер-оболочка для проверки на 0
  * @param {NumberFormatter}  successFormatter - функция-форматер для числа не равного 0
- * @returns {NumberFormatter} - функция-форматер, возвращающая пустую строку, если значение равно 0, или результат вызова successFormatter
+ * @returns {NumberFormatter} - функция-форматер, возвращающая пустую строку, если значение равно 0,
+ * или результат вызова successFormatter
  * в другом случае
  */
-export const checkZero = (successFormatter: NumberFormatter): NumberFormatter => (value: number) => value === 0 ? '' : successFormatter(value);
+export const checkZero = (successFormatter: NumberFormatter): NumberFormatter =>
+	(value: number, context?: CTXValue) => value === 0 ? '' : successFormatter(value, context);
 
 /**
  * Форматер-оболочка для проверки на строку
  * @param {StringFormatter}  successFormatter - функция-форматер для строк
- * @returns {Function} - функция-форматер, возвращающая переданное значение, если значение не строка, иначе результат вызова successFormatter
+ * @returns {Function} - функция-форматер, возвращающая переданное значение, если значение
+ * не строка, иначе результат вызова successFormatter
  * в другом случае
  */
-export const checkString = (successFormatter: StringFormatter) => (value?: string | number): string => {
-	const stringValue = typeof value === 'string' ? value : value?.toString() ?? '';
-	return successFormatter(stringValue);
-};
+export const checkString = (successFormatter: StringFormatter) =>
+	(value?: string | number, context?: CTXValue): string => {
+		const stringValue = typeof value === 'string' ? value : value?.toString() ?? '';
+		return successFormatter(stringValue, context);
+	};
 
 /**
  * Форматер-оболочка для проверки на число
  * @param {NumberFormatter}  successFormatter - функция-форматер для числа
- * @returns {Function} - функция-форматер, возвращающая переданное значение, если значение не число, иначе результат вызова successFormatter
+ * @returns {Function} - функция-форматер, возвращающая переданное значение, если значение
+ * не число, иначе результат вызова successFormatter
  * в другом случае
  */
 export const checkNumber = (successFormatter: NumberFormatter): ValueFormatter =>
-	(value: string | number): string => {
+	(value: string | number, context?: CTXValue): string => {
 		const numValue = typeof value === 'string' ? parseFloat(value) : value;
 		// $FlowFixMe - parseFloat(string) - isNaN => typeof value === 'string'
-		return isNaN(numValue) ? value : successFormatter(numValue);
+		return isNaN(numValue) ? value : successFormatter(numValue, context);
 	};
 
 /**
@@ -137,7 +148,8 @@ export const checkNumber = (successFormatter: NumberFormatter): ValueFormatter =
  * @param {string} additional - строка добавления
  * @returns {StringFormatter} - функция-форматер
  */
-export const additionalFormat = (additional: string): StringFormatter => value => value ? `${value}${additional}` : value;
+export const additionalFormat = (additional: string): StringFormatter =>
+	(value: string): string => value ? `${value}${additional}` : value;
 
 /**
  * Форматер для добавления процента в конец значения
@@ -169,7 +181,10 @@ export const sevenDaysFormatter: ValueFormatter = (value?: string | number): str
  * @param {NumberFormatter} addConverter - внутренний форматер
  * @returns {NumberFormatter} - функция-форматер
  */
-export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, addConverter: NumberFormatter): NumberFormatter => {
+export const notationConverter = (
+	notation: $Values<typeof NOTATION_FORMATS>,
+	addConverter: NumberFormatter
+): NumberFormatter => {
 	const {BILLION, MILLION, THOUSAND, TRILLION} = NOTATION_FORMATS;
 	let [divider, additional] = [1, ''];
 
@@ -197,7 +212,10 @@ export const notationConverter = (notation: $Values<typeof NOTATION_FORMATS>, ad
  * @param {boolean} hideZero - сообщает нужно ли убирать нулевые (пустые) значения
  * @returns {NumberFormatter} - функция-форматер
  */
-export const makeFormatterByNumberFormat = (format: NumberAxisFormat, hideZero: boolean = true): NumberFormatter => {
+export const makeFormatterByNumberFormat = (
+	format: NumberAxisFormat,
+	hideZero: boolean = true
+): NumberFormatter => {
 	let formatter = (value: number): string => {
 		let result = '';
 		let {splitDigits, symbolCount} = format;
@@ -244,7 +262,10 @@ export const makeFormatterByFormat = (format: AxisFormat | null, hideZero: boole
 			result = checkString(getLabelFormatter(format.labelFormat ?? LABEL_FORMATS.TITLE));
 		}
 
-		if (format.type === AXIS_FORMAT_TYPE.INTEGER_FORMAT || format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT) {
+		if (
+			format.type === AXIS_FORMAT_TYPE.INTEGER_FORMAT
+			|| format.type === AXIS_FORMAT_TYPE.NUMBER_FORMAT
+		) {
 			result = checkNumber(makeFormatterByNumberFormat(format, hideZero));
 		}
 
@@ -260,9 +281,11 @@ export const makeFormatterByFormat = (format: AxisFormat | null, hideZero: boole
  * Форматер, который применяет базовый форматер, и добавляет запись
  * [значение, отформатированное значение, облегчённый контекст] в массив stored.
  * Накапливает информацию о форматировании для генерации тест-кейсов.
- * @param {Array<[string | number, string]>} stored - массив для сохранения пар [значение, отформатировавшие значение]
+ * @param {Array<[string | number, string]>} stored - массив для сохранения пар [значение,
+ * отформатировавшие значение]
  * @param {ValueFormatter} formatter - базовый форматер
- * @param {Function} ctxFormatter - функция экстрактор для облегчения ctx объекта. зависит от реализации базового форматера
+ * @param {Function} ctxFormatter - функция экстрактор для облегчения ctx объекта. зависит
+ * от реализации базового форматера
  * @returns {ValueFormatter} - функция форматер
  */
 export const storedFormatter = (
@@ -283,7 +306,7 @@ export const storedFormatter = (
  * Создание форматера для CNT(%) типа агрегации
  * @param {NumberFormatter} formatter - функция-форматер для значения
  * @param {PercentStore} percentStore - данные для cnt(%)
- * @returns {Function} - функция-форматер
+ * @returns {NumberFormatter} - функция-форматер
  */
 export const cntPercentFormatter = (
 	formatter: NumberFormatter,
@@ -297,12 +320,13 @@ export const cntPercentFormatter = (
 	const percentFormatterWithCheck = checkNumber(percentFormatter);
 	const valueFormatter = checkNumber(formatter);
 
-	return (value: number): string => {
+	return (value: number, context: CTXValue): string => {
 		let result = '';
+		const {name} = context ?? {};
 
 		if (value) {
 			const valueStr = valueFormatter(value);
-			const percent = percentStore[value];
+			const percent = name in percentStore ? percentStore[name][value] : percentStore[null]?.[value];
 
 			if (percent) {
 				const percentStr = percentFormatterWithCheck(percent);
@@ -362,7 +386,8 @@ export const formatMSInterval = (format: DTIntervalAxisFormat): NumberFormatter 
  * @deprecated Перед использованием спросить у аналитика
  * @param {number} ms - значение интервала в миллисекундах
  * @returns {string} - Человекочитаемый формат интервала
- * - В случае целого числа недель, дней, часов или минут, выводим в соответствии с полученным значением:
+ * - В случае целого числа недель, дней, часов или минут, выводим в соответствии
+ * с полученным значением:
  * --- если получилось от 1000 мс до 60 000 мс - в секундах,
  * --- от 60 000 мс до 3 600 000 мс - в минутах,
  * --- от 3 600 000 мс до 86 400 000 мс - в часах,

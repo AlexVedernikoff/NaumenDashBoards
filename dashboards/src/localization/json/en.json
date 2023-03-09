@@ -364,6 +364,8 @@
 	"SelectModal::Cancel": "Cancel",
 	"SelectModal::CreateField": "Attribute type selection",
 	"SelectWithCustomEdit::UserOption": "Customizing",
+	"SessionControls::ByParametersClass": "% by parameters",
+	"SessionControls::ByWidgetClass": "% by widget",
 	"ShowTotalAmountBox::ShowSubTotalAmount": "Display subtotals",
 	"ShowTotalAmountBox::ShowTotalAmount": "Display totals",
 	"SortingBox::SortingAsc": "By ascending",
