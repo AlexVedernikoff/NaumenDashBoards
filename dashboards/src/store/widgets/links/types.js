@@ -1,5 +1,5 @@
 // @flow
-import type {Breakdown, Group, MixedAttribute, Parameter, Widget} from 'store/widgets/data/types';
+import type {Breakdown, Group, Indicator, MixedAttribute, Parameter, Widget} from 'store/widgets/data/types';
 import {LINKS_EVENTS} from './constants';
 import type {ThunkAction} from 'store/types';
 
@@ -22,6 +22,7 @@ export type DrillDownMixin = {
 	descriptor?: string,
 	filterId?: string,
 	filters: Array<Filter>,
+	indicators?: Array<Indicator>,
 	isSummaryAdditionalValue?: boolean,
 	parameters?: Array<Parameter>,
 	showBlankData?: boolean,
