@@ -7165,28 +7165,43 @@
             //берём из этих групп первые по top или все группы, если данных меньше
             if (tempResult.size() > top.count && fromNoOrTwoFiltersList)
             {
-                if (top.modeOfTop == ModeOfTop.MAX)
+                if (aggregationOrderWithDates)
                 {
-                    if (aggregationOrderWithDates == 'DESC')
+                    if (top.modeOfTop == ModeOfTop.MAX)
                     {
-                        tempResult = tempResult[0..(top.count - 1)]
+                        if (aggregationOrderWithDates == 'DESC')
+                        {
+                            tempResult = tempResult[0..(top.count - 1)]
+                        }
+                        else
+                        {
+                            tempResult =
+                                tempResult[(tempResult.size() - top.count)..(tempResult.size() - 1)]
+                        }
                     }
                     else
                     {
-                        tempResult =
-                            tempResult[(tempResult.size() - top.count)..(tempResult.size() - 1)]
+                        if (aggregationOrderWithDates == 'DESC')
+                        {
+                            tempResult =
+                                tempResult[(tempResult.size() - top.count)..(tempResult.size() - 1)]
+                        }
+                        else
+                        {
+                            tempResult = tempResult[0..(top.count - 1)]
+                        }
                     }
                 }
                 else
                 {
-                    if (aggregationOrderWithDates == 'DESC')
+                    if (top.modeOfTop == ModeOfTop.MAX)
                     {
-                        tempResult =
-                            tempResult[(tempResult.size() - top.count)..(tempResult.size() - 1)]
+                        tempResult = tempResult[0..(top.count - 1)]
                     }
                     else
                     {
-                        tempResult = tempResult[0..(top.count - 1)]
+                        tempResult =
+                            tempResult[(tempResult.size() - top.count)..(tempResult.size() - 1)]
                     }
                 }
             }
