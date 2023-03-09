@@ -364,6 +364,8 @@
 	"SelectModal::Cancel": "Отмена",
 	"SelectModal::CreateField": "Выбор типа поля",
 	"SelectWithCustomEdit::UserOption": "Пользовательская настройка",
+	"SessionControls::ByParametersClass": "% по параметру",
+	"SessionControls::ByWidgetClass": "% по виджету",
 	"ShowTotalAmountBox::ShowSubTotalAmount": "Отображать промежуточные итоги",
 	"ShowTotalAmountBox::ShowTotalAmount": "Отображать общую сумму объектов",
 	"SortingBox::SortingAsc": "По возрастанию",

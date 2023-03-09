@@ -364,6 +364,8 @@
 	"SelectModal::Cancel": "",
 	"SelectModal::CreateField": "",
 	"SelectWithCustomEdit::UserOption": "",
+	"SessionControls::ByParametersClass": "",
+	"SessionControls::ByWidgetClass": "",
 	"ShowTotalAmountBox::ShowSubTotalAmount": "",
 	"ShowTotalAmountBox::ShowTotalAmount": "",
 	"SortingBox::SortingAsc": "",
