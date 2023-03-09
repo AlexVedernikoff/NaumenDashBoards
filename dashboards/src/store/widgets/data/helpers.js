@@ -1,6 +1,7 @@
 // @flow
 import type {
 	AddWidget,
+	AnyWidget,
 	AxisData,
 	CircleData,
 	ClearMessageWarning,
@@ -8,12 +9,14 @@ import type {
 	Group,
 	Indicator,
 	SelectWidget,
+	SessionWidgetPart,
 	SetCreatedWidget,
 	SetMessageWarning,
 	SetWidgets,
 	Source,
 	SourceData,
 	TableData,
+	UpdateSessionWidget,
 	UpdateWidget,
 	Widget,
 	WidgetType,
@@ -154,6 +157,26 @@ const updateWidget = (state: WidgetsDataState, {payload}: UpdateWidget): Widgets
 	};
 };
 
+/**
+ * Сохраняем временные изменения данных виджета
+ * @param {WidgetsDataState} state - хранилище данных виджетов
+ * @param {Widget} payload - данные виджета
+ * @returns {WidgetsDataState}
+ */
+const updateSessionWidget = (
+	state: WidgetsDataState,
+	{payload}: UpdateSessionWidget
+): WidgetsDataState => {
+	const {id} = payload;
+	return {
+		...state,
+		sessionData: {
+			...state.sessionData,
+			[id]: payload
+		}
+	};
+};
+
 const getBuildSet = ({data}: Object) => data.find(set => !set.sourceForCompute) || data[0];
 
 /**
@@ -215,7 +238,9 @@ const createCustomColorsSettingsKey = (
 	if (attribute && attribute.type in ATTRIBUTE_SETS.REFERENCE) {
 		const targetAttribute = attribute.ref || attribute;
 
-		key = targetAttribute && group ? `${targetAttribute.property}-${targetAttribute.code}-${group.data}` : null;
+		key = targetAttribute && group
+			? `${targetAttribute.property}-${targetAttribute.code}-${group.data}`
+			: null;
 	} else {
 		key = source && attribute && group ? `${source.value}-${attribute.code}-${group.data}` : null;
 	}
@@ -413,6 +438,41 @@ const isDontUseParamsForDataSet = (
 	dataSet: ?TableData
 ) => dataSet && typeof dataSet.sourceRowName === 'string';
 
+/**
+ * Объединяет данные виджета с сессионными данными
+ * @param {AnyWidget} widget - изначальный виджет
+ * @param {SessionWidgetPart | null} sessionData - временные данные для объединения
+ * @returns {AnyWidget} - объединенный виджет
+ */
+function uniteWidgetWithSession<T: AnyWidget> (
+	widget: T,
+	sessionData?: SessionWidgetPart | null
+): T {
+	if (sessionData) {
+		const unite = (subject: Object, update: {[key: string]: any}) => {
+			const result = {...subject};
+
+			Object.keys(update).forEach(key => {
+				const value = update[key];
+
+				if (value !== result[key]) {
+					if (typeof result[key] === 'object' && typeof value === 'object') {
+						result[key] = unite(result[key], value);
+					}
+
+					result[key] = value;
+				}
+			});
+
+			return result;
+		};
+
+		return unite(widget, sessionData);
+	}
+
+	return widget;
+}
+
 export {
 	addWidget,
 	clearWidgetWarning,
@@ -428,9 +488,11 @@ export {
 	getMainDataSetIndex,
 	getSourceDescriptor,
 	isDontUseParamsForDataSet,
+	uniteWidgetWithSession,
 	resetWidget,
 	setSelectedWidget,
 	setWidgets,
 	setWidgetWarning,
+	updateSessionWidget,
 	updateWidget
 };

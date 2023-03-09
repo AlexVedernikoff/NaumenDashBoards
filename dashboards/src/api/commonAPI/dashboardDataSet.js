@@ -13,6 +13,7 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 		dashboardKey: string,
 		widgetKey: string,
 		cardObjectUuid: string,
+		sessionData: DTOValue,
 		widgetFilters: Array<DTOValue>
 	) {
 		return this.transport(
@@ -23,6 +24,7 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 				cardObjectUuid,
 				dashboardKey,
 				offsetUTCMinutes: -(new Date()).getTimezoneOffset(),
+				sessionData,
 				widgetFilters,
 				widgetKey
 			}
@@ -34,6 +36,7 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 		widgetKey: string,
 		cardObjectUuid: string,
 		tableRequestSettings: DTOValue,
+		sessionData: DTOValue,
 		widgetFilters: Array<DTOValue>
 	) {
 		return this.transport(
@@ -44,6 +47,7 @@ export default class DashboardDataSet implements DashboardDataSetAPI {
 				cardObjectUuid,
 				dashboardKey,
 				offsetUTCMinutes: -(new Date()).getTimezoneOffset(),
+				sessionData,
 				tableRequestSettings,
 				widgetFilters,
 				widgetKey

@@ -2,23 +2,23 @@
 
 export type CTXValue = Object;
 
-export type PercentStore = {[id: number]: number};
+export type PercentStore = {[storeId: string | null]: {[id: number]: number}};
 
-export type NumberFormatter = (value: number) => string;
+export type NumberFormatter = (value: number, context?: CTXValue) => string;
 
-export type StringFormatter = (value: string) => string;
+export type StringFormatter = (value: string, context?: CTXValue) => string;
 
-export type ValueFormatter = (value: string | number) => string;
+export type ValueFormatter = (value: string | number, context?: CTXValue) => string;
 
-export type PivotValueFormatter = (value: string | number | [number, number] | null) => string;
+export type PivotValueFormatter = (value: string | number | [number, number] | null, context?: CTXValue) => string;
 
-export type ValuePivotFormatter = (key: string, value: string | number | [number, number] | null) => string;
+export type ValuePivotFormatter = (key: string, value: string | number | [number, number] | null, context?: CTXValue) => string;
 
-export type ComboNumberFormatter = (dataKey: string) => (value: number) => string;
+export type ComboNumberFormatter = (dataKey: string) => (value: number, context?: CTXValue) => string;
 
-export type ComboStringFormatter = (dataKey: string) => (value: string) => string;
+export type ComboStringFormatter = (dataKey: string) => (value: string, context?: CTXValue) => string;
 
-export type ComboValueFormatter = (dataKey: string) => (value: number | string) => string;
+export type ComboValueFormatter = (dataKey: string) => (value: number | string, context?: CTXValue) => string;
 
 export type FormatterParams = {
 	hasOverlappedLabel: boolean,
@@ -27,7 +27,7 @@ export type FormatterParams = {
 };
 
 export type AxisFormatter = {
-	dataLabel: NumberFormatter,
+	dataLabel: ValueFormatter,
 	indicator: ValueFormatter,
 	legend: ValueFormatter,
 	parameter: ValueFormatter,

@@ -47,7 +47,7 @@ export class BarWidget extends PureComponent<Props, State> {
 				fill,
 				indicator: formatters.parameter(data.name),
 				parameter: formatters.parameter(key),
-				value: formatters.tooltip(data[key])
+				value: formatters.tooltip(data[key], data)
 			}
 		});
 	};
@@ -156,12 +156,11 @@ export class BarWidget extends PureComponent<Props, State> {
 			return (
 				<LabelList
 					className={showClassName}
-					content={<StoreLabel dataKey={key} />}
+					content={<StoreLabel dataKey={key} formatter={formatters.dataLabel} />}
 					dataKey={key}
 					fill={fontColor}
 					fontFamily={fontFamily}
 					fontSize={fontSize}
-					formatter={formatters.dataLabel}
 					position="center"
 				/>
 			);

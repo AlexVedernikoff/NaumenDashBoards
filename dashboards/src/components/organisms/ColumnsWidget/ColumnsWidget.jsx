@@ -37,7 +37,7 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 				fill,
 				indicator: formatters.parameter(data.name),
 				parameter: formatters.parameter(key),
-				value: formatters.tooltip(data[key])
+				value: formatters.tooltip(data[key], data)
 			}
 		});
 	};
@@ -155,12 +155,13 @@ export class ColumnsWidget extends PureComponent<Props, State> {
 			return (
 				<LabelList
 					className={showClassName}
-					content={<StoreLabel dataKey={key} force={true} />}
+					content={
+						<StoreLabel dataKey={key} force={true} formatter={formatters.dataLabel} />
+					}
 					dataKey={key}
 					fill={fontColor}
 					fontFamily={fontFamily}
 					fontSize={fontSize}
-					formatter={formatters.dataLabel}
 					position="center"
 				/>
 			);

@@ -37,7 +37,7 @@ const getDataForTableDiagram = async (
 	pageNumber: number,
 	pageSize: number
 ): Promise<TableBuildData> => {
-	const {context, dashboard} = state;
+	const {context, dashboard, widgets} = state;
 	const {
 		ignoreDataLimits: ignoreLimits = {
 			breakdown: false,
@@ -51,12 +51,14 @@ const getDataForTableDiagram = async (
 		pageSize,
 		sorting
 	};
+	const session = widgets.data.sessionData[widget.id];
 	const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
 	const data = await api.instance.dashboardDataSet.getDataForTableDiagram(
 		dashboard.settings.code,
 		widget.id,
 		context.subjectUuid,
 		requestData,
+		session,
 		widgetFilters
 	);
 	return data;
@@ -146,13 +148,15 @@ const fetchDiagramBuildData = (
 		dispatch(requestBuildData(widget));
 
 		try {
-			const {context, dashboard} = getState();
+			const {context, dashboard, widgets} = getState();
 			const widgetFilters = getWidgetFilterOptionsDescriptors(widget);
+			const session = widgets.data.sessionData[widget.id];
 
 			const data = await api.instance.dashboardDataSet.getDataForCompositeDiagram(
 				dashboard.settings.code,
 				widget.id,
 				context.subjectUuid,
+				session,
 				widgetFilters
 			);
 

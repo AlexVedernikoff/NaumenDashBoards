@@ -7,6 +7,8 @@ import type {DivRef} from 'components/types';
 import {functions, props} from './selectors';
 import {getOptions} from 'utils/recharts';
 import React, {createRef, PureComponent} from 'react';
+import SessionControls from './components/SessionControls';
+import type {SessionWidgetPart} from 'store/widgets/data/types';
 import styles from './styles.less';
 import T from 'components/atoms/Translation';
 import t from 'localization';
@@ -72,6 +74,14 @@ export const withBaseWidget = <Config: WidgetProps>(
 			return {hiddenSeries};
 		});
 
+		handleUpdateSessionWidget = (data: SessionWidgetPart) => {
+			const {updateSessionWidget} = this.props;
+
+			if (updateSessionWidget) {
+				updateSessionWidget(data);
+			}
+		};
+
 		updateOptions = (container: HTMLDivElement) => {
 			const {height, width} = container.getBoundingClientRect();
 			return this.setState({height, width});
@@ -85,6 +95,7 @@ export const withBaseWidget = <Config: WidgetProps>(
 			if (!error && !updateError && !loading && options) {
 				return (
 					<Content widget={widget}>
+						<SessionControls updateWidget={this.handleUpdateSessionWidget} widget={widget} />
 						<Component
 							{...props}
 							data={data}
