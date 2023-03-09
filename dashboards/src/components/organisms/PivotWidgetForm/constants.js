@@ -43,22 +43,25 @@ addMethod(array, 'sourceLinks', function () {
 		function (sourceLinks: Array<PivotLink>) {
 			const result: Array<string> = [];
 			const {parent: {data}} = this;
-			const pivotData = (data: Array<PivotDataSet>);
-			const sourceLinksKeys = sourceLinks.flatMap(({dataKey1, dataKey2}) => [dataKey1, dataKey2]);
-			const dataKeysSet = new Set(sourceLinksKeys);
+			const pivotData: Array<PivotDataSet> = data;
 
-			pivotData.forEach(dataSet => {
-				if (!dataKeysSet.has(dataSet.dataKey)) {
-					result.push(dataSet.source.value?.label ?? '');
-				}
-			});
+			if (pivotData.length > 1) {
+				const sourceLinksKeys = sourceLinks.flatMap(({dataKey1, dataKey2}) => [dataKey1, dataKey2]);
+				const dataKeysSet = new Set(sourceLinksKeys);
 
-			if (result.length >= 1) {
-				const message = t('PivotWidgetScheme::CheckSourceLinksForAllSources', {
-					sources: result.join(', ')
+				pivotData.forEach(dataSet => {
+					if (!dataKeysSet.has(dataSet.dataKey)) {
+						result.push(dataSet.source.value?.label ?? '');
+					}
 				});
 
-				return this.createError({message});
+				if (result.length >= 1) {
+					const message = t('PivotWidgetScheme::CheckSourceLinksForAllSources', {
+						sources: result.join(', ')
+					});
+
+					return this.createError({message});
+				}
 			}
 
 			return true;
