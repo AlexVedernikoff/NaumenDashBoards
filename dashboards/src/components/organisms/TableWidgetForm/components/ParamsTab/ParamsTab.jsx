@@ -257,7 +257,6 @@ export class ParamsTab extends PureComponent<Props> {
 				<FormField name={DIAGRAM_FIELDS.top}>
 					<DataTopField
 						disabled={disabled}
-						hasModeOfTop={false}
 						onChange={this.handleChangeTopSettings}
 						value={top}
 					/>
