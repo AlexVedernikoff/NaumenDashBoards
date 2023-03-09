@@ -265,6 +265,7 @@ export class WidgetsGrid extends Component<Props, State> {
 					<Grid
 						innerRef={gridRef}
 						isDraggable={isEditable}
+						isDroppable={isEditable}
 						isResizable={isEditable}
 						layouts={layouts}
 						onDrag={this.handleDrag}
