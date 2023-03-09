@@ -5,6 +5,7 @@ import type {ConnectedFunctions, ConnectedProps} from './types';
 import {saveWidget} from 'store/widgets/actions';
 
 export const props = (state: AppState): ConnectedProps => ({
+	customGroups: state.customGroups.map,
 	values: state.widgetForms.comboChartForm
 });
 

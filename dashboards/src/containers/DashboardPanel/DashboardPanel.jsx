@@ -31,9 +31,11 @@ class DashboardPanel extends PureComponent<Props> {
 	};
 
 	render () {
-		const goBack = (isCancel, relativeElement) => { this.handleGoBackAsync(isCancel, relativeElement); };
+		const goBack = (isCancel, relativeElement) => {
+			this.handleGoBackAsync(isCancel, relativeElement);
+		};
 
-		return (<Component {...this.props} goBack={goBack} />);
+		return <Component {...this.props} goBack={goBack} />;
 	}
 }
 

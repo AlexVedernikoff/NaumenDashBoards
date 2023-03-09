@@ -34,7 +34,7 @@ export class ComboChartWidgetForm extends PureComponent<Props> {
 
 	renderParamsTab = (props: TabProps) => <ParamsTab {...props} hasCustomGroup={this.hasCustomGroup(props.values)} />;
 
-	renderStyleTab = (props: TabProps) => <StyleTab {...props} hasCustomGroup={this.hasCustomGroup(props.values)} />;
+	renderStyleTab = (props: TabProps) => <StyleTab {...props} />;
 
 	render () {
 		const {onChange, values} = this.props;
