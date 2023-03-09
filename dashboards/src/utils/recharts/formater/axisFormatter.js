@@ -158,7 +158,11 @@ const getAxisFormatterDebug = (
 	const tooltipTitle = [];
 	const totalDataLabel = [];
 
-	console.info('getAxisFormatterDebug: ', {...store, dataLabel, indicator, legend, parameterDefault, parameterOverlapped, tooltipTitle});
+	console.info(
+		'getAxisFormatterDebug: ',
+		{...store, dataLabel, indicator, legend, parameterDefault, parameterOverlapped, tooltipTitle}
+	);
+
 	return {
 		dataLabel: storedFormatter(dataLabel, baseFormatter.dataLabel),
 		indicator: storedFormatter(indicator, baseFormatter.indicator),

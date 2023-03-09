@@ -227,14 +227,18 @@ const getValueFromSeriesLabel = (value?: string | number): ValueFromSeriesLabelR
  * @returns {RechartSeriesData} - данные для rechart
  */
 const getSeriesData = (data: DiagramBuildData): RechartSeriesData => {
+	const globalStore = {};
 	const result = {
 		data: [],
-		percentStore: {}
+		percentStore: {null: globalStore}
 	};
 	const {labels, series} = data;
 
 	labels.forEach((label, i) => {
 		const item: RechartDataItem = {name: label};
+		const store = {};
+
+		result.percentStore[label] = store;
 
 		series.forEach(({data, dataKey, name}) => {
 			const id = dataKey ?? name ?? 'value';
@@ -244,7 +248,8 @@ const getSeriesData = (data: DiagramBuildData): RechartSeriesData => {
 				item[id] = value;
 
 				if (percent) {
-					result.percentStore[value] = percent;
+					globalStore[value] = percent;
+					store[value] = percent;
 				}
 			} else {
 				item[id] = 0;
@@ -263,9 +268,10 @@ const getSeriesData = (data: DiagramBuildData): RechartSeriesData => {
  * @returns {RechartSeriesData} - данные для rechart
  */
 const getComboSeriesData = (data: DiagramBuildData): RechartSeriesData => {
+	const globalStore = {};
 	const result = {
 		data: [],
-		percentStore: {}
+		percentStore: {null: globalStore}
 	};
 	const {labels, series} = data;
 
@@ -280,7 +286,7 @@ const getComboSeriesData = (data: DiagramBuildData): RechartSeriesData => {
 				item[id] = value;
 
 				if (percent) {
-					result.percentStore[value] = percent;
+					globalStore[value] = percent;
 				}
 			} else {
 				item[id] = 0;
@@ -305,9 +311,10 @@ const getCircleSeriesData = (
 	data: DiagramBuildData,
 	globalColorsSettings: GlobalCustomChartColorsSettings
 ): RechartCircleData => {
+	const globalStore = {};
 	const result = {
 		data: [],
-		percentStore: {}
+		percentStore: {null: globalStore}
 	};
 
 	const {labels, series} = data;
@@ -326,7 +333,7 @@ const getCircleSeriesData = (
 			});
 
 			if (percent) {
-				result.percentStore[value] = percent;
+				globalStore[value] = percent;
 			}
 		}
 	});

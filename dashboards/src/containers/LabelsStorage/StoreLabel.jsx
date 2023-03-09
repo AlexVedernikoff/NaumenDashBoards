@@ -30,7 +30,7 @@ export class StoreLabel extends PureComponent<Props> {
 			if (force) {
 				register = true;
 			} else {
-				const text = formatter ? formatter(value) : value.toString();
+				const text = formatter ? formatter(value, this.props) : value.toString();
 
 				const sizes = calculateStringsSize([[text]], fontFamily, fontSize);
 				const {height: heightText, width: widthText} = sizes[0];

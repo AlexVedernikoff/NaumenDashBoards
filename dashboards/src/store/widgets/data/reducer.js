@@ -8,12 +8,17 @@ import {
 	setSelectedWidget,
 	setWidgetWarning,
 	setWidgets,
+	updateSessionWidget,
 	updateWidget
 } from './helpers';
 import {defaultAction, initialWidgetsState} from './init';
+import {omit} from 'helpers';
 import type {WidgetsAction, WidgetsDataState} from './types';
 
-const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsAction = defaultAction): WidgetsDataState => {
+const reducer = (
+	state: WidgetsDataState = initialWidgetsState,
+	action: WidgetsAction = defaultAction
+): WidgetsDataState => {
 	switch (action.type) {
 		case 'widgets/data/addWidget':
 			return addWidget(state, action);
@@ -123,6 +128,13 @@ const reducer = (state: WidgetsDataState = initialWidgetsState, action: WidgetsA
 			return setWidgetWarning(state, action);
 		case 'widgets/data/widgetClearWarning':
 			return clearWidgetWarning(state, action);
+		case 'widgets/data/clearSessionData':
+			return {
+				...state,
+				sessionData: omit(state.sessionData, action.payload)
+			};
+		case 'widgets/data/updateSessionWidget':
+			return updateSessionWidget(state, action);
 		default:
 			return state;
 	}
