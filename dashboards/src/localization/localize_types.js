@@ -102,6 +102,11 @@ type SelectModal =
 type SelectWithCustomEdit =
 	| 'SelectWithCustomEdit::UserOption';
 
+// containers/withBaseWidget/components/SessionControls/SessionControls
+type SessionControls =
+  | 'SessionControls::ByWidgetClass'
+  | 'SessionControls::ByParametersClass';
+
 // components/molecules/TreeSelect
 type TreeSelect =
 	| 'TreeSelect::DefaultPlaceholder';
@@ -1070,6 +1075,7 @@ export type LangType =
 	| SelectList
 	| SelectModal
 	| SelectWithCustomEdit
+	| SessionControls
 	| ShowTotalAmountBox
 	| SortingBox
 	| SourceBox

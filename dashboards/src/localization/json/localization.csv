@@ -358,6 +358,8 @@
 "SelectModal::Cancel","Отмена","Cancel",,
 "SelectModal::CreateField","Выбор типа поля","Attribute type selection",,
 "SelectWithCustomEdit::UserOption","Пользовательская настройка","Customizing",,
+"SessionControls::ByParametersClass","% по параметру","% by parameters",,
+"SessionControls::ByWidgetClass","% по виджету","% by widget",,
 "ShowTotalAmountBox::ShowSubTotalAmount","Отображать промежуточные итоги","Display subtotals",,
 "ShowTotalAmountBox::ShowTotalAmount","Отображать общую сумму объектов","Display totals",,
 "SortingBox::SortingAsc","По возрастанию","By ascending",,
