@@ -2355,9 +2355,13 @@
 
             // доводим запрос до совершенства/ шлифуем вычисления
             Closure getRequestData = { String key -> intermediateData[key].requestData }
+            Collection<GroupParameter> basicSourceGroups = intermediateData.findResult { key, value ->
+                GroupParameter group = value.requestData?.groups?.size() ? value.requestData.groups.first() : null
+                return group?.attribute ? value.requestData.groups : null
+            }
             def computationDataRequest = intermediateData
                 .findResults { key, value -> value.computeData ? value : null }
-                ?.collectEntries(this.&produceComputationData.curry(getRequestData, diagramType)) ?: [:]
+                ?.collectEntries(this.&produceComputationData.curry(getRequestData, diagramType, basicSourceGroups)) ?: [:]
 
             def defaultDataRequest = intermediateData.findResults { key, map ->
                 map.requisite && !(map.computeData) ? [(key): map.requestData] : null
@@ -2488,10 +2492,14 @@
          * Метод обработки вычислений
          * @param getData - функция получения источника данных по ключю
          * @param diagramType - тип диаграммы
+         * @param basicSourceGroups - группировки основного источника
          * @param map - данные для вычислений
          * @return сгруппированные данные по названию переменной и источнику данных
          */
-        Map<String, RequestData> produceComputationData(Closure getData, DiagramType diagramType, Map map)
+        Map<String, RequestData> produceComputationData(Closure getData,
+                                                        DiagramType diagramType,
+                                                        Collection<GroupParameter> basicSourceGroups,
+                                                        Map map)
         {
             if (map.computeData instanceof Collection)
             {
@@ -2554,8 +2562,6 @@
                 //по идее на этом этапе у нас только один реквизит и у него одна запись
                 def formula = (node as ComputationRequisiteNode).formula
                 def variableNames = new FormulaCalculator(formula).variableNames
-
-                Collection<GroupParameter> basicSourceGroups
 
                 return variableNames.collectEntries { variableName ->
                     def comp = computeData[variableName] as Map<String, Object>
@@ -4034,9 +4040,9 @@
             }
 
             Boolean hasPercentCntAggregation = getPercentCntAggregationIndexes(request).size() != 0
-            Boolean percentCntAggregationForColumnStackedExists = filteringResult?.size()
-                && filteringResult.first().size() == 3
-                && hasPercentCntAggregation
+            Boolean percentCntAggregationForColumnStackedExists = filteringResult?.size() &&
+                                                                  filteringResult.first().size() == 3 &&
+                                                                  hasPercentCntAggregation
 
             if (percentCntAggregationForColumnStackedExists &&
                 widgetPercentCntAggregationType == Aggregation.PERCENT_CNT_BY_PARAMETERS)
@@ -7465,12 +7471,6 @@
                             this.&formatGroupSet.rcurry(data as RequestData, listIdsOfNormalAggregations, diagramType, notBlank, widgetPercentCntAggregationType)
                         Collection result = dashboardQueryWrapperUtils.getData(data as RequestData, top, currentUserLocale, user, notBlank, diagramType, ignoreLimits?.parameter, '', paginationSettings)
                                                                       .with(postProcess)
-
-                        if (result.size() == 0 || result.first() in Collection && result.first().size() == 0)
-                        {
-                            result[0] = [0]
-                        }
-
                         [(key): result]
                     } as Map<String, List>
 
