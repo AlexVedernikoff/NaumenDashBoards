@@ -433,6 +433,8 @@ const selectWidget = (widgetId: string): ThunkAction =>
 					dispatch(fetchSourcesFilters(item));
 				});
 			}
+
+			dispatch(fetchCustomGroups());
 		}
 
 		dispatch({

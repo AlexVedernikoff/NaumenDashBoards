@@ -11,7 +11,7 @@ export const withBlurRoot = <Props: InnerProps>(Component: React$ComponentType<P
 	class WithBlurRoot extends PureComponent<Props & InnerProps> {
 		renderComponent = (setBlurRoot: SetBlurRoot) => {
 			const {forwardedRef, ...rest} = this.props;
-			return (<Component {...rest} ref={forwardedRef} setBlurRoot={setBlurRoot} />);
+			return <Component {...rest} ref={forwardedRef} setBlurRoot={setBlurRoot} />;
 		};
 
 		render () {

@@ -6,8 +6,6 @@ import DataLabelsBox from 'WidgetFormPanel/components/DataLabelsBox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
 import FormField from 'components/molecules/FormField';
 import {getMainDataSetIndex} from 'store/widgets/data/helpers';
-import {getSortingOptions} from 'WidgetFormPanel/helpers';
-import {GROUP_WAYS} from 'store/widgets/constants';
 import {hasBreakdown} from 'store/widgets/helpers';
 import HeaderBox from 'WidgetFormPanel/components/HeaderBox';
 import LegendBox from 'WidgetFormPanel/components/LegendBox';
@@ -16,7 +14,7 @@ import type {OnChangeEvent} from 'components/types';
 import ParameterFormat from 'WidgetFormPanel/components/ParameterFormat';
 import type {Props} from './types';
 import React, {Component} from 'react';
-import SortingBox from 'WidgetFormPanel/components/SortingBox';
+import SortingBox from 'containers/SortingBox/AxisSortingBox';
 import styles from './styles.less';
 import t from 'localization';
 import TextInput from 'components/atoms/TextInput';
@@ -26,25 +24,23 @@ import withWidget from 'WidgetFormPanel/HOCs/withWidget';
 export class StyleTab extends Component<Props> {
 	handleChangeAxisName = (index: number) => ({name, value}: OnChangeEvent<string>) => {
 		const {onChange, values} = this.props;
-		const newData = values.data.map((dataSet, i) => i === index ? {...dataSet, [name]: value} : dataSet);
+		const newData = values.data.map(
+			(dataSet, i) => i === index ? {...dataSet, [name]: value} : dataSet
+		);
 
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
 
 	handleChangeData = data => this.props.onChange(DIAGRAM_FIELDS.data, data);
 
-	hasCustomGroup = () => {
-		const {values} = this.props;
-		const {CUSTOM} = GROUP_WAYS;
-
-		return !!values.data.find(({breakdown, parameters}) =>
-			parameters[0].group.way === CUSTOM || (breakdown && breakdown[0].group.way === CUSTOM)
-		);
-	};
-
 	renderAxisNameField = (index: number, name: string, value: string) => (
 		<FormField small>
-			<TextInput maxLength={MAX_TEXT_LENGTH} name={name} onChange={this.handleChangeAxisName(index)} value={value} />
+			<TextInput
+				maxLength={MAX_TEXT_LENGTH}
+				name={name}
+				onChange={this.handleChangeAxisName(index)}
+				value={value}
+			/>
 		</FormField>
 	);
 
@@ -95,14 +91,18 @@ export class StyleTab extends Component<Props> {
 					name={DIAGRAM_FIELDS.parameter}
 					onChange={onChange}
 					renderAxisFormat={this.renderParameterFormat}
-					renderNameField={() => this.renderAxisNameField(index, DIAGRAM_FIELDS.xAxisName, xAxisName)}
+					renderNameField={
+						() => this.renderAxisNameField(index, DIAGRAM_FIELDS.xAxisName, xAxisName)
+					}
 					title={t('AxisChartStyleTab::Parameter')}
 					value={parameter}
 				/>
 				<AxisSettingsBox
 					name={DIAGRAM_FIELDS.indicator}
 					onChange={onChange}
-					renderNameField={() => this.renderAxisNameField(index, DIAGRAM_FIELDS.yAxisName, yAxisName)}
+					renderNameField={
+						() => this.renderAxisNameField(index, DIAGRAM_FIELDS.yAxisName, yAxisName)
+					}
 					title={t('AxisChartStyleTab::Indicator')}
 					value={indicator}
 				/>
@@ -110,7 +110,6 @@ export class StyleTab extends Component<Props> {
 				<SortingBox
 					name={DIAGRAM_FIELDS.sorting}
 					onChange={onChange}
-					options={getSortingOptions(!this.hasCustomGroup())}
 					value={sorting}
 				/>
 				<DataLabelsBox

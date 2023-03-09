@@ -3,23 +3,16 @@ import BreakdownFormat from 'WidgetFormPanel/components/BreakdownFormat';
 import ColorsBox from 'containers/ColorsBox';
 import DataLabelsBox from 'WidgetFormPanel/components/DataLabelsBox';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
-import {getSortingOptions} from 'WidgetFormPanel/helpers';
-import {GROUP_WAYS} from 'store/widgets/constants';
 import HeaderBox from 'WidgetFormPanel/components/HeaderBox';
 import LegendBox from 'WidgetFormPanel/components/LegendBox';
 import type {Props} from './types';
 import React, {Component} from 'react';
-import SortingBox from 'WidgetFormPanel/components/SortingBox';
-import {SORTING_VALUES} from 'store/widgets/data/constants';
+import SortingBox from 'containers/SortingBox/CircleChartSortingBox';
 import styles from './styles.less';
 import withWidget from 'WidgetFormPanel/HOCs/withWidget';
 
 export class StyleTab extends Component<Props> {
-	getSortingOptions = () => getSortingOptions(!this.hasCustomGroup()).filter(option => option.value !== SORTING_VALUES.PARAMETER);
-
 	handleChangeData = data => this.props.onChange(DIAGRAM_FIELDS.data, data);
-
-	hasCustomGroup = () => !!this.props.values.data.find(({breakdown}) => breakdown[0].group.way === GROUP_WAYS.CUSTOM);
 
 	renderColorsBox = () => {
 		const {onChange, values, widget} = this.props;
@@ -49,7 +42,6 @@ export class StyleTab extends Component<Props> {
 				<SortingBox
 					name={DIAGRAM_FIELDS.sorting}
 					onChange={onChange}
-					options={this.getSortingOptions()}
 					value={sorting}
 				/>
 				<DataLabelsBox

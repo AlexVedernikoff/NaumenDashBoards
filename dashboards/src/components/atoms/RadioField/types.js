@@ -5,5 +5,6 @@ export type Props = {
 	...RadioButtonProps,
 	className: string,
 	disabled: boolean,
+	disabledMessage: string,
 	label: string
 };

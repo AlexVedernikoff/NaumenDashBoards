@@ -5,7 +5,6 @@ import DataLabelsBox from 'WidgetFormPanel/components/DataLabelsBox';
 import {DIAGRAM_FIELDS} from 'components/organisms/WidgetFormPanel/constants';
 import FormField from 'components/molecules/FormField';
 import {getDefaultFormatForParameter, getMainDataSet} from 'store/widgets/data/helpers';
-import {getSortingOptions} from 'WidgetFormPanel/helpers';
 import HeaderBox from 'WidgetFormPanel/components/HeaderBox';
 import IndicatorSettingsBox from 'components/organisms/ComboChartWidgetForm/components/IndicatorSettingsBox';
 import LegendBox from 'WidgetFormPanel/components/LegendBox';
@@ -14,7 +13,7 @@ import type {OnChangeEvent} from 'components/types';
 import ParameterFormatPanel from 'components/molecules/ParameterFormatPanel';
 import type {Props, XAxisNameContext} from './types';
 import React, {Component, createContext} from 'react';
-import SortingBox from 'components/organisms/ComboChartWidgetForm/components/SortingBox';
+import SortingBox from 'containers/SortingBox/ComboSortingBox';
 import styles from './styles.less';
 import t from 'localization';
 import TextInput from 'components/atoms/TextInput';
@@ -35,7 +34,9 @@ export class StyleTab extends Component<Props> {
 
 	handleChangeAxisName = (index: number) => ({name, value}: OnChangeEvent<string>) => {
 		const {onChange, values} = this.props;
-		const newData = values.data.map((dataSet, i) => i === index ? {...dataSet, [name]: value} : dataSet);
+		const newData = values.data.map(
+			(dataSet, i) => i === index ? {...dataSet, [name]: value} : dataSet
+		);
 
 		onChange(DIAGRAM_FIELDS.data, newData);
 	};
@@ -111,7 +112,7 @@ export class StyleTab extends Component<Props> {
 	);
 
 	render () {
-		const {hasCustomGroup, values, widget} = this.props;
+		const {values, widget} = this.props;
 		const {colorsSettings, data, dataLabels, header, indicator, legend, sorting} = values;
 
 		return (
@@ -130,7 +131,6 @@ export class StyleTab extends Component<Props> {
 					data={data}
 					name={DIAGRAM_FIELDS.sorting}
 					onChange={this.handleChange}
-					options={getSortingOptions(!hasCustomGroup)}
 					value={sorting}
 				/>
 				<DataLabelsBox

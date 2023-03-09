@@ -660,6 +660,7 @@ type ShowTotalAmountBox =
 
 // components/organisms/WidgetFormPanel/components/SortingBox
 type SortingBox =
+	| 'SortingBox::DifferentGroupingsWarn'
 	| 'SortingBox::SortingByDefault'
 	| 'SortingBox::SortingByParameter'
 	| 'SortingBox::SortingByIndicator'

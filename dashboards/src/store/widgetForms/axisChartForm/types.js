@@ -17,6 +17,7 @@ import type {Breakdown, Indicator, Parameter, SourceData} from 'store/widgetForm
 
 export type DataSet = $Exact<{
 	...AxisData,
+	__type: 'AXIS_DATA_SET',
 	breakdown?: Breakdown,
 	indicators: Array<Indicator>,
 	parameters: Array<Parameter>,

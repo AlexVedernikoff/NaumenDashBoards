@@ -368,6 +368,7 @@
 	"SessionControls::ByWidgetClass": "% по виджету",
 	"ShowTotalAmountBox::ShowSubTotalAmount": "Отображать промежуточные итоги",
 	"ShowTotalAmountBox::ShowTotalAmount": "Отображать общую сумму объектов",
+	"SortingBox::DifferentGroupingsWarn": "Порядок сортировки нарушен по причине разных группировок",
 	"SortingBox::SortingAsc": "По возрастанию",
 	"SortingBox::SortingByDefault": "По умолчанию",
 	"SortingBox::SortingByIndicator": "Показатель",

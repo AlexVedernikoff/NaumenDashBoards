@@ -362,6 +362,7 @@
 "SessionControls::ByWidgetClass","% по виджету","% by widget",,
 "ShowTotalAmountBox::ShowSubTotalAmount","Отображать промежуточные итоги","Display subtotals",,
 "ShowTotalAmountBox::ShowTotalAmount","Отображать общую сумму объектов","Display totals",,
+"SortingBox::DifferentGroupingsWarn","Порядок сортировки нарушен по причине разных группировок","The sorting order is broken because of the different groupings",,
 "SortingBox::SortingAsc","По возрастанию","By ascending",,
 "SortingBox::SortingByDefault","По умолчанию","By default",,
 "SortingBox::SortingByIndicator","Показатель","Indicator",,
