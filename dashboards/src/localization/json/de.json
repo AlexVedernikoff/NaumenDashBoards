@@ -366,6 +366,7 @@
 	"SelectWithCustomEdit::UserOption": "",
 	"ShowTotalAmountBox::ShowSubTotalAmount": "",
 	"ShowTotalAmountBox::ShowTotalAmount": "",
+	"SortingBox::DifferentGroupingsWarn": "",
 	"SortingBox::SortingAsc": "",
 	"SortingBox::SortingByDefault": "",
 	"SortingBox::SortingByIndicator": "",

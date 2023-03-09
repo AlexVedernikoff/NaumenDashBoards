@@ -394,38 +394,41 @@ const removeWidget = (widgetId: string): ThunkAction => async (dispatch: Dispatc
  * @param {string} widgetId - id виджета
  * @returns {ThunkAction}
  */
-const selectWidget = (widgetId: string): ThunkAction => (dispatch: Dispatch, getState: GetState): void => {
-	const state = getState();
-	const {data: widgetsData} = state.widgets;
+const selectWidget = (widgetId: string): ThunkAction =>
+	(dispatch: Dispatch, getState: GetState): void => {
+		const state = getState();
+		const {data: widgetsData} = state.widgets;
 
-	if (widgetId !== NewWidget.id) {
-		const widgetData = widgetsData.map[widgetId];
+		if (widgetId !== NewWidget.id) {
+			const widgetData = widgetsData.map[widgetId];
 
-		if (widgetData.data) {
-			const sourcesSet = new Set(
-				widgetData
-					.data
-					.map(dataSet => dataSet.source.value?.value)
-					.filter(e => !!e)
-			);
+			if (widgetData.data) {
+				const sourcesSet = new Set(
+					widgetData
+						.data
+						.map(dataSet => dataSet.source.value?.value)
+						.filter(e => !!e)
+				);
 
-			sourcesSet.forEach(item => {
-				dispatch(fetchSourcesFilters(item));
-			});
+				sourcesSet.forEach(item => {
+					dispatch(fetchSourcesFilters(item));
+				});
+			}
+
+			dispatch(fetchCustomGroups());
 		}
-	}
 
-	dispatch({
-		payload: false,
-		type: 'dashboard/settings/setShowCopyPanel'
-	});
-	dispatch(setSelectedWidget(widgetId));
-	dispatch({
-		type: 'dashboard/settings/switchOnEditMode'
-	});
+		dispatch({
+			payload: false,
+			type: 'dashboard/settings/setShowCopyPanel'
+		});
+		dispatch(setSelectedWidget(widgetId));
+		dispatch({
+			type: 'dashboard/settings/switchOnEditMode'
+		});
 
-	dashboardResizer.resetHeight();
-};
+		dashboardResizer.resetHeight();
+	};
 
 /**
  * Проверяет является ли выбранный виджет валидным для копирования

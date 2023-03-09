@@ -1,6 +1,5 @@
 // @flow
 import CheckIconButtonGroup from 'components/molecules/CheckIconButtonGroup';
-import cn from 'classnames';
 import CollapsableFormBox from 'components/molecules/CollapsableFormBox';
 import Container from 'components/atoms/Container';
 import {DIAGRAM_FIELDS} from 'WidgetFormPanel/constants';
@@ -44,16 +43,14 @@ export class SortingBox extends PureComponent<Props, State> {
 
 	renderValueField = (option: SortingValueOption, index: number) => {
 		const {value: currentValue} = this.props.value;
-		const {disabled, label, value} = option;
-		const CN = cn({
-			[styles.valueField]: true,
-			[styles.disabledValueField]: disabled
-		});
+		const {disabled, disabledMessage, label, value} = option;
 
 		return (
-			<div className={CN} key={index}>
+			<div className={styles.valueField} key={index}>
 				<RadioField
 					checked={currentValue === value}
+					disabled={!!disabled}
+					disabledMessage={disabledMessage}
 					label={t(label)}
 					name={DIAGRAM_FIELDS.value}
 					onChange={this.handleChange}
