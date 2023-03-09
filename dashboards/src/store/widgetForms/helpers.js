@@ -1,6 +1,8 @@
 // @flow
 import type {AttrSetConditions} from 'utils/descriptorUtils/types';
+import {ATTRIBUTE_TYPES} from 'store/sources/attributes/constants';
 import type {Breakdown, DiagramDataSet, Indicator, SourceData} from './types';
+import type {CustomGroupsMap} from 'store/customGroups/types';
 import type {DataSet as TableDataSet} from 'store/widgetForms/tableForm/types';
 import type {DataSet as SpeedometerDataSet} from 'store/widgetForms/speedometerForm/types';
 import type {DataSet as SummaryDataSet} from 'store/widgetForms/summaryForm/types';
@@ -9,7 +11,8 @@ import {DEFAULT_PARAMETER} from 'store/widgetForms/constants';
 import {omit} from 'helpers';
 import {parseCasesAndGroupCode} from 'utils/descriptorUtils';
 import type {PivotIndicator} from 'store/widgetForms/pivotForm/types';
-import {SHOW_SUB_TOTAL_MODE} from './constants';
+import type {Values as AxisChartValues} from 'store/widgetForms/axisChartForm/types';
+import type {Values as ComboChartValues} from 'store/widgetForms/comboChartForm/types';
 
 /**
  * Возвращает разбивку по умолчанию
@@ -146,12 +149,10 @@ const fixClearIndicatorsFormat = (indicators: ?Array<Indicator>): Array<Indicato
 /**
  * Определяет режим отображения/скрытия чекбокса промежуточных итогов
  * @param {?Array<DiagramDataSet>} data - источники данных на виджете
- * @returns {SHOW_SUB_TOTAL_MODE} - HIDE - скрыть; SHOW - показать; DISABLE - (временно) отобразить без возможности выбора
- * TODO: после реализации правильного расчета процента, функция должна возвращать boolean @see #SMRMEXT-13872
+ * @returns {boolean} Если true - отображать промежуточные итоги
  */
-const getShowSubTotalMode = (data: ?Array<DiagramDataSet>): $Keys<typeof SHOW_SUB_TOTAL_MODE> => {
+const shouldShowSubTotalMode = (data: ?Array<DiagramDataSet>): boolean => {
 	const aggregations = [];
-	let result = SHOW_SUB_TOTAL_MODE.SHOW;
 
 	if (data) {
 		data.forEach(dataSet => {
@@ -163,11 +164,45 @@ const getShowSubTotalMode = (data: ?Array<DiagramDataSet>): $Keys<typeof SHOW_SU
 		});
 	}
 
-	if (aggregations.some(aggregation => aggregation === DEFAULT_AGGREGATION.PERCENT)) {
-		result = SHOW_SUB_TOTAL_MODE.HIDE;
-	} else if (aggregations.some(aggregation => aggregation === DEFAULT_AGGREGATION.PERCENT_CNT)) {
-		// TODO: после удаления этого кода проверить, что не осталось временного кода с задачи #SMRMEXT-13872
-		result = SHOW_SUB_TOTAL_MODE.DISABLE;
+	return !(
+		aggregations.some(aggregation =>
+			(aggregation === DEFAULT_AGGREGATION.PERCENT)
+			|| (aggregation === DEFAULT_AGGREGATION.PERCENT_CNT)
+		));
+};
+
+/**
+ * Проверяется наличие поля для вычислений в показателе и установку пользовательской группировки
+ * с несколькими группами в параметре
+ * @param {AxisChartValues} values - значение виджета
+ * @param {CustomGroupsMap} customGroups - кастомные группы
+ * @param {number?} mainDataSetIndex - индекс основного источника
+ * @returns {boolean} - true, если описанное условие выполняется
+ */
+const hasCalcAndCustomGroups = (
+	values: AxisChartValues | ComboChartValues,
+	customGroups: CustomGroupsMap,
+	mainDataSetIndex?: number
+): boolean => {
+	let result = false;
+	const mainDataSet = mainDataSetIndex
+		? values.data[mainDataSetIndex]
+		: values.data.find(dataSet => !dataSet.sourceForCompute);
+
+	if (mainDataSet) {
+		const indicator = mainDataSet.indicators[0];
+		const parameter = mainDataSet.parameters[0];
+
+		if (indicator && parameter) {
+			const isCalcIndicator = indicator.attribute?.type === ATTRIBUTE_TYPES.COMPUTED_ATTR;
+			const isCustomGroups = parameter.group.way === GROUP_WAYS.CUSTOM;
+
+			if (isCalcIndicator && isCustomGroups) {
+				const customGroup = customGroups[parameter.group.data];
+
+				result = !customGroup || customGroup.data.subGroups.length > 1;
+			}
+		}
 	}
 
 	return result;
@@ -183,6 +218,7 @@ export {
 	fixPivotIndicators,
 	fixRemoveParameters,
 	getDefaultBreakdown,
-	getShowSubTotalMode,
+	hasCalcAndCustomGroups,
+	shouldShowSubTotalMode,
 	parseAttrSetConditions
 };

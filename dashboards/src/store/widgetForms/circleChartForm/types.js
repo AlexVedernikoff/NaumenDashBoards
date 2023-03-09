@@ -16,6 +16,7 @@ import type {Breakdown, Indicator, SourceData} from 'store/widgetForms/types';
 
 export type DataSet = $Exact<{
 	...CircleData,
+	__type: 'CIRCLE_DATA_SET',
 	breakdown: Breakdown,
 	indicators: Array<Indicator>,
 	source: SourceData

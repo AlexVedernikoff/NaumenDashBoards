@@ -13,6 +13,7 @@ export type Components = {
 
 export type SortingValueOption = {
 	disabled?: boolean,
+	disabledMessage?: string,
 	label: LangType,
 	value: string
 };

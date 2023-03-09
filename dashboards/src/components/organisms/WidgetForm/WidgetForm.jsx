@@ -104,13 +104,14 @@ class WidgetForm extends Component<Props, State> {
 		if (!this.errorFocusRef) this.errorFocusRef = ref;
 	};
 
-	setFieldValue = (name: string, value: any, callback?: Function) =>
+	setFieldValue = (name: string, value: any, callback?: Function) => {
 		this.setState(({values: prevValues}) => ({
 			values: {
 				...prevValues,
 				[name]: value
 			}
 		}), callback);
+	};
 
 	validate = async (): Promise<boolean> => {
 		const {validate} = this.props;

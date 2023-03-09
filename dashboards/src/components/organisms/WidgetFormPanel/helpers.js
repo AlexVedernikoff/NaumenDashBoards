@@ -23,8 +23,12 @@ const getErrorPath = (...keys: Array<string | number>): string => {
  * @param {boolean} disabledDefault - указывает на необходимость дизейбла дефолтной опции
  * @returns {Array<SortingValueOption>}
  */
-const getSortingOptions = (disabledDefault: boolean): Array<SortingValueOption> => SORTING_OPTIONS
-	.map(option => option.value === SORTING_VALUES.DEFAULT ? {...option, disabled: disabledDefault} : option);
+const getSortingOptions = (disabledDefault: boolean): Array<SortingValueOption> =>
+	SORTING_OPTIONS.map(option =>
+		option.value === SORTING_VALUES.DEFAULT
+			? {...option, disabled: disabledDefault}
+			: option
+	);
 
 export {
 	getErrorPath,

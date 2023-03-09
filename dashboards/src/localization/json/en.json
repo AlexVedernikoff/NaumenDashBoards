@@ -366,6 +366,7 @@
 	"SelectWithCustomEdit::UserOption": "Customizing",
 	"ShowTotalAmountBox::ShowSubTotalAmount": "Display subtotals",
 	"ShowTotalAmountBox::ShowTotalAmount": "Display totals",
+	"SortingBox::DifferentGroupingsWarn": "The sorting order is broken because of the different groupings",
 	"SortingBox::SortingAsc": "By ascending",
 	"SortingBox::SortingByDefault": "By default",
 	"SortingBox::SortingByIndicator": "Indicator",
