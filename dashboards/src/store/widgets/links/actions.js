@@ -1,7 +1,7 @@
 // @flow
 import api from 'api';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
-import {DrillDownBigData, NoDetailData} from 'api/errors';
+import {DrillDownBigData, NoDetailData, OverflowData} from 'api/errors';
 import type {DrillDownMixin} from './types';
 import {getDescriptorCases} from 'store/helpers';
 import {getPartsClassFqn} from './helpers';
@@ -104,7 +104,7 @@ const openObjectsList = (widget: Widget, payload: Object): ThunkAction =>
 				return;
 			}
 
-			if (exception instanceof NoDetailData) {
+			if (exception instanceof NoDetailData || exception instanceof OverflowData) {
 				dispatch(setWarningMessage({id, message: exception.message}));
 				return;
 			}
