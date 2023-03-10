@@ -26,6 +26,7 @@ import ru.naumen.jsonschema.annotations.MechanismSettings
 class ConstantMap
 {
     final static String NAME_MECHANISM_SETTINGS = 'map'
+    final static String CODE_FOR_STORAGE = 'nauMaps_map'
     final static String EMBEDDED_APPLICATION_CODE = 'nauMaps'
     final static String ACTUAL_VERSION = 'actualVersion'
     final static String FIRST_PART_STRATEGY_CODE = 'mapStrategy'
@@ -416,7 +417,7 @@ class SettingsProvider
 {
     MapSettings getSettings()
     {
-        String nameSpace = ConstantMap.NAME_MECHANISM_SETTINGS
+        String nameSpace = ConstantMap.CODE_FOR_STORAGE
         String actualVersion = api.keyValue.get(nameSpace, ConstantMap.ACTUAL_VERSION)
         if (actualVersion != null)
         {
@@ -436,7 +437,7 @@ class SettingsProvider
 
 void saveSettings(MapSettings settings)
 {
-    String nameSpace = ConstantMap.NAME_MECHANISM_SETTINGS
+    String nameSpace = ConstantMap.CODE_FOR_STORAGE
     Integer actualVersion = api.keyValue.get(nameSpace, ConstantMap.ACTUAL_VERSION) as Integer ?: 0
     String settingsJson = Jackson.toJsonString(
         new MapSettingsWithTimeStamp(

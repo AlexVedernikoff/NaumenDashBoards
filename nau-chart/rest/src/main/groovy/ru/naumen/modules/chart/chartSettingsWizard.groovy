@@ -23,6 +23,7 @@ import ru.naumen.metainfo.shared.ClassFqn
 class ConstantSchemes
 {
     final static String NAME_MECHANISM_SETTINGS = 'schemes'
+    final static String CODE_FOR_STORAGE = 'nauScheme_schemes'
     final static String EMBEDDED_APPLICATION_CODE = 'nauScheme'  //testScheme
     final static String ACTUAL_VERSION = 'actualVersion'
     final static String FIRST_PART_STRATEGY_CODE = 'schemesStrategy'
@@ -310,7 +311,7 @@ Object getInitSettings()
 
 void saveSettings(SchemesSettings settings)
 {
-    String nameSpace = ConstantSchemes.NAME_MECHANISM_SETTINGS
+    String nameSpace = ConstantSchemes.CODE_FOR_STORAGE
     Integer actualVersion =
         api.keyValue.get(nameSpace, ConstantSchemes.ACTUAL_VERSION) as Integer ?: 0
 
@@ -382,7 +383,7 @@ class SettingsProviderSchemes
 {
     SchemesSettings getSettings()
     {
-        String nameSpace = ConstantSchemes.NAME_MECHANISM_SETTINGS
+        String nameSpace = ConstantSchemes.CODE_FOR_STORAGE
         String actualVersion = api.keyValue.get(nameSpace, ConstantSchemes.ACTUAL_VERSION)
         if (actualVersion != null)
         {
