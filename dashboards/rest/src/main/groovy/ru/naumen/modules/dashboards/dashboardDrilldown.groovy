@@ -251,6 +251,7 @@ class DashboardDrilldownService
                 offsetMinutes,
                 requestContent.parameters,
                 requestContent.breakdown,
+                requestContent.indicators,
                 conditionForDataSet
             )
         return web.list(linkBuilder)
@@ -326,6 +327,7 @@ class DashboardDrilldownService
                                Integer offsetMinutes,
                                List parameters,
                                List breakdowns,
+                               List indicators,
                                Boolean conditionForDataSet)
     {
         def builder = web.defineListLink(false)
@@ -354,7 +356,7 @@ class DashboardDrilldownService
         def filterBuilder = builder.filter()
         addDescriptorInFilter(filterBuilder, link.descriptor, builder)
         formatFilter(filterBuilder, link.filters, link.classFqn, link.cases, link.descriptor, offsetMinutes, link.diagramType)
-        filterTotalDataSetWithoutBlankData(filterBuilder, conditionForDataSet, parameters, breakdowns)
+        filterTotalDataSetWithoutBlankData(filterBuilder, conditionForDataSet, parameters, breakdowns, indicators)
         return builder
     }
 
@@ -1720,7 +1722,9 @@ class DashboardDrilldownService
      */
     private void filterTotalDataSetWithoutBlankData(IListLinkDefinition.IFilter filterBuilder,
                                                     Boolean conditionForDataSet,
-                                                    List parameters, List breakdowns)
+                                                    List parameters,
+                                                    List breakdowns,
+                                                    List indicators)
     {
         if (conditionForDataSet)
         {
@@ -1728,7 +1732,11 @@ class DashboardDrilldownService
                 Attribute attr = data.attribute
                 filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', null))
             }
-            breakdowns.each { data ->
+            indicators?.each { data ->
+                Attribute attr = data.attribute
+                filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', null))
+            }
+            breakdowns?.each { data ->
                 Attribute attr = data.attribute
                 filterBuilder.AND(filterBuilder.OR(attr.code, 'notNull', null))
             }

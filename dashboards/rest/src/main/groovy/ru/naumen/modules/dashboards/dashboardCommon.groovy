@@ -5154,7 +5154,10 @@ class GetLinkRequest
      * лист разбивок
      */
     List breakdown
-
+    /**
+    * лист показетелей
+    */
+    List indicators
     /**
      * Флаг незаполенных данных
      */
