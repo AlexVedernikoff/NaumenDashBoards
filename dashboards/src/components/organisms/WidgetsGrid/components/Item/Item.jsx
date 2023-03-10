@@ -1,13 +1,10 @@
 // @flow
 import cn from 'classnames';
-import type {DivRef} from 'src/components/types';
 import type {Props} from './types';
-import React, {createRef, PureComponent} from 'react';
+import React, {PureComponent} from 'react';
 import styles from './styles.less';
 
 export class Item extends PureComponent<Props> {
-	itemRef: DivRef = createRef();
-
 	componentDidMount () {
 		this.focus();
 	}
@@ -22,24 +19,24 @@ export class Item extends PureComponent<Props> {
 
 	focus = () => {
 		const {focused, onFocus} = this.props;
-		const {current: item} = this.itemRef;
+		const {current: item} = this.props.forwardedRef;
 
 		focused && item && onFocus(item);
 	};
 
 	render () {
-		const {children, className, focused, onFocus, selected, ...props} = this.props;
+		const {children, className, focused, forwardedRef, onFocus, selected, ...props} = this.props;
 		const CN = cn({
 			[styles.focusedItem]: focused && !selected,
 			[styles.selectedItem]: selected
 		}, styles.item, className);
 
 		return (
-			<div {...props} className={CN} ref={this.itemRef}>
+			<div {...props} className={CN} ref={this.props.forwardedRef}>
 				{children}
 			</div>
 		);
 	}
 }
 
-export default Item;
+export default React.forwardRef((props, ref) => <Item {...props} forwardedRef={ref} />);

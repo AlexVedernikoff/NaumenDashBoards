@@ -1,4 +1,5 @@
 // @flow
+import type {Ref} from 'components/types';
 
 type GridProps = {
 	className?: string,
@@ -12,6 +13,7 @@ type GridProps = {
 export type Props = GridProps & {
 	children: React$Node,
 	focused: boolean,
+	forwardedRef: Ref<'div'>,
 	onFocus: (element: HTMLDivElement) => void,
 	selected: boolean
 };
