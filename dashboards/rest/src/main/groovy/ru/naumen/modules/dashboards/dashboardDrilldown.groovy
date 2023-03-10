@@ -718,6 +718,22 @@ class DashboardDrilldownService
                                             if(attr.attrChains().count {it.type in AttributeType.LINK_TYPES} > 1)
                                             {
                                                 //двухуровневый ссылочный
+                                                Boolean conditionRelatedObj =
+                                                    metainfo
+                                                        .getMetaClass(attr.ref.sourceCode)
+                                                        .getAttribute(attr.ref.code)
+                                                        .type.attributeType.isAttributeOfRelatedObject()
+                                                if (conditionRelatedObj)
+                                                {
+                                                    String message =
+                                                        messageProvider.getConstant(
+                                                            NO_DETAIL_DATA_ERROR,
+                                                            currentUserLocale
+                                                        )
+                                                    utils
+                                                        .throwReadableException("${ message }#${ NO_DETAIL_DATA_ERROR }")
+                                                }
+
                                                 objects = findObjects(attr.ref,attr.property, LinksAttributeMarshaller.unmarshal(value).last())
                                             }
                                             else
