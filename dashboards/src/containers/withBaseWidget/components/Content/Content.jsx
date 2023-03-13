@@ -22,16 +22,14 @@ export class Content extends PureComponent<Props, State> {
 	};
 
 	renderHeader = () => {
-		const {header, name, tooltip} = this.props.widget;
+		const {widget} = this.props;
 
-		if (header.show) {
+		if (widget.header.show) {
 			return (
 				<Header
 					className={styles.header}
 					onChangeHeight={this.handleChangeHeaderHeight}
-					settings={header}
-					tooltip={tooltip}
-					widgetName={name}
+					widget={widget}
 				/>
 			);
 		}
