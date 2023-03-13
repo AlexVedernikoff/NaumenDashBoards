@@ -731,33 +731,25 @@ class QueryWrapper implements CriteriaWrapper
                 }
                 else if(lastParameterAttributeType in AttributeType.HAS_UUID_TYPES)
                 {
-                    if (attributeCodes.contains('value') && !totalValueCriteria &&
-                        parameter.attribute.property.equals(AttributeType.TOTAL_VALUE_TYPE))
-                    {
-                        column = sc.property(criteriaForColumn, 'test')
-                    }
-                    else
-                    {
-                        String columnStringValue = LinksAttributeMarshaller.marshal(
-                            attributeChains.takeWhile {
-                                it.type in AttributeType.HAS_UUID_TYPES
-                            }.code.with(this.&replaceMetaClassCode).join('.'),
-                            DashboardQueryWrapperUtils.UUID_CODE
-                        ).toString()
+                    String columnStringValue = LinksAttributeMarshaller.marshal(
+                        attributeChains.takeWhile {
+                            it.type in AttributeType.HAS_UUID_TYPES
+                        }.code.with(this.&replaceMetaClassCode).join('.'),
+                        DashboardQueryWrapperUtils.UUID_CODE
+                    ).toString()
 
-                        Object columnFirst = sc.property(criteriaForColumn, attributeCodes)
-                        Object columnSecond = sc.property(criteriaForColumn, columnStringValue)
+                    Object columnFirst = sc.property(criteriaForColumn, attributeCodes)
+                    Object columnSecond = sc.property(criteriaForColumn, columnStringValue)
 
-                        column = sc.selectCase()
-                                   .when(api.whereClause.isNull(columnSecond), columnFirst)
-                                   .otherwise(
-                                       sc.concat(
-                                           columnFirst,
-                                           sc.constant(LinksAttributeMarshaller.delimiter),
-                                           columnSecond
-                                       )
+                    column = sc.selectCase()
+                               .when(api.whereClause.isNull(columnSecond), columnFirst)
+                               .otherwise(
+                                   sc.concat(
+                                       columnFirst,
+                                       sc.constant(LinksAttributeMarshaller.delimiter),
+                                       columnSecond
                                    )
-                    }
+                               )
                     criteria.addGroupColumn(column)
                     criteria.addColumn(column)
                 }
@@ -1051,11 +1043,6 @@ class QueryWrapper implements CriteriaWrapper
             case GroupType.HOUR_INTERVAL:
             case GroupType.DAY_INTERVAL:
             case GroupType.WEEK_INTERVAL:
-                if (attributeCodes.contains('value') && !totalValueCriteria &&
-                    parameter.attribute.property.equals(AttributeType.TOTAL_VALUE_TYPE))
-                {
-                    column = sc.property(criteriaForColumn, 'test')
-                }
                 criteria.addGroupColumn(column)
                 criteria.addColumn(column)
                 String sortingType = parameter.sortingType
@@ -1436,7 +1423,7 @@ class QueryWrapper implements CriteriaWrapper
             ignoreParameterLimit,
             paginationSettings
         ).collect {
-            requestHasOneNoneAggregation || it in String ? [it] : it
+            requestHasOneNoneAggregation || it in String ? [it] : [it, null]
         }
     }
 
@@ -1757,18 +1744,6 @@ class DashboardQueryWrapperUtils
                     diagramType,
                     top,
                     onlyFilled,
-                    sourceMetaClassCriteriaMap
-                )
-            }
-            clonedGroups.each {
-                wrapperBlankData.processGroup(
-                    wrapperBlankData,
-                    criteriaBlankDataForDynamicAttributes,
-                    false,
-                    it as GroupParameter,
-                    diagramType,
-                    requestData.source,
-                    user,
                     sourceMetaClassCriteriaMap
                 )
             }

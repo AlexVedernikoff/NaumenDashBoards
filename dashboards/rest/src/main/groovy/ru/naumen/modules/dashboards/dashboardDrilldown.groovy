@@ -790,7 +790,8 @@ class DashboardDrilldownService
                                 filterBuilder,
                                 attr,
                                 classFqn,
-                                descriptor
+                                descriptor,
+                                indicatorsCode
                             )]
                         }
                     }
@@ -2422,23 +2423,47 @@ class DashboardDrilldownService
          * @param value - значение
          * @param filterBuilder - текущий объект с фильтрацией
          * @param attr - атрибут
+         * @param classFqn - метакласс запроса
+         * @param descriptor - дескриптор
+         * @param indicatorsCode - код из фильтра индикатора
          * @return фильтр по дате
          */
-        def getFilter(GroupType groupType, String format, String value,
-                      def filterBuilder, Attribute attr, String classFqn, String descriptor)
+        def getFilter(GroupType groupType,
+                      String format,
+                      String value,
+                      def filterBuilder,
+                      Attribute attr,
+                      String classFqn,
+                      String descriptor,
+                      String indicatorsCode)
         {
             String providerKey = getProviderKey(groupType, format, attr)
             if (value == 'Не заполнено' || value == 'EMPTY')
             {
-                if(providerKey.contains('static_ref'))
+                if (providerKey.contains('static_ref'))
                 {
                     def values = getValuesForRefAttr(attr, null)
                     checkValuesSize(values)
                     return filterBuilder.OR(attr.code, 'containsInSet', values)
                 }
-                else if(providerKey.contains('static'))
+                else if (providerKey.contains('static'))
                 {
                     return filterBuilder.OR(attr.code, 'null', null)
+                }
+                else if (providerKey.contains('dynamic'))
+                {
+                    List elements = getElementsByCriteriaToFilter(
+                        attr,
+                        classFqn,
+                        descriptor,
+                        indicatorsCode
+                    )
+                    checkValuesSize(elements)
+                    return filterBuilder.OR(
+                        indicatorsCode, 'contains', elements.collect {
+                        it as String
+                    }
+                    )
                 }
             }
             def provider = filterProviders[providerKey]
@@ -2540,7 +2565,7 @@ class DashboardDrilldownService
             }
             def uuids = wrapper.getResult(true, DiagramType.TABLE, true, true).flatten()
             checkValuesSize(uuids)
-            return filterBuilder.AND(filterBuilder.OR('totalValue', 'containsInSet', uuids))
+            return filterBuilder.OR('totalValue', 'containsInSet', uuids)
         }
     }
 
