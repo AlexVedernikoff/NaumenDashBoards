@@ -3855,7 +3855,7 @@
                                     RequestData newData = data.clone()
                                     newData.filters = filters
                                     Closure postProcess = this.&formatGroupSet.rcurry(newData as RequestData, listIdsOfNormalAggregations, diagramType, notBlank, widgetPercentCntAggregationType)
-                                    def res = dashboardQueryWrapperUtils.getData(newData as RequestData, top,currentUserLocale, user, notBlank, diagramType, ignoreLimits.parameter ?: false, templateUUID, paginationSettings)
+                                    def res = dashboardQueryWrapperUtils.getData(newData as RequestData, top,currentUserLocale, user, notBlank, diagramType, ignoreLimits?.parameter ?: false, templateUUID, paginationSettings)
                                     if(!res && !onlyFilled)
                                     {
                                         def tempRes = ['']*(newData.groups.size() + notAggregatedAttributes.size())
@@ -4182,7 +4182,7 @@
                     return res[(res.size()-top.count)..(res.size()-1)]
                 }
             }
-            if ((parameterFilters && i < top.count) || !top)
+            if (!top || (parameterFilters && i < top.count))
             {
                 return res
             }
@@ -5866,7 +5866,7 @@
                                           IUUIDIdentifiable user)
         {
             List breakdownValues = hasBreakdown ? transposeDataSet.last().findAll().unique() : []
-            Boolean valuesInBasicBreakdownExceedLimit = !customValuesInBreakdown && breakdownValues.size() > DashboardUtils.tableBreakdownLimit && !ignoreLimits.breakdown
+            Boolean valuesInBasicBreakdownExceedLimit = !customValuesInBreakdown && breakdownValues.size() > DashboardUtils.tableBreakdownLimit && !ignoreLimits?.breakdown
             breakdownValues = valuesInBasicBreakdownExceedLimit
                 ? breakdownValues[0..DashboardUtils.tableBreakdownLimit - 1]
                 : breakdownValues
@@ -6192,7 +6192,7 @@
             boolean isDynamicBreakdown = breakdownAttribute?.attribute?.code?.contains(AttributeType.TOTAL_VALUE_TYPE)
             if(breakdownAttribute && !customValuesInBreakdown)
             {
-                limitBreakdown = !ignoreLimits.breakdown &&
+                limitBreakdown = !ignoreLimits?.breakdown &&
                                  isDynamicBreakdown
                     ? dashboardQueryWrapperUtils.countDistinctTotalValue(source,
                                                                          breakdownAttribute.attribute.code.tokenize('_').last()) >
