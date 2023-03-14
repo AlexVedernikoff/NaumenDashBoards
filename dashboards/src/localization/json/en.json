@@ -248,6 +248,7 @@
 	"GroupModal::TimeOver": "Time over",
 	"GroupModal::TitleContains": "Title contains",
 	"GroupModal::TitleNotContains": "Title not contains",
+	"Header::Top": "Top {count}",
 	"HeaderBox::PositionBottom": "Display below",
 	"HeaderBox::PositionTop": "Display on top",
 	"HeaderBox::Title": "Title",

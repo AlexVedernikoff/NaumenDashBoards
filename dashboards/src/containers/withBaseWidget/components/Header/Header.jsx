@@ -1,5 +1,5 @@
 // @flow
-import type {Chart} from 'store/widgets/data/types';
+import type {Chart, DataTopSettings, TableWidget} from 'store/widgets/data/types';
 import cn from 'classnames';
 import {FONT_STYLES, TEXT_HANDLERS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {Props} from './types';
@@ -7,6 +7,7 @@ import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
 import settingsStyles from 'styles/settings.less';
 import styles from './styles.less';
+import T from 'components/atoms/Translation';
 import WidgetTooltip from 'components/molecules/WidgetTooltip';
 
 export class Header extends PureComponent<Props> {
@@ -32,31 +33,40 @@ export class Header extends PureComponent<Props> {
 	renderTop = () => {
 		const {widget} = this.props;
 
-		if (
-			widget
-			&& (
+		if (widget) {
+			if (
 				widget.type in WIDGET_SETS.AXIS
 				|| widget.type in WIDGET_SETS.CIRCLE
 				|| widget.type === WIDGET_TYPES.COMBO
-			)
-		) {
-			// $FlowFixMe
-			const chartWidget: Chart = widget;
-			const mainDataSet = chartWidget.data.find(ds => !ds.sourceForCompute);
+			) {
+				// $FlowFixMe
+				const chartWidget: Chart = widget;
+				const mainDataSet = chartWidget.data.find(ds => !ds.sourceForCompute);
 
-			if (mainDataSet && mainDataSet.top) {
-				const {count = 0, show = false} = mainDataSet.top ?? {};
-
-				if (show) {
-					return (
-						<div className={styles.top}>Топ {count}</div>
-					);
+				if (mainDataSet && mainDataSet.top) {
+					return this.renderTopElement(mainDataSet.top ?? {show: false});
 				}
+			} else if (widget.type === WIDGET_TYPES.TABLE) {
+				const tableWidget: TableWidget = widget;
+
+				return this.renderTopElement(tableWidget.top);
 			}
 		}
 
 		return null;
-	};;
+	};
+
+	renderTopElement = (top: DataTopSettings) => {
+		if (top.show) {
+			return (
+				<div className={styles.top}>
+					<T count={top.count} text="Header::Top" />
+				</div>
+			);
+		}
+
+		return null;
+	};
 
 	render () {
 		const {className, widget} = this.props;
