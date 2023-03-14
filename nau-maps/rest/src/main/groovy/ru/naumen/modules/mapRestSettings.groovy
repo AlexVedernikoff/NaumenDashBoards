@@ -190,29 +190,27 @@ class ElementsMap
                     linkDefaultIcons
         }
 
-        TrailBuilder trailBuilder =
-            dbTrail && dbTrail.siteA && dbTrail.siteB && dbTrail.title && dbTrail.gradLongA
-                ? createTrailBuilder(dbTrail)
-                .setHeader(dbTrail.title)
-                .setColor(color)
-                .setOpacity(opacity)
-                .setWidth(width)
-                .setLineStyle(lineStyle)
-                .setTooltip(tooltip)
-                .setGeopositions(
-                    returnDataByAttributeHierarchy(strategie?.pathCoordinatesLatitudeA, dbTrail),
-                    returnDataByAttributeHierarchy(strategie?.pathCoordinatesLongitudA, dbTrail),
-                    returnDataByAttributeHierarchy(strategie?.pathCoordinatesLatitudeB, dbTrail),
-                    returnDataByAttributeHierarchy(strategie?.pathCoordinatesLongitudB, dbTrail)
-                )
-                .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(dbTrail)))
-                .setDisplayingLinesDots(strategie.displayingLinesDots)
-                .setIconFirst(dataDisplayPointA)
-                .setIconSecond(dataDisplayPointB)
-                .setParts(dbTrail)
-                .setEquipments(dbTrail)
-                .addAction(GO_TO_CARD, api.web.open(dbTrail.UUID))
-                : null
+        TrailBuilder trailBuilder = createTrailBuilder(dbTrail)
+            .setHeader(dbTrail.title)
+            .setColor(color)
+            .setOpacity(opacity)
+            .setWidth(width)
+            .setLineStyle(lineStyle)
+            .setTooltip(tooltip)
+            .setGeopositions(
+                returnDataByAttributeHierarchy(strategie?.pathCoordinatesLatitudeA, dbTrail),
+                returnDataByAttributeHierarchy(strategie?.pathCoordinatesLongitudA, dbTrail),
+                returnDataByAttributeHierarchy(strategie?.pathCoordinatesLatitudeB, dbTrail),
+                returnDataByAttributeHierarchy(strategie?.pathCoordinatesLongitudB, dbTrail)
+            )
+            .setCodeEditingForm(getCodeEditingForm(api.metainfo.getMetaClass(dbTrail)))
+            .setDisplayingLinesDots(strategie.displayingLinesDots)
+            .setIconFirst(dataDisplayPointA)
+            .setIconSecond(dataDisplayPointB)
+            .setParts(dbTrail, strategie)
+            .setEquipments(dbTrail)
+            .addAction(GO_TO_CARD, api.web.open(dbTrail.UUID))
+            ?: null
         MetaclassNameAndAttributeList attributesFromGroup =
             getListAttributesOutputCharacteristics(defaultSettingsWizardSettings, dbTrail)
         addOptionsElementsOnMap(
@@ -408,26 +406,26 @@ class ElementsMap
      * @param dbPart - участок трассы из БД
      * @return сформированный участок трассы
      */
-    public SectionBuilder createPart(ISDtObject dbPart)
+    public SectionBuilder createPart(ISDtObject dbPart, OutputObjectStrategies strategie)
     {
-        if (dbPart && dbPart.title && dbPart.siteA && dbPart.siteB)
+        if (dbPart && dbPart.title)
         {
             return createSectionBuilder(dbPart)
                 .setHeader(dbPart.title)
                 .setColor(dbPart.HEXcolor)
                 .addOption(
                     AREA_A,
-                    new Value(label: dbPart.siteA.title, url: api.web.open(dbPart.siteA.UUID))
+                    new Value(label: dbPart.title, url: api.web.open(dbPart.UUID))
                 )
                 .addOption(
                     AREA_B,
-                    new Value(label: dbPart.siteB.title, url: api.web.open(dbPart.siteB.UUID))
+                    new Value(label: dbPart.title, url: api.web.open(dbPart.UUID))
                 )
                 .setGeopositions(
-                    dbPart.gradLatA,
-                    dbPart.gradLongA,
-                    dbPart.gradLatB,
-                    dbPart.gradLongB
+                    dbPart[strategie.pathCoordinatesLatitudeA],
+                    dbPart[strategie.pathCoordinatesLongitudA],
+                    dbPart[strategie.pathCoordinatesLatitudeB],
+                    dbPart[strategie.pathCoordinatesLongitudB]
                 )
                 .addAction(GO_TO_CARD, api.web.open(dbPart.UUID))
         }
@@ -1153,11 +1151,11 @@ class TrailBuilder extends MapObjectBuilder
         return this
     }
 
-    TrailBuilder setParts(ISDtObject dbParts)
+    TrailBuilder setParts(ISDtObject dbParts, OutputObjectStrategies strategie)
     {
-        if (dbParts && dbParts.title && dbParts.siteA && dbParts.siteB)
+        if (dbParts && dbParts.title)
         {
-            this.parts = [elementsMap.createPart(dbParts)]
+            this.parts = [elementsMap.createPart(dbParts, strategie)]
         }
         return this
     }

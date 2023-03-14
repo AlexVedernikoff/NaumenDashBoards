@@ -172,7 +172,7 @@ class DataGeneration
             strategie?.placesOfUse?.each { place ->
                 if (place == nameContent)
                 {
-                    ScriptDtOList executeScript =
+                    Collection executeScript =
                         api.utils.executeScript(strategie.scriptText, bindings)
                     if (isDataAboutPointsOrLines)
                     {
