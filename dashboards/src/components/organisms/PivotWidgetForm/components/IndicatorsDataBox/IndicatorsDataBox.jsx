@@ -140,11 +140,12 @@ export class IndicatorsDataBox extends PureComponent<Props, State> {
 	getChangeDataSetIndicatorHandler = (valueIndex: number) => (index: number, dataSetIndex: number) => {
 		const {data} = this.props;
 		const {values} = this.state;
-		const {dataKey} = data[dataSetIndex];
+		const {dataKey, indicators} = data[dataSetIndex];
+		const newIndex = indicators.length;
 
 		const newValues = values.map((item, idx) =>
 			(idx === valueIndex)
-				? {...item, dataKey, dataSetIndex, indicator: createPivotIndicator()}
+				? {...item, dataKey, dataSetIndex, index: newIndex, indicator: createPivotIndicator()}
 				: item
 		);
 
