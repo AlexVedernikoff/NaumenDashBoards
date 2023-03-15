@@ -542,7 +542,8 @@ class Charts
      * @param listAttributes - список атрибутов
      * @param allSchemeToDisplay - все схемы
      * @param idElements - идентификатор элемента на схеме
-     * @param attributeHandler - переменная для доступа к методу обработки иерархичных атрибутов* @return все линии по соответствующей стратегии
+     * @param attributeHandler - переменная для доступа к методу обработки иерархичных атрибутов*
+     * @return все линии по соответствующей стратегии
      */
     void addLineByRelatedObjects(Object currentStrategy,
                                  Collection<Collection<ElementChart>> currentSchemeToDisplay,
