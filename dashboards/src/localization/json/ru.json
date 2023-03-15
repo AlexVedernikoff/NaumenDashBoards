@@ -248,6 +248,7 @@
 	"GroupModal::TimeOver": "Кончился запас времени",
 	"GroupModal::TitleContains": "Название содержит",
 	"GroupModal::TitleNotContains": "Название не содержит",
+	"Header::Top": "Топ {count}",
 	"HeaderBox::PositionBottom": "Отображать снизу",
 	"HeaderBox::PositionTop": "Отображать сверху",
 	"HeaderBox::Title": "Заголовок",

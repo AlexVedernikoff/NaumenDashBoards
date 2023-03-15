@@ -608,6 +608,10 @@ type FontStyleControl =
 	| 'FontStyleControl::Italic'
 	| 'FontStyleControl::Underline';
 
+// containers/withBaseWidget/components/Header/Header.jsx
+type Header =
+	| 'Header::Top';
+
 // components/organisms/WidgetFormPanel/components/HeaderBox
 type HeaderBox =
 	| 'HeaderBox::PositionTop'
@@ -1044,6 +1048,7 @@ export type LangType =
 	| Formatter
 	| GroupModalActive
 	| GroupModalScheme
+	| Header
 	| HeaderBox
 	| IndicatorFieldset
 	| IndicatorsBox
