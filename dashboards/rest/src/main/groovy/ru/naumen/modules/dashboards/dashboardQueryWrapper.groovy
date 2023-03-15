@@ -692,6 +692,7 @@ class QueryWrapper implements CriteriaWrapper
     {
         def sc = api.selectClause
         GroupType groupType = parameter.type
+        parameter.attribute = DashboardQueryWrapperUtils.updateRefAttributeCode(parameter.attribute)
         String[] attributeCodes = parameter.attribute.attrChains()*.code
                                            .with(this.&replaceMetaClassCode)
         IApiCriteriaColumn column = sc.property(criteriaForColumn, attributeCodes)
@@ -2155,22 +2156,35 @@ class DashboardQueryWrapperUtils
         Boolean attributeIsNotDynamic = !(attribute.code.contains(AttributeType.TOTAL_VALUE_TYPE)
             || attribute.property?.contains(AttributeType.TOTAL_VALUE_TYPE))
 
-        Attribute attributeToUpdate = attribute.ref ?: attribute
-        Boolean attrRefHasBaseValues = !attributeToUpdate.code?.contains('@')
-
-        //если класс/тип, на который ссылается атрибут не равен метаклассу атрибута,
-        //скорей всего атрибут есть только в конкретном типе, но его нет в классе
-        //также атрибут должен быть не динамический и в нём уже не проставлен этот код корректно
-        if (attributeToUpdate.metaClassFqn && attributeIsNotDynamic && attrRefHasBaseValues)
+        List<Attribute> attributesToUpdate = [attribute]
+        if (attribute.ref)
         {
-            String attrRefCode = attributeToUpdate.code
-            IAttributeWrapper systemAttribute = getApi().metainfo.getMetaClass(attributeToUpdate.metaClassFqn).getAttribute(attrRefCode)
-            Boolean attrSignedInClass = systemAttribute.declaredMetaClass.fqn.isClass()
-            if(!attrSignedInClass && (!attribute.ref || attribute.property != attribute.ref.metaClassFqn))
+            attributesToUpdate << attribute.ref
+        }
+
+        attributesToUpdate.each {attributeToUpdate ->
+            Boolean attrRefHasBaseValues = !attributeToUpdate.code?.contains('@')
+
+            //если класс/тип, на который ссылается атрибут не равен метаклассу атрибута,
+            //скорей всего атрибут есть только в конкретном типе, но его нет в классе
+            //также атрибут должен быть не динамический и в нём уже не проставлен этот код корректно
+            if (attributeToUpdate.metaClassFqn && attributeIsNotDynamic && attrRefHasBaseValues)
             {
-                attributeToUpdate.code = systemAttribute.attributeFqn.toString()
+                String attrRefCode = attributeToUpdate.code
+                IAttributeWrapper systemAttribute = getApi().metainfo.getMetaClass(attributeToUpdate.metaClassFqn).getAttribute(attrRefCode)
+                Boolean attrSignedInClass = systemAttribute.declaredMetaClass.fqn.isClass() &&
+                                            !systemAttribute.declaredMetaClass.toString().contains('__Evt')
+                if (!attrSignedInClass && (!attribute.ref || attribute.property !=
+                                           attribute.ref?.metaClassFqn ||
+                                           attribute.metaClassFqn.contains(
+                                               '__Evt'
+                                           )))
+                {
+                    attributeToUpdate.code = systemAttribute.attributeFqn.toString()
+                }
             }
         }
+
         return attribute
     }
 
