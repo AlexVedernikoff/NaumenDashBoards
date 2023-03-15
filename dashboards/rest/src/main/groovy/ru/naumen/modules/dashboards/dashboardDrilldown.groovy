@@ -664,20 +664,38 @@ class DashboardDrilldownService
                             }
                             else
                             {
-                                attr.ref = new Attribute(
-                                    code: 'textValue',
-                                    type: 'string',
-                                    property: AttributeType.TOTAL_VALUE_TYPE
-                                )
-                                objects = findObjects(attr.ref, attr.property, value)
-                                checkValuesSize(objects)
-                                attr.code = AttributeType.TOTAL_VALUE_TYPE
-                                result << [filterBuilder.OR(attr.code, 'notNull', null)]
-                                result << [filterBuilder.OR(
-                                    attr.code, 'containsInSet', objects.collect {
-                                    it.hasProperty('UUID') ? it.UUID : it
+                                if (value == 'Не заполнено')
+                                {
+                                    List elements = getElementsByCriteriaToFilter(
+                                        attr,
+                                        classFqn,
+                                        descriptor,
+                                        indicatorsCode
+                                    )
+                                    checkValuesSize(elements)
+                                    result << [filterBuilder.OR(
+                                        indicatorsCode, 'contains', elements.collect {
+                                        it as String
+                                    }
+                                    )]
                                 }
-                                )]
+                                else
+                                {
+                                    attr.ref = new Attribute(
+                                        code: 'textValue',
+                                        type: 'string',
+                                        property: AttributeType.TOTAL_VALUE_TYPE
+                                    )
+                                    objects = findObjects(attr.ref, attr.property, value)
+                                    checkValuesSize(objects)
+                                    attr.code = AttributeType.TOTAL_VALUE_TYPE
+                                    result << [filterBuilder.OR(attr.code, 'notNull', null)]
+                                    result << [filterBuilder.OR(
+                                        attr.code, 'containsInSet', objects.collect {
+                                        it.hasProperty('UUID') ? it.UUID : it
+                                    }
+                                    )]
+                                }
                             }
                         }
                         else
