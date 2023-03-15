@@ -165,15 +165,16 @@ class Charts
                     logger.info("Передан неверный скрипт!")
                     logger.error("#schemeParamsSettings ${ ex.message }", ex)
                 }
+                AttributeHandler attributeHandler = new AttributeHandler()
                 Collection listAttributes =
                     currentStrategy.rulesLinkingSchemaObjects.collect {
                         it.pathCoordinateLongitude
                     }
-
                 Collection<Set<ISDtObject>> allObjectsToScheme =
                     distributeRelatedObjectsIntoBlocks(
                         scriptedBusinessObjectsSetupWizard,
-                        listAttributes
+                        listAttributes,
+                        attributeHandler
                     )
                 Collection<Collection<ElementChart>> currentSchemeToDisplay =
                     addPointsByRelatedObjects(allObjectsToScheme, currentStrategy, idElements)
@@ -184,7 +185,8 @@ class Charts
                     currentSchemeToDisplay,
                     listAttributes,
                     allSchemeToDisplay,
-                    idElements
+                    idElements,
+                    attributeHandler
                 )
             }
         }
@@ -401,12 +403,17 @@ class Charts
      * @return коллекции наборов со схемами
      */
     Collection<Set<ISDtObject>> distributeRelatedObjectsIntoBlocks(Collection<ISDtObject> scriptedBusinessObjectsSetupWizard,
-                                                                   Collection listAttributes)
+                                                                   Collection listAttributes,
+                                                                   AttributeHandler attributeHandler)
     {
         Collection<Set<ISDtObject>> allObjectsToScheme = []
         scriptedBusinessObjectsSetupWizard.each { objectsByScript ->
             listAttributes.each { attributesName ->
-                if (objectsByScript.hasProperty(attributesName))
+                Collection objectsByAttribute = attributeHandler.returnDataByAttributeHierarchy(
+                    attributesName,
+                    objectsByScript
+                )
+                if (objectsByAttribute)
                 {
                     Set<ISDtObject> arrayContainingCurrentObject = allObjectsToScheme.find {
                         listObject
@@ -415,24 +422,24 @@ class Charts
                                 ->
                                 object.UUID ==
                                 objectsByScript.UUID ||
-                                object.UUID in objectsByScript[attributesName]?.UUID
+                                object.UUID in objectsByAttribute?.UUID
                             }
                     }
                     if (arrayContainingCurrentObject)
                     {
                         arrayContainingCurrentObject += objectsByScript
-                        if (objectsByScript[attributesName] in ISDtObject)
+                        if (objectsByAttribute in ISDtObject)
                         {
-                            if (objectsByScript[attributesName].UUID in
+                            if (objectsByAttribute.UUID in
                                 scriptedBusinessObjectsSetupWizard.UUID)
                             {
-                                arrayContainingCurrentObject += objectsByScript[attributesName]
+                                arrayContainingCurrentObject += objectsByAttribute
                             }
                         }
                         else
                         {
                             arrayContainingCurrentObject +=
-                                objectsByScript[attributesName].findAll {
+                                objectsByAttribute.findAll {
                                     scriptObject
                                         ->
                                         scriptObject.UUID in scriptedBusinessObjectsSetupWizard.UUID
@@ -449,11 +456,16 @@ class Charts
                                 }
                             }
                         }
-                        Set<ISDtObject> setContainingCurrentElement = allObjectsToScheme.find {
-                            listObject
-                                ->
-                                listObject.find { object -> object.UUID == objectsByScript.UUID
+                        Set<ISDtObject> setContainingCurrentElement =
+                            allObjectsToScheme.find { listObject -> objectsByScript in listObject
+                            }
+                        arrayContainingCurrentObject.each { object ->
+                            allObjectsToScheme.findAll { listObject ->
+                                if (listObject && object.UUID in listObject.UUID)
+                                {
+                                    arrayContainingCurrentObject += listObject
                                 }
+                            }
                         }
                         if (setContainingCurrentElement)
                         {
@@ -466,16 +478,16 @@ class Charts
                     {
                         Set<ISDtObject> listObjects = []
                         listObjects += objectsByScript
-                        if (objectsByScript[attributesName] in ISDtObject)
+                        if (objectsByAttribute in ISDtObject)
                         {
-                            ISDtObject currentObject = objectsByScript[attributesName].UUID in
+                            ISDtObject currentObject = objectsByAttribute.UUID in
                                                        scriptedBusinessObjectsSetupWizard.UUID ?
-                                objectsByScript[attributesName] : null
+                                objectsByAttribute : null
                             listObjects << currentObject
                         }
                         else
                         {
-                            listObjects += objectsByScript[attributesName].findAll { scritpObject ->
+                            listObjects += objectsByAttribute.findAll { scritpObject ->
                                 scritpObject.UUID in scriptedBusinessObjectsSetupWizard.UUID
                             }
                         }
@@ -543,14 +555,18 @@ class Charts
             scheme.each { elementScheme ->
                 listAttributes.each { attributesName ->
                     ISDtObject objectSystem = api.utils.get(elementScheme.UUID)
-                    if (objectSystem.hasProperty(attributesName))
+                    Collection objectsByAttribute = attributeHandler.returnDataByAttributeHierarchy(
+                        attributesName,
+                        objectSystem
+                    )
+                    if (objectsByAttribute)
                     {
-                        if (objectSystem[attributesName] in ISDtObject)
+                        if (objectsByAttribute in ISDtObject)
                         {
                             ElementChart currentElementsScheme = scheme.find { objects
                                 ->
                                 objects?.UUID ==
-                                objectSystem[attributesName].UUID && objects?.UUID != elementScheme
+                                objectsByAttribute.UUID && objects?.UUID != elementScheme
                             }
                             if (currentElementsScheme)
                             {
@@ -565,7 +581,7 @@ class Charts
                         }
                         else
                         {
-                            objectSystem[attributesName].each { objectsAttributes ->
+                            objectsByAttribute.each { objectsAttributes ->
                                 ElementChart currentElementsScheme = scheme.find {
                                     objects
                                         ->
