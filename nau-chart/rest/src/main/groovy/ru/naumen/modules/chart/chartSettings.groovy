@@ -400,6 +400,7 @@ class Charts
      * Осуществляет распределение элементов схемы по соответствующим массивам по связи объектов
      * @param scriptedBusinessObjectsSetupWizard - информация о всех точках из мастера настроек
      * @param listAttributes - список атрибутов
+     * @param attributeHandler - переменная для доступа к методу обработки иерархичных атрибутов
      * @return коллекции наборов со схемами
      */
     Collection<Set<ISDtObject>> distributeRelatedObjectsIntoBlocks(Collection<ISDtObject> scriptedBusinessObjectsSetupWizard,
@@ -541,13 +542,14 @@ class Charts
      * @param listAttributes - список атрибутов
      * @param allSchemeToDisplay - все схемы
      * @param idElements - идентификатор элемента на схеме
-     * @return все линии по соответствующей стратегии
+     * @param attributeHandler - переменная для доступа к методу обработки иерархичных атрибутов* @return все линии по соответствующей стратегии
      */
     void addLineByRelatedObjects(Object currentStrategy,
                                  Collection<Collection<ElementChart>> currentSchemeToDisplay,
                                  Collection listAttributes,
                                  Collection<Collection<ElementChart>> allSchemeToDisplay,
-                                 SchemaWorkingElements idElements
+                                 SchemaWorkingElements idElements,
+                                 AttributeHandler attributeHandler
                                 )
     {
         ElementsScheme elementsScheme = new ElementsScheme()

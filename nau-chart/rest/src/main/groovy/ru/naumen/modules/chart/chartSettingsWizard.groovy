@@ -282,8 +282,8 @@ class RulesLinkingObjects
     @UiSchemaMeta(widget = 'metaClass-select', includeNested = 'enable')
     @JsonSchemaMeta(title = 'Метакласс')
     MetaClassObjectSchemes metaClassObjects = new MetaClassObjectSchemes('', '')
-    @UiSchemaMeta(widget = 'attr-select', paramsPath = '../metaClassObjects')
-    @JsonSchemaMeta(title = 'attr-tree-select', nullable = false)
+    @UiSchemaMeta(widget = 'attr-tree-select', paramsPath = '../metaClassObjects')
+    @JsonSchemaMeta(title = 'Атрибут связи', nullable = false)
     String pathCoordinateLongitude = ""
 }
 
