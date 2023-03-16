@@ -60,6 +60,8 @@ export class MainSelectList extends PureComponent<Props> {
 				} else {
 					fetchDynamicAttributeGroups(dataKey, descriptor, filterId);
 				}
+
+				this.searchDebounce = null;
 			}, 500);
 		}
 	};
