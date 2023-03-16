@@ -146,8 +146,13 @@ const Resource = (props: Props) => {
 	const renderTreeSelect = () => {
 		const {options} = props;
 
+		const currentCN = cn({
+			[styles.select]: true,
+			[styles.errorValidationInput]: (!resource.source.value && props.errorValidation)
+		});
+
 		return (
-			<div className={styles.select}>
+			<div className={cn(styles.select, styles.tooltip)}>
 				<TreeSelect
 					className={styles.sourceTreeSelect}
 					onRemove={handleRemoveSource}
@@ -156,6 +161,7 @@ const Resource = (props: Props) => {
 					removable={true}
 					value={resource.source.value}
 				/>
+				<span className={styles.tooltiptext}>Метакласс ресурсов</span>
 				{(!resource.source.value && props.errorValidation) && <ErrorResource />}
 			</div>
 		);
@@ -255,7 +261,8 @@ const Resource = (props: Props) => {
 			[styles.selectIcon]: true,
 			[styles.selectWidth]: true,
 			[styles.width]: true,
-			[styles.defaultInput]: getAttribute(column.code) === null
+			[styles.defaultInput]: getAttribute(column.code) === null,
+			[styles.selectForm]: true
 		});
 
 		return (

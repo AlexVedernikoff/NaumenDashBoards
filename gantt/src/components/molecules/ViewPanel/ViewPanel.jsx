@@ -7,7 +7,8 @@ import styles from './styles.less';
 import {useDispatch, useSelector} from 'react-redux';
 
 const ViewPanel = () => {
-	const isPersonalDiagram = useSelector(state => state.isPersonalDiagram);
+	const store = useSelector(state => state);
+	const {isPersonalDiagram} = store.APP;
 
 	const [activeGeneralViewButton, setActiveGeneralViewButton] = useState(true);
 	const [activePersonalViewButton, setActivePersonalViewButton] = useState(false);
@@ -32,7 +33,7 @@ const ViewPanel = () => {
 		setPersonal(false);
 	};
 
-	const setPersonalView = () => {
+	const setPersonalViewDiagram = () => {
 		setActivePersonalViewButton(true);
 		setActiveGeneralViewButton(false);
 		dispatch(getGanttData(true));
@@ -52,7 +53,7 @@ const ViewPanel = () => {
 	const renderViewButtons = () => {
 		return isPersonal ? <div>
 			<Button className={generalBtnStyles} onClick={setGeneralView}>Общий</Button>
-			<Button className={personalBtnStyles} onClick={setPersonalView}>Личный</Button>
+			<Button className={personalBtnStyles} onClick={setPersonalViewDiagram}>Личный</Button>
 		</div> : null;
 	};
 
@@ -73,8 +74,6 @@ const ViewPanel = () => {
 	};
 
 	useEffect(() => {
-		dispatch(setPersonalView(isPersonalDiagram));
-
 		setActivePersonal(isPersonalDiagram);
 	}, [isPersonalDiagram]);
 

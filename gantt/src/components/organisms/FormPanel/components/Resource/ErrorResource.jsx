@@ -4,7 +4,7 @@ import styles from './styles.less';
 
 const ErrorResource = () => {
 	return (
-		<div className={styles.errorValidation}>Заполните метакласс у добавленного ресурса</div>
+		<div className={styles.errorValidation}>Укажите метакласс ресурсов</div>
 	);
 };
 

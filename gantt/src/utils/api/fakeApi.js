@@ -36,7 +36,7 @@ export default class FakeApi {
 			return {groupUser: USER_ROLES.REGULAR};
 		}
 
-		return {email: 'test@d.ru', groupUser: USER_ROLES.SUPER, name: 'test'};
+		return {email: 'test@d.ru', groupUser: USER_ROLES.REGULAR, name: 'test'};
 	}
 
 	async getDiagramData (contentCode, subjectUuid, user, timezone) {
@@ -93,30 +93,11 @@ export default class FakeApi {
 		return [
 			{
 				'department': 'front',
-				'showUsers': false,
-				'lvl': 0,
-				'users': [
-					{
-						'code': 'Gromov Aleksey',
-						'ganttMaster': false,
-						'name': 'Громов Алексей'
-					},
-					{
-						'code': 'qwd qwdq',
-						'ganttMaster': false,
-						'name': 'Куртков Алексей'
-					},
-					{
-						'code': 'wefwe wef',
-						'ganttMaster': false,
-						'name': 'Тролин Алексей'
-					}
-				],
 				'innerDepartments': [
 					{
-						'department': 'front',
-						'showUsers': false,
+						'department': 'herh',
 						'lvl': 1,
+						'showUsers': false,
 						'users': [
 							{
 								'code': 'Gromov Aleksey',
@@ -133,14 +114,107 @@ export default class FakeApi {
 								'ganttMaster': false,
 								'name': 'Тролин Алексей'
 							}
+						],
+						'innerDepartments': [
+							{
+								'department': 'wefwe',
+								'lvl': 2,
+								'showUsers': false,
+								'users': [
+									{
+										'code': 'Groqwdmov Aledqwksey',
+										'ganttMaster': false,
+										'name': 'аааааА'
+									},
+									{
+										'code': 'qwqwrd qwqwrdq',
+										'ganttMaster': false,
+										'name': 'цуацуа ййй'
+									},
+									{
+										'code': 'wefqwdwe qwdwef',
+										'ganttMaster': false,
+										'name': 'Троqwdлин Алекqwdсей'
+									}
+								],
+									'innerDepartments': [
+									{
+										'department': 'wefwe',
+										'lvl': 3,
+										'showUsers': false,
+										'users': [
+											{
+												'code': 'Groqwdmov Aledqwksey',
+												'ganttMaster': false,
+												'name': 'аааааА'
+											},
+											{
+												'code': 'qwqwrd qwqwrdq',
+												'ganttMaster': false,
+												'name': 'цуацуа ййй'
+											},
+											{
+												'code': 'wefqwdwe qwdwef',
+												'ganttMaster': false,
+												'name': 'Троqwdлин Алекqwdсей'
+											}
+										],
+
+										'innerDepartments': [
+											{
+												'department': 'wefwe',
+												'lvl': 4,
+												'showUsers': false,
+												'users': [
+													{
+														'code': 'Groqwdmov Aledqwksey',
+														'ganttMaster': false,
+														'name': 'аааааА'
+													},
+													{
+														'code': 'qwqwrd qwqwrdq',
+														'ganttMaster': false,
+														'name': 'цуацуа ййй'
+													},
+													{
+														'code': 'wefqwdwe qwdwef',
+														'ganttMaster': false,
+														'name': 'Смирнова'
+													}
+												]
+											}
+										]
+									}
+								]
+							}
 						]
+					}
+				],
+				'lvl': 0,
+				'showUsers': false,
+				'users': [
+					{
+						'code': 'Gromov Aleksey',
+						'ganttMaster': false,
+						'name': 'Громов Алексей'
+					},
+					{
+						'code': 'qwd qwdq',
+						'ganttMaster': false,
+						'name': 'Куртков Алексей'
+					},
+					{
+						'code': 'wefwe wef',
+						'ganttMaster': false,
+						'name': 'Тролин Алексей'
 					}
 				]
 			},
 			{
 				'department': 'back',
-				'showUsers': false,
 				'lvl': 0,
+				'showUsers': false,
+				'innerDepartments': [],
 				'users': [
 					{
 						'code': 'Nosov Aleksandr',

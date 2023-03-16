@@ -70,7 +70,7 @@ const deepClone = (object: Object) => JSON.parse(JSON.stringify(object));
  */
 const normalizeDate = date => {
 	const [datePart, time] = date.split(',');
-	const dateParts = datePart.replace(/[\.\-]/g, ',').split(',');
+	const dateParts = datePart.replace(/[\.\-\/]/g, ',').split(',');
 
 	if (dateParts[2].length === 4) {
 		[dateParts[0], dateParts[2]] = [dateParts[2], dateParts[0]];
