@@ -67,7 +67,11 @@ const StepTransferPanel = props => {
 		const endDate = gantt.date.add(date, 1, scale.value.toLowerCase());
 
 		setInputStartDate(endDate.toLocaleString());
-		gantt.showDate(endDate);
+
+		const position = gantt.posFromDate(endDate);
+
+		gantt.scrollTo(position);
+		gantt.render();
 	};
 
 	const makePrevStep = () => {
@@ -75,7 +79,11 @@ const StepTransferPanel = props => {
 		const endDate = gantt.date.add(date, -1, scale.value.toLowerCase());
 
 		setInputStartDate(endDate.toLocaleString());
-		gantt.showDate(endDate);
+
+		const position = gantt.posFromDate(endDate);
+
+		gantt.scrollTo(position);
+		gantt.render();
 	};
 
 	const renderStepPanel = () => {

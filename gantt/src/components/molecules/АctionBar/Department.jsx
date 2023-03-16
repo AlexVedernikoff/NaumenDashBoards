@@ -3,6 +3,7 @@ import ArrowIcon from 'icons/ArrowIcon';
 import {Checkbox, FormControl} from 'naumen-common-components';
 import cn from 'classnames';
 import {deepClone} from 'helpers';
+import type {Departments} from './types';
 import React, {useState} from 'react';
 import {
 	setUsers
@@ -75,12 +76,45 @@ const Department = ({data, usersClone}) => {
 
 	const renderInnerDepartments = () => innerDepartments.map(renderInnerDepartment);
 
+	const resultDepartment = [];
+
+	resultDepartment.push(data);
+
+	/**
+	 * Функция для проверки существования хотя бы одного пользователя в иерархии подразделений
+	 * @param {Departments} departmentsHierarcy - иерархия подразделения
+	 * @returns {boolean}
+	 */
+	const hasUsersInDepartmentHierarchy = departmentsHierarcy => {
+		if (resultDepartment?.length) {
+			const hasUsers = departmentsHierarcy.some(deparmentHierarcy => {
+				if (deparmentHierarcy.users?.length) {
+					return true;
+				}
+
+				return deparmentHierarcy.innerDepartments ? hasUsersInDepartmentHierarchy(deparmentHierarcy.innerDepartments) : false;
+			});
+
+			return hasUsers;
+		} else {
+			return false;
+		}
+	};
+
+	const renderHeaderDepartment = () => {
+		if (hasUsersInDepartmentHierarchy(resultDepartment)) {
+			return (
+				<div className={styles.wrapperUser} onClick={getShowUsersHandler()}>
+					<ArrowIcon toggleArrow={arrowCN} />
+					<div className={styles.department}>{department}</div>
+				</div>
+			);
+		}
+	};
+
 	return (
-		<div style={{'margin-left': lvl * 20 + 'px'}}>
-			{(users?.length || innerDepartments?.users?.length) && <div className={styles.wrapperUser} onClick={getShowUsersHandler()}>
-				<ArrowIcon toggleArrow={arrowCN} />
-				<div className={styles.department}>{department}</div>
-			</div>}
+		<div style={{'margin-left': 1 * 20 + 'px'}}>
+			{renderHeaderDepartment()}
 			{showUsers && renderUsers()}
 			{innerDepartments && showUsers && renderInnerDepartments()}
 		</div>

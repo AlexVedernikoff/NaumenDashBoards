@@ -83,16 +83,18 @@ const ModalTask = (props: Props) => {
 		const tasks = deepClone(store.APP.tasks);
 
 		tasks.forEach(item => {
-			if (item.start_date) {
-				setInputStartDate(task.start_date.toLocaleString());
-			} else {
-				setInputStartDate('');
-			}
+			if (item.id === task.id) {
+				if (item.start_date) {
+					setInputStartDate(task.start_date.toLocaleString());
+				} else {
+					setInputStartDate('');
+				}
 
-			if (item.end_date) {
-				setInputEndDate(task.end_date.toLocaleString());
-			} else {
-				setInputEndDate('');
+				if (item.end_date) {
+					setInputEndDate(task.end_date.toLocaleString());
+				} else {
+					setInputEndDate('');
+				}
 			}
 		});
 	};
@@ -107,63 +109,112 @@ const ModalTask = (props: Props) => {
 	};
 
 	const save = () => {
-		const newStartDate = normalizeDate(inputStartDate);
-		const newEndDate = normalizeDate(inputEndDate);
-		const tasks = deepClone(store.APP.tasks);
-		const task = gantt.getTask(taskId);
-		const tasksGantt = gantt.getTaskByTime();
+		if (inputStartDate || inputEndDate) {
+			const newStartDate = inputStartDate ? normalizeDate(inputStartDate) : normalizeDate(inputEndDate);
+			const newEndDate = inputEndDate ? normalizeDate(inputEndDate) : normalizeDate(inputStartDate);
+			const tasks = deepClone(store.APP.tasks);
+			const task = gantt.getTask(taskId);
+			const tasksGantt = gantt.getTaskByTime();
 
-		task.text = currentValue;
+			task.text = currentValue;
 
-		if (Date.parse(newEndDate) >= Date.parse(newStartDate) || currentTask.type === 'milestone') {
-			const formatFunc = gantt.date.date_to_str('%Y-%m-%dT%H:%i:%s');
-			const newFormatStartDate = formatFunc(newStartDate);
-			const newFormatEndDate = formatFunc(newEndDate);
+			if (Date.parse(newEndDate) >= Date.parse(newStartDate) || currentTask.type === 'milestone') {
+				const formatFunc = gantt.date.date_to_str('%Y-%m-%dT%H:%i:%s');
+				const newFormatStartDate = formatFunc(newStartDate);
+				const newFormatEndDate = formatFunc(newEndDate);
+
+				tasks.forEach(i => {
+					if (i.id === task.id) {
+						i.start_date = inputStartDate ? newFormatStartDate : '';
+						i.end_date = inputEndDate ? (currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate) : '';
+						i.code1 = currentValue;
+						i.text = currentValue;
+						i.title = currentValue;
+
+						if (currentTask.type === 'milestone') {
+							i.completed = active;
+						}
+
+						const attrStartDate = resources[1].startWorkAttribute.code;
+						const attrEndDate = resources[1].endWorkAttribute.code;
+						const attrMilestone = resources[1]?.checkpointStatusAttr?.code;
+						const workDate = {
+							title: currentValue
+						};
+
+						if (currentTask.type === 'milestone') {
+							workDate[attrMilestone] = newFormatStartDate;
+							workDate.completed = currentTask.type === 'milestone' ? active : null;
+						} else {
+							if (inputStartDate && !inputEndDate) {
+								workDate[attrStartDate] = newFormatStartDate;
+								workDate[attrEndDate] = '';
+							} else if (!inputStartDate && inputEndDate) {
+								workDate[attrStartDate] = '';
+								workDate[attrEndDate] = currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate;
+							} else {
+								workDate[attrStartDate] = newFormatStartDate;
+								workDate[attrEndDate] = currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate;
+							}
+						}
+
+						dispatch(postEditedWorkData(workDate, currentMetaClassFqn, taskId));
+						task.start_date = newStartDate;
+						task.end_date = currentTask.type === 'milestone' ? newStartDate : newEndDate;
+					}
+				});
+
+				tasksGantt.forEach(i => {
+					if (i.id === task.id) {
+						i.start_date = newStartDate;
+						i.end_date = currentTask.type === 'milestone' ? newStartDate : newEndDate;
+						i.text = currentValue;
+						i.name = currentValue;
+						i.code1 = currentValue;
+
+						if (currentTask.type === 'milestone') {
+							i.completed = active;
+						}
+					}
+				});
+
+				dispatch(setColumnTask(tasks));
+
+				gantt.render();
+				setShowModal(false);
+			} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
+				setValueError('Дата начала не может быть позднее даты завершения');
+			} else if (!inputStartDate || !inputEndDate) {
+				setValueError('Заполните все поля');
+			} else {
+				setValueError('Некорректная дата');
+			}
+		} else {
+			const task = gantt.getTask(taskId);
+			const tasks = deepClone(store.APP.tasks);
 
 			tasks.forEach(i => {
 				if (i.id === task.id) {
-					i.start_date = newFormatStartDate;
-					i.end_date = currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate;
+					i.start_date = '';
+					i.end_date = '';
 					i.code1 = currentValue;
 					i.text = currentValue;
 					i.title = currentValue;
 
-					if (currentTask.type === 'milestone') {
-						i.completed = active;
-					}
-
 					const attrStartDate = resources[1].startWorkAttribute.code;
 					const attrEndDate = resources[1].endWorkAttribute.code;
-					const attrMilestone = resources[1].checkpointStatusAttr.code;
+
 					const workDate = {
 						title: currentValue
 					};
 
-					if (currentTask.type === 'milestone') {
-						workDate[attrMilestone] = newFormatStartDate;
-						workDate.completed = currentTask.type === 'milestone' ? active : null;
-					} else {
-						workDate[attrStartDate] = newFormatStartDate;
-						workDate[attrEndDate] = currentTask.type === 'milestone' ? newFormatStartDate : newFormatEndDate;
-					}
+					workDate[attrStartDate] = '';
+					workDate[attrEndDate] = '';
 
 					dispatch(postEditedWorkData(workDate, currentMetaClassFqn, taskId));
-					task.start_date = newStartDate;
-					task.end_date = currentTask.type === 'milestone' ? newStartDate : newEndDate;
-				}
-			});
-
-			tasksGantt.forEach(i => {
-				if (i.id === task.id) {
-					i.start_date = newStartDate;
-					i.end_date = currentTask.type === 'milestone' ? newStartDate : newEndDate;
-					i.text = currentValue;
-					i.name = currentValue;
-					i.code1 = currentValue;
-
-					if (currentTask.type === 'milestone') {
-						i.completed = active;
-					}
+					task.start_date = '';
+					task.end_date = '';
+					task.unscheduled = true;
 				}
 			});
 
@@ -171,12 +222,6 @@ const ModalTask = (props: Props) => {
 
 			gantt.render();
 			setShowModal(false);
-		} else if (Date.parse(newEndDate) <= Date.parse(newStartDate)) {
-			setValueError('Дата начала не может быть позднее даты завершения');
-		} else if (!inputStartDate || !inputEndDate) {
-			setValueError('Заполните все поля');
-		} else {
-			setValueError('Некорректная дата');
 		}
 	};
 
@@ -326,7 +371,7 @@ const ModalTask = (props: Props) => {
 			renderDatePickerDate: renderDatePickerStartDate,
 			setShowDatePickerDate: setShowDatePickerStartDate,
 			showDatePickerDate: showDatePickerStartDate,
-			text: 'С'
+			text: 'Начальная дата'
 		},
 		{
 			changeDate: changeEndDate,
@@ -334,7 +379,7 @@ const ModalTask = (props: Props) => {
 			renderDatePickerDate: renderDatePickerEndDate,
 			setShowDatePickerDate: setShowDatePickerEndDate,
 			showDatePickerDate: showDatePickerEndDate,
-			text: 'По'
+			text: 'Конечная дата'
 		}
 	];
 
@@ -352,18 +397,16 @@ const ModalTask = (props: Props) => {
 	const dataFinal = currentTask.type === 'milestone' ? dataMilestoneInterval : dataInterval;
 
 	const listDataInterval = dataFinal.map((item, index) => {
-		if (item.inputDate) {
-			return (
-				<div className={styles.interval__wrapper_input} key={index}>
-					<span className={styles.interval__label}>{item.text}</span>
-					<div className={styles.wrapper_input}>
-						<TextInput className={styles.input} maxLength={30} onChange={item.changeDate} placeholder="дд.мм.гггг, чч:мм:сс" value={item.inputDate} />
-						<IconButton className={styles.basket} icon="TOUCH_CALENDAR" onClick={() => item.setShowDatePickerDate(!item.showDatePickerDate)} />
-					</div>
-					{item.renderDatePickerDate()}
+		return (
+			<div className={styles.interval__wrapper_input} key={index}>
+				<span className={styles.interval__label}>{item.text}</span>
+				<div className={styles.wrapper_input}>
+					<TextInput className={styles.input} maxLength={30} onChange={item.changeDate} placeholder="дд.мм.гггг, чч:мм:сс" value={item.inputDate ? item.inputDate : ''} />
+					<IconButton className={styles.basket} icon="TOUCH_CALENDAR" onClick={() => item.setShowDatePickerDate(!item.showDatePickerDate)} />
 				</div>
-			);
-		}
+				{item.renderDatePickerDate()}
+			</div>
+		);
 	});
 
 	// нужно для следующего мр

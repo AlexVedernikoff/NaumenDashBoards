@@ -39,11 +39,17 @@
 	}
 
 	.milestoneSelect {
+		margin-top: 8px;
 		max-width: 100% !important;
-
+		
 		&>div>div {
 			color: #323232;
 			font-size: 13px;
+		}
+
+		svg {
+			color: #999999;
+			stroke: #999999;
 		}
 	}
 
@@ -103,6 +109,10 @@
 		pointer-events: none;
 	}
 
+	.errorValidationInput .sourceTreeSelect {
+		border: 1px solid red;
+	}
+
 	.padding {
 		padding: 3px 12px;
 	}
@@ -111,6 +121,44 @@
 		padding-bottom: 12px;
 		padding-top: 4px;
 		width: 100%;
+	
+		& div[title] {
+			pointer-events: none;
+		}
+	
+	}
+
+	.tooltip {
+		display: inline-block;
+		position: relative;
+		width: 100%;
+	}
+	
+	.tooltip .tooltiptext {
+		background-color: #fff;
+		border: 1px solid black;
+		color: black;
+		font-size: 12px;
+		left: 63px;
+		padding: 6px;
+		position: absolute;
+		text-align: center;
+		top: 45px;
+		visibility: hidden;
+		z-index: 3;
+	}
+	
+	.tooltip:hover .tooltiptext {
+		visibility: visible;
+	}
+
+	.valueMileStone > div > div {
+		color: #767676;
+	}
+
+	.valueMileStone svg {
+		color: #999999;
+		fill: #999999;
 	}
 
 	.margin {
@@ -136,6 +184,14 @@
 		flex-direction: column;
 		justify-content: space-between;
 		padding: 4px 14px 8px 0;
+
+		& > div > div > div {
+			padding: 0 12px;
+		}
+
+		& > div > div > div > div {
+			padding: 8px 0px;
+		}
 	}
 
 	.date {
@@ -205,7 +261,6 @@
 		font-size: 13px;
 		height: 32px;
 		margin-top: 5px;
-		padding: 1px 12px;
 		position: relative;
 		width: 100%;
 
@@ -221,10 +276,22 @@
 
 		& > div {
 			border-bottom: none;
+			position: relative;
+			top: 0px;
+
+			//Выпадающий список поверх тултипа
+			&:nth-child(2) {
+				z-index: 4;
+			}
 		}
 	}
 
 	.width {
 		width: 100%;
+
+		& > div:nth-child(2) > div {
+			max-height: 126px;
+			height: auto !important;
+		}
 	}
 }

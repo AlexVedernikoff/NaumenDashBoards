@@ -161,9 +161,11 @@ const getVersionSettings = (versionKey: string): ThunkAction => async (dispatch:
 		const timezone = new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 		const {
 			commonSettings,
-			diagramKey
+			diagramKey,
+			tasks
 		} = await getGanttVersionsSettings(versionKey, timezone);
 
+		dispatch(setColumnTask(tasks));
 		dispatch(setCurrentVersion(versionKey));
 		dispatch(setDiagramKey(diagramKey));
 		dispatch(setCommonSettings(commonSettings && Object.keys(commonSettings).length ? commonSettings : defaultCommonSettings));
@@ -630,7 +632,7 @@ const getGanttData = (personalView: boolean): ThunkAction => async (dispatch: Di
 		dispatch(switchProgressCheckbox(!!progressCheckbox));
 		dispatch(switchWorkRelationCheckbox(!!workRelationCheckbox));
 		dispatch(setAttributesMap(attributesMap));
-		dispatch(setPersonalView(!!isPersonalDiagram));
+		dispatch(setPersonalView(isPersonalDiagram));
 		dispatch(setPersonal(!!isPersonal));
 		dispatch(setContentCode(contentCode));
 		dispatch(setTextWork(viewWork || {label: 'в работах', value: 'work'}));

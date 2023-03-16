@@ -380,11 +380,11 @@ export default class Api {
 	* Сохраняет настройки цветов
 	* @param {CurrentColorSettings} currentColorSettings - список сущностей
 	* @param {string} contentCode - ключ контента, на котором расположена диаграмма
-	* @param {string} subjectUuid - UUID объекта
+	* @param {string} subjectUUID - UUID объекта
 	* @returns {ThunkAction}
 	*/
 	async saveGanttColorSettings (currentColorSettings: CurrentColorSettings, contentCode: string, subjectUUID: string) {
-		const url = `exec-post?func=modules.ganttSettings.saveGanttColorSettings&params=requestContent`;
+		const url = `exec-post?func=modules.ganttSettings.saveGanttColorSettings&params=requestContent,user`;
 		const body = {
 			contentCode,
 			currentColorSettings,

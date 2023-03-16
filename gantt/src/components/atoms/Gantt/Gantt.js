@@ -3,13 +3,13 @@ import './gant-export';
 import './styles.less';
 import 'naumen-gantt/codebase/dhtmlxgantt.css';
 import CheckedMenu from 'components/atoms/CheckedMenu';
+import {config} from './config';
 import {deepClone, normalizeDate, shiftTimeZone} from 'helpers';
 import {gantt} from 'naumen-gantt';
+import {getVersionSettings, postEditedWorkData, savePositionOfWork, setColumnSettings, setColumnTask, setDiagramLinksData} from 'store/App/actions';
 import ModalTask from 'components/atoms/ModalTask';
-import {postEditedWorkData, savePositionOfWork, setColumnSettings, setColumnTask, setDiagramLinksData} from 'store/App/actions';
 import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {config} from './config';
 
 const HEIGHT_HEADER = 70;
 
@@ -193,27 +193,28 @@ const Gantt = (props: Props) => {
 	};
 
 	useEffect(() => {
-		gantt.attachEvent('onGanttReady', () => {
-			const el = document.querySelector('.gantt_hor_scroll');
-
-			if (el) {
-				el.addEventListener('scroll', () => {
-					document.documentElement.style.setProperty(
-						'--gantt-frozen-column-scroll-left', el.scrollLeft + 'px'
-					);
-				});
-			}
-		});
-
-		if (gantt.config.columns.length >= 6) {
-			gantt.config.layout = config;
-			gantt.config.grid_elastic_columns = 'min-width';
-		}
-
 		gantt.config.auto_scheduling = true;
 		gantt.config.autoscroll = true;
 		gantt.config.auto_scheduling = true;
 		gantt.config.columns = configureAdaptedColumns();
+
+		if (columns.length >= 6) {
+			gantt.attachEvent('onGanttReady', () => {
+				const el = document.querySelector('.gantt_hor_scroll');
+
+				if (el) {
+					el.addEventListener('scroll', () => {
+						document.documentElement.style.setProperty(
+							'--gantt-frozen-column-scroll-left', el.scrollLeft + 'px'
+						);
+					});
+				}
+			});
+
+			gantt.config.layout = config;
+			gantt.config.grid_elastic_columns = 'min-width';
+		}
+
 		gantt.config.drag_project = true;
 		gantt.config.drag_multiple = true;
 		gantt.config.duration_unit = 'minute';
@@ -357,19 +358,21 @@ const Gantt = (props: Props) => {
 		gantt.attachEvent('onRowDragStart', function (id, target, e) {
 			return true;
 		});
+
+		gantt.attachEvent('onBeforeRowDragEnd', async function (id, parent, tindex) {
+			const newParent = gantt.getTask(id).parent;
+			const newIndex = gantt.getTaskIndex(id);
+
+			const res = await savePositionOfWork(id, newParent, store.APP.diagramKey, newIndex, store.APP.currentVersion)(dispatch);
+
+			if (res?.status === 500) {
+				gantt.moveTask(id, tindex, parent);
+
+				alert('Нередактируемый атрибут, нельзя переместить работу');
+				return false;
+			}
+		});
 	}, []);
-
-	gantt.attachEvent('onBeforeRowDragEnd', debounce(async function (id, _, tindex) {
-		const parent = gantt.getTask(id).parent;
-
-		const res = await savePositionOfWork(id, parent, store.APP.diagramKey, tIndex, store.APP.currentVersion)(dispatch);
-
-		if (res && res.status === 500) {
-			gantt.moveTask(id, tindex, parent);
-
-			alert('Нередактируемый атрибут, нельзя переместить работу');
-		}
-	}, 100));
 
 	gantt.attachEvent('onAfterTaskDrag', debounce(function (id, parent) {
 		const task = gantt.getTask(id);
@@ -392,7 +395,6 @@ const Gantt = (props: Props) => {
 
 		saveChangedWorkProgress(task.id, task.progress);
 		dispatch(setColumnTask(newTasks));
-
 
 		gantt.render();
 	}, 100));
@@ -425,9 +427,11 @@ const Gantt = (props: Props) => {
 	useEffect(() => {
 		const {endDate, startDate} = store.APP;
 
-		gantt.config.start_date = typeof startDate === 'string' ? normalizeDate(startDate) : normalizeDate((startDate).toLocaleString());
-		gantt.config.end_date = typeof endDate === 'string' ? normalizeDate(endDate) : normalizeDate((endDate).toLocaleString());
-		gantt.render();
+		if (startDate && endDate) {
+			gantt.config.start_date = typeof startDate === 'string' ? normalizeDate(startDate) : normalizeDate((startDate).toLocaleString());
+			gantt.config.end_date = typeof endDate === 'string' ? normalizeDate(endDate) : normalizeDate((endDate).toLocaleString());
+			gantt.render();
+		}
 	}, [store.APP.startDate, store.APP.endDate]);
 
 	// Изменяет временной формат на диграемме при изменении scale
@@ -465,8 +469,6 @@ const Gantt = (props: Props) => {
 			}
 		});
 
-		gantt.render();
-
 		tasks
 			.filter(task => !task.parent)
 			.map(task => task.id)
@@ -480,6 +482,25 @@ const Gantt = (props: Props) => {
 				title: dateToStr(new Date())
 			});
 		}
+
+		gantt.templates.tooltip_text = (_, __, task) => {
+			const storeTask = store.APP.tasks.find(TASK => TASK.id === task.id);
+
+			if (task.type === 'milestone') {
+				return `<br /><b>Название:</b> ${task.text} <br /><b>Контрольная точка:</b> ${dateToStr(task.start_date)}`;
+			} else if (storeTask?.end_date && storeTask?.start_date) {
+				return `<br /><b>Название:</b> ${task.text} <br /><b>Начальная дата:</b> ${dateToStr(task.start_date)}
+					<br /><b>Конечная дата:</b> ${dateToStr(task.end_date)}`;
+			} else {
+				if (storeTask?.end_date) {
+					return `<br /><b>Название:</b> ${task.text} <br /><b>Конечная дата:</b> ${dateToStr(task.end_date)}`;
+				} else if (storeTask?.start_date) {
+					return `<br /><b>Название:</b> ${task.text} <br /><b>Начальная дата:</b> ${dateToStr(task.start_date)}`;
+				}
+			}
+		};
+
+		gantt.render();
 	}, [tasks]);
 
 	useEffect(() => {
@@ -535,9 +556,22 @@ const Gantt = (props: Props) => {
 
 	// Обновляет диаграмму при изменении props.refresh
 	useEffect(() => {
+		const {isPersonal} = store.APP;
+
 		if (initPage) {
-			props.getGanttData();
-			gantt.render();
+			if (store.APP.currentVersion) {
+				gantt.clearAll();
+
+				setTimeout(() => {
+					dispatch(getVersionSettings(store.APP.currentVersion));
+
+					gantt.parse(JSON.stringify({data: store.APP.tasks, links: store.APP.workRelations}));
+					gantt.render();
+				}, 0);
+			} else {
+				props.getGanttData(isPersonal);
+				gantt.render();
+			}
 		}
 
 		setInitPage(true);
@@ -739,7 +773,7 @@ const Gantt = (props: Props) => {
 				editor: item.editor,
 				hide: !item.show,
 				label: item.title + `<div id="${item.code}"></div>`,
-				min_width: gantt.config.columns.length >= 6 ? 200 : 0,
+				min_width: columns.length >= 6 ? 200 : 0,
 				name: item.code,
 				resize: true,
 				width: '*'

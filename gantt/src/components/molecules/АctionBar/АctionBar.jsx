@@ -10,7 +10,7 @@ import {gantt} from 'naumen-gantt';
 import IconButton from 'components/atoms/IconButton';
 import {ICON_NAMES} from 'components/atoms/Icon';
 import Modal from 'components/atoms/Modal/Modal';
-import {postDataUsers, setIsVersions} from 'store/App/actions';
+import {postDataUsers, setIsVersions, setUsers} from 'store/App/actions';
 import React, {useEffect, useState} from 'react';
 import {ScaleNames} from 'components/organisms/FormPanel/consts';
 import StepTransferPanel from 'components/atoms/StepTransferPanel/StepTransferPanel';
@@ -26,6 +26,7 @@ const АctionBar = props => {
 
 	const [inputStartDate, setInputStartDate] = useState(sd);
 	const [inputEndDate, setInputEndDate] = useState(ed);
+	const [localUsers, setLocalUsers] = useState([]);
 
 	const [flag, setFlag] = useState(true);
 
@@ -239,9 +240,30 @@ const АctionBar = props => {
 
 	const renderUsers = () => <CheckboxPrivilege usersClone={store.APP.users} />;
 
+	/**
+	 * Функция для скрытия подразделений
+	 * @param {UserItem[]} users - пользователи
+	 * @param {Function} action - функция обновления пользователей в хранилище
+	 * @param {UserItem[]} resultUsers - результирующие пользователи
+	 */
+	const hideDepartments = (users, action, resultUsers) => {
+		users.forEach(user => {
+			user.showUsers = false;
+			user.innerDepartments && hideDepartments(user.innerDepartments);
+		});
+
+		dispatch(action(resultUsers));
+		setInputUsers('');
+	};
+
 	const onSubModal = () => {
 		setShowModalUsers(!showModalUsers);
-		dispatch(postDataUsers(store.APP.users));
+		hideDepartments(store.APP.users, postDataUsers, store.APP.users);
+	};
+
+	const handleClose = () => {
+		setShowModalUsers(!showModalUsers);
+		hideDepartments(store.APP.users, setUsers, localUsers);
 	};
 
 	const filterGanttUsers = (value, clonedUsers) => {
@@ -249,31 +271,27 @@ const АctionBar = props => {
 
 		setInputUsers(value);
 
-		if (!value.length || value === '') {
-			setFilteredUsers(statUsers);
-		} else {
+		if (value.length) {
 			clonedUsers.forEach(item => {
-				const array = [];
+				const users = [];
 
 				item.users.forEach(user => {
 					if (value.length && user.name.toLowerCase().includes(value.toLowerCase())) {
-						array.push(user);
-
-						item.users = array;
-						item.showUsers = true;
-					} else {
-						if (!array.length) {
-							item.users = [];
-						}
-					}
-
-					if (item.innerDepartments?.length) {
-						filterGanttUsers(value, item.innerDepartments);
+						users.push(user);
 					}
 				});
 
+				item.users = users;
+				item.showUsers = true;
+
+				if (item.innerDepartments?.length) {
+					filterGanttUsers(value, item.innerDepartments);
+				}
+
 				setFilteredUsers(clonedUsers);
 			});
+		} else {
+			setFilteredUsers(statUsers);
 		}
 	};
 
@@ -288,7 +306,7 @@ const АctionBar = props => {
 				<Modal
 					className={styles.modalUsers}
 					notice={true}
-					onClose={() => setShowModalUsers(!showModalUsers)}
+					onClose={handleClose}
 					onSubmit={onSubModal}
 					submitText="Сохранить"
 				>
@@ -307,6 +325,12 @@ const АctionBar = props => {
 	};
 
 	const openUsersModal = () => {
+		const clonedUsers = deepClone(store.APP.users);
+
+		setLocalUsers(clonedUsers);
+
+		dispatch(setIsVersions(true));
+
 		setShowModalUsers(!showModalUsers);
 	};
 
@@ -323,9 +347,15 @@ const АctionBar = props => {
 		const {settings, tasks, viewWork, workRelations} = store.APP;
 
 		props.savedGanttVersionSettings(isPersonal, settings, title, new Date().toLocaleString(), tasks, workRelations, viewWork);
-
-		dispatch(setIsVersions(true));
 		dispatch(props.setCurrentVersion(''));
+
+		setShowModalSave(!showModalSave);
+	};
+
+	const handleCloseModal = () => {
+		if (!props.versions.length) {
+			dispatch(setIsVersions(false));
+		}
 
 		setShowModalSave(!showModalSave);
 	};
@@ -336,7 +366,7 @@ const АctionBar = props => {
 				<Modal
 					className={styles.modal}
 					notice={true}
-					onClose={() => setShowModalSave(!showModalSave)}
+					onClose={handleCloseModal}
 					onSubmit={submitSaveVersion}
 					submitText="Сохранить"
 				>
@@ -417,6 +447,11 @@ const АctionBar = props => {
 
 		props.deleteGanttVersionSettings(diagramKey);
 		props.setListVersions(versions);
+
+		if (!versions.length) {
+			dispatch(setIsVersions(false));
+			dispatch(props.setCurrentVersion(''));
+		}
 	};
 
 	const renderVersion = (version) => {
@@ -505,7 +540,7 @@ const АctionBar = props => {
 
 	const renderButtonsEventVersion = () => (
 		<>
-			<Button className={styles.btn} onClick={openConfirmationModal}>Применить</Button>
+			{store.APP.currentVersion && <Button className={styles.btn} onClick={openConfirmationModal}>Применить</Button>}
 			<Button className={styles.btn} onClick={openSaveModal}>Сохранить вид</Button>
 		</>
 	);

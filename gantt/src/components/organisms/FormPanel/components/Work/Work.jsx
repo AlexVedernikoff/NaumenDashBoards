@@ -16,7 +16,7 @@ import {functions, props} from './selectors';
 import Modal from 'src/components/atoms/Modal';
 import {openFilterForm} from 'utils/api/context';
 import type {Props} from './types';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import styles from './styles.less';
 import WorkIcon from 'icons/WorkIcon';
 
@@ -147,8 +147,14 @@ const Work = (props: Props) => {
 	const renderTreeSelect = () => {
 		const {options} = props;
 
+		const currentCN = cn({
+			[styles.select]: true,
+			[styles.tooltip]: true,
+			[styles.errorValidationInput]: (!work.source.value && props.errorValidation)
+		});
+
 		return (
-			<div className={styles.select}>
+			<div className={currentCN}>
 				<TreeSelect
 					className={styles.sourceTreeSelect}
 					onRemove={handleRemoveSource}
@@ -157,7 +163,8 @@ const Work = (props: Props) => {
 					removable={true}
 					value={work.source.value}
 				/>
-				{(!work.source.value && props.errorValidation) && <div className={styles.errorValidation}>Заполните метакласс у добавленной работы</div>}
+				<span className={styles.tooltiptext}>Метакласс работ</span>
+				{(!work.source.value && props.errorValidation) && <div className={styles.errorValidation}>Укажите метакласс работ</div>}
 			</div>
 		);
 	};
@@ -220,9 +227,17 @@ const Work = (props: Props) => {
 		const workAttribute = work?.communicationResourceAttribute;
 		const currentValue: Attribute = workAttribute ? getAdditionalFields(workAttribute, workAttribute.title, workAttribute.code) : null;
 
+		const currentCN = cn({
+			[styles.select]: true,
+			[styles.tooltip]: true,
+			[styles.errorValidationInput]: (!currentValue && props.errorValidation)
+		});
+
+		const inputRef = useRef(null);
+
 		return (
-			<div className={styles.select}>
-				<Select className={cn(styles.margin, styles.selectIcon, styles.width)}
+			<div className={currentCN}>
+				<Select className={cn(styles.margin, styles.selectIcon, styles.width, styles.sourceTreeSelect)}
 					fetchOptions={getOptionsForBondWithResource}
 					icon={'CHEVRON'}
 					isSearching={true}
@@ -230,9 +245,11 @@ const Work = (props: Props) => {
 					onSelect={handleAttributeBondWithResource}
 					options={newValueAttributes}
 					placeholder='Атрибут связи с ресурсом'
+					ref={inputRef}
 					value={currentValue}
 				/>
-				{(!currentValue && props.errorValidation) && <div className={styles.errorValidation}>У работы не заполнен обязательный параметр связи c родительским ресурсом</div>}
+				<span className={styles.tooltiptext}>Атрибут связи с ресурсом</span>
+				{(!currentValue && props.errorValidation) && <div className={styles.errorValidation}>Укажите атрибут связи c ресурсом </div>}
 			</div>
 		);
 	};
@@ -254,8 +271,13 @@ const Work = (props: Props) => {
 		const workAttribute = work?.communicationWorkAttribute;
 		const currentValue: Attribute = workAttribute ? getAdditionalFields(workAttribute, workAttribute.title, workAttribute.code) : null;
 
+		const currentCN = cn({
+			[styles.select]: true,
+			[styles.errorValidationInput]: (!work.source.value && props.errorValidation)
+		});
+
 		return (
-			<div className={styles.select}>
+			<div className={currentCN}>
 				<span className={styles.label}>Связь с вышестоящей работой</span>
 				<Select className={cn(styles.margin, styles.selectIcon, styles.width)}
 					fetchOptions={getOptionsForBondWithWork}
@@ -311,11 +333,17 @@ const Work = (props: Props) => {
 		const label = target === 'start' ? 'Атрибут начала работ' : 'Атрибут окончания работ';
 		const attribute = target === 'start' ? work?.startWorkAttribute : work?.endWorkAttribute;
 		const currentValue: Attribute = attribute ? getAdditionalFields(attribute, attribute.title, attribute.code) : null;
-		const currntError = target === 'start' ? 'Заполните у работы атрибуты начала' : 'Заполните у работы атрибуты окончания';
+		const currntError = target === 'start' ? 'Укажите атрибут начала работ' : 'Укажите атрибут окончания работ';
+
+		const currentCN = cn({
+			[styles.select]: true,
+			[styles.tooltip]: true,
+			[styles.errorValidationInput]: (!currentValue && props.errorValidation)
+		});
 
 		return (
-			<div className={styles.select}>
-				<Select className={cn(styles.margin, styles.selectIcon, styles.width)}
+			<div className={currentCN}>
+				<Select className={cn(styles.margin, styles.selectIcon, styles.width, styles.sourceTreeSelect)}
 					fetchOptions={getOptionsForDate}
 					icon={'CHEVRON'}
 					isSearching={true}
@@ -325,6 +353,7 @@ const Work = (props: Props) => {
 					placeholder={label}
 					value={currentValue}
 				/>
+				<span className={styles.tooltiptext}>{label}</span>
 				{(!currentValue && props.errorValidation) && <div className={styles.errorValidation}>{currntError}</div>}
 			</div>
 		);
@@ -337,7 +366,8 @@ const Work = (props: Props) => {
 			[styles.selectIcon]: true,
 			[styles.selectWidth]: true,
 			[styles.width]: true,
-			[styles.defaultInput]: getAttribute(column.code) === null
+			[styles.defaultInput]: getAttribute(column.code) === null,
+			[styles.selectForm]: true
 		});
 
 		return (
@@ -431,11 +461,19 @@ const Work = (props: Props) => {
 	};
 
 	const renderMilestoneBlock = () => {
+
+		const currentCN = cn({
+			[styles.milestoneSelect]: true,
+			[styles.selectIcon]: (!work.source.value && props.errorValidation),
+			[styles.selectWidth]: true,
+			[styles.width]: true,
+			[styles.valueMileStone]: !valueMileStone
+		});
+
 		if (store.APP.milestonesCheckbox) {
 			return (
-				<>
-					<span className={styles.labelMilestone}>Атрибут контрольной точки</span>
-					<Select className={cn(styles.milestoneSelect, styles.selectIcon, styles.selectWidth, styles.width)}
+				<div className={styles.tooltip}>
+					<Select className={currentCN}
 						fetchOptions={getOptionsForBondWithMilestone}
 						icon={'CHEVRON'}
 						isSearching={true}
@@ -444,7 +482,8 @@ const Work = (props: Props) => {
 						placeholder='Атрибут контрольной точки'
 						value={valueMileStone}
 					/>
-				</>
+					<span className={styles.tooltiptext}>Атрибут контрольной точки</span>
+				</div>
 			);
 		}
 	};

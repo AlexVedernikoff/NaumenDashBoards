@@ -33,9 +33,10 @@
 
 	.datepicker {
 		position: absolute;
-		z-index: 1;
 		right: 68px;
 		top: 23px;
+		// Окно календаря стоит поверх других элементов
+		z-index: 2;
 	}
 
 	.icon {
@@ -63,7 +64,14 @@
 
 		button {
 			position: absolute;
+			right: 25px;
+		}
+
+		.calendar {
+			min-width: 23px;
+			padding: 4px 4px 4px 5px;
 			right: 4px;
+			width: 23px;
 		}
 	}
 
