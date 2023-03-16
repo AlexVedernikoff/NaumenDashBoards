@@ -8,6 +8,7 @@ import type {Props} from './types';
 import React, {PureComponent} from 'react';
 import styles from './styles.less';
 import T from 'components/atoms/Translation';
+import t from 'localization';
 import {VARIANTS as BUTTON_VARIANTS} from 'components/atoms/Button/constants';
 
 export class SessionControls extends PureComponent<Props> {
@@ -35,26 +36,34 @@ export class SessionControls extends PureComponent<Props> {
 			const {aggregation = '', attribute = null} = mainDataSet?.indicators?.[0] ?? {};
 
 			if (hasCountPercent(attribute, aggregation)) {
-				const byWidgetClass = cn({
-					[styles.activeButton]: aggregationType === AGGREGATION_TYPE.PERCENT_CNT_BY_COMMON
-				});
-				const byParametersClass = cn({
-					[styles.activeButton]: aggregationType === AGGREGATION_TYPE.PERCENT_CNT_BY_PARAMETERS
-				});
+				let byWidgetClass = styles.button;
+				let byParametersClass = styles.button;
+				let byWidgetVariant = BUTTON_VARIANTS.GRAY;
+				let byParametersVariant = BUTTON_VARIANTS.GRAY;
+
+				if (aggregationType === AGGREGATION_TYPE.PERCENT_CNT_BY_COMMON) {
+					byWidgetClass = cn(styles.button, styles.activeButton);
+					byWidgetVariant = BUTTON_VARIANTS.INFO;
+				} else {
+					byParametersClass = cn(styles.button, styles.activeButton);
+					byParametersVariant = BUTTON_VARIANTS.INFO;
+				}
 
 				return (
 					<div className={styles.cntPercent}>
 						<Button
 							className={byWidgetClass}
 							onClick={this.getChangeAggregationTypeHandler(AGGREGATION_TYPE.PERCENT_CNT_BY_COMMON)}
-							variant={BUTTON_VARIANTS.GRAY}
+							tooltip={t('SessionControls::ByWidgetClassTooltip')}
+							variant={byWidgetVariant}
 						>
 							<T text="SessionControls::ByWidgetClass" />
 						</Button>
 						<Button
 							className={byParametersClass}
 							onClick={this.getChangeAggregationTypeHandler(AGGREGATION_TYPE.PERCENT_CNT_BY_PARAMETERS)}
-							variant={BUTTON_VARIANTS.GRAY}
+							tooltip={t('SessionControls::ByParametersClassTooltip')}
+							variant={byParametersVariant}
 						>
 							<T text="SessionControls::ByParametersClass" />
 						</Button>

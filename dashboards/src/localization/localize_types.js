@@ -104,8 +104,10 @@ type SelectWithCustomEdit =
 
 // containers/withBaseWidget/components/SessionControls/SessionControls
 type SessionControls =
-  | 'SessionControls::ByWidgetClass'
-  | 'SessionControls::ByParametersClass';
+	| 'SessionControls::ByWidgetClass'
+	| 'SessionControls::ByParametersClass'
+	| 'SessionControls::ByWidgetClassTooltip'
+	| 'SessionControls::ByParametersClassTooltip';
 
 // components/molecules/TreeSelect
 type TreeSelect =
