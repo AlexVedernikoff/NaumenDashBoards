@@ -13,6 +13,7 @@ import type {Indicator, SourceData} from 'store/widgetForms/types';
 
 export type DataSet = $Exact<{
 	...SummaryData,
+	__type: 'SUMMARY_DATA_SET',
 	indicators: Array<Indicator>,
 	source: SourceData
 }>;

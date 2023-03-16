@@ -19,18 +19,19 @@ export class WidgetAddPanel extends Component<Props, State> {
 	};
 
 	addDiagramWidget = () => {
-		const {layoutMode} = this.props;
+		const {newWidgetDisplay} = this.props;
 
-		this.addWidget(new NewWidget(layoutMode));
+		this.addWidget(new NewWidget(newWidgetDisplay));
 	};
 
 	addTextWidget = () => {
-		const {layoutMode} = this.props;
+		const {newWidgetDisplay} = this.props;
 
-		this.addWidget(new NewWidget(layoutMode, WIDGET_TYPES.TEXT));
+		this.addWidget(new NewWidget(newWidgetDisplay, WIDGET_TYPES.TEXT));
 	};
 
-	addWidget = (widget: NewWidget) => widget && this.props.addNewWidget(widget, this.relativeElement);
+	addWidget = (widget: NewWidget) =>
+		widget && this.props.addNewWidget(widget, this.relativeElement);
 
 	showCopyDiagramWidget = () => { this.props.showCopyPanel(); };
 

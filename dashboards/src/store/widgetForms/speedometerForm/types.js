@@ -15,6 +15,7 @@ import type {Indicator, SourceData} from 'store/widgetForms/types';
 
 export type DataSet = $Exact<{
 	...SpeedometerData,
+	__type: 'SPEEDOMETER_DATA_SET',
 	indicators: Array<Indicator>,
 	source: SourceData
 }>;

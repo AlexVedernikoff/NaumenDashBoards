@@ -30,17 +30,18 @@ import t from 'localization';
  * @param {DivRef} relativeElement - элемент, вызвавший событие проверки
  * @returns {ThunkAction}
  */
-const checkWidgetsCount = (relativeElement?: DivRef) => (dispatch: Dispatch, getState: GetState): void => {
-	const {map} = getState().widgets.data;
-	const {DASHBOARD_WIDGET_COUNT_LIMIT: LIMIT} = LIMITS;
+const checkWidgetsCount = (relativeElement?: DivRef) =>
+	(dispatch: Dispatch, getState: GetState): void => {
+		const {map} = getState().widgets.data;
+		const {DASHBOARD_WIDGET_COUNT_LIMIT: LIMIT} = LIMITS;
 
-	if (Object.keys(map).length >= LIMIT) {
-		throw dispatch(createToast({
-			text: t('store::widgets::data::Limit', {limit: LIMIT}),
-			type: 'error'
-		}, relativeElement));
-	}
-};
+		if (Object.keys(map).length >= LIMIT) {
+			throw dispatch(createToast({
+				text: t('store::widgets::data::Limit', {limit: LIMIT}),
+				type: 'error'
+			}, relativeElement));
+		}
+	};
 
 /**
  * Добавляет новый виджет
