@@ -6046,7 +6046,7 @@ class DashboardDataSetService
                 {
                     List childrenColumns = aggrCol.columns
                     childrenColumns.each { childCol ->
-                        String keyName = "${ aggrCol.header }\$${ childCol.header }"
+                        String keyName = childCol.accessor
                         if (aggrCol.aggregation == 'NOT_APPLICABLE')
                         {
                             totalCount = data.count {
