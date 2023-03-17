@@ -360,7 +360,7 @@
 "SelectModal::CreateField","Выбор типа поля","Attribute type selection",,
 "SelectWithCustomEdit::UserOption","Пользовательская настройка","Customizing",,
 "SessionControls::ByParametersClass","% По параметру","% By parameters",,
-"SessionControls::ByParametersClassTooltip","Процент выводится по каждому показателю (столбцу)","The percentage is displayed for each indicator (column)",,
+"SessionControls::ByParametersClassTooltip","Процент выводится по каждому параметру (столбцу)","The percentage is displayed for each parameter (column)",,
 "SessionControls::ByWidgetClass","% По виджету","% By widget",,
 "SessionControls::ByWidgetClassTooltip","Процент считается от общего количества элементов","The percentage is calculated from the total number of elements",,
 "ShowTotalAmountBox::ShowSubTotalAmount","Отображать промежуточные итоги","Display subtotals",,

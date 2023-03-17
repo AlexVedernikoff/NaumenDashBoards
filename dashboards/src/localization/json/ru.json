@@ -366,7 +366,7 @@
 	"SelectModal::CreateField": "Выбор типа поля",
 	"SelectWithCustomEdit::UserOption": "Пользовательская настройка",
 	"SessionControls::ByParametersClass": "% По параметру",
-	"SessionControls::ByParametersClassTooltip": "Процент выводится по каждому показателю (столбцу)",
+	"SessionControls::ByParametersClassTooltip": "Процент выводится по каждому параметру (столбцу)",
 	"SessionControls::ByWidgetClass": "% По виджету",
 	"SessionControls::ByWidgetClassTooltip": "Процент считается от общего количества элементов",
 	"ShowTotalAmountBox::ShowSubTotalAmount": "Отображать промежуточные итоги",
