@@ -1,7 +1,13 @@
 // @flow
-import type {Chart, DataTopSettings, TableWidget} from 'store/widgets/data/types';
+import type {Chart, ComboWidget, DataTopSettings, TableWidget} from 'store/widgets/data/types';
 import cn from 'classnames';
-import {FONT_STYLES, TEXT_HANDLERS, WIDGET_SETS, WIDGET_TYPES} from 'store/widgets/data/constants';
+import {
+	FONT_STYLES,
+	MODE_OF_TOP,
+	TEXT_HANDLERS,
+	WIDGET_SETS,
+	WIDGET_TYPES
+} from 'store/widgets/data/constants';
 import type {Props} from './types';
 import React, {createRef, PureComponent} from 'react';
 import type {Ref} from 'components/types';
@@ -37,7 +43,6 @@ export class Header extends PureComponent<Props> {
 			if (
 				widget.type in WIDGET_SETS.AXIS
 				|| widget.type in WIDGET_SETS.CIRCLE
-				|| widget.type === WIDGET_TYPES.COMBO
 			) {
 				// $FlowFixMe
 				const chartWidget: Chart = widget;
@@ -45,6 +50,24 @@ export class Header extends PureComponent<Props> {
 
 				if (mainDataSet && mainDataSet.top) {
 					return this.renderTopElement(mainDataSet.top ?? {show: false});
+				}
+			} else if (widget.type === WIDGET_TYPES.COMBO) {
+				const comboWidget: ComboWidget = widget;
+				const tops = [];
+
+				comboWidget.data.forEach(ds => {
+					if (!ds.sourceForCompute) {
+						tops.push(ds.top);
+					}
+				});
+
+				if (tops.length) {
+					const show = tops.some(top => top.show);
+					const firstCount = tops[0].count;
+					const isEqualsCount = tops.every(top => top.count === firstCount);
+					const count = isEqualsCount ? firstCount : null;
+
+					return this.renderTopElement({count, modeOfTop: MODE_OF_TOP.MAX, show});
 				}
 			} else if (widget.type === WIDGET_TYPES.TABLE) {
 				const tableWidget: TableWidget = widget;
@@ -60,7 +83,7 @@ export class Header extends PureComponent<Props> {
 		if (top.show) {
 			return (
 				<div className={styles.top}>
-					<T count={top.count} text="Header::Top" />
+					<T count={top.count ?? ''} text="Header::Top" />
 				</div>
 			);
 		}
