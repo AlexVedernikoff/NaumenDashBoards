@@ -11,7 +11,6 @@
 package ru.naumen.modules.dashboards
 
 import groovy.json.JsonOutput
-
 import java.util.regex.Pattern
 import java.util.regex.Matcher
 /**

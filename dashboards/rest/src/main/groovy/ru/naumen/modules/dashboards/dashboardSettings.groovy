@@ -18,7 +18,6 @@ import ru.naumen.core.server.script.api.IDbApi
 import ru.naumen.core.server.script.api.IKeyValueStorageApi
 import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.ea.IEmbeddedApplicationsApi
-import ru.naumen.core.server.script.api.injection.InjectApi
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.amazonaws.util.json.Jackson
 import ru.naumen.core.server.script.spi.IScriptUtils

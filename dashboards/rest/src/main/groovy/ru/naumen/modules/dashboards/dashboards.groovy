@@ -11,10 +11,8 @@
 package ru.naumen.modules.dashboards
 
 import groovy.json.JsonSlurper
-import groovy.transform.Canonical
 import groovy.transform.Field
 import groovy.transform.InheritConstructors
-import org.codehaus.groovy.runtime.StringBufferWriter
 import ru.naumen.core.server.script.api.IDbApi
 import ru.naumen.core.server.script.api.IFTSApi
 import ru.naumen.core.server.script.api.IListDataApi
@@ -29,8 +27,6 @@ import ru.naumen.core.server.script.spi.IScriptUtils
 import ru.naumen.core.shared.IUUIDIdentifiable
 import ru.naumen.core.server.script.api.metainfo.IAttributeWrapper
 import ru.naumen.core.shared.dto.ISDtObject
-import ru.naumen.metainfo.shared.IClassFqn
-
 import static groovy.json.JsonOutput.toJson
 import static MessageProvider.*
 

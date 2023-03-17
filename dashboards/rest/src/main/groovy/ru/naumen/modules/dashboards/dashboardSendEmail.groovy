@@ -13,12 +13,10 @@ package ru.naumen.modules.dashboards
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.transform.InheritConstructors
-
 import javax.mail.util.ByteArrayDataSource
 import ru.naumen.core.server.script.api.injection.InjectApi
 import groovy.transform.Field
 import static MessageProvider.*
-import static CurrentUserHolder.*
 
 @Field @Lazy @Delegate DashboardSendEmail dashboardSendEmail = new DashboardSendEmailImpl(binding)
 

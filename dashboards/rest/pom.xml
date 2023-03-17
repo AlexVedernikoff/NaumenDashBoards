@@ -23,12 +23,12 @@
 		<repository>
 			<id>naumen</id>
 			<name>Naumen external repo</name>
-			<url>https://mvnex.nsd.naumen.ru/</url>
+			<url>https://nexus.sd.naumen.ru/</url>
 		</repository>
 		<repository>
 			<id>naumen-public</id>
 			<name>Naumen public external repo</name>
-			<url>https://mvnex.nsd.naumen.ru/repository/naumen-public/</url>
+			<url>https://nexus.sd.naumen.ru/repository/naumen-public/</url>
 		</repository>
 		<repository>
 			<id>central</id>

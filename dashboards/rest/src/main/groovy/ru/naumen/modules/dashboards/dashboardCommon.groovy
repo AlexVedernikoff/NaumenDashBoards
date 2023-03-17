@@ -23,7 +23,6 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
-
 import java.util.concurrent.TimeUnit
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -60,16 +59,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import ru.naumen.core.shared.IUUIDIdentifiable
-import ru.naumen.commons.shared.FxException
 import groovy.json.JsonSlurper
-
 import javax.transaction.Transaction
 import java.util.stream.Stream
-
 import static org.springframework.web.context.request.RequestContextHolder.getRequestAttributes
-
 import ru.naumen.core.server.script.api.injection.InjectApi
-
 import static Constants.*
 
 //region enum

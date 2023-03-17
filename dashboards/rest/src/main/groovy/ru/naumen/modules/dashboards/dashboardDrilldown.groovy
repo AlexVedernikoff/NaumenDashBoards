@@ -27,7 +27,6 @@ import ru.naumen.core.server.script.spi.IScriptConditionsApi
 import ru.naumen.core.server.script.api.IWhereClauseApi
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 import ru.naumen.core.server.script.spi.IScriptUtils
-
 import java.text.SimpleDateFormat
 import static groovy.json.JsonOutput.toJson
 import com.amazonaws.util.json.Jackson

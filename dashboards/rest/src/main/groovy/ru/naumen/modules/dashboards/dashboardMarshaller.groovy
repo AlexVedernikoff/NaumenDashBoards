@@ -11,16 +11,13 @@
 package ru.naumen.modules.dashboards
 
 import groovy.json.JsonSlurper
-
 import static groovy.json.JsonOutput.toJson
-
 
 /**
  * Класс для сериализации и десериализации объектов
  */
 class DashboardMarshallerClass
 {
-
     /**
      * Метод для замены cardObjectUuid в объекте фильтрации. Требуется для корректной работы фильтра containsSubject
      * @param descriptor     - json объекта фильтра

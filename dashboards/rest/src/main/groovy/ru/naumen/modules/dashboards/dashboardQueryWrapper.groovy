@@ -14,11 +14,9 @@ package ru.naumen.modules.dashboards
 import ru.naumen.core.server.script.api.criteria.*
 import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.shared.list.IListDescriptor
-
 import static MessageProvider.*
 import groovy.json.JsonSlurper
 import static groovy.json.JsonOutput.toJson
-import ru.naumen.core.server.script.api.DbApi$Query
 import ru.naumen.core.server.script.api.IMetainfoApi
 import ru.naumen.core.server.script.api.metainfo.IMetaClassWrapper
 import ru.naumen.core.server.script.api.ISelectClauseApi
@@ -73,7 +71,7 @@ trait CriteriaWrapper
             {
                 if (isDebugMode)
                 {
-                    DbApi$Query query = api.db.query(criteria)
+                    def query = api.db.query(criteria)
                     DashboardUtils.log(QueryWrapper.DASHBOARD_QUERY_WRAPPER_MODULE_NAME, 43, 'query', query.hq.getQueryString())
                 }
                 return api.db.query(criteria).setFirstResult(paginationSettings.firstElementIndex).setMaxResults(paginationSettings.pageSize).list()
@@ -82,7 +80,7 @@ trait CriteriaWrapper
             {
                 if (isDebugMode)
                 {
-                    DbApi$Query query = api.db.query(criteria)
+                    def query = api.db.query(criteria)
                     DashboardUtils.log(QueryWrapper.DASHBOARD_QUERY_WRAPPER_MODULE_NAME, 49, 'query', query.hq.getQueryString())
                 }
                 return api.db.query(criteria).list()
@@ -91,7 +89,7 @@ trait CriteriaWrapper
             {
                 if (isDebugMode)
                 {
-                    DbApi$Query query = api.db.query(criteria)
+                    def query = api.db.query(criteria)
                     DashboardUtils.log(QueryWrapper.DASHBOARD_QUERY_WRAPPER_MODULE_NAME, 55, 'query', query.hq.getQueryString())
                 }
                 return api.db.query(criteria).setMaxResults(DashboardUtils.tableParameterLimit).list()
@@ -100,7 +98,7 @@ trait CriteriaWrapper
         }
         if (isDebugMode)
         {
-            DbApi$Query query = api.db.query(criteria)
+            def query = api.db.query(criteria)
             DashboardUtils.log(QueryWrapper.DASHBOARD_QUERY_WRAPPER_MODULE_NAME, 61, 'query', query.hq.getQueryString())
         }
         return api.db.query(criteria).setMaxResults(hasBreakdown || isTimerTypeAttributeInGroup ? 5000 : 100).list()

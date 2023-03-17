@@ -9,6 +9,7 @@
 //Версия: 4.13.1
 //Категория: скриптовый модуль
 package ru.naumen.modules.dashboards
+
 import ru.naumen.core.server.script.api.injection.InjectApi
 import ru.naumen.core.server.script.spi.IScriptUtils
 
