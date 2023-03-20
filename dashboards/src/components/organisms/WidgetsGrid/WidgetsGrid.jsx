@@ -1,6 +1,11 @@
 // @flow
 import type {AnyWidget, WidgetType} from 'store/widgets/data/types';
-import {calculatePosition, generateWebSMLayout, getSortedWidgetsByLayout, isEqualsLayouts} from './helpers';
+import {
+	calculatePosition,
+	generateWebSMLayout,
+	getSortedWidgetsByLayout,
+	isEqualsLayouts
+} from './helpers';
 import cn from 'classnames';
 import ContextMenu from 'components/molecules/ContextMenu';
 import {debounce} from 'helpers';
@@ -51,16 +56,26 @@ export class WidgetsGrid extends Component<Props, State> {
 	addNewText = () => this.addNewWidget(WIDGET_TYPES.TEXT);
 
 	addNewWidget = (type: WidgetType) => {
-		const {addNewWidget, layoutMode} = this.props;
+		const {addNewWidget, layoutMode, newWidgetDisplay} = this.props;
 		const {contextMenu} = this.state;
 
 		if (this.dashGrid.current) {
 			const {breakpoints, cols, rowHeight, width} = this.dashGrid.current.props;
-			const recommendedPosition = contextMenu
-				? calculatePosition(layoutMode, breakpoints, cols, rowHeight, width, contextMenu.x, contextMenu.y)
-				: null;
+			let recommendedPosition = null;
 
-			addNewWidget(new NewWidget(layoutMode, type, recommendedPosition), this.contextMenuRef);
+			if (contextMenu) {
+				recommendedPosition = calculatePosition(
+					layoutMode,
+					breakpoints,
+					cols,
+					rowHeight,
+					width,
+					contextMenu.x,
+					contextMenu.y
+				);
+			}
+
+			addNewWidget(new NewWidget(newWidgetDisplay, type, recommendedPosition), this.contextMenuRef);
 			this.setState({contextMenu: null});
 		}
 	};
@@ -170,7 +185,8 @@ export class WidgetsGrid extends Component<Props, State> {
 			const style = window.getComputedStyle(gridElement);
 			const marginLeft = parseInt(style.marginLeft);
 			const {current: container} = this.gridContainerRef;
-			const isNeedContainer = target === container || (target instanceof Node && target.parentElement === container);
+			const isNeedContainer = target === container
+				|| (target instanceof Node && target.parentElement === container);
 
 			if (isNeedContainer) {
 				if (container) {
@@ -194,7 +210,9 @@ export class WidgetsGrid extends Component<Props, State> {
 
 		if (current) {
 			const {paddingLeft, paddingRight} = getComputedStyle(current);
-			const width: number = Math.round(current.offsetWidth - parseFloat(paddingLeft) - parseFloat(paddingRight));
+			const width: number = Math.round(
+				current.offsetWidth - parseFloat(paddingLeft) - parseFloat(paddingRight)
+			);
 
 			this.setState(() => ({width}));
 		}
@@ -211,9 +229,17 @@ export class WidgetsGrid extends Component<Props, State> {
 
 		if (contextMenu) {
 			return (
-				<ContextMenu {...contextMenu} forwardedRef={this.contextMenuRef} hideContextMenu={this.hideContextMenu}>
-					<MenuItem key='widget' onClick={this.addNewDiagram}><T text="WidgetsGrid::ContextMenuCreateWidget" /></MenuItem>
-					<MenuItem key='text' onClick={this.addNewText}><T text="WidgetsGrid::ContextMenuCreateText" /></MenuItem>
+				<ContextMenu
+					{...contextMenu}
+					forwardedRef={this.contextMenuRef}
+					hideContextMenu={this.hideContextMenu}
+				>
+					<MenuItem key='widget' onClick={this.addNewDiagram}>
+						<T text="WidgetsGrid::ContextMenuCreateWidget" />
+					</MenuItem>
+					<MenuItem key='text' onClick={this.addNewText}>
+						<T text="WidgetsGrid::ContextMenuCreateText" />
+					</MenuItem>
 				</ContextMenu>
 			);
 		}
@@ -239,7 +265,12 @@ export class WidgetsGrid extends Component<Props, State> {
 		<div className={styles.createButtonPlace}>
 			<div className={styles.creationButtonInfo}>
 				<T text="WidgetsGrid::EmptyGridPart1" />
-				<a aria-pressed="false" className={styles.creationButton} onClick={this.addNewDiagram} role="button">
+				<a
+					aria-pressed="false"
+					className={styles.creationButton}
+					onClick={this.addNewDiagram}
+					role="button"
+				>
 					<T text="WidgetsGrid::EmptyGridAction" />
 				</a>
 				<T text="WidgetsGrid::EmptyGridPart2" />
@@ -292,7 +323,13 @@ export class WidgetsGrid extends Component<Props, State> {
 		const selected = widget.id === selectedWidget;
 
 		return (
-			<GridItem focused={focused} key={widget.id} onClick={this.handleItemClick} onFocus={this.handleFocus} selected={selected}>
+			<GridItem
+				focused={focused}
+				key={widget.id}
+				onClick={this.handleItemClick}
+				onFocus={this.handleFocus}
+				selected={selected}
+			>
 				<Suspense fallback={this.renderWidgetSuspend()}>
 					{widget instanceof NewWidget ? null : this.renderWidget(widget)}
 				</Suspense>
@@ -365,7 +402,12 @@ export class WidgetsGrid extends Component<Props, State> {
 		const onContextMenu = isMobileDevice ? null : this.onContextMenu;
 
 		return (
-			<div className={containerCN} onClick={this.handleClick} onContextMenu={onContextMenu} ref={this.gridContainerRef}>
+			<div
+				className={containerCN}
+				onClick={this.handleClick}
+				onContextMenu={onContextMenu}
+				ref={this.gridContainerRef}
+			>
 				{this.renderContextMenu()}
 				{this.renderGrid()}
 				{this.renderCreateInfo()}

@@ -4,11 +4,11 @@ import type {AxisFormat, CustomFilter, Group, MixedAttribute, Source, WidgetTool
 import type {DataSet as AxisChartDataSet, State as AxisChartFormState, Values as AxisChartValues} from './axisChartForm/types';
 import type {DataSet as CircleChartDataSet, State as CircleChartFormState, Values as CircleChartValues} from './circleChartForm/types';
 import type {DataSet as ComboChartDataSet, State as ComboChartFormState, Values as ComboChartValues} from './comboChartForm/types';
+import type {DataSet as SpeedometerDataSet, State as SpeedometerFormState, Values as SpeedometerValues} from './speedometerForm/types';
 import type {DataSet as SummaryDataSet, State as SummaryFormState, Values as SummaryValues} from './summaryForm/types';
 import type {DataSet as TableDataSet, State as TableFormState, Values as TableValues} from './tableForm/types';
 import type {DataSet as PivotDataSet, State as PivotFormState, Values as PivotValues} from './pivotForm/types';
 import {EVENTS} from 'store/widgetForms/constants';
-import type {State as SpeedometerFormState, Values as SpeedometerValues} from './speedometerForm/types';
 import type {State as TextFormState, Values as TextValues} from './textForm/types';
 
 export type SourceData = {
@@ -104,6 +104,7 @@ export type DiagramDataSet =
 	| AxisChartDataSet
 	| CircleChartDataSet
 	| ComboChartDataSet
+	| SpeedometerDataSet
 	| SummaryDataSet
 	| TableDataSet
 	| PivotDataSet;
@@ -114,7 +115,8 @@ export type DiagramValues =
 	| ComboChartValues
 	| SpeedometerValues
 	| SummaryValues
-	| TableValues;
+	| TableValues
+	| PivotValues;
 
 export type Values = DiagramValues | TextValues;
 

@@ -1,11 +1,10 @@
 // @flow
-import type {AddNewWidgetAction} from 'store/widgets/data/types';
-import type {LayoutMode} from 'store/dashboard/settings/types';
+import type {AddNewWidgetAction, DisplayMode} from 'store/widgets/data/types';
 import type {ThunkAction} from 'store/types';
 
 export type ConnectedProps = {|
 	canShowCopyPanel: boolean,
-	layoutMode: LayoutMode,
+	newWidgetDisplay: DisplayMode,
 |};
 
 export type ConnectedFunctions = {|

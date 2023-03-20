@@ -8,6 +8,7 @@ import {changeAxisChartFormValues} from 'store/widgetForms/actions';
 import {CONTEXT_EVENTS, DASHBOARD_EDIT_MODE} from 'store/context/constants';
 import {createToast} from 'store/toasts/actions';
 import type {Dispatch, GetState, ThunkAction} from 'store/types';
+import {DISPLAY_MODE, WIDGET_TYPES} from 'store/widgets/data/constants';
 import type {EditPanelPosition, LayoutMode, SettingsAction} from './types';
 import {EDIT_PANEL_POSITION, MAX_AUTO_UPDATE_INTERVAL} from './constants';
 import {fetchBuildData} from 'store/widgets/actions';
@@ -24,7 +25,11 @@ import {getDashboardDescription} from './selectors';
 import {getDataSources} from 'store/sources/data/actions';
 import {getLocalStorageValue, getUserLocalStorageId, setLocalStorageValue} from 'store/helpers';
 import {getValueFromDescriptor} from 'utils/descriptorUtils';
-import {isPersonalDashboard, isRestrictUserModeDashboard, isUserModeDashboard} from 'store/dashboard/settings/selectors';
+import {
+	isPersonalDashboard,
+	isRestrictUserModeDashboard,
+	isUserModeDashboard
+} from 'store/dashboard/settings/selectors';
 import {LOCAL_STORAGE_VARS} from 'store/constants';
 import NewWidget from 'store/widgets/data/NewWidget';
 import {resizer as dashboardResizer} from 'app.constants';
@@ -32,7 +37,6 @@ import {setCustomChartsColorsSettings} from 'store/dashboard/customChartColorsSe
 import StorageSettings from 'utils/storageSettings';
 import t from 'localization';
 import type {User} from 'store/users/types';
-import {WIDGET_TYPES} from 'store/widgets/data/constants';
 
 /**
  * Получает и устанавливает настройки автообновления
@@ -395,20 +399,20 @@ const getPassedWidget = (): ThunkAction => async (dispatch: Dispatch, getState: 
  * Добавляем первый виджет для дашбордов  userSource
  * @returns {ThunkAction}
  */
-const updateUserSourceMode = (): ThunkAction => async (dispatch: Dispatch, getState: GetState) => {
-	const state = getState();
-	const {dashboard} = state;
-	const isUserMode = isRestrictUserModeDashboard(state);
-	const widgets = getAllWidgets(state);
+const updateUserSourceMode = (): ThunkAction =>
+	async (dispatch: Dispatch, getState: GetState) => {
+		const state = getState();
+		const isUserMode = isRestrictUserModeDashboard(state);
+		const widgets = getAllWidgets(state);
 
-	if (isUserMode && widgets.length === 0) {
-		const newWidget: Object = new NewWidget(dashboard.settings.layoutMode, WIDGET_TYPES.COLUMN);
+		if (isUserMode && widgets.length === 0) {
+			const newWidget: Object = new NewWidget(DISPLAY_MODE.ANY, WIDGET_TYPES.COLUMN);
 
-		dispatch(addLayouts(newWidget.id));
-		dispatch(addNewWidget(newWidget));
-		dispatch(editDashboard());
-	}
-};
+			dispatch(addLayouts(newWidget.id));
+			dispatch(addNewWidget(newWidget));
+			dispatch(editDashboard());
+		}
+	};
 
 /**
  * Сохраняет настройки автообновления

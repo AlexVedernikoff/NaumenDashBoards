@@ -1,5 +1,12 @@
 // @flow
-import type {AddNewWidgetAction, DispatchAddNewWidget, FocusWidget, ResetFocusedWidget, Widget} from 'store/widgets/data/types';
+import type {
+	AddNewWidgetAction,
+	DispatchAddNewWidget,
+	DisplayMode,
+	FocusWidget,
+	ResetFocusedWidget,
+	Widget
+} from 'store/widgets/data/types';
 import type {LayoutMode} from 'store/dashboard/settings/types';
 import type {Layouts, LayoutsPayloadForChange} from 'store/dashboard/layouts/types';
 import type {ThunkAction} from 'store/types';
@@ -32,6 +39,7 @@ export type ConnectedProps = {
 	isUserMode: boolean,
 	layoutMode: LayoutMode,
 	layouts: Layouts,
+	newWidgetDisplay: DisplayMode,
 	selectedWidget: string,
 	showCreationInfo: boolean,
 	user: UserData,
