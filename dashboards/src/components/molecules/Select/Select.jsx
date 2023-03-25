@@ -206,7 +206,6 @@ export class Select extends Component<Props, State> {
 						{this.renderList()}
 						{/* {this.renderNoOptionsMessage()} */}
 						{this.renderNotFoundMessage()}
-						{this.renderNotFoundMessage()}
 						{this.renderLoadingMessage()}
 					</MenuContainer>
 				</OutsideClickDetector>
