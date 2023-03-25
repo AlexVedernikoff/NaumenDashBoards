@@ -65,7 +65,8 @@ export class Tree extends Component<Props> {
 		const loaded = !loading;
 		const noOptions = Object.keys(options).length === 0;
 
-		return loaded && noOptions ? <div className={styles.message}><T text="Tree::ListEmpty" /></div> : null;
+		// return loaded && noOptions ? <div className={styles.message}><T text="Tree::ListEmpty" /></div> : null;
+		return loaded && noOptions ? <div className={styles.message}><T text="Select::NotFoundMessage" /></div> : null;
 	};
 
 	renderNode = (node: Node) => {
