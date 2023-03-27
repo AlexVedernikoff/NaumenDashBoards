@@ -496,6 +496,7 @@
 "TimerValueListOptionValue::Status","Статус","Status",,
 "TimerValueListOptionValue::Value","Значение","Value",,
 "Tree::ListEmpty","Список пуст","List is empty",,
+"Tree::NotFoundMessage","Ничего не найдено","Nothing found",,
 "Tree::ShowMore","Показать еще","Show more",,
 "TreeSelect::DefaultPlaceholder","Выберите значение","Select a value",,
 "TreeSelectNode::ShowMore","Показать еще","Show more",,

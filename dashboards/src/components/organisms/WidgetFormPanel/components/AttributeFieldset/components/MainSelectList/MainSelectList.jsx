@@ -141,6 +141,7 @@ export class MainSelectList extends PureComponent<Props> {
 			return (
 				<TreeList
 					components={DEFAULT_COMPONENTS}
+					dynamicAttributesMode={dynamicAttributesMode}
 					getNodeLabel={this.getNodeLabel}
 					getNodeValue={this.getNodeValue}
 					getOptionLabel={getOptionLabel}
@@ -152,6 +153,7 @@ export class MainSelectList extends PureComponent<Props> {
 					onSelect={this.handleSelectDynAttr(onSelect)}
 					options={data}
 					searchValue={searchValue}
+					treeListEmptytext={'Tree::NotFoundMessage'}
 					value={value}
 				/>
 			);
@@ -177,8 +179,8 @@ export class MainSelectList extends PureComponent<Props> {
 		const {dynamicAttributesMode, source, sources} = this.props;
 		const {value: sourceValue} = source;
 		const hasDynamic = sourceValue
-				&& sources[sourceValue.value]
-				&& sources[sourceValue.value].value.hasDynamic;
+			&& sources[sourceValue.value]
+			&& sources[sourceValue.value].value.hasDynamic;
 		const showDynamicAttributes = dynamicAttributesMode === 'show';
 
 		if (hasDynamic) {

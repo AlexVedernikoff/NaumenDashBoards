@@ -15,6 +15,7 @@ export class Tree extends Component<Props> {
 		loading: false,
 		multiple: false,
 		showMore: false,
+		treeListEmptytext: 'Tree::ListEmpty',
 		value: '',
 		values: []
 	};
@@ -61,12 +62,12 @@ export class Tree extends Component<Props> {
 	renderLoader = () => this.props.loading && <div className={styles.message}><Loader size={35} /></div>;
 
 	renderNoOptionsMessage = () => {
-		const {loading, options} = this.props;
+		const {loading, options, treeListEmptytext} = this.props;
 		const loaded = !loading;
 		const noOptions = Object.keys(options).length === 0;
 
 		// return loaded && noOptions ? <div className={styles.message}><T text="Tree::ListEmpty" /></div> : null;
-		return loaded && noOptions ? <div className={styles.message}><T text="Select::NotFoundMessage" /></div> : null;
+		return loaded && noOptions ? <div className={styles.message}><T text={treeListEmptytext} /></div> : null;
 	};
 
 	renderNode = (node: Node) => {
