@@ -69,10 +69,13 @@ export class BarWidget extends PureComponent<Props, State> {
 	};
 
 	renderBar = ({breakdownLabels, color, key, label}, idx) => {
+		const {subTotalGetter} = this.state.options;
 		const {hiddenSeries} = this.props;
 		const {options: {stackId}} = this.state;
 		const fill = color(label);
 		const hide = hiddenSeries.includes(key);
+
+		const renderedDataLabels = subTotalGetter ? null : this.renderDataLabels(key)
 
 		return (
 			<Bar
@@ -86,9 +89,10 @@ export class BarWidget extends PureComponent<Props, State> {
 				onMouseLeave={this.handleClearTooltip}
 				stackId={stackId}
 			>
-				{this.renderDataLabels(key)}
-				{this.renderTotalDataLabels(idx)}
-				{this.renderBarCells(color, key, breakdownLabels, idx) }
+				{renderedDataLabels}   {/* надписи внутри баров */}
+				{this.renderTotalDataLabels(idx)}    {/* надписи снаружи баров */}
+
+				{this.renderBarCells(color, key, breakdownLabels, idx)}
 			</Bar>
 		);
 	};
@@ -220,6 +224,8 @@ export class BarWidget extends PureComponent<Props, State> {
 
 	renderTotalDataLabels = idx => {
 		const {dataLabels, formatters, series, subTotalGetter} = this.state.options;
+		console.log("subTotalGetter = ", subTotalGetter)
+		// console.log("series = ", series)
 		const {fontFamily, fontSize} = dataLabels;
 
 		if (subTotalGetter && idx === series.length - 1) {
@@ -234,7 +240,7 @@ export class BarWidget extends PureComponent<Props, State> {
 					fontSize={fontSize}
 					formatter={formatters.totalDataLabel}
 					position={labelPosition}
-					valueAccessor={({name}) => getter(name) }
+					valueAccessor={({name}) => getter(name)}
 				/>
 			);
 		}
