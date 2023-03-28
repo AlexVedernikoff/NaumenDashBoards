@@ -57,7 +57,6 @@ export class StoreLabel extends PureComponent<Props> {
 	};
 
 	render () {
-		// console.log("StoreLabel props= ", this.props);
 		return (
 			<LABELS_STORAGE_CONTEXT.Consumer>
 				{this.registerLabel}

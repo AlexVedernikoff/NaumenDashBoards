@@ -224,8 +224,6 @@ export class BarWidget extends PureComponent<Props, State> {
 
 	renderTotalDataLabels = idx => {
 		const {dataLabels, formatters, series, subTotalGetter} = this.state.options;
-		console.log("subTotalGetter = ", subTotalGetter)
-		// console.log("series = ", series)
 		const {fontFamily, fontSize} = dataLabels;
 
 		if (subTotalGetter && idx === series.length - 1) {
