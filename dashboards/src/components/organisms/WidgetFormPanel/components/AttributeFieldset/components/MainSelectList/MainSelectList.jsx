@@ -138,6 +138,8 @@ export class MainSelectList extends PureComponent<Props> {
 
 			data = attributesHelpers.filterDynamicAttributes(data, dataSetIndex, initialSelected);
 
+			const listEmptytext = data && searchValue ? 'Tree::NotFoundMessage' : 'Tree::ListEmpty';
+
 			return (
 				<TreeList
 					components={DEFAULT_COMPONENTS}
@@ -148,12 +150,12 @@ export class MainSelectList extends PureComponent<Props> {
 					getOptionValue={getOptionValue}
 					initialSelected={initialSelected}
 					isDisabled={this.isDisabledDynamicNode}
+					listEmptytext={listEmptytext}
 					loading={loading}
 					onFetch={this.handleFetchDynamicAttributes}
 					onSelect={this.handleSelectDynAttr(onSelect)}
 					options={data}
 					searchValue={searchValue}
-					treeListEmptytext={'Tree::NotFoundMessage'}
 					value={value}
 				/>
 			);

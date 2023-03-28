@@ -1,19 +1,20 @@
 // @flow
-import type {Components, Node, Option, Tree} from 'components/molecules/TreeSelect/types';
+import type {Components, Node, Option, Tree, LangType} from 'components/molecules/TreeSelect/types';
 
 export type State = {
 	foundIds: Array<string>,
 	selectedIds: Array<string>
 };
 
-export type DefaultProps = {|
+export type DefaultProps = {
 	isDisabled: (node: Node) => boolean,
+	listEmptytext: LangType,
 	loading: boolean,
 	multiple: boolean,
 	showMore: boolean,
 	value: Option | null,
 	values: Array<Option>
-|};
+};
 
 export type Props = {
 	...DefaultProps,
