@@ -20,10 +20,12 @@ export type Label = {
 	width: number,
 	x: number,
 	y: number,
+	intermediate: boolean,
 };
 
 export type StoreLabelProps = Label & {
-	force: boolean
+	force: boolean,
+	intermediate: boolean,
 };
 
 export type Context = {

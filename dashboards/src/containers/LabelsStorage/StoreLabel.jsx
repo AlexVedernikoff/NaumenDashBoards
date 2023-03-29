@@ -22,32 +22,27 @@ export class StoreLabel extends PureComponent<Props> {
 	};
 
 	registerLabel = (context: Context) => {
-		const {fontFamily, fontSize, force, formatter, height, value, width} = this.props;
+		const {fontFamily, fontSize, force, formatter, height, intermediate, value, width} = this.props;
 		const key = generateLabelKey(this.props);
 
 		let register = false;
 
 		if (height >= 1 && width >= 1) { // Проверка на нулевые области
-			register = true;
+			if (force) {
+				register = true;
+			} else {
+				const text = formatter ? formatter(value, this.props) : value.toString();
+
+				const sizes = calculateStringsSize([[text]], fontFamily, fontSize);
+				const {height: heightText, width: widthText} = sizes[0];
+
+				if (height > heightText && width > widthText) {
+					register = true;
+				} else {
+					register = intermediate;
+				}
+			}
 		}
-
-		//Старый вариант кода с проверкой, вмещается ли подпись в размер бара
-		// let register = false;
-
-		// if (height >= 1 && width >= 1) { // Проверка на нулевые области
-		// 	if (force) {
-		// 		register = true;
-		// 	} else {
-		// 		const text = formatter ? formatter(value, this.props) : value.toString();
-
-		// 		const sizes = calculateStringsSize([[text]], fontFamily, fontSize);
-		// 		const {height: heightText, width: widthText} = sizes[0];
-
-		// 		if (height > heightText && width > widthText) {
-		// 			register = true;
-		// 		}
-		// 	}
-		// }
 
 		if (register) {
 			context.registerLabel(key, this.props);

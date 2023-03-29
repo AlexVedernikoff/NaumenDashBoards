@@ -204,7 +204,6 @@ export class Select extends Component<Props, State> {
 						{this.renderMenuHeader()}
 						{this.renderSearchInput()}
 						{this.renderList()}
-						{/* {this.renderNoOptionsMessage()} */}
 						{this.renderNotFoundMessage()}
 						{this.renderLoadingMessage()}
 					</MenuContainer>

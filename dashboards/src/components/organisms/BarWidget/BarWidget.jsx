@@ -75,7 +75,7 @@ export class BarWidget extends PureComponent<Props, State> {
 		const fill = color(label);
 		const hide = hiddenSeries.includes(key);
 
-		const renderedDataLabels = subTotalGetter ? null : this.renderDataLabels(key)
+		const renderedDataLabels = subTotalGetter ? this.renderDataLabels(key, false) : this.renderDataLabels(key, true);
 
 		return (
 			<Bar
@@ -149,7 +149,7 @@ export class BarWidget extends PureComponent<Props, State> {
 		return null;
 	};
 
-	renderDataLabels = (key: string) => {
+	renderDataLabels = (key: string, intermediate: boolean) => {
 		const {options: {dataLabels, formatters}} = this.state;
 		const {fontColor, fontFamily, fontSize, show, showShadow} = dataLabels;
 
@@ -160,7 +160,7 @@ export class BarWidget extends PureComponent<Props, State> {
 			return (
 				<LabelList
 					className={showClassName}
-					content={<StoreLabel dataKey={key} formatter={formatters.dataLabel} />}
+					content={<StoreLabel dataKey={key} formatter={formatters.dataLabel} intermediate={+intermediate} />}
 					dataKey={key}
 					fill={fontColor}
 					fontFamily={fontFamily}
