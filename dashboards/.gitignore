@@ -18,9 +18,9 @@ flow-typed/npm
 #smpsync
 rest/stand.json
 
-.env
-.env*
-.env.develop
+# .env
+# .env*
+# .env.develop
 
 .DS_Store
 
