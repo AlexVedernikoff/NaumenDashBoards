@@ -75,7 +75,7 @@ export class BarWidget extends PureComponent<Props, State> {
 		const fill = color(label);
 		const hide = hiddenSeries.includes(key);
 
-		const renderedDataLabels = subTotalGetter ? this.renderDataLabels(key, false) : this.renderDataLabels(key, true);
+		const renderedDataLabels = this.renderDataLabels(key, !subTotalGetter);
 
 		return (
 			<Bar
@@ -91,7 +91,6 @@ export class BarWidget extends PureComponent<Props, State> {
 			>
 				{renderedDataLabels}   {/* надписи внутри баров */}
 				{this.renderTotalDataLabels(idx)}    {/* надписи снаружи баров */}
-
 				{this.renderBarCells(color, key, breakdownLabels, idx)}
 			</Bar>
 		);

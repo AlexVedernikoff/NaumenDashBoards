@@ -91,7 +91,7 @@ type Select =
 
 // components/molecules/Select/components/List
 type SelectList =
-	|'Select::List::ShowMore';
+	| 'Select::List::ShowMore';
 
 // components/molecules/Select/components/List
 type SelectModal =
@@ -120,7 +120,8 @@ type TreeSelectNode =
 // components/molecules/TreeSelect/components/Tree
 type Tree =
 	| 'Tree::ListEmpty'
-	| 'Tree::ShowMore';
+	| 'Tree::ShowMore'
+	| "Tree::NotFoundMessage";
 
 // components/organisms/AttributeCreatingModal/components/SourceControlTree
 type SourceControlTree =
@@ -206,8 +207,8 @@ type DashboardPanel =
 
 // components/organisms/DiagramWidget/components/LoadingContent
 type LoadingContent =
- | 'LoadingContent::Loading'
- | 'LoadingContent::Empty';
+	| 'LoadingContent::Loading'
+	| 'LoadingContent::Empty';
 
 // components/organisms/ExportByEmailForm/components/FormFooter
 type ExportByEmailFormFormFooter =
@@ -626,7 +627,7 @@ type IndicatorFieldset =
 	| 'IndicatorFieldset::CreateField'
 	| 'IndicatorFieldset::MathFormula'
 	| 'IndicatorFieldset::SourcePercentageRelative'
-	| 'IndicatorFieldset::SourcePercentageRelativeField' ;
+	| 'IndicatorFieldset::SourcePercentageRelativeField';
 
 // components/organisms/WidgetFormPanel/components/IndicatorsBox
 type IndicatorsBox =
@@ -751,7 +752,7 @@ type WidgetFormSimpleWidgetTooltipForm =
 	| 'WidgetForm::SimpleWidgetTooltipForm::TooltipAtTitle';
 
 type WidgetTooltip =
- | 'WidgetTooltip::DefaultHeader';
+	| 'WidgetTooltip::DefaultHeader';
 
 // containers/DashboardPanel
 type DashboardPanelContainers =

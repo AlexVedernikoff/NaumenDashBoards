@@ -12,7 +12,7 @@ import T from 'components/atoms/Translation';
 export class Tree extends Component<Props> {
 	static defaultProps = {
 		isDisabled: () => false,
-		listEmptytext: 'Tree::ListEmpty',
+		listEmptyText: 'Tree::ListEmpty',
 		loading: false,
 		multiple: false,
 		showMore: false,
@@ -62,11 +62,11 @@ export class Tree extends Component<Props> {
 	renderLoader = () => this.props.loading && <div className={styles.message}><Loader size={35} /></div>;
 
 	renderNoOptionsMessage = () => {
-		const {listEmptytext, loading, options} = this.props;
+		const {listEmptyText, loading, options} = this.props;
 		const loaded = !loading;
 		const noOptions = Object.keys(options).length === 0;
 
-		return loaded && noOptions ? <div className={styles.message}><T text={listEmptytext} /></div> : null;
+		return loaded && noOptions ? <div className={styles.message}><T text={listEmptyText} /></div> : null;
 	};
 
 	renderNode = (node: Node) => {

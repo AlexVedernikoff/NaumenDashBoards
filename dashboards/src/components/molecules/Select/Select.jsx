@@ -204,6 +204,7 @@ export class Select extends Component<Props, State> {
 						{this.renderMenuHeader()}
 						{this.renderSearchInput()}
 						{this.renderList()}
+						{/* {this.renderNoOptionsMessage()} */}
 						{this.renderNotFoundMessage()}
 						{this.renderLoadingMessage()}
 					</MenuContainer>
@@ -232,6 +233,8 @@ export class Select extends Component<Props, State> {
 		const {Message} = this.getComponents();
 
 		return !loading && options.length === 0 ? <Message className={styles.message}><T text={noOptionsMessage} /></Message> : null;
+		// return !loading && options.length === 0 ? <Message className={styles.message}><T text={noOptionsMessage} /></Message> : <Message className={styles.message}><T text={noOptionsMessage} /></Message>;
+		// return <Message className={styles.message}><T text={noOptionsMessage} /></Message>;
 	};
 
 	renderNotFoundMessage = (): React$Node => {

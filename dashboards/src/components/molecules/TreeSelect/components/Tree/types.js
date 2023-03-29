@@ -6,15 +6,15 @@ export type State = {
 	selectedIds: Array<string>
 };
 
-export type DefaultProps = {
+export type DefaultProps = {|
 	isDisabled: (node: Node) => boolean,
-	listEmptytext: LangType,
+	listEmptyText: LangType,
 	loading: boolean,
 	multiple: boolean,
 	showMore: boolean,
 	value: Option | null,
 	values: Array<Option>
-};
+|};
 
 export type Props = {
 	...DefaultProps,
