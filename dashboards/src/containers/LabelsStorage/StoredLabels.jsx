@@ -6,16 +6,21 @@ import React, {PureComponent} from 'react';
 
 export class StoredLabels extends PureComponent<{}> {
 	renderLabel = (label: Label, idx: number) => {
-		const {content, dataKey, force, formatter, height, parentViewBox, textBreakAll, value, viewBox, width, ...props} = label;
-		const dx = width / 2;
+		const {content, dataKey, external, force, formatter, height, parentViewBox, textBreakAll, value, viewBox, width, ...props} = label;
+
+		console.log('height = ', height);
+		console.log('external = ', external);
+
+		const dx = external ? width + 7 : width / 2;
+		const textAnchor = external ? 'right' : 'middle';
 		const dy = height / 2;
 		const textValue = formatter ? formatter(value, label) : value;
 		const key = generateLabelKey(label);
 
 		return (
-			<text {...props} dominantBaseline="middle" key={key} textAnchor="middle">
-				<tspan dx={dx} dy={dy}>{textValue}</tspan>
-			</text>
+			<text {...props} dominantBaseline="middle" key={key} textAnchor={textAnchor} >
+				<tspan dx={dx} dy={dy}> {textValue}</tspan >
+			</text >
 		);
 	};
 

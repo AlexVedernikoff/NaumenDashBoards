@@ -231,14 +231,19 @@ export class BarWidget extends PureComponent<Props, State> {
 			const labelPosition = position === SUB_TOTAL_POSITION.OUTER ? 'right' : 'insideRight';
 
 			return (
+				// 	<LabelList
+				// 		content={content}
+				// 		fontFamily={fontFamily}
+				// 		fontSize={fontSize}
+				// 		formatter={formatters.totalDataLabel}
+				// 		position={labelPosition}
+				// 		valueAccessor={({name}) => getter(name)}
+				// 	/>
 				<LabelList
-					content={content}
-					fontFamily={fontFamily}
+					content={<StoreLabel external={true} />}
 					fontSize={fontSize}
-					formatter={formatters.totalDataLabel}
-					position={labelPosition}
-					valueAccessor={({name}) => getter(name)}
 				/>
+
 			);
 		}
 
